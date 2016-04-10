@@ -31,7 +31,7 @@ const createFeature = config => {
     config.update(action)(modelAndTask[0]) : modelAndTask;
 
   // modelAndTask$ : Observable<[Model, Task Action]>
-  const modelAndTask$ = mergedAction$.scan(update, config.initialModel).share();
+  const modelAndTask$ = mergedAction$.scan(update, config.initialModel).shareReplay(1);
 
   // model$ : Observable<Model>
   const model$ = modelAndTask$.map(modelAndTask => modelAndTask[0]);
@@ -43,9 +43,9 @@ const createFeature = config => {
   const sendAction = action => new Task((rej, res) => res(action$.onNext(action)));
   //const sendAction = action => Future((rej, res) => res(action$.next(action)));
 
-  // taskRunner$ : Observable<Task Never ()>
+  // task$ : Observable<Task Never ()>
   const task$ = modelAndTask$.map(modelAndTask =>
-    modelAndTask[1] ? modelAndTask[1].chain(sendAction) : Task.of(null));
+    !!modelAndTask[1] ? modelAndTask[1].chain(sendAction) : Task.of(null));
 
   const result = {
     view$,

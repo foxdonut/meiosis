@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rx";
 import { identity } from "ramda";
 import Type from "union-type";
 

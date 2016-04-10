@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import Task from "data.task";
 import { identity, inc, lensProp, merge, over } from "ramda";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rx";
 import Type from "union-type";
 
 import { createFeature, taskRunner } from "../src/index";
@@ -28,8 +28,8 @@ describe("library/feature", function() {
       initialModel: [initial, null],
       view: address => model => {
         expect(address).to.exist;
-        expect(address.next).to.exist;
-        expect(address.next).to.be.a("function");
+        expect(address.onNext).to.exist;
+        expect(address.onNext).to.be.a("function");
 
         expect(model).to.equal(initial);
 
@@ -50,7 +50,7 @@ describe("library/feature", function() {
       view: address => _model => {
         if (flag) {
           flag = false;
-          address.next(testAction);
+          address.onNext(testAction);
         }
       },
       update: action => model => {
@@ -75,7 +75,7 @@ describe("library/feature", function() {
       view: address => _model => {
         if (flag) {
           flag = false;
-          address.next(firstAction);
+          address.onNext(firstAction);
           return "view 1";
         }
         return "view 2";
@@ -110,7 +110,7 @@ describe("library/feature", function() {
       view: address => model => {
         if (flag) {
           flag = false;
-          address.next(INCREMENT);
+          address.onNext(INCREMENT);
         } else {
           expect(model.counter).to.equal(2);
           done();
@@ -144,7 +144,7 @@ describe("library/feature", function() {
 
     feature.view$.subscribe(identity);
 
-    input.next(INCREMENT);
+    input.onNext(INCREMENT);
   });
 
   it("executes tasks", function(done) {
@@ -179,7 +179,7 @@ describe("library/feature", function() {
     feature.view$.subscribe(identity);
     feature.task$.subscribe(taskRunner);
 
-    input.next(INCREMENT);
+    input.onNext(INCREMENT);
   });
 
   it("dispatches the next action", function(done) {
@@ -203,7 +203,7 @@ describe("library/feature", function() {
     const loadListTask = new Task((rej, res) => res(Action.ShowList(todos)));
 
     const showListTask = new Task((rej, res) => {
-      output.next(todos);
+      output.onNext(todos);
       res(Action.NoOp());
     });
 
@@ -227,6 +227,6 @@ describe("library/feature", function() {
 
     feature.task$.subscribe(taskRunner);
 
-    input.next(Action.LoadList());
+    input.onNext(Action.LoadList());
   });
 });

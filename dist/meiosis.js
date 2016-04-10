@@ -690,7 +690,7 @@ module.exports =
 	  };
 
 	  // modelAndTask$ : Observable<[Model, Task Action]>
-	  var modelAndTask$ = mergedAction$.scan(update, config.initialModel).share();
+	  var modelAndTask$ = mergedAction$.scan(update, config.initialModel).shareReplay(1);
 
 	  // model$ : Observable<Model>
 	  var model$ = modelAndTask$.map(function (modelAndTask) {
@@ -708,9 +708,9 @@ module.exports =
 	  };
 	  //const sendAction = action => Future((rej, res) => res(action$.next(action)));
 
-	  // taskRunner$ : Observable<Task Never ()>
+	  // task$ : Observable<Task Never ()>
 	  var task$ = modelAndTask$.map(function (modelAndTask) {
-	    return modelAndTask[1] ? modelAndTask[1].chain(sendAction) : _data2.default.of(null);
+	    return !!modelAndTask[1] ? modelAndTask[1].chain(sendAction) : _data2.default.of(null);
 	  });
 
 	  var result = {
