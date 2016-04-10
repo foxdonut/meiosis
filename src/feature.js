@@ -11,11 +11,7 @@ Feature =
   , taskRunner : (Task Never ())$
   }
 */
-import { BehaviorSubject } from "rxjs/subject/BehaviorSubject";
-import "rxjs/add/operator/map";
-import "rxjs/add/operator/merge";
-import "rxjs/add/operator/publishReplay";
-import "rxjs/add/operator/scan";
+import { BehaviorSubject } from "rx";
 import Task from "data.task";
 //import { Future } from "ramda-fantasy";
 
@@ -35,7 +31,7 @@ const createFeature = config => {
     config.update(action)(modelAndTask[0]) : modelAndTask;
 
   // modelAndTask$ : Observable<[Model, Task Action]>
-  const modelAndTask$ = mergedAction$.scan(update, config.initialModel).publishReplay(1).refCount();
+  const modelAndTask$ = mergedAction$.scan(update, config.initialModel).share();
 
   // model$ : Observable<Model>
   const model$ = modelAndTask$.map(modelAndTask => modelAndTask[0]);
@@ -44,7 +40,7 @@ const createFeature = config => {
   const view$ = model$.map(config.view(action$));
 
   // sendAction : Action -> Task Never ()
-  const sendAction = action => new Task((rej, res) => res(action$.next(action)));
+  const sendAction = action => new Task((rej, res) => res(action$.onNext(action)));
   //const sendAction = action => Future((rej, res) => res(action$.next(action)));
 
   // taskRunner$ : Observable<Task Never ()>

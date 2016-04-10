@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "meiosis",
   "main": "dist/meiosis.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "data.task": "^3.1.0",
-    "rxjs": "5.0.0-beta.4"
+    "rx": "^4.1.0"
   },
   "devDependencies": {
     "babel-core": "^6.7.6",

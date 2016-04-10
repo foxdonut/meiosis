@@ -2,7 +2,9 @@ module.exports = {
   entry: "./src/index.js",
   output: {
     path: "./dist",
-    filename: "meiosis.js"
+    filename: "meiosis.js",
+    library: "meiosis",
+    libraryTarget: "commonjs2"
   },
   module: {
     loaders: [
