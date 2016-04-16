@@ -10,7 +10,7 @@ describe("library/feature", function() {
   const baseConfig = {
     inputs: [],
     initialModel: [{}, null],
-    update: _action => model => [model, null],
+    update: (model, _action) => [model, null],
     view: _address => _model => null
   };
 
@@ -53,7 +53,7 @@ describe("library/feature", function() {
           address.onNext(testAction);
         }
       },
-      update: action => model => {
+      update: (model, action) => {
         expect(action).to.equal(testAction);
         expect(model).to.equal(initial);
         done();
@@ -80,7 +80,7 @@ describe("library/feature", function() {
         }
         return "view 2";
       },
-      update: action => model => {
+      update: (model, action) => {
         if (action === firstAction) {
           return [model, task];
         } else if (action === secondAction) {
@@ -101,7 +101,7 @@ describe("library/feature", function() {
 
     const feature = createFeature(merge(baseConfig, {
       initialModel: [{ counter: 1 }, null],
-      update: action => model => {
+      update: (model, action) => {
         if (action === INCREMENT) {
           return [over(lensProp("counter"), inc, model), null];
         }
@@ -128,7 +128,7 @@ describe("library/feature", function() {
 
     const feature = createFeature(merge(baseConfig, {
       initialModel: [{ counter: 1 }, null],
-      update: action => model => {
+      update: (model, action) => {
         if (action === INCREMENT) {
           return [over(lensProp("counter"), inc, model), null];
         }
@@ -162,7 +162,7 @@ describe("library/feature", function() {
 
     const feature = createFeature(merge(baseConfig, {
       initialModel: [{ counter: 1 }, null],
-      update: action => model => {
+      update: (model, action) => {
         if (action === INCREMENT) {
           return [over(lensProp("counter"), inc, model), task];
         }
@@ -221,7 +221,7 @@ describe("library/feature", function() {
       });
 
     const feature = createFeature(merge(baseConfig, {
-      update: action => model => Action.case(handler(model), action),
+      update: (model, action) => Action.case(handler(model), action),
       inputs: [input]
     }));
 

@@ -2,7 +2,7 @@
 Config action model =
   { inputs : List (action$)
   , initialModel : [ model, Task action ]
-  , update : action -> model -> [ model, Task action ]
+  , update : (model, action) -> [ model, Task action ]
   , view : Address action -> model -> Html
   }
 
@@ -26,9 +26,9 @@ const createFeature = config => {
     mergedAction$ = mergedAction$.merge(input$);
   });
 
-  // update : [ Model, Task Action ] -> Action -> [ Model, Task Action ]
+  // update : ([ Model, Task Action ], Action) -> [ Model, Task Action ]
   const update = (modelAndTask, action) => action ?
-    config.update(action)(modelAndTask[0]) : modelAndTask;
+    config.update(modelAndTask[0], action) : modelAndTask;
 
   // modelAndTask$ : Observable<[Model, Task Action]>
   const modelAndTask$ = mergedAction$.scan(update, config.initialModel).shareReplay(1);
@@ -45,7 +45,7 @@ const createFeature = config => {
 
   // task$ : Observable<Task Never ()>
   const task$ = modelAndTask$.map(modelAndTask =>
-    !!modelAndTask[1] ? modelAndTask[1].chain(sendAction) : Task.of(null));
+    modelAndTask[1] ? modelAndTask[1].chain(sendAction) : Task.of(null));
 
   const result = {
     view$,
