@@ -664,7 +664,7 @@ module.exports =
 	Config action model =
 	  { inputs : List (action$)
 	  , initialModel : [ model, Task action ]
-	  , update : action -> model -> [ model, Task action ]
+	  , update : (model, action) -> [ model, Task action ]
 	  , view : Address action -> model -> Html
 	  }
 
@@ -684,9 +684,9 @@ module.exports =
 	    mergedAction$ = mergedAction$.merge(input$);
 	  });
 
-	  // update : [ Model, Task Action ] -> Action -> [ Model, Task Action ]
+	  // update : ([ Model, Task Action ], Action) -> [ Model, Task Action ]
 	  var update = function update(modelAndTask, action) {
-	    return action ? config.update(action)(modelAndTask[0]) : modelAndTask;
+	    return action ? config.update(modelAndTask[0], action) : modelAndTask;
 	  };
 
 	  // modelAndTask$ : Observable<[Model, Task Action]>
@@ -710,7 +710,7 @@ module.exports =
 
 	  // task$ : Observable<Task Never ()>
 	  var task$ = modelAndTask$.map(function (modelAndTask) {
-	    return !!modelAndTask[1] ? modelAndTask[1].chain(sendAction) : _data2.default.of(null);
+	    return modelAndTask[1] ? modelAndTask[1].chain(sendAction) : _data2.default.of(null);
 	  });
 
 	  var result = {
