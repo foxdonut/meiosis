@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { merge } from "ramda";
-import radio from "radio";
+//import radio from "radio";
 
 import { meiosis } from "../src/index";
 
@@ -13,7 +13,25 @@ describe("meiosis", function() {
   let vnode = null;
 
   // adapters
-  const pubsub = radio;
+  //const pubsub = radio;
+  let radios = {};
+  const createChannel = () => {
+    let subs = [];
+    const subscribe = f => subs.push(f);
+    const unsubscribe = _f => subs = [];
+    const broadcast = d => {
+      subs.forEach(sub => sub(d));
+    };
+    return { subscribe, unsubscribe, broadcast };
+  };
+  const pubsub = name => {
+    let channel = radios[name];
+    if (!channel) {
+      channel = createChannel();
+      radios[name] = channel;
+    }
+    return channel;
+  };
   const render = view => { vnode = view; };
   const adapters = { pubsub, render };
 
@@ -84,8 +102,36 @@ describe("meiosis", function() {
     expect(vnode.children[1].text).to.equal(ListText);
   });
 
-  xit("triggers an action", function() {
+  it("triggers an action", function() {
+    const UPDATE = "update";
+
+    const actions = next => ({
+      update: () => { console.log("next:", next); next(UPDATE); }
+    });
+
+    let actionsRef = null;
+
+    const Main = createFeature(merge(baseConfig, {
+      name: "action",
+      initialModel: { name: "one"},
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      model: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
+        }
+        return model;
+      }
+    }));
     
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.update();
+    expect(vnode.text).to.equal("two");
   });
 
   xit("chains an action", function() {

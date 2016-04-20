@@ -16,7 +16,7 @@ Feature =
   { view : props => html
   }
 */
-import { merge } from "ramda";
+import { merge } from "ramda"; // FIXME: adapter
 
 const meiosis = adapters => {
   const unsubscribes = [];
@@ -37,7 +37,7 @@ const meiosis = adapters => {
       rootPubsub.broadcast(model);
       config.chain(model, action);
     };
-    //adapters.pubsub(config.name).subscribe(subscriber);
+    adapters.pubsub(config.name).subscribe(subscriber);
     unsubscribes.push(() => adapters.pubsub(config.name).unsubscribe(subscriber));
 
     return props => config.view({model: props.model, actions});
