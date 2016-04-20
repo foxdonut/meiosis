@@ -1,45 +1,42 @@
 import { expect } from "chai";
-import Task from "data.task";
-import { identity, inc, lensProp, merge, over } from "ramda";
-import { Subject } from "rx";
-import Type from "union-type";
+import { merge } from "ramda";
+import radio from "radio";
 
-import { createFeature, taskRunner } from "../src/index";
+import { meiosis } from "../src/index";
 
 describe("library/feature", function() {
+  const pubsub = radio("meiosis-tests");
+  const render = _html => null;
+
+  const adapters = { pubsub, render };
+ 
   const baseConfig = {
-    inputs: [],
-    initialModel: [{}, null],
-    update: (model, _action) => [model, null],
-    view: _address => _model => null
+    initialModel: {},
+    model: (model, _next) => model,
+    actions: _next => ({}),
+    view: _props => null,
+    chain: _props => null
   };
 
-  it("creates a feature", function() {
-    const feature = createFeature(baseConfig);
+  const createFeature = meiosis(adapters);
 
-    expect(feature.view$).to.exist;
-    expect(feature.task$).to.exist;
-  });
-
-  it("calls the view with an address and a model", function(done) {
+  it("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
 
-    const feature = createFeature(merge(baseConfig, {
-      initialModel: [initial, null],
-      view: address => model => {
-        expect(address).to.exist;
-        expect(address.onNext).to.exist;
-        expect(address.onNext).to.be.a("function");
+    createFeature(merge(baseConfig, {
+      initialModel: initial,
 
-        expect(model).to.equal(initial);
+      view: props => {
+        expect(props.actions).to.exist;
+        expect(props.model).to.exist;
+        expect(props.model).to.equal(initial);
 
         done();
       }
     }));
-
-    feature.view$.subscribe(identity);
   });
 
+  /*
   it("calls update with an action and a model", function(done) {
     const initial = { duck: "quack" };
     const testAction = "TEST";
@@ -229,4 +226,5 @@ describe("library/feature", function() {
 
     input.onNext(Action.LoadList());
   });
+  */
 });

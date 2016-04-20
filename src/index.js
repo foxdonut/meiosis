@@ -1,3 +1,3 @@
-import { createFeature } from "./feature";
+import { meiosis } from "./meiosis";
 
-export { createFeature };
+export { meiosis };
