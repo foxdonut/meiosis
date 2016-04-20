@@ -27,10 +27,14 @@
     "babel-register": "^6.7.2",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "hyperscript-helpers": "^2.1.1",
+    "jsdom": "^8.4.0",
     "mocha": "^2.4.5",
+    "mocha-jsdom": "^1.1.0",
     "radio": "^0.2.0",
     "ramda": "^0.21.0",
     "sinon": "^1.17.3",
+    "snabbdom": "^0.4.2",
     "union-type": "^0.3.0",
     "webpack": "^1.12.14"
   }

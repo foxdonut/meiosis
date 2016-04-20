@@ -4,21 +4,45 @@ import radio from "radio";
 
 import { meiosis } from "../src/index";
 
-describe("library/feature", function() {
-  const pubsub = radio("meiosis-tests");
-  const render = _html => null;
+import snabbdom from "snabbdom";
+import h from "snabbdom/h";
+import jsdom from "mocha-jsdom";
 
-  const adapters = { pubsub, render };
+const {div} = require("hyperscript-helpers")(h);
+
+describe("meiosis", function() {
  
+  // snabbdom setup
+  const patch = snabbdom.init([
+    require("snabbdom/modules/props"),
+    require("snabbdom/modules/eventlisteners")
+  ]);
+
+  // mocha-jsdom setup
+  jsdom();
+
+  let element = null;
+
+  beforeEach(function() {
+    element = document.createElement("div");
+  });
+
+  // adapters
+  const pubsub = radio("meiosis-tests");
+  const render = view => { element = patch(element, view); };
+  const adapters = { pubsub, render };
+
+  // createFeature
+  const createFeature = meiosis(adapters);
+
+  // baseline config for tests
   const baseConfig = {
     initialModel: {},
     model: (model, _next) => model,
     actions: _next => ({}),
     view: _props => null,
-    chain: _props => null
+    chain: (_model, _next) => null
   };
-
-  const createFeature = meiosis(adapters);
 
   it("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
@@ -34,6 +58,20 @@ describe("library/feature", function() {
         done();
       }
     }));
+  });
+
+  it("renders a view", function() {
+    const initial = { duck: "quack" };
+
+    const view = props => div(`A duck says ${props.model.duck}`);
+
+    createFeature(merge(baseConfig, {
+      initialModel: initial,
+      view: view
+    }));
+
+    expect(element).to.exist;
+    expect(element.tagName.toLowerCase()).to.equal("div");
   });
 
   /*
