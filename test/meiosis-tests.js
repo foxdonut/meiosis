@@ -4,37 +4,22 @@ import radio from "radio";
 
 import { meiosis } from "../src/index";
 
-import snabbdom from "snabbdom";
 import h from "snabbdom/h";
-import jsdom from "mocha-jsdom";
 
 const {div, span} = require("hyperscript-helpers")(h);
 
 describe("meiosis", function() {
- 
-  // snabbdom setup
-  const patch = snabbdom.init([
-    require("snabbdom/modules/props"),
-    require("snabbdom/modules/eventlisteners")
-  ]);
+
+  let vnode = null;
 
   // adapters
   const pubsub = radio;
-  const render = view => { console.log("render view:", view); element = patch(element, view); };
+  const render = view => { vnode = view; };
   const adapters = { pubsub, render };
 
   // prepare Meiosis
   const Meiosis = meiosis(adapters);
   const createFeature = Meiosis.createFeature;
-
-  // mocha-jsdom setup
-  jsdom();
-
-  let element = null;
-
-  beforeEach(function() {
-    element = document.createElement("div");
-  });
 
   afterEach(function() {
     Meiosis.shutdown();
@@ -50,7 +35,7 @@ describe("meiosis", function() {
     chain: (_model, _next) => null
   };
 
-  xit("calls the view with actions and model", function(done) {
+  it("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
 
     Meiosis.run(createFeature(merge(baseConfig, {
@@ -59,7 +44,7 @@ describe("meiosis", function() {
       view: props => {
         expect(props.actions).to.exist;
         expect(props.model).to.exist;
-        expect(props.model).to.equal(initial);
+        expect(props.model).to.deep.equal(initial);
 
         done();
       }
@@ -69,19 +54,19 @@ describe("meiosis", function() {
   it("renders a view", function() {
     const initial = { duck: "quack" };
 
-    const view = props => { console.log("props:", props); return span(`A duck says ${props.model.duck}`); };
+    const view = props => span(`A duck says ${props.model.duck}`);
 
     Meiosis.run(createFeature(merge(baseConfig, {
       initialModel: initial,
       view: view
     })));
 
-    expect(element).to.exist;
-    expect(element.tagName.toLowerCase()).to.equal("span");
-    expect(element.innerHTML).to.equal("A duck says quack");
+    expect(vnode).to.exist;
+    expect(vnode.sel).to.equal("span");
+    expect(vnode.text).to.equal("A duck says quack");
   });
 
-  xit("renders a tree of views", function() {
+  it("renders a tree of views", function() {
     const FormText = "Form";
     const ListText = "List";
 
@@ -91,12 +76,12 @@ describe("meiosis", function() {
 
     Meiosis.run(Main);
 
-    expect(element).to.exist;
-    expect(element.tagName.toLowerCase()).to.equal("div");
-    expect(element.children.length).to.equal(2);
+    expect(vnode).to.exist;
+    expect(vnode.sel).to.equal("div");
+    expect(vnode.children.length).to.equal(2);
 
-    expect(element.children[0].innerHTML).to.equal(FormText);
-    expect(element.children[1].innerHTML).to.equal(ListText);
+    expect(vnode.children[0].text).to.equal(FormText);
+    expect(vnode.children[1].text).to.equal(ListText);
   });
 
   xit("triggers an action", function() {
