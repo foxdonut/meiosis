@@ -8,7 +8,7 @@ import snabbdom from "snabbdom";
 import h from "snabbdom/h";
 import jsdom from "mocha-jsdom";
 
-const {div} = require("hyperscript-helpers")(h);
+const {div, span} = require("hyperscript-helpers")(h);
 
 describe("meiosis", function() {
  
@@ -28,15 +28,17 @@ describe("meiosis", function() {
   });
 
   // adapters
-  const pubsub = radio("meiosis-tests");
+  const pubsub = radio;
   const render = view => { element = patch(element, view); };
   const adapters = { pubsub, render };
 
-  // createFeature
-  const createFeature = meiosis(adapters);
+  // prepare Meiosis
+  const Meiosis = meiosis(adapters);
+  const createFeature = Meiosis.createFeature;
 
   // baseline config for tests
   const baseConfig = {
+    name: "test",
     initialModel: {},
     model: (model, _next) => model,
     actions: _next => ({}),
@@ -47,7 +49,7 @@ describe("meiosis", function() {
   it("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
 
-    createFeature(merge(baseConfig, {
+    Meiosis.run(createFeature(merge(baseConfig, {
       initialModel: initial,
 
       view: props => {
@@ -57,13 +59,13 @@ describe("meiosis", function() {
 
         done();
       }
-    }));
+    })));
   });
 
   it("renders a view", function() {
     const initial = { duck: "quack" };
 
-    const view = props => div(`A duck says ${props.model.duck}`);
+    const view = props => span(`A duck says ${props.model.duck}`);
 
     createFeature(merge(baseConfig, {
       initialModel: initial,
@@ -71,9 +73,47 @@ describe("meiosis", function() {
     }));
 
     expect(element).to.exist;
-    expect(element.tagName.toLowerCase()).to.equal("div");
+    expect(element.tagName.toLowerCase()).to.equal("span");
+    expect(element.innerHTML).to.equal("A duck says quack");
   });
 
+  it("renders a tree of views", function() {
+    const FormText = "Form";
+    const ListText = "List";
+
+    const Form = createFeature(merge(baseConfig, { name: "Form", view: _props => div(FormText) }));
+    const List = createFeature(merge(baseConfig, { name: "List", view: _props => div(ListText) }));
+    const Main = createFeature(merge(baseConfig, { name: "Main", view: props => div([Form(props), List(props)]) }));
+
+    Meiosis.run(Main);
+
+    expect(element).to.exist;
+    expect(element.tagName.toLowerCase()).to.equal("div");
+    expect(element.children.length).to.equal(2);
+
+    expect(element.children[0].innerHTML).to.equal(FormText);
+    expect(element.children[1].innerHTML).to.equal(ListText);
+  });
+
+  xit("triggers an action", function() {
+    
+  });
+
+  xit("chains an action", function() {
+    
+  });
+
+  xit("merges the models into a single root model", function() {
+    
+  });
+
+  xit("reflects change from one view in another view", function() {
+    
+  });
+
+  xit("executes tasks", function() {
+    
+  });
   /*
   it("calls update with an action and a model", function(done) {
     const initial = { duck: "quack" };
