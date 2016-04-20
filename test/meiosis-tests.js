@@ -18,6 +18,15 @@ describe("meiosis", function() {
     require("snabbdom/modules/eventlisteners")
   ]);
 
+  // adapters
+  const pubsub = radio;
+  const render = view => { console.log("render view:", view); element = patch(element, view); };
+  const adapters = { pubsub, render };
+
+  // prepare Meiosis
+  const Meiosis = meiosis(adapters);
+  const createFeature = Meiosis.createFeature;
+
   // mocha-jsdom setup
   jsdom();
 
@@ -27,14 +36,9 @@ describe("meiosis", function() {
     element = document.createElement("div");
   });
 
-  // adapters
-  const pubsub = radio;
-  const render = view => { element = patch(element, view); };
-  const adapters = { pubsub, render };
-
-  // prepare Meiosis
-  const Meiosis = meiosis(adapters);
-  const createFeature = Meiosis.createFeature;
+  afterEach(function() {
+    Meiosis.shutdown();
+  });
 
   // baseline config for tests
   const baseConfig = {
@@ -46,7 +50,7 @@ describe("meiosis", function() {
     chain: (_model, _next) => null
   };
 
-  it("calls the view with actions and model", function(done) {
+  xit("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
 
     Meiosis.run(createFeature(merge(baseConfig, {
@@ -65,19 +69,19 @@ describe("meiosis", function() {
   it("renders a view", function() {
     const initial = { duck: "quack" };
 
-    const view = props => span(`A duck says ${props.model.duck}`);
+    const view = props => { console.log("props:", props); return span(`A duck says ${props.model.duck}`); };
 
-    createFeature(merge(baseConfig, {
+    Meiosis.run(createFeature(merge(baseConfig, {
       initialModel: initial,
       view: view
-    }));
+    })));
 
     expect(element).to.exist;
     expect(element.tagName.toLowerCase()).to.equal("span");
     expect(element.innerHTML).to.equal("A duck says quack");
   });
 
-  it("renders a tree of views", function() {
+  xit("renders a tree of views", function() {
     const FormText = "Form";
     const ListText = "List";
 

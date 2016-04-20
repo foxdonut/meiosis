@@ -19,6 +19,8 @@ Feature =
 import { merge } from "ramda";
 
 const meiosis = adapters => {
+  const unsubscribes = [];
+
   const rootPubsub = adapters.pubsub("meiosis");
   let rootModel = {};
 
@@ -29,28 +31,36 @@ const meiosis = adapters => {
 
     const actions = config.actions(adapters.pubsub(config.name).broadcast);
 
-    adapters.pubsub(config.name).subscribe(action => {
-        console.log("action:", action);
+    const subscriber = action => {
+      console.log("action:", action);
       const model = config.model(rootModel, action);
       rootPubsub.broadcast(model);
       config.chain(model, action);
-    });
+    };
+    //adapters.pubsub(config.name).subscribe(subscriber);
+    unsubscribes.push(() => adapters.pubsub(config.name).unsubscribe(subscriber));
 
     return props => config.view({model: props.model, actions});
   };
 
   const run = root => {
-    rootPubsub.subscribe(model => {
-        console.log("rootPubsub:", model);
+    const rootSubscriber = model => {
+      console.log("rootPubsub:", model);
       rootModel = merge(rootModel, model);
       adapters.render(root({model: rootModel}));
-    });
+    };
+    rootPubsub.subscribe(rootSubscriber);
+    unsubscribes.push(() => rootPubsub.unsubscribe(rootSubscriber));
 
-    console.log("initial broadcast");
+    console.log("initial broadcast:", rootModel);
     rootPubsub.broadcast(rootModel);
   };
 
-  return { createFeature, run };
+  const shutdown = () => {
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+  };
+
+  return { createFeature, run, shutdown };
 };
 
 export { meiosis };
