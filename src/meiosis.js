@@ -1,7 +1,7 @@
 /*
 Adapters =
   { render : html => void
-  , pubsub : subscribe, broadcast
+  , wire : send, receive
   }
 Config =
   { name : String
@@ -19,48 +19,33 @@ Feature =
 import { merge } from "ramda"; // FIXME: adapter
 
 const meiosis = adapters => {
-  const unsubscribes = [];
-
-  const rootPubsub = adapters.pubsub("meiosis");
+  const rootWire = adapters.wire("meiosis");
   let rootModel = {};
 
   const createFeature = config => {
-    console.log("createFeature:", config.name);
     rootModel = merge(rootModel, config.initialModel);
-    console.log("rootModel:", rootModel);
 
-    const actions = config.actions(adapters.pubsub(config.name).broadcast);
+    const actions = config.actions(adapters.wire(config.name).send);
 
-    const subscriber = action => {
-      console.log("action:", action);
+    adapters.wire(config.name).receive(action => {
       const model = config.model(rootModel, action);
-      rootPubsub.broadcast(model);
-      config.chain(model, action);
-    };
-    adapters.pubsub(config.name).subscribe(subscriber);
-    unsubscribes.push(() => adapters.pubsub(config.name).unsubscribe(subscriber));
+      rootWire.send(model);
+      config.chain(model, action, actions);
+    });
 
     return props => config.view({model: props.model, actions});
   };
 
   const run = root => {
-    const rootSubscriber = model => {
-      console.log("rootPubsub:", model);
+    rootWire.receive(model => {
       rootModel = merge(rootModel, model);
       adapters.render(root({model: rootModel}));
-    };
-    rootPubsub.subscribe(rootSubscriber);
-    unsubscribes.push(() => rootPubsub.unsubscribe(rootSubscriber));
+    });
 
-    console.log("initial broadcast:", rootModel);
-    rootPubsub.broadcast(rootModel);
+    rootWire.send(rootModel);
   };
 
-  const shutdown = () => {
-    unsubscribes.forEach(unsubscribe => unsubscribe());
-  };
-
-  return { createFeature, run, shutdown };
+  return { createFeature, run };
 };
 
 export { meiosis };

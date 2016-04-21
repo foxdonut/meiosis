@@ -1,10 +1,9 @@
 import { expect } from "chai";
 import { merge } from "ramda";
-//import radio from "radio";
+import h from "snabbdom/h";
+import Task from "data.task";
 
 import { meiosis } from "../src/index";
-
-import h from "snabbdom/h";
 
 const {div, span} = require("hyperscript-helpers")(h);
 
@@ -13,35 +12,28 @@ describe("meiosis", function() {
   let vnode = null;
 
   // adapters
-  //const pubsub = radio;
-  let radios = {};
-  const createChannel = () => {
-    let subs = [];
-    const subscribe = f => subs.push(f);
-    const unsubscribe = _f => subs = [];
-    const broadcast = d => {
-      subs.forEach(sub => sub(d));
-    };
-    return { subscribe, unsubscribe, broadcast };
+  let wires = {};
+  const createWire = () => {
+    let receiver = null;
+    const receive = rcv => receiver = rcv;
+    const send = data => receiver(data);
+
+    return { send, receive };
   };
-  const pubsub = name => {
-    let channel = radios[name];
-    if (!channel) {
-      channel = createChannel();
-      radios[name] = channel;
+  const wire = name => {
+    let theWire = wires[name];
+    if (!theWire) {
+      theWire = createWire();
+      wires[name] = theWire;
     }
-    return channel;
+    return theWire;
   };
   const render = view => { vnode = view; };
-  const adapters = { pubsub, render };
+  const adapters = { render, wire };
 
   // prepare Meiosis
   const Meiosis = meiosis(adapters);
   const createFeature = Meiosis.createFeature;
-
-  afterEach(function() {
-    Meiosis.shutdown();
-  });
 
   // baseline config for tests
   const baseConfig = {
@@ -106,7 +98,7 @@ describe("meiosis", function() {
     const UPDATE = "update";
 
     const actions = next => ({
-      update: () => { console.log("next:", next); next(UPDATE); }
+      update: () => next(UPDATE)
     });
 
     let actionsRef = null;
@@ -134,210 +126,188 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("two");
   });
 
-  xit("chains an action", function() {
-    
-  });
+  it("chains an action", function() {
+    const UPDATE = "update";
+    const REFRESH = "refresh";
 
-  xit("merges the models into a single root model", function() {
-    
-  });
+    const actions = next => ({
+      update: () => next(UPDATE),
+      refresh: () => next(REFRESH)
+    });
 
-  xit("reflects change from one view in another view", function() {
-    
-  });
+    let actionsRef = null;
 
-  xit("executes tasks", function() {
-    
-  });
-  /*
-  it("calls update with an action and a model", function(done) {
-    const initial = { duck: "quack" };
-    const testAction = "TEST";
-    let flag = true;
-
-    const feature = createFeature(merge(baseConfig, {
-      initialModel: [initial, null],
-      view: address => _model => {
-        if (flag) {
-          flag = false;
-          address.onNext(testAction);
-        }
+    const Main = createFeature(merge(baseConfig, {
+      name: "chain",
+      initialModel: { name: "one"},
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
       },
-      update: (model, action) => {
-        expect(action).to.equal(testAction);
-        expect(model).to.equal(initial);
-        done();
-        return [model, null];
-      }
-    }));
-
-    feature.view$.subscribe(identity);
-  });
-
-  it("sends the next action", function(done) {
-    const firstAction = "first";
-    const secondAction = "second";
-    const task = Task.of(secondAction);
-
-    let flag = true;
-
-    const feature = createFeature(merge(baseConfig, {
-      view: address => _model => {
-        if (flag) {
-          flag = false;
-          address.onNext(firstAction);
-          return "view 1";
+      model: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
         }
-        return "view 2";
+        else if (action === REFRESH) {
+          return { name: "four" };
+        }
+        return model;
       },
-      update: (model, action) => {
-        if (action === firstAction) {
-          return [model, task];
-        } else if (action === secondAction) {
-          done();
-          return [model, null];
+      chain: (model, action, actions) => {
+        if (action === UPDATE) {
+          actions.refresh();
         }
       }
     }));
+    
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
 
-    feature.view$.subscribe(identity);
-    feature.task$.subscribe(taskRunner);
+    actionsRef.update();
+    expect(vnode.text).to.equal("four");
   });
 
-  it("updates the model", function(done) {
-    const INCREMENT = "increment";
+  it("merges the models into a single root model", function() {
+    const UPDATE = "update";
 
-    let flag = true;
+    const actions = next => ({
+      update: () => next(UPDATE)
+    });
 
-    const feature = createFeature(merge(baseConfig, {
-      initialModel: [{ counter: 1 }, null],
-      update: (model, action) => {
-        if (action === INCREMENT) {
-          return [over(lensProp("counter"), inc, model), null];
-        }
-        return [model, null];
+    let actionsRef = null;
+
+    const Form = createFeature(merge(baseConfig, {
+      name: "Form",
+      initialModel: { formText: "F1" },
+      view: props => span(props.model.formText)
+    }));
+
+    const List = createFeature(merge(baseConfig, {
+      name: "List",
+      initialModel: { listText: "L1" },
+      view: props => span(props.model.listText)
+    }));
+
+    const Main = createFeature(merge(baseConfig, {
+      name: "Main",
+      initialModel: { name: "one"},
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return div(
+          [ span(props.model.name)
+          , Form(props)
+          , List(props)
+          ]
+        );
       },
-      view: address => model => {
-        if (flag) {
-          flag = false;
-          address.onNext(INCREMENT);
-        } else {
-          expect(model.counter).to.equal(2);
-          done();
+      model: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two", formText: "F2", listText: "L2" };
         }
+        return model;
+      }
+    }));
+    
+    Meiosis.run(Main);
+
+    expect(vnode.children.length).to.equal(3);
+    expect(vnode.children[0].text).to.equal("one");
+    expect(vnode.children[1].text).to.equal("F1");
+    expect(vnode.children[2].text).to.equal("L1");
+
+    actionsRef.update();
+    expect(vnode.children[0].text).to.equal("two");
+    expect(vnode.children[1].text).to.equal("F2");
+    expect(vnode.children[2].text).to.equal("L2");
+  });
+
+  it("reflects change from one view in another view", function() {
+    const UPDATE = "update";
+
+    const actions = next => ({
+      update: () => next(UPDATE)
+    });
+
+    let actionsRef = null;
+
+    const Form = createFeature(merge(baseConfig, {
+      name: "Form",
+      initialModel: { formText: "F1" },
+      view: props => span(props.model.formText)
+    }));
+
+    const List = createFeature(merge(baseConfig, {
+      name: "List",
+      initialModel: { listText: "L1" },
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.listText);
+      },
+      model: (model, action) => {
+        if (action === UPDATE) {
+          return { formText: "F2" };
+        }
+        return model;
       }
     }));
 
-    feature.view$.subscribe(identity);
-  });
-
-  it("merges input signals", function(done) {
-    const INCREMENT = "increment";
-
-    const input = new Subject();
-
-    const feature = createFeature(merge(baseConfig, {
-      initialModel: [{ counter: 1 }, null],
-      update: (model, action) => {
-        if (action === INCREMENT) {
-          return [over(lensProp("counter"), inc, model), null];
-        }
-        return [model, null];
-      },
-      view: _address => model => {
-        if (model.counter === 2) {
-          done();
-        }
-      },
-      inputs: [input]
+    const Main = createFeature(merge(baseConfig, {
+      name: "Main",
+      initialModel: { name: "one"},
+      actions: actions,
+      view: props => div(
+        [ span(props.model.name)
+        , Form(props)
+        , List(props)
+        ]
+      )
     }));
+    
+    Meiosis.run(Main);
 
-    feature.view$.subscribe(identity);
+    expect(vnode.children.length).to.equal(3);
+    expect(vnode.children[0].text).to.equal("one");
+    expect(vnode.children[1].text).to.equal("F1");
+    expect(vnode.children[2].text).to.equal("L1");
 
-    input.onNext(INCREMENT);
+    actionsRef.update();
+    expect(vnode.children[0].text).to.equal("one");
+    expect(vnode.children[1].text).to.equal("F2");
+    expect(vnode.children[2].text).to.equal("L1");
   });
 
   it("executes tasks", function(done) {
     const INCREMENT = "increment";
-    const NO_OP = "noOp";
 
-    let flag = true;
+    let value = 0;
+    let actionsRef = null;
 
-    const input = new Subject();
+    const task = new Task((rej, res) => { res(42); });
 
-    const task = new Task((rej, res) => {
-      flag = false;
-      res(NO_OP);
+    const actions = next => ({
+      increment: () => task.fork(null, res => { value = res; next(INCREMENT); })
     });
 
-    const feature = createFeature(merge(baseConfig, {
-      initialModel: [{ counter: 1 }, null],
-      update: (model, action) => {
+    Meiosis.run(createFeature(merge(baseConfig, {
+      name: "task",
+      initialModel: { counter: 1 },
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return span("test");
+      },
+      model: (model, action) => {
         if (action === INCREMENT) {
-          return [over(lensProp("counter"), inc, model), task];
-        }
-        return [model, null];
-      },
-      view: _address => _model => {
-        if (!flag) {
+          expect(value).to.equal(42);
           done();
         }
-      },
-      inputs: [input]
-    }));
+        return model;
+      }
+    })));
 
-    feature.view$.subscribe(identity);
-    feature.task$.subscribe(taskRunner);
-
-    input.onNext(INCREMENT);
+    actionsRef.increment();
   });
-
-  it("dispatches the next action", function(done) {
-    const input = new Subject();
-    const output = new Subject();
-
-    const todos = [{
-      id: 1,
-      description: "test 1"
-    }, {
-      id: 2,
-      description: "test 2"
-    }];
-
-    const Action = Type({
-      NoOp: [],
-      LoadList: [],
-      ShowList: [Array]
-    });
-
-    const loadListTask = new Task((rej, res) => res(Action.ShowList(todos)));
-
-    const showListTask = new Task((rej, res) => {
-      output.onNext(todos);
-      res(Action.NoOp());
-    });
-
-    const handler = model =>
-      ({
-        NoOp: () => {
-          expect(model).to.deep.equal(todos);
-          done();
-          return [model, null];
-        },
-        LoadList: () => [
-          [], loadListTask
-        ],
-        ShowList: todos => [todos, showListTask]
-      });
-
-    const feature = createFeature(merge(baseConfig, {
-      update: (model, action) => Action.case(handler(model), action),
-      inputs: [input]
-    }));
-
-    feature.task$.subscribe(taskRunner);
-
-    input.onNext(Action.LoadList());
-  });
-  */
 });
