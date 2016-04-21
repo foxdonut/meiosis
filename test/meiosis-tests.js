@@ -3,9 +3,9 @@ import { merge } from "ramda";
 import h from "snabbdom/h";
 import Task from "data.task";
 
-import { meiosis } from "../src/index";
+import meiosis from "../src/index";
 
-const {div, span} = require("hyperscript-helpers")(h);
+const { div, span } = require("hyperscript-helpers")(h);
 
 describe("meiosis", function() {
 
@@ -17,22 +17,21 @@ describe("meiosis", function() {
 
   // prepare Meiosis
   const Meiosis = meiosis(adapters);
-  const createFeature = Meiosis.createFeature;
+  const createComponent = Meiosis.createComponent;
 
   // baseline config for tests
   const baseConfig = {
-    name: "test",
     initialModel: {},
-    model: (model, _next) => model,
+    update: (model, _action) => model,
     actions: _next => ({}),
     view: _props => null,
-    chain: (_model, _next) => null
+    chain: (_model, _action, _actions) => null
   };
 
   it("calls the view with actions and model", function(done) {
     const initial = { duck: "quack" };
 
-    Meiosis.run(createFeature(merge(baseConfig, {
+    Meiosis.run(createComponent(merge(baseConfig, {
       initialModel: initial,
 
       view: props => {
@@ -50,7 +49,7 @@ describe("meiosis", function() {
 
     const view = props => span(`A duck says ${props.model.duck}`);
 
-    Meiosis.run(createFeature(merge(baseConfig, {
+    Meiosis.run(createComponent(merge(baseConfig, {
       initialModel: initial,
       view: view
     })));
@@ -64,9 +63,9 @@ describe("meiosis", function() {
     const FormText = "Form";
     const ListText = "List";
 
-    const Form = createFeature(merge(baseConfig, { name: "Form", view: _props => div(FormText) }));
-    const List = createFeature(merge(baseConfig, { name: "List", view: _props => div(ListText) }));
-    const Main = createFeature(merge(baseConfig, { name: "Main", view: props => div([Form(props), List(props)]) }));
+    const Form = createComponent(merge(baseConfig, { view: _props => div(FormText) }));
+    const List = createComponent(merge(baseConfig, { view: _props => div(ListText) }));
+    const Main = createComponent(merge(baseConfig, { view: props => div([Form(props), List(props)]) }));
 
     Meiosis.run(Main);
 
@@ -87,15 +86,14 @@ describe("meiosis", function() {
 
     let actionsRef = null;
 
-    const Main = createFeature(merge(baseConfig, {
-      name: "action",
+    const Main = createComponent(merge(baseConfig, {
       initialModel: { name: "one"},
       actions: actions,
       view: props => {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      model: (model, action) => {
+      update: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -121,15 +119,14 @@ describe("meiosis", function() {
 
     let actionsRef = null;
 
-    const Main = createFeature(merge(baseConfig, {
-      name: "chain",
+    const Main = createComponent(merge(baseConfig, {
       initialModel: { name: "one"},
       actions: actions,
       view: props => {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      model: (model, action) => {
+      update: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -161,20 +158,17 @@ describe("meiosis", function() {
 
     let actionsRef = null;
 
-    const Form = createFeature(merge(baseConfig, {
-      name: "Form",
+    const Form = createComponent(merge(baseConfig, {
       initialModel: { formText: "F1" },
       view: props => span(props.model.formText)
     }));
 
-    const List = createFeature(merge(baseConfig, {
-      name: "List",
+    const List = createComponent(merge(baseConfig, {
       initialModel: { listText: "L1" },
       view: props => span(props.model.listText)
     }));
 
-    const Main = createFeature(merge(baseConfig, {
-      name: "Main",
+    const Main = createComponent(merge(baseConfig, {
       initialModel: { name: "one"},
       actions: actions,
       view: props => {
@@ -186,7 +180,7 @@ describe("meiosis", function() {
           ]
         );
       },
-      model: (model, action) => {
+      update: (model, action) => {
         if (action === UPDATE) {
           return { name: "two", formText: "F2", listText: "L2" };
         }
@@ -216,21 +210,19 @@ describe("meiosis", function() {
 
     let actionsRef = null;
 
-    const Form = createFeature(merge(baseConfig, {
-      name: "Form",
+    const Form = createComponent(merge(baseConfig, {
       initialModel: { formText: "F1" },
       view: props => span(props.model.formText)
     }));
 
-    const List = createFeature(merge(baseConfig, {
-      name: "List",
+    const List = createComponent(merge(baseConfig, {
       initialModel: { listText: "L1" },
       actions: actions,
       view: props => {
         actionsRef = props.actions;
         return span(props.model.listText);
       },
-      model: (model, action) => {
+      update: (model, action) => {
         if (action === UPDATE) {
           return { formText: "F2" };
         }
@@ -238,8 +230,7 @@ describe("meiosis", function() {
       }
     }));
 
-    const Main = createFeature(merge(baseConfig, {
-      name: "Main",
+    const Main = createComponent(merge(baseConfig, {
       initialModel: { name: "one"},
       actions: actions,
       view: props => div(
@@ -275,15 +266,14 @@ describe("meiosis", function() {
       increment: () => task.fork(null, res => { value = res; next(INCREMENT); })
     });
 
-    Meiosis.run(createFeature(merge(baseConfig, {
-      name: "task",
+    Meiosis.run(createComponent(merge(baseConfig, {
       initialModel: { counter: 1 },
       actions: actions,
       view: props => {
         actionsRef = props.actions;
         return span("test");
       },
-      model: (model, action) => {
+      update: (model, action) => {
         if (action === INCREMENT) {
           expect(value).to.equal(42);
           done();

@@ -4,12 +4,11 @@ Adapters =
   , wire : send, receive
   }
 Config =
-  { name : String
-  , initialModel : model
-  , model : (model, next) => model
+  { initialModel : model
+  , update : (model, action) => model
   , actions : next => Object
   , view : ({model, actions}) => html
-  , chain : (model, next) => <next action> void
+  , chain : (model, action, actions) => <next action> void
   }
 
 Feature =
@@ -19,6 +18,7 @@ Feature =
 import { merge } from "ramda"; // FIXME: adapter
 
 let wires = {};
+let nextWireId = 1;
 const createWire = () => {
   let receiver = null;
   const receive = rcv => receiver = rcv;
@@ -26,7 +26,12 @@ const createWire = () => {
 
   return { send, receive };
 };
-const defaultWire = name => {
+const defaultWire = wireName => {
+  let name = wireName;
+  if (!name) {
+    name = "wire_" + nextWireId;
+    nextWireId++;
+  }
   let theWire = wires[name];
   if (!theWire) {
     theWire = createWire();
@@ -40,13 +45,14 @@ const meiosis = adapters => {
   const rootWire = wire("meiosis");
   let rootModel = {};
 
-  const createFeature = config => {
+  const createComponent = config => {
     rootModel = merge(rootModel, config.initialModel);
 
-    const actions = config.actions(wire(config.name).send);
+    const componentWire = wire();
+    const actions = config.actions(componentWire.send);
 
-    wire(config.name).receive(action => {
-      const model = config.model(rootModel, action);
+    componentWire.receive(action => {
+      const model = config.update(rootModel, action);
       rootWire.send(model);
       config.chain(model, action, actions);
     });
@@ -63,7 +69,7 @@ const meiosis = adapters => {
     rootWire.send(rootModel);
   };
 
-  return { createFeature, run };
+  return { createComponent, run };
 };
 
 export { meiosis };

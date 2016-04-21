@@ -50,11 +50,10 @@ module.exports =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.meiosis = undefined;
 
 	var _meiosis = __webpack_require__(1);
 
-	exports.meiosis = _meiosis.meiosis;
+	exports.default = _meiosis.meiosis;
 
 /***/ },
 /* 1 */
@@ -77,12 +76,11 @@ module.exports =
 	                  , wire : send, receive
 	                  }
 	                Config =
-	                  { name : String
-	                  , initialModel : model
-	                  , model : (model, next) => model
+	                  { initialModel : model
+	                  , update : (model, action) => model
 	                  , actions : next => Object
 	                  , view : ({model, actions}) => html
-	                  , chain : (model, next) => <next action> void
+	                  , chain : (model, action, actions) => <next action> void
 	                  }
 	                
 	                Feature =
@@ -90,6 +88,7 @@ module.exports =
 	                  }
 	                */
 
+	var nextWireId = 1;
 	var createWire = function createWire() {
 	  var receiver = null;
 	  var receive = function receive(rcv) {
@@ -101,7 +100,12 @@ module.exports =
 
 	  return { send: send, receive: receive };
 	};
-	var defaultWire = function defaultWire(name) {
+	var defaultWire = function defaultWire(wireName) {
+	  var name = wireName;
+	  if (!name) {
+	    name = "wire_" + nextWireId;
+	    nextWireId++;
+	  }
 	  var theWire = wires[name];
 	  if (!theWire) {
 	    theWire = createWire();
@@ -115,13 +119,14 @@ module.exports =
 	  var rootWire = wire("meiosis");
 	  var rootModel = {};
 
-	  var createFeature = function createFeature(config) {
+	  var createComponent = function createComponent(config) {
 	    rootModel = (0, _ramda.merge)(rootModel, config.initialModel);
 
-	    var actions = config.actions(wire(config.name).send);
+	    var componentWire = wire();
+	    var actions = config.actions(componentWire.send);
 
-	    wire(config.name).receive(function (action) {
-	      var model = config.model(rootModel, action);
+	    componentWire.receive(function (action) {
+	      var model = config.update(rootModel, action);
 	      rootWire.send(model);
 	      config.chain(model, action, actions);
 	    });
@@ -140,7 +145,7 @@ module.exports =
 	    rootWire.send(rootModel);
 	  };
 
-	  return { createFeature: createFeature, run: run };
+	  return { createComponent: createComponent, run: run };
 	};
 
 	exports.meiosis = meiosis;

@@ -1,3 +1,3 @@
 import { meiosis } from "./meiosis";
 
-export { meiosis };
+export default meiosis;
