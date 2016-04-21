@@ -18,16 +18,34 @@ Feature =
 */
 import { merge } from "ramda"; // FIXME: adapter
 
+let wires = {};
+const createWire = () => {
+  let receiver = null;
+  const receive = rcv => receiver = rcv;
+  const send = data => receiver(data);
+
+  return { send, receive };
+};
+const defaultWire = name => {
+  let theWire = wires[name];
+  if (!theWire) {
+    theWire = createWire();
+    wires[name] = theWire;
+  }
+  return theWire;
+};
+
 const meiosis = adapters => {
-  const rootWire = adapters.wire("meiosis");
+  const wire = adapters.wire || defaultWire;
+  const rootWire = wire("meiosis");
   let rootModel = {};
 
   const createFeature = config => {
     rootModel = merge(rootModel, config.initialModel);
 
-    const actions = config.actions(adapters.wire(config.name).send);
+    const actions = config.actions(wire(config.name).send);
 
-    adapters.wire(config.name).receive(action => {
+    wire(config.name).receive(action => {
       const model = config.model(rootModel, action);
       rootWire.send(model);
       config.chain(model, action, actions);

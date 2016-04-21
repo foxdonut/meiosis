@@ -12,24 +12,8 @@ describe("meiosis", function() {
   let vnode = null;
 
   // adapters
-  let wires = {};
-  const createWire = () => {
-    let receiver = null;
-    const receive = rcv => receiver = rcv;
-    const send = data => receiver(data);
-
-    return { send, receive };
-  };
-  const wire = name => {
-    let theWire = wires[name];
-    if (!theWire) {
-      theWire = createWire();
-      wires[name] = theWire;
-    }
-    return theWire;
-  };
   const render = view => { vnode = view; };
-  const adapters = { render, wire };
+  const adapters = { render };
 
   // prepare Meiosis
   const Meiosis = meiosis(adapters);
