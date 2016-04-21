@@ -284,4 +284,26 @@ describe("meiosis", function() {
 
     actionsRef.increment();
   });
+
+  it("accepts only specifying the view", function() {
+    const FormText = "Form";
+    const ListText = "List";
+
+    const Form = createComponent(merge(baseConfig, { view: _props => div(FormText) }));
+    const List = createComponent(merge(baseConfig, { view: _props => div(ListText) }));
+    const Main = createComponent({ view: props => div([Form(props), List(props)]) });
+
+    Meiosis.run(Main);
+
+    expect(vnode).to.exist;
+    expect(vnode.sel).to.equal("div");
+    expect(vnode.children.length).to.equal(2);
+
+    expect(vnode.children[0].text).to.equal(FormText);
+    expect(vnode.children[1].text).to.equal(ListText);
+  });
+
+  it("throws if no view is specified", function() {
+    expect(() => createComponent({ initialModel: {}})).to.throw(Error);
+  });
 });

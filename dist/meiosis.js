@@ -120,15 +120,23 @@ module.exports =
 	  var rootModel = {};
 
 	  var createComponent = function createComponent(config) {
-	    rootModel = (0, _ramda.merge)(rootModel, config.initialModel);
+	    if (!config || !config.view) {
+	      throw new Error("At a minimum, you need to specify a view to create a component.");
+	    }
+	    rootModel = (0, _ramda.merge)(rootModel, config.initialModel || {});
 
 	    var componentWire = wire();
-	    var actions = config.actions(componentWire.send);
+	    var actions = config.actions ? config.actions(componentWire.send) : {};
 
 	    componentWire.receive(function (action) {
-	      var model = config.update(rootModel, action);
-	      rootWire.send(model);
-	      config.chain(model, action, actions);
+	      if (config.update) {
+	        var model = config.update(rootModel, action);
+	        rootWire.send(model);
+
+	        if (config.chain) {
+	          config.chain(model, action, actions);
+	        }
+	      }
 	    });
 
 	    return function (props) {

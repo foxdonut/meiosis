@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "meiosis",
   "main": "dist/meiosis.js",
   "scripts": {

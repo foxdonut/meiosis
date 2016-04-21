@@ -46,15 +46,23 @@ const meiosis = adapters => {
   let rootModel = {};
 
   const createComponent = config => {
-    rootModel = merge(rootModel, config.initialModel);
+    if (!config || !config.view) {
+      throw new Error("At a minimum, you need to specify a view to create a component.");
+    }
+    rootModel = merge(rootModel, config.initialModel || {});
 
     const componentWire = wire();
-    const actions = config.actions(componentWire.send);
+    const actions = config.actions ? config.actions(componentWire.send) : {};
 
     componentWire.receive(action => {
-      const model = config.update(rootModel, action);
-      rootWire.send(model);
-      config.chain(model, action, actions);
+      if (config.update) {
+        const model = config.update(rootModel, action);
+        rootWire.send(model);
+
+        if (config.chain) {
+          config.chain(model, action, actions);
+        }
+      }
     });
 
     return props => config.view({model: props.model, actions});
