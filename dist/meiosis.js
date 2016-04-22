@@ -126,7 +126,9 @@ module.exports =
 	    rootModel = (0, _ramda.merge)(rootModel, config.initialModel || {});
 
 	    var componentWire = wire();
-	    var actions = config.actions ? config.actions(componentWire.send) : {};
+	    var next = componentWire.send;
+	    var nextAction = { next: next };
+	    var actions = config.actions ? (0, _ramda.merge)(nextAction, config.actions(next)) : nextAction;
 
 	    componentWire.receive(function (action) {
 	      if (config.update) {
