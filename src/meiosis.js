@@ -15,7 +15,7 @@ Feature =
   { view : props => html
   }
 */
-import { merge } from "ramda"; // FIXME: adapter
+import { assoc, merge } from "ramda"; // FIXME: adapter
 
 let wires = {};
 let nextWireId = 1;
@@ -67,12 +67,12 @@ const meiosis = adapters => {
       }
     });
 
-    return props => config.view({model: props.model, actions});
+    return props => config.view(assoc("actions", actions, props));
   };
 
   const run = root => {
     rootWire.receive(model => {
-      rootModel = merge(rootModel, model);
+      rootModel = merge(rootModel, model); // add multiple functions, default merge, also logging or time travel
       adapters.render(root({model: rootModel}));
     });
 

@@ -142,13 +142,13 @@ module.exports =
 	    });
 
 	    return function (props) {
-	      return config.view({ model: props.model, actions: actions });
+	      return config.view((0, _ramda.assoc)("actions", actions, props));
 	    };
 	  };
 
 	  var run = function run(root) {
 	    rootWire.receive(function (model) {
-	      rootModel = (0, _ramda.merge)(rootModel, model);
+	      rootModel = (0, _ramda.merge)(rootModel, model); // add multiple functions, default merge, also logging or time travel
 	      adapters.render(root({ model: rootModel }));
 	    });
 
