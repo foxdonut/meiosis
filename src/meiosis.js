@@ -52,7 +52,9 @@ const meiosis = adapters => {
     rootModel = merge(rootModel, config.initialModel || {});
 
     const componentWire = wire();
-    const actions = config.actions ? config.actions(componentWire.send) : {};
+    const next = componentWire.send;
+    const nextAction = {next};
+    const actions = config.actions ? merge(nextAction, config.actions(next)) : nextAction;
 
     componentWire.receive(action => {
       if (config.update) {

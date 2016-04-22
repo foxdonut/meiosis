@@ -87,7 +87,7 @@ describe("meiosis", function() {
     let actionsRef = null;
 
     const Main = createComponent(merge(baseConfig, {
-      initialModel: { name: "one"},
+      initialModel: { name: "one" },
       actions: actions,
       view: props => {
         actionsRef = props.actions;
@@ -120,7 +120,7 @@ describe("meiosis", function() {
     let actionsRef = null;
 
     const Main = createComponent(merge(baseConfig, {
-      initialModel: { name: "one"},
+      initialModel: { name: "one" },
       actions: actions,
       view: props => {
         actionsRef = props.actions;
@@ -169,7 +169,7 @@ describe("meiosis", function() {
     }));
 
     const Main = createComponent(merge(baseConfig, {
-      initialModel: { name: "one"},
+      initialModel: { name: "one" },
       actions: actions,
       view: props => {
         actionsRef = props.actions;
@@ -231,7 +231,7 @@ describe("meiosis", function() {
     }));
 
     const Main = createComponent(merge(baseConfig, {
-      initialModel: { name: "one"},
+      initialModel: { name: "one" },
       actions: actions,
       view: props => div(
         [ span(props.model.name)
@@ -305,5 +305,62 @@ describe("meiosis", function() {
 
   it("throws if no view is specified", function() {
     expect(() => createComponent({ initialModel: {}})).to.throw(Error);
+  });
+
+  it("passes actions.next to the view by default", function() {
+    const UPDATE = "update";
+
+    let actionsRef = null;
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      update: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
+        }
+        return model;
+      }
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next(UPDATE);
+    expect(vnode.text).to.equal("two");
+  });
+
+  it("passes actions.next to the view even when specifying actions", function() {
+    const UPDATE = "update";
+
+    const actions = next => ({
+      update: () => next(UPDATE)
+    });
+
+    let actionsRef = null;
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      actions: actions,
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      update: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
+        }
+        return model;
+      }
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next(UPDATE);
+    expect(vnode.text).to.equal("two");
   });
 });
