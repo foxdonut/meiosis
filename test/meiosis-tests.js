@@ -482,4 +482,23 @@ describe("meiosis", function() {
     actionsRef.next(UPDATE);
     expect(vnode.text).to.equal("3");
   });
+
+  it("returns a function to render a view from a model", function() {
+    const initial = { duck: "quack" };
+
+    const view = props => span(`A duck says ${props.model.duck}`);
+
+    const renderRoot = Meiosis.run(createComponent(merge(baseConfig, {
+      initialModel: initial,
+      view: view
+    })));
+
+    expect(vnode).to.exist;
+    expect(vnode.sel).to.equal("span");
+    expect(vnode.text).to.equal("A duck says quack");
+
+    const sound2 = "QUACK!";
+    renderRoot({ duck: sound2 });
+    expect(vnode.text).to.equal("A duck says " + sound2);
+  });
 });

@@ -5,15 +5,14 @@ Adapters =
   }
 Config =
   { initialModel : model
-  , update : (model, action) => model
-  , actions : next => Object
   , view : ({model, actions}) => html
+  , actions : next => Object
+  , update : (model, action) => model
   , chain : (model, action, actions) => <next action> void
+  , pipeline : [(model, update) => model]
   }
 
-Feature =
-  { view : props => html
-  }
+Component = model => view
 */
 import { assoc, merge } from "ramda"; // FIXME: adapter
 
@@ -89,11 +88,12 @@ const meiosis = adapters => {
       // FIXME: remove ramda dep
       pipelines.push(merge);
     }
-    rootWire.receive(model => {
-      adapters.render(root({model}));
-    });
+    const renderRoot = model => { adapters.render(root({ model })); };
+    rootWire.receive(renderRoot);
 
     rootWire.send(rootModel);
+
+    return renderRoot;
   };
 
   return { createComponent, run };
