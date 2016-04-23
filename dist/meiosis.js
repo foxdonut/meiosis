@@ -70,51 +70,36 @@ module.exports =
 
 	// FIXME: adapter
 
-	var wires = {}; /*
-	                Adapters =
-	                  { render : html => void
-	                  , wire : send, receive
-	                  }
-	                Config =
-	                  { initialModel : model
-	                  , update : (model, action) => model
-	                  , actions : next => Object
-	                  , view : ({model, actions}) => html
-	                  , chain : (model, action, actions) => <next action> void
-	                  }
-	                
-	                Feature =
-	                  { view : props => html
-	                  }
-	                */
-
-	var nextWireId = 1;
-	var createWire = function createWire() {
-	  var receiver = null;
-	  var receive = function receive(rcv) {
-	    return receiver = rcv;
-	  };
-	  var send = function send(data) {
-	    return receiver(data);
-	  };
-
-	  return { send: send, receive: receive };
-	};
-	var defaultWire = function defaultWire(wireName) {
-	  var name = wireName;
-	  if (!name) {
-	    name = "wire_" + nextWireId;
-	    nextWireId++;
-	  }
-	  var theWire = wires[name];
-	  if (!theWire) {
-	    theWire = createWire();
-	    wires[name] = theWire;
-	  }
-	  return theWire;
-	};
-
 	var meiosis = function meiosis(adapters) {
+	  var wires = {};
+	  var nextWireId = 1;
+	  var createWire = function createWire() {
+	    var receiver = null;
+	    var receive = function receive(rcv) {
+	      return receiver = rcv;
+	    };
+	    var send = function send(data) {
+	      return receiver(data);
+	    };
+
+	    return { send: send, receive: receive };
+	  };
+	  var defaultWire = function defaultWire(wireName) {
+	    var name = wireName;
+	    if (!name) {
+	      name = "wire_" + nextWireId;
+	      nextWireId++;
+	    }
+	    var theWire = wires[name];
+	    if (!theWire) {
+	      theWire = createWire();
+	      wires[name] = theWire;
+	    }
+	    return theWire;
+	  };
+
+	  var pipelines = [];
+
 	  var wire = adapters.wire || defaultWire;
 	  var rootWire = wire("meiosis");
 	  var rootModel = {};
@@ -130,33 +115,64 @@ module.exports =
 	    var nextAction = { next: next };
 	    var actions = config.actions ? (0, _ramda.merge)(nextAction, config.actions(next)) : nextAction;
 
+	    var pipeline = config.pipeline;
+	    // FIXME: allow multiple functions in a component's pipeline
+	    if (pipeline) {
+	      pipelines.push(pipeline);
+	    }
+
 	    componentWire.receive(function (action) {
 	      if (config.update) {
-	        var model = config.update(rootModel, action);
-	        rootWire.send(model);
+	        (function () {
+	          var model = config.update(rootModel, action);
+	          pipelines.forEach(function (pipeline) {
+	            return rootModel = pipeline(rootModel, model);
+	          });
+	          rootWire.send(rootModel);
 
-	        if (config.chain) {
-	          config.chain(model, action, actions);
-	        }
+	          if (config.chain) {
+	            config.chain(model, action, actions);
+	          }
+	        })();
 	      }
 	    });
 
 	    return function (props) {
 	      return config.view((0, _ramda.assoc)("actions", actions, props));
-	    };
+	    }; // FIXME: remove ramda dep
 	  };
 
 	  var run = function run(root) {
+	    if (pipelines.length === 0) {
+	      // FIXME: remove ramda dep
+	      pipelines.push(_ramda.merge);
+	    }
 	    rootWire.receive(function (model) {
-	      rootModel = (0, _ramda.merge)(rootModel, model); // add multiple functions, default merge, also logging or time travel
-	      adapters.render(root({ model: rootModel }));
+	      adapters.render(root({ model: model }));
 	    });
 
 	    rootWire.send(rootModel);
 	  };
 
 	  return { createComponent: createComponent, run: run };
-	};
+	}; /*
+	   Adapters =
+	     { render : html => void
+	     , wire : send, receive
+	     }
+	   Config =
+	     { initialModel : model
+	     , update : (model, action) => model
+	     , actions : next => Object
+	     , view : ({model, actions}) => html
+	     , chain : (model, action, actions) => <next action> void
+	     }
+	   
+	   Feature =
+	     { view : props => html
+	     }
+	   */
+
 
 	exports.meiosis = meiosis;
 

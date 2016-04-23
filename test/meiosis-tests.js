@@ -15,9 +15,14 @@ describe("meiosis", function() {
   const render = view => { vnode = view; };
   const adapters = { render };
 
-  // prepare Meiosis
-  const Meiosis = meiosis(adapters);
-  const createComponent = Meiosis.createComponent;
+  let Meiosis = null;
+  let createComponent = null;
+
+  beforeEach(function() {
+    // prepare Meiosis
+    Meiosis = meiosis(adapters);
+    createComponent = Meiosis.createComponent;
+  });
 
   // baseline config for tests
   const baseConfig = {
@@ -362,5 +367,71 @@ describe("meiosis", function() {
 
     actionsRef.next(UPDATE);
     expect(vnode.text).to.equal("two");
+  });
+
+  it("runs updates through a pipeline", function() {
+    const UPDATE = "update";
+
+    let actionsRef = null;
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      update: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
+        }
+        return model;
+      },
+      pipeline: (model, update) => {
+        expect(model.name).to.equal("one");
+        expect(update.name).to.equal("two");
+        return { name: "three" };
+      }
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next(UPDATE);
+    expect(vnode.text).to.equal("three");
+  });
+
+  it("calls one component's pipeline with another component's update", function() {
+    const UPDATE = "update";
+
+    let actionsRef = null;
+
+    const Child = createComponent({
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      update: (model, action) => {
+        if (action === UPDATE) {
+          return { name: "two" };
+        }
+        return model;
+      }
+    });
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      view: props => Child(props),
+      pipeline: (model, update) => {
+        expect(model.name).to.equal("one");
+        expect(update.name).to.equal("two");
+        return { name: "three" };
+      }
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next(UPDATE);
+    expect(vnode.text).to.equal("three");
   });
 });
