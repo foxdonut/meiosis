@@ -434,4 +434,52 @@ describe("meiosis", function() {
     actionsRef.next(UPDATE);
     expect(vnode.text).to.equal("three");
   });
+
+  it("accepts multiple functions in a pipeline", function() {
+    const UPDATE = "update";
+
+    let actionsRef = null;
+
+    const Child = createComponent({
+      view: props => {
+        actionsRef = props.actions;
+        return span(String(props.model.value));
+      },
+      update: (model, action) => {
+        if (action === UPDATE) {
+          return { value: 2 };
+        }
+        return model;
+      },
+      pipeline: [
+        (model, _update) => {
+          return model;
+        },
+        (model, _update) => {
+          return model;
+        }
+      ]
+    });
+
+    const Main = createComponent({
+      initialModel: { value: 1 },
+      view: props => Child(props),
+      pipeline: [
+        (model, update) => {
+          expect(model.value).to.equal(1);
+          expect(update.value).to.equal(2);
+          return { value: 3 };
+        },
+        (model, _update) => {
+          return model;
+        }
+      ]
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("1");
+
+    actionsRef.next(UPDATE);
+    expect(vnode.text).to.equal("3");
+  });
 });

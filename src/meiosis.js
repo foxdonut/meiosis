@@ -61,7 +61,12 @@ const meiosis = adapters => {
     const pipeline = config.pipeline;
     // FIXME: allow multiple functions in a component's pipeline
     if (pipeline) {
-      pipelines.push(pipeline);
+      if (Array === pipeline.constructor) {
+        Array.prototype.push.apply(pipelines, pipeline);
+      }
+      else {
+        pipelines.push(pipeline);
+      }
     }
 
     componentWire.receive(action => {
