@@ -7,9 +7,9 @@ Config =
   { initialModel : model
   , view : ({model, actions}) => html
   , actions : next => Object
-  , update : (model, action) => model
-  , chain : (model, action, actions) => <next action> void
-  , pipeline : [(model, update) => model]
+  , transform : (model, update) => update
+  , chain : (model, update, actions) => <next action> void
+  , receivers : [(model, update) => model]
   }
 
 Component = model => view
@@ -40,7 +40,7 @@ const meiosis = adapters => {
     return theWire;
   };
 
-  let pipelines = [];
+  let allReceivers = [];
 
   const wire = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
@@ -57,25 +57,19 @@ const meiosis = adapters => {
     const nextAction = {next};
     const actions = config.actions ? merge(nextAction, config.actions(next)) : nextAction;
 
-    const pipeline = config.pipeline;
-    // FIXME: allow multiple functions in a component's pipeline
-    if (pipeline) {
-      if (Array === pipeline.constructor) {
-        Array.prototype.push.apply(pipelines, pipeline);
-      }
-      else {
-        pipelines.push(pipeline);
-      }
+    const receivers = config.receivers;
+    if (receivers && Array === receivers.constructor) {
+      Array.prototype.push.apply(allReceivers, receivers);
     }
 
-    componentWire.receive(action => {
-      if (config.update) {
-        const model = config.update(rootModel, action);
-        pipelines.forEach(pipeline => rootModel = pipeline(rootModel, model));
+    componentWire.receive(update => {
+      if (config.transform) {
+        const updateTr = config.transform(rootModel, update);
+        allReceivers.forEach(receiver => rootModel = receiver(rootModel, updateTr));
         rootWire.send(rootModel);
 
         if (config.chain) {
-          config.chain(model, action, actions);
+          config.chain(updateTr, update, actions);
         }
       }
     });
@@ -84,9 +78,9 @@ const meiosis = adapters => {
   };
 
   const run = root => {
-    if (pipelines.length === 0) {
+    if (allReceivers.length === 0) {
       // FIXME: remove ramda dep
-      pipelines.push(merge);
+      allReceivers.push(merge);
     }
     const renderRoot = model => { adapters.render(root({ model })); };
     rootWire.receive(renderRoot);

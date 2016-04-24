@@ -27,7 +27,7 @@ describe("meiosis", function() {
   // baseline config for tests
   const baseConfig = {
     initialModel: {},
-    update: (model, _action) => model,
+    transform: (model, _action) => model,
     actions: _next => ({}),
     view: _props => null,
     chain: (_model, _action, _actions) => null
@@ -98,7 +98,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -131,7 +131,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -185,7 +185,7 @@ describe("meiosis", function() {
           ]
         );
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two", formText: "F2", listText: "L2" };
         }
@@ -227,7 +227,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.listText);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { formText: "F2" };
         }
@@ -278,7 +278,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span("test");
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === INCREMENT) {
           expect(value).to.equal(42);
           done();
@@ -323,7 +323,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -342,7 +342,7 @@ describe("meiosis", function() {
     const UPDATE = "update";
 
     const actions = next => ({
-      update: () => next(UPDATE)
+      transform: () => next(UPDATE)
     });
 
     let actionsRef = null;
@@ -354,7 +354,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -369,7 +369,7 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("two");
   });
 
-  it("runs updates through a pipeline", function() {
+  it("runs updates through receivers", function() {
     const UPDATE = "update";
 
     let actionsRef = null;
@@ -380,17 +380,17 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
         return model;
       },
-      pipeline: (model, update) => {
+      receivers: [(model, update) => {
         expect(model.name).to.equal("one");
         expect(update.name).to.equal("two");
         return { name: "three" };
-      }
+      }]
     });
 
     Meiosis.run(Main);
@@ -400,7 +400,7 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("three");
   });
 
-  it("calls one component's pipeline with another component's update", function() {
+  it("calls one component's receivers with another component's update", function() {
     const UPDATE = "update";
 
     let actionsRef = null;
@@ -410,7 +410,7 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(props.model.name);
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { name: "two" };
         }
@@ -421,11 +421,11 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { name: "one" },
       view: props => Child(props),
-      pipeline: (model, update) => {
+      receivers: [(model, update) => {
         expect(model.name).to.equal("one");
         expect(update.name).to.equal("two");
         return { name: "three" };
-      }
+      }]
     });
 
     Meiosis.run(Main);
@@ -435,7 +435,7 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("three");
   });
 
-  it("accepts multiple functions in a pipeline", function() {
+  it("accepts multiple functions in receivers", function() {
     const UPDATE = "update";
 
     let actionsRef = null;
@@ -445,13 +445,13 @@ describe("meiosis", function() {
         actionsRef = props.actions;
         return span(String(props.model.value));
       },
-      update: (model, action) => {
+      transform: (model, action) => {
         if (action === UPDATE) {
           return { value: 2 };
         }
         return model;
       },
-      pipeline: [
+      receivers: [
         (model, _update) => {
           return model;
         },
@@ -464,7 +464,7 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { value: 1 },
       view: props => Child(props),
-      pipeline: [
+      receivers: [
         (model, update) => {
           expect(model.value).to.equal(1);
           expect(update.value).to.equal(2);

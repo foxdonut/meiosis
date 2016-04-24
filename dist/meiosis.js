@@ -151,11 +151,14 @@ module.exports =
 	      // FIXME: remove ramda dep
 	      pipelines.push(_ramda.merge);
 	    }
-	    rootWire.receive(function (model) {
+	    var renderRoot = function renderRoot(model) {
 	      adapters.render(root({ model: model }));
-	    });
+	    };
+	    rootWire.receive(renderRoot);
 
 	    rootWire.send(rootModel);
+
+	    return renderRoot;
 	  };
 
 	  return { createComponent: createComponent, run: run };
@@ -166,15 +169,14 @@ module.exports =
 	     }
 	   Config =
 	     { initialModel : model
-	     , update : (model, action) => model
-	     , actions : next => Object
 	     , view : ({model, actions}) => html
+	     , actions : next => Object
+	     , update : (model, action) => model
 	     , chain : (model, action, actions) => <next action> void
+	     , pipeline : [(model, update) => model]
 	     }
 	   
-	   Feature =
-	     { view : props => html
-	     }
+	   Component = model => view
 	   */
 
 
