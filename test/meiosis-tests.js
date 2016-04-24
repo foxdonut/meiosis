@@ -140,7 +140,7 @@ describe("meiosis", function() {
         }
         return model;
       },
-      chain: (model, action, actions) => {
+      chain: (action, actions) => {
         if (action === UPDATE) {
           actions.refresh();
         }
@@ -500,5 +500,55 @@ describe("meiosis", function() {
     const sound2 = "QUACK!";
     renderRoot({ duck: sound2 });
     expect(vnode.text).to.equal("A duck says " + sound2);
+  });
+
+  it("runs updates directly through receivers with no transforms", function() {
+    let actionsRef = null;
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      receivers: [(model, update) => {
+        expect(model.name).to.equal("one");
+        expect(update.name).to.equal("two");
+        return { name: "three" };
+      }]
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next({ name: "two" });
+    expect(vnode.text).to.equal("three");
+  });
+
+  it("sends updates directly through to the chain function", function(done) {
+    let actionsRef = null;
+
+    const Main = createComponent({
+      initialModel: { name: "one" },
+      view: props => {
+        actionsRef = props.actions;
+        return span(props.model.name);
+      },
+      receivers: [(model, update) => {
+        expect(model.name).to.equal("one");
+        expect(update.name).to.equal("two");
+        return { name: "three" };
+      }],
+      chain: (action, _actions) => {
+        expect(action).to.deep.equal({ name: "two" });
+        done();
+      }
+    });
+
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("one");
+
+    actionsRef.next({ name: "two" });
+    expect(vnode.text).to.equal("three");
   });
 });

@@ -98,7 +98,7 @@ module.exports =
 	    return theWire;
 	  };
 
-	  var pipelines = [];
+	  var allReceivers = [];
 
 	  var wire = adapters.wire || defaultWire;
 	  var rootWire = wire("meiosis");
@@ -115,29 +115,20 @@ module.exports =
 	    var nextAction = { next: next };
 	    var actions = config.actions ? (0, _ramda.merge)(nextAction, config.actions(next)) : nextAction;
 
-	    var pipeline = config.pipeline;
-	    // FIXME: allow multiple functions in a component's pipeline
-	    if (pipeline) {
-	      if (Array === pipeline.constructor) {
-	        Array.prototype.push.apply(pipelines, pipeline);
-	      } else {
-	        pipelines.push(pipeline);
-	      }
+	    var receivers = config.receivers;
+	    if (receivers && Array === receivers.constructor) {
+	      Array.prototype.push.apply(allReceivers, receivers);
 	    }
 
-	    componentWire.receive(function (action) {
-	      if (config.update) {
-	        (function () {
-	          var model = config.update(rootModel, action);
-	          pipelines.forEach(function (pipeline) {
-	            return rootModel = pipeline(rootModel, model);
-	          });
-	          rootWire.send(rootModel);
+	    componentWire.receive(function (update) {
+	      var updateTr = config.transform ? config.transform(rootModel, update) : update;
+	      allReceivers.forEach(function (receiver) {
+	        return rootModel = receiver(rootModel, updateTr);
+	      });
+	      rootWire.send(rootModel);
 
-	          if (config.chain) {
-	            config.chain(model, action, actions);
-	          }
-	        })();
+	      if (config.chain) {
+	        config.chain(update, actions);
 	      }
 	    });
 
@@ -147,9 +138,9 @@ module.exports =
 	  };
 
 	  var run = function run(root) {
-	    if (pipelines.length === 0) {
+	    if (allReceivers.length === 0) {
 	      // FIXME: remove ramda dep
-	      pipelines.push(_ramda.merge);
+	      allReceivers.push(_ramda.merge);
 	    }
 	    var renderRoot = function renderRoot(model) {
 	      adapters.render(root({ model: model }));
@@ -171,9 +162,9 @@ module.exports =
 	     { initialModel : model
 	     , view : ({model, actions}) => html
 	     , actions : next => Object
-	     , update : (model, action) => model
-	     , chain : (model, action, actions) => <next action> void
-	     , pipeline : [(model, update) => model]
+	     , transform : (model, update) => update
+	     , chain : (update, actions) => <next action> void
+	     , receivers : [(model, update) => model]
 	     }
 	   
 	   Component = model => view

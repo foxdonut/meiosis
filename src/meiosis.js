@@ -8,7 +8,7 @@ Config =
   , view : ({model, actions}) => html
   , actions : next => Object
   , transform : (model, update) => update
-  , chain : (model, update, actions) => <next action> void
+  , chain : (update, actions) => <next action> void
   , receivers : [(model, update) => model]
   }
 
@@ -63,14 +63,12 @@ const meiosis = adapters => {
     }
 
     componentWire.receive(update => {
-      if (config.transform) {
-        const updateTr = config.transform(rootModel, update);
-        allReceivers.forEach(receiver => rootModel = receiver(rootModel, updateTr));
-        rootWire.send(rootModel);
+      const updateTr = config.transform ? config.transform(rootModel, update) : update;
+      allReceivers.forEach(receiver => rootModel = receiver(rootModel, updateTr));
+      rootWire.send(rootModel);
 
-        if (config.chain) {
-          config.chain(updateTr, update, actions);
-        }
+      if (config.chain) {
+        config.chain(update, actions);
       }
     });
 
