@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "meiosis",
   "main": "dist/meiosis.js",
   "scripts": {
@@ -22,19 +22,17 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "babel-core": "^6.7.6",
+    "babel-core": "^6.7.7",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.6.0",
     "babel-register": "^6.7.2",
     "chai": "^3.5.0",
-    "chai-as-promised": "^5.3.0",
-    "data.task": "^3.1.0",
     "hyperscript-helpers": "^2.1.1",
     "mocha": "^2.4.5",
     "ramda": "^0.21.0",
     "sinon": "^1.17.3",
     "snabbdom": "^0.4.2",
     "union-type": "^0.3.0",
-    "webpack": "^1.12.14"
+    "webpack": "^1.13.0"
   }
 }

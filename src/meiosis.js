@@ -14,8 +14,6 @@ Config =
 
 Component = model => view
 */
-import { assoc, merge } from "ramda"; // FIXME: adapter
-
 const meiosis = adapters => {
   let wires = {};
   let nextWireId = 1;
@@ -44,6 +42,10 @@ const meiosis = adapters => {
 
   const wire = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
+
+  const defaultMerge = (obj1, obj2) => Object.assign({}, obj1, obj2);
+  const merge = adapters.merge || defaultMerge;
+
   let rootModel = {};
 
   const createComponent = config => {
@@ -72,12 +74,11 @@ const meiosis = adapters => {
       }
     });
 
-    return props => config.view(assoc("actions", actions, props)); // FIXME: remove ramda dep
+    return props => { props.actions = actions; return config.view(props); };
   };
 
   const run = root => {
     if (allReceivers.length === 0) {
-      // FIXME: remove ramda dep
       allReceivers.push(merge);
     }
     const renderRoot = model => { adapters.render(root({ model })); };

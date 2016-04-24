@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { merge } from "ramda";
 import h from "snabbdom/h";
-import Task from "data.task";
 
 import meiosis from "../src/index";
 
@@ -265,10 +264,10 @@ describe("meiosis", function() {
     let value = 0;
     let actionsRef = null;
 
-    const task = new Task((rej, res) => { res(42); });
+    const promise = new Promise(res => res(42));
 
     const actions = next => ({
-      increment: () => task.fork(null, res => { value = res; next(INCREMENT); })
+      increment: () => promise.then(res => { value = res; next(INCREMENT); })
     });
 
     Meiosis.run(createComponent(merge(baseConfig, {
