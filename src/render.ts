@@ -1,1 +1,5 @@
-// render.ts
+interface Renderer {
+  (props: any): any;
+}
+
+export { Renderer };

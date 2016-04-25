@@ -1,1 +1,5 @@
-// view.ts
+interface View {
+  (props: any): any;
+}
+
+export { View };

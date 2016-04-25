@@ -1,8 +1,8 @@
-interface Merge {
+interface Merger {
   (target: any, source: any): any;
 }
 
-const defaultMerge: Merge = function(target: any, source: any) {
+const defaultMerge: Merger = function(target: any, source: any) {
   if (target === undefined || target === null) {
     throw new TypeError("Cannot convert undefined or null to object");
   }
@@ -21,4 +21,4 @@ const defaultMerge: Merge = function(target: any, source: any) {
   return output;
 };
 
-export { Merge, defaultMerge };
+export { Merger, defaultMerge };

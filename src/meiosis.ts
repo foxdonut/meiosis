@@ -1,91 +1,77 @@
-/*
-Adapters =
-  { render : html => void
-  , wire : send, receive
-  }
-Config =
-  { initialModel : model
-  , view : ({model, actions}) => html
-  , actions : next => Object
-  , transform : (model, update) => update
-  , chain : (update, actions) => <next action> void
-  , receivers : [(model, update) => model]
-  }
+import { Adapters } from "./adapters";
+import { Config } from "./config";
+import { Merger, defaultMerge } from "./merge";
+import { Receiver } from "./receivers";
+import { Emitter, Listener, WireCreator, Wire, defaultWire } from "./wire";
 
-Component = model => view
-*/
-import { Merge, defaultMerge } from "./merge";
+interface Component {
+  (props: any): any;
+}
 
-const meiosis = adapters => {
-  let wires = {};
-  let nextWireId = 1;
-  const createWire = () => {
-    let receiver = null;
-    const receive = rcv => receiver = rcv;
-    const send = data => receiver(data);
+interface CreateComponent {
+  (config: Config): Component;
+}
 
-    return { send, receive };
-  };
-  const defaultWire = wireName => {
-    let name = wireName;
-    if (!name) {
-      name = "wire_" + nextWireId;
-      nextWireId++;
-    }
-    let theWire = wires[name];
-    if (!theWire) {
-      theWire = createWire();
-      wires[name] = theWire;
-    }
-    return theWire;
-  };
+interface MeiosisInstance {
+  createComponent: CreateComponent;
+}
 
-  let allReceivers = [];
+interface Meiosis {
+  (adapters: Adapters): MeiosisInstance;
+}
 
-  const wire = adapters.wire || defaultWire;
+const meiosis = (adapters: Adapters) => {
+  let allReceivers: Array<Receiver> = [];
+
+  const wire: WireCreator = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
 
-  const merge: Merge = adapters.merge || defaultMerge;
+  const merge: Merger = adapters.merge || defaultMerge;
 
-  let rootModel = {};
+  let rootModel: any = {};
 
-  const createComponent = config => {
+  const createComponent = (config: Config) => {
     if (!config || !config.view) {
       throw new Error("At a minimum, you need to specify a view to create a component.");
     }
     rootModel = merge(rootModel, config.initialModel || {});
 
-    const componentWire = wire();
-    const next = componentWire.send;
+    const componentWire: Wire = wire();
+    const next: Emitter = componentWire.emit;
     const nextAction = {next};
     const actions = config.actions ? merge(nextAction, config.actions(next)) : nextAction;
 
-    const receivers = config.receivers;
+    const receivers: Array<Receiver> = config.receivers;
     if (receivers && Array === receivers.constructor) {
       Array.prototype.push.apply(allReceivers, receivers);
     }
 
-    componentWire.receive(update => {
-      const updateTr = config.transform ? config.transform(rootModel, update) : update;
-      allReceivers.forEach(receiver => rootModel = receiver(rootModel, updateTr));
-      rootWire.send(rootModel);
+    componentWire.listen(update => {
+      const updateTr: any = config.transform ? config.transform(rootModel, update) : update;
+
+      allReceivers.forEach((receiver: Receiver) => {
+        rootModel = receiver(rootModel, updateTr);
+        return rootModel;
+      });
+
+      rootWire.emit(rootModel);
 
       if (config.chain) {
         config.chain(update, actions);
       }
     });
 
-    return props => { props.actions = actions; return config.view(props); };
+    return (props: any) => { props.actions = actions; return config.view(props); };
   };
 
-  const run = root => {
+  const run = (root: Component) => {
     if (allReceivers.length === 0) {
       allReceivers.push(merge);
     }
-    const renderRoot = model => { adapters.render(root({ model })); };
-    rootWire.receive(renderRoot);
+    const renderRoot = (model: any) => { adapters.render(root({ model })); };
+    rootWire.listen(renderRoot);
 
-    rootWire.send(rootModel);
+    rootWire.emit(rootModel);
 
     return renderRoot;
   };

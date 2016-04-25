@@ -5,8 +5,8 @@
   "main": "dist/meiosis.js",
   "scripts": {
     "start": "webpack",
-    "test": "mocha --compilers js:babel-register `find test -name '*-tests.js'`",
-    "test:watch": "mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`"
+    "test": "npm start && mocha --compilers js:babel-register `find test -name '*-tests.js'`",
+    "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`"
   },
   "repository": {
     "type": "git",

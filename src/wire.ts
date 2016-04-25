@@ -1,6 +1,14 @@
+interface Listener {
+  (data: any): any;
+}
+
+interface Emitter {
+  (data: any): any;
+}
+
 interface Wire {
-  send(data: any): void;
-  receive(data: any): void;
+  emit: Emitter;
+  listen(listener: Listener): any;
 }
 
 interface WireCreator {
@@ -12,11 +20,11 @@ const defaultWire: WireCreator = (function() {
   let nextWireId = 1;
 
   const createWire = function(): Wire {
-    let receiver = null;
-    const receive = rcv => receiver = rcv;
-    const send = data => receiver(data);
+    let listener: Listener = null;
+    const listen = (lstnr: Listener) => listener = lstnr;
+    const emit = (data: any) => listener(data);
 
-    return { send, receive };
+    return { emit, listen };
   };
 
   return function(wireName: string) {
@@ -34,4 +42,4 @@ const defaultWire: WireCreator = (function() {
   };
 })();
 
-export { Wire, defaultWire };
+export { Emitter, Listener, Wire, WireCreator, defaultWire };

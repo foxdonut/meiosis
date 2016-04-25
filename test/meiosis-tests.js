@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { merge } from "ramda";
 import h from "snabbdom/h";
 
-import meiosis from "../src/index";
+import meiosis from "../dist/meiosis";
 
 const { div, span } = require("hyperscript-helpers")(h);
 
@@ -104,7 +104,7 @@ describe("meiosis", function() {
         return model;
       }
     }));
-    
+
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
@@ -145,7 +145,7 @@ describe("meiosis", function() {
         }
       }
     }));
-    
+
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
@@ -191,7 +191,7 @@ describe("meiosis", function() {
         return model;
       }
     }));
-    
+
     Meiosis.run(Main);
 
     expect(vnode.children.length).to.equal(3);
@@ -244,7 +244,7 @@ describe("meiosis", function() {
         ]
       )
     }));
-    
+
     Meiosis.run(Main);
 
     expect(vnode.children.length).to.equal(3);

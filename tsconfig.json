@@ -1,26 +1,41 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "declaration": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "isolatedModules": false,
         "module": "commonjs",
         "moduleResolution": "node",
-        "isolatedModules": false,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "declaration": false,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitUseStrict": false,
-        "removeComments": true,
         "noLib": false,
+        "outDir": "dist/",
         "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": true
+        "removeComments": true,
+        "sourceMap": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "target": "es5"
     },
-    "exclude": [
-        "node_modules",
-        "typings/browser",
-        "typings/browser.d.ts"
+    "files": [
+        "src/actions.ts",
+        "src/adapters.ts",
+        "src/chain.ts",
+        "src/config.ts",
+        "src/index.ts",
+        "src/meiosis.ts",
+        "src/merge.ts",
+        "src/receivers.ts",
+        "src/render.ts",
+        "src/transform.ts",
+        "src/view.ts",
+        "src/wire.ts"
     ],
-    "compileOnSave": true,
+    "compileOnSave": false,
     "buildOnSave": false,
+    "formatCodeOptions": {
+      "indentSize": 2,
+      "tabSize": 2
+    },
     "atom": {
         "rewriteTsconfig": false
     }

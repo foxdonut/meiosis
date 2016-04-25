@@ -5,7 +5,7 @@ module.exports = {
     "es6": true,
     "mocha": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": ["eslint:recommended"],
   "parserOptions": {
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
@@ -13,9 +13,6 @@ module.exports = {
     },
     "sourceType": "module"
   },
-  "plugins": [
-    "react"
-  ],
   "rules": {
     "indent": [
       "error",
@@ -35,9 +32,6 @@ module.exports = {
     "quotes": [
       "error",
       "double"
-    ],
-    "react/display-name": [
-      0
     ],
     "semi": [
       "error",
