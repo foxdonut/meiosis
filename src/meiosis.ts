@@ -14,6 +14,8 @@ Config =
 
 Component = model => view
 */
+import { Merge, defaultMerge } from "./merge";
+
 const meiosis = adapters => {
   let wires = {};
   let nextWireId = 1;
@@ -43,8 +45,7 @@ const meiosis = adapters => {
   const wire = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
 
-  const defaultMerge = (obj1, obj2) => Object.assign({}, obj1, obj2);
-  const merge = adapters.merge || defaultMerge;
+  const merge: Merge = adapters.merge || defaultMerge;
 
   let rootModel = {};
 
