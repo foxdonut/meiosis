@@ -550,4 +550,118 @@ describe("meiosis", function() {
     actionsRef.next({ name: "two" });
     expect(vnode.text).to.equal("three");
   });
+
+  it("passes correct actions to each view", function() {
+    const formActions = next => ({
+      formAction: () => next("formAction")
+    });
+
+    const Form = createComponent(merge(baseConfig, {
+      initialModel: { formText: "F1" },
+      actions: formActions,
+      view: props => {
+        expect(props.actions.formAction).to.exist;
+        return span(props.model.formText);
+      }
+    }));
+
+    const listActions = next => ({
+      listAction: () => next("listAction")
+    });
+
+    const List = createComponent(merge(baseConfig, {
+      initialModel: { listText: "L1" },
+      actions: listActions,
+      view: props => {
+        expect(props.actions.listAction).to.exist;
+        return span(props.model.listText);
+      }
+    }));
+
+    const mainActions = next => ({
+      mainAction: () => next("mainAction")
+    });
+
+    const Main = createComponent(merge(baseConfig, {
+      initialModel: { name: "one" },
+      actions: mainActions,
+      view: props => {
+        expect(props.actions.mainAction).to.exist;
+        return div(
+          [ span(props.model.name)
+          , Form(props)
+          , List(props)
+          ]
+        );
+      }
+    }));
+
+    Meiosis.run(Main);
+
+    expect(vnode.children.length).to.equal(3);
+    expect(vnode.children[0].text).to.equal("one");
+    expect(vnode.children[1].text).to.equal("F1");
+    expect(vnode.children[2].text).to.equal("L1");
+  });
+
+  it("passes correct actions to the chain function", function(done) {
+    let formActionsRef = null;
+    let listActionsRef = null;
+    let counter = 0;
+
+    const formActions = next => ({
+      formAction: () => next("formAction")
+    });
+
+    const Form = createComponent(merge(baseConfig, {
+      initialModel: { formText: "F1" },
+      actions: formActions,
+      view: props => {
+        formActionsRef = props.actions;
+        return span(props.model.formText);
+      },
+      chain: (update, actions) => {
+        expect(actions.formAction).to.exist;
+        counter++;
+        if (counter === 2) {
+          done();
+        }
+      }
+    }));
+
+    const listActions = next => ({
+      listAction: () => next("listAction")
+    });
+
+    const List = createComponent(merge(baseConfig, {
+      initialModel: { listText: "L1" },
+      actions: listActions,
+      view: props => {
+        listActionsRef = props.actions;
+        return span(props.model.listText);
+      },
+      chain: (update, actions) => {
+        expect(actions.listAction).to.exist;
+        counter++;
+        if (counter === 2) {
+          done();
+        }
+      }
+    }));
+
+    const Main = createComponent(merge(baseConfig, {
+      initialModel: { name: "one" },
+      view: props => div(
+        [ span(props.model.name)
+        , Form(props)
+        , List(props)
+        ]
+      )
+    }));
+
+    Meiosis.run(Main);
+
+    formActionsRef.formAction();
+    listActionsRef.listAction();
+  });
 });
