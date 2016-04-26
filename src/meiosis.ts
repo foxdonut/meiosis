@@ -46,7 +46,7 @@ const meiosis = (adapters: Adapters) => {
       Array.prototype.push.apply(allReceivers, receivers);
     }
 
-    componentWire.listen(update => {
+    componentWire.listen((update: any) => {
       const updateTr: any = config.transform ? config.transform(rootModel, update) : update;
 
       allReceivers.forEach((receiver: Receiver) => {
@@ -61,7 +61,7 @@ const meiosis = (adapters: Adapters) => {
       }
     });
 
-    return (props: any) => { props.actions = actions; return config.view(props); };
+    return (props: any) => config.view(merge({}, props, {actions}));
   };
 
   const run = (root: Component) => {

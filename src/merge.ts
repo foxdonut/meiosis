@@ -1,8 +1,8 @@
 interface Merger {
-  (target: any, source: any): any;
+  (target: any, ...sources: Array<any>): any;
 }
 
-const defaultMerge: Merger = function(target: any, source: any) {
+const defaultMerge: Merger = function(target: any, ...sources: Array<any>) {
   if (target === undefined || target === null) {
     throw new TypeError("Cannot convert undefined or null to object");
   }

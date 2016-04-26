@@ -88,7 +88,7 @@ module.exports =
 	                config.chain(update, actions);
 	            }
 	        });
-	        return function (props) { props.actions = actions; return config.view(props); };
+	        return function (props) { return config.view(merge({}, props, { actions: actions })); };
 	    };
 	    var run = function (root) {
 	        if (allReceivers.length === 0) {
@@ -109,17 +109,21 @@ module.exports =
 /***/ function(module, exports) {
 
 	"use strict";
-	var defaultMerge = function (target, source) {
+	var defaultMerge = function (target) {
+	    var sources = [];
+	    for (var _i = 1; _i < arguments.length; _i++) {
+	        sources[_i - 1] = arguments[_i];
+	    }
 	    if (target === undefined || target === null) {
 	        throw new TypeError("Cannot convert undefined or null to object");
 	    }
 	    var output = Object(target);
 	    for (var index = 1; index < arguments.length; index++) {
-	        var source_1 = arguments[index];
-	        if (source_1 !== undefined && source_1 !== null) {
-	            for (var nextKey in source_1) {
-	                if (source_1.hasOwnProperty(nextKey)) {
-	                    output[nextKey] = source_1[nextKey];
+	        var source = arguments[index];
+	        if (source !== undefined && source !== null) {
+	            for (var nextKey in source) {
+	                if (source.hasOwnProperty(nextKey)) {
+	                    output[nextKey] = source[nextKey];
 	                }
 	            }
 	        }
