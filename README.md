@@ -1,5 +1,7 @@
 # Meiosis
 
+[![Join the chat at https://gitter.im/foxdonut/meiosis](https://badges.gitter.im/foxdonut/meiosis.svg)](https://gitter.im/foxdonut/meiosis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Meiosis is a library and an architecture pattern for dividing a web application into small,
 independent, manageable, and testable parts.
 
