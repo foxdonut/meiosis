@@ -1,6 +1,6 @@
 # Meiosis
 
-http://foxdonut.github.io/meiosis
+http://meiosis.js.org
 
 > _It's what you already love, only better._
 

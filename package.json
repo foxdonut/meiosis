@@ -4,7 +4,7 @@
   "description": "meiosis",
   "main": "dist/meiosis.js",
   "scripts": {
-    "start": "webpack",
+    "start": "webpack && NODE_ENV=production webpack",
     "test": "npm start && mocha --compilers js:babel-register `find test -name '*-tests.js'`",
     "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`"
   },
