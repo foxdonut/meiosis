@@ -19,14 +19,13 @@
     "files": [
         "src/actions.ts",
         "src/adapters.ts",
-        "src/chain.ts",
         "src/config.ts",
         "src/index.ts",
         "src/meiosis.ts",
         "src/merge.ts",
-        "src/receivers.ts",
+        "src/nextUpdate.ts",
+        "src/receiveUpdate.ts",
         "src/render.ts",
-        "src/transform.ts",
         "src/view.ts",
         "src/wire.ts"
     ],

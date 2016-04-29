@@ -1,5 +1,5 @@
 interface View {
-  (props: any): any;
+  (model: any, actions: any): any;
 }
 
 export { View };

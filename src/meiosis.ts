@@ -1,7 +1,8 @@
 import { Adapters } from "./adapters";
 import { Config } from "./config";
 import { Merger, defaultMerge } from "./merge";
-import { Receiver } from "./receivers";
+import { NextUpdate } from "./nextUpdate";
+import { ReceiveUpdate } from "./receiveUpdate";
 import { Emitter, Listener, WireCreator, Wire, defaultWire } from "./wire";
 
 interface Component {
@@ -21,7 +22,7 @@ interface Meiosis {
 }
 
 const meiosis = (adapters: Adapters) => {
-  let allReceivers: Array<Receiver> = [];
+  let allReceiveUpdates: Array<ReceiveUpdate> = [];
 
   const wire: WireCreator = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
@@ -31,44 +32,48 @@ const meiosis = (adapters: Adapters) => {
   let rootModel: any = {};
 
   const createComponent = (config: Config) => {
-    if (!config || !config.view) {
-      throw new Error("At a minimum, you need to specify a view to create a component.");
+    if (!config || (
+      !config.actions &&
+      !config.nextUpdate &&
+      !config.initialModel &&
+      !config.receiveUpdate &&
+      !config.view
+    )) {
+      throw new Error("Please specify a config when calling createComponent.");
     }
     rootModel = merge(rootModel, config.initialModel || {});
 
     const componentWire: Wire = wire();
-    const next: Emitter = componentWire.emit;
-    const nextAction = {next};
-    const actions = config.actions ? merge(nextAction, config.actions(next)) : nextAction;
+    const sendUpdate: Emitter = componentWire.emit;
+    const sendUpdateActions = {sendUpdate};
+    const actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
 
-    const receivers: Array<Receiver> = config.receivers;
-    if (receivers && Array === receivers.constructor) {
-      Array.prototype.push.apply(allReceivers, receivers);
+    const receiveUpdate: ReceiveUpdate = config.receiveUpdate;
+    if (receiveUpdate) {
+      allReceiveUpdates.push(receiveUpdate);
     }
 
     componentWire.listen((update: any) => {
-      const updateTr: any = config.transform ? config.transform(rootModel, update) : update;
-
-      allReceivers.forEach((receiver: Receiver) => {
-        rootModel = receiver(rootModel, updateTr);
+      allReceiveUpdates.forEach((receiveUpdate: ReceiveUpdate) => {
+        rootModel = receiveUpdate(rootModel, update);
         return rootModel;
       });
 
       rootWire.emit(rootModel);
 
-      if (config.chain) {
-        config.chain(update, actions);
+      if (config.nextUpdate) {
+        config.nextUpdate(rootModel, update, actions);
       }
     });
 
-    return (props: any) => config.view(merge({}, props, {actions}));
+    return (model: any) => config.view(model, actions);
   };
 
   const run = (root: Component) => {
-    if (allReceivers.length === 0) {
-      allReceivers.push(merge);
+    if (allReceiveUpdates.length === 0) {
+      allReceiveUpdates.push(merge);
     }
-    const renderRoot = (model: any) => { adapters.render(root({ model })); };
+    const renderRoot = (model: any) => { adapters.render(root(model)); };
     rootWire.listen(renderRoot);
 
     rootWire.emit(rootModel);

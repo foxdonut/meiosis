@@ -1,16 +1,14 @@
 import { Actions } from "./actions";
-import { Chain } from "./chain";
-import { Receiver } from "./receivers";
-import { Transform } from "./transform";
+import { NextUpdate } from "./nextUpdate";
+import { ReceiveUpdate } from "./receiveUpdate";
 import { View } from "./view";
 
 interface Config {
   actions?: Actions;
-  chain?: Chain;
+  nextUpdate?: NextUpdate;
   initialModel?: any;
-  transform?: Transform;
-  receivers?: Array<Receiver>;
-  view: View;
+  receiveUpdate?: ReceiveUpdate;
+  view?: View;
 }
 
 export { Config };

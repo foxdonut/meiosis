@@ -59,42 +59,45 @@ module.exports =
 	var merge_1 = __webpack_require__(2);
 	var wire_1 = __webpack_require__(3);
 	var meiosis = function (adapters) {
-	    var allReceivers = [];
+	    var allReceiveUpdates = [];
 	    var wire = adapters.wire || wire_1.defaultWire;
 	    var rootWire = wire("meiosis");
 	    var merge = adapters.merge || merge_1.defaultMerge;
 	    var rootModel = {};
 	    var createComponent = function (config) {
-	        if (!config || !config.view) {
-	            throw new Error("At a minimum, you need to specify a view to create a component.");
+	        if (!config || (!config.actions &&
+	            !config.nextUpdate &&
+	            !config.initialModel &&
+	            !config.receiveUpdate &&
+	            !config.view)) {
+	            throw new Error("Please specify a config when calling createComponent.");
 	        }
 	        rootModel = merge(rootModel, config.initialModel || {});
 	        var componentWire = wire();
-	        var next = componentWire.emit;
-	        var nextAction = { next: next };
-	        var actions = config.actions ? merge(nextAction, config.actions(next)) : nextAction;
-	        var receivers = config.receivers;
-	        if (receivers && Array === receivers.constructor) {
-	            Array.prototype.push.apply(allReceivers, receivers);
+	        var sendUpdate = componentWire.emit;
+	        var sendUpdateActions = { sendUpdate: sendUpdate };
+	        var actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
+	        var receiveUpdate = config.receiveUpdate;
+	        if (receiveUpdate) {
+	            allReceiveUpdates.push(receiveUpdate);
 	        }
 	        componentWire.listen(function (update) {
-	            var updateTr = config.transform ? config.transform(rootModel, update) : update;
-	            allReceivers.forEach(function (receiver) {
-	                rootModel = receiver(rootModel, updateTr);
+	            allReceiveUpdates.forEach(function (receiveUpdate) {
+	                rootModel = receiveUpdate(rootModel, update);
 	                return rootModel;
 	            });
 	            rootWire.emit(rootModel);
-	            if (config.chain) {
-	                config.chain(update, actions);
+	            if (config.nextUpdate) {
+	                config.nextUpdate(rootModel, update, actions);
 	            }
 	        });
-	        return function (props) { return config.view(merge({}, props, { actions: actions })); };
+	        return function (model) { return config.view(model, actions); };
 	    };
 	    var run = function (root) {
-	        if (allReceivers.length === 0) {
-	            allReceivers.push(merge);
+	        if (allReceiveUpdates.length === 0) {
+	            allReceiveUpdates.push(merge);
 	        }
-	        var renderRoot = function (model) { adapters.render(root({ model: model })); };
+	        var renderRoot = function (model) { adapters.render(root(model)); };
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        return renderRoot;

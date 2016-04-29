@@ -1,7 +1,7 @@
 import { Emitter } from "./wire";
 
 interface Actions {
-  (next: Emitter): any;
+  (sendUpdate: Emitter): any;
 }
 
 export { Actions };
