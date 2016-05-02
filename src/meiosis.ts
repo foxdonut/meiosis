@@ -2,6 +2,7 @@ import { Adapters } from "./adapters";
 import { Config } from "./config";
 import { Merger, defaultMerge } from "./merge";
 import { NextUpdate } from "./nextUpdate";
+import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
 import { Emitter, Listener, WireCreator, Wire, defaultWire } from "./wire";
 
@@ -23,6 +24,7 @@ interface Meiosis {
 
 const meiosis = (adapters: Adapters) => {
   let allReceiveUpdates: Array<ReceiveUpdate> = [];
+  let allReadies: Array<Ready> = [];
 
   const wire: WireCreator = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
@@ -36,6 +38,7 @@ const meiosis = (adapters: Adapters) => {
       !config.actions &&
       !config.nextUpdate &&
       !config.initialModel &&
+      !config.ready &&
       !config.receiveUpdate &&
       !config.view
     )) {
@@ -51,6 +54,11 @@ const meiosis = (adapters: Adapters) => {
     const receiveUpdate: ReceiveUpdate = config.receiveUpdate;
     if (receiveUpdate) {
       allReceiveUpdates.push(receiveUpdate);
+    }
+
+    const ready: Ready = config.ready;
+    if (ready) {
+      allReadies.push(ready);
     }
 
     componentWire.listen((update: any) => {
@@ -77,6 +85,10 @@ const meiosis = (adapters: Adapters) => {
     rootWire.listen(renderRoot);
 
     rootWire.emit(rootModel);
+
+    allReadies.forEach((ready: Ready) => {
+      ready();
+    });
 
     return renderRoot;
   };

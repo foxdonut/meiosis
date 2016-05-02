@@ -60,6 +60,7 @@ module.exports =
 	var wire_1 = __webpack_require__(3);
 	var meiosis = function (adapters) {
 	    var allReceiveUpdates = [];
+	    var allReadies = [];
 	    var wire = adapters.wire || wire_1.defaultWire;
 	    var rootWire = wire("meiosis");
 	    var merge = adapters.merge || merge_1.defaultMerge;
@@ -68,6 +69,7 @@ module.exports =
 	        if (!config || (!config.actions &&
 	            !config.nextUpdate &&
 	            !config.initialModel &&
+	            !config.ready &&
 	            !config.receiveUpdate &&
 	            !config.view)) {
 	            throw new Error("Please specify a config when calling createComponent.");
@@ -80,6 +82,10 @@ module.exports =
 	        var receiveUpdate = config.receiveUpdate;
 	        if (receiveUpdate) {
 	            allReceiveUpdates.push(receiveUpdate);
+	        }
+	        var ready = config.ready;
+	        if (ready) {
+	            allReadies.push(ready);
 	        }
 	        componentWire.listen(function (update) {
 	            allReceiveUpdates.forEach(function (receiveUpdate) {
@@ -100,6 +106,9 @@ module.exports =
 	        var renderRoot = function (model) { adapters.render(root(model)); };
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
+	        allReadies.forEach(function (ready) {
+	            ready();
+	        });
 	        return renderRoot;
 	    };
 	    return { createComponent: createComponent, run: run };

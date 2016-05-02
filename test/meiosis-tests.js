@@ -600,4 +600,20 @@ describe("meiosis", function() {
     formActionsRef.formAction();
     listActionsRef.listAction();
   });
+
+  it("calls the ready function", function(done) {
+    const initial = { duck: "quack" };
+
+    const view = model => span(`A duck says ${model.duck}`);
+
+    Meiosis.run(createComponent({
+      initialModel: initial,
+      view: view,
+      ready: done
+    }));
+
+    expect(vnode).to.exist;
+    expect(vnode.sel).to.equal("span");
+    expect(vnode.text).to.equal("A duck says quack");
+  });
 });

@@ -24,6 +24,7 @@
         "src/meiosis.ts",
         "src/merge.ts",
         "src/nextUpdate.ts",
+        "src/ready.ts",
         "src/receiveUpdate.ts",
         "src/render.ts",
         "src/view.ts",
