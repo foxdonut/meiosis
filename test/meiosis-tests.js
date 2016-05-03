@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { merge } from "ramda";
 import h from "snabbdom/h";
 
-import meiosis from "../dist/meiosis";
+import meiosis from "../lib/meiosis";
 
 const { div, span } = require("hyperscript-helpers")(h);
 
@@ -609,7 +609,11 @@ describe("meiosis", function() {
     Meiosis.run(createComponent({
       initialModel: initial,
       view: view,
-      ready: done
+      ready: actions => {
+        expect(actions).to.exist;
+        expect(actions.sendUpdate).to.exist;
+        done();
+      }
     }));
 
     expect(vnode).to.exist;

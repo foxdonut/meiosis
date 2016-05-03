@@ -1,5 +1,7 @@
+import { Actions } from "./actions";
+
 interface Ready {
-  (): any;
+  (actions: Actions): any;
 }
 
 export { Ready };

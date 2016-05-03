@@ -2,9 +2,9 @@
   "name": "meiosis",
   "version": "0.4.2",
   "description": "meiosis",
-  "main": "dist/meiosis.js",
+  "main": "lib/meiosis.js",
   "scripts": {
-    "start": "webpack && NODE_ENV=production webpack",
+    "start": "webpack && NODE_ENV=prod webpack && NODE_ENV=dev webpack",
     "test": "npm start && mocha --compilers js:babel-register `find test -name '*-tests.js'`",
     "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`"
   },

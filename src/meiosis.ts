@@ -44,7 +44,8 @@ const meiosis = (adapters: Adapters) => {
     )) {
       throw new Error("Please specify a config when calling createComponent.");
     }
-    rootModel = merge(rootModel, config.initialModel || {});
+    const initialModel: any = config.initialModel || {};
+    rootModel = merge(rootModel, initialModel);
 
     const componentWire: Wire = wire();
     const sendUpdate: Emitter = componentWire.emit;
@@ -58,7 +59,7 @@ const meiosis = (adapters: Adapters) => {
 
     const ready: Ready = config.ready;
     if (ready) {
-      allReadies.push(ready);
+      allReadies.push(() => ready(actions));
     }
 
     componentWire.listen((update: any) => {
@@ -86,7 +87,7 @@ const meiosis = (adapters: Adapters) => {
 
     rootWire.emit(rootModel);
 
-    allReadies.forEach((ready: Ready) => {
+    allReadies.forEach((ready: Function) => {
       ready();
     });
 
