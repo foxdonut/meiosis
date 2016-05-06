@@ -2,6 +2,7 @@ import { Adapters } from "./adapters";
 import { Config } from "./config";
 import { Merger, defaultMerge } from "./merge";
 import { NextUpdate } from "./nextUpdate";
+import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
 import { Emitter, Listener, WireCreator, Wire, defaultWire } from "./wire";
@@ -25,6 +26,7 @@ interface Meiosis {
 const meiosis = (adapters: Adapters) => {
   let allReceiveUpdates: Array<ReceiveUpdate> = [];
   let allReadies: Array<Ready> = [];
+  let allPostRenders: Array<PostRender> = [];
 
   const wire: WireCreator = adapters.wire || defaultWire;
   const rootWire = wire("meiosis");
@@ -62,6 +64,11 @@ const meiosis = (adapters: Adapters) => {
       allReadies.push(() => ready(actions));
     }
 
+    const postRender: PostRender = config.postRender;
+    if (postRender) {
+      allPostRenders.push(postRender);
+    }
+
     componentWire.listen((update: any) => {
       allReceiveUpdates.forEach((receiveUpdate: ReceiveUpdate) => {
         rootModel = receiveUpdate(rootModel, update);
@@ -82,14 +89,15 @@ const meiosis = (adapters: Adapters) => {
     if (allReceiveUpdates.length === 0) {
       allReceiveUpdates.push(merge);
     }
-    const renderRoot = (model: any) => { adapters.render(root(model)); };
+    const renderRoot = (model: any) => {
+      const rootView = root(model);
+      adapters.render(rootView);
+      allPostRenders.forEach((postRender: PostRender) => postRender(rootView));
+    };
     rootWire.listen(renderRoot);
 
     rootWire.emit(rootModel);
-
-    allReadies.forEach((ready: Function) => {
-      ready();
-    });
+    allReadies.forEach((ready: Function) => ready());
 
     return renderRoot;
   };

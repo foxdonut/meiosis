@@ -601,7 +601,7 @@ describe("meiosis", function() {
     listActionsRef.listAction();
   });
 
-  it("calls the ready function", function(done) {
+  it("calls the ready function with actions", function(done) {
     const initial = { duck: "quack" };
 
     const view = model => span(`A duck says ${model.duck}`);
@@ -619,5 +619,21 @@ describe("meiosis", function() {
     expect(vnode).to.exist;
     expect(vnode.sel).to.equal("span");
     expect(vnode.text).to.equal("A duck says quack");
+  });
+
+  it("calls the postRender function with the view", function(done) {
+    const initial = { duck: "quack" };
+    const view = model => span(`A duck says ${model.duck}`);
+
+    Meiosis.run(createComponent({
+      initialModel: initial,
+      view: view,
+      postRender: renderedView => {
+        expect(renderedView).to.exist;
+        expect(renderedView.sel).to.equal("span");
+        expect(renderedView.text).to.equal("A duck says quack");
+        done();
+      }
+    }));
   });
 });
