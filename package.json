@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "description": "meiosis",
   "main": "lib/meiosis.js",
   "scripts": {
