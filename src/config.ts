@@ -7,8 +7,8 @@ import { View } from "./view";
 
 interface Config {
   actions?: Actions;
-  nextUpdate?: NextUpdate;
   initialModel?: any;
+  nextUpdate?: NextUpdate;
   postRender?: PostRender;
   ready?: Ready;
   receiveUpdate?: ReceiveUpdate;

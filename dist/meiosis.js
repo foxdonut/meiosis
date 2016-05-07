@@ -118,7 +118,8 @@ var meiosis =
 	        allReadies.forEach(function (ready) { return ready(); });
 	        return renderRoot;
 	    };
-	    return { createComponent: createComponent, run: run };
+	    var meiosisInstance = { createComponent: createComponent, run: run };
+	    return meiosisInstance;
 	};
 	exports.meiosis = meiosis;
 

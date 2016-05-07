@@ -8,22 +8,27 @@ import { ReceiveUpdate } from "./receiveUpdate";
 import { Emitter, Listener, WireCreator, Wire, defaultWire } from "./wire";
 
 interface Component {
-  (props: any): any;
+  (model: any): any;
 }
 
 interface CreateComponent {
   (config: Config): Component;
 }
 
+interface Run {
+  (model: any): any;
+}
+
 interface MeiosisInstance {
   createComponent: CreateComponent;
+  run: Run;
 }
 
 interface Meiosis {
   (adapters: Adapters): MeiosisInstance;
 }
 
-const meiosis = (adapters: Adapters) => {
+const meiosis: Meiosis = (adapters: Adapters) => {
   let allReceiveUpdates: Array<ReceiveUpdate> = [];
   let allReadies: Array<Ready> = [];
   let allPostRenders: Array<PostRender> = [];
@@ -35,7 +40,7 @@ const meiosis = (adapters: Adapters) => {
 
   let rootModel: any = {};
 
-  const createComponent = (config: Config) => {
+  const createComponent: CreateComponent = (config: Config) => {
     if (!config || (
       !config.actions &&
       !config.nextUpdate &&
@@ -102,7 +107,9 @@ const meiosis = (adapters: Adapters) => {
     return renderRoot;
   };
 
-  return { createComponent, run };
+  const meiosisInstance: MeiosisInstance = { createComponent, run };
+
+  return meiosisInstance;
 };
 
 export { meiosis };
