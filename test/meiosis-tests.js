@@ -636,4 +636,34 @@ describe("meiosis", function() {
       }
     }));
   });
+
+  it("can refuse an update", function(done) {
+    let actionsRef = null;
+    let counter = 0;
+
+    const Main = createComponent({
+      initialModel: { value: 1 },
+      view: (model, actions) => {
+        counter++;
+        actionsRef = actions;
+        if (counter === 3) {
+          expect(model.value).to.equal(4);
+          done();
+        }
+        return span(model.value);
+      },
+      receiveUpdate: (_model, update) => {
+        if (update.value % 2 > 0) {
+          return null;
+        }
+        return update;
+      }
+    });
+
+    Meiosis.run(Main);
+
+    actionsRef.sendUpdate({ value: 2 });
+    actionsRef.sendUpdate({ value: 3 });
+    actionsRef.sendUpdate({ value: 4 });
+  });
 });

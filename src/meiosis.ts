@@ -75,15 +75,27 @@ const meiosis: Meiosis = (adapters: Adapters) => {
     }
 
     componentWire.listen((update: any) => {
-      allReceiveUpdates.forEach((receiveUpdate: ReceiveUpdate) => {
-        rootModel = receiveUpdate(rootModel, update);
-        return rootModel;
-      });
+      let accepted = true;
 
-      rootWire.emit(rootModel);
+      for (let i: number = 0; i < allReceiveUpdates.length; i++) {
+        const receiveUpdate: ReceiveUpdate = allReceiveUpdates[i];
+        const receivedUpdate = receiveUpdate(rootModel, update);
 
-      if (config.nextUpdate) {
-        config.nextUpdate(rootModel, update, actions);
+        if (receivedUpdate === null || receivedUpdate === undefined) {
+          accepted = false;
+          break;
+        }
+        else {
+          rootModel = receivedUpdate;
+        }
+      };
+
+      if (accepted) {
+        rootWire.emit(rootModel);
+
+        if (config.nextUpdate) {
+          config.nextUpdate(rootModel, update, actions);
+        }
       }
     });
 
