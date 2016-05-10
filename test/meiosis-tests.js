@@ -654,7 +654,37 @@ describe("meiosis", function() {
       },
       receiveUpdate: (_model, update) => {
         if (update.value % 2 > 0) {
-          return null;
+          return meiosis.REFUSE_UPDATE;
+        }
+        return update;
+      }
+    });
+
+    Meiosis.run(Main);
+
+    actionsRef.sendUpdate({ value: 2 });
+    actionsRef.sendUpdate({ value: 3 });
+    actionsRef.sendUpdate({ value: 4 });
+  });
+
+  it("does not mistake empty object for REFUSE_UPDATE", function(done) {
+    let actionsRef = null;
+    let counter = 0;
+
+    const Main = createComponent({
+      initialModel: { value: 1 },
+      view: (model, actions) => {
+        counter++;
+        actionsRef = actions;
+        if (counter === 4) {
+          expect(model.value).to.equal(4);
+          done();
+        }
+        return span(model.value);
+      },
+      receiveUpdate: (_model, update) => {
+        if (update.value % 2 > 0) {
+          return {};
         }
         return update;
       }

@@ -26,102 +26,109 @@ interface MeiosisInstance {
 
 interface Meiosis {
   (adapters: Adapters): MeiosisInstance;
+  REFUSE_UPDATE: Object;
 }
 
-const meiosis: Meiosis = (adapters: Adapters) => {
-  let allReceiveUpdates: Array<ReceiveUpdate> = [];
-  let allReadies: Array<Ready> = [];
-  let allPostRenders: Array<PostRender> = [];
+const meiosis: Meiosis = (() => {
+  const meiosisFunction: any = (adapters: Adapters) => {
+    let allReceiveUpdates: Array<ReceiveUpdate> = [];
+    let allReadies: Array<Ready> = [];
+    let allPostRenders: Array<PostRender> = [];
 
-  const wire: WireCreator = adapters.wire || defaultWire;
-  const rootWire = wire("meiosis");
+    const wire: WireCreator = adapters.wire || defaultWire;
+    const rootWire = wire("meiosis");
 
-  const merge: Merger = adapters.merge || defaultMerge;
+    const merge: Merger = adapters.merge || defaultMerge;
 
-  let rootModel: any = {};
+    let rootModel: any = {};
 
-  const createComponent: CreateComponent = (config: Config) => {
-    if (!config || (
-      !config.actions &&
-      !config.nextUpdate &&
-      !config.initialModel &&
-      !config.ready &&
-      !config.receiveUpdate &&
-      !config.view
-    )) {
-      throw new Error("Please specify a config when calling createComponent.");
-    }
-    const initialModel: any = config.initialModel || {};
-    rootModel = merge(rootModel, initialModel);
-
-    const componentWire: Wire = wire();
-    const sendUpdate: Emitter = componentWire.emit;
-    const sendUpdateActions = {sendUpdate};
-    const actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
-
-    const receiveUpdate: ReceiveUpdate = config.receiveUpdate;
-    if (receiveUpdate) {
-      allReceiveUpdates.push(receiveUpdate);
-    }
-
-    const ready: Ready = config.ready;
-    if (ready) {
-      allReadies.push(() => ready(actions));
-    }
-
-    const postRender: PostRender = config.postRender;
-    if (postRender) {
-      allPostRenders.push(postRender);
-    }
-
-    componentWire.listen((update: any) => {
-      let accepted = true;
-
-      for (let i: number = 0; i < allReceiveUpdates.length; i++) {
-        const receiveUpdate: ReceiveUpdate = allReceiveUpdates[i];
-        const receivedUpdate = receiveUpdate(rootModel, update);
-
-        if (receivedUpdate === null || receivedUpdate === undefined) {
-          accepted = false;
-          break;
-        }
-        else {
-          rootModel = receivedUpdate;
-        }
-      };
-
-      if (accepted) {
-        rootWire.emit(rootModel);
-
-        if (config.nextUpdate) {
-          config.nextUpdate(rootModel, update, actions);
-        }
+    const createComponent: CreateComponent = (config: Config) => {
+      if (!config || (
+        !config.actions &&
+        !config.nextUpdate &&
+        !config.initialModel &&
+        !config.ready &&
+        !config.receiveUpdate &&
+        !config.view
+      )) {
+        throw new Error("Please specify a config when calling createComponent.");
       }
-    });
+      const initialModel: any = config.initialModel || {};
+      rootModel = merge(rootModel, initialModel);
 
-    return (model: any) => config.view(model, actions);
-  };
+      const componentWire: Wire = wire();
+      const sendUpdate: Emitter = componentWire.emit;
+      const sendUpdateActions = {sendUpdate};
+      const actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
 
-  const run = (root: Component) => {
-    if (allReceiveUpdates.length === 0) {
-      allReceiveUpdates.push(merge);
-    }
-    const renderRoot = (model: any) => {
-      const rootView = root(model);
-      adapters.render(rootView);
-      allPostRenders.forEach((postRender: PostRender) => postRender(rootView));
+      const receiveUpdate: ReceiveUpdate = config.receiveUpdate;
+      if (receiveUpdate) {
+        allReceiveUpdates.push(receiveUpdate);
+      }
+
+      const ready: Ready = config.ready;
+      if (ready) {
+        allReadies.push(() => ready(actions));
+      }
+
+      const postRender: PostRender = config.postRender;
+      if (postRender) {
+        allPostRenders.push(postRender);
+      }
+
+      componentWire.listen((update: any) => {
+        let accepted = true;
+
+        for (let i: number = 0; i < allReceiveUpdates.length; i++) {
+          const receiveUpdate: ReceiveUpdate = allReceiveUpdates[i];
+          const receivedUpdate = receiveUpdate(rootModel, update);
+
+          if (receivedUpdate === meiosisFunction.REFUSE_UPDATE) {
+            accepted = false;
+            break;
+          }
+          else {
+            rootModel = receivedUpdate;
+          }
+        };
+
+        if (accepted) {
+          rootWire.emit(rootModel);
+
+          if (config.nextUpdate) {
+            config.nextUpdate(rootModel, update, actions);
+          }
+        }
+      });
+
+      return (model: any) => config.view(model, actions);
     };
-    rootWire.listen(renderRoot);
 
-    rootWire.emit(rootModel);
-    allReadies.forEach((ready: Function) => ready());
+    const run = (root: Component) => {
+      if (allReceiveUpdates.length === 0) {
+        allReceiveUpdates.push(merge);
+      }
+      const renderRoot = (model: any) => {
+        const rootView = root(model);
+        adapters.render(rootView);
+        allPostRenders.forEach((postRender: PostRender) => postRender(rootView));
+      };
+      rootWire.listen(renderRoot);
 
-    return renderRoot;
+      rootWire.emit(rootModel);
+      allReadies.forEach((ready: Function) => ready());
+
+      return renderRoot;
+    };
+
+    const meiosisInstance: MeiosisInstance = { createComponent, run };
+
+    return meiosisInstance;
   };
 
-  const meiosisInstance: MeiosisInstance = { createComponent, run };
+  meiosisFunction.REFUSE_UPDATE = {};
 
-  return meiosisInstance;
-};
+  return <Meiosis>meiosisFunction;
+})();
 
 export { meiosis };
