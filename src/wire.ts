@@ -1,45 +1,49 @@
-interface Listener {
-  (data: any): any;
+interface Listener<U> {
+  (update: U): void;
 }
 
-interface Emitter {
-  (data: any): any;
+interface Emitter<U> {
+  (update: U): void;
 }
 
-interface Wire {
-  emit: Emitter;
-  listen(listener: Listener): any;
+interface Wire<U> {
+  emit: Emitter<U>;
+  listen(listener: Listener<U>): any;
 }
 
-interface WireCreator {
-  (wireName?: string): Wire;
+interface WireCreator<U> {
+  (wireName?: string): Wire<U>;
 }
 
-const defaultWire: WireCreator = (function() {
+function defaultWireCreator<U>(): WireCreator<U> {
   let wires = {};
   let nextWireId = 1;
 
-  const createWire = function(): Wire {
-    let listener: Listener = null;
-    const listen = (lstnr: Listener) => listener = lstnr;
-    const emit = (data: any) => listener(data);
+  const createWire = function(): Wire<U> {
+    let listener: Listener<U> = null;
+    const listen = (lstnr: Listener<U>) => listener = lstnr;
+    const emit = (update: U) => listener(update);
 
     return { emit, listen };
   };
 
   return function(wireName: string) {
     let name = wireName;
+
     if (!name) {
       name = "wire_" + nextWireId;
       nextWireId++;
     }
-    let theWire: Wire = wires[name];
+
+    let theWire: Wire<U> = wires[name];
+
     if (!theWire) {
       theWire = createWire();
       wires[name] = theWire;
     }
+
     return theWire;
   };
-})();
+};
 
-export { Emitter, Listener, Wire, WireCreator, defaultWire };
+export { Emitter, Listener, Wire, WireCreator, defaultWireCreator };

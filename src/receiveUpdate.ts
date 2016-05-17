@@ -1,5 +1,5 @@
-interface ReceiveUpdate {
-  (model: any, update: any): any;
+interface ReceiveUpdate<M, U> {
+  (model: M, update: U): M;
 }
 
 export { ReceiveUpdate };

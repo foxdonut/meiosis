@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/8cc14d55978d9eca2c374adf1c70d5b9c0abef70/mithril/mithril.d.ts",
+    "raw": "registry:dt/mithril#0.0.0+20160501155657",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/8cc14d55978d9eca2c374adf1c70d5b9c0abef70/mithril/mithril.d.ts"
+  }
+}

@@ -3,6 +3,7 @@ import { merge } from "ramda";
 import h from "snabbdom/h";
 
 import meiosis from "../lib/meiosis";
+import { REFUSE_UPDATE } from "../lib/meiosis";
 
 const { div, span } = require("hyperscript-helpers")(h);
 
@@ -654,7 +655,7 @@ describe("meiosis", function() {
       },
       receiveUpdate: (_model, update) => {
         if (update.value % 2 > 0) {
-          return meiosis.REFUSE_UPDATE;
+          return REFUSE_UPDATE;
         }
         return update;
       }

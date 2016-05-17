@@ -5,8 +5,10 @@
   "main": "lib/meiosis.js",
   "scripts": {
     "start": "webpack && NODE_ENV=prod webpack && NODE_ENV=dev webpack",
-    "test": "npm start && mocha --compilers js:babel-register `find test -name '*-tests.js'`",
-    "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`"
+    "test": "npm start && mocha --compilers js:babel-register test/meiosis-tests.js",
+    "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`",
+    "pretstest": "tsc -p test",
+    "tstest": "mocha test/build/test/meiosis-ts-tests.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "eslint": "^2.8.0",
     "eslint-plugin-react": "^5.0.1",
     "hyperscript-helpers": "^2.1.1",
+    "mithril": "^0.2.4",
     "mocha": "^2.4.5",
     "ramda": "^0.21.0",
     "sinon": "^1.17.3",

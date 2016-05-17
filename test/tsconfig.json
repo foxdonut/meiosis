@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "noImplicitUseStrict": false,
         "noLib": false,
-        "outDir": "dist/",
+        "outDir": "./build",
         "preserveConstEnums": true,
         "removeComments": true,
         "sourceMap": true,
@@ -17,20 +17,8 @@
         "target": "es5"
     },
     "files": [
-        "src/actions.ts",
-        "src/adapters.ts",
-        "src/config.ts",
-        "src/index.ts",
-        "src/meiosis.ts",
-        "src/merge.ts",
-        "src/nextUpdate.ts",
-        "src/postRender.ts",
-        "src/ready.ts",
-        "src/receiveUpdate.ts",
-        "src/renderer.ts",
-        "src/view.ts",
-        "src/wire.ts",
-        "typings/index.d.ts"
+        "./meiosis-ts-tests.ts",
+        "../typings/index.d.ts"
     ],
     "compileOnSave": false,
     "buildOnSave": false,

@@ -1,5 +1,5 @@
-interface View {
-  (model: any, actions: any): any;
+interface View<M, V> {
+  (model: M, actions: any): V;
 }
 
 export { View };

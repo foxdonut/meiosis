@@ -5,14 +5,14 @@ import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
 import { View } from "./view";
 
-interface Config {
-  actions?: Actions;
-  initialModel?: any;
-  nextUpdate?: NextUpdate;
-  postRender?: PostRender;
-  ready?: Ready;
-  receiveUpdate?: ReceiveUpdate;
-  view?: View;
+interface Config<M, V, U> {
+  initialModel: M;
+  view?: View<M, V>;
+  receiveUpdate?: ReceiveUpdate<M, U>;
+  actions?: Actions<U>;
+  nextUpdate?: NextUpdate<M, U>;
+  ready?: Ready<U>;
+  postRender?: PostRender<V>;
 }
 
 export { Config };

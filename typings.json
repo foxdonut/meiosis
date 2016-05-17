@@ -1,0 +1,9 @@
+{
+  "globalDependencies": {
+    "mithril": "registry:dt/mithril#0.0.0+20160501155657",
+    "mocha": "registry:dt/mocha#2.2.5+20160317120654"
+  },
+  "dependencies": {
+    "chai": "registry:npm/chai#3.5.0+20160415060238"
+  }
+}
