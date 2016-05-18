@@ -1,7 +1,5 @@
 /*global process*/
 var isProd = process.env.NODE_ENV === "prod";
-var isDev = process.env.NODE_ENV === "dev";
-var isLib = !(isProd || isDev);
 
 var webpack = require("webpack");
 
@@ -9,10 +7,10 @@ module.exports = {
   entry: "./src/index.ts",
   devtool: "source-map",
   output: {
-    path: isLib ? "./lib" : "./dist",
+    path: "./dist",
     filename: isProd ? "meiosis.min.js" : "meiosis.js",
     library: "meiosis",
-    libraryTarget: isLib ? "commonjs2" : "var"
+    libraryTarget: "var"
   },
   resolve: {
     extensions: ["", ".js", ".ts"]
@@ -30,6 +28,11 @@ module.exports = {
         exclude: /node_modules/
       }
     ]
+  },
+  ts: {
+    compilerOptions: {
+      declaration: false
+    }
   },
   plugins: isProd ? [
     new webpack.optimize.UglifyJsPlugin()

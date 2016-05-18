@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "declaration": false,
+        "declaration": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "isolatedModules": false,
@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "noImplicitUseStrict": false,
         "noLib": false,
-        "outDir": "dist/",
+        "outDir": "lib",
         "preserveConstEnums": true,
         "removeComments": true,
         "sourceMap": true,
@@ -17,6 +17,7 @@
         "target": "es5"
     },
     "files": [
+        "typings/index.d.ts",
         "src/actions.ts",
         "src/adapters.ts",
         "src/config.ts",
@@ -29,14 +30,13 @@
         "src/receiveUpdate.ts",
         "src/renderer.ts",
         "src/view.ts",
-        "src/wire.ts",
-        "typings/index.d.ts"
+        "src/wire.ts"
     ],
     "compileOnSave": false,
     "buildOnSave": false,
     "formatCodeOptions": {
-      "indentSize": 2,
-      "tabSize": 2
+        "indentSize": 2,
+        "tabSize": 2
     },
     "atom": {
         "rewriteTsconfig": false

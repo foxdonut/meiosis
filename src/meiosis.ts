@@ -7,30 +7,30 @@ import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
-interface Component<M, V> {
+export interface Component<M, V> {
   (model: M): V;
 }
 
-interface CreateComponent<M, V, U> {
+export interface CreateComponent<M, V, U> {
   (config: Config<M, V, U>): Component<M, V>;
 }
 
-interface RenderRoot<M> {
+export interface RenderRoot<M> {
   (model: M): void;
 }
 
-interface Run<M, V> {
+export interface Run<M, V> {
   (component: Component<M, V>): RenderRoot<M>;
 }
 
-interface Meiosis<M, V, U> {
+export interface Meiosis<M, V, U> {
   createComponent: CreateComponent<M, V, U>;
   run: Run<M, V>;
 }
 
 const REFUSE_UPDATE = {};
 
-function meiosis<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
+function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
   let allReceiveUpdates: Array<ReceiveUpdate<M, U>> = [];
   let allReadies: Array<Ready<U>> = [];
   let allPostRenders: Array<PostRender<V>> = [];
@@ -131,10 +131,6 @@ function meiosis<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
 };
 
 export {
-  meiosis,
-  Component,
-  CreateComponent,
-  Meiosis,
-  RenderRoot,
+  init,
   REFUSE_UPDATE
 };

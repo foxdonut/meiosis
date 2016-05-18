@@ -2,13 +2,12 @@
   "name": "meiosis",
   "version": "0.4.4",
   "description": "meiosis",
-  "main": "lib/meiosis.js",
+  "main": "lib/index.js",
   "scripts": {
-    "start": "webpack && NODE_ENV=prod webpack && NODE_ENV=dev webpack",
-    "test": "npm start && mocha --compilers js:babel-register test/meiosis-tests.js",
-    "test:watch": "npm start && mocha --watch --compilers js:babel-register `find test -name '*-tests.js'`",
-    "pretstest": "tsc -p test",
-    "tstest": "mocha test/build/test/meiosis-ts-tests.js"
+    "prestart": "tsc",
+    "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",
+    "pretest": "tsc -p test",
+    "test": "npm start && mocha --compilers js:babel-register test/meiosis-tests.js ; mocha test/build/test/meiosis-ts-tests.js"
   },
   "repository": {
     "type": "git",

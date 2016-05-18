@@ -46,10 +46,12 @@ var meiosis =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var meiosis_1 = __webpack_require__(1);
-	exports.REFUSE_UPDATE = meiosis_1.REFUSE_UPDATE;
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = meiosis_1.meiosis;
+	function __export(m) {
+	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+	}
+	__export(__webpack_require__(1));
+	__export(__webpack_require__(2));
+	__export(__webpack_require__(3));
 
 
 /***/ },
@@ -61,7 +63,7 @@ var meiosis =
 	var wire_1 = __webpack_require__(3);
 	var REFUSE_UPDATE = {};
 	exports.REFUSE_UPDATE = REFUSE_UPDATE;
-	function meiosis(adapters) {
+	function init(adapters) {
 	    var allReceiveUpdates = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
@@ -140,7 +142,7 @@ var meiosis =
 	    };
 	    return meiosisInstance;
 	}
-	exports.meiosis = meiosis;
+	exports.init = init;
 	;
 
 
