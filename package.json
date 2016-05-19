@@ -3,6 +3,7 @@
   "version": "0.4.4",
   "description": "meiosis",
   "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
     "prestart": "tsc",
     "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",

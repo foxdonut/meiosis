@@ -1,0 +1,8 @@
+*.md
+*.tgz
+.babelrc
+.eslintrc.js
+images
+src
+test
+webpack.config.js

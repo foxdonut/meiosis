@@ -1,4 +1,6 @@
 {
+  "name": "meiosis",
+  "main": "lib/index.d.ts",
   "globalDependencies": {
     "mithril": "registry:dt/mithril#0.0.0+20160501155657",
     "mocha": "registry:dt/mocha#2.2.5+20160317120654"
