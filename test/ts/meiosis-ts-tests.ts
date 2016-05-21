@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import * as m from "mithril";
 
-import meiosis from "../src/index";
-import { Adapters, CreateComponent, Component, Emitter, Meiosis, Renderer, RenderRoot } from "../src/index";
+import { init } from "../../lib/index";
+import { Adapters, CreateComponent, Component, Emitter, Meiosis, Renderer, RenderRoot } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -40,7 +40,7 @@ describe("meiosis typescript", function() {
 
   beforeEach(function() {
     // prepare Meiosis
-    Meiosis = meiosis(adapters);
+    Meiosis = init(adapters);
     createComponent = Meiosis.createComponent;
   });
 

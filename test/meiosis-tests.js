@@ -2,8 +2,7 @@ import { expect } from "chai";
 import { merge } from "ramda";
 import h from "snabbdom/h";
 
-import meiosis from "../lib/meiosis";
-import { REFUSE_UPDATE } from "../lib/meiosis";
+import { init, REFUSE_UPDATE } from "../lib/index";
 
 const { div, span } = require("hyperscript-helpers")(h);
 
@@ -20,7 +19,7 @@ describe("meiosis", function() {
 
   beforeEach(function() {
     // prepare Meiosis
-    Meiosis = meiosis(adapters);
+    Meiosis = init(adapters);
     createComponent = Meiosis.createComponent;
   });
 

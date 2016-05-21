@@ -1,14 +1,14 @@
 {
   "name": "meiosis",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "meiosis",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
     "prestart": "tsc",
     "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",
-    "pretest": "tsc -p test",
-    "test": "npm start && mocha --compilers js:babel-register test/meiosis-tests.js ; mocha test/build/test/meiosis-ts-tests.js"
+    "pretest": "tsc -p test/ts",
+    "test": "npm start && mocha --compilers js:babel-register test/meiosis-tests.js ; mocha test/build/meiosis-ts-tests.js"
   },
   "repository": {
     "type": "git",

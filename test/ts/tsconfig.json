@@ -9,7 +9,7 @@
         "noImplicitAny": true,
         "noImplicitUseStrict": false,
         "noLib": false,
-        "outDir": "./build",
+        "outDir": "../build",
         "preserveConstEnums": true,
         "removeComments": true,
         "sourceMap": true,
@@ -18,13 +18,13 @@
     },
     "files": [
         "./meiosis-ts-tests.ts",
-        "../typings/index.d.ts"
+        "../../typings/index.d.ts"
     ],
     "compileOnSave": false,
     "buildOnSave": false,
     "formatCodeOptions": {
-      "indentSize": 2,
-      "tabSize": 2
+        "indentSize": 2,
+        "tabSize": 2
     },
     "atom": {
         "rewriteTsconfig": false
