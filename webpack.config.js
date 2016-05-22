@@ -10,7 +10,7 @@ module.exports = {
     path: "./dist",
     filename: isProd ? "meiosis.min.js" : "meiosis.js",
     library: "meiosis",
-    libraryTarget: "var"
+    libraryTarget: "umd"
   },
   resolve: {
     extensions: ["", ".js", ".ts"]
