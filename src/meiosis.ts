@@ -102,7 +102,9 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
       }
     });
 
-    return (model: M) => config.view(model, actions);
+    return function(model: M): V {
+      return config.view && config.view(model, actions) || undefined;
+    };
   };
 
   const run: Run<M, V> = (root: Component<M, V>) => {

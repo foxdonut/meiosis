@@ -129,7 +129,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        });
-	        return function (model) { return config.view(model, actions); };
+	        return function (model) {
+	            return config.view && config.view(model, actions) || undefined;
+	        };
 	    };
 	    var run = function (root) {
 	        if (allReceiveUpdates.length === 0) {
