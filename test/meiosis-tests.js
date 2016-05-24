@@ -540,7 +540,7 @@ describe("meiosis", function() {
     expect(vnode.children[2].text).to.equal("L1");
   });
 
-  it("passes correct actions to the nextUpdate function", function(done) {
+  it("calls all nextUpdate functions and passes correct actions to the each one", function(done) {
     let formActionsRef = null;
     let listActionsRef = null;
     let counter = 0;
@@ -559,7 +559,7 @@ describe("meiosis", function() {
       nextUpdate: (_model, _update, actions) => {
         expect(actions.formAction).to.exist;
         counter++;
-        if (counter === 2) {
+        if (counter === 4) {
           done();
         }
       }
@@ -579,7 +579,7 @@ describe("meiosis", function() {
       nextUpdate: (_model, _update, actions) => {
         expect(actions.listAction).to.exist;
         counter++;
-        if (counter === 2) {
+        if (counter === 4) {
           done();
         }
       }
@@ -695,5 +695,18 @@ describe("meiosis", function() {
     actionsRef.sendUpdate({ value: 2 });
     actionsRef.sendUpdate({ value: 3 });
     actionsRef.sendUpdate({ value: 4 });
+  });
+
+  it("calls viewModel initially", function(done) {
+    const initialModel = { value: 2 };
+    const Main = createComponent({
+      initialModel,
+      viewModel: (model) => {
+        expect(model).to.deep.equal(initialModel);
+        done();
+      }
+    });
+
+    Meiosis.run(Main);
   });
 });

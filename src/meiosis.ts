@@ -1,7 +1,7 @@
 import { Adapters } from "./adapters";
 import { Config } from "./config";
 import { Merger, defaultMerge } from "./merge";
-import { NextUpdate } from "./nextUpdate";
+import { NextUpdate, NextUpdateFromActions } from "./nextUpdate";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
@@ -34,10 +34,14 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
   let allReceiveUpdates: Array<ReceiveUpdate<M, U>> = [];
   let allReadies: Array<Ready<U>> = [];
   let allPostRenders: Array<PostRender<V>> = [];
+  let allNextUpdates: Array<NextUpdateFromActions<M, U>> = [];
 
   const createRootWire: WireCreator<M> = adapters.rootWire || defaultWireCreator();
   const createComponentWire: WireCreator<U> = adapters.componentWire || defaultWireCreator();
   const rootWire: Wire<M> = createRootWire("meiosis");
+  const componentWire: Wire<U> = createComponentWire();
+  const sendUpdate: Emitter<U> = componentWire.emit;
+  const sendUpdateActions = {sendUpdate};
 
   const merge: Merger = adapters.merge || defaultMerge;
 
@@ -57,9 +61,6 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     const initialModel: any = config.initialModel || {};
     rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
 
-    const componentWire: Wire<U> = createComponentWire();
-    const sendUpdate: Emitter<U> = componentWire.emit;
-    const sendUpdateActions = {sendUpdate};
     const actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
 
     const receiveUpdate: ReceiveUpdate<M, U> = config.receiveUpdate;
@@ -75,6 +76,21 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     const postRender: PostRender<V> = config.postRender;
     if (postRender) {
       allPostRenders.push(postRender);
+    }
+
+    const nextUpdate: NextUpdate<M, U> = config.nextUpdate;
+    if (nextUpdate) {
+      allNextUpdates.push((model: M, update: U) => nextUpdate(model, update, actions));
+    }
+
+    return function(model: M): V {
+      return config.view && config.view(model, actions) || undefined;
+    };
+  };
+
+  const run: Run<M, V> = (root: Component<M, V>) => {
+    if (allReceiveUpdates.length === 0) {
+      allReceiveUpdates.push(merge);
     }
 
     componentWire.listen((update: any) => {
@@ -96,21 +112,10 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
       if (accepted) {
         rootWire.emit(rootModel);
 
-        if (config.nextUpdate) {
-          config.nextUpdate(rootModel, update, actions);
-        }
+        allNextUpdates.forEach((nextUpdate: NextUpdateFromActions<M, U>) => nextUpdate(rootModel, update));
       }
     });
 
-    return function(model: M): V {
-      return config.view && config.view(model, actions) || undefined;
-    };
-  };
-
-  const run: Run<M, V> = (root: Component<M, V>) => {
-    if (allReceiveUpdates.length === 0) {
-      allReceiveUpdates.push(merge);
-    }
     const renderRoot: RenderRoot<M> = (model: M) => {
       const rootView: V = root(model);
       adapters.render(rootView);

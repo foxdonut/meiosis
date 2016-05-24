@@ -76,9 +76,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var allReceiveUpdates = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
+	    var allNextUpdates = [];
 	    var createRootWire = adapters.rootWire || wire_1.defaultWireCreator();
 	    var createComponentWire = adapters.componentWire || wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis");
+	    var componentWire = createComponentWire();
+	    var sendUpdate = componentWire.emit;
+	    var sendUpdateActions = { sendUpdate: sendUpdate };
 	    var merge = adapters.merge || merge_1.defaultMerge;
 	    var rootModel = null;
 	    var createComponent = function (config) {
@@ -92,9 +96,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var initialModel = config.initialModel || {};
 	        rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
-	        var componentWire = createComponentWire();
-	        var sendUpdate = componentWire.emit;
-	        var sendUpdateActions = { sendUpdate: sendUpdate };
 	        var actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
 	        var receiveUpdate = config.receiveUpdate;
 	        if (receiveUpdate) {
@@ -108,11 +109,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (postRender) {
 	            allPostRenders.push(postRender);
 	        }
+	        var nextUpdate = config.nextUpdate;
+	        if (nextUpdate) {
+	            allNextUpdates.push(function (model, update) { return nextUpdate(model, update, actions); });
+	        }
+	        return function (model) {
+	            return config.view && config.view(model, actions) || undefined;
+	        };
+	    };
+	    var run = function (root) {
+	        if (allReceiveUpdates.length === 0) {
+	            allReceiveUpdates.push(merge);
+	        }
 	        componentWire.listen(function (update) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceiveUpdates.length; i++) {
-	                var receiveUpdate_1 = allReceiveUpdates[i];
-	                var receivedUpdate = receiveUpdate_1(rootModel, update);
+	                var receiveUpdate = allReceiveUpdates[i];
+	                var receivedUpdate = receiveUpdate(rootModel, update);
 	                if (receivedUpdate === REFUSE_UPDATE) {
 	                    accepted = false;
 	                    break;
@@ -124,19 +137,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ;
 	            if (accepted) {
 	                rootWire.emit(rootModel);
-	                if (config.nextUpdate) {
-	                    config.nextUpdate(rootModel, update, actions);
-	                }
+	                allNextUpdates.forEach(function (nextUpdate) { return nextUpdate(rootModel, update); });
 	            }
 	        });
-	        return function (model) {
-	            return config.view && config.view(model, actions) || undefined;
-	        };
-	    };
-	    var run = function (root) {
-	        if (allReceiveUpdates.length === 0) {
-	            allReceiveUpdates.push(merge);
-	        }
 	        var renderRoot = function (model) {
 	            var rootView = root(model);
 	            adapters.render(rootView);
