@@ -1,10 +1,8 @@
 import { expect } from "chai";
-import { merge } from "ramda";
-import h from "snabbdom/h";
+import { Promise } from "es6-promise";
+const h = require("snabbdom/h");
 
-import { init, REFUSE_UPDATE } from "../lib/index";
-
-const { div, span } = require("hyperscript-helpers")(h);
+import { init, REFUSE_UPDATE } from "../../lib/index";
 
 describe("meiosis", function() {
 
@@ -42,7 +40,7 @@ describe("meiosis", function() {
   it("renders a view", function() {
     const initial = { duck: "quack" };
 
-    const view = (model, _actions) => span(`A duck says ${model.duck}`);
+    const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
     Meiosis.run(createComponent({
       initialModel: initial,
@@ -58,9 +56,9 @@ describe("meiosis", function() {
     const FormText = "Form";
     const ListText = "List";
 
-    const Form = createComponent({ view: _props => div(FormText) });
-    const List = createComponent({ view: _props => div(ListText) });
-    const Main = createComponent({ view: props => div([Form(props), List(props)]) });
+    const Form = createComponent({ view: _props => h("div", FormText) });
+    const List = createComponent({ view: _props => h("div", ListText) });
+    const Main = createComponent({ view: props => h("div", [Form(props), List(props)]) });
 
     Meiosis.run(Main);
 
@@ -81,7 +79,7 @@ describe("meiosis", function() {
       initialModel: { name: "one" },
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         if (update === UPDATE) {
@@ -114,7 +112,7 @@ describe("meiosis", function() {
       actions: actions,
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         if (update === UPDATE) {
@@ -150,12 +148,12 @@ describe("meiosis", function() {
 
     const Form = createComponent({
       initialModel: { formText: "F1" },
-      view: model => span(model.formText)
+      view: model => h("span", model.formText)
     });
 
     const List = createComponent({
       initialModel: { listText: "L1" },
-      view: model => span(model.listText)
+      view: model => h("span", model.listText)
     });
 
     const Main = createComponent({
@@ -163,8 +161,8 @@ describe("meiosis", function() {
       actions: actions,
       view: (model, actions) => {
         actionsRef = actions;
-        return div(
-          [ span(model.name)
+        return h("div",
+          [ h("span", model.name)
           , Form(model)
           , List(model)
           ]
@@ -198,18 +196,19 @@ describe("meiosis", function() {
 
     const Form = createComponent({
       initialModel: { formText: "F1" },
-      view: model => span(model.formText)
+      view: model => h("span", model.formText)
     });
 
     const List = createComponent({
       initialModel: { listText: "L1" },
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.listText);
+        return h("span", model.listText);
       },
       receiveUpdate: (model, update) => {
         if (update === UPDATE) {
-          return merge(model, { formText: "F2" });
+          model.formText = "F2";
+          return model;
         }
         return model;
       }
@@ -217,8 +216,8 @@ describe("meiosis", function() {
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: model => div(
-        [ span(model.name)
+      view: model => h("div",
+        [ h("span", model.name)
         , Form(model)
         , List(model)
         ]
@@ -244,7 +243,7 @@ describe("meiosis", function() {
     let value = 0;
     let actionsRef = null;
 
-    const promise = new Promise(res => res(42));
+    const promise = new Promise<any>(res => res(42));
 
     const actions = sendUpdate => ({
       increment: () => promise.then(res => { value = res; sendUpdate(INCREMENT); })
@@ -255,7 +254,7 @@ describe("meiosis", function() {
       actions: actions,
       view: (_model, actions) => {
         actionsRef = actions;
-        return span("test");
+        return h("span", "test");
       },
       receiveUpdate: (model, update) => {
         if (update === INCREMENT) {
@@ -273,9 +272,9 @@ describe("meiosis", function() {
     const FormText = "Form";
     const ListText = "List";
 
-    const Form = createComponent({ view: _props => div(FormText) });
-    const List = createComponent({ view: _props => div(ListText) });
-    const Main = createComponent({ view: props => div([Form(props), List(props)]) });
+    const Form = createComponent({ view: _props => h("div", FormText) });
+    const List = createComponent({ view: _props => h("div", ListText) });
+    const Main = createComponent({ view: props => h("div", [Form(props), List(props)]) });
 
     Meiosis.run(Main);
 
@@ -309,7 +308,7 @@ describe("meiosis", function() {
       initialModel: { name: "one" },
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         if (update === UPDATE) {
@@ -340,7 +339,7 @@ describe("meiosis", function() {
       actions: actions,
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         if (update === UPDATE) {
@@ -364,7 +363,7 @@ describe("meiosis", function() {
       initialModel: { name: "one" },
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         expect(model.name).to.equal("one");
@@ -386,7 +385,7 @@ describe("meiosis", function() {
     const Child = createComponent({
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       }
     });
 
@@ -413,7 +412,7 @@ describe("meiosis", function() {
     const Child = createComponent({
       view: (model, actions) => {
         actionsRef = actions;
-        return span(String(model.value));
+        return h("span", String(model.value));
       },
       receiveUpdate: (model, update) => {
         expect(model.value).to.equal(2);
@@ -442,7 +441,7 @@ describe("meiosis", function() {
   it("returns a function to render a view from a model", function() {
     const initial = { duck: "quack" };
 
-    const view = (model, _actions) => span(`A duck says ${model.duck}`);
+    const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
     const renderRoot = Meiosis.run(createComponent({
       initialModel: initial,
@@ -465,7 +464,7 @@ describe("meiosis", function() {
       initialModel: { name: "one" },
       view: (model, actions) => {
         actionsRef = actions;
-        return span(model.name);
+        return h("span", model.name);
       },
       receiveUpdate: (model, update) => {
         expect(model.name).to.equal("one");
@@ -497,7 +496,7 @@ describe("meiosis", function() {
       actions: formActions,
       view: (model, actions) => {
         expect(actions.formAction).to.exist;
-        return span(model.formText);
+        return h("span", model.formText);
       }
     });
 
@@ -510,7 +509,7 @@ describe("meiosis", function() {
       actions: listActions,
       view: (model, actions) => {
         expect(actions.listAction).to.exist;
-        return span(model.listText);
+        return h("span", model.listText);
       }
     });
 
@@ -523,8 +522,8 @@ describe("meiosis", function() {
       actions: mainActions,
       view: (model, actions) => {
         expect(actions.mainAction).to.exist;
-        return div(
-          [ span(model.name)
+        return h("div",
+          [ h("span", model.name)
           , Form(model)
           , List(model)
           ]
@@ -554,7 +553,7 @@ describe("meiosis", function() {
       actions: formActions,
       view: (model, actions) => {
         formActionsRef = actions;
-        return span(model.formText);
+        return h("span", model.formText);
       },
       nextUpdate: (_model, _update, actions) => {
         expect(actions.formAction).to.exist;
@@ -574,7 +573,7 @@ describe("meiosis", function() {
       actions: listActions,
       view: (model, actions) => {
         listActionsRef = actions;
-        return span(model.listText);
+        return h("span", model.listText);
       },
       nextUpdate: (_model, _update, actions) => {
         expect(actions.listAction).to.exist;
@@ -587,8 +586,8 @@ describe("meiosis", function() {
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: (model, _actions) => div(
-        [ span(model.name)
+      view: (model, _actions) => h("div",
+        [ h("span", model.name)
         , Form(model)
         , List(model)
         ]
@@ -604,7 +603,7 @@ describe("meiosis", function() {
   it("calls the ready function with actions", function(done) {
     const initial = { duck: "quack" };
 
-    const view = model => span(`A duck says ${model.duck}`);
+    const view = model => h("span", `A duck says ${model.duck}`);
 
     Meiosis.run(createComponent({
       initialModel: initial,
@@ -623,7 +622,7 @@ describe("meiosis", function() {
 
   it("calls the postRender function with the view", function(done) {
     const initial = { duck: "quack" };
-    const view = model => span(`A duck says ${model.duck}`);
+    const view = model => h("span", `A duck says ${model.duck}`);
 
     Meiosis.run(createComponent({
       initialModel: initial,
@@ -650,7 +649,7 @@ describe("meiosis", function() {
           expect(model.value).to.equal(4);
           done();
         }
-        return span(model.value);
+        return h("span", model.value);
       },
       receiveUpdate: (_model, update) => {
         if (update.value % 2 > 0) {
@@ -680,7 +679,7 @@ describe("meiosis", function() {
           expect(model.value).to.equal(4);
           done();
         }
-        return span(model.value);
+        return h("span", model.value);
       },
       receiveUpdate: (_model, update) => {
         if (update.value % 2 > 0) {
