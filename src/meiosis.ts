@@ -5,6 +5,7 @@ import { NextUpdate, NextUpdateFromActions } from "./nextUpdate";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
+import { ViewModel } from "./viewModel";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
 export interface Component<M, V> {
@@ -32,6 +33,7 @@ const REFUSE_UPDATE = {};
 
 function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
   let allReceiveUpdates: Array<ReceiveUpdate<M, U>> = [];
+  let allViewModels: Array<ViewModel<M>> = [];
   let allReadies: Array<Ready<U>> = [];
   let allPostRenders: Array<PostRender<V>> = [];
   let allNextUpdates: Array<NextUpdateFromActions<M, U>> = [];
@@ -68,6 +70,11 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
       allReceiveUpdates.push(receiveUpdate);
     }
 
+    const viewModel: ViewModel<M> = config.viewModel;
+    if (viewModel) {
+      allViewModels.push(viewModel);
+    }
+
     const ready: Ready<U> = config.ready;
     if (ready) {
       allReadies.push(() => ready(actions));
@@ -86,6 +93,12 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     return function(model: M): V {
       return config.view && config.view(model, actions) || undefined;
     };
+  };
+
+  const runAllViewModels = () => {
+    allViewModels.forEach((viewModel: ViewModel<M>) => {
+      rootModel = viewModel(rootModel);
+    });
   };
 
   const run: Run<M, V> = (root: Component<M, V>) => {
@@ -110,8 +123,8 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
       };
 
       if (accepted) {
+        runAllViewModels();
         rootWire.emit(rootModel);
-
         allNextUpdates.forEach((nextUpdate: NextUpdateFromActions<M, U>) => nextUpdate(rootModel, update));
       }
     });
@@ -123,6 +136,7 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     };
     rootWire.listen(renderRoot);
 
+    runAllViewModels();
     rootWire.emit(rootModel);
     allReadies.forEach((ready: Function) => ready());
 

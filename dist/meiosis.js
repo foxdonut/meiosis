@@ -74,6 +74,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.REFUSE_UPDATE = REFUSE_UPDATE;
 	function init(adapters) {
 	    var allReceiveUpdates = [];
+	    var allViewModels = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextUpdates = [];
@@ -101,6 +102,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (receiveUpdate) {
 	            allReceiveUpdates.push(receiveUpdate);
 	        }
+	        var viewModel = config.viewModel;
+	        if (viewModel) {
+	            allViewModels.push(viewModel);
+	        }
 	        var ready = config.ready;
 	        if (ready) {
 	            allReadies.push(function () { return ready(actions); });
@@ -116,6 +121,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return function (model) {
 	            return config.view && config.view(model, actions) || undefined;
 	        };
+	    };
+	    var runAllViewModels = function () {
+	        allViewModels.forEach(function (viewModel) {
+	            rootModel = viewModel(rootModel);
+	        });
 	    };
 	    var run = function (root) {
 	        if (allReceiveUpdates.length === 0) {
@@ -136,6 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            ;
 	            if (accepted) {
+	                runAllViewModels();
 	                rootWire.emit(rootModel);
 	                allNextUpdates.forEach(function (nextUpdate) { return nextUpdate(rootModel, update); });
 	            }
@@ -146,6 +157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            allPostRenders.forEach(function (postRender) { return postRender(rootView); });
 	        };
 	        rootWire.listen(renderRoot);
+	        runAllViewModels();
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        return renderRoot;
