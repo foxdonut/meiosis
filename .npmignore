@@ -1,6 +1,4 @@
 *.tgz
-.babelrc
-.eslintrc.js
 images
 src
 test
