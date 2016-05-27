@@ -7,7 +7,7 @@ import { View } from "./view";
 import { ViewModel } from "./viewModel";
 
 interface Config<M, V, U> {
-  initialModel: M;
+  initialModel?: M;
   viewModel?: ViewModel<M>;
   view?: View<M, V>;
   receiveUpdate?: ReceiveUpdate<M, U>;
