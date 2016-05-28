@@ -26,6 +26,10 @@ For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/bo
 
 Examples: https://github.com/foxdonut/meiosis-examples
 
+Please post questions and suggestions as Github issues on the [meiosis repository](https://github.com/foxdonut/meiosis).
+
+You can also chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
+
 ## Why the name _Meiosis_?
 
 I picked the name **Meiosis** for three reasons:
