@@ -8,7 +8,8 @@ http://meiosis.js.org
 
 **Meiosis** is a library and an architecture pattern for dividing a web application into small,
 independent, manageable, and testable parts,
-_while letting you keep using the tools that you already love._
+_while letting you keep using the tools that you already love._ Meiosis manages the data flow and
+lets you choose whatever you like for rendering views.
 
 The key principles of Meiosis are:
 - remain small, with no dependencies, and simple, allowing you to build components with minimal
@@ -16,15 +17,14 @@ effort
 - provide an architecture to structure your code that scales well as your application gets larger
 and more complex
 - let you choose the libraries that you want to use: for example,
-[React](https://facebook.github.io/react/), [snabbdom](https://github.com/paldepind/snabbdom),
-[jQuery](http://jquery.com/), [Immutable](https://facebook.github.io/immutable-js/),
-[mori](http://swannodette.github.io/mori/), or no libraries at all and just plain vanilla JavaScript
+[React](https://facebook.github.io/react/), [jQuery](http://jquery.com/),
+[snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org),
+[Handlebars](http://handlebarsjs.com), or no libraries at all and just plain vanilla JavaScript
 - provide functionality out of the box, but allow you to swap implementation details if need be.
 
-Meiosis is currently under active development. Once the design and API have stabilized, more
-documentation and resources will be produced.
+For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
 
-Examples will be added to: https://github.com/foxdonut/meiosis-examples
+Examples: https://github.com/foxdonut/meiosis-examples
 
 ## Why the name _Meiosis_?
 

@@ -1,7 +1,7 @@
 {
   "name": "meiosis",
   "version": "0.5.0",
-  "description": "meiosis",
+  "description": "Meiosis manages the data flow of your web applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
