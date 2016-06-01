@@ -700,12 +700,29 @@ describe("meiosis", function() {
     const initialModel = { value: 2 };
     const Main = createComponent({
       initialModel,
-      viewModel: (model) => {
+      viewModel: model => {
         expect(model).to.deep.equal(initialModel);
+        done();
+      },
+      view: model => ""
+    });
+
+    Meiosis.run(Main);
+  });
+
+  it("calls viewModel on component function", function(done) {
+    const initialModel = { value: 2 };
+    const Main = createComponent({
+      initialModel,
+      viewModel: model => {
+        return { value: model.value * 2 };
+      },
+      view: model => {
+        expect(model.value).to.equal(8);
         done();
       }
     });
 
-    Meiosis.run(Main);
+    Main({ value: 4 });
   });
 });
