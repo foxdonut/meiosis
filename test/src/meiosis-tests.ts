@@ -696,33 +696,76 @@ describe("meiosis", function() {
     actionsRef.sendUpdate({ value: 4 });
   });
 
-  it("calls viewModel initially", function(done) {
+  it("can use a display function for an initial viewModel", function() {
     const initialModel = { value: 2 };
+
+    const display = view => model => view({ value: model.value * 2 });
+    const view = model => h("span", String(model.value));
+
     const Main = createComponent({
       initialModel,
-      viewModel: model => {
-        expect(model).to.deep.equal(initialModel);
-        done();
-      },
-      view: model => ""
+      view: display(view)
     });
 
     Meiosis.run(Main);
+
+    expect(vnode.text).to.equal("4");
   });
 
-  it("calls viewModel on component function", function(done) {
-    const initialModel = { value: 2 };
-    const Main = createComponent({
-      initialModel,
-      viewModel: model => {
-        return { value: model.value * 2 };
+  it("can use a state object in receiveUpdate, and to decide which view to display", function() {
+    const UPDATE = "update";
+
+    let actionsRef = null;
+
+    const state = {
+      isReady: model => model.value === 1,
+      isSet: model => model.value === 2,
+      isGo: model => model.value === 4
+    };
+
+    const view = {
+      ready: (model, actions) => {
+        actionsRef = actions;
+        return h("span", "ready");
       },
-      view: model => {
-        expect(model.value).to.equal(8);
-        done();
+      set: (model, actions) => h("span", "set"),
+      go: (model, actions) => h("span", "go")
+    };
+
+    const display = (state, view) => (model, actions) => {
+      if (state.isReady(model)) {
+        return view.ready(model, actions);
       }
+      else if (state.isSet(model)) {
+        return view.set(model, actions);
+      }
+      else if (state.isGo(model)) {
+        return view.go(model, actions);
+      }
+    };
+
+    const receiveUpdate = state => (model, update) => {
+      if (state.isReady(model)) {
+        return { value: 2 };
+      }
+      else if (state.isSet(model)) {
+        return { value: 4 };
+      }
+    };
+
+    const Main = createComponent({
+      initialModel: { value: 1 },
+      view: display(state, view),
+      receiveUpdate: receiveUpdate(state)
     });
 
-    Main({ value: 4 });
+    Meiosis.run(Main);
+    expect(vnode.text).to.equal("ready");
+
+    actionsRef.sendUpdate(UPDATE);
+    expect(vnode.text).to.equal("set");
+
+    actionsRef.sendUpdate(UPDATE);
+    expect(vnode.text).to.equal("go");
   });
 });
