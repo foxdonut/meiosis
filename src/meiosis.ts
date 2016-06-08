@@ -5,7 +5,6 @@ import { NextUpdate, NextUpdateFromActions } from "./nextUpdate";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { ReceiveUpdate } from "./receiveUpdate";
-import { ViewModel } from "./viewModel";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
 export interface Component<M, V> {
@@ -85,14 +84,7 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     }
 
     return function(model: M): V {
-      if (config.view) {
-        const viewModel: ViewModel<M> = config.viewModel;
-        if (viewModel) {
-          model = viewModel(model);
-        }
-        return config.view(model, actions);
-      }
-      return undefined;
+      return config.view ? config.view(model, actions) : undefined;
     };
   };
 

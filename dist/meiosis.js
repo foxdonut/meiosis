@@ -114,14 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            allNextUpdates.push(function (model, update) { return nextUpdate(model, update, actions); });
 	        }
 	        return function (model) {
-	            if (config.view) {
-	                var viewModel = config.viewModel;
-	                if (viewModel) {
-	                    model = viewModel(model);
-	                }
-	                return config.view(model, actions);
-	            }
-	            return undefined;
+	            return config.view ? config.view(model, actions) : undefined;
 	        };
 	    };
 	    var run = function (root) {
