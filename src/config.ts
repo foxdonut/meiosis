@@ -7,10 +7,10 @@ import { View } from "./view";
 
 interface Config<M, V, U> {
   initialModel?: M;
+  actions?: Actions<U>;
   view?: View<M, V>;
   postRender?: PostRender<V>;
   ready?: Ready<U>;
-  actions?: Actions<U>;
   receiveUpdate?: ReceiveUpdate<M, U>;
   nextUpdate?: NextUpdate<M, U>;
 }

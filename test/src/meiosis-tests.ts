@@ -557,6 +557,7 @@ describe("meiosis", function() {
       },
       nextUpdate: (_model, _update, actions) => {
         expect(actions.formAction).to.exist;
+        expect(actions.listAction).not.to.exist;
         counter++;
         if (counter === 4) {
           done();
@@ -577,6 +578,7 @@ describe("meiosis", function() {
       },
       nextUpdate: (_model, _update, actions) => {
         expect(actions.listAction).to.exist;
+        expect(actions.formAction).not.to.exist;
         counter++;
         if (counter === 4) {
           done();

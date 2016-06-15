@@ -96,7 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var initialModel = config.initialModel || {};
 	        rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
-	        var actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
+	        var actions = config.actions ? merge(merge({}, sendUpdateActions), config.actions(sendUpdate)) : sendUpdateActions;
 	        var receiveUpdate = config.receiveUpdate;
 	        if (receiveUpdate) {
 	            allReceiveUpdates.push(receiveUpdate);

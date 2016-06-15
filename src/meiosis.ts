@@ -61,7 +61,7 @@ function init<M, V, U>(adapters: Adapters<M, V, U>): Meiosis<M, V, U> {
     const initialModel: any = config.initialModel || {};
     rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
 
-    const actions = config.actions ? merge(sendUpdateActions, config.actions(sendUpdate)) : sendUpdateActions;
+    const actions = config.actions ? merge(merge({}, sendUpdateActions), config.actions(sendUpdate)) : sendUpdateActions;
 
     const receiveUpdate: ReceiveUpdate<M, U> = config.receiveUpdate;
     if (receiveUpdate) {
