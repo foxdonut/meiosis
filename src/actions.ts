@@ -1,7 +1,7 @@
 import { Emitter } from "./wire";
 
-interface Actions<U> {
-  (sendUpdate: Emitter<U>): any;
+interface Actions<P> {
+  (propose: Emitter<P>): any;
 }
 
 export { Actions };

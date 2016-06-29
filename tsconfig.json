@@ -24,10 +24,10 @@
         "src/index.ts",
         "src/meiosis.ts",
         "src/merge.ts",
-        "src/nextUpdate.ts",
+        "src/nextAction.ts",
         "src/postRender.ts",
         "src/ready.ts",
-        "src/receiveUpdate.ts",
+        "src/receive.ts",
         "src/renderer.ts",
         "src/view.ts",
         "src/wire.ts"

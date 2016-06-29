@@ -1,7 +1,7 @@
 import { Actions } from "./actions";
 
-interface Ready<U> {
-  (actions: Actions<U>): void;
+interface Ready<P> {
+  (actions: Actions<P>): void;
 }
 
 export { Ready };

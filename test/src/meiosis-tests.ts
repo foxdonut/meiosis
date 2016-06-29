@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { init, REFUSE_UPDATE } from "../../lib/index";
+import { init, REFUSE_PROPOSAL } from "../../lib/index";
 
 describe("meiosis", function() {
 
@@ -21,15 +21,15 @@ describe("meiosis", function() {
     createComponent = Meiosis.createComponent;
   });
 
-  it("calls the view with model and actions", function(done) {
+  it("calls the view with model and propose", function(done) {
     const initial = { duck: "quack" };
 
     Meiosis.run(createComponent({
       initialModel: initial,
 
-      view: (model, actions) => {
+      view: (model, propose) => {
         expect(model).to.exist;
-        expect(actions).to.exist;
+        expect(propose).to.exist;
         expect(model).to.deep.equal(initial);
 
         done();
@@ -56,9 +56,9 @@ describe("meiosis", function() {
     const FormText = "Form";
     const ListText = "List";
 
-    const Form = createComponent({ view: _props => h("div", FormText) });
-    const List = createComponent({ view: _props => h("div", ListText) });
-    const Main = createComponent({ view: props => h("div", [Form(props), List(props)]) });
+    const Form = createComponent({ view: _model => h("div", FormText) });
+    const List = createComponent({ view: _model => h("div", ListText) });
+    const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
     Meiosis.run(Main);
 
@@ -70,19 +70,19 @@ describe("meiosis", function() {
     expect(vnode.children[1].text).to.equal(ListText);
   });
 
-  it("triggers an action", function() {
-    const UPDATE = "update";
+  it("triggers a proposal", function() {
+    const PROPOSAL = "proposal";
 
-    let actionsRef = null;
+    let propose = null;
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === PROPOSAL) {
           return { name: "two" };
         }
         return model;
@@ -92,17 +92,17 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate(UPDATE);
+    propose(PROPOSAL);
     expect(vnode.text).to.equal("two");
   });
 
-  it("nextUpdate", function() {
-    const UPDATE = "update";
+  it("nextAction", function() {
+    const CHANGE = "change";
     const REFRESH = "refresh";
 
-    const actions = sendUpdate => ({
-      update: () => sendUpdate(UPDATE),
-      refresh: () => sendUpdate(REFRESH)
+    const actions = propose => ({
+      change: () => propose(CHANGE),
+      refresh: () => propose(REFRESH)
     });
 
     let actionsRef = null;
@@ -110,21 +110,21 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { name: "one" },
       actions: actions,
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, actions_) => {
+        actionsRef = actions_;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === CHANGE) {
           return { name: "two" };
         }
-        else if (update === REFRESH) {
+        else if (proposal === REFRESH) {
           return { name: "four" };
         }
         return model;
       },
-      nextUpdate: (model, update, actions) => {
-        if (update === UPDATE) {
+      nextAction: (model, proposal, actions) => {
+        if (proposal === CHANGE) {
           actions.refresh();
         }
       }
@@ -133,15 +133,15 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.update();
+    actionsRef.change();
     expect(vnode.text).to.equal("four");
   });
 
   it("merges the models into a single root model", function() {
-    const UPDATE = "update";
+    const PROPOSAL = "proposal";
 
-    const actions = sendUpdate => ({
-      update: () => sendUpdate(UPDATE)
+    const actions = propose => ({
+      doIt: () => propose(PROPOSAL)
     });
 
     let actionsRef = null;
@@ -168,8 +168,8 @@ describe("meiosis", function() {
           ]
         );
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === PROPOSAL) {
           return { name: "two", formText: "F2", listText: "L2" };
         }
         return model;
@@ -183,16 +183,16 @@ describe("meiosis", function() {
     expect(vnode.children[1].text).to.equal("F1");
     expect(vnode.children[2].text).to.equal("L1");
 
-    actionsRef.update();
+    actionsRef.doIt();
     expect(vnode.children[0].text).to.equal("two");
     expect(vnode.children[1].text).to.equal("F2");
     expect(vnode.children[2].text).to.equal("L2");
   });
 
   it("reflects change from one view in another view", function() {
-    const UPDATE = "update";
+    const CHANGE = "change";
 
-    let actionsRef = null;
+    let propose = null;
 
     const Form = createComponent({
       initialModel: { formText: "F1" },
@@ -201,12 +201,12 @@ describe("meiosis", function() {
 
     const List = createComponent({
       initialModel: { listText: "L1" },
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", model.listText);
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === CHANGE) {
           model.formText = "F2";
           return model;
         }
@@ -231,7 +231,7 @@ describe("meiosis", function() {
     expect(vnode.children[1].text).to.equal("F1");
     expect(vnode.children[2].text).to.equal("L1");
 
-    actionsRef.sendUpdate(UPDATE);
+    propose(CHANGE);
     expect(vnode.children[0].text).to.equal("one");
     expect(vnode.children[1].text).to.equal("F2");
     expect(vnode.children[2].text).to.equal("L1");
@@ -245,8 +245,8 @@ describe("meiosis", function() {
 
     const promise = new Promise<any>(res => res(42));
 
-    const actions = sendUpdate => ({
-      increment: () => promise.then(res => { value = res; sendUpdate(INCREMENT); })
+    const actions = propose => ({
+      increment: () => promise.then(res => { value = res; propose(INCREMENT); })
     });
 
     Meiosis.run(createComponent({
@@ -256,8 +256,8 @@ describe("meiosis", function() {
         actionsRef = actions;
         return h("span", "test");
       },
-      receiveUpdate: (model, update) => {
-        if (update === INCREMENT) {
+      receive: (model, proposal) => {
+        if (proposal === INCREMENT) {
           expect(value).to.equal(42);
           done();
         }
@@ -272,9 +272,9 @@ describe("meiosis", function() {
     const FormText = "Form";
     const ListText = "List";
 
-    const Form = createComponent({ view: _props => h("div", FormText) });
-    const List = createComponent({ view: _props => h("div", ListText) });
-    const Main = createComponent({ view: props => h("div", [Form(props), List(props)]) });
+    const Form = createComponent({ view: _model => h("div", FormText) });
+    const List = createComponent({ view: _model => h("div", ListText) });
+    const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
     Meiosis.run(Main);
 
@@ -299,19 +299,20 @@ describe("meiosis", function() {
     })).to.throw(Error);
   });
 
-  it("passes actions.sendUpdate to the view by default", function() {
-    const UPDATE = "update";
+  it("passes propose to the view by default", function() {
+    const CHANGE = "change";
 
-    let actionsRef = null;
+    let propose = null;
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        expect(typeof propose_).to.equal("function");
+        propose = propose_;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === CHANGE) {
           return { name: "two" };
         }
         return model;
@@ -321,15 +322,15 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate(UPDATE);
+    propose(CHANGE);
     expect(vnode.text).to.equal("two");
   });
 
-  it("passes actions.sendUpdate to the view even when specifying actions", function() {
-    const UPDATE = "update";
+  it("passes the actions object to the view", function() {
+    const CHANGE = "change";
 
-    const actions = sendUpdate => ({
-      test: () => sendUpdate(UPDATE)
+    const actions = propose => ({
+      test: () => propose(CHANGE)
     });
 
     let actionsRef = null;
@@ -338,11 +339,12 @@ describe("meiosis", function() {
       initialModel: { name: "one" },
       actions: actions,
       view: (model, actions) => {
+        expect(typeof actions).to.equal("object");
         actionsRef = actions;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
-        if (update === UPDATE) {
+      receive: (model, proposal) => {
+        if (proposal === CHANGE) {
           return { name: "two" };
         }
         return model;
@@ -352,22 +354,22 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate(UPDATE);
+    actionsRef.test();
     expect(vnode.text).to.equal("two");
   });
 
-  it("runs updates through receiveUpdate", function() {
-    let actionsRef = null;
+  it("runs proposals through receive", function() {
+    let propose = null;
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
+      receive: (model, proposal) => {
         expect(model.name).to.equal("one");
-        expect(update.name).to.equal("two");
+        expect(proposal.name).to.equal("two");
         return { name: "three" };
       }
     });
@@ -375,16 +377,16 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate({ name: "two" });
+    propose({ name: "two" });
     expect(vnode.text).to.equal("three");
   });
 
-  it("calls one component's receiveUpdate with another component's update", function() {
-    let actionsRef = null;
+  it("calls one component's receive with another component's proposal", function() {
+    let propose = null;
 
     const Child = createComponent({
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", model.name);
       }
     });
@@ -392,9 +394,9 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { name: "one" },
       view: model => Child(model),
-      receiveUpdate: (model, update) => {
+      receive: (model, proposal) => {
         expect(model.name).to.equal("one");
-        expect(update.name).to.equal("two");
+        expect(proposal.name).to.equal("two");
         return { name: "three" };
       }
     });
@@ -402,21 +404,21 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate({ name: "two" });
+    propose({ name: "two" });
     expect(vnode.text).to.equal("three");
   });
 
-  it("multiple functions that receive updates, in order of creation", function() {
-    let actionsRef = null;
+  it("supports multiple functions that receive proposals, in order of creation", function() {
+    let propose = null;
 
     const Child = createComponent({
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", String(model.value));
       },
-      receiveUpdate: (model, update) => {
+      receive: (model, proposal) => {
         expect(model.value).to.equal(2);
-        expect(update.value).to.equal(3);
+        expect(proposal.value).to.equal(3);
         return { value: model.value + 3 };
       }
     });
@@ -424,9 +426,9 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { value: 2 },
       view: model => Child(model),
-      receiveUpdate: (model, update) => {
+      receive: (model, proposal) => {
         expect(model.value).to.equal(5);
-        expect(update.value).to.equal(3);
+        expect(proposal.value).to.equal(3);
         return { value: model.value * 2 };
       }
     });
@@ -434,7 +436,7 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("2");
 
-    actionsRef.sendUpdate({ value: 3 });
+    propose({ value: 3 });
     expect(vnode.text).to.equal("10");
   });
 
@@ -457,24 +459,24 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("A duck says " + sound2);
   });
 
-  it("sends update through to the nextUpdate function", function(done) {
-    let actionsRef = null;
+  it("sends proposal through to the nextAction function", function(done) {
+    let propose = null;
 
     const Main = createComponent({
       initialModel: { name: "one" },
-      view: (model, actions) => {
-        actionsRef = actions;
+      view: (model, propose_) => {
+        propose = propose_;
         return h("span", model.name);
       },
-      receiveUpdate: (model, update) => {
+      receive: (model, proposal) => {
         expect(model.name).to.equal("one");
-        expect(update.name).to.equal("two");
+        expect(proposal.name).to.equal("two");
         return { name: "three" };
       },
-      nextUpdate: (model, update, actions) => {
+      nextAction: (model, proposal, propose_) => {
         expect(model.name).to.equal("three");
-        expect(update).to.deep.equal({ name: "two" });
-        expect(actions).to.equal(actionsRef);
+        expect(proposal).to.deep.equal({ name: "two" });
+        expect(propose_).to.equal(propose);
         done();
       }
     });
@@ -482,13 +484,13 @@ describe("meiosis", function() {
     Meiosis.run(Main);
     expect(vnode.text).to.equal("one");
 
-    actionsRef.sendUpdate({ name: "two" });
+    propose({ name: "two" });
     expect(vnode.text).to.equal("three");
   });
 
   it("passes correct actions to each view", function() {
-    const formActions = sendUpdate => ({
-      formAction: () => sendUpdate("formAction")
+    const formActions = propose => ({
+      formAction: () => propose("formAction")
     });
 
     const Form = createComponent({
@@ -500,8 +502,8 @@ describe("meiosis", function() {
       }
     });
 
-    const listActions = sendUpdate => ({
-      listAction: () => sendUpdate("listAction")
+    const listActions = propose => ({
+      listAction: () => propose("listAction")
     });
 
     const List = createComponent({
@@ -513,8 +515,8 @@ describe("meiosis", function() {
       }
     });
 
-    const mainActions = sendUpdate => ({
-      mainAction: () => sendUpdate("mainAction")
+    const mainActions = propose => ({
+      mainAction: () => propose("mainAction")
     });
 
     const Main = createComponent({
@@ -539,13 +541,13 @@ describe("meiosis", function() {
     expect(vnode.children[2].text).to.equal("L1");
   });
 
-  it("calls all nextUpdate functions and passes correct actions to the each one", function(done) {
+  it("calls all nextAction functions and passes correct actions to the each one", function(done) {
     let formActionsRef = null;
     let listActionsRef = null;
     let counter = 0;
 
-    const formActions = sendUpdate => ({
-      formAction: () => sendUpdate("formAction")
+    const formActions = propose => ({
+      formAction: () => propose("formAction")
     });
 
     const Form = createComponent({
@@ -555,7 +557,7 @@ describe("meiosis", function() {
         formActionsRef = actions;
         return h("span", model.formText);
       },
-      nextUpdate: (_model, _update, actions) => {
+      nextAction: (_model, _proposal, actions) => {
         expect(actions.formAction).to.exist;
         expect(actions.listAction).not.to.exist;
         counter++;
@@ -565,8 +567,8 @@ describe("meiosis", function() {
       }
     });
 
-    const listActions = sendUpdate => ({
-      listAction: () => sendUpdate("listAction")
+    const listActions = propose => ({
+      listAction: () => propose("listAction")
     });
 
     const List = createComponent({
@@ -576,7 +578,7 @@ describe("meiosis", function() {
         listActionsRef = actions;
         return h("span", model.listText);
       },
-      nextUpdate: (_model, _update, actions) => {
+      nextAction: (_model, _proposal, actions) => {
         expect(actions.listAction).to.exist;
         expect(actions.formAction).not.to.exist;
         counter++;
@@ -602,7 +604,7 @@ describe("meiosis", function() {
     listActionsRef.listAction();
   });
 
-  it("calls the ready function with actions", function(done) {
+  it("calls the ready function with propose", function(done) {
     const initial = { duck: "quack" };
 
     const view = model => h("span", `A duck says ${model.duck}`);
@@ -610,9 +612,9 @@ describe("meiosis", function() {
     Meiosis.run(createComponent({
       initialModel: initial,
       view: view,
-      ready: actions => {
-        expect(actions).to.exist;
-        expect(actions.sendUpdate).to.exist;
+      ready: propose => {
+        expect(propose).to.exist;
+        expect(typeof propose).to.equal("function");
         done();
       }
     }));
@@ -638,64 +640,64 @@ describe("meiosis", function() {
     }));
   });
 
-  it("can refuse an update", function(done) {
-    let actionsRef = null;
+  it("can refuse a proposal", function(done) {
+    let propose = null;
     let counter = 0;
 
     const Main = createComponent({
       initialModel: { value: 1 },
-      view: (model, actions) => {
+      view: (model, propose_) => {
         counter++;
-        actionsRef = actions;
+        propose = propose_;
         if (counter === 3) {
           expect(model.value).to.equal(4);
           done();
         }
         return h("span", model.value);
       },
-      receiveUpdate: (_model, update) => {
-        if (update.value % 2 > 0) {
-          return REFUSE_UPDATE;
+      receive: (_model, proposal) => {
+        if (proposal.value % 2 > 0) {
+          return REFUSE_PROPOSAL;
         }
-        return update;
+        return proposal;
       }
     });
 
     Meiosis.run(Main);
 
-    actionsRef.sendUpdate({ value: 2 });
-    actionsRef.sendUpdate({ value: 3 });
-    actionsRef.sendUpdate({ value: 4 });
+    propose({ value: 2 });
+    propose({ value: 3 });
+    propose({ value: 4 });
   });
 
-  it("does not mistake empty object for REFUSE_UPDATE", function(done) {
-    let actionsRef = null;
+  it("does not mistake empty object for REFUSE_PROPOSAL", function(done) {
+    let propose = null;
     let counter = 0;
 
     const Main = createComponent({
       initialModel: { value: 1 },
-      view: (model, actions) => {
+      view: (model, propose_) => {
         counter++;
-        actionsRef = actions;
+        propose = propose_;
         if (counter === 4) {
           expect(model.value).to.equal(4);
           done();
         }
         return h("span", model.value);
       },
-      receiveUpdate: (_model, update) => {
-        if (update.value % 2 > 0) {
+      receive: (_model, proposal) => {
+        if (proposal.value % 2 > 0) {
           return {};
         }
-        return update;
+        return proposal;
       }
     });
 
     Meiosis.run(Main);
 
-    actionsRef.sendUpdate({ value: 2 });
-    actionsRef.sendUpdate({ value: 3 });
-    actionsRef.sendUpdate({ value: 4 });
+    propose({ value: 2 });
+    propose({ value: 3 });
+    propose({ value: 4 });
   });
 
   it("can use a display function for an initial viewModel", function() {
@@ -714,10 +716,10 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("4");
   });
 
-  it("can use a state object in receiveUpdate, and to decide which view to display", function() {
-    const UPDATE = "update";
+  it("can use a state object in receive, and to decide which view to display", function() {
+    const CHANGE = "change";
 
-    let actionsRef = null;
+    let propose = null;
 
     const state = {
       isReady: model => model.value === 1,
@@ -726,27 +728,27 @@ describe("meiosis", function() {
     };
 
     const view = {
-      ready: (model, actions) => {
-        actionsRef = actions;
+      ready: (model, propose_) => {
+        propose = propose_;
         return h("span", "ready");
       },
-      set: (model, actions) => h("span", "set"),
-      go: (model, actions) => h("span", "go")
+      set: (model, propose_) => h("span", "set"),
+      go: (model, propose_) => h("span", "go")
     };
 
-    const display = (state, view) => (model, actions) => {
+    const display = (state, view) => (model, propose) => {
       if (state.isReady(model)) {
-        return view.ready(model, actions);
+        return view.ready(model, propose);
       }
       else if (state.isSet(model)) {
-        return view.set(model, actions);
+        return view.set(model, propose);
       }
       else if (state.isGo(model)) {
-        return view.go(model, actions);
+        return view.go(model, propose);
       }
     };
 
-    const receiveUpdate = state => (model, update) => {
+    const receive = state => (model, proposal) => {
       if (state.isReady(model)) {
         return { value: 2 };
       }
@@ -758,16 +760,16 @@ describe("meiosis", function() {
     const Main = createComponent({
       initialModel: { value: 1 },
       view: display(state, view),
-      receiveUpdate: receiveUpdate(state)
+      receive: receive(state)
     });
 
     Meiosis.run(Main);
     expect(vnode.text).to.equal("ready");
 
-    actionsRef.sendUpdate(UPDATE);
+    propose(CHANGE);
     expect(vnode.text).to.equal("set");
 
-    actionsRef.sendUpdate(UPDATE);
+    propose(CHANGE);
     expect(vnode.text).to.equal("go");
   });
 });

@@ -1,15 +1,15 @@
-interface Listener<U> {
-    (update: U): void;
+interface Listener<P> {
+    (proposal: P): void;
 }
-interface Emitter<U> {
-    (update: U): void;
+interface Emitter<P> {
+    (proposal: P): void;
 }
-interface Wire<U> {
-    emit: Emitter<U>;
-    listen(listener: Listener<U>): any;
+interface Wire<P> {
+    emit: Emitter<P>;
+    listen(listener: Listener<P>): any;
 }
-interface WireCreator<U> {
-    (wireName?: string): Wire<U>;
+interface WireCreator<P> {
+    (wireName?: string): Wire<P>;
 }
-declare function defaultWireCreator<U>(): WireCreator<U>;
+declare function defaultWireCreator<P>(): WireCreator<P>;
 export { Emitter, Listener, Wire, WireCreator, defaultWireCreator };

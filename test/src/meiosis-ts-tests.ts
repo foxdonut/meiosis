@@ -11,17 +11,17 @@ interface Model {
 
 type View = Mithril.VirtualElement;
 
-interface Update {
+interface Proposal {
   increment: number;
 }
 
-interface Actions<U> {
+interface Actions<P> {
   increase: () => void;
   decrease: () => void;
 }
 
-interface ActionCreator<U> {
-  (sendUpdate: Emitter<U>): Actions<U>;
+interface ActionCreator<P> {
+  (propose: Emitter<P>): Actions<P>;
 }
 
 describe("meiosis typescript", function() {
@@ -31,12 +31,12 @@ describe("meiosis typescript", function() {
     vnode = view;
   };
 
-  const adapters: Adapters<Model, View, Update> = {
+  const adapters: Adapters<Model, View, Proposal> = {
     render: render
   };
 
-  let Meiosis: Meiosis<Model, View, Update> = null;
-  let createComponent: CreateComponent<Model, View, Update> = null;
+  let Meiosis: Meiosis<Model, View, Proposal> = null;
+  let createComponent: CreateComponent<Model, View, Proposal> = null;
 
   beforeEach(function() {
     // prepare Meiosis
@@ -45,32 +45,32 @@ describe("meiosis typescript", function() {
   });
 
   it("takes advantage of typescript features", function() {
-    const INCREASE: Update = { increment: 1 };
-    const DECREASE: Update = { increment: -1 };
+    const INCREASE: Proposal = { increment: 1 };
+    const DECREASE: Proposal = { increment: -1 };
 
-    const actions: ActionCreator<Update> = (sendUpdate: Emitter<Update>) => ({
-      increase: () => sendUpdate(INCREASE),
-      decrease: () => sendUpdate(DECREASE)
+    const actions: ActionCreator<Proposal> = (propose: Emitter<Proposal>) => ({
+      increase: () => propose(INCREASE),
+      decrease: () => propose(DECREASE)
     });
 
-    let actionsRef: Actions<Update> = null;
+    let actionsRef: Actions<Proposal> = null;
 
     const Main: Component<Model, View> = createComponent({
       initialModel: { counter: 1, description: "test" },
       actions: actions,
-      view: (model: Model, actions: Actions<Update>) => {
+      view: (model: Model, actions: Actions<Proposal>) => {
         actionsRef = actions;
         return m("span", model.description + " " + model.counter);
       },
-      receiveUpdate: (model: Model, update: Update) => {
-        if (update.increment) {
-          model.counter = model.counter + update.increment;
+      receive: (model: Model, proposal: Proposal) => {
+        if (proposal.increment) {
+          model.counter = model.counter + proposal.increment;
           return model;
         }
         return model;
       },
-      nextUpdate: (model: Model, update: Update, actions: Actions<Update>) => {
-        if (update.increment === 0) {
+      nextAction: (model: Model, proposal: Proposal, actions: Actions<Proposal>) => {
+        if (proposal.increment === 0) {
           actions.decrease();
         }
       }
