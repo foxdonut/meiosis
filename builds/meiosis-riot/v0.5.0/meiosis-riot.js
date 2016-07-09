@@ -101,7 +101,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var update = function update(model) {
 	            tags[0].update(model);
 	            _riot2.default.update();
-	            console.log("called riot.update");
 	          };
 	          resolve(update);
 	        } else {
