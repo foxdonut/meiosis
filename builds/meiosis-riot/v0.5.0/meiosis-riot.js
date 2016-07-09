@@ -98,7 +98,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var tags = _riot2.default.mount(element, rootTagName);
 
 	        if (tags && tags.length) {
-	          var update = tags[0].update;
+	          var update = function update(model) {
+	            tags[0].update(model);
+	            _riot2.default.update();
+	          };
 	          resolve(update);
 	        } else {
 	          reject("Could not mount riot tag " + rootTagName);
