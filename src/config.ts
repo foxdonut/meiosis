@@ -9,7 +9,7 @@ interface Config<M, V, P> {
   initialModel?: M;
   actions?: Actions<P>;
   view?: View<M, V>;
-  postRender?: PostRender<V>;
+  postRender?: PostRender;
   ready?: Ready<P>;
   receive?: Receive<M, P>;
   nextAction?: NextAction<M, P>;

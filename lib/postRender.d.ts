@@ -1,4 +1,4 @@
-interface PostRender<V> {
-    (view: V): any;
+interface PostRender {
+    (): any;
 }
 export { PostRender };

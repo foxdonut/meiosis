@@ -1,48 +1,43 @@
 import { Adapters } from "./adapters";
+import { Component } from "./component";
 import { Config } from "./config";
-import { Merger, defaultMerge } from "./merge";
 import { NextAction, NextActionFromActions } from "./nextAction";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { Receive } from "./receive";
+import { Renderer } from "./renderer";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
-
-export interface Component<M, V> {
-  (model: M): V;
-}
 
 export interface CreateComponent<M, V, P> {
   (config: Config<M, V, P>): Component<M, V>;
 }
 
 export interface RenderRoot<M> {
-  (model: M): void;
+  (model: M): any;
 }
 
-export interface Run<M, V> {
-  (component: Component<M, V>): RenderRoot<M>;
+export interface Run<M, V, P> {
+  (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
 }
 
-export interface Meiosis<M, V, P> {
+export interface MeiosisApp<M, V, P> {
   createComponent: CreateComponent<M, V, P>;
-  run: Run<M, V>;
+  run: Run<M, V, P>;
 }
 
 const REFUSE_PROPOSAL = {};
 
-function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
+function init<M, V, P>(adapters: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P>> = [];
-  let allPostRenders: Array<PostRender<V>> = [];
+  let allPostRenders: Array<PostRender> = [];
   let allNextActions: Array<NextActionFromActions<M, P>> = [];
 
-  const createRootWire: WireCreator<M> = adapters.rootWire || defaultWireCreator();
-  const createComponentWire: WireCreator<P> = adapters.componentWire || defaultWireCreator();
+  const createRootWire: WireCreator<M> = (adapters && adapters.rootWire) || defaultWireCreator();
+  const createComponentWire: WireCreator<P> = (adapters && adapters.componentWire) || defaultWireCreator();
   const rootWire: Wire<M> = createRootWire("meiosis");
   const componentWire: Wire<P> = createComponentWire();
   const propose: Emitter<P> = componentWire.emit;
-
-  const merge: Merger = adapters.merge || defaultMerge;
 
   let rootModel: M = null;
 
@@ -58,7 +53,7 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
       throw new Error("Please specify a config when calling createComponent.");
     }
     const initialModel: any = config.initialModel || {};
-    rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
+    rootModel = (rootModel === null) ? initialModel : null; // merge(rootModel, initialModel);
 
     const actions = config.actions ? config.actions(propose) : propose;
 
@@ -72,7 +67,7 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
       allReadies.push(() => ready(actions));
     }
 
-    const postRender: PostRender<V> = config.postRender;
+    const postRender: PostRender = config.postRender;
     if (postRender) {
       allPostRenders.push(postRender);
     }
@@ -87,11 +82,7 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
     };
   };
 
-  const run: Run<M, V> = (root: Component<M, V>) => {
-    if (allReceives.length === 0) {
-      allReceives.push(merge);
-    }
-
+  const run: Run<M, V, P> = (render: Renderer<M, V>, rootComponent: Component<M, V>) => {
     componentWire.listen((proposal: any) => {
       let accepted = true;
 
@@ -115,9 +106,9 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
     });
 
     const renderRoot: RenderRoot<M> = (model: M) => {
-      const rootView: V = root(model);
-      adapters.render(rootView);
-      allPostRenders.forEach((postRender: PostRender<V>) => postRender(rootView));
+      const result = render(model, rootComponent);
+      allPostRenders.forEach((postRender: PostRender) => postRender());
+      return result;
     };
     rootWire.listen(renderRoot);
 
@@ -127,15 +118,19 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): Meiosis<M, V, P> {
     return renderRoot;
   };
 
-  const meiosisInstance: Meiosis<M, V, P> = {
+  return {
     createComponent,
     run
   };
+}
 
-  return meiosisInstance;
-};
+const instance = init<any, any, any>(undefined);
+const createComponent = instance.createComponent;
+const run = instance.run;
 
 export {
   init,
+  createComponent,
+  run,
   REFUSE_PROPOSAL
 };

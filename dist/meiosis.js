@@ -60,7 +60,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	__export(__webpack_require__(1));
 	__export(__webpack_require__(2));
-	__export(__webpack_require__(3));
 
 
 /***/ },
@@ -68,8 +67,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var merge_1 = __webpack_require__(2);
-	var wire_1 = __webpack_require__(3);
+	var wire_1 = __webpack_require__(2);
 	var REFUSE_PROPOSAL = {};
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	function init(adapters) {
@@ -77,12 +75,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = adapters.rootWire || wire_1.defaultWireCreator();
-	    var createComponentWire = adapters.componentWire || wire_1.defaultWireCreator();
+	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
+	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis");
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var merge = adapters.merge || merge_1.defaultMerge;
 	    var rootModel = null;
 	    var createComponent = function (config) {
 	        if (!config || (!config.actions &&
@@ -94,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
 	        var initialModel = config.initialModel || {};
-	        rootModel = (rootModel === null) ? initialModel : merge(rootModel, initialModel);
+	        rootModel = (rootModel === null) ? initialModel : null;
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;
 	        if (receive) {
@@ -116,10 +113,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return config.view ? config.view(model, actions) : undefined;
 	        };
 	    };
-	    var run = function (root) {
-	        if (allReceives.length === 0) {
-	            allReceives.push(merge);
-	        }
+	    var run = function (render, rootComponent) {
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -140,56 +134,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 	        var renderRoot = function (model) {
-	            var rootView = root(model);
-	            adapters.render(rootView);
-	            allPostRenders.forEach(function (postRender) { return postRender(rootView); });
+	            var result = render(model, rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(); });
+	            return result;
 	        };
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        return renderRoot;
 	    };
-	    var meiosisInstance = {
+	    return {
 	        createComponent: createComponent,
 	        run: run
 	    };
-	    return meiosisInstance;
 	}
 	exports.init = init;
-	;
+	var instance = init(undefined);
+	var createComponent = instance.createComponent;
+	exports.createComponent = createComponent;
+	var run = instance.run;
+	exports.run = run;
 
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var defaultMerge = function (target) {
-	    var sources = [];
-	    for (var _i = 1; _i < arguments.length; _i++) {
-	        sources[_i - 1] = arguments[_i];
-	    }
-	    if (target === undefined || target === null) {
-	        throw new TypeError("Cannot convert undefined or null to object");
-	    }
-	    var output = Object(target);
-	    for (var index = 1; index < arguments.length; index++) {
-	        var source = arguments[index];
-	        if (source !== undefined && source !== null) {
-	            for (var nextKey in source) {
-	                if (source.hasOwnProperty(nextKey)) {
-	                    output[nextKey] = source[nextKey];
-	                }
-	            }
-	        }
-	    }
-	    return output;
-	};
-	exports.defaultMerge = defaultMerge;
-
-
-/***/ },
-/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";

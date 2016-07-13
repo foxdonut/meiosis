@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import * as m from "mithril";
 
-import { init } from "../../lib/index";
-import { Adapters, CreateComponent, Component, Emitter, Meiosis, Renderer, RenderRoot } from "../../lib/index";
+import { createComponent, run } from "../../lib/index";
+import { CreateComponent, Component, Emitter, Renderer, RenderRoot } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -27,22 +27,9 @@ interface ActionCreator<P> {
 describe("meiosis typescript", function() {
   let vnode: Mithril.VirtualElement = null;
 
-  const render: Renderer<View> = (view: View) => {
-    vnode = view;
+  const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>) => {
+    vnode = rootComponent(model);
   };
-
-  const adapters: Adapters<Model, View, Proposal> = {
-    render: render
-  };
-
-  let Meiosis: Meiosis<Model, View, Proposal> = null;
-  let createComponent: CreateComponent<Model, View, Proposal> = null;
-
-  beforeEach(function() {
-    // prepare Meiosis
-    Meiosis = init(adapters);
-    createComponent = Meiosis.createComponent;
-  });
 
   it("takes advantage of typescript features", function() {
     const INCREASE: Proposal = { increment: 1 };
@@ -76,7 +63,7 @@ describe("meiosis typescript", function() {
       }
     });
 
-    const renderRoot: RenderRoot<Model> = Meiosis.run(Main);
+    const renderRoot: RenderRoot<Model> = run(render, Main);
     expect(vnode.children[0]).to.equal("test 1");
 
     actionsRef.increase();

@@ -2,29 +2,18 @@ import { expect } from "chai";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { init, REFUSE_PROPOSAL } from "../../lib/index";
+import { createComponent, run, REFUSE_PROPOSAL } from "../../lib/index";
 
 describe("meiosis", function() {
 
   let vnode = null;
 
-  // adapters
   const render = view => { vnode = view; };
-  const adapters = { render };
-
-  let Meiosis = null;
-  let createComponent = null;
-
-  beforeEach(function() {
-    // prepare Meiosis
-    Meiosis = init(adapters);
-    createComponent = Meiosis.createComponent;
-  });
 
   it("calls the view with model and propose", function(done) {
     const initial = { duck: "quack" };
 
-    Meiosis.run(createComponent({
+    run(render, createComponent({
       initialModel: initial,
 
       view: (model, propose) => {
@@ -42,7 +31,7 @@ describe("meiosis", function() {
 
     const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
-    Meiosis.run(createComponent({
+    run(render, createComponent({
       initialModel: initial,
       view: view
     }));
@@ -60,7 +49,7 @@ describe("meiosis", function() {
     const List = createComponent({ view: _model => h("div", ListText) });
     const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode).to.exist;
     expect(vnode.sel).to.equal("div");
@@ -89,7 +78,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     propose(PROPOSAL);
@@ -130,7 +119,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     actionsRef.change();
@@ -176,7 +165,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode.children.length).to.equal(3);
     expect(vnode.children[0].text).to.equal("one");
@@ -224,7 +213,7 @@ describe("meiosis", function() {
       )
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode.children.length).to.equal(3);
     expect(vnode.children[0].text).to.equal("one");
@@ -249,7 +238,7 @@ describe("meiosis", function() {
       increment: () => promise.then(res => { value = res; propose(INCREMENT); })
     });
 
-    Meiosis.run(createComponent({
+    run(render, createComponent({
       initialModel: { counter: 1 },
       actions: actions,
       view: (_model, actions) => {
@@ -276,7 +265,7 @@ describe("meiosis", function() {
     const List = createComponent({ view: _model => h("div", ListText) });
     const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode).to.exist;
     expect(vnode.sel).to.equal("div");
@@ -287,16 +276,9 @@ describe("meiosis", function() {
   });
 
   it("all configs are optional, but you need something", function() {
-    expect(() => createComponent()).to.throw(Error);
+    expect(() => createComponent(undefined)).to.throw(Error);
+    expect(() => createComponent(null)).to.throw(Error);
     expect(() => createComponent({})).to.throw(Error);
-  });
-
-  it("throws an error if actions is not a function", function() {
-    expect(() => createComponent({
-      actions: ({
-        test: () => {}
-      })
-    })).to.throw(Error);
   });
 
   it("passes propose to the view by default", function() {
@@ -319,7 +301,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     propose(CHANGE);
@@ -351,7 +333,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     actionsRef.test();
@@ -374,7 +356,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     propose({ name: "two" });
@@ -401,7 +383,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     propose({ name: "two" });
@@ -433,7 +415,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("2");
 
     propose({ value: 3 });
@@ -445,7 +427,7 @@ describe("meiosis", function() {
 
     const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
-    const renderRoot = Meiosis.run(createComponent({
+    const renderRoot = run(render, createComponent({
       initialModel: initial,
       view: view
     }));
@@ -481,7 +463,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("one");
 
     propose({ name: "two" });
@@ -533,7 +515,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode.children.length).to.equal(3);
     expect(vnode.children[0].text).to.equal("one");
@@ -598,7 +580,7 @@ describe("meiosis", function() {
       )
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     formActionsRef.formAction();
     listActionsRef.listAction();
@@ -609,7 +591,7 @@ describe("meiosis", function() {
 
     const view = model => h("span", `A duck says ${model.duck}`);
 
-    Meiosis.run(createComponent({
+    run(render, createComponent({
       initialModel: initial,
       view: view,
       ready: propose => {
@@ -624,19 +606,14 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("A duck says quack");
   });
 
-  it("calls the postRender function with the view", function(done) {
+  it("calls the postRender function", function(done) {
     const initial = { duck: "quack" };
     const view = model => h("span", `A duck says ${model.duck}`);
 
-    Meiosis.run(createComponent({
+    run(render, createComponent({
       initialModel: initial,
       view: view,
-      postRender: renderedView => {
-        expect(renderedView).to.exist;
-        expect(renderedView.sel).to.equal("span");
-        expect(renderedView.text).to.equal("A duck says quack");
-        done();
-      }
+      postRender: () => done()
     }));
   });
 
@@ -663,7 +640,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     propose({ value: 2 });
     propose({ value: 3 });
@@ -693,7 +670,7 @@ describe("meiosis", function() {
       }
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     propose({ value: 2 });
     propose({ value: 3 });
@@ -711,7 +688,7 @@ describe("meiosis", function() {
       view: display(view)
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
 
     expect(vnode.text).to.equal("4");
   });
@@ -763,7 +740,7 @@ describe("meiosis", function() {
       receive: receive(state)
     });
 
-    Meiosis.run(Main);
+    run(render, Main);
     expect(vnode.text).to.equal("ready");
 
     propose(CHANGE);
