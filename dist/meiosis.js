@@ -90,8 +90,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            !config.view)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        var initialModel = config.initialModel || {};
-	        rootModel = (rootModel === null) ? initialModel : null;
+	        if (rootModel === null) {
+	            var startingModel = {};
+	            rootModel = startingModel;
+	        }
+	        var initialModel = config.initialModel;
+	        if (typeof initialModel === "function") {
+	            rootModel = initialModel(rootModel);
+	        }
+	        else if (initialModel) {
+	            rootModel = initialModel;
+	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;
 	        if (receive) {
@@ -149,7 +158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 	exports.init = init;
-	var instance = init(undefined);
+	var instance = init();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;

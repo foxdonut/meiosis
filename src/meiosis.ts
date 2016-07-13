@@ -27,7 +27,7 @@ export interface MeiosisApp<M, V, P> {
 
 const REFUSE_PROPOSAL = {};
 
-function init<M, V, P>(adapters: Adapters<M, V, P>): MeiosisApp<M, V, P> {
+function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P>> = [];
   let allPostRenders: Array<PostRender> = [];
@@ -52,8 +52,18 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     )) {
       throw new Error("Please specify a config when calling createComponent.");
     }
-    const initialModel: any = config.initialModel || {};
-    rootModel = (rootModel === null) ? initialModel : null; // merge(rootModel, initialModel);
+    if (rootModel === null) {
+      let startingModel: any = {};
+      rootModel = startingModel;
+    }
+    const initialModel: any = config.initialModel;
+
+    if (typeof initialModel === "function") {
+      rootModel = initialModel(rootModel);
+    }
+    else if (initialModel) {
+      rootModel = initialModel;
+    }
 
     const actions = config.actions ? config.actions(propose) : propose;
 
@@ -124,7 +134,7 @@ function init<M, V, P>(adapters: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   };
 }
 
-const instance = init<any, any, any>(undefined);
+const instance = init<any, any, any>();
 const createComponent = instance.createComponent;
 const run = instance.run;
 

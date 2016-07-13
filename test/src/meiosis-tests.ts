@@ -2,13 +2,21 @@ import { expect } from "chai";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { createComponent, run, REFUSE_PROPOSAL } from "../../lib/index";
+import { init, REFUSE_PROPOSAL } from "../../lib/index";
 
 describe("meiosis", function() {
 
+  let createComponent = null;
+  let run = null;
   let vnode = null;
 
-  const render = view => { vnode = view; };
+  const render = (model, root) => { vnode = root(model); };
+
+  beforeEach(function() {
+    const Meiosis = init();
+    createComponent = Meiosis.createComponent;
+    run = Meiosis.run;
+  });
 
   it("calls the view with model and propose", function(done) {
     const initial = { duck: "quack" };
@@ -136,17 +144,17 @@ describe("meiosis", function() {
     let actionsRef = null;
 
     const Form = createComponent({
-      initialModel: { formText: "F1" },
+      initialModel: model => { model.formText = "F1"; return model; },
       view: model => h("span", model.formText)
     });
 
     const List = createComponent({
-      initialModel: { listText: "L1" },
+      initialModel: model => { model.listText = "L1"; return model; },
       view: model => h("span", model.listText)
     });
 
     const Main = createComponent({
-      initialModel: { name: "one" },
+      initialModel: model => { model.name = "one"; return model; },
       actions: actions,
       view: (model, actions) => {
         actionsRef = actions;
@@ -184,12 +192,12 @@ describe("meiosis", function() {
     let propose = null;
 
     const Form = createComponent({
-      initialModel: { formText: "F1" },
+      initialModel: model => { model.formText = "F1"; return model; },
       view: model => h("span", model.formText)
     });
 
     const List = createComponent({
-      initialModel: { listText: "L1" },
+      initialModel: model => { model.listText = "L1"; return model; },
       view: (model, propose_) => {
         propose = propose_;
         return h("span", model.listText);
@@ -204,7 +212,7 @@ describe("meiosis", function() {
     });
 
     const Main = createComponent({
-      initialModel: { name: "one" },
+      initialModel: model => { model.name = "one"; return model; },
       view: model => h("div",
         [ h("span", model.name)
         , Form(model)
@@ -476,7 +484,7 @@ describe("meiosis", function() {
     });
 
     const Form = createComponent({
-      initialModel: { formText: "F1" },
+      initialModel: model => { model.formText = "F1"; return model; },
       actions: formActions,
       view: (model, actions) => {
         expect(actions.formAction).to.exist;
@@ -489,7 +497,7 @@ describe("meiosis", function() {
     });
 
     const List = createComponent({
-      initialModel: { listText: "L1" },
+      initialModel: model => { model.listText = "L1"; return model; },
       actions: listActions,
       view: (model, actions) => {
         expect(actions.listAction).to.exist;
@@ -502,7 +510,7 @@ describe("meiosis", function() {
     });
 
     const Main = createComponent({
-      initialModel: { name: "one" },
+      initialModel: model => { model.name = "one"; return model; },
       actions: mainActions,
       view: (model, actions) => {
         expect(actions.mainAction).to.exist;
