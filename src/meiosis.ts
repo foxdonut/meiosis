@@ -124,7 +124,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     });
 
     const renderRoot: RenderRoot<M> = (model: M) => {
-      const result = render(model, rootComponent);
+      const result: any = render(model, rootComponent);
       allPostRenders.forEach((postRender: PostRender) => postRender());
       return result;
     };
