@@ -81,6 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
 	    var rootModel = null;
+	    var initialModelCount = 0;
 	    var createComponent = function (config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
@@ -95,11 +96,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            rootModel = startingModel;
 	        }
 	        var initialModel = config.initialModel;
+	        var initialModelError = false;
 	        if (typeof initialModel === "function") {
 	            rootModel = initialModel(rootModel);
+	            initialModelError = initialModelCount > 0;
 	        }
 	        else if (initialModel) {
 	            rootModel = initialModel;
+	            initialModelCount++;
+	            initialModelError = initialModelCount > 1;
+	        }
+	        if (initialModelError) {
+	            throw new Error("When more than one initialModel is used, they must all be functions.");
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;

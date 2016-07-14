@@ -40,6 +40,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   const propose: Emitter<P> = componentWire.emit;
 
   let rootModel: M = null;
+  let initialModelCount = 0;
 
   const createComponent: CreateComponent<M, V, P> = (config: Config<M, V, P>) => {
     if (!config || (
@@ -57,12 +58,19 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       rootModel = startingModel;
     }
     const initialModel: any = config.initialModel;
+    let initialModelError: boolean = false;
 
     if (typeof initialModel === "function") {
       rootModel = initialModel(rootModel);
+      initialModelError = initialModelCount > 0;
     }
     else if (initialModel) {
       rootModel = initialModel;
+      initialModelCount++;
+      initialModelError = initialModelCount > 1;
+    }
+    if (initialModelError) {
+      throw new Error("When more than one initialModel is used, they must all be functions.");
     }
 
     const actions = config.actions ? config.actions(propose) : propose;

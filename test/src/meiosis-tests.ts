@@ -289,6 +289,16 @@ describe("meiosis", function() {
     expect(() => createComponent({})).to.throw(Error);
   });
 
+  it("warns when multiple initialModel components are not all functions", function() {
+    createComponent({
+      initialModel: { duck: "yellow" }
+    });
+
+    expect(() => createComponent({
+      initialModel: model => { model.sound = "quack"; return model; }
+    })).to.throw(Error);
+  });
+
   it("passes propose to the view by default", function() {
     const CHANGE = "change";
 
@@ -541,11 +551,10 @@ describe("meiosis", function() {
     });
 
     const Form = createComponent({
-      initialModel: { formText: "F1" },
       actions: formActions,
-      view: (model, actions) => {
+      view: (_model, actions) => {
         formActionsRef = actions;
-        return h("span", model.formText);
+        return h("span");
       },
       nextAction: (_model, _proposal, actions) => {
         expect(actions.formAction).to.exist;
@@ -562,11 +571,10 @@ describe("meiosis", function() {
     });
 
     const List = createComponent({
-      initialModel: { listText: "L1" },
       actions: listActions,
-      view: (model, actions) => {
+      view: (_model, actions) => {
         listActionsRef = actions;
-        return h("span", model.listText);
+        return h("span");
       },
       nextAction: (_model, _proposal, actions) => {
         expect(actions.listAction).to.exist;
