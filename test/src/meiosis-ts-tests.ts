@@ -27,7 +27,7 @@ interface ActionCreator<P> {
 describe("meiosis typescript", function() {
   let vnode: Mithril.VirtualElement = null;
 
-  const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>) => {
+  const render: Renderer<Model, View, Proposal> = (model: Model, rootComponent: Component<Model, View>) => {
     vnode = rootComponent(model);
   };
 

@@ -15,10 +15,10 @@ interface WireCreator<P> {
   (wireName?: string): Wire<P>;
 }
 
-function defaultWireCreator<P>(): WireCreator<P> {
-  let wires = {};
-  let nextWireId = 1;
+let wires = {};
+let nextWireId = 1;
 
+function defaultWireCreator<P>(): WireCreator<P> {
   const createWire = function(): Wire<P> {
     let listener: Listener<P> = null;
     const listen = (lstnr: Listener<P>) => listener = lstnr;

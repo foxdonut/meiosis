@@ -70,6 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var wire_1 = __webpack_require__(2);
 	var REFUSE_PROPOSAL = {};
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
+	var nextId = 1;
 	function init(adapters) {
 	    var allReceives = [];
 	    var allReadies = [];
@@ -77,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var allNextActions = [];
 	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
 	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
-	    var rootWire = createRootWire("meiosis");
+	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
 	    var rootModel = null;
@@ -151,7 +152,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 	        var renderRoot = function (model) {
-	            var result = render(model, rootComponent);
+	            var result = render(model, rootComponent, propose);
 	            allPostRenders.forEach(function (postRender) { return postRender(); });
 	            return result;
 	        };
@@ -178,9 +179,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	"use strict";
+	var wires = {};
+	var nextWireId = 1;
 	function defaultWireCreator() {
-	    var wires = {};
-	    var nextWireId = 1;
 	    var createWire = function () {
 	        var listener = null;
 	        var listen = function (lstnr) { return listener = lstnr; };

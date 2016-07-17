@@ -9,7 +9,7 @@ export interface RenderRoot<M> {
     (model: M): any;
 }
 export interface Run<M, V, P> {
-    (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
+    (render: Renderer<M, V, P>, component: Component<M, V>): RenderRoot<M>;
 }
 export interface MeiosisApp<M, V, P> {
     createComponent: CreateComponent<M, V, P>;

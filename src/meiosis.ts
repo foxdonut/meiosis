@@ -17,7 +17,7 @@ export interface RenderRoot<M> {
 }
 
 export interface Run<M, V, P> {
-  (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
+  (render: Renderer<M, V, P>, component: Component<M, V>): RenderRoot<M>;
 }
 
 export interface MeiosisApp<M, V, P> {
@@ -26,6 +26,7 @@ export interface MeiosisApp<M, V, P> {
 }
 
 const REFUSE_PROPOSAL = {};
+let nextId = 1;
 
 function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
@@ -35,7 +36,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
 
   const createRootWire: WireCreator<M> = (adapters && adapters.rootWire) || defaultWireCreator();
   const createComponentWire: WireCreator<P> = (adapters && adapters.componentWire) || defaultWireCreator();
-  const rootWire: Wire<M> = createRootWire("meiosis");
+  const rootWire: Wire<M> = createRootWire("meiosis_" + (nextId++));
   const componentWire: Wire<P> = createComponentWire();
   const propose: Emitter<P> = componentWire.emit;
 
@@ -100,7 +101,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     };
   };
 
-  const run: Run<M, V, P> = (render: Renderer<M, V>, rootComponent: Component<M, V>) => {
+  const run: Run<M, V, P> = (render: Renderer<M, V, P>, rootComponent: Component<M, V>) => {
     componentWire.listen((proposal: any) => {
       let accepted = true;
 
@@ -124,7 +125,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     });
 
     const renderRoot: RenderRoot<M> = (model: M) => {
-      const result: any = render(model, rootComponent);
+      const result: any = render(model, rootComponent, propose);
       allPostRenders.forEach((postRender: PostRender) => postRender());
       return result;
     };
