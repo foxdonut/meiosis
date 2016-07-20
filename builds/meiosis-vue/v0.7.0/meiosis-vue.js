@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("riot"));
+		module.exports = factory(require("Vue"));
 	else if(typeof define === 'function' && define.amd)
-		define(["riot"], factory);
+		define(["Vue"], factory);
 	else if(typeof exports === 'object')
-		exports["meiosisRiot"] = factory(require("riot"));
+		exports["meiosisVue"] = factory(require("Vue"));
 	else
-		root["meiosisRiot"] = factory(root["riot"]);
+		root["meiosisVue"] = factory(root["Vue"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -60,14 +60,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _meiosisRiot = __webpack_require__(1);
+	var _meiosisVue = __webpack_require__(1);
 
-	Object.keys(_meiosisRiot).forEach(function (key) {
+	Object.keys(_meiosisVue).forEach(function (key) {
 	  if (key === "default") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
-	      return _meiosisRiot[key];
+	      return _meiosisVue[key];
 	    }
 	  });
 	});
@@ -83,33 +83,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.renderer = undefined;
 
-	var _riot = __webpack_require__(2);
+	var _vue = __webpack_require__(2);
 
-	var _riot2 = _interopRequireDefault(_riot);
-
-	var _meiosisRender = __webpack_require__(3);
+	var _vue2 = _interopRequireDefault(_vue);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var intoElement = function intoElement(rootTagName) {
-	  return function (element) {
-	    var tags = _riot2.default.mount(element, rootTagName);
-
-	    if (tags && tags.length) {
-	      var update = function update(model) {
-	        tags[0].update(model);
-	        _riot2.default.update();
-	        return tags[0];
-	      };
-	      return update;
-	    } else {
-	      throw new Error("Could not mount riot tag " + rootTagName);
-	    }
+	var renderer = function renderer(data, key) {
+	  return function (model) {
+	    return _vue2.default.set(data, key, JSON.parse(JSON.stringify(model[key])));
 	  };
-	};
-
-	var renderer = function renderer(rootTagName) {
-	  return (0, _meiosisRender.meiosisRender)(intoElement(rootTagName));
 	};
 
 	exports.renderer = renderer;
@@ -119,38 +102,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	function __export(m) {
-	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-	}
-	__export(__webpack_require__(4));
-	//# sourceMappingURL=index.js.map
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	"use strict";
-	function meiosisRender(intoElement) {
-	    var intoId = function (doc, id) {
-	        return intoElement(doc.getElementById(id));
-	    };
-	    var intoSelector = function (doc, selector) {
-	        return intoElement(doc.querySelector(selector));
-	    };
-	    return {
-	        intoElement: intoElement,
-	        intoId: intoId,
-	        intoSelector: intoSelector
-	    };
-	}
-	exports.meiosisRender = meiosisRender;
-	//# sourceMappingURL=meiosis-render.js.map
 
 /***/ }
 /******/ ])
