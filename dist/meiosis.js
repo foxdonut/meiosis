@@ -111,6 +111,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error("When more than one initialModel is used, they must all be functions.");
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
+	        var setup = config.setup;
+	        if (setup) {
+	            setup(actions);
+	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);

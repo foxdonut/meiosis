@@ -2,7 +2,7 @@ import { expect } from "chai";
 import * as m from "mithril";
 
 import { createComponent, run } from "../../lib/index";
-import { CreateComponent, Component, Emitter, Renderer, RenderRoot } from "../../lib/index";
+import { CreateComponent, Component, Emitter, Renderer, RenderRoot, Setup } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -42,9 +42,12 @@ describe("meiosis typescript", function() {
 
     let actionsRef: Actions<Proposal> = null;
 
+    const setup: Setup<Proposal> = actions => null;
+
     const Main: Component<Model, View> = createComponent({
       initialModel: { counter: 1, description: "test" },
       actions: actions,
+      setup: setup,
       view: (model: Model, actions: Actions<Proposal>) => {
         actionsRef = actions;
         return m("span", model.description + " " + model.counter);

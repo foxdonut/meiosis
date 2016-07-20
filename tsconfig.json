@@ -29,6 +29,7 @@
         "src/ready.ts",
         "src/receive.ts",
         "src/renderer.ts",
+        "src/setup.ts",
         "src/view.ts",
         "src/wire.ts"
     ],

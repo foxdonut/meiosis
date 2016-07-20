@@ -602,6 +602,20 @@ describe("meiosis", function() {
     listActionsRef.listAction();
   });
 
+  it("calls the setup function with actions", function(done) {
+    const actions = propose => ({
+      duck: () => propose("quack")
+    });
+
+    run(render, createComponent({
+      actions,
+      setup: act => {
+        expect(act.duck).to.exist;
+        done();
+      }
+    }));
+  });
+
   it("calls the ready function with propose", function(done) {
     const initial = { duck: "quack" };
 
