@@ -39,10 +39,21 @@ rendering views.</p>
 and more complex</li>
 <li>let you choose the libraries that you want to use: for example,
 <a href="https://facebook.github.io/react/">React</a>, <a href="http://jquery.com/">jQuery</a>,
-<a href="https://github.com/paldepind/snabbdom">snabbdom</a>, <a href="http://mithril.js.org">Mithril</a>,
-<a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript</li>
-<li>provide functionality out of the box, but allow you to swap implementation details if need be.</li>
+<a href="https://github.com/paldepind/snabbdom">Snabbdom</a>, <a href="http://mithril.js.org">Mithril</a>,
+<a href="http://vuejs.org">Vue</a>, <a href="http://riotjs.com">Riot</a>,
+<a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript.</li>
 </ul>
+
+<p>You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:</p>
+<ul>
+<li>Creating and maintaining a <i>single root model</i></li>
+<li>Letting you hook in functions that receive <i>proposals</i> and change the model accordingly</li>
+<li>Passing action objects to your views so that they can trigger proposals</li>
+<li>Automatically re-rendering your views</li>
+<li>Letting you define logic for actions that should automatically trigger.</li>
+</ul>
+
+<p>Meiosis is about managing the application data flow. Create components by specifying functions, and Meiosis takes care of the wiring. Every part of the process is optional, so you can specify what you need for each component.</p>
 
 <p>For documentation please refer to the
 <a href="https://www.gitbook.com/book/foxdonut/meiosis-guide/">Meiosis Guide</a>.</p>
