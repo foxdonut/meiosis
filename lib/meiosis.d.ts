@@ -7,6 +7,7 @@ export interface CreateComponent<M, V, P> {
 }
 export interface RenderRoot<M> {
     (model: M): any;
+    initialModel: M;
 }
 export interface Run<M, V, P> {
     (render: Renderer<M, V, P>, component: Component<M, V>): RenderRoot<M>;

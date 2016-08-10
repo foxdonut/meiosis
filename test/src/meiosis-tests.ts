@@ -459,6 +459,13 @@ describe("meiosis", function() {
     expect(vnode.text).to.equal("A duck says " + sound2);
   });
 
+  it("returns the combined initial model", function() {
+    createComponent({ initialModel: model => { model.duck = "quack"; return model; } });
+    const Root = createComponent({ initialModel: model => { model.color = "yellow"; return model; } });
+    const renderRoot = run(render, Root);
+    expect(renderRoot.initialModel).to.deep.equal({ duck: "quack", color: "yellow" });
+  });
+
   it("sends proposal through to the nextAction function", function(done) {
     let propose = null;
 

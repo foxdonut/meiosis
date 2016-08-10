@@ -15,6 +15,7 @@ export interface CreateComponent<M, V, P> {
 
 export interface RenderRoot<M> {
   (model: M): any;
+  initialModel: M;
 }
 
 export interface Run<M, V, P> {
@@ -130,11 +131,15 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       }
     });
 
-    const renderRoot: RenderRoot<M> = (model: M) => {
+    const renderRoot_: any = (model: M) => {
       const result: any = render(model, rootComponent, propose);
       allPostRenders.forEach((postRender: PostRender) => postRender());
       return result;
     };
+    renderRoot_.initialModel = rootModel;
+
+    const renderRoot: RenderRoot<M> = renderRoot_;
+
     rootWire.listen(renderRoot);
 
     rootWire.emit(rootModel);
