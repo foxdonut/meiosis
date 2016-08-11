@@ -14,7 +14,7 @@
         "removeComments": true,
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": true,
-        "target": "es5"
+        "target": "es2015"
     },
     "files": [
         "./meiosis-tests.ts",
