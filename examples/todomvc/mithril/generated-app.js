@@ -2377,10 +2377,21 @@
 	    var intoSelector = function (doc, selector) {
 	        return intoElement(doc.querySelector(selector));
 	    };
+	    var intoViewIds = function (doc) { return function (model, rootComponent) {
+	        var views = rootComponent(model);
+	        var _loop_1 = function(id) {
+	            var component = function (model) { return views[id]; };
+	            intoElement(doc.getElementById(id))(model, component);
+	        };
+	        for (var id in views) {
+	            _loop_1(id);
+	        }
+	    }; };
 	    return {
 	        intoElement: intoElement,
 	        intoId: intoId,
-	        intoSelector: intoSelector
+	        intoSelector: intoSelector,
+	        intoViewIds: intoViewIds
 	    };
 	}
 	exports.meiosisRender = meiosisRender;
@@ -2482,6 +2493,10 @@
 	            throw new Error("When more than one initialModel is used, they must all be functions.");
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
+	        var setup = config.setup;
+	        if (setup) {
+	            setup(actions);
+	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
@@ -2522,11 +2537,13 @@
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot = function (model) {
+	        var renderRoot_ = function (model) {
 	            var result = render(model, rootComponent, propose);
 	            allPostRenders.forEach(function (postRender) { return postRender(); });
 	            return result;
 	        };
+	        renderRoot_.initialModel = rootModel;
+	        var renderRoot = renderRoot_;
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
@@ -2658,10 +2675,12 @@
 		var tracerModel = _model.initialModel;
 		
 		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector) {
+		  var receiver = (0, _receive2.default)(tracerModel, _view.proposalView);
 		  createComponent({
-		    receive: (0, _receive2.default)(tracerModel, _view.proposalView)
+		    receive: receiver
 		  });
 		  (0, _view.initialView)(selector, renderRoot, tracerModel);
+		  receiver(renderRoot.initialModel, "initialModel");
 		};
 		
 		exports.meiosisTracer = meiosisTracer;
