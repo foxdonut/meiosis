@@ -3,3 +3,6 @@ div {
   margin-bottom: 2px;
   padding: 2px;
 }
+span, button {
+  margin-right: 4px;
+}
