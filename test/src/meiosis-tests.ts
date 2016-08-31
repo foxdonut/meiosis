@@ -649,7 +649,7 @@ test("calls the postRender function", t => {
   run(render, createComponent({
     initialModel: initial,
     view: view,
-    postRender: () => t.pass()
+    postRender: model => t.is(model, initial)
   }));
 });
 

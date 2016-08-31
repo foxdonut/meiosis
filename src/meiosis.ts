@@ -33,7 +33,7 @@ let nextId = 1;
 function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P>> = [];
-  let allPostRenders: Array<PostRender> = [];
+  let allPostRenders: Array<PostRender<M>> = [];
   let allNextActions: Array<NextActionFromActions<M, P>> = [];
 
   const createRootWire: WireCreator<M> = (adapters && adapters.rootWire) || defaultWireCreator();
@@ -93,7 +93,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       allReadies.push(() => ready(actions));
     }
 
-    const postRender: PostRender = config.postRender;
+    const postRender: PostRender<M> = config.postRender;
     if (postRender) {
       allPostRenders.push(postRender);
     }
@@ -133,7 +133,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
 
     const renderRoot_: any = (model: M) => {
       const result: any = render(model, rootComponent, propose);
-      allPostRenders.forEach((postRender: PostRender) => postRender());
+      allPostRenders.forEach((postRender: PostRender<M>) => postRender(model));
       return result;
     };
     renderRoot_.initialModel = rootModel;
