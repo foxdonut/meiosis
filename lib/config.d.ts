@@ -10,7 +10,7 @@ interface Config<M, V, P> {
     actions?: Actions<P>;
     setup?: Setup<P>;
     view?: View<M, V>;
-    postRender?: PostRender;
+    postRender?: PostRender<M>;
     ready?: Ready<P>;
     receive?: Receive<M, P>;
     nextAction?: NextAction<M, P>;
