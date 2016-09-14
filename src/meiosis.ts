@@ -52,7 +52,9 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       !config.initialModel &&
       !config.ready &&
       !config.receive &&
-      !config.view
+      !config.view &&
+      !config.postRender &&
+      !config.setup
     )) {
       throw new Error("Please specify a config when calling createComponent.");
     }

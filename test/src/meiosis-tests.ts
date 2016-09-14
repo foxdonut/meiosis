@@ -4,7 +4,6 @@ const h = require("snabbdom/h");
 
 import { init, REFUSE_PROPOSAL } from "../../lib/index";
 
-
 let createComponent = null;
 let run = null;
 let vnode = null;
@@ -288,6 +287,11 @@ test("all configs are optional, but you need something", t => {
   t.throws(() => createComponent(undefined));
   t.throws(() => createComponent(null));
   t.throws(() => createComponent({}));
+});
+
+test("allows to have only one config property", t => {
+  createComponent({ setup: () => null });
+  createComponent({ postRender: () => null });
 });
 
 test("warns when multiple initialModel components are not all functions", t => {
