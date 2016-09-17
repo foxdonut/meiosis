@@ -108,7 +108,9 @@
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
-	            !config.view)) {
+	            !config.view &&
+	            !config.postRender &&
+	            !config.setup)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
 	        if (rootModel === null) {
@@ -176,7 +178,7 @@
 	        });
 	        var renderRoot_ = function (model) {
 	            var result = render(model, rootComponent, propose);
-	            allPostRenders.forEach(function (postRender) { return postRender(); });
+	            allPostRenders.forEach(function (postRender) { return postRender(model); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
@@ -21167,7 +21169,9 @@
 		  size: 2
 		};
 		
+		var tracerContainerId = "tracerContainer";
 		var tracerId = "tracerSlider";
+		var tracerToggleId = "tracerToggle";
 		var tracerIndexId = "tracerIndex";
 		var tracerModelId = "tracerModel";
 		var tracerProposalId = "tracerProposal";
@@ -21211,15 +21215,33 @@
 		  };
 		};
 		
+		var onToggle = function onToggle(tracerContainer) {
+		  return function (evt) {
+		    var button = evt.target;
+		
+		    if (tracerContainer.style.display === "none") {
+		      tracerContainer.style.display = "block";
+		      button.innerHTML = "Hide";
+		    } else {
+		      tracerContainer.style.display = "none";
+		      button.innerHTML = "Show";
+		    }
+		  };
+		};
+		
 		var initialView = function initialView(selector, renderRoot, tracerModel) {
 		  var target = document.querySelector(selector);
 		
 		  if (target) {
-		    var viewHtml = "<div><input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40' style='display: block'></textarea>" + "<textarea id='" + tracerModelId + "' rows='20' cols='40' style='display: block'></textarea></div>";
+		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'><input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40' style='display: block'></textarea>" + "<textarea id='" + tracerModelId + "' rows='20' cols='40' style='display: block'></textarea></div>";
 		
 		    target.innerHTML = viewHtml;
+		
+		    var tracerContainer = document.getElementById(tracerContainerId);
+		
 		    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderRoot, tracerModel));
 		    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderRoot));
+		    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
 		  }
 		};
 		
@@ -22264,19 +22286,15 @@
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _actions = __webpack_require__(200);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
-	var _nextAction = __webpack_require__(201);
+	var _nextAction = __webpack_require__(200);
 
 	var _nextAction2 = _interopRequireDefault(_nextAction);
 
-	var _receive = __webpack_require__(202);
+	var _receive = __webpack_require__(201);
 
 	var _receive2 = _interopRequireDefault(_receive);
 
-	var _view = __webpack_require__(203);
+	var _view = __webpack_require__(202);
 
 	var _view2 = _interopRequireDefault(_view);
 
@@ -22295,8 +22313,8 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	//import view from "./view";
-	var entryComponent = (0, _meiosis.createComponent)((0, _nestComponent2.default)((0, _main2.default)(_actions2.default), "store.entry"));
-	var dateComponent = (0, _meiosis.createComponent)((0, _nestComponent2.default)((0, _main4.default)(_actions2.default), "store.date"));
+	var entryComponent = (0, _meiosis.createComponent)((0, _nestComponent2.default)(_main2.default, "store.entry"));
+	var dateComponent = (0, _meiosis.createComponent)((0, _nestComponent2.default)(_main4.default, "store.date"));
 
 	var nestTemperatureComponent = function nestTemperatureComponent(path, id, label) {
 	  return (0, _meiosis.createComponent)((0, _nestComponent2.default)((0, _main6.default)(id, label), path));
@@ -22368,9 +22386,14 @@
 	})(this, function(){
 	  'use strict';
 
-	  var
-	    toStr = Object.prototype.toString,
-	    _hasOwnProperty = Object.prototype.hasOwnProperty;
+	  var toStr = Object.prototype.toString;
+	  function hasOwnProperty(obj, prop) {
+	    if(obj == null) {
+	      return false
+	    }
+	    //to handle objects with null prototypes (too edge case?)
+	    return Object.prototype.hasOwnProperty.call(obj, prop)
+	  }
 
 	  function isEmpty(value){
 	    if (!value) {
@@ -22380,7 +22403,7 @@
 	        return true;
 	    } else if (typeof value !== 'string') {
 	        for (var i in value) {
-	            if (_hasOwnProperty.call(value, i)) {
+	            if (hasOwnProperty(value, i)) {
 	                return false;
 	            }
 	        }
@@ -22433,7 +22456,7 @@
 	    };
 
 	    function getShallowProperty(obj, prop) {
-	      if (options.includeInheritedProps || (typeof prop === 'number' && Array.isArray(obj)) || _hasOwnProperty.call(obj, prop)) {
+	      if (options.includeInheritedProps || (typeof prop === 'number' && Array.isArray(obj)) || hasOwnProperty(obj, prop)) {
 	        return obj[prop];
 	      }
 	    }
@@ -22470,10 +22493,6 @@
 	    }
 
 	    objectPath.has = function (obj, path) {
-	      if (obj == null) {
-	        return false;
-	      }
-
 	      if (typeof path === 'number') {
 	        path = [path];
 	      } else if (typeof path === 'string') {
@@ -22481,13 +22500,14 @@
 	      }
 
 	      if (!path || path.length === 0) {
-	        return false;
+	        return !!obj;
 	      }
 
 	      for (var i = 0; i < path.length; i++) {
 	        var j = getKey(path[i]);
+
 	        if((typeof j === 'number' && isArray(obj) && j < obj.length) ||
-	          (options.includeInheritedProps ? (j in Object(obj)) : _hasOwnProperty.call(obj, j))) {
+	          (options.includeInheritedProps ? (j in Object(obj)) : hasOwnProperty(obj, j))) {
 	          obj = obj[j];
 	        } else {
 	          return false;
@@ -22538,7 +22558,7 @@
 	        value.length = 0;
 	      } else if (isObject(value)) {
 	        for (i in value) {
-	          if (_hasOwnProperty.call(value, i)) {
+	          if (hasOwnProperty(value, i)) {
 	            delete value[i];
 	          }
 	        }
@@ -22668,55 +22688,53 @@
 
 /***/ },
 /* 200 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-
-	var _unionType = __webpack_require__(173);
-
-	var _unionType2 = _interopRequireDefault(_unionType);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Action = (0, _unionType2.default)({
-	  Validate: [Object],
-	  Save: [Object]
-	});
-
-	exports.default = Action;
-
-/***/ },
-/* 201 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _actions = __webpack_require__(200);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	var nextAction = function nextAction(model, proposal, propose) {
-	  _actions2.default.case({
+	  proposal.case({
 	    Validate: function Validate() {
 	      if (!model.store.entry.errors && !model.store.date.errors) {
-	        propose(_actions2.default.Save(model));
+	        propose(Action.Save(model));
 	      }
 	    },
 	    _: function _() {}
-	  }, proposal);
+	  });
 	};
 
 	exports.default = nextAction;
+
+/***/ },
+/* 201 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var receive = function receive(model, proposal) {
+	  proposal.case({
+	    Save: function Save(save) {
+	      var air = save.store.temperature.air;
+	      var water = save.store.temperature.water;
+
+	      model.store.saved = "Entry #" + save.store.entry.value + " on " + save.store.date.value + ":" + " Air: " + air.value + " \xB0" + air.units + " Water: " + water.value + " \xB0" + water.units;
+
+	      model.store.entry.value = "";
+	      model.store.date.value = "";
+	    },
+	    _: function _() {}
+	  });
+
+	  return model;
+	};
+
+	exports.default = receive;
 
 /***/ },
 /* 202 */
@@ -22728,46 +22746,11 @@
 	  value: true
 	});
 
-	var _actions = __webpack_require__(200);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var receive = function receive(model, proposal) {
-	  _actions2.default.case({
-	    Save: function Save(save) {
-	      var air = save.store.temperature.air;
-	      var water = save.store.temperature.water;
-
-	      model.store.saved = "Entry #" + save.store.entry.value + " on " + save.store.date.value + ":" + " Air: " + air.value + " \xB0" + air.units + " Water: " + water.value + " \xB0" + water.units;
-
-	      model.store.entry.value = "";
-	      model.store.date.value = "";
-	    },
-	    _: function _() {}
-	  }, proposal);
-
-	  return model;
-	};
-
-	exports.default = receive;
-
-/***/ },
-/* 203 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(204);
+	var _react = __webpack_require__(203);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _actions = __webpack_require__(200);
+	var _actions = __webpack_require__(209);
 
 	var _actions2 = _interopRequireDefault(_actions);
 
@@ -22804,16 +22787,16 @@
 	exports.default = view;
 
 /***/ },
-/* 204 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(205);
+	module.exports = __webpack_require__(204);
 
 
 /***/ },
-/* 205 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22833,14 +22816,14 @@
 
 	var ReactChildren = __webpack_require__(104);
 	var ReactComponent = __webpack_require__(136);
-	var ReactPureComponent = __webpack_require__(206);
+	var ReactPureComponent = __webpack_require__(205);
 	var ReactClass = __webpack_require__(135);
-	var ReactDOMFactories = __webpack_require__(207);
+	var ReactDOMFactories = __webpack_require__(206);
 	var ReactElement = __webpack_require__(97);
 	var ReactPropTypes = __webpack_require__(96);
 	var ReactVersion = __webpack_require__(164);
 
-	var onlyChild = __webpack_require__(209);
+	var onlyChild = __webpack_require__(208);
 	var warning = __webpack_require__(22);
 
 	var createElement = ReactElement.createElement;
@@ -22848,7 +22831,7 @@
 	var cloneElement = ReactElement.cloneElement;
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(208);
+	  var ReactElementValidator = __webpack_require__(207);
 	  createElement = ReactElementValidator.createElement;
 	  createFactory = ReactElementValidator.createFactory;
 	  cloneElement = ReactElementValidator.cloneElement;
@@ -22908,7 +22891,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 206 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22955,7 +22938,7 @@
 	module.exports = ReactPureComponent;
 
 /***/ },
-/* 207 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22980,7 +22963,7 @@
 	 */
 	var createDOMFactory = ReactElement.createFactory;
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(208);
+	  var ReactElementValidator = __webpack_require__(207);
 	  createDOMFactory = ReactElementValidator.createFactory;
 	}
 
@@ -23131,7 +23114,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 208 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23365,7 +23348,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 209 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23409,6 +23392,29 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
+/* 209 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _unionType = __webpack_require__(173);
+
+	var _unionType2 = _interopRequireDefault(_unionType);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Action = (0, _unionType2.default)({
+	  Validate: [Object],
+	  Save: [Object]
+	});
+
+	exports.default = Action;
+
+/***/ },
 /* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -23426,18 +23432,16 @@
 
 	var _receive2 = _interopRequireDefault(_receive);
 
-	var _view = __webpack_require__(217);
+	var _view = __webpack_require__(216);
 
 	var _view2 = _interopRequireDefault(_view);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var entryConfig = function entryConfig(MainAction) {
-	  return {
-	    initialModel: _model2.default,
-	    view: _view2.default,
-	    receive: (0, _receive2.default)(MainAction)
-	  };
+	var entryConfig = {
+	  initialModel: _model2.default,
+	  view: _view2.default,
+	  receive: _receive2.default
 	};
 	//import view from "./view";
 	exports.default = entryConfig;
@@ -23472,10 +23476,6 @@
 
 	var _validate2 = _interopRequireDefault(_validate);
 
-	var _actions = __webpack_require__(216);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var validation = {
@@ -23489,24 +23489,18 @@
 	  }
 	};
 
-	var receive = function receive(FormAction) {
-	  return function (model, proposal) {
-	    _actions2.default.case({
-	      EditEntryValue: function EditEntryValue(value) {
-	        return model.value = value;
-	      },
-	      _: function _() {}
-	    }, proposal);
+	var receive = function receive(model, proposal) {
+	  proposal.case({
+	    EditEntryValue: function EditEntryValue(value) {
+	      return model.value = value;
+	    },
+	    Validate: function Validate() {
+	      return model.errors = (0, _validate2.default)(model, validation);
+	    },
+	    _: function _() {}
+	  });
 
-	    FormAction.case({
-	      Validate: function Validate() {
-	        model.errors = (0, _validate2.default)(model, validation);
-	      },
-	      _: function _() {}
-	    }, proposal);
-
-	    return model;
-	  };
+	  return model;
 	};
 
 	exports.default = receive;
@@ -24689,29 +24683,7 @@
 	  value: true
 	});
 
-	var _unionType = __webpack_require__(173);
-
-	var _unionType2 = _interopRequireDefault(_unionType);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Action = (0, _unionType2.default)({
-	  EditEntryValue: [String]
-	});
-
-	exports.default = Action;
-
-/***/ },
-/* 217 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(204);
+	var _react = __webpack_require__(203);
 
 	var _react2 = _interopRequireDefault(_react);
 
@@ -24719,7 +24691,7 @@
 
 	var _objectPath2 = _interopRequireDefault(_objectPath);
 
-	var _actions = __webpack_require__(216);
+	var _actions = __webpack_require__(217);
 
 	var _actions2 = _interopRequireDefault(_actions);
 
@@ -24756,6 +24728,28 @@
 	exports.default = view;
 
 /***/ },
+/* 217 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _unionType = __webpack_require__(173);
+
+	var _unionType2 = _interopRequireDefault(_unionType);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Action = (0, _unionType2.default)({
+	  EditEntryValue: [String]
+	});
+
+	exports.default = Action;
+
+/***/ },
 /* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -24773,18 +24767,16 @@
 
 	var _receive2 = _interopRequireDefault(_receive);
 
-	var _view = __webpack_require__(222);
+	var _view = __webpack_require__(221);
 
 	var _view2 = _interopRequireDefault(_view);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var dateConfig = function dateConfig(MainAction) {
-	  return {
-	    initialModel: _model2.default,
-	    view: _view2.default,
-	    receive: (0, _receive2.default)(MainAction)
-	  };
+	var dateConfig = {
+	  initialModel: _model2.default,
+	  view: _view2.default,
+	  receive: _receive2.default
 	};
 	//import view from "./view";
 	exports.default = dateConfig;
@@ -24819,10 +24811,6 @@
 
 	var _validate2 = _interopRequireDefault(_validate);
 
-	var _actions = __webpack_require__(221);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_validate2.default.extend(_validate2.default.validators.datetime, {
@@ -24841,24 +24829,18 @@
 	  }
 	};
 
-	var receive = function receive(FormAction) {
-	  return function (model, proposal) {
-	    _actions2.default.case({
-	      EditDateValue: function EditDateValue(value) {
-	        return model.value = value;
-	      },
-	      _: function _() {}
-	    }, proposal);
+	var receive = function receive(model, proposal) {
+	  proposal.case({
+	    EditDateValue: function EditDateValue(value) {
+	      return model.value = value;
+	    },
+	    Validate: function Validate() {
+	      return model.errors = (0, _validate2.default)(model, validation);
+	    },
+	    _: function _() {}
+	  });
 
-	    FormAction.case({
-	      Validate: function Validate() {
-	        model.errors = (0, _validate2.default)(model, validation);
-	      },
-	      _: function _() {}
-	    }, proposal);
-
-	    return model;
-	  };
+	  return model;
 	};
 
 	exports.default = receive;
@@ -24873,29 +24855,7 @@
 	  value: true
 	});
 
-	var _unionType = __webpack_require__(173);
-
-	var _unionType2 = _interopRequireDefault(_unionType);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Action = (0, _unionType2.default)({
-	  EditDateValue: [String]
-	});
-
-	exports.default = Action;
-
-/***/ },
-/* 222 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(204);
+	var _react = __webpack_require__(203);
 
 	var _react2 = _interopRequireDefault(_react);
 
@@ -24903,7 +24863,7 @@
 
 	var _objectPath2 = _interopRequireDefault(_objectPath);
 
-	var _actions = __webpack_require__(221);
+	var _actions = __webpack_require__(222);
 
 	var _actions2 = _interopRequireDefault(_actions);
 
@@ -24940,6 +24900,28 @@
 	exports.default = view;
 
 /***/ },
+/* 222 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _unionType = __webpack_require__(173);
+
+	var _unionType2 = _interopRequireDefault(_unionType);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Action = (0, _unionType2.default)({
+	  EditDateValue: [String]
+	});
+
+	exports.default = Action;
+
+/***/ },
 /* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -24957,7 +24939,7 @@
 
 	var _receive2 = _interopRequireDefault(_receive);
 
-	var _view = __webpack_require__(227);
+	var _view = __webpack_require__(226);
 
 	var _view2 = _interopRequireDefault(_view);
 
@@ -24992,24 +24974,17 @@
 
 /***/ },
 /* 225 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-
-	var _actions = __webpack_require__(226);
-
-	var _actions2 = _interopRequireDefault(_actions);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	var receive = function receive(id) {
 	  return function (model, proposal) {
 	    if (proposal.id === id) {
-	      _actions2.default.case({
+	      proposal.case({
 	        Increase: function Increase(amount) {
 	          model.value = model.value + amount;
 	        },
@@ -25026,7 +25001,7 @@
 	          }
 	        },
 	        _: function _() {}
-	      }, proposal.action);
+	      });
 	    }
 
 	    return model;
@@ -25045,35 +25020,11 @@
 	  value: true
 	});
 
-	var _unionType = __webpack_require__(173);
-
-	var _unionType2 = _interopRequireDefault(_unionType);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Action = (0, _unionType2.default)({
-	  Increase: [Number],
-	  Decrease: [Number],
-	  ChangeUnits: []
-	});
-
-	exports.default = Action;
-
-/***/ },
-/* 227 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(204);
+	var _react = __webpack_require__(203);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _actions = __webpack_require__(226);
+	var _actions = __webpack_require__(227);
 
 	var _actions2 = _interopRequireDefault(_actions);
 
@@ -25081,14 +25032,17 @@
 
 	var view = function view(id, label) {
 	  return function (model, propose) {
+	    var withId = function withId(id, obj) {
+	      obj.id = id;return obj;
+	    };
 	    var onChangeUnits = function onChangeUnits(_evt) {
-	      return propose({ id: id, action: _actions2.default.ChangeUnits() });
+	      return propose(withId(id, _actions2.default.ChangeUnits()));
 	    };
 	    var onIncrease = function onIncrease(_evt) {
-	      return propose({ id: id, action: _actions2.default.Increase(1) });
+	      return propose(withId(id, _actions2.default.Increase(1)));
 	    };
 	    var onDecrease = function onDecrease(_evt) {
-	      return propose({ id: id, action: _actions2.default.Decrease(1) });
+	      return propose(withId(id, _actions2.default.Decrease(1)));
 	    };
 
 	    return _react2.default.createElement(
@@ -25128,6 +25082,30 @@
 	};
 
 	exports.default = view;
+
+/***/ },
+/* 227 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _unionType = __webpack_require__(173);
+
+	var _unionType2 = _interopRequireDefault(_unionType);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Action = (0, _unionType2.default)({
+	  Increase: [Number],
+	  Decrease: [Number],
+	  ChangeUnits: []
+	});
+
+	exports.default = Action;
 
 /***/ }
 /******/ ]);

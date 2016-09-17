@@ -12,7 +12,6 @@
         <div><span>React Counter: {model.counter}</span></div>
         <div>
           <button className="btn btn-sm btn-primary" onClick={onInc}>+ 2</button>
-          <span> </span>
           <button className="btn btn-sm btn-default" onClick={onDecr}>- 2</button>
         </div>
       </div>
