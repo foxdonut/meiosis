@@ -6,3 +6,13 @@ div {
 span, button {
   margin-right: 4px;
 }
+span.has-error {
+  margin-right: 0;
+}
+.modal-header {
+  color: #ffffff;
+  background-color: #2c3e50;
+}
+#tracer {
+  font-size: 8pt;
+}
