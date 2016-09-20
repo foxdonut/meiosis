@@ -167,6 +167,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
+	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
+	        if (devtool) {
+	            devtool.setup(createComponent, renderRoot);
+	        }
 	        return renderRoot;
 	    };
 	    return {

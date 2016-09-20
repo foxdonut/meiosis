@@ -147,6 +147,11 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     rootWire.emit(rootModel);
     allReadies.forEach((ready: Function) => ready());
 
+    const devtool: any = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
+    if (devtool) {
+      devtool.setup(createComponent, renderRoot);
+    }
+
     return renderRoot;
   };
 
