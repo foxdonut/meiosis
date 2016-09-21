@@ -169,7 +169,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
 	        if (devtool) {
-	            devtool.setup(createComponent, renderRoot);
+	            console.log("meiosis initializing devtool");
+	            createComponent({
+	                receive: function (model, proposal) {
+	                    console.log("meiosis posting MEIOSIS_RECEIVE");
+	                    window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    return model;
+	                }
+	            });
+	            window.addEventListener("message", function (evt) {
+	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+	                    console.log("meiosis received MEIOSIS_RENDER_ROOT");
+	                    renderRoot(evt.data.model);
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
+	                    console.log("meiosis received MEIOSIS_INITIAL_MODEL");
+	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: rootModel }, "*");
+	                }
+	                else {
+	                    console.log("meiosis received:", evt);
+	                }
+	            });
 	        }
 	        return renderRoot;
 	    };
