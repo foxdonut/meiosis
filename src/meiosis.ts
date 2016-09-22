@@ -30,6 +30,8 @@ export interface MeiosisApp<M, V, P> {
 const REFUSE_PROPOSAL = {};
 let nextId = 1;
 
+const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
+
 function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P>> = [];
@@ -150,18 +152,41 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     const devtool: any = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
     if (devtool) {
       console.log("meiosis initializing devtool");
+      const initialModel = copy(rootModel);
+      const bufferedReceives: Array<any> = [];
+      let devtoolInitialized: boolean = false;
+
       createComponent({
         receive: (model, proposal) => {
-          window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+          if (devtoolInitialized) {
+            console.log("meiosis devtool initialized, sending receive");
+            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+          }
+          else {
+            console.log("meiosis devtool not initialized, buffering receive");
+            bufferedReceives.push({model: copy(model), proposal});
+          }
           return model;
         }
       });
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+          console.log("meiosis render root from devtool");
           renderRoot(evt.data.model);
         }
         else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
-          window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: rootModel }, "*");
+          console.log("meiosis received devtool initialize");
+          window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel }, "*");
+          devtoolInitialized = true;
+
+          for (let i: number = 0; i < bufferedReceives.length; i++) {
+            const { model, proposal }: any = bufferedReceives[i];
+            console.log("meiosis sending buffered receive");
+            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+          }
+        }
+        else {
+          console.log("meiosis unknown message:", evt);
         }
       });
     }

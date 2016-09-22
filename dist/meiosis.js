@@ -71,6 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var REFUSE_PROPOSAL = {};
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
+	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function init(adapters) {
 	    var allReceives = [];
 	    var allReadies = [];
@@ -170,18 +171,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
 	        if (devtool) {
 	            console.log("meiosis initializing devtool");
+	            var initialModel_1 = copy(rootModel);
+	            var bufferedReceives_1 = [];
+	            var devtoolInitialized_1 = false;
 	            createComponent({
 	                receive: function (model, proposal) {
-	                    window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    if (devtoolInitialized_1) {
+	                        console.log("meiosis devtool initialized, sending receive");
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                    else {
+	                        console.log("meiosis devtool not initialized, buffering receive");
+	                        bufferedReceives_1.push({ model: copy(model), proposal: proposal });
+	                    }
 	                    return model;
 	                }
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+	                    console.log("meiosis render root from devtool");
 	                    renderRoot(evt.data.model);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
-	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: rootModel }, "*");
+	                    console.log("meiosis received devtool initialize");
+	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
+	                    devtoolInitialized_1 = true;
+	                    for (var i = 0; i < bufferedReceives_1.length; i++) {
+	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
+	                        console.log("meiosis sending buffered receive");
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                }
+	                else {
+	                    console.log("meiosis unknown message:", evt);
 	                }
 	            });
 	        }
