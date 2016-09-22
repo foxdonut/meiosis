@@ -171,6 +171,9 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
         }
       });
     }
+    else {
+      console.log("meiosis no devtool");
+    }
 
     return renderRoot;
   };

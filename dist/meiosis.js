@@ -191,6 +191,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 	        }
+	        else {
+	            console.log("meiosis no devtool");
+	        }
 	        return renderRoot;
 	    };
 	    return {
