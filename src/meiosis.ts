@@ -152,22 +152,16 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       console.log("meiosis initializing devtool");
       createComponent({
         receive: (model, proposal) => {
-          console.log("meiosis posting MEIOSIS_RECEIVE");
           window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
           return model;
         }
       });
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-          console.log("meiosis received MEIOSIS_RENDER_ROOT");
           renderRoot(evt.data.model);
         }
         else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
-          console.log("meiosis received MEIOSIS_INITIAL_MODEL");
           window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: rootModel }, "*");
-        }
-        else {
-          console.log("meiosis received:", evt);
         }
       });
     }
