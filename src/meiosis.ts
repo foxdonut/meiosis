@@ -149,9 +149,10 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     rootWire.emit(rootModel);
     allReadies.forEach((ready: Function) => ready());
 
+    const ts: any = () => new Date().toISOString().substring(11);
     const devtool: any = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
     if (devtool) {
-      console.log("meiosis initializing devtool");
+      console.log(ts(), "meiosis initializing devtool");
       const initialModel = copy(rootModel);
       const bufferedReceives: Array<any> = [];
       let devtoolInitialized: boolean = false;
@@ -159,11 +160,11 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       createComponent({
         receive: (model, proposal) => {
           if (devtoolInitialized) {
-            console.log("meiosis devtool initialized, sending receive");
+            console.log(ts(), "meiosis devtool initialized, sending receive");
             window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
           }
           else {
-            console.log("meiosis devtool not initialized, buffering receive");
+            console.log(ts(), "meiosis devtool not initialized, buffering receive");
             bufferedReceives.push({model: copy(model), proposal});
           }
           return model;
@@ -171,27 +172,24 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       });
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-          console.log("meiosis render root from devtool");
+          console.log(ts(), "meiosis render root from devtool");
           renderRoot(evt.data.model);
         }
         else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
-          console.log("meiosis received devtool initialize");
+          console.log(ts(), "meiosis received devtool initialize");
           window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel }, "*");
           devtoolInitialized = true;
 
           for (let i: number = 0; i < bufferedReceives.length; i++) {
             const { model, proposal }: any = bufferedReceives[i];
-            console.log("meiosis sending buffered receive");
+            console.log(ts(), "meiosis sending buffered receive");
             window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
           }
-        }
-        else {
-          console.log("meiosis unknown message:", evt);
         }
       });
     }
     else {
-      console.log("meiosis no devtool");
+      console.log(ts(), "meiosis no devtool");
     }
 
     return renderRoot;
