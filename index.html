@@ -32,18 +32,32 @@ independent, manageable, and testable parts, <i>while letting you keep using the
 already love</i>. Meiosis manages the data flow and lets you choose whatever you like for
 rendering views.</p>
 
-<p>The key principles of Meiosis are:</p>
-
-<ul>
-<li>remain small and simple, allowing you to build components with minimal effort</li>
-<li>provide an architecture to structure your code that scales well as your application gets larger
-and more complex</li>
-<li>let you choose the libraries that you want to use: for example,
-<a href="https://facebook.github.io/react/">React</a>, <a href="http://jquery.com/">jQuery</a>,
-<a href="https://github.com/paldepind/snabbdom">Snabbdom</a>, <a href="http://mithril.js.org">Mithril</a>,
+<p>For example, you can use
+<a href="https://facebook.github.io/react/">React</a>, <a href="https://github.com/trueadm/inferno">Inferno</a>,
+<a href="http://jquery.com/">jQuery</a>, <a href="https://github.com/paldepind/snabbdom">Snabbdom</a>,
+<a href="http://mithril.js.org">Mithril</a>,
 <a href="http://vuejs.org">Vue</a>, <a href="http://riotjs.com">Riot</a>,
-<a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript.</li>
-</ul>
+<a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript.
+</p>
+
+<p>Developing a web application with Meiosis involves three simple concepts:</p>
+
+<ol>
+  <li>
+    Have a single model. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
+  </li>
+  <li>
+    Write the view as a function of the model.
+  </li>
+  <li>
+    Have a way to <i>propose</i> changes to the model. After the changes have been accepted,
+    Meiosis re-renders the view by calling the view function with the new model.
+   </li>
+</ol>
+
+<p>Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort,
+providing an architecture to structure your code that scales well as your application gets larger and more complex.
+</p>
 
 <p>You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:</p>
 <ul>
@@ -54,7 +68,9 @@ and more complex</li>
 <li>Letting you define logic for actions that should automatically trigger.</li>
 </ul>
 
-<p>Meiosis is about managing the application data flow. Create components by specifying functions, and Meiosis takes care of the wiring. Every part of the process is optional, so you can specify what you need for each component.</p>
+<p>Meiosis is about managing the application data flow. Create components by specifying functions,
+and Meiosis takes care of the wiring. Every part of the process is optional,
+so you can specify what you need for each component.</p>
 
 <p>For documentation please refer to the
 <a href="https://www.gitbook.com/book/foxdonut/meiosis-guide/">Meiosis Guide</a>.</p>
