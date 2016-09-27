@@ -18,7 +18,7 @@ or no libraries at all and just plain vanilla JavaScript.
 
 Developing a web application with Meiosis involves three simple concepts:
 
-1. Have a single model. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
+1. Have a single model object. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
 2. Write the view as a function of the model.
 3. Have a way to _propose_ changes to the model. After the changes have been accepted, Meiosis re-renders the view by
 calling the view function with the new model.
@@ -26,9 +26,21 @@ calling the view function with the new model.
 Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort, providing
 an architecture to structure your code that scales well as your application gets larger and more complex.
 
+You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:
+
+- Creating and maintaining a _single root model_
+- Letting you hook in functions that receive _proposals_ and change the model accordingly
+- Passing action objects to your views so that they can trigger proposals
+- Automatically re-rendering your views
+- Letting you define logic for actions that should automatically trigger.
+
+Meiosis is about managing the application data flow. Create components by specifying functions, and Meiosis takes care of the wiring. Every part of the process is optional, so you can specify what you need for each component.
+
 For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
 
-Examples: https://github.com/foxdonut/meiosis-examples
+Try out the examples online: http://meiosis.js.org/example-index.html
+
+Example code: https://github.com/foxdonut/meiosis-examples
 
 Please post questions and suggestions as Github issues on the [meiosis repository](https://github.com/foxdonut/meiosis).
 
