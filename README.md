@@ -6,21 +6,25 @@ http://meiosis.js.org
 
 ## Do you Mei-O?
 
-**Meiosis** is a library and an architecture pattern for dividing a web application into small,
+**Meiosis** is a library and an architecture pattern for dividing web applications into small,
 independent, manageable, and testable parts,
 _while letting you keep using the tools that you already love._ Meiosis manages the data flow and
 lets you choose whatever you like for rendering views.
 
-The key principles of Meiosis are:
-- remain small, with no dependencies, and simple, allowing you to build components with minimal
-effort
-- provide an architecture to structure your code that scales well as your application gets larger
-and more complex
-- let you choose the libraries that you want to use: for example,
-[React](https://facebook.github.io/react/), [jQuery](http://jquery.com/),
-[snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org),
-[Handlebars](http://handlebarsjs.com), or no libraries at all and just plain vanilla JavaScript
-- provide functionality out of the box, but allow you to swap implementation details if need be.
+For example, you can use [React](https://facebook.github.io/react/), [Inferno](https://github.com/trueadm/inferno),
+[jQuery](http://jquery.com/), [snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org),
+[Vue](http://vuejs.org), [Riot](http://riotjs.com), [Handlebars](http://handlebarsjs.com),
+or no libraries at all and just plain vanilla JavaScript.
+
+Developing a web application with Meiosis involves three simple concepts:
+
+1. Have a single model. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
+2. Write the view as a function of the model.
+3. Have a way to _propose_ changes to the model. After the changes have been accepted, Meiosis re-renders the view by
+calling the view function with the new model.
+
+Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort, providing
+an architecture to structure your code that scales well as your application gets larger and more complex.
 
 For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
 
