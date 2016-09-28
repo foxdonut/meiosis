@@ -1079,7 +1079,7 @@
 /***/ function(module, exports) {
 
 	/**
-	 * Sinon.JS 1.17.5, 2016/07/26
+	 * Sinon.JS 1.17.6, 2016/09/19
 	 *
 	 * @author Christian Johansen (christian@cjohansen.no)
 	 * @author Contributors: https://github.com/cjohansen/Sinon.JS/blob/master/AUTHORS
@@ -2419,6 +2419,13 @@
 	
 	            var error, wrappedMethod, i;
 	
+	            function simplePropertyAssignment() {
+	                wrappedMethod = object[property];
+	                checkWrappedMethod(wrappedMethod);
+	                object[property] = method;
+	                method.displayName = property;
+	            }
+	
 	            // IE 8 does not support hasOwnProperty on the window object and Firefox has a problem
 	            // when using hasOwn.call on objects from other frames.
 	            var owned = object.hasOwnProperty ? object.hasOwnProperty(property) : hasOwn.call(object, property);
@@ -2451,11 +2458,17 @@
 	                    mirrorProperties(methodDesc[types[i]], wrappedMethodDesc[types[i]]);
 	                }
 	                Object.defineProperty(object, property, methodDesc);
+	
+	                // catch failing assignment
+	                // this is the converse of the check in `.restore` below
+	                if ( typeof method === "function" && object[property] !== method ) {
+	                    // correct any wrongdoings caused by the defineProperty call above,
+	                    // such as adding new items (if object was a Storage object)
+	                    delete object[property];
+	                    simplePropertyAssignment();
+	                }
 	            } else {
-	                wrappedMethod = object[property];
-	                checkWrappedMethod(wrappedMethod);
-	                object[property] = method;
-	                method.displayName = property;
+	                simplePropertyAssignment();
 	            }
 	
 	            method.displayName = property;
@@ -6996,6 +7009,10 @@
 	            },
 	
 	            restore: function () {
+	                if (arguments.length) {
+	                    throw new Error("sandbox.restore() does not take any parameters. Perhaps you meant stub.restore()");
+	                }
+	
 	                sinon.collection.restore.apply(this, arguments);
 	                this.restoreContext();
 	            },
@@ -7547,6 +7564,7 @@
 	var REFUSE_PROPOSAL = {};
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
+	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function init(adapters) {
 	    var allReceives = [];
 	    var allReadies = [];
@@ -7643,6 +7661,36 @@
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
+	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
+	        if (devtool) {
+	            var initialModel_1 = copy(rootModel);
+	            var bufferedReceives_1 = [];
+	            var devtoolInitialized_1 = false;
+	            createComponent({
+	                receive: function (model, proposal) {
+	                    if (devtoolInitialized_1) {
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                    else {
+	                        bufferedReceives_1.push({ model: copy(model), proposal: proposal });
+	                    }
+	                    return model;
+	                }
+	            });
+	            window.addEventListener("message", function (evt) {
+	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+	                    renderRoot(evt.data.model);
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
+	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
+	                    devtoolInitialized_1 = true;
+	                    for (var i = 0; i < bufferedReceives_1.length; i++) {
+	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                }
+	            });
+	        }
 	        return renderRoot;
 	    };
 	    return {
@@ -9971,13 +10019,17 @@
 		
 		var tracerModel = _model.initialModel;
 		
-		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector) {
+		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector, horizontal) {
 		  var receiver = (0, _receive2.default)(tracerModel, _view.proposalView);
 		  createComponent({
 		    receive: receiver
 		  });
-		  (0, _view.initialView)(selector, renderRoot, tracerModel);
+		  (0, _view.initialView)(selector, renderRoot, tracerModel, horizontal);
 		  receiver(renderRoot.initialModel, "initialModel");
+		
+		  return { reset: function reset() {
+		      return (0, _view.reset)(tracerModel);
+		    } };
 		};
 		
 		exports.meiosisTracer = meiosisTracer;
@@ -10007,7 +10059,7 @@
 		Object.defineProperty(exports, "__esModule", {
 		  value: true
 		});
-		exports.proposalView = exports.initialView = undefined;
+		exports.reset = exports.proposalView = exports.initialView = undefined;
 		
 		var _jsonFormat = __webpack_require__(4);
 		
@@ -10023,6 +10075,7 @@
 		var tracerContainerId = "tracerContainer";
 		var tracerId = "tracerSlider";
 		var tracerToggleId = "tracerToggle";
+		var tracerResetId = "tracerReset";
 		var tracerIndexId = "tracerIndex";
 		var tracerModelId = "tracerModel";
 		var tracerProposalId = "tracerProposal";
@@ -10080,11 +10133,26 @@
 		  };
 		};
 		
-		var initialView = function initialView(selector, renderRoot, tracerModel) {
+		var onReset = function onReset(tracerModel) {
+		  return function () {
+		    reset(tracerModel);
+		  };
+		};
+		
+		var reset = function reset(tracerModel) {
+		  tracerModel.tracerStates.length = 0;
+		  tracerModel.tracerIndex = 0;
+		  proposalView({ model: {}, proposal: {} }, tracerModel);
+		};
+		
+		var initialView = function initialView(selector, renderRoot, tracerModel, horizontal) {
 		  var target = document.querySelector(selector);
 		
 		  if (target) {
-		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'><input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40' style='display: block'></textarea>" + "<textarea id='" + tracerModelId + "' rows='20' cols='40' style='display: block'></textarea></div>";
+		    var modelRows = horizontal ? "5" : "20";
+		    var divStyle = horizontal ? " style='float: left'" : "";
+		
+		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='" + modelRows + "' cols='40'></textarea></div></div>";
 		
 		    target.innerHTML = viewHtml;
 		
@@ -10093,11 +10161,13 @@
 		    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderRoot, tracerModel));
 		    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderRoot));
 		    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
+		    document.getElementById(tracerResetId).addEventListener("click", onReset(tracerModel));
 		  }
 		};
 		
 		exports.initialView = initialView;
 		exports.proposalView = proposalView;
+		exports.reset = reset;
 	
 	/***/ },
 	/* 4 */

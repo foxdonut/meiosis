@@ -80,6 +80,7 @@
 	var REFUSE_PROPOSAL = {};
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
+	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function init(adapters) {
 	    var allReceives = [];
 	    var allReadies = [];
@@ -176,6 +177,36 @@
 	        rootWire.listen(renderRoot);
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
+	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
+	        if (devtool) {
+	            var initialModel_1 = copy(rootModel);
+	            var bufferedReceives_1 = [];
+	            var devtoolInitialized_1 = false;
+	            createComponent({
+	                receive: function (model, proposal) {
+	                    if (devtoolInitialized_1) {
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                    else {
+	                        bufferedReceives_1.push({ model: copy(model), proposal: proposal });
+	                    }
+	                    return model;
+	                }
+	            });
+	            window.addEventListener("message", function (evt) {
+	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+	                    renderRoot(evt.data.model);
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
+	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
+	                    devtoolInitialized_1 = true;
+	                    for (var i = 0; i < bufferedReceives_1.length; i++) {
+	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
+	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
+	                    }
+	                }
+	            });
+	        }
 	        return renderRoot;
 	    };
 	    return {
