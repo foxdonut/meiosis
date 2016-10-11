@@ -1,4 +1,5 @@
 export * from "./meiosis";
+export * from "./actions";
 export * from "./adapters";
 export * from "./component";
 export * from "./config";

@@ -1,6 +1,6 @@
 import { WireCreator } from "./wire";
 
-interface Adapters<M, V, P> {
+interface Adapters<M, P> {
   rootWire?: WireCreator<M>;
   componentWire?: WireCreator<P>;
 }

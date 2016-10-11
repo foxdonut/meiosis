@@ -16,22 +16,9 @@
         "suppressImplicitAnyIndexErrors": true,
         "target": "es5"
     },
-    "files": [
+    "include": [
         "typings/index.d.ts",
-        "src/actions.ts",
-        "src/adapters.ts",
-        "src/component.ts",
-        "src/config.ts",
-        "src/index.ts",
-        "src/meiosis.ts",
-        "src/nextAction.ts",
-        "src/postRender.ts",
-        "src/ready.ts",
-        "src/receive.ts",
-        "src/renderer.ts",
-        "src/setup.ts",
-        "src/view.ts",
-        "src/wire.ts"
+        "src/*.ts"
     ],
     "compileOnSave": false,
     "buildOnSave": false,

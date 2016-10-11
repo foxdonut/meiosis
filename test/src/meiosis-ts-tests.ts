@@ -1,8 +1,8 @@
-import test from "ava";
+import test, { TestContext } from "ava";
 import * as m from "mithril";
 
 import { createComponent, run } from "../../lib/index";
-import { CreateComponent, Component, Emitter, Renderer, RenderRoot, Setup } from "../../lib/index";
+import { ActionCreator, CreateComponent, Component, Emitter, Ready, Renderer, RenderRoot, Setup } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -15,13 +15,11 @@ interface Proposal {
   increment: number;
 }
 
-interface Actions<P> {
+type Propose = Emitter<Proposal>;
+
+interface Actions {
   increase: () => void;
   decrease: () => void;
-}
-
-interface ActionCreator<P> {
-  (propose: Emitter<P>): Actions<P>;
 }
 
 let vnode: Mithril.VirtualElement = null;
@@ -30,24 +28,24 @@ const render: Renderer<Model, View, Proposal> = (model: Model, rootComponent: Co
   vnode = rootComponent(model);
 };
 
-test("takes advantage of typescript features", t => {
+test("takes advantage of typescript features", (t: TestContext) => {
   const INCREASE: Proposal = { increment: 1 };
   const DECREASE: Proposal = { increment: -1 };
 
-  const actions: ActionCreator<Proposal> = (propose: Emitter<Proposal>) => ({
+  const actions: ActionCreator<Proposal, Actions> = (propose: Propose) => ({
     increase: () => propose(INCREASE),
     decrease: () => propose(DECREASE)
   });
 
-  let actionsRef: Actions<Proposal> = null;
+  let actionsRef: Actions = null;
 
-  const setup: Setup<Proposal> = actions => null;
+  const setup: Setup<Proposal> = (actions: Actions) => null;
 
-  const Main: Component<Model, View> = createComponent({
+  const Main: Component<Model, View> = createComponent<Actions>({
     initialModel: { counter: 1, description: "test" },
-    actions: actions,
-    setup: setup,
-    view: (model: Model, actions: Actions<Proposal>) => {
+    actions,
+    setup,
+    view: (model: Model, actions: Actions) => {
       actionsRef = actions;
       return m("span", model.description + " " + model.counter);
     },
@@ -58,7 +56,49 @@ test("takes advantage of typescript features", t => {
       }
       return model;
     },
-    nextAction: (model: Model, proposal: Proposal, actions: Actions<Proposal>) => {
+    nextAction: (model: Model, proposal: Proposal, actions: Actions) => {
+      if (proposal.increment === 0) {
+        actions.decrease();
+      }
+    }
+  });
+
+  const renderRoot: RenderRoot<Model> = run(render, Main);
+  t.is(vnode.children[0], "test 1");
+
+  actionsRef.increase();
+  t.is(vnode.children[0], "test 2");
+});
+
+test("can create components with propose or actions", (t: TestContext) => {
+  const INCREASE: Proposal = { increment: 1 };
+  const DECREASE: Proposal = { increment: -1 };
+
+  const actions: ActionCreator<Proposal, Actions> = (propose: Propose) => ({
+    increase: () => propose(INCREASE),
+    decrease: () => propose(DECREASE)
+  });
+
+  let actionsRef: Actions = null;
+
+  const ready: Ready<Proposal> = (actions: Actions) => null;
+
+  const Main: Component<Model, View> = createComponent<Actions>({
+    initialModel: { counter: 1, description: "test" },
+    actions,
+    ready,
+    view: (model: Model, actions: Actions) => {
+      actionsRef = actions;
+      return m("span", model.description + " " + model.counter);
+    },
+    receive: (model: Model, proposal: Proposal) => {
+      if (proposal.increment) {
+        model.counter = model.counter + proposal.increment;
+        return model;
+      }
+      return model;
+    },
+    nextAction: (model: Model, proposal: Proposal, actions: Actions) => {
       if (proposal.increment === 0) {
         actions.decrease();
       }

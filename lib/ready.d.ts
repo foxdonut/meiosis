@@ -1,5 +1,5 @@
-import { Actions } from "./actions";
-interface Ready<P> {
-    (actions: Actions<P>): void;
+import { Emitter } from "./wire";
+interface Ready<P, A> {
+    (actions: A | Emitter<P>): void;
 }
 export { Ready };

@@ -9,22 +9,22 @@ import { Renderer } from "./renderer";
 import { Setup } from "./setup";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
-export interface CreateComponent<M, V, P> {
-  (config: Config<M, V, P>): Component<M, V>;
-}
-
 export interface RenderRoot<M> {
   (model: M): any;
   initialModel: M;
 }
 
-export interface Run<M, V, P> {
-  (render: Renderer<M, V, P>, component: Component<M, V>): RenderRoot<M>;
+export interface Run<M, V> {
+  (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
+}
+
+export interface CreateComponent<M, V, P> {
+  <A>(config: Config<M, V, P, A>): Component<M, V>;
 }
 
 export interface MeiosisApp<M, V, P> {
   createComponent: CreateComponent<M, V, P>;
-  run: Run<M, V, P>;
+  run: Run<M, V>;
 }
 
 const REFUSE_PROPOSAL = {};
@@ -32,9 +32,9 @@ let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
-function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
+function init<M, V, P>(adapters?: Adapters<M, P>): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
-  let allReadies: Array<Ready<P>> = [];
+  let allReadies: Array<Ready<P, any>> = [];
   let allPostRenders: Array<PostRender<M>> = [];
   let allNextActions: Array<NextActionFromActions<M, P>> = [];
 
@@ -47,7 +47,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
   let rootModel: M = null;
   let initialModelCount = 0;
 
-  const createComponent: CreateComponent<M, V, P> = (config: Config<M, V, P>) => {
+  function createComponent<A>(config: Config<M, V, P, A>): Component<M, V> {
     if (!config || (
       !config.actions &&
       !config.nextAction &&
@@ -80,9 +80,9 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       throw new Error("When more than one initialModel is used, they must all be functions.");
     }
 
-    const actions = config.actions ? config.actions(propose) : propose;
+    const actions: A | Emitter<P> = config.actions ? config.actions(propose) : propose;
 
-    const setup: Setup<P> = config.setup;
+    const setup: Setup<P, A> = config.setup;
     if (setup) {
       setup(actions);
     }
@@ -92,7 +92,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       allReceives.push(receive);
     }
 
-    const ready: Ready<P> = config.ready;
+    const ready: Ready<P, A> = config.ready;
     if (ready) {
       allReadies.push(() => ready(actions));
     }
@@ -102,7 +102,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       allPostRenders.push(postRender);
     }
 
-    const nextAction: NextAction<M, P> = config.nextAction;
+    const nextAction: NextAction<M, P, A> = config.nextAction;
     if (nextAction) {
       allNextActions.push((model: M, proposal: P) => nextAction(model, proposal, actions));
     }
@@ -112,7 +112,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     };
   };
 
-  const run: Run<M, V, P> = (render: Renderer<M, V, P>, rootComponent: Component<M, V>) => {
+  const run: Run<M, V> = (render: Renderer<M, V>, rootComponent: Component<M, V>) => {
     componentWire.listen((proposal: any) => {
       let accepted = true;
 
@@ -136,7 +136,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
     });
 
     const renderRoot_: any = (model: M) => {
-      const result: any = render(model, rootComponent, propose);
+      const result: any = render(model, rootComponent);
       allPostRenders.forEach((postRender: PostRender<M>) => postRender(model));
       return result;
     };
@@ -156,7 +156,7 @@ function init<M, V, P>(adapters?: Adapters<M, V, P>): MeiosisApp<M, V, P> {
       let devtoolInitialized: boolean = false;
 
       createComponent({
-        receive: (model, proposal) => {
+        receive: (model: any, proposal: any) => {
           if (devtoolInitialized) {
             window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
           }
