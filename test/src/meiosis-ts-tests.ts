@@ -1,8 +1,9 @@
 import test, { TestContext } from "ava";
 import * as m from "mithril";
 
-import { createComponent, run } from "../../lib/index";
-import { ActionCreator, CreateComponent, Component, Emitter, Ready, Renderer, RenderRoot, Setup } from "../../lib/index";
+import { init } from "../../lib/index";
+import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
+  Ready, Renderer, RenderRoot, Run, Setup } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -22,41 +23,50 @@ interface Actions {
   decrease: () => void;
 }
 
-let vnode: Mithril.VirtualElement = null;
+let vnode: View = null;
 
-const render: Renderer<Model, View, Proposal> = (model: Model, rootComponent: Component<Model, View>) => {
+const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>) => {
   vnode = rootComponent(model);
 };
+
+let createComponent: CreateComponent<Model, View, Proposal> = null;
+let run: Run<Model, View> = null;
+
+test.beforeEach(function() {
+  const Meiosis: MeiosisApp<Model, View, Proposal> = init<Model, View, Proposal>();
+  createComponent = Meiosis.createComponent;
+  run = Meiosis.run;
+});
 
 test("takes advantage of typescript features", (t: TestContext) => {
   const INCREASE: Proposal = { increment: 1 };
   const DECREASE: Proposal = { increment: -1 };
 
-  const actions: ActionCreator<Proposal, Actions> = (propose: Propose) => ({
+  const actions: ActionCreator<Proposal, Actions> = (propose: Propose): Actions => ({
     increase: () => propose(INCREASE),
     decrease: () => propose(DECREASE)
   });
 
   let actionsRef: Actions = null;
 
-  const setup: Setup<Proposal> = (actions: Actions) => null;
+  const setup: Setup<Proposal, Actions> = (actions: Actions): void => null;
 
   const Main: Component<Model, View> = createComponent<Actions>({
     initialModel: { counter: 1, description: "test" },
     actions,
     setup,
-    view: (model: Model, actions: Actions) => {
+    view: (model: Model, actions: Actions): View => {
       actionsRef = actions;
       return m("span", model.description + " " + model.counter);
     },
-    receive: (model: Model, proposal: Proposal) => {
+    receive: (model: Model, proposal: Proposal): Model => {
       if (proposal.increment) {
         model.counter = model.counter + proposal.increment;
         return model;
       }
       return model;
     },
-    nextAction: (model: Model, proposal: Proposal, actions: Actions) => {
+    nextAction: (model: Model, proposal: Proposal, actions: Actions): void => {
       if (proposal.increment === 0) {
         actions.decrease();
       }
@@ -74,40 +84,41 @@ test("can create components with propose or actions", (t: TestContext) => {
   const INCREASE: Proposal = { increment: 1 };
   const DECREASE: Proposal = { increment: -1 };
 
-  const actions: ActionCreator<Proposal, Actions> = (propose: Propose) => ({
+  let proposeRef: Propose = null;
+
+  const Other: Component<Model, View> = createComponent<Propose>({
+    view: (model: Model, propose: Propose): View => {
+      proposeRef = propose;
+      return m("span", model.description + " " + model.counter);
+    }
+  });
+
+  const actions: ActionCreator<Proposal, Actions> = (propose: Propose): Actions => ({
     increase: () => propose(INCREASE),
     decrease: () => propose(DECREASE)
   });
 
-  let actionsRef: Actions = null;
-
-  const ready: Ready<Proposal> = (actions: Actions) => null;
+  const ready: Ready<Proposal, Actions> = (actions: Actions): void => null;
 
   const Main: Component<Model, View> = createComponent<Actions>({
     initialModel: { counter: 1, description: "test" },
     actions,
     ready,
     view: (model: Model, actions: Actions) => {
-      actionsRef = actions;
-      return m("span", model.description + " " + model.counter);
+      return Other(model);
     },
-    receive: (model: Model, proposal: Proposal) => {
+    receive: (model: Model, proposal: Proposal): Model => {
       if (proposal.increment) {
         model.counter = model.counter + proposal.increment;
         return model;
       }
       return model;
-    },
-    nextAction: (model: Model, proposal: Proposal, actions: Actions) => {
-      if (proposal.increment === 0) {
-        actions.decrease();
-      }
     }
   });
 
   const renderRoot: RenderRoot<Model> = run(render, Main);
   t.is(vnode.children[0], "test 1");
 
-  actionsRef.increase();
+  proposeRef(INCREASE);
   t.is(vnode.children[0], "test 2");
 });

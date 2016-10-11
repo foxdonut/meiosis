@@ -1,32 +1,32 @@
 {
-    "compilerOptions": {
-        "declaration": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "isolatedModules": false,
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "noImplicitAny": true,
-        "noImplicitUseStrict": false,
-        "noLib": false,
-        "outDir": "lib",
-        "preserveConstEnums": true,
-        "removeComments": true,
-        "sourceMap": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "target": "es5"
-    },
-    "include": [
-        "typings/index.d.ts",
-        "src/*.ts"
-    ],
-    "compileOnSave": false,
-    "buildOnSave": false,
-    "formatCodeOptions": {
-        "indentSize": 2,
-        "tabSize": 2
-    },
-    "atom": {
-        "rewriteTsconfig": false
-    }
+  "compilerOptions": {
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "isolatedModules": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitUseStrict": false,
+    "noLib": false,
+    "outDir": "lib",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "es5"
+  },
+  "include": [
+    "typings/index.d.ts",
+    "src/*.ts"
+  ],
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "formatCodeOptions": {
+    "indentSize": 2,
+    "tabSize": 2
+  },
+  "atom": {
+    "rewriteTsconfig": false
+  }
 }

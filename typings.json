@@ -3,9 +3,6 @@
   "main": "lib/index.d.ts",
   "globalDependencies": {
     "mithril": "registry:dt/mithril#0.0.0+20160501155657",
-    "require": "registry:dt/require#2.1.20+20160316155526"
-  },
-  "dependencies": {
-    "es6-promise": "registry:npm/es6-promise#3.0.0+20160211003958"
+    "node": "registry:dt/node#6.0.0+20161010101523"
   }
 }

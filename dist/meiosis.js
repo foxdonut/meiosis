@@ -84,7 +84,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var propose = componentWire.emit;
 	    var rootModel = null;
 	    var initialModelCount = 0;
-	    var createComponent = function (config) {
+	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
 	            !config.initialModel &&
@@ -137,7 +137,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return function (model) {
 	            return config.view ? config.view(model, actions) : undefined;
 	        };
-	    };
+	    }
+	    ;
 	    var run = function (render, rootComponent) {
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
@@ -159,7 +160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent, propose);
+	            var result = render(model, rootComponent);
 	            allPostRenders.forEach(function (postRender) { return postRender(model); });
 	            return result;
 	        };

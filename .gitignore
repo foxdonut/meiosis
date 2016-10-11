@@ -34,3 +34,4 @@ node_modules
 
 test/build
 meiosis*.tgz
+typings
