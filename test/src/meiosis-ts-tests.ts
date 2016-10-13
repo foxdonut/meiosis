@@ -6,8 +6,8 @@ import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
   Ready, Renderer, RenderRoot, Run, Setup } from "../../lib/index";
 
 interface Model {
-  counter: number;
-  description: string;
+  counter?: number;
+  description?: string;
 }
 
 type View = Mithril.VirtualElement;
@@ -25,20 +25,20 @@ interface Actions {
 
 let vnode: View = null;
 
-const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>) => {
+const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>): void => {
   vnode = rootComponent(model);
 };
 
 let createComponent: CreateComponent<Model, View, Proposal> = null;
 let run: Run<Model, View> = null;
 
-test.beforeEach(function() {
+test.beforeEach(function(): void {
   const Meiosis: MeiosisApp<Model, View, Proposal> = init<Model, View, Proposal>();
   createComponent = Meiosis.createComponent;
   run = Meiosis.run;
 });
 
-test("takes advantage of typescript features", (t: TestContext) => {
+test("takes advantage of typescript features", (t: TestContext): void => {
   const INCREASE: Proposal = { increment: 1 };
   const DECREASE: Proposal = { increment: -1 };
 
@@ -80,7 +80,7 @@ test("takes advantage of typescript features", (t: TestContext) => {
   t.is(vnode.children[0], "test 2");
 });
 
-test("can create components with propose or actions", (t: TestContext) => {
+test("can create components with propose or actions", (t: TestContext): void => {
   const INCREASE: Proposal = { increment: 1 };
   const DECREASE: Proposal = { increment: -1 };
 
@@ -104,9 +104,7 @@ test("can create components with propose or actions", (t: TestContext) => {
     initialModel: { counter: 1, description: "test" },
     actions,
     ready,
-    view: (model: Model, actions: Actions) => {
-      return Other(model);
-    },
+    view: (model: Model, actions: Actions): View => Other(model),
     receive: (model: Model, proposal: Proposal): Model => {
       if (proposal.increment) {
         model.counter = model.counter + proposal.increment;
@@ -121,4 +119,25 @@ test("can create components with propose or actions", (t: TestContext) => {
 
   proposeRef(INCREASE);
   t.is(vnode.children[0], "test 2");
+});
+
+test("can create initial model using functions", (t: TestContext): void => {
+  const Component1: Component<Model, View> = createComponent<Propose>({
+    initialModel: (model: Model): Model => {
+      model.description = "test";
+      return model;
+    },
+    view: (model: Model, propose: Propose): View => m("span", model.description + " " + model.counter)
+  });
+
+  const Component2: Component<Model, View> = createComponent<Propose>({
+    initialModel: (model: Model): Model => {
+      model.counter = 42;
+      return model;
+    }
+  })
+
+  run(render, Component1);
+
+  t.is(vnode.children[0], "test 42");
 });

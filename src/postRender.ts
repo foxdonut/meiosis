@@ -1,5 +1,3 @@
-interface PostRender<M> {
+export interface PostRender<M> {
   (model: M): any;
 }
-
-export { PostRender };

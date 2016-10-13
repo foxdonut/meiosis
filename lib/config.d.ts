@@ -5,8 +5,11 @@ import { Ready } from "./ready";
 import { Receive } from "./receive";
 import { Setup } from "./setup";
 import { View } from "./view";
-interface Config<M, V, P, A> {
-    initialModel?: M;
+export interface InitialModel<M> {
+    (model: M): M;
+}
+export interface Config<M, V, P, A> {
+    initialModel?: M | InitialModel<M>;
     actions?: ActionCreator<P, A>;
     setup?: Setup<P, A>;
     view?: View<M, V, P, A>;
@@ -15,4 +18,3 @@ interface Config<M, V, P, A> {
     receive?: Receive<M, P>;
     nextAction?: NextAction<M, P, A>;
 }
-export { Config };

@@ -1,15 +1,14 @@
-interface Listener<P> {
+export interface Listener<P> {
     (proposal: P): void;
 }
-interface Emitter<P> {
+export interface Emitter<P> {
     (proposal: P): void;
 }
-interface Wire<P> {
+export interface Wire<P> {
     emit: Emitter<P>;
     listen(listener: Listener<P>): any;
 }
-interface WireCreator<P> {
+export interface WireCreator<P> {
     (wireName?: string): Wire<P>;
 }
-declare function defaultWireCreator<P>(): WireCreator<P>;
-export { Emitter, Listener, Wire, WireCreator, defaultWireCreator };
+export declare function defaultWireCreator<P>(): WireCreator<P>;
