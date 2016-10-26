@@ -8,12 +8,17 @@
     "prestart": "typings i && tsc",
     "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",
     "pretest": "npm start && tsc -p test/src",
-    "test": "ava -v test/build/*-tests.js"
+    "test": "ava",
+    "prepublish": "npm start"
   },
   "ava": {
     "require": [
       "./test/build/setup-browser-env.js"
-    ]
+    ],
+    "files": [
+      "test/build/*-tests.js"
+    ],
+    "verbose": true
   },
   "repository": {
     "type": "git",
@@ -30,12 +35,12 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "ava": "^0.16.0",
-    "browser-env": "^2.0.12",
+    "browser-env": "^2.0.15",
     "es6-promise": "^4.0.5",
     "mithril": "^0.2.5",
     "snabbdom": "^0.5.4",
     "ts-loader": "^0.9.5",
-    "typescript": "^2.0.3",
+    "typescript": "^2.0.6",
     "webpack": "^1.13.2"
   }
 }
