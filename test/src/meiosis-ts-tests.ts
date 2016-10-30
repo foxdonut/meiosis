@@ -1,7 +1,7 @@
 import test, { TestContext } from "ava";
 import * as m from "mithril";
 
-import { init } from "../../lib/index";
+import { newInstance } from "../../lib/index";
 import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
   Ready, Renderer, RenderRoot, Run } from "../../lib/index";
 
@@ -33,7 +33,7 @@ let createComponent: CreateComponent<Model, View, Proposal> = null;
 let run: Run<Model, View> = null;
 
 test.beforeEach(function(): void {
-  const Meiosis: MeiosisApp<Model, View, Proposal> = init<Model, View, Proposal>();
+  const Meiosis: MeiosisApp<Model, View, Proposal> = newInstance<Model, View, Proposal>();
   createComponent = Meiosis.createComponent;
   run = Meiosis.run;
 });

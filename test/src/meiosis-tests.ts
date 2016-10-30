@@ -2,7 +2,7 @@ import test from "ava";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { init, REFUSE_PROPOSAL } from "../../lib/index";
+import { newInstance, REFUSE_PROPOSAL } from "../../lib/index";
 
 let createComponent = null;
 let run = null;
@@ -11,7 +11,7 @@ let vnode = null;
 const render = (model, root) => { vnode = root(model); };
 
 test.beforeEach(function() {
-  const Meiosis = init();
+  const Meiosis = newInstance();
   createComponent = Meiosis.createComponent;
   run = Meiosis.run;
 });

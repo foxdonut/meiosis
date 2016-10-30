@@ -72,7 +72,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init() {
+	function newInstance() {
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
@@ -201,8 +201,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        run: run
 	    };
 	}
-	exports.init = init;
-	var instance = init();
+	exports.newInstance = newInstance;
+	var instance = newInstance();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;

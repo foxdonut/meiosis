@@ -30,7 +30,7 @@ let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
-function init<M, V, P>(): MeiosisApp<M, V, P> {
+function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P, any>> = [];
   let allPostRenders: Array<PostRender<M>> = [];
@@ -183,12 +183,12 @@ function init<M, V, P>(): MeiosisApp<M, V, P> {
   };
 }
 
-const instance = init<any, any, any>();
+const instance = newInstance<any, any, any>();
 const createComponent = instance.createComponent;
 const run = instance.run;
 
 export {
-  init,
+  newInstance,
   createComponent,
   run,
   REFUSE_PROPOSAL
