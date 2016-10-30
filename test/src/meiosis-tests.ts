@@ -2,7 +2,7 @@ import test from "ava";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { newInstance, REFUSE_PROPOSAL } from "../../src/index";
+import { newInstance, REFUSE_PROPOSAL } from "../../lib/index";
 
 let createComponent = null;
 let run = null;

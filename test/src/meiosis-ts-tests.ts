@@ -1,9 +1,8 @@
 import test, { TestContext } from "ava";
 import * as m from "mithril";
 
-import { newInstance } from "../../src/index";
 import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
-  Ready, Renderer, RenderRoot, Run } from "../../lib/index";
+  Ready, Renderer, RenderRoot, Run, newInstance } from "../../lib/index";
 
 interface Model {
   counter?: number;
