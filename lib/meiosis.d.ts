@@ -1,4 +1,3 @@
-import { Adapters } from "./adapters";
 import { Component } from "./component";
 import { Config } from "./config";
 import { Renderer } from "./renderer";
@@ -17,7 +16,7 @@ export interface MeiosisApp<M, V, P> {
     run: Run<M, V>;
 }
 declare const REFUSE_PROPOSAL: {};
-declare function init<M, V, P>(adapters?: Adapters<M, P>): MeiosisApp<M, V, P>;
+declare function init<M, V, P>(): MeiosisApp<M, V, P>;
 declare const createComponent: CreateComponent<any, any, any>;
 declare const run: Run<any, any>;
 export { init, createComponent, run, REFUSE_PROPOSAL };

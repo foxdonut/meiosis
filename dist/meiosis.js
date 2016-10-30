@@ -72,13 +72,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init(adapters) {
+	function init() {
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
-	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
+	    var createRootWire = wire_1.defaultWireCreator();
+	    var createComponentWire = wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;

@@ -1,4 +1,3 @@
-import { Adapters } from "./adapters";
 import { Component } from "./component";
 import { Config } from "./config";
 import { NextAction, NextActionFromActions } from "./nextAction";
@@ -31,14 +30,14 @@ let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
-function init<M, V, P>(adapters?: Adapters<M, P>): MeiosisApp<M, V, P> {
+function init<M, V, P>(): MeiosisApp<M, V, P> {
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P, any>> = [];
   let allPostRenders: Array<PostRender<M>> = [];
   let allNextActions: Array<NextActionFromActions<M, P>> = [];
 
-  const createRootWire: WireCreator<M> = (adapters && adapters.rootWire) || defaultWireCreator();
-  const createComponentWire: WireCreator<P> = (adapters && adapters.componentWire) || defaultWireCreator();
+  const createRootWire: WireCreator<M> = defaultWireCreator();
+  const createComponentWire: WireCreator<P> = defaultWireCreator();
   const rootWire: Wire<M> = createRootWire("meiosis_" + (nextId++));
   const componentWire: Wire<P> = createComponentWire();
   const propose: Emitter<P> = componentWire.emit;
