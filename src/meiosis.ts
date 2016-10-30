@@ -110,7 +110,7 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
     };
   };
 
-  const run: Run<M, V> = (runConfig: RunConfig<M, V>) => {
+  const run: Run<M, V> = (runConfig: RunConfig<M, V>): RenderRoot<M> => {
     componentWire.listen((proposal: any) => {
       let accepted = true;
 
