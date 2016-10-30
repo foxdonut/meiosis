@@ -12,9 +12,8 @@ _while letting you keep using the tools that you already love._ Meiosis manages 
 lets you choose whatever you like for rendering views.
 
 For example, you can use [React](https://facebook.github.io/react/), [Inferno](https://github.com/trueadm/inferno),
-[jQuery](http://jquery.com/), [snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org),
-[Vue](http://vuejs.org), [Riot](http://riotjs.com), [Handlebars](http://handlebarsjs.com),
-or no libraries at all and just plain vanilla JavaScript.
+[snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org), [jQuery](http://jquery.com/),
+[Handlebars](http://handlebarsjs.com), or no libraries at all and just plain vanilla JavaScript.
 
 Developing a web application with Meiosis involves three simple concepts:
 

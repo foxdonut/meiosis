@@ -3,7 +3,7 @@ import * as m from "mithril";
 
 import { init } from "../../lib/index";
 import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
-  Ready, Renderer, RenderRoot, Run, Setup } from "../../lib/index";
+  Ready, Renderer, RenderRoot, Run } from "../../lib/index";
 
 interface Model {
   counter?: number;
@@ -49,12 +49,9 @@ test("takes advantage of typescript features", (t: TestContext): void => {
 
   let actionsRef: Actions = null;
 
-  const setup: Setup<Proposal, Actions> = (actions: Actions): void => null;
-
   const Main: Component<Model, View> = createComponent<Actions>({
     initialModel: { counter: 1, description: "test" },
     actions,
-    setup,
     view: (model: Model, actions: Actions): View => {
       actionsRef = actions;
       return m("span", model.description + " " + model.counter);

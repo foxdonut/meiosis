@@ -3,7 +3,6 @@ import { NextAction } from "./nextAction";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { Receive } from "./receive";
-import { Setup } from "./setup";
 import { View } from "./view";
 
 export interface InitialModel<M> {
@@ -13,7 +12,6 @@ export interface InitialModel<M> {
 export interface Config<M, V, P, A> {
   initialModel?: M | InitialModel<M>;
   actions?: ActionCreator<P, A>;
-  setup?: Setup<P, A>;
   view?: View<M, V, P, A>;
   postRender?: PostRender<M>;
   ready?: Ready<P, A>;

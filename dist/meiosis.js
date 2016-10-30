@@ -91,8 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            !config.ready &&
 	            !config.receive &&
 	            !config.view &&
-	            !config.postRender &&
-	            !config.setup)) {
+	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
 	        if (rootModel === null) {
@@ -114,10 +113,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error("When more than one initialModel is used, they must all be functions.");
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
-	        var setup = config.setup;
-	        if (setup) {
-	            setup(actions);
-	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);

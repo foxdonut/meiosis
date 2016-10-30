@@ -290,7 +290,6 @@ test("all configs are optional, but you need something", t => {
 });
 
 test("allows to have only one config property", t => {
-  createComponent({ setup: () => null });
   createComponent({ postRender: () => null });
 });
 
@@ -606,21 +605,6 @@ test("calls all nextAction functions and passes correct actions to the each one"
 
   formActionsRef.formAction();
   listActionsRef.listAction();
-});
-
-test("calls the setup function with actions", t => {
-  t.plan(1);
-
-  const actions = propose => ({
-    duck: () => propose("quack")
-  });
-
-  run(render, createComponent({
-    actions,
-    setup: act => {
-      t.truthy(act.duck);
-    }
-  }));
 });
 
 test("calls the ready function with propose", t => {

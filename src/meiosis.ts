@@ -6,7 +6,6 @@ import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { Receive } from "./receive";
 import { Renderer } from "./renderer";
-import { Setup } from "./setup";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
 export interface RenderRoot<M> {
@@ -55,8 +54,7 @@ function init<M, V, P>(adapters?: Adapters<M, P>): MeiosisApp<M, V, P> {
       !config.ready &&
       !config.receive &&
       !config.view &&
-      !config.postRender &&
-      !config.setup
+      !config.postRender
     )) {
       throw new Error("Please specify a config when calling createComponent.");
     }
@@ -81,11 +79,6 @@ function init<M, V, P>(adapters?: Adapters<M, P>): MeiosisApp<M, V, P> {
     }
 
     const actions: A | Emitter<P> = config.actions ? config.actions(propose) : propose;
-
-    const setup: Setup<P, A> = config.setup;
-    if (setup) {
-      setup(actions);
-    }
 
     const receive: Receive<M, P> = config.receive;
     if (receive) {
