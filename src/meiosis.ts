@@ -12,8 +12,14 @@ export interface RenderRoot<M> {
   initialModel: M;
 }
 
+export interface RunConfig<M, V> {
+  renderer: Renderer<M, V>;
+  rootComponent: Component<M, V>;
+  initialModel?: M;
+}
+
 export interface Run<M, V> {
-  (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
+  (runConfig: RunConfig<M, V>): RenderRoot<M>;
 }
 
 export interface CreateComponent<M, V, P> {
@@ -104,7 +110,7 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
     };
   };
 
-  const run: Run<M, V> = (render: Renderer<M, V>, rootComponent: Component<M, V>) => {
+  const run: Run<M, V> = (runConfig: RunConfig<M, V>) => {
     componentWire.listen((proposal: any) => {
       let accepted = true;
 
@@ -128,7 +134,7 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
     });
 
     const renderRoot_: any = (model: M) => {
-      const result: any = render(model, rootComponent);
+      const result: any = runConfig.renderer(model, runConfig.rootComponent);
       allPostRenders.forEach((postRender: PostRender<M>) => postRender(model));
       return result;
     };

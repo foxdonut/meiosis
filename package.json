@@ -41,6 +41,6 @@
     "snabbdom": "^0.5.4",
     "ts-loader": "^0.9.5",
     "typescript": "^2.0.6",
-    "webpack": "^1.13.2"
+    "webpack": "^1.13.3"
   }
 }

@@ -8,7 +8,7 @@ let createComponent = null;
 let run = null;
 let vnode = null;
 
-const render = (model, root) => { vnode = root(model); };
+const renderer = (model, root) => { vnode = root(model); };
 
 test.beforeEach(function() {
   const Meiosis = newInstance();
@@ -19,28 +19,23 @@ test.beforeEach(function() {
 test("calls the view with model and propose", t => {
   t.plan(3);
 
-  const initial = { duck: "quack" };
+  const initialModel = { duck: "quack" };
 
-  run(render, createComponent({
-    initialModel: initial,
-
+  run({ renderer, initialModel, rootComponent: createComponent({
     view: (model, propose) => {
       t.truthy(model);
       t.truthy(propose);
-      t.deepEqual(model, initial);
+      t.deepEqual(model, initialModel);
     }
-  }));
+  }) });
 });
 
 test("renders a view", t => {
-  const initial = { duck: "quack" };
+  const initialModel = { duck: "quack" };
 
   const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
-  run(render, createComponent({
-    initialModel: initial,
-    view: view
-  }));
+  run({ renderer, initialModel, rootComponent: createComponent({ view: view }) });
 
   t.truthy(vnode);
   t.is(vnode.sel, "span");
@@ -55,7 +50,7 @@ test("renders a tree of views", t => {
   const List = createComponent({ view: _model => h("div", ListText) });
   const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   t.truthy(vnode);
   t.is(vnode.sel, "div");
@@ -71,7 +66,7 @@ test("triggers a proposal", t => {
   let propose = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     view: (model, propose_) => {
       propose = propose_;
       return h("span", model.name);
@@ -84,7 +79,7 @@ test("triggers a proposal", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
   t.is(vnode.text, "one");
 
   propose(PROPOSAL);
@@ -103,7 +98,7 @@ test("nextAction", t => {
   let actionsRef = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     actions: actions,
     view: (model, actions_) => {
       actionsRef = actions_;
@@ -125,7 +120,7 @@ test("nextAction", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
   t.is(vnode.text, "one");
 
   actionsRef.change();
@@ -171,7 +166,7 @@ test("merges the models into a single root model", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   t.is(vnode.children.length, 3);
   t.is(vnode.children[0].text, "one");
@@ -210,7 +205,6 @@ test("reflects change from one view in another view", t => {
   });
 
   const Main = createComponent({
-    initialModel: model => { model.name = "one"; return model; },
     view: model => h("div",
       [ h("span", model.name)
       , Form(model)
@@ -219,7 +213,7 @@ test("reflects change from one view in another view", t => {
     )
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main, initialModel: { name: "one" } });
 
   t.is(vnode.children.length, 3);
   t.is(vnode.children[0].text, "one");
@@ -246,8 +240,7 @@ test.cb("executes tasks", t => {
     increment: () => promise.then(res => { value = res; propose(INCREMENT); })
   });
 
-  run(render, createComponent({
-    initialModel: { counter: 1 },
+  run({ renderer, initialModel: { counter: 1 }, rootComponent: createComponent({
     actions: actions,
     view: (_model, actions) => {
       actionsRef = actions;
@@ -260,7 +253,7 @@ test.cb("executes tasks", t => {
       }
       return model;
     }
-  }));
+  }) });
 
   actionsRef.increment();
 });
@@ -273,7 +266,7 @@ test("accepts only specifying the view", t => {
   const List = createComponent({ view: _model => h("div", ListText) });
   const Main = createComponent({ view: model => h("div", [Form(model), List(model)]) });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   t.truthy(vnode);
   t.is(vnode.sel, "div");
@@ -293,13 +286,9 @@ test("allows to have only one config property", t => {
   createComponent({ postRender: () => null });
 });
 
-test("warns when multiple initialModel components are not all functions", t => {
-  createComponent({
-    initialModel: { duck: "yellow" }
-  });
-
+test("warns when initialModel is not a function", t => {
   t.throws(() => createComponent({
-    initialModel: model => { model.sound = "quack"; return model; }
+    initialModel: { duck: "yellow" }
   }));
 });
 
@@ -309,7 +298,6 @@ test("passes propose to the view by default", t => {
   let propose = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
     view: (model, propose_) => {
       t.is(typeof propose_, "function");
       propose = propose_;
@@ -323,7 +311,7 @@ test("passes propose to the view by default", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, initialModel: { name: "one" }, rootComponent: Main });
   t.is(vnode.text, "one");
 
   propose(CHANGE);
@@ -340,7 +328,7 @@ test("passes the actions object to the view", t => {
   let actionsRef = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     actions: actions,
     view: (model, actions) => {
       t.is(typeof actions, "object");
@@ -355,7 +343,7 @@ test("passes the actions object to the view", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
   t.is(vnode.text, "one");
 
   actionsRef.test();
@@ -366,7 +354,7 @@ test("runs proposals through receive", t => {
   let propose = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     view: (model, propose_) => {
       propose = propose_;
       return h("span", model.name);
@@ -378,7 +366,7 @@ test("runs proposals through receive", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -396,7 +384,6 @@ test("calls one component's receive with another component's proposal", t => {
   });
 
   const Main = createComponent({
-    initialModel: { name: "one" },
     view: model => Child(model),
     receive: (model, proposal) => {
       t.is(model.name, "one");
@@ -405,7 +392,7 @@ test("calls one component's receive with another component's proposal", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, initialModel: { name: "one" }, rootComponent: Main });
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -428,7 +415,6 @@ test("supports multiple functions that receive proposals, in order of creation",
   });
 
   const Main = createComponent({
-    initialModel: { value: 2 },
     view: model => Child(model),
     receive: (model, proposal) => {
       t.is(model.value, 5);
@@ -437,7 +423,7 @@ test("supports multiple functions that receive proposals, in order of creation",
     }
   });
 
-  run(render, Main);
+  run({ renderer, initialModel: { value: 2 }, rootComponent: Main });
   t.is(vnode.text, "2");
 
   propose({ value: 3 });
@@ -445,14 +431,11 @@ test("supports multiple functions that receive proposals, in order of creation",
 });
 
 test("returns a function to render a view from a model", t => {
-  const initial = { duck: "quack" };
+  const initialModel = { duck: "quack" };
 
   const view = (model, _actions) => h("span", `A duck says ${model.duck}`);
 
-  const renderRoot = run(render, createComponent({
-    initialModel: initial,
-    view: view
-  }));
+  const renderRoot = run({ renderer, initialModel, rootComponent: createComponent({ view: view }) });
 
   t.truthy(vnode);
   t.is(vnode.sel, "span");
@@ -466,8 +449,8 @@ test("returns a function to render a view from a model", t => {
 test("returns the combined initial model", t => {
   createComponent({ initialModel: model => { model.duck = "quack"; return model; } });
   const Root = createComponent({ initialModel: model => { model.color = "yellow"; return model; } });
-  const renderRoot = run(render, Root);
-  t.deepEqual(renderRoot.initialModel, { duck: "quack", color: "yellow" });
+  const renderRoot = run({ renderer, initialModel: { one: "two" }, rootComponent: Root });
+  t.deepEqual(renderRoot.initialModel, { one: "two", duck: "quack", color: "yellow" });
 });
 
 test("sends proposal through to the nextAction function", t => {
@@ -476,7 +459,7 @@ test("sends proposal through to the nextAction function", t => {
   let propose = null;
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     view: (model, propose_) => {
       propose = propose_;
       return h("span", model.name);
@@ -493,7 +476,7 @@ test("sends proposal through to the nextAction function", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -545,7 +528,7 @@ test("passes correct actions to each view", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   t.is(vnode.children.length, 3);
   t.is(vnode.children[0].text, "one");
@@ -592,7 +575,7 @@ test("calls all nextAction functions and passes correct actions to the each one"
   });
 
   const Main = createComponent({
-    initialModel: { name: "one" },
+    initialModel: () => ({ name: "one" }),
     view: (model, _actions) => h("div",
       [ h("span", model.name)
       , Form(model)
@@ -601,7 +584,7 @@ test("calls all nextAction functions and passes correct actions to the each one"
     )
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   formActionsRef.formAction();
   listActionsRef.listAction();
@@ -610,18 +593,17 @@ test("calls all nextAction functions and passes correct actions to the each one"
 test("calls the ready function with propose", t => {
   t.plan(5);
 
-  const initial = { duck: "quack" };
+  const initialModel = { duck: "quack" };
 
   const view = model => h("span", `A duck says ${model.duck}`);
 
-  run(render, createComponent({
-    initialModel: initial,
+  run({ renderer, initialModel, rootComponent: createComponent({
     view: view,
     ready: propose => {
       t.truthy(propose);
       t.is(typeof propose, "function");
     }
-  }));
+  }) });
 
   t.truthy(vnode);
   t.is(vnode.sel, "span");
@@ -631,14 +613,13 @@ test("calls the ready function with propose", t => {
 test("calls the postRender function", t => {
   t.plan(1);
 
-  const initial = { duck: "quack" };
+  const initialModel = { duck: "quack" };
   const view = model => h("span", `A duck says ${model.duck}`);
 
-  run(render, createComponent({
-    initialModel: initial,
+  run({ renderer, initialModel, rootComponent: createComponent({
     view: view,
-    postRender: model => t.is(model, initial)
-  }));
+    postRender: model => t.is(model, initialModel)
+  }) });
 });
 
 test("can refuse a proposal", t => {
@@ -648,7 +629,7 @@ test("can refuse a proposal", t => {
   let counter = 0;
 
   const Main = createComponent({
-    initialModel: { value: 1 },
+    initialModel: () => ({ value: 1 }),
     view: (model, propose_) => {
       counter++;
       propose = propose_;
@@ -665,7 +646,7 @@ test("can refuse a proposal", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   propose({ value: 2 });
   propose({ value: 3 });
@@ -679,7 +660,7 @@ test("does not mistake empty object for REFUSE_PROPOSAL", t => {
   let counter = 0;
 
   const Main = createComponent({
-    initialModel: { value: 1 },
+    initialModel: () => ({ value: 1 }),
     view: (model, propose_) => {
       counter++;
       propose = propose_;
@@ -696,7 +677,7 @@ test("does not mistake empty object for REFUSE_PROPOSAL", t => {
     }
   });
 
-  run(render, Main);
+  run({ renderer, rootComponent: Main });
 
   propose({ value: 2 });
   propose({ value: 3 });
@@ -709,12 +690,9 @@ test("can use a display function for an initial viewModel", t => {
   const display = view => model => view({ value: model.value * 2 });
   const view = model => h("span", String(model.value));
 
-  const Main = createComponent({
-    initialModel,
-    view: display(view)
-  });
+  const Main = createComponent({ view: display(view) });
 
-  run(render, Main);
+  run({ renderer, initialModel, rootComponent: Main });
 
   t.is(vnode.text, "4");
 });
@@ -761,12 +739,11 @@ test("can use a state object in receive, and to decide which view to display", t
   };
 
   const Main = createComponent({
-    initialModel: { value: 1 },
     view: display(state, view),
     receive: receive(state)
   });
 
-  run(render, Main);
+  run({ renderer, initialModel: { value: 1 }, rootComponent: Main });
   t.is(vnode.text, "ready");
 
   propose(CHANGE);

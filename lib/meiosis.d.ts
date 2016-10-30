@@ -5,8 +5,13 @@ export interface RenderRoot<M> {
     (model: M): any;
     initialModel: M;
 }
+export interface RunConfig<M, V> {
+    renderer: Renderer<M, V>;
+    rootComponent: Component<M, V>;
+    initialModel?: M;
+}
 export interface Run<M, V> {
-    (render: Renderer<M, V>, component: Component<M, V>): RenderRoot<M>;
+    (runConfig: RunConfig<M, V>): RenderRoot<M>;
 }
 export interface CreateComponent<M, V, P> {
     <A>(config: Config<M, V, P, A>): Component<M, V>;

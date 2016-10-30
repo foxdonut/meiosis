@@ -134,7 +134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }
 	    ;
-	    var run = function (render, rootComponent) {
+	    var run = function (runConfig) {
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -155,7 +155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent);
+	            var result = runConfig.renderer(model, runConfig.rootComponent);
 	            allPostRenders.forEach(function (postRender) { return postRender(model); });
 	            return result;
 	        };

@@ -25,7 +25,7 @@ interface Actions {
 
 let vnode: View = null;
 
-const render: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>): void => {
+const renderer: Renderer<Model, View> = (model: Model, rootComponent: Component<Model, View>): void => {
   vnode = rootComponent(model);
 };
 
@@ -50,7 +50,6 @@ test("takes advantage of typescript features", (t: TestContext): void => {
   let actionsRef: Actions = null;
 
   const Main: Component<Model, View> = createComponent<Actions>({
-    initialModel: { counter: 1, description: "test" },
     actions,
     view: (model: Model, actions: Actions): View => {
       actionsRef = actions;
@@ -70,7 +69,11 @@ test("takes advantage of typescript features", (t: TestContext): void => {
     }
   });
 
-  const renderRoot: RenderRoot<Model> = run(render, Main);
+  const renderRoot: RenderRoot<Model> = run({
+    renderer,
+    rootComponent: Main,
+    initialModel: { counter: 1, description: "test" }
+  });
   t.is(vnode.children[0], "test 1");
 
   actionsRef.increase();
@@ -98,7 +101,6 @@ test("can create components with propose or actions", (t: TestContext): void => 
   const ready: Ready<Proposal, Actions> = (actions: Actions): void => null;
 
   const Main: Component<Model, View> = createComponent<Actions>({
-    initialModel: { counter: 1, description: "test" },
     actions,
     ready,
     view: (model: Model, actions: Actions): View => Other(model),
@@ -111,7 +113,11 @@ test("can create components with propose or actions", (t: TestContext): void => 
     }
   });
 
-  const renderRoot: RenderRoot<Model> = run(render, Main);
+  const renderRoot: RenderRoot<Model> = run({
+    renderer,
+    rootComponent: Main,
+    initialModel: { counter: 1, description: "test" }
+  });
   t.is(vnode.children[0], "test 1");
 
   proposeRef(INCREASE);
@@ -134,7 +140,7 @@ test("can create initial model using functions", (t: TestContext): void => {
     }
   })
 
-  run(render, Component1);
+  run({ renderer, rootComponent: Component1 });
 
   t.is(vnode.children[0], "test 42");
 });
