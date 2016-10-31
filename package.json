@@ -8,8 +8,7 @@
     "prestart": "typings i && tsc",
     "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",
     "pretest": "npm start && tsc -p test/src",
-    "test": "ava",
-    "prepublish": "npm start"
+    "test": "ava"
   },
   "ava": {
     "require": [
