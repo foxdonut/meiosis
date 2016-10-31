@@ -1,5 +1,5 @@
 import { Component } from "./component";
-import { Config } from "./config";
+import { Config, InitialModel } from "./config";
 import { NextAction, NextActionFromActions } from "./nextAction";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
@@ -37,6 +37,7 @@ let nextId = 1;
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
 function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
+  let allInitialModels: Array<InitialModel<M>> = [];
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P, any>> = [];
   let allPostRenders: Array<PostRender<M>> = [];
@@ -47,9 +48,6 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
   const rootWire: Wire<M> = createRootWire("meiosis_" + (nextId++));
   const componentWire: Wire<P> = createComponentWire();
   const propose: Emitter<P> = componentWire.emit;
-
-  let rootModel: M = null;
-  let initialModelCount = 0;
 
   function createComponent<A>(config: Config<M, V, P, A>): Component<M, V> {
     if (!config || (
@@ -63,24 +61,13 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
     )) {
       throw new Error("Please specify a config when calling createComponent.");
     }
-    if (rootModel === null) {
-      let startingModel: any = {};
-      rootModel = startingModel;
-    }
-    const initialModel: any = config.initialModel;
-    let initialModelError: boolean = false;
+    const initialModel: InitialModel<M> = config.initialModel;
 
-    if (typeof initialModel === "function") {
-      rootModel = initialModel(rootModel);
-      initialModelError = initialModelCount > 0;
-    }
-    else if (initialModel) {
-      rootModel = initialModel;
-      initialModelCount++;
-      initialModelError = initialModelCount > 1;
-    }
-    if (initialModelError) {
-      throw new Error("When more than one initialModel is used, they must all be functions.");
+    if (initialModel) {
+      if (typeof initialModel !== "function") {
+        throw new Error("When more than one initialModel is used, they must all be functions.");
+      }
+      allInitialModels.push(initialModel);
     }
 
     const actions: A | Emitter<P> = config.actions ? config.actions(propose) : propose;
@@ -111,6 +98,9 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
   };
 
   const run: Run<M, V> = (runConfig: RunConfig<M, V>): RenderRoot<M> => {
+    let rootModel: any = runConfig.initialModel || {};
+    allInitialModels.forEach((initialModel: Function) => rootModel = initialModel(rootModel));
+
     componentWire.listen((proposal: any) => {
       let accepted = true;
 

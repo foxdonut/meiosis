@@ -8,7 +8,7 @@ export interface InitialModel<M> {
     (model: M): M;
 }
 export interface Config<M, V, P, A> {
-    initialModel?: M | InitialModel<M>;
+    initialModel?: InitialModel<M>;
     actions?: ActionCreator<P, A>;
     view?: View<M, V, P, A>;
     postRender?: PostRender<M>;

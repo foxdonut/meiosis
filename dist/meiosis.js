@@ -73,6 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function newInstance() {
+	    var allInitialModels = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
@@ -82,8 +83,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var rootModel = null;
-	    var initialModelCount = 0;
 	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
@@ -94,23 +93,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        if (rootModel === null) {
-	            var startingModel = {};
-	            rootModel = startingModel;
-	        }
 	        var initialModel = config.initialModel;
-	        var initialModelError = false;
-	        if (typeof initialModel === "function") {
-	            rootModel = initialModel(rootModel);
-	            initialModelError = initialModelCount > 0;
-	        }
-	        else if (initialModel) {
-	            rootModel = initialModel;
-	            initialModelCount++;
-	            initialModelError = initialModelCount > 1;
-	        }
-	        if (initialModelError) {
-	            throw new Error("When more than one initialModel is used, they must all be functions.");
+	        if (initialModel) {
+	            if (typeof initialModel !== "function") {
+	                throw new Error("When more than one initialModel is used, they must all be functions.");
+	            }
+	            allInitialModels.push(initialModel);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;
@@ -135,6 +123,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    ;
 	    var run = function (runConfig) {
+	        var rootModel = runConfig.initialModel || {};
+	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
