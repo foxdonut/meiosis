@@ -96,7 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var initialModel = config.initialModel;
 	        if (initialModel) {
 	            if (typeof initialModel !== "function") {
-	                throw new Error("When more than one initialModel is used, they must all be functions.");
+	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
 	            }
 	            allInitialModels.push(initialModel);
 	        }
