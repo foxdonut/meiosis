@@ -7,5 +7,6 @@ export * from "./postRender";
 export * from "./ready";
 export * from "./receive";
 export * from "./renderer";
+export * from "./state";
 export * from "./view";
 export * from "./wire";

@@ -1,3 +1,3 @@
-export interface PostRender<M> {
-    (model: M): any;
+export interface PostRender<S> {
+    (state: S): any;
 }

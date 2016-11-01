@@ -74,6 +74,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function newInstance() {
 	    var allInitialModels = [];
+	    var allStates = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
@@ -89,6 +90,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
+	            !config.state &&
 	            !config.view &&
 	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
@@ -99,6 +101,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
 	            }
 	            allInitialModels.push(initialModel);
+	        }
+	        var state = config.state;
+	        if (state) {
+	            allStates.push(state);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;
@@ -117,14 +123,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (nextAction) {
 	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
 	        }
-	        return function (model) {
-	            return config.view ? config.view(model, actions) : undefined;
+	        return function (state) {
+	            return config.view ? config.view(state, actions) : undefined;
 	        };
 	    }
 	    ;
 	    var run = function (runConfig) {
 	        var rootModel = runConfig.initialModel || {};
 	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
+	        var rootState = runConfig.state || (function (model) { return model; });
+	        allStates.forEach(function (stateFunction) {
+	            var prevState = rootState;
+	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
+	        });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -144,14 +155,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot_ = function (model) {
-	            var result = runConfig.renderer(model, runConfig.rootComponent);
-	            allPostRenders.forEach(function (postRender) { return postRender(model); });
+	        var renderRoot_ = function (state) {
+	            var result = runConfig.renderer(state, runConfig.rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(state); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
+	        renderRoot_.state = rootState;
 	        var renderRoot = renderRoot_;
-	        rootWire.listen(renderRoot);
+	        rootWire.listen(function (model) { return renderRoot(rootState(model)); });
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];

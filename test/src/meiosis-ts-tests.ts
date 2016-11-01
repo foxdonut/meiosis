@@ -28,11 +28,11 @@ const renderer: Renderer<Model, View> = (model: Model, rootComponent: Component<
   vnode = rootComponent(model);
 };
 
-let createComponent: CreateComponent<Model, View, Proposal> = null;
-let run: Run<Model, View> = null;
+let createComponent: CreateComponent<Model, Model, View, Proposal> = null;
+let run: Run<Model, Model, View> = null;
 
 test.beforeEach(function(): void {
-  const Meiosis: MeiosisApp<Model, View, Proposal> = newInstance<Model, View, Proposal>();
+  const Meiosis: MeiosisApp<Model, Model, View, Proposal> = newInstance<Model, Model, View, Proposal>();
   createComponent = Meiosis.createComponent;
   run = Meiosis.run;
 });
@@ -68,7 +68,7 @@ test("takes advantage of typescript features", (t: TestContext): void => {
     }
   });
 
-  const renderRoot: RenderRoot<Model> = run({
+  const renderRoot: RenderRoot<Model, Model> = run({
     renderer,
     rootComponent: Main,
     initialModel: { counter: 1, description: "test" }
@@ -112,7 +112,7 @@ test("can create components with propose or actions", (t: TestContext): void => 
     }
   });
 
-  const renderRoot: RenderRoot<Model> = run({
+  const renderRoot: RenderRoot<Model, Model> = run({
     renderer,
     rootComponent: Main,
     initialModel: { counter: 1, description: "test" }

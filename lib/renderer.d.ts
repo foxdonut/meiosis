@@ -1,4 +1,4 @@
 import { Component } from "./component";
-export interface Renderer<M, V> {
-    (model: M, rootComponent: Component<M, V>): any;
+export interface Renderer<S, V> {
+    (state: S, rootComponent: Component<S, V>): any;
 }

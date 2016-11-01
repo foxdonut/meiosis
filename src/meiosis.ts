@@ -5,30 +5,33 @@ import { PostRender } from "./postRender";
 import { Ready } from "./ready";
 import { Receive } from "./receive";
 import { Renderer } from "./renderer";
+import { State } from "./state";
 import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
 
-export interface RenderRoot<M> {
-  (model: M): any;
+export interface RenderRoot<M, S> {
+  (state: S): any;
   initialModel: M;
+  state: State<M, S>;
 }
 
-export interface RunConfig<M, V> {
-  renderer: Renderer<M, V>;
-  rootComponent: Component<M, V>;
+export interface RunConfig<M, S, V> {
+  renderer: Renderer<S, V>;
+  rootComponent: Component<S, V>;
   initialModel?: M;
+  state?: State<M, S>;
 }
 
-export interface Run<M, V> {
-  (runConfig: RunConfig<M, V>): RenderRoot<M>;
+export interface Run<M, S, V> {
+  (runConfig: RunConfig<M, S, V>): RenderRoot<M, S>;
 }
 
-export interface CreateComponent<M, V, P> {
-  <A>(config: Config<M, V, P, A>): Component<M, V>;
+export interface CreateComponent<M, S, V, P> {
+  <A>(config: Config<M, S, V, P, A>): Component<S, V>;
 }
 
-export interface MeiosisApp<M, V, P> {
-  createComponent: CreateComponent<M, V, P>;
-  run: Run<M, V>;
+export interface MeiosisApp<M, S, V, P> {
+  createComponent: CreateComponent<M, S, V, P>;
+  run: Run<M, S, V>;
 }
 
 const REFUSE_PROPOSAL = {};
@@ -36,11 +39,12 @@ let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
-function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
+function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
   let allInitialModels: Array<InitialModel<M>> = [];
+  let allStates: Array<State<M, S>> = [];
   let allReceives: Array<Receive<M, P>> = [];
   let allReadies: Array<Ready<P, any>> = [];
-  let allPostRenders: Array<PostRender<M>> = [];
+  let allPostRenders: Array<PostRender<S>> = [];
   let allNextActions: Array<NextActionFromActions<M, P>> = [];
 
   const createRootWire: WireCreator<M> = defaultWireCreator();
@@ -49,13 +53,14 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
   const componentWire: Wire<P> = createComponentWire();
   const propose: Emitter<P> = componentWire.emit;
 
-  function createComponent<A>(config: Config<M, V, P, A>): Component<M, V> {
+  function createComponent<A>(config: Config<M, S, V, P, A>): Component<S, V> {
     if (!config || (
       !config.actions &&
       !config.nextAction &&
       !config.initialModel &&
       !config.ready &&
       !config.receive &&
+      !config.state &&
       !config.view &&
       !config.postRender
     )) {
@@ -70,6 +75,11 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
       allInitialModels.push(initialModel);
     }
 
+    const state: State<M, S> = config.state;
+    if (state) {
+      allStates.push(state);
+    }
+
     const actions: A | Emitter<P> = config.actions ? config.actions(propose) : propose;
 
     const receive: Receive<M, P> = config.receive;
@@ -82,7 +92,7 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
       allReadies.push(() => ready(actions));
     }
 
-    const postRender: PostRender<M> = config.postRender;
+    const postRender: PostRender<S> = config.postRender;
     if (postRender) {
       allPostRenders.push(postRender);
     }
@@ -92,14 +102,20 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
       allNextActions.push((model: M, proposal: P) => nextAction(model, proposal, actions));
     }
 
-    return function(model: M): V {
-      return config.view ? config.view(model, actions) : undefined;
+    return function(state: S): V {
+      return config.view ? config.view(state, actions) : undefined;
     };
   };
 
-  const run: Run<M, V> = (runConfig: RunConfig<M, V>): RenderRoot<M> => {
+  const run: Run<M, S, V> = (runConfig: RunConfig<M, S, V>): RenderRoot<M, S> => {
     let rootModel: any = runConfig.initialModel || {};
     allInitialModels.forEach((initialModel: Function) => rootModel = initialModel(rootModel));
+
+    let rootState: State<any, any> = runConfig.state || ( (model: M) => model );
+    allStates.forEach((stateFunction: State<M, S>) => {
+      const prevState = rootState;
+      rootState = (model: M, state: S): S => stateFunction(model, prevState(model))
+    });
 
     componentWire.listen((proposal: any) => {
       let accepted = true;
@@ -123,16 +139,17 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
       }
     });
 
-    const renderRoot_: any = (model: M) => {
-      const result: any = runConfig.renderer(model, runConfig.rootComponent);
-      allPostRenders.forEach((postRender: PostRender<M>) => postRender(model));
+    const renderRoot_: any = (state: S) => {
+      const result: any = runConfig.renderer(state, runConfig.rootComponent);
+      allPostRenders.forEach((postRender: PostRender<S>) => postRender(state));
       return result;
     };
     renderRoot_.initialModel = rootModel;
+    renderRoot_.state = rootState;
 
-    const renderRoot: RenderRoot<M> = renderRoot_;
+    const renderRoot: RenderRoot<M, S> = renderRoot_;
 
-    rootWire.listen(renderRoot);
+    rootWire.listen((model: M) => renderRoot(rootState(model)));
 
     rootWire.emit(rootModel);
     allReadies.forEach((ready: Function) => ready());
@@ -179,7 +196,7 @@ function newInstance<M, V, P>(): MeiosisApp<M, V, P> {
   };
 }
 
-const instance = newInstance<any, any, any>();
+const instance = newInstance<any, any, any, any>();
 const createComponent = instance.createComponent;
 const run = instance.run;
 
