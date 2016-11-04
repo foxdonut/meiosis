@@ -173,7 +173,7 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
       });
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-          renderRoot(evt.data.model);
+          renderRoot(evt.data.state);
         }
         else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
           window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel }, "*");
@@ -183,6 +183,11 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
             const { model, proposal }: any = bufferedReceives[i];
             window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
           }
+        }
+        else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+          const state: S = renderRoot.state(evt.data.model);
+          const ts: string = evt.data.ts;
+          window.postMessage({ type: "MEIOSIS_STATE", state, ts }, "*");
         }
       });
     }

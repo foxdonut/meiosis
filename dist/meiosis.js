@@ -184,7 +184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-	                    renderRoot(evt.data.model);
+	                    renderRoot(evt.data.state);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
 	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
@@ -193,6 +193,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
 	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
 	                    }
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+	                    var state = renderRoot.state(evt.data.model);
+	                    var ts = evt.data.ts;
+	                    window.postMessage({ type: "MEIOSIS_STATE", state: state, ts: ts }, "*");
 	                }
 	            });
 	        }
