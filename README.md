@@ -6,44 +6,22 @@ http://meiosis.js.org
 
 ## Do you Mei-O?
 
-**Meiosis** is a library and an architecture pattern for dividing web applications into small,
-independent, manageable, and testable parts,
-_while letting you keep using the tools that you already love._ Meiosis manages the data flow and
-lets you choose whatever you like for rendering views.
+**Meiosis** is a library that manages the data flow of your web applications,
+_while letting you keep using the tools that you already love._
 
 For example, you can use [React](https://facebook.github.io/react/), [Inferno](https://github.com/trueadm/inferno),
 [snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org), [jQuery](http://jquery.com/),
 [Handlebars](http://handlebarsjs.com), or no libraries at all and just plain vanilla JavaScript.
 
-Developing a web application with Meiosis involves three simple concepts:
+Meiosis implements the [SAM pattern](http://sam.js.org) by [Jean-Jacques Dubray](http://www.ebpml.org/about).
 
-1. Have a single model object. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
-2. Write the view as a function of the model.
-3. Have a way to _propose_ changes to the model. After the changes have been accepted, Meiosis re-renders the view by
-calling the view function with the new model.
-
-Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort, providing
-an architecture to structure your code that scales well as your application gets larger and more complex.
-
-You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:
-
-- Creating and maintaining a _single root model_
-- Letting you hook in functions that receive _proposals_ and change the model accordingly
-- Passing action objects to your views so that they can trigger proposals
-- Automatically re-rendering your views
-- Letting you define logic for actions that should automatically trigger.
-
-Meiosis is about managing the application data flow. Create components by specifying functions, and Meiosis takes care of the wiring. Every part of the process is optional, so you can specify what you need for each component.
-
-For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
+Please see [http://meiosis.js.org](http://meiosis.js.org) for more details.
 
 Try out the examples online: http://meiosis.js.org/example-index.html
 
-Example code: https://github.com/foxdonut/meiosis-examples
+For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
 
-Please post questions and suggestions as Github issues on the [meiosis repository](https://github.com/foxdonut/meiosis).
-
-You can also chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
+You can also discuss on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
 
 ## Why the name _Meiosis_?
 
