@@ -39,19 +39,21 @@ rendering views.</p>
 <a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript.
 </p>
 
+<p>Meiosis implements the <a href="http://sam.js.org">SAM pattern</a> by <a href="http://www.ebpml.org/about">Jean-Jacques Dubray</a>.</p>
+
 <p>Developing a web application with Meiosis involves three simple concepts:</p>
 
 <ol>
   <li>
-    Have a single model. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you.
+    Start with a model. This is the <i>single source of truth</i>. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you. Optionally, write a <code>state</code> function that takes the model and computes additional properties to produce the complete <i>application state</i>.
   </li>
   <li>
-    Write the view as a function of the model.
+    Write the view as a function of the model/application state.
   </li>
   <li>
     Have a way to <i>propose</i> changes to the model. After the changes have been accepted,
-    Meiosis re-renders the view by calling the view function with the new model.
-   </li>
+    Meiosis re-renders the view by calling the view function with the new model/application state.
+  </li>
 </ol>
 
 <p>Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort,
@@ -60,7 +62,7 @@ providing an architecture to structure your code that scales well as your applic
 
 <p>You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:</p>
 <ul>
-<li>Creating and maintaining a <i>single root model</i></li>
+<li>Creating and maintaining a <i>single root model</i>, and (optionally) calling your <code>state</code> function to produce the <i>application state</i>.</li>
 <li>Letting you hook in functions that receive <i>proposals</i> and change the model accordingly</li>
 <li>Passing action objects to your views so that they can trigger proposals</li>
 <li>Automatically re-rendering your views</li>
