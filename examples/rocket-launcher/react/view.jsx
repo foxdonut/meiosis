@@ -22,7 +22,10 @@
         actions.abort();
       };
       return (<div>
-        <p>Count down: {model.counter}</p>
+        <p>
+          Count down: {model.counter} {model.even ? "(Even)" : "(Odd)"}
+          {model.closeToLaunch ? " CLOSE TO LAUNCH!" : ""}
+        </p>
         <form>
           <input type="submit" className="btn btn-danger" value="Abort" onClick={onAbort}/>
         </form>

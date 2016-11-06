@@ -20,15 +20,13 @@
   function(MainAction) {
     return function(todoStorage) {
       return function(model, proposal) {
-        return MainAction.case({
+        MainAction.case({
           SetAllCompleted: function(completed) {
             model.todos = todoStorage.setAllCompleted(completed);
-            return model;
-          },
-          _: function() {
-            return model;
           }
         }, proposal);
+
+        return model;
       };
     };
   }

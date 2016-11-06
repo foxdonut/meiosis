@@ -66,7 +66,7 @@
 
 	_unionType2.default.check = false;
 
-	var renderRoot = (0, _meiosis.run)((0, _meiosisReact.renderer)().intoId(document, "app"), _main2.default);
+	var renderRoot = (0, _meiosis.run)({ renderer: (0, _meiosisReact.renderer)().intoId(document, "app"), rootComponent: _main2.default });
 	(0, _meiosisTracer2.default)(_meiosis.createComponent, renderRoot, "#tracer");
 
 /***/ },
@@ -91,52 +91,41 @@
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init(adapters) {
+	function newInstance() {
+	    var allInitialModels = [];
+	    var allStates = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
-	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
+	    var createRootWire = wire_1.defaultWireCreator();
+	    var createComponentWire = wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var rootModel = null;
-	    var initialModelCount = 0;
-	    var createComponent = function (config) {
+	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
+	            !config.state &&
 	            !config.view &&
-	            !config.postRender &&
-	            !config.setup)) {
+	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        if (rootModel === null) {
-	            var startingModel = {};
-	            rootModel = startingModel;
-	        }
 	        var initialModel = config.initialModel;
-	        var initialModelError = false;
-	        if (typeof initialModel === "function") {
-	            rootModel = initialModel(rootModel);
-	            initialModelError = initialModelCount > 0;
+	        if (initialModel) {
+	            if (typeof initialModel !== "function") {
+	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
+	            }
+	            allInitialModels.push(initialModel);
 	        }
-	        else if (initialModel) {
-	            rootModel = initialModel;
-	            initialModelCount++;
-	            initialModelError = initialModelCount > 1;
-	        }
-	        if (initialModelError) {
-	            throw new Error("When more than one initialModel is used, they must all be functions.");
+	        var state = config.state;
+	        if (state) {
+	            allStates.push(state);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
-	        var setup = config.setup;
-	        if (setup) {
-	            setup(actions);
-	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
@@ -153,11 +142,19 @@
 	        if (nextAction) {
 	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
 	        }
-	        return function (model) {
-	            return config.view ? config.view(model, actions) : undefined;
+	        return function (state) {
+	            return config.view ? config.view(state, actions) : undefined;
 	        };
-	    };
-	    var run = function (render, rootComponent) {
+	    }
+	    ;
+	    var run = function (runConfig) {
+	        var rootModel = runConfig.initialModel || {};
+	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
+	        var rootState = runConfig.state || (function (model) { return model; });
+	        allStates.forEach(function (stateFunction) {
+	            var prevState = rootState;
+	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
+	        });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -177,14 +174,15 @@
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent, propose);
-	            allPostRenders.forEach(function (postRender) { return postRender(model); });
+	        var renderRoot_ = function (state) {
+	            var result = runConfig.renderer(state, runConfig.rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(state); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
+	        renderRoot_.state = rootState;
 	        var renderRoot = renderRoot_;
-	        rootWire.listen(renderRoot);
+	        rootWire.listen(function (model) { return renderRoot(rootState(model)); });
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
@@ -205,7 +203,7 @@
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-	                    renderRoot(evt.data.model);
+	                    renderRoot(evt.data.state);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
 	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
@@ -214,6 +212,11 @@
 	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
 	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
 	                    }
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+	                    var state = renderRoot.state(evt.data.model);
+	                    var ts = evt.data.ts;
+	                    window.postMessage({ type: "MEIOSIS_STATE", state: state, ts: ts }, "*");
 	                }
 	            });
 	        }
@@ -224,8 +227,8 @@
 	        run: run
 	    };
 	}
-	exports.init = init;
-	var instance = init();
+	exports.newInstance = newInstance;
+	var instance = newInstance();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;
@@ -422,25 +425,40 @@
 	var cachedSetTimeout;
 	var cachedClearTimeout;
 
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
 	(function () {
 	    try {
-	        cachedSetTimeout = setTimeout;
-	    } catch (e) {
-	        cachedSetTimeout = function () {
-	            throw new Error('setTimeout is not defined');
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
 	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
 	    }
 	    try {
-	        cachedClearTimeout = clearTimeout;
-	    } catch (e) {
-	        cachedClearTimeout = function () {
-	            throw new Error('clearTimeout is not defined');
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
 	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
 	    }
 	} ())
 	function runTimeout(fun) {
 	    if (cachedSetTimeout === setTimeout) {
 	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
 	        return setTimeout(fun, 0);
 	    }
 	    try {
@@ -461,6 +479,11 @@
 	function runClearTimeout(marker) {
 	    if (cachedClearTimeout === clearTimeout) {
 	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
 	        return clearTimeout(marker);
 	    }
 	    try {
@@ -21148,15 +21171,13 @@
 		var tracerModel = _model.initialModel;
 		
 		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector, horizontal) {
-		  var receiver = (0, _receive2.default)(tracerModel, _view.proposalView);
-		  createComponent({
-		    receive: receiver
-		  });
+		  var receiver = (0, _receive2.default)(tracerModel, (0, _view.proposalView)(renderRoot));
+		  createComponent({ receive: receiver });
 		  (0, _view.initialView)(selector, renderRoot, tracerModel, horizontal);
 		  receiver(renderRoot.initialModel, "initialModel");
 		
 		  return { reset: function reset() {
-		      return (0, _view.reset)(tracerModel);
+		      return (0, _view.reset)(renderRoot, tracerModel);
 		    } };
 		};
 		
@@ -21206,33 +21227,53 @@
 		var tracerResetId = "tracerReset";
 		var tracerIndexId = "tracerIndex";
 		var tracerModelId = "tracerModel";
+		var tracerStateId = "tracerState";
 		var tracerProposalId = "tracerProposal";
 		
-		var proposalView = function proposalView(_ref, tracerModel) {
-		  var model = _ref.model;
-		  var proposal = _ref.proposal;
+		var stateFunction = function stateFunction(renderRoot, model, callback) {
+		  var stateResult = renderRoot.state(model);
 		
-		  var tracer = document.getElementById(tracerId);
-		  tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
-		  tracer.value = String(tracerModel.tracerIndex);
+		  if (typeof stateResult.then === "function") {
+		    stateResult.then(function (state) {
+		      callback(state);
+		    });
+		  } else {
+		    callback(stateResult);
+		  }
+		};
 		
-		  var tracerIndex = document.getElementById(tracerIndexId);
-		  tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		var proposalView = function proposalView(renderRoot) {
+		  return function (_ref, tracerModel) {
+		    var model = _ref.model,
+		        proposal = _ref.proposal;
 		
-		  var tracerModelEl = document.getElementById(tracerModelId);
-		  tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		    var tracer = document.getElementById(tracerId);
+		    tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
+		    tracer.value = String(tracerModel.tracerIndex);
 		
-		  var tracerProposalEl = document.getElementById(tracerProposalId);
-		  tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		    var tracerIndex = document.getElementById(tracerIndexId);
+		    tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		
+		    var tracerProposalEl = document.getElementById(tracerProposalId);
+		    tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		
+		    var tracerModelEl = document.getElementById(tracerModelId);
+		    tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		
+		    var tracerStateEl = document.getElementById(tracerStateId);
+		    stateFunction(renderRoot, model, function (state) {
+		      return tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		    });
+		  };
 		};
 		
 		var onSliderChange = function onSliderChange(renderRoot, tracerModel) {
 		  return function (evt) {
 		    var index = parseInt(evt.target.value, 10);
 		    var snapshot = tracerModel.tracerStates[index];
-		    renderRoot(snapshot.model);
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
 		    tracerModel.tracerIndex = index;
-		    proposalView(snapshot, tracerModel);
+		    proposalView(renderRoot)(snapshot, tracerModel);
 		  };
 		};
 		
@@ -21240,7 +21281,12 @@
 		  return function (evt) {
 		    try {
 		      var model = JSON.parse(evt.target.value);
-		      renderRoot(model);
+		      stateFunction(renderRoot, model, function (state) {
+		        var tracerStateEl = document.getElementById(tracerStateId);
+		        tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		
+		        renderRoot(state);
+		      });
 		    } catch (err) {
 		      // ignore invalid JSON
 		    }
@@ -21261,26 +21307,30 @@
 		  };
 		};
 		
-		var onReset = function onReset(tracerModel) {
+		var onReset = function onReset(renderRoot, tracerModel) {
 		  return function () {
-		    reset(tracerModel);
+		    reset(renderRoot, tracerModel);
 		  };
 		};
 		
-		var reset = function reset(tracerModel) {
+		var reset = function reset(renderRoot, tracerModel) {
+		  var snapshot = tracerModel.tracerStates[0];
+		  if (snapshot) {
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
+		    proposalView(renderRoot)(snapshot, tracerModel);
+		  }
+		
 		  tracerModel.tracerStates.length = 0;
 		  tracerModel.tracerIndex = 0;
-		  proposalView({ model: {}, proposal: {} }, tracerModel);
 		};
 		
 		var initialView = function initialView(selector, renderRoot, tracerModel, horizontal) {
 		  var target = document.querySelector(selector);
 		
 		  if (target) {
-		    var modelRows = horizontal ? "5" : "20";
 		    var divStyle = horizontal ? " style='float: left'" : "";
 		
-		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='" + modelRows + "' cols='40'></textarea></div></div>";
+		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>State:</div>" + "<textarea id='" + tracerStateId + "' rows='5' cols='40'></textarea></div></div>";
 		
 		    target.innerHTML = viewHtml;
 		
@@ -21289,7 +21339,7 @@
 		    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderRoot, tracerModel));
 		    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderRoot));
 		    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
-		    document.getElementById(tracerResetId).addEventListener("click", onReset(tracerModel));
+		    document.getElementById(tracerResetId).addEventListener("click", onReset(renderRoot, tracerModel));
 		  }
 		};
 		
@@ -21451,7 +21501,7 @@
 	        (validator.prototype === undefined || !validator.prototype.isPrototypeOf(v)) &&
 	        (typeof validator !== 'function' || !validator(v))) {
 	      var strVal = typeof v === 'string' ? "'" + v + "'" : v; // put the value in quotes if it's a string
-	      throw new TypeError('bad value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
+	      throw new TypeError('wrong value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
 	    }
 	  }
 	};
@@ -21511,10 +21561,12 @@
 	      throw new Error('non-exhaustive patterns in a function');
 	    }
 	  }
-	  var args = wildcard === true ? [arg]
-	           : arg !== undefined ? valueToArray(value).concat([arg])
-	           : valueToArray(value);
-	  return handler.apply(undefined, args);
+	  if (handler !== undefined) {
+	    var args = wildcard === true ? [arg]
+	             : arg !== undefined ? valueToArray(value).concat([arg])
+	             : valueToArray(value);
+	    return handler.apply(undefined, args);
+	  }
 	}
 
 	var typeCase = curryN(3, rawCase);
@@ -21540,8 +21592,8 @@
 	  
 	  obj.prototype = {};
 	  obj.prototype[Symbol ? Symbol.iterator : '@@iterator'] = createIterator;
-	  obj.prototype.case = function (cases) { return obj.case(cases, this); }
-	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); }
+	  obj.prototype.case = function (cases) { return obj.case(cases, this); };
+	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); };
 	  
 	  for (key in desc) {
 	    res = constructor(obj, key, desc[key]);
@@ -21556,18 +21608,18 @@
 	  var innerType = Type({T: [T]}).T;
 	  var validate = List.case({
 	    List: function (array) {
-	      try{
+	      try {
 	        for(var n = 0; n < array.length; n++) {
-	          innerType(array[n])
+	          innerType(array[n]);
 	        }
 	      } catch (e) {
-	        throw TypeError('wrong value '+array[n]+' passed to location '+numToStr[n]+' in List')
+	        throw new TypeError('wrong value '+ array[n] + ' passed to location ' + numToStr[n] + ' in List');
 	      }
 	      return true;
 	    }
 	  });
 	  return compose(validate, List.List);
-	}
+	};
 
 	module.exports = Type;
 
@@ -22339,11 +22391,11 @@
 
 	var _nextAction2 = _interopRequireDefault(_nextAction);
 
-	var _receive = __webpack_require__(201);
+	var _receive = __webpack_require__(202);
 
 	var _receive2 = _interopRequireDefault(_receive);
 
-	var _view = __webpack_require__(202);
+	var _view = __webpack_require__(203);
 
 	var _view2 = _interopRequireDefault(_view);
 
@@ -22737,18 +22789,25 @@
 
 /***/ },
 /* 200 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+
+	var _actions = __webpack_require__(201);
+
+	var _actions2 = _interopRequireDefault(_actions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	var nextAction = function nextAction(model, proposal, propose) {
 	  proposal.case({
 	    Validate: function Validate() {
 	      if (!model.store.entry.errors && !model.store.date.errors) {
-	        propose(Action.Save(model));
+	        propose(_actions2.default.Save(model));
 	      }
 	    },
 	    _: function _() {}
@@ -22759,6 +22818,29 @@
 
 /***/ },
 /* 201 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _unionType = __webpack_require__(173);
+
+	var _unionType2 = _interopRequireDefault(_unionType);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Action = (0, _unionType2.default)({
+	  Validate: [Object],
+	  Save: [Object]
+	});
+
+	exports.default = Action;
+
+/***/ },
+/* 202 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22776,8 +22858,7 @@
 
 	      model.store.entry.value = "";
 	      model.store.date.value = "";
-	    },
-	    _: function _() {}
+	    }
 	  });
 
 	  return model;
@@ -22786,7 +22867,7 @@
 	exports.default = receive;
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22795,11 +22876,11 @@
 	  value: true
 	});
 
-	var _react = __webpack_require__(203);
+	var _react = __webpack_require__(204);
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _actions = __webpack_require__(209);
+	var _actions = __webpack_require__(201);
 
 	var _actions2 = _interopRequireDefault(_actions);
 
@@ -22836,16 +22917,16 @@
 	exports.default = view;
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = __webpack_require__(204);
+	module.exports = __webpack_require__(205);
 
 
 /***/ },
-/* 204 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22865,14 +22946,14 @@
 
 	var ReactChildren = __webpack_require__(104);
 	var ReactComponent = __webpack_require__(136);
-	var ReactPureComponent = __webpack_require__(205);
+	var ReactPureComponent = __webpack_require__(206);
 	var ReactClass = __webpack_require__(135);
-	var ReactDOMFactories = __webpack_require__(206);
+	var ReactDOMFactories = __webpack_require__(207);
 	var ReactElement = __webpack_require__(97);
 	var ReactPropTypes = __webpack_require__(96);
 	var ReactVersion = __webpack_require__(164);
 
-	var onlyChild = __webpack_require__(208);
+	var onlyChild = __webpack_require__(209);
 	var warning = __webpack_require__(22);
 
 	var createElement = ReactElement.createElement;
@@ -22880,7 +22961,7 @@
 	var cloneElement = ReactElement.cloneElement;
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(207);
+	  var ReactElementValidator = __webpack_require__(208);
 	  createElement = ReactElementValidator.createElement;
 	  createFactory = ReactElementValidator.createFactory;
 	  cloneElement = ReactElementValidator.cloneElement;
@@ -22940,7 +23021,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 205 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22987,7 +23068,7 @@
 	module.exports = ReactPureComponent;
 
 /***/ },
-/* 206 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23012,7 +23093,7 @@
 	 */
 	var createDOMFactory = ReactElement.createFactory;
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(207);
+	  var ReactElementValidator = __webpack_require__(208);
 	  createDOMFactory = ReactElementValidator.createFactory;
 	}
 
@@ -23163,7 +23244,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 207 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23397,7 +23478,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ },
-/* 208 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23439,29 +23520,6 @@
 
 	module.exports = onlyChild;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
-
-/***/ },
-/* 209 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _unionType = __webpack_require__(173);
-
-	var _unionType2 = _interopRequireDefault(_unionType);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Action = (0, _unionType2.default)({
-	  Validate: [Object],
-	  Save: [Object]
-	});
-
-	exports.default = Action;
 
 /***/ },
 /* 210 */
@@ -23545,8 +23603,7 @@
 	    },
 	    Validate: function Validate() {
 	      return model.errors = (0, _validate2.default)(model, validation);
-	    },
-	    _: function _() {}
+	    }
 	  });
 
 	  return model;
@@ -24732,7 +24789,7 @@
 	  value: true
 	});
 
-	var _react = __webpack_require__(203);
+	var _react = __webpack_require__(204);
 
 	var _react2 = _interopRequireDefault(_react);
 
@@ -24885,8 +24942,7 @@
 	    },
 	    Validate: function Validate() {
 	      return model.errors = (0, _validate2.default)(model, validation);
-	    },
-	    _: function _() {}
+	    }
 	  });
 
 	  return model;
@@ -24904,7 +24960,7 @@
 	  value: true
 	});
 
-	var _react = __webpack_require__(203);
+	var _react = __webpack_require__(204);
 
 	var _react2 = _interopRequireDefault(_react);
 
@@ -25048,8 +25104,7 @@
 	            model.value = Math.round(model.value * 9 / 5 + 32);
 	            model.units = "F";
 	          }
-	        },
-	        _: function _() {}
+	        }
 	      });
 	    }
 
@@ -25069,7 +25124,7 @@
 	  value: true
 	});
 
-	var _react = __webpack_require__(203);
+	var _react = __webpack_require__(204);
 
 	var _react2 = _interopRequireDefault(_react);
 

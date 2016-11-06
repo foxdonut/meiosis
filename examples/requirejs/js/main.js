@@ -23,13 +23,13 @@ requirejs(["require", "meiosis", "meiosisVanillaJs", "meiosisTracer",
     var renderer = meiosisVanillaJs.renderer();
 
     var Main = meiosis.createComponent({
-      initialModel: model.initialModel,
       view: view,
       ready: ready,
       receive: receive
     });
 
-    var renderRoot = meiosis.run(renderer.intoId(document, "app"), Main);
+    var renderRoot = meiosis.run({ renderer: renderer.intoId(document, "app"),
+      initialModel: model.initialModel, rootComponent: Main });
 
     meiosisTracer(meiosis.createComponent, renderRoot, "#tracer");
   }

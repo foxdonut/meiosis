@@ -22,7 +22,7 @@
     var root = document.getElementById("app");
 
     return function(actions) {
-      var history = History.createHistory();
+      var history = History.createBrowserHistory();
 
       history.listen(function(location) {
         var route = location.hash.split("/")[1] || "all";

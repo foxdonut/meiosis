@@ -24,7 +24,8 @@
         actions.abort();
       };
       return h("div", [
-        h("p", "Count down: " + model.counter),
+        h("p", "Count down: " + model.counter + " " + (model.even ? "(Even)" : "(Odd)") +
+          (model.closeToLaunch ? " CLOSE TO LAUNCH!" : "")),
         h("form", [
           h("input.btn.btn-danger", {attrs: {type: "submit", value: "Abort"}, on: {click: onAbort}})
         ])

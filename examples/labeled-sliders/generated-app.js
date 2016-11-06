@@ -57,7 +57,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var SliderContainer = (0, _main2.default)();
-	(0, _meiosis.run)((0, _meiosisSnabbdom.renderer)().intoId(document, "app"), SliderContainer);
+	(0, _meiosis.run)({ renderer: (0, _meiosisSnabbdom.renderer)().intoId(document, "app"), rootComponent: SliderContainer });
 
 /***/ },
 /* 1 */
@@ -81,52 +81,41 @@
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init(adapters) {
+	function newInstance() {
+	    var allInitialModels = [];
+	    var allStates = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
-	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
+	    var createRootWire = wire_1.defaultWireCreator();
+	    var createComponentWire = wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var rootModel = null;
-	    var initialModelCount = 0;
-	    var createComponent = function (config) {
+	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
+	            !config.state &&
 	            !config.view &&
-	            !config.postRender &&
-	            !config.setup)) {
+	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        if (rootModel === null) {
-	            var startingModel = {};
-	            rootModel = startingModel;
-	        }
 	        var initialModel = config.initialModel;
-	        var initialModelError = false;
-	        if (typeof initialModel === "function") {
-	            rootModel = initialModel(rootModel);
-	            initialModelError = initialModelCount > 0;
+	        if (initialModel) {
+	            if (typeof initialModel !== "function") {
+	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
+	            }
+	            allInitialModels.push(initialModel);
 	        }
-	        else if (initialModel) {
-	            rootModel = initialModel;
-	            initialModelCount++;
-	            initialModelError = initialModelCount > 1;
-	        }
-	        if (initialModelError) {
-	            throw new Error("When more than one initialModel is used, they must all be functions.");
+	        var state = config.state;
+	        if (state) {
+	            allStates.push(state);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
-	        var setup = config.setup;
-	        if (setup) {
-	            setup(actions);
-	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
@@ -143,11 +132,19 @@
 	        if (nextAction) {
 	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
 	        }
-	        return function (model) {
-	            return config.view ? config.view(model, actions) : undefined;
+	        return function (state) {
+	            return config.view ? config.view(state, actions) : undefined;
 	        };
-	    };
-	    var run = function (render, rootComponent) {
+	    }
+	    ;
+	    var run = function (runConfig) {
+	        var rootModel = runConfig.initialModel || {};
+	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
+	        var rootState = runConfig.state || (function (model) { return model; });
+	        allStates.forEach(function (stateFunction) {
+	            var prevState = rootState;
+	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
+	        });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -167,14 +164,15 @@
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent, propose);
-	            allPostRenders.forEach(function (postRender) { return postRender(model); });
+	        var renderRoot_ = function (state) {
+	            var result = runConfig.renderer(state, runConfig.rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(state); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
+	        renderRoot_.state = rootState;
 	        var renderRoot = renderRoot_;
-	        rootWire.listen(renderRoot);
+	        rootWire.listen(function (model) { return renderRoot(rootState(model)); });
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
@@ -195,7 +193,7 @@
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-	                    renderRoot(evt.data.model);
+	                    renderRoot(evt.data.state);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
 	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
@@ -204,6 +202,11 @@
 	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
 	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
 	                    }
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+	                    var state = renderRoot.state(evt.data.model);
+	                    var ts = evt.data.ts;
+	                    window.postMessage({ type: "MEIOSIS_STATE", state: state, ts: ts }, "*");
 	                }
 	            });
 	        }
@@ -214,8 +217,8 @@
 	        run: run
 	    };
 	}
-	exports.init = init;
-	var instance = init();
+	exports.newInstance = newInstance;
+	var instance = newInstance();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;
@@ -314,7 +317,7 @@
 		var _meiosisSnabbdom = __webpack_require__(1);
 
 		Object.keys(_meiosisSnabbdom).forEach(function (key) {
-		  if (key === "default") return;
+		  if (key === "default" || key === "__esModule") return;
 		  Object.defineProperty(exports, key, {
 		    enumerable: true,
 		    get: function get() {
@@ -410,7 +413,9 @@
 		  }
 
 		  function emptyNodeAt(elm) {
-		    return VNode(api.tagName(elm).toLowerCase(), {}, [], undefined, elm);
+		    var id = elm.id ? '#' + elm.id : '';
+		    var c = elm.className ? '.' + elm.className.split(' ').join('.') : '';
+		    return VNode(api.tagName(elm).toLowerCase() + id + c, {}, [], undefined, elm);
 		  }
 
 		  function createRmCb(childElm, listeners) {
@@ -441,7 +446,7 @@
 		      elm = vnode.elm = isDef(data) && isDef(i = data.ns) ? api.createElementNS(i, tag)
 		                                                          : api.createElement(tag);
 		      if (hash < dot) elm.id = sel.slice(hash + 1, dot);
-		      if (dotIdx > 0) elm.className = sel.slice(dot+1).replace(/\./g, ' ');
+		      if (dotIdx > 0) elm.className = sel.slice(dot + 1).replace(/\./g, ' ');
 		      if (is.array(children)) {
 		        for (i = 0; i < children.length; ++i) {
 		          api.appendChild(elm, createElm(children[i], insertedVnodeQueue));
@@ -717,11 +722,12 @@
 		var VNode = __webpack_require__(3);
 		var is = __webpack_require__(4);
 
-		function addNS(data, children) {
+		function addNS(data, children, sel) {
 		  data.ns = 'http://www.w3.org/2000/svg';
-		  if (children !== undefined) {
+
+		  if (sel !== 'foreignObject' && children !== undefined) {
 		    for (var i = 0; i < children.length; ++i) {
-		      addNS(children[i].data, children[i].children);
+		      addNS(children[i].data, children[i].children, children[i].sel);
 		    }
 		  }
 		}
@@ -743,7 +749,7 @@
 		    }
 		  }
 		  if (sel[0] === 's' && sel[1] === 'v' && sel[2] === 'g') {
-		    addNS(data, children);
+		    addNS(data, children, sel);
 		  }
 		  return VNode(sel, data, children, text, undefined);
 		};
@@ -772,10 +778,21 @@
 		    var intoSelector = function (doc, selector) {
 		        return intoElement(doc.querySelector(selector));
 		    };
+		    var intoViewIds = function (doc) { return function (model, rootComponent) {
+		        var views = rootComponent(model);
+		        var _loop_1 = function(id) {
+		            var component = function (model) { return views[id]; };
+		            intoElement(doc.getElementById(id))(model, component);
+		        };
+		        for (var id in views) {
+		            _loop_1(id);
+		        }
+		    }; };
 		    return {
 		        intoElement: intoElement,
 		        intoId: intoId,
-		        intoSelector: intoSelector
+		        intoSelector: intoSelector,
+		        intoViewIds: intoViewIds
 		    };
 		}
 		exports.meiosisRender = meiosisRender;
@@ -785,32 +802,44 @@
 	/* 9 */
 	/***/ function(module, exports) {
 
-		var booleanAttrs = ["allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare", 
-		                "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable", 
-		                "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple", 
-		                "muted", "nohref", "noresize", "noshade", "novalidate", "nowrap", "open", "pauseonexit", "readonly", 
-		                "required", "reversed", "scoped", "seamless", "selected", "sortable", "spellcheck", "translate", 
+		var NamespaceURIs = {
+		  "xlink": "http://www.w3.org/1999/xlink"
+		};
+
+		var booleanAttrs = ["allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare",
+		                "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable",
+		                "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple",
+		                "muted", "nohref", "noresize", "noshade", "novalidate", "nowrap", "open", "pauseonexit", "readonly",
+		                "required", "reversed", "scoped", "seamless", "selected", "sortable", "spellcheck", "translate",
 		                "truespeed", "typemustmatch", "visible"];
-		    
-		var booleanAttrsDict = {};
+
+		var booleanAttrsDict = Object.create(null);
 		for(var i=0, len = booleanAttrs.length; i < len; i++) {
 		  booleanAttrsDict[booleanAttrs[i]] = true;
 		}
-		    
+
 		function updateAttrs(oldVnode, vnode) {
 		  var key, cur, old, elm = vnode.elm,
-		      oldAttrs = oldVnode.data.attrs || {}, attrs = vnode.data.attrs || {};
-		  
+		      oldAttrs = oldVnode.data.attrs, attrs = vnode.data.attrs, namespaceSplit;
+
+		  if (!oldAttrs && !attrs) return;
+		  oldAttrs = oldAttrs || {};
+		  attrs = attrs || {};
+
 		  // update modified attributes, add new attributes
 		  for (key in attrs) {
 		    cur = attrs[key];
 		    old = oldAttrs[key];
 		    if (old !== cur) {
-		      // TODO: add support to namespaced attributes (setAttributeNS)
 		      if(!cur && booleanAttrsDict[key])
 		        elm.removeAttribute(key);
-		      else
-		        elm.setAttribute(key, cur);
+		      else {
+		        namespaceSplit = key.split(":");
+		        if(namespaceSplit.length > 1 && NamespaceURIs.hasOwnProperty(namespaceSplit[0]))
+		          elm.setAttributeNS(NamespaceURIs[namespaceSplit[0]], key, cur);
+		        else
+		          elm.setAttribute(key, cur);
+		      }
 		    }
 		  }
 		  //remove removed attributes
@@ -832,8 +861,13 @@
 
 		function updateClass(oldVnode, vnode) {
 		  var cur, name, elm = vnode.elm,
-		      oldClass = oldVnode.data.class || {},
-		      klass = vnode.data.class || {};
+		      oldClass = oldVnode.data.class,
+		      klass = vnode.data.class;
+
+		  if (!oldClass && !klass) return;
+		  oldClass = oldClass || {};
+		  klass = klass || {};
+
 		  for (name in oldClass) {
 		    if (!klass[name]) {
 		      elm.classList.remove(name);
@@ -852,66 +886,109 @@
 
 	/***/ },
 	/* 11 */
-	/***/ function(module, exports, __webpack_require__) {
+	/***/ function(module, exports) {
 
-		var is = __webpack_require__(4);
-
-		function arrInvoker(arr) {
-		  return function() {
-		    if (!arr.length) return;
-		    // Special case when length is two, for performance
-		    arr.length === 2 ? arr[0](arr[1]) : arr[0].apply(undefined, arr.slice(1));
-		  };
+		function invokeHandler(handler, vnode, event) {
+		  if (typeof handler === "function") {
+		    // call function handler
+		    handler.call(vnode, event, vnode);
+		  } else if (typeof handler === "object") {
+		    // call handler with arguments
+		    if (typeof handler[0] === "function") {
+		      // special case for single argument for performance
+		      if (handler.length === 2) {
+		        handler[0].call(vnode, handler[1], event, vnode);
+		      } else {
+		        var args = handler.slice(1);
+		        args.push(event);
+		        args.push(vnode);
+		        handler[0].apply(vnode, args);
+		      }
+		    } else {
+		      // call multiple handlers
+		      for (var i = 0; i < handler.length; i++) {
+		        invokeHandler(handler[i]);
+		      }
+		    }
+		  }
 		}
 
-		function fnInvoker(o) {
-		  return function(ev) { 
-		    if (o.fn === null) return;
-		    o.fn(ev); 
-		  };
+		function handleEvent(event, vnode) {
+		  var name = event.type,
+		      on = vnode.data.on;
+
+		  // call event handler(s) if exists
+		  if (on && on[name]) {
+		    invokeHandler(on[name], vnode, event);
+		  }
+		}
+
+		function createListener() {
+		  return function handler(event) {
+		    handleEvent(event, handler.vnode);
+		  }
 		}
 
 		function updateEventListeners(oldVnode, vnode) {
-		  var name, cur, old, elm = vnode.elm,
-		      oldOn = oldVnode.data.on || {}, on = vnode.data.on;
-		  if (!on) return;
-		  for (name in on) {
-		    cur = on[name];
-		    old = oldOn[name];
-		    if (old === undefined) {
-		      if (is.array(cur)) {
-		        elm.addEventListener(name, arrInvoker(cur));
-		      } else {
-		        cur = {fn: cur};
-		        on[name] = cur;
-		        elm.addEventListener(name, fnInvoker(cur));
+		  var oldOn = oldVnode.data.on,
+		      oldListener = oldVnode.listener,
+		      oldElm = oldVnode.elm,
+		      on = vnode && vnode.data.on,
+		      elm = vnode && vnode.elm,
+		      name;
+
+		  // optimization for reused immutable handlers
+		  if (oldOn === on) {
+		    return;
+		  }
+
+		  // remove existing listeners which no longer used
+		  if (oldOn && oldListener) {
+		    // if element changed or deleted we remove all existing listeners unconditionally
+		    if (!on) {
+		      for (name in oldOn) {
+		        // remove listener if element was changed or existing listeners removed
+		        oldElm.removeEventListener(name, oldListener, false);
 		      }
-		    } else if (is.array(old)) {
-		      // Deliberately modify old array since it's captured in closure created with `arrInvoker`
-		      old.length = cur.length;
-		      for (var i = 0; i < old.length; ++i) old[i] = cur[i];
-		      on[name]  = old;
 		    } else {
-		      old.fn = cur;
-		      on[name] = old;
+		      for (name in oldOn) {
+		        // remove listener if existing listener removed
+		        if (!on[name]) {
+		          oldElm.removeEventListener(name, oldListener, false);
+		        }
+		      }
 		    }
 		  }
-		  if (oldOn) {
-		    for (name in oldOn) {
-		      if (on[name] === undefined) {
-		        var old = oldOn[name];
-		        if (is.array(old)) {
-		          old.length = 0;
-		        }
-		        else {
-		          old.fn = null;
+
+		  // add new listeners which has not already attached
+		  if (on) {
+		    // reuse existing listener or create new
+		    var listener = vnode.listener = oldVnode.listener || createListener();
+		    // update vnode for listener
+		    listener.vnode = vnode;
+
+		    // if element changed or added we add all needed listeners unconditionally
+		    if (!oldOn) {
+		      for (name in on) {
+		        // add listener if element was changed or new listeners added
+		        elm.addEventListener(name, listener, false);
+		      }
+		    } else {
+		      for (name in on) {
+		        // add listener if new listener added
+		        if (!oldOn[name]) {
+		          elm.addEventListener(name, listener, false);
 		        }
 		      }
 		    }
 		  }
 		}
 
-		module.exports = {create: updateEventListeners, update: updateEventListeners};
+		module.exports = {
+		  create: updateEventListeners,
+		  update: updateEventListeners,
+		  destroy: updateEventListeners
+		};
 
 
 	/***/ },
@@ -920,7 +997,12 @@
 
 		function updateProps(oldVnode, vnode) {
 		  var key, cur, old, elm = vnode.elm,
-		      oldProps = oldVnode.data.props || {}, props = vnode.data.props || {};
+		      oldProps = oldVnode.data.props, props = vnode.data.props;
+
+		  if (!oldProps && !props) return;
+		  oldProps = oldProps || {};
+		  props = props || {};
+
 		  for (key in oldProps) {
 		    if (!props[key]) {
 		      delete elm[key];
@@ -951,9 +1033,14 @@
 
 		function updateStyle(oldVnode, vnode) {
 		  var cur, name, elm = vnode.elm,
-		      oldStyle = oldVnode.data.style || {},
-		      style = vnode.data.style || {},
-		      oldHasDel = 'delayed' in oldStyle;
+		      oldStyle = oldVnode.data.style,
+		      style = vnode.data.style;
+
+		  if (!oldStyle && !style) return;
+		  oldStyle = oldStyle || {};
+		  style = style || {};
+		  var oldHasDel = 'delayed' in oldStyle;
+
 		  for (name in oldStyle) {
 		    if (!style[name]) {
 		      elm.style[name] = '';
@@ -1043,7 +1130,9 @@
 	  var LabeledSlider = (0, _main2.default)();
 
 	  return (0, _meiosis.createComponent)({
-	    initialModel: _model.initialModel,
+	    initialModel: function initialModel() {
+	      return _model.initialModel;
+	    },
 	    view: (0, _view2.default)(LabeledSlider),
 	    receive: _receive2.default
 	  });
@@ -10019,7 +10108,7 @@
 	        (validator.prototype === undefined || !validator.prototype.isPrototypeOf(v)) &&
 	        (typeof validator !== 'function' || !validator(v))) {
 	      var strVal = typeof v === 'string' ? "'" + v + "'" : v; // put the value in quotes if it's a string
-	      throw new TypeError('bad value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
+	      throw new TypeError('wrong value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
 	    }
 	  }
 	};
@@ -10079,10 +10168,12 @@
 	      throw new Error('non-exhaustive patterns in a function');
 	    }
 	  }
-	  var args = wildcard === true ? [arg]
-	           : arg !== undefined ? valueToArray(value).concat([arg])
-	           : valueToArray(value);
-	  return handler.apply(undefined, args);
+	  if (handler !== undefined) {
+	    var args = wildcard === true ? [arg]
+	             : arg !== undefined ? valueToArray(value).concat([arg])
+	             : valueToArray(value);
+	    return handler.apply(undefined, args);
+	  }
 	}
 
 	var typeCase = curryN(3, rawCase);
@@ -10108,8 +10199,8 @@
 	  
 	  obj.prototype = {};
 	  obj.prototype[Symbol ? Symbol.iterator : '@@iterator'] = createIterator;
-	  obj.prototype.case = function (cases) { return obj.case(cases, this); }
-	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); }
+	  obj.prototype.case = function (cases) { return obj.case(cases, this); };
+	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); };
 	  
 	  for (key in desc) {
 	    res = constructor(obj, key, desc[key]);
@@ -10124,18 +10215,18 @@
 	  var innerType = Type({T: [T]}).T;
 	  var validate = List.case({
 	    List: function (array) {
-	      try{
+	      try {
 	        for(var n = 0; n < array.length; n++) {
-	          innerType(array[n])
+	          innerType(array[n]);
 	        }
 	      } catch (e) {
-	        throw TypeError('wrong value '+array[n]+' passed to location '+numToStr[n]+' in List')
+	        throw new TypeError('wrong value '+ array[n] + ' passed to location ' + numToStr[n] + ' in List');
 	      }
 	      return true;
 	    }
 	  });
 	  return compose(validate, List.List);
-	}
+	};
 
 	module.exports = Type;
 
@@ -11028,8 +11119,8 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var view = function view(_ref, propose) {
-	  var measurement = _ref.measurement;
-	  var index = _ref.index;
+	  var measurement = _ref.measurement,
+	      index = _ref.index;
 
 	  var getValue = function getValue(evt) {
 	    return parseInt(evt.target.value, 10);

@@ -24,11 +24,11 @@
   };
 
   var Main = meiosis.createComponent({
-    initialModel: initialModel,
     view: view,
     ready: ready,
     receive: receive
   });
 
-  meiosis.run(meiosisVanillaJs.renderer().intoId(document, "app"), Main);
+  meiosis.run({ renderer: meiosisVanillaJs.renderer().intoId(document, "app"),
+    initialModel: initialModel, rootComponent: Main });
 })();

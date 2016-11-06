@@ -20,10 +20,9 @@
   function(meiosis, HeaderAction) {
     return function(todoStorage) {
       return function(model, proposal) {
-        return HeaderAction.case({
+        HeaderAction.case({
           NewTodo: function(title) {
             model.newTodo = title;
-            return model;
           },
           SaveNewTodo: function(title) {
             title = title.trim();
@@ -31,7 +30,6 @@
             if (title) {
               model.todos = todoStorage.saveTodo({title: title});
               model.newTodo = "";
-              return model;
             }
             else {
               return meiosis.REFUSE_PROPOSAL;
@@ -39,12 +37,10 @@
           },
           ClearNewTodo: function() {
             model.newTodo = "";
-            return model;
-          },
-          _: function() {
-            return model;
           }
         }, proposal);
+
+        return model;
       };
     };
   }

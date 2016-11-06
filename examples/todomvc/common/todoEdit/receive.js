@@ -20,10 +20,9 @@
   function(meiosis, EditAction) {
     return function(todoStorage) {
       return function(model, proposal) {
-        return EditAction.case({
+        EditAction.case({
           EditingTodo: function(todo) {
             model.editTodo = todo;
-            return model;
           },
           SaveTodo: function(todo) {
             var editing = todo.id === model.editTodo.id;
@@ -32,7 +31,6 @@
             if (editing && todo.title) {
               model.todos = todoStorage.saveTodo(todo);
               model.editTodo = { };
-              return model;
             }
             else {
               return meiosis.REFUSE_PROPOSAL;
@@ -40,12 +38,10 @@
           },
           ClearEdit: function() {
             model.editTodo = { };
-            return model;
-          },
-          _: function() {
-            return model;
           }
         }, proposal);
+
+        return model;
       };
     };
   }

@@ -46,7 +46,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -20898,7 +20898,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -20922,7 +20922,7 @@
 	    Type.check = false;
 	
 	    var root = rootComponent(todoStorage);
-	    var renderRoot = meiosis.run(meiosisRender.renderer().intoId(document, "app"), root);
+	    var renderRoot = meiosis.run({ renderer: meiosisRender.renderer().intoId(document, "app"), rootComponent: root });
 	    meiosisTracer(meiosis.createComponent, renderRoot, "#tracer");
 	  };
 	});
@@ -20949,52 +20949,35 @@
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init(adapters) {
+	function newInstance() {
+	    var allInitialModels = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
-	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
+	    var createRootWire = wire_1.defaultWireCreator();
+	    var createComponentWire = wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var rootModel = null;
-	    var initialModelCount = 0;
-	    var createComponent = function (config) {
+	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
 	            !config.view &&
-	            !config.postRender &&
-	            !config.setup)) {
+	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        if (rootModel === null) {
-	            var startingModel = {};
-	            rootModel = startingModel;
-	        }
 	        var initialModel = config.initialModel;
-	        var initialModelError = false;
-	        if (typeof initialModel === "function") {
-	            rootModel = initialModel(rootModel);
-	            initialModelError = initialModelCount > 0;
-	        }
-	        else if (initialModel) {
-	            rootModel = initialModel;
-	            initialModelCount++;
-	            initialModelError = initialModelCount > 1;
-	        }
-	        if (initialModelError) {
-	            throw new Error("When more than one initialModel is used, they must all be functions.");
+	        if (initialModel) {
+	            if (typeof initialModel !== "function") {
+	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
+	            }
+	            allInitialModels.push(initialModel);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
-	        var setup = config.setup;
-	        if (setup) {
-	            setup(actions);
-	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
@@ -21014,8 +20997,11 @@
 	        return function (model) {
 	            return config.view ? config.view(model, actions) : undefined;
 	        };
-	    };
-	    var run = function (render, rootComponent) {
+	    }
+	    ;
+	    var run = function (runConfig) {
+	        var rootModel = runConfig.initialModel || {};
+	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -21036,7 +21022,7 @@
 	            }
 	        });
 	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent, propose);
+	            var result = runConfig.renderer(model, runConfig.rootComponent);
 	            allPostRenders.forEach(function (postRender) { return postRender(model); });
 	            return result;
 	        };
@@ -21082,8 +21068,8 @@
 	        run: run
 	    };
 	}
-	exports.init = init;
-	var instance = init();
+	exports.newInstance = newInstance;
+	var instance = newInstance();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;
@@ -21203,15 +21189,13 @@
 		var tracerModel = _model.initialModel;
 		
 		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector, horizontal) {
-		  var receiver = (0, _receive2.default)(tracerModel, _view.proposalView);
-		  createComponent({
-		    receive: receiver
-		  });
+		  var receiver = (0, _receive2.default)(tracerModel, (0, _view.proposalView)(renderRoot));
+		  createComponent({ receive: receiver });
 		  (0, _view.initialView)(selector, renderRoot, tracerModel, horizontal);
 		  receiver(renderRoot.initialModel, "initialModel");
 		
 		  return { reset: function reset() {
-		      return (0, _view.reset)(tracerModel);
+		      return (0, _view.reset)(renderRoot, tracerModel);
 		    } };
 		};
 		
@@ -21261,33 +21245,53 @@
 		var tracerResetId = "tracerReset";
 		var tracerIndexId = "tracerIndex";
 		var tracerModelId = "tracerModel";
+		var tracerStateId = "tracerState";
 		var tracerProposalId = "tracerProposal";
 		
-		var proposalView = function proposalView(_ref, tracerModel) {
-		  var model = _ref.model;
-		  var proposal = _ref.proposal;
+		var stateFunction = function stateFunction(renderRoot, model, callback) {
+		  var stateResult = renderRoot.state(model);
 		
-		  var tracer = document.getElementById(tracerId);
-		  tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
-		  tracer.value = String(tracerModel.tracerIndex);
+		  if (typeof stateResult.then === "function") {
+		    stateResult.then(function (state) {
+		      callback(state);
+		    });
+		  } else {
+		    callback(stateResult);
+		  }
+		};
 		
-		  var tracerIndex = document.getElementById(tracerIndexId);
-		  tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		var proposalView = function proposalView(renderRoot) {
+		  return function (_ref, tracerModel) {
+		    var model = _ref.model,
+		        proposal = _ref.proposal;
 		
-		  var tracerModelEl = document.getElementById(tracerModelId);
-		  tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		    var tracer = document.getElementById(tracerId);
+		    tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
+		    tracer.value = String(tracerModel.tracerIndex);
 		
-		  var tracerProposalEl = document.getElementById(tracerProposalId);
-		  tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		    var tracerIndex = document.getElementById(tracerIndexId);
+		    tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		
+		    var tracerProposalEl = document.getElementById(tracerProposalId);
+		    tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		
+		    var tracerModelEl = document.getElementById(tracerModelId);
+		    tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		
+		    var tracerStateEl = document.getElementById(tracerStateId);
+		    stateFunction(renderRoot, model, function (state) {
+		      return tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		    });
+		  };
 		};
 		
 		var onSliderChange = function onSliderChange(renderRoot, tracerModel) {
 		  return function (evt) {
 		    var index = parseInt(evt.target.value, 10);
 		    var snapshot = tracerModel.tracerStates[index];
-		    renderRoot(snapshot.model);
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
 		    tracerModel.tracerIndex = index;
-		    proposalView(snapshot, tracerModel);
+		    proposalView(renderRoot)(snapshot, tracerModel);
 		  };
 		};
 		
@@ -21295,7 +21299,12 @@
 		  return function (evt) {
 		    try {
 		      var model = JSON.parse(evt.target.value);
-		      renderRoot(model);
+		      stateFunction(renderRoot, model, function (state) {
+		        var tracerStateEl = document.getElementById(tracerStateId);
+		        tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		
+		        renderRoot(state);
+		      });
 		    } catch (err) {
 		      // ignore invalid JSON
 		    }
@@ -21316,26 +21325,30 @@
 		  };
 		};
 		
-		var onReset = function onReset(tracerModel) {
+		var onReset = function onReset(renderRoot, tracerModel) {
 		  return function () {
-		    reset(tracerModel);
+		    reset(renderRoot, tracerModel);
 		  };
 		};
 		
-		var reset = function reset(tracerModel) {
+		var reset = function reset(renderRoot, tracerModel) {
+		  var snapshot = tracerModel.tracerStates[0];
+		  if (snapshot) {
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
+		    proposalView(renderRoot)(snapshot, tracerModel);
+		  }
+		
 		  tracerModel.tracerStates.length = 0;
 		  tracerModel.tracerIndex = 0;
-		  proposalView({ model: {}, proposal: {} }, tracerModel);
 		};
 		
 		var initialView = function initialView(selector, renderRoot, tracerModel, horizontal) {
 		  var target = document.querySelector(selector);
 		
 		  if (target) {
-		    var modelRows = horizontal ? "5" : "20";
 		    var divStyle = horizontal ? " style='float: left'" : "";
 		
-		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='" + modelRows + "' cols='40'></textarea></div></div>";
+		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>State:</div>" + "<textarea id='" + tracerStateId + "' rows='5' cols='40'></textarea></div></div>";
 		
 		    target.innerHTML = viewHtml;
 		
@@ -21344,7 +21357,7 @@
 		    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderRoot, tracerModel));
 		    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderRoot));
 		    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
-		    document.getElementById(tracerResetId).addEventListener("click", onReset(tracerModel));
+		    document.getElementById(tracerResetId).addEventListener("click", onReset(renderRoot, tracerModel));
 		  }
 		};
 		
@@ -21506,7 +21519,7 @@
 	        (validator.prototype === undefined || !validator.prototype.isPrototypeOf(v)) &&
 	        (typeof validator !== 'function' || !validator(v))) {
 	      var strVal = typeof v === 'string' ? "'" + v + "'" : v; // put the value in quotes if it's a string
-	      throw new TypeError('bad value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
+	      throw new TypeError('wrong value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
 	    }
 	  }
 	};
@@ -21566,10 +21579,12 @@
 	      throw new Error('non-exhaustive patterns in a function');
 	    }
 	  }
-	  var args = wildcard === true ? [arg]
-	           : arg !== undefined ? valueToArray(value).concat([arg])
-	           : valueToArray(value);
-	  return handler.apply(undefined, args);
+	  if (handler !== undefined) {
+	    var args = wildcard === true ? [arg]
+	             : arg !== undefined ? valueToArray(value).concat([arg])
+	             : valueToArray(value);
+	    return handler.apply(undefined, args);
+	  }
 	}
 	
 	var typeCase = curryN(3, rawCase);
@@ -21595,8 +21610,8 @@
 	  
 	  obj.prototype = {};
 	  obj.prototype[Symbol ? Symbol.iterator : '@@iterator'] = createIterator;
-	  obj.prototype.case = function (cases) { return obj.case(cases, this); }
-	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); }
+	  obj.prototype.case = function (cases) { return obj.case(cases, this); };
+	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); };
 	  
 	  for (key in desc) {
 	    res = constructor(obj, key, desc[key]);
@@ -21611,18 +21626,18 @@
 	  var innerType = Type({T: [T]}).T;
 	  var validate = List.case({
 	    List: function (array) {
-	      try{
+	      try {
 	        for(var n = 0; n < array.length; n++) {
-	          innerType(array[n])
+	          innerType(array[n]);
 	        }
 	      } catch (e) {
-	        throw TypeError('wrong value '+array[n]+' passed to location '+numToStr[n]+' in List')
+	        throw new TypeError('wrong value '+ array[n] + ' passed to location ' + numToStr[n] + ' in List');
 	      }
 	      return true;
 	    }
 	  });
 	  return compose(validate, List.List);
-	}
+	};
 	
 	module.exports = Type;
 
@@ -22376,7 +22391,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -22385,22 +22400,25 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(198), __webpack_require__(199), __webpack_require__(206)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoModel, rootView, todoappComponent) {
-	      return root.todoappComponent = factory(meiosis, todoModel, rootView, todoappComponent);
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(198), __webpack_require__(199), __webpack_require__(200), __webpack_require__(207)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoModel, todoState, rootView, todoappComponent) {
+	      return root.todoappComponent = factory(meiosis, todoModel, todoState, rootView, todoappComponent);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-	    module.exports = root.rootComponent = factory(require("meiosis"), require("../../common/root/model"), require("./view.jsx"), require("../todoapp/component"));
+	    module.exports = root.rootComponent = factory(require("meiosis"), require("../../common/root/model"), require("../../common/root/state"), require("./view.jsx"), require("../todoapp/component"));
 	  } else {
-	    root.rootComponent = factory(root.meiosis, root.todoModel, root.rootView, root.todoappComponent);
+	    root.rootComponent = factory(root.meiosis, root.todoModel, root.todoState, root.rootView, root.todoappComponent);
 	  }
 	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
 	
-	function (meiosis, todoModel, rootView, todoappComponent) {
+	function (meiosis, todoModel, todoState, rootView, todoappComponent) {
 	  return function (todoStorage) {
 	    var todoapp = todoappComponent(todoStorage);
 	
 	    return meiosis.createComponent({
-	      initialModel: todoModel(todoStorage),
+	      initialModel: function initialModel() {
+	        return todoModel(todoStorage);
+	      },
+	      state: todoState,
 	      view: rootView(todoapp)
 	    });
 	  };
@@ -22412,7 +22430,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -22448,7 +22466,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -22457,7 +22475,73 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	      return root.todoState = factory();
+	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+	    module.exports = root.todoState = factory();
+	  } else {
+	    root.todoState = factory();
+	  }
+	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
+	
+	function () {
+	  var allCompleted = function allCompleted(filteredTodos) {
+	    var result = true;
+	
+	    for (var i = 0, t = filteredTodos.length; i < t; i++) {
+	      if (!filteredTodos[i].completed) {
+	        result = false;
+	        break;
+	      }
+	    }
+	    return result;
+	  };
+	
+	  return function (model) {
+	    var state = Object.assign({}, model);
+	    var by = model.filter;
+	    var completed = by === "completed";
+	
+	    var filterBy = by && by !== "all" ? function (todo) {
+	      return !!todo.completed === completed;
+	    } : function () {
+	      return true;
+	    };
+	    state.filteredTodos = model.todos.filter(filterBy);
+	    state.allCompleted = allCompleted(state.filteredTodos);
+	
+	    var notCompleted = function notCompleted(todo) {
+	      return !todo.completed;
+	    };
+	    var itemsLeft = state.filteredTodos.filter(notCompleted).length;
+	    state.itemsLeftText = state.filteredTodos.length > 0 ? String(itemsLeft) + " item" + (itemsLeft === 1 ? "" : "s") + " left" : "";
+	    state.clearCompleted = state.filteredTodos.length - itemsLeft > 0;
+	
+	    state.allSelected = model.filter === "all";
+	    state.activeSelected = model.filter === "active";
+	    state.completedSelected = model.filter === "completed";
+	
+	    return state;
+	  };
+	});
+
+/***/ },
+/* 200 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	/*global define, exports, module, require*/
+	
+	// This boilerplate is to support running this code with either, just the browser, or RequireJS,
+	// or node.js / npm (browserify, webpack, etc.) Do not think this boilerplate is necessary to run
+	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
+	(function (root, factory) {
+	  if (true) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.rootView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -22511,16 +22595,16 @@
 	});
 
 /***/ },
-/* 200 */
+/* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	module.exports = __webpack_require__(201);
+	module.exports = __webpack_require__(202);
 
 
 /***/ },
-/* 201 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22540,14 +22624,14 @@
 	
 	var ReactChildren = __webpack_require__(101);
 	var ReactComponent = __webpack_require__(133);
-	var ReactPureComponent = __webpack_require__(202);
+	var ReactPureComponent = __webpack_require__(203);
 	var ReactClass = __webpack_require__(132);
-	var ReactDOMFactories = __webpack_require__(203);
+	var ReactDOMFactories = __webpack_require__(204);
 	var ReactElement = __webpack_require__(94);
 	var ReactPropTypes = __webpack_require__(93);
 	var ReactVersion = __webpack_require__(161);
 	
-	var onlyChild = __webpack_require__(205);
+	var onlyChild = __webpack_require__(206);
 	var warning = __webpack_require__(19);
 	
 	var createElement = ReactElement.createElement;
@@ -22555,7 +22639,7 @@
 	var cloneElement = ReactElement.cloneElement;
 	
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(204);
+	  var ReactElementValidator = __webpack_require__(205);
 	  createElement = ReactElementValidator.createElement;
 	  createFactory = ReactElementValidator.createFactory;
 	  cloneElement = ReactElementValidator.cloneElement;
@@ -22615,7 +22699,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22662,7 +22746,7 @@
 	module.exports = ReactPureComponent;
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -22687,7 +22771,7 @@
 	 */
 	var createDOMFactory = ReactElement.createFactory;
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactElementValidator = __webpack_require__(204);
+	  var ReactElementValidator = __webpack_require__(205);
 	  createDOMFactory = ReactElementValidator.createFactory;
 	}
 	
@@ -22838,7 +22922,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 204 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23072,7 +23156,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 205 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23116,12 +23200,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 206 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23130,7 +23214,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(207), __webpack_require__(208), __webpack_require__(213), __webpack_require__(234)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoappView, headerComponent, mainComponent, footerComponent) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(208), __webpack_require__(209), __webpack_require__(214), __webpack_require__(233)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoappView, headerComponent, mainComponent, footerComponent) {
 	      return root.todoappComponent = factory(meiosis, todoappView, headerComponent, mainComponent, footerComponent);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23141,54 +23225,24 @@
 	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
 	
 	function (meiosis, todoappView, headerComponent, mainComponent, footerComponent) {
-	  var viewModel = function viewModel(model) {
-	    var viewModel = model;
-	    var by = model.filter;
-	    var completed = by === "completed";
-	
-	    var filterBy = by && by !== "all" ? function (todo) {
-	      return !!todo.completed === completed;
-	    } : function () {
-	      return true;
-	    };
-	    viewModel.filteredTodos = model.todos.filter(filterBy);
-	
-	    var notCompleted = function notCompleted(todo) {
-	      return !todo.completed;
-	    };
-	    var itemsLeft = viewModel.filteredTodos.filter(notCompleted).length;
-	    viewModel.itemsLeftText = viewModel.filteredTodos.length > 0 ? String(itemsLeft) + " item" + (itemsLeft === 1 ? "" : "s") + " left" : "";
-	    viewModel.clearCompleted = viewModel.filteredTodos.length - itemsLeft > 0;
-	
-	    viewModel.allSelected = model.filter === "all";
-	    viewModel.activeSelected = model.filter === "active";
-	    viewModel.completedSelected = model.filter === "completed";
-	
-	    return viewModel;
-	  };
-	
 	  return function (todoStorage) {
 	    var header = headerComponent(todoStorage);
 	    var main = mainComponent(todoStorage);
 	    var footer = footerComponent(todoStorage);
 	
-	    var _view = todoappView(header, main, footer);
+	    var view = todoappView(header, main, footer);
 	
-	    return meiosis.createComponent({
-	      view: function view(model) {
-	        return _view(viewModel(model));
-	      }
-	    });
+	    return meiosis.createComponent({ view: view });
 	  };
 	});
 
 /***/ },
-/* 207 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23197,7 +23251,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.todoappView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23222,12 +23276,12 @@
 	});
 
 /***/ },
-/* 208 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23236,7 +23290,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(209), __webpack_require__(211), __webpack_require__(212)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, headerActions, headerReceive, headerView) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(210), __webpack_require__(212), __webpack_require__(213)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, headerActions, headerReceive, headerView) {
 	      return root.headerComponent = factory(meiosis, headerActions, headerReceive, headerView);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23257,12 +23311,12 @@
 	});
 
 /***/ },
-/* 209 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23271,7 +23325,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(210)], __WEBPACK_AMD_DEFINE_RESULT__ = function (headerActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(211)], __WEBPACK_AMD_DEFINE_RESULT__ = function (headerActionTypes) {
 	      return root.headerActions = factory(headerActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23320,12 +23374,12 @@
 	});
 
 /***/ },
-/* 210 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23353,12 +23407,12 @@
 	});
 
 /***/ },
-/* 211 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23367,7 +23421,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(210)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, headerActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(211)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, headerActionTypes) {
 	      return root.headerReceive = factory(meiosis, headerActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23380,10 +23434,9 @@
 	function (meiosis, HeaderAction) {
 	  return function (todoStorage) {
 	    return function (model, proposal) {
-	      return HeaderAction.case({
+	      HeaderAction.case({
 	        NewTodo: function NewTodo(title) {
 	          model.newTodo = title;
-	          return model;
 	        },
 	        SaveNewTodo: function SaveNewTodo(title) {
 	          title = title.trim();
@@ -23391,30 +23444,27 @@
 	          if (title) {
 	            model.todos = todoStorage.saveTodo({ title: title });
 	            model.newTodo = "";
-	            return model;
 	          } else {
 	            return meiosis.REFUSE_PROPOSAL;
 	          }
 	        },
 	        ClearNewTodo: function ClearNewTodo() {
 	          model.newTodo = "";
-	          return model;
-	        },
-	        _: function _() {
-	          return model;
 	        }
 	      }, proposal);
+	
+	      return model;
 	    };
 	  };
 	});
 
 /***/ },
-/* 212 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23423,7 +23473,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.headerView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23452,12 +23502,12 @@
 	});
 
 /***/ },
-/* 213 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23466,35 +23516,35 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(214), __webpack_require__(216), __webpack_require__(217), __webpack_require__(218), __webpack_require__(219), __webpack_require__(220)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, mainActions, mainState, mainDisplay, mainReceive, mainView, todoItemComponent) {
-	      return root.mainComponent = factory(meiosis, mainActions, mainState, mainDisplay, mainReceive, mainView, todoItemComponent);
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(215), __webpack_require__(217), __webpack_require__(218), __webpack_require__(219)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, mainActions, mainReceive, mainView, todoItemComponent) {
+	      return root.mainComponent = factory(meiosis, mainActions, mainReceive, mainView, todoItemComponent);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-	    module.exports = root.mainComponent = factory(require("meiosis"), require("../../common/main/actions"), require("../../common/main/state"), require("../../common/main/display"), require("../../common/main/receive"), require("./view.jsx"), require("../todoItem/component"));
+	    module.exports = root.mainComponent = factory(require("meiosis"), require("../../common/main/actions"), require("../../common/main/receive"), require("./view.jsx"), require("../todoItem/component"));
 	  } else {
-	    root.mainComponent = factory(root.meiosis, root.mainActions, root.mainState, root.mainDisplay, root.mainReceive, root.mainView, root.todoItemComponent);
+	    root.mainComponent = factory(root.meiosis, root.mainActions, root.mainReceive, root.mainView, root.todoItemComponent);
 	  }
 	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
 	
-	function (meiosis, mainActions, mainState, mainDisplay, mainReceive, mainView, todoItemComponent) {
+	function (meiosis, mainActions, mainReceive, mainView, todoItemComponent) {
 	  return function (todoStorage) {
 	    var todoItem = todoItemComponent(todoStorage);
 	
 	    return meiosis.createComponent({
 	      actions: mainActions,
-	      view: mainDisplay(mainState, mainView(todoItem)),
+	      view: mainView(todoItem),
 	      receive: mainReceive(todoStorage)
 	    });
 	  };
 	});
 
 /***/ },
-/* 214 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23503,7 +23553,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(215)], __WEBPACK_AMD_DEFINE_RESULT__ = function (mainActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(216)], __WEBPACK_AMD_DEFINE_RESULT__ = function (mainActionTypes) {
 	      return root.mainActions = factory(mainActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23532,12 +23582,12 @@
 	});
 
 /***/ },
-/* 215 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23563,53 +23613,12 @@
 	});
 
 /***/ },
-/* 216 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
-	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-	
-	/*global define, exports, module, require*/
-	
-	// This boilerplate is to support running this code with either, just the browser, or RequireJS,
-	// or node.js / npm (browserify, webpack, etc.) Do not think this boilerplate is necessary to run
-	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
-	(function (root, factory) {
-	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-	      return root.mainState = factory();
-	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-	    module.exports = root.mainState = factory();
-	  } else {
-	    root.mainState = factory();
-	  }
-	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
-	
-	function () {
-	  return {
-	    allCompleted: function allCompleted(model) {
-	      var result = true;
-	
-	      for (var i = 0, t = model.filteredTodos.length; i < t; i++) {
-	        if (!model.filteredTodos[i].completed) {
-	          result = false;
-	          break;
-	        }
-	      }
-	      return result;
-	    }
-	  };
-	});
-
-/***/ },
 /* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23618,48 +23627,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-	      return root.mainDisplay = factory();
-	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-	    module.exports = root.mainDisplay = factory();
-	  } else {
-	    root.mainDisplay = factory();
-	  }
-	})(undefined || window, // ^^ the code above is boilerplate. the "real" code starts below. vv
-	
-	function () {
-	  var viewModel = function viewModel(state, model) {
-	    var viewModel = model;
-	
-	    viewModel.allCompleted = state.allCompleted(model);
-	
-	    return viewModel;
-	  };
-	
-	  return function (state, view) {
-	    return function (model, actions) {
-	      return view(viewModel(state, model), actions);
-	    };
-	  };
-	});
-
-/***/ },
-/* 218 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
-	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-	
-	/*global define, exports, module, require*/
-	
-	// This boilerplate is to support running this code with either, just the browser, or RequireJS,
-	// or node.js / npm (browserify, webpack, etc.) Do not think this boilerplate is necessary to run
-	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
-	(function (root, factory) {
-	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(215)], __WEBPACK_AMD_DEFINE_RESULT__ = function (mainActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(216)], __WEBPACK_AMD_DEFINE_RESULT__ = function (mainActionTypes) {
 	      return root.mainReceive = factory(mainActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23672,26 +23640,24 @@
 	function (MainAction) {
 	  return function (todoStorage) {
 	    return function (model, proposal) {
-	      return MainAction.case({
+	      MainAction.case({
 	        SetAllCompleted: function SetAllCompleted(completed) {
 	          model.todos = todoStorage.setAllCompleted(completed);
-	          return model;
-	        },
-	        _: function _() {
-	          return model;
 	        }
 	      }, proposal);
+	
+	      return model;
 	    };
 	  };
 	});
 
 /***/ },
-/* 219 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23700,7 +23666,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.mainView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23734,12 +23700,12 @@
 	});
 
 /***/ },
-/* 220 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23748,7 +23714,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(221), __webpack_require__(223), __webpack_require__(224), __webpack_require__(226), __webpack_require__(227), __webpack_require__(228)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoItemActions, todoItemState, todoItemDisplay, todoItemView, todoItemReceive, todoEditComponent) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(220), __webpack_require__(222), __webpack_require__(223), __webpack_require__(225), __webpack_require__(226), __webpack_require__(227)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoItemActions, todoItemState, todoItemDisplay, todoItemView, todoItemReceive, todoEditComponent) {
 	      return root.todoItemComponent = factory(meiosis, todoItemActions, todoItemState, todoItemDisplay, todoItemView, todoItemReceive, todoEditComponent);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23771,12 +23737,12 @@
 	});
 
 /***/ },
-/* 221 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23785,7 +23751,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(222)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoItemActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(221)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoItemActionTypes) {
 	      return root.todoItemActions = factory(todoItemActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23832,12 +23798,12 @@
 	});
 
 /***/ },
-/* 222 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23865,12 +23831,12 @@
 	});
 
 /***/ },
-/* 223 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23898,12 +23864,12 @@
 	});
 
 /***/ },
-/* 224 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -23912,7 +23878,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(225)], __WEBPACK_AMD_DEFINE_RESULT__ = function (classnames) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(224)], __WEBPACK_AMD_DEFINE_RESULT__ = function (classnames) {
 	      return root.todoItemDisplay = factory(classnames);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -23941,7 +23907,7 @@
 	});
 
 /***/ },
-/* 225 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -23995,12 +23961,12 @@
 
 
 /***/ },
-/* 226 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24009,7 +23975,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.todoItemView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24047,12 +24013,12 @@
 	});
 
 /***/ },
-/* 227 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24061,7 +24027,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(222)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoItemActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(221)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoItemActionTypes) {
 	      return root.todoItemReceive = factory(todoItemActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24074,34 +24040,30 @@
 	function (ItemAction) {
 	  return function (todoStorage) {
 	    return function (model, proposal) {
-	      return ItemAction.case({
+	      ItemAction.case({
 	        SetCompleted: function SetCompleted(todoId, completed) {
 	          model.todos = todoStorage.setCompleted(todoId, completed);
-	          return model;
 	        },
 	        EditTodo: function EditTodo(todo) {
 	          model.editTodo = todo;
-	          return model;
 	        },
 	        DeleteTodo: function DeleteTodo(todoId) {
 	          model.todos = todoStorage.deleteTodoId(todoId);
-	          return model;
-	        },
-	        _: function _() {
-	          return model;
 	        }
 	      }, proposal);
+	
+	      return model;
 	    };
 	  };
 	});
 
 /***/ },
-/* 228 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24110,7 +24072,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(229), __webpack_require__(231), __webpack_require__(232), __webpack_require__(233), __webpack_require__(223)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoEditActions, todoEditView, todoEditDisplay, todoEditReceive, todoItemState) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(228), __webpack_require__(230), __webpack_require__(231), __webpack_require__(232), __webpack_require__(222)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoEditActions, todoEditView, todoEditDisplay, todoEditReceive, todoItemState) {
 	      return root.todoEditComponent = factory(meiosis, todoEditActions, todoEditView, todoEditDisplay, todoEditReceive, todoItemState);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24131,12 +24093,12 @@
 	});
 
 /***/ },
-/* 229 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24145,7 +24107,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(230)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoEditActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(229)], __WEBPACK_AMD_DEFINE_RESULT__ = function (todoEditActionTypes) {
 	      return root.todoEditActions = factory(todoEditActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24199,12 +24161,12 @@
 	});
 
 /***/ },
-/* 230 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24232,12 +24194,12 @@
 	});
 
 /***/ },
-/* 231 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24246,7 +24208,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React) {
 	      return root.todoEditView = factory(React);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24276,12 +24238,12 @@
 	});
 
 /***/ },
-/* 232 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24309,12 +24271,12 @@
 	});
 
 /***/ },
-/* 233 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24323,7 +24285,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(230)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoEditActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(229)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, todoEditActionTypes) {
 	      return root.todoEditReceive = factory(meiosis, todoEditActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24336,10 +24298,9 @@
 	function (meiosis, EditAction) {
 	  return function (todoStorage) {
 	    return function (model, proposal) {
-	      return EditAction.case({
+	      EditAction.case({
 	        EditingTodo: function EditingTodo(todo) {
 	          model.editTodo = todo;
-	          return model;
 	        },
 	        SaveTodo: function SaveTodo(todo) {
 	          var editing = todo.id === model.editTodo.id;
@@ -24348,30 +24309,27 @@
 	          if (editing && todo.title) {
 	            model.todos = todoStorage.saveTodo(todo);
 	            model.editTodo = {};
-	            return model;
 	          } else {
 	            return meiosis.REFUSE_PROPOSAL;
 	          }
 	        },
 	        ClearEdit: function ClearEdit() {
 	          model.editTodo = {};
-	          return model;
-	        },
-	        _: function _() {
-	          return model;
 	        }
 	      }, proposal);
+	
+	      return model;
 	    };
 	  };
 	});
 
 /***/ },
-/* 234 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24380,7 +24338,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(235), __webpack_require__(237), __webpack_require__(238), __webpack_require__(239)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, footerActions, footerView, footerReceive, footerReady) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(234), __webpack_require__(236), __webpack_require__(237), __webpack_require__(238)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, footerActions, footerView, footerReceive, footerReady) {
 	      return root.footerComponent = factory(meiosis, footerActions, footerView, footerReceive, footerReady);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24402,12 +24360,12 @@
 	});
 
 /***/ },
-/* 235 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24416,7 +24374,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(236)], __WEBPACK_AMD_DEFINE_RESULT__ = function (footerActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(235)], __WEBPACK_AMD_DEFINE_RESULT__ = function (footerActionTypes) {
 	      return root.footerActions = factory(footerActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24448,12 +24406,12 @@
 	});
 
 /***/ },
-/* 236 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24480,12 +24438,12 @@
 	});
 
 /***/ },
-/* 237 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24494,7 +24452,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(200), __webpack_require__(225)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React, classnames) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(201), __webpack_require__(224)], __WEBPACK_AMD_DEFINE_RESULT__ = function (React, classnames) {
 	      return root.footerView = factory(React, classnames);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24557,12 +24515,12 @@
 	});
 
 /***/ },
-/* 238 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24571,7 +24529,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(236)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, footerActionTypes) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(170), __webpack_require__(235)], __WEBPACK_AMD_DEFINE_RESULT__ = function (meiosis, footerActionTypes) {
 	      return root.footerReceive = factory(meiosis, footerActionTypes);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24584,10 +24542,9 @@
 	function (meiosis, FooterAction) {
 	  return function (todoStorage) {
 	    return function (model, proposal) {
-	      return FooterAction.case({
+	      FooterAction.case({
 	        ClearCompleted: function ClearCompleted() {
 	          model.todos = todoStorage.clearCompleted();
-	          return model;
 	        },
 	        Filter: function Filter(by) {
 	          if (by === model.filter) {
@@ -24595,23 +24552,21 @@
 	          }
 	          model.todos = todoStorage.loadAll();
 	          model.filter = by;
-	          return model;
-	        },
-	        _: function _() {
-	          return model;
 	        }
 	      }, proposal);
+	
+	      return model;
 	    };
 	  };
 	});
 
 /***/ },
-/* 239 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	
@@ -24620,7 +24575,7 @@
 	// Meiosis. It is for convenience to be able to run the example with your preferred module system.
 	(function (root, factory) {
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(240)], __WEBPACK_AMD_DEFINE_RESULT__ = function (History) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(239)], __WEBPACK_AMD_DEFINE_RESULT__ = function (History) {
 	      return root.footerReady = factory(History);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -24634,7 +24589,7 @@
 	
 	function (History) {
 	  return function (actions) {
-	    var history = History.createHistory();
+	    var history = History.createBrowserHistory();
 	
 	    history.listen(function (location) {
 	      var route = location.hash.split("/")[1] || "all";
@@ -24644,7 +24599,7 @@
 	});
 
 /***/ },
-/* 240 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -24652,7 +24607,7 @@
 	exports.__esModule = true;
 	exports.createPath = exports.parsePath = exports.locationsAreEqual = exports.createLocation = exports.createMemoryHistory = exports.createHashHistory = exports.createBrowserHistory = undefined;
 	
-	var _LocationUtils = __webpack_require__(241);
+	var _LocationUtils = __webpack_require__(240);
 	
 	Object.defineProperty(exports, 'createLocation', {
 	  enumerable: true,
@@ -24701,7 +24656,7 @@
 	exports.createMemoryHistory = _createMemoryHistory3.default;
 
 /***/ },
-/* 241 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -24713,9 +24668,15 @@
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
+	var _resolvePathname = __webpack_require__(241);
+	
+	var _resolvePathname2 = _interopRequireDefault(_resolvePathname);
+	
 	var _PathUtils = __webpack_require__(242);
 	
-	var createLocation = exports.createLocation = function createLocation(path, state, key) {
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var createLocation = exports.createLocation = function createLocation(path, state, key, currentLocation) {
 	  var location = void 0;
 	  if (typeof path === 'string') {
 	    // Two-arg form: push(path, state)
@@ -24725,16 +24686,33 @@
 	    // One-arg form: push(location)
 	    location = _extends({}, path);
 	
-	    if (!location.pathname) location.pathname = '/';
+	    if (location.pathname === undefined) location.pathname = '';
 	
-	    if (location.search && location.search.charAt(0) !== '?') location.search = '?' + location.search;
+	    if (location.search) {
+	      if (location.search.charAt(0) !== '?') location.search = '?' + location.search;
+	    } else {
+	      location.search = '';
+	    }
 	
-	    if (location.hash && location.hash.charAt(0) !== '#') location.hash = '#' + location.hash;
+	    if (location.hash) {
+	      if (location.hash.charAt(0) !== '#') location.hash = '#' + location.hash;
+	    } else {
+	      location.hash = '';
+	    }
 	
 	    if (state !== undefined && location.state === undefined) location.state = state;
 	  }
 	
 	  location.key = key;
+	
+	  if (currentLocation) {
+	    // Resolve incomplete/relative pathname relative to current location.
+	    if (!location.pathname) {
+	      location.pathname = currentLocation.pathname;
+	    } else if (location.pathname.charAt(0) !== '/') {
+	      location.pathname = (0, _resolvePathname2.default)(location.pathname, currentLocation.pathname);
+	    }
+	  }
 	
 	  return location;
 	};
@@ -24754,12 +24732,12 @@
 	      return looseEqual(item, b[index]);
 	    });
 	  } else if (typeofA === 'object') {
-	    var keysOfA = Object.keys(a);
-	    var keysOfB = Object.keys(b);
+	    var aKeys = Object.keys(a);
+	    var bKeys = Object.keys(b);
 	
-	    if (keysOfA.length !== keysOfB.length) return false;
+	    if (aKeys.length !== bKeys.length) return false;
 	
-	    return keysOfA.every(function (key) {
+	    return aKeys.every(function (key) {
 	      return looseEqual(a[key], b[key]);
 	    });
 	  }
@@ -24770,6 +24748,81 @@
 	var locationsAreEqual = exports.locationsAreEqual = function locationsAreEqual(a, b) {
 	  return a.pathname === b.pathname && a.search === b.search && a.hash === b.hash && a.key === b.key && looseEqual(a.state, b.state);
 	};
+
+/***/ },
+/* 241 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var isAbsolute = function isAbsolute(pathname) {
+	  return pathname.charAt(0) === '/';
+	};
+	
+	// About 1.5x faster than the two-arg version of Array#splice()
+	var spliceOne = function spliceOne(list, index) {
+	  for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1) {
+	    list[i] = list[k];
+	  }list.pop();
+	};
+	
+	// This implementation is based heavily on node's url.parse
+	var resolvePathname = function resolvePathname(to) {
+	  var from = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+	
+	  var toParts = to && to.split('/') || [];
+	  var fromParts = from && from.split('/') || [];
+	
+	  var isToAbs = to && isAbsolute(to);
+	  var isFromAbs = from && isAbsolute(from);
+	  var mustEndAbs = isToAbs || isFromAbs;
+	
+	  if (to && isAbsolute(to)) {
+	    // to is absolute
+	    fromParts = toParts;
+	  } else if (toParts.length) {
+	    // to is relative, drop the filename
+	    fromParts.pop();
+	    fromParts = fromParts.concat(toParts);
+	  }
+	
+	  if (!fromParts.length) return '/';
+	
+	  var hasTrailingSlash = void 0;
+	  if (fromParts.length) {
+	    var last = fromParts[fromParts.length - 1];
+	    hasTrailingSlash = last === '.' || last === '..' || last === '';
+	  } else {
+	    hasTrailingSlash = false;
+	  }
+	
+	  var up = 0;
+	  for (var i = fromParts.length; i >= 0; i--) {
+	    var part = fromParts[i];
+	
+	    if (part === '.') {
+	      spliceOne(fromParts, i);
+	    } else if (part === '..') {
+	      spliceOne(fromParts, i);
+	      up++;
+	    } else if (up) {
+	      spliceOne(fromParts, i);
+	      up--;
+	    }
+	  }
+	
+	  if (!mustEndAbs) for (; up--; up) {
+	    fromParts.unshift('..');
+	  }if (mustEndAbs && fromParts[0] !== '' && (!fromParts[0] || !isAbsolute(fromParts[0]))) fromParts.unshift('');
+	
+	  var result = fromParts.join('/');
+	
+	  if (hasTrailingSlash && result.substr(-1) !== '/') result += '/';
+	
+	  return result;
+	};
+	
+	module.exports = resolvePathname;
 
 /***/ },
 /* 242 */
@@ -24819,6 +24872,7 @@
 	  var search = location.search;
 	  var hash = location.hash;
 	
+	
 	  var path = pathname || '/';
 	
 	  if (search && search !== '?') path += search.charAt(0) === '?' ? search : '?' + search;
@@ -24848,7 +24902,7 @@
 	
 	var _invariant2 = _interopRequireDefault(_invariant);
 	
-	var _LocationUtils = __webpack_require__(241);
+	var _LocationUtils = __webpack_require__(240);
 	
 	var _PathUtils = __webpack_require__(242);
 	
@@ -24996,7 +25050,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(!((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && path.state !== undefined && state !== undefined), 'You should avoid providing a 2nd state argument to push when the 1st ' + 'argument is a location-like object that already has state; it is ignored') : void 0;
 	
 	    var action = 'PUSH';
-	    var location = (0, _LocationUtils.createLocation)(path, state, createKey());
+	    var location = (0, _LocationUtils.createLocation)(path, state, createKey(), history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25032,7 +25086,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(!((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && path.state !== undefined && state !== undefined), 'You should avoid providing a 2nd state argument to replace when the 1st ' + 'argument is a location-like object that already has state; it is ignored') : void 0;
 	
 	    var action = 'REPLACE';
-	    var location = (0, _LocationUtils.createLocation)(path, state, createKey());
+	    var location = (0, _LocationUtils.createLocation)(path, state, createKey(), history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25426,7 +25480,7 @@
 	
 	var _invariant2 = _interopRequireDefault(_invariant);
 	
-	var _LocationUtils = __webpack_require__(241);
+	var _LocationUtils = __webpack_require__(240);
 	
 	var _PathUtils = __webpack_require__(242);
 	
@@ -25597,7 +25651,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(state === undefined, 'Hash history cannot push state; it is ignored') : void 0;
 	
 	    var action = 'PUSH';
-	    var location = (0, _LocationUtils.createLocation)(path);
+	    var location = (0, _LocationUtils.createLocation)(path, undefined, undefined, history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25632,7 +25686,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(state === undefined, 'Hash history cannot replace state; it is ignored') : void 0;
 	
 	    var action = 'REPLACE';
-	    var location = (0, _LocationUtils.createLocation)(path);
+	    var location = (0, _LocationUtils.createLocation)(path, undefined, undefined, history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25750,7 +25804,7 @@
 	
 	var _warning2 = _interopRequireDefault(_warning);
 	
-	var _LocationUtils = __webpack_require__(241);
+	var _LocationUtils = __webpack_require__(240);
 	
 	var _createTransitionManager = __webpack_require__(246);
 	
@@ -25792,7 +25846,7 @@
 	
 	  var index = clamp(initialIndex, 0, initialEntries.length - 1);
 	  var entries = initialEntries.map(function (entry, index) {
-	    return typeof entry === 'string' ? (0, _LocationUtils.createLocation)(entry, index ? createKey() : undefined) : entry;
+	    return typeof entry === 'string' ? (0, _LocationUtils.createLocation)(entry, undefined, index ? createKey() : undefined) : (0, _LocationUtils.createLocation)(entry, undefined, index ? entry.key || createKey() : undefined);
 	  });
 	
 	  // Public interface
@@ -25801,7 +25855,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(!((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && path.state !== undefined && state !== undefined), 'You should avoid providing a 2nd state argument to push when the 1st ' + 'argument is a location-like object that already has state; it is ignored') : void 0;
 	
 	    var action = 'PUSH';
-	    var location = (0, _LocationUtils.createLocation)(path, state, createKey());
+	    var location = (0, _LocationUtils.createLocation)(path, state, createKey(), history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25829,7 +25883,7 @@
 	    process.env.NODE_ENV !== 'production' ? (0, _warning2.default)(!((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' && path.state !== undefined && state !== undefined), 'You should avoid providing a 2nd state argument to replace when the 1st ' + 'argument is a location-like object that already has state; it is ignored') : void 0;
 	
 	    var action = 'REPLACE';
-	    var location = (0, _LocationUtils.createLocation)(path, state, createKey());
+	    var location = (0, _LocationUtils.createLocation)(path, state, createKey(), history.location);
 	
 	    transitionManager.confirmTransitionTo(location, action, getUserConfirmation, function (ok) {
 	      if (!ok) return;
@@ -25911,7 +25965,7 @@
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;"use strict";
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/*global define, exports, module, require*/
 	

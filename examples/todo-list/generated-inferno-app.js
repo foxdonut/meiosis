@@ -65,7 +65,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var runapp = function runapp() {
-	  var renderRoot = (0, _meiosis.run)((0, _meiosisInferno.renderer)().intoId(document, "app"), (0, _componentInferno2.default)());
+	  var renderRoot = (0, _meiosis.run)({ renderer: (0, _meiosisInferno.renderer)().intoId(document, "app"), rootComponent: (0, _componentInferno2.default)() });
 	  (0, _meiosisTracer2.default)(_meiosis.createComponent, renderRoot, "#tracer");
 	};
 	
@@ -140,7 +140,7 @@
 	        (validator.prototype === undefined || !validator.prototype.isPrototypeOf(v)) &&
 	        (typeof validator !== 'function' || !validator(v))) {
 	      var strVal = typeof v === 'string' ? "'" + v + "'" : v; // put the value in quotes if it's a string
-	      throw new TypeError('bad value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
+	      throw new TypeError('wrong value ' + strVal + ' passed as ' + numToStr[i] + ' argument to constructor ' + name);
 	    }
 	  }
 	};
@@ -200,10 +200,12 @@
 	      throw new Error('non-exhaustive patterns in a function');
 	    }
 	  }
-	  var args = wildcard === true ? [arg]
-	           : arg !== undefined ? valueToArray(value).concat([arg])
-	           : valueToArray(value);
-	  return handler.apply(undefined, args);
+	  if (handler !== undefined) {
+	    var args = wildcard === true ? [arg]
+	             : arg !== undefined ? valueToArray(value).concat([arg])
+	             : valueToArray(value);
+	    return handler.apply(undefined, args);
+	  }
 	}
 	
 	var typeCase = curryN(3, rawCase);
@@ -229,8 +231,8 @@
 	  
 	  obj.prototype = {};
 	  obj.prototype[Symbol ? Symbol.iterator : '@@iterator'] = createIterator;
-	  obj.prototype.case = function (cases) { return obj.case(cases, this); }
-	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); }
+	  obj.prototype.case = function (cases) { return obj.case(cases, this); };
+	  obj.prototype.caseOn = function (cases) { return obj.caseOn(cases, this); };
 	  
 	  for (key in desc) {
 	    res = constructor(obj, key, desc[key]);
@@ -245,18 +247,18 @@
 	  var innerType = Type({T: [T]}).T;
 	  var validate = List.case({
 	    List: function (array) {
-	      try{
+	      try {
 	        for(var n = 0; n < array.length; n++) {
-	          innerType(array[n])
+	          innerType(array[n]);
 	        }
 	      } catch (e) {
-	        throw TypeError('wrong value '+array[n]+' passed to location '+numToStr[n]+' in List')
+	        throw new TypeError('wrong value '+ array[n] + ' passed to location ' + numToStr[n] + ' in List');
 	      }
 	      return true;
 	    }
 	  });
 	  return compose(validate, List.List);
-	}
+	};
 	
 	module.exports = Type;
 
@@ -7565,52 +7567,41 @@
 	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
-	function init(adapters) {
+	function newInstance() {
+	    var allInitialModels = [];
+	    var allStates = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
 	    var allNextActions = [];
-	    var createRootWire = (adapters && adapters.rootWire) || wire_1.defaultWireCreator();
-	    var createComponentWire = (adapters && adapters.componentWire) || wire_1.defaultWireCreator();
+	    var createRootWire = wire_1.defaultWireCreator();
+	    var createComponentWire = wire_1.defaultWireCreator();
 	    var rootWire = createRootWire("meiosis_" + (nextId++));
 	    var componentWire = createComponentWire();
 	    var propose = componentWire.emit;
-	    var rootModel = null;
-	    var initialModelCount = 0;
-	    var createComponent = function (config) {
+	    function createComponent(config) {
 	        if (!config || (!config.actions &&
 	            !config.nextAction &&
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
+	            !config.state &&
 	            !config.view &&
-	            !config.postRender &&
-	            !config.setup)) {
+	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
 	        }
-	        if (rootModel === null) {
-	            var startingModel = {};
-	            rootModel = startingModel;
-	        }
 	        var initialModel = config.initialModel;
-	        var initialModelError = false;
-	        if (typeof initialModel === "function") {
-	            rootModel = initialModel(rootModel);
-	            initialModelError = initialModelCount > 0;
+	        if (initialModel) {
+	            if (typeof initialModel !== "function") {
+	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
+	            }
+	            allInitialModels.push(initialModel);
 	        }
-	        else if (initialModel) {
-	            rootModel = initialModel;
-	            initialModelCount++;
-	            initialModelError = initialModelCount > 1;
-	        }
-	        if (initialModelError) {
-	            throw new Error("When more than one initialModel is used, they must all be functions.");
+	        var state = config.state;
+	        if (state) {
+	            allStates.push(state);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
-	        var setup = config.setup;
-	        if (setup) {
-	            setup(actions);
-	        }
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
@@ -7627,11 +7618,19 @@
 	        if (nextAction) {
 	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
 	        }
-	        return function (model) {
-	            return config.view ? config.view(model, actions) : undefined;
+	        return function (state) {
+	            return config.view ? config.view(state, actions) : undefined;
 	        };
-	    };
-	    var run = function (render, rootComponent) {
+	    }
+	    ;
+	    var run = function (runConfig) {
+	        var rootModel = runConfig.initialModel || {};
+	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
+	        var rootState = runConfig.state || (function (model) { return model; });
+	        allStates.forEach(function (stateFunction) {
+	            var prevState = rootState;
+	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
+	        });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -7651,14 +7650,15 @@
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot_ = function (model) {
-	            var result = render(model, rootComponent, propose);
-	            allPostRenders.forEach(function (postRender) { return postRender(model); });
+	        var renderRoot_ = function (state) {
+	            var result = runConfig.renderer(state, runConfig.rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(state); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
+	        renderRoot_.state = rootState;
 	        var renderRoot = renderRoot_;
-	        rootWire.listen(renderRoot);
+	        rootWire.listen(function (model) { return renderRoot(rootState(model)); });
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
@@ -7679,7 +7679,7 @@
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-	                    renderRoot(evt.data.model);
+	                    renderRoot(evt.data.state);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
 	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
@@ -7688,6 +7688,11 @@
 	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
 	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
 	                    }
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+	                    var state = renderRoot.state(evt.data.model);
+	                    var ts = evt.data.ts;
+	                    window.postMessage({ type: "MEIOSIS_STATE", state: state, ts: ts }, "*");
 	                }
 	            });
 	        }
@@ -7698,8 +7703,8 @@
 	        run: run
 	    };
 	}
-	exports.init = init;
-	var instance = init();
+	exports.newInstance = newInstance;
+	var instance = newInstance();
 	var createComponent = instance.createComponent;
 	exports.createComponent = createComponent;
 	var run = instance.run;
@@ -10020,15 +10025,13 @@
 		var tracerModel = _model.initialModel;
 		
 		var meiosisTracer = function meiosisTracer(createComponent, renderRoot, selector, horizontal) {
-		  var receiver = (0, _receive2.default)(tracerModel, _view.proposalView);
-		  createComponent({
-		    receive: receiver
-		  });
+		  var receiver = (0, _receive2.default)(tracerModel, (0, _view.proposalView)(renderRoot));
+		  createComponent({ receive: receiver });
 		  (0, _view.initialView)(selector, renderRoot, tracerModel, horizontal);
 		  receiver(renderRoot.initialModel, "initialModel");
 		
 		  return { reset: function reset() {
-		      return (0, _view.reset)(tracerModel);
+		      return (0, _view.reset)(renderRoot, tracerModel);
 		    } };
 		};
 		
@@ -10078,33 +10081,53 @@
 		var tracerResetId = "tracerReset";
 		var tracerIndexId = "tracerIndex";
 		var tracerModelId = "tracerModel";
+		var tracerStateId = "tracerState";
 		var tracerProposalId = "tracerProposal";
 		
-		var proposalView = function proposalView(_ref, tracerModel) {
-		  var model = _ref.model;
-		  var proposal = _ref.proposal;
+		var stateFunction = function stateFunction(renderRoot, model, callback) {
+		  var stateResult = renderRoot.state(model);
 		
-		  var tracer = document.getElementById(tracerId);
-		  tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
-		  tracer.value = String(tracerModel.tracerIndex);
+		  if (typeof stateResult.then === "function") {
+		    stateResult.then(function (state) {
+		      callback(state);
+		    });
+		  } else {
+		    callback(stateResult);
+		  }
+		};
 		
-		  var tracerIndex = document.getElementById(tracerIndexId);
-		  tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		var proposalView = function proposalView(renderRoot) {
+		  return function (_ref, tracerModel) {
+		    var model = _ref.model,
+		        proposal = _ref.proposal;
 		
-		  var tracerModelEl = document.getElementById(tracerModelId);
-		  tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		    var tracer = document.getElementById(tracerId);
+		    tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
+		    tracer.value = String(tracerModel.tracerIndex);
 		
-		  var tracerProposalEl = document.getElementById(tracerProposalId);
-		  tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		    var tracerIndex = document.getElementById(tracerIndexId);
+		    tracerIndex.innerHTML = String(tracerModel.tracerIndex);
+		
+		    var tracerProposalEl = document.getElementById(tracerProposalId);
+		    tracerProposalEl.value = (0, _jsonFormat2.default)(proposal, jsonFormatConfig);
+		
+		    var tracerModelEl = document.getElementById(tracerModelId);
+		    tracerModelEl.value = (0, _jsonFormat2.default)(model, jsonFormatConfig);
+		
+		    var tracerStateEl = document.getElementById(tracerStateId);
+		    stateFunction(renderRoot, model, function (state) {
+		      return tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		    });
+		  };
 		};
 		
 		var onSliderChange = function onSliderChange(renderRoot, tracerModel) {
 		  return function (evt) {
 		    var index = parseInt(evt.target.value, 10);
 		    var snapshot = tracerModel.tracerStates[index];
-		    renderRoot(snapshot.model);
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
 		    tracerModel.tracerIndex = index;
-		    proposalView(snapshot, tracerModel);
+		    proposalView(renderRoot)(snapshot, tracerModel);
 		  };
 		};
 		
@@ -10112,7 +10135,12 @@
 		  return function (evt) {
 		    try {
 		      var model = JSON.parse(evt.target.value);
-		      renderRoot(model);
+		      stateFunction(renderRoot, model, function (state) {
+		        var tracerStateEl = document.getElementById(tracerStateId);
+		        tracerStateEl.value = (0, _jsonFormat2.default)(state, jsonFormatConfig);
+		
+		        renderRoot(state);
+		      });
 		    } catch (err) {
 		      // ignore invalid JSON
 		    }
@@ -10133,26 +10161,30 @@
 		  };
 		};
 		
-		var onReset = function onReset(tracerModel) {
+		var onReset = function onReset(renderRoot, tracerModel) {
 		  return function () {
-		    reset(tracerModel);
+		    reset(renderRoot, tracerModel);
 		  };
 		};
 		
-		var reset = function reset(tracerModel) {
+		var reset = function reset(renderRoot, tracerModel) {
+		  var snapshot = tracerModel.tracerStates[0];
+		  if (snapshot) {
+		    stateFunction(renderRoot, snapshot.model, renderRoot);
+		    proposalView(renderRoot)(snapshot, tracerModel);
+		  }
+		
 		  tracerModel.tracerStates.length = 0;
 		  tracerModel.tracerIndex = 0;
-		  proposalView({ model: {}, proposal: {} }, tracerModel);
 		};
 		
 		var initialView = function initialView(selector, renderRoot, tracerModel, horizontal) {
 		  var target = document.querySelector(selector);
 		
 		  if (target) {
-		    var modelRows = horizontal ? "5" : "20";
 		    var divStyle = horizontal ? " style='float: left'" : "";
 		
-		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='" + modelRows + "' cols='40'></textarea></div></div>";
+		    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Proposal:</div>" + "<textarea id='" + tracerProposalId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea></div>" + "<div" + divStyle + "><div>State:</div>" + "<textarea id='" + tracerStateId + "' rows='5' cols='40'></textarea></div></div>";
 		
 		    target.innerHTML = viewHtml;
 		
@@ -10161,7 +10193,7 @@
 		    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderRoot, tracerModel));
 		    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderRoot));
 		    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
-		    document.getElementById(tracerResetId).addEventListener("click", onReset(tracerModel));
+		    document.getElementById(tracerResetId).addEventListener("click", onReset(renderRoot, tracerModel));
 		  }
 		};
 		
@@ -10323,19 +10355,19 @@
 	
 	var _services2 = _interopRequireDefault(_services);
 	
-	var _viewInferno3 = __webpack_require__(69);
+	var _viewInferno3 = __webpack_require__(72);
 	
 	var _viewInferno4 = _interopRequireDefault(_viewInferno3);
 	
-	var _main = __webpack_require__(71);
+	var _main = __webpack_require__(74);
 	
 	var _main2 = _interopRequireDefault(_main);
 	
-	var _viewInferno5 = __webpack_require__(80);
+	var _viewInferno5 = __webpack_require__(83);
 	
 	var _viewInferno6 = _interopRequireDefault(_viewInferno5);
 	
-	var _main3 = __webpack_require__(82);
+	var _main3 = __webpack_require__(85);
 	
 	var _main4 = _interopRequireDefault(_main3);
 
@@ -19910,7 +19942,7 @@
 	
 	var _ajaxAxios2 = _interopRequireDefault(_ajaxAxios);
 	
-	var _todoUrl = __webpack_require__(68);
+	var _todoUrl = __webpack_require__(71);
 	
 	var _todoUrl2 = _interopRequireDefault(_todoUrl);
 	
@@ -20458,11 +20490,16 @@
 	  return createInstance(defaultConfig);
 	};
 	
+	// Expose Cancel & CancelToken
+	axios.Cancel = __webpack_require__(68);
+	axios.CancelToken = __webpack_require__(69);
+	axios.isCancel = __webpack_require__(65);
+	
 	// Expose all/spread
 	axios.all = function all(promises) {
 	  return Promise.all(promises);
 	};
-	axios.spread = __webpack_require__(67);
+	axios.spread = __webpack_require__(70);
 	
 	module.exports = axios;
 	
@@ -20693,7 +20730,7 @@
 	  } else {
 	    // Iterate over object keys
 	    for (var key in obj) {
-	      if (obj.hasOwnProperty(key)) {
+	      if (Object.prototype.hasOwnProperty.call(obj, key)) {
 	        fn.call(null, obj[key], key, obj);
 	      }
 	    }
@@ -20800,10 +20837,10 @@
 	
 	var defaults = __webpack_require__(50);
 	var utils = __webpack_require__(47);
-	var InterceptorManager = __webpack_require__(52);
-	var dispatchRequest = __webpack_require__(53);
-	var isAbsoluteURL = __webpack_require__(65);
-	var combineURLs = __webpack_require__(66);
+	var InterceptorManager = __webpack_require__(62);
+	var dispatchRequest = __webpack_require__(63);
+	var isAbsoluteURL = __webpack_require__(66);
+	var combineURLs = __webpack_require__(67);
 	
 	/**
 	 * Create a new instance of Axios
@@ -20887,10 +20924,10 @@
 /* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
 	var utils = __webpack_require__(47);
-	var normalizeHeaderName = __webpack_require__(51);
+	var normalizeHeaderName = __webpack_require__(52);
 	
 	var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 	var DEFAULT_CONTENT_TYPE = {
@@ -20903,7 +20940,21 @@
 	  }
 	}
 	
+	function getDefaultAdapter() {
+	  var adapter;
+	  if (typeof XMLHttpRequest !== 'undefined') {
+	    // For browsers use XHR adapter
+	    adapter = __webpack_require__(53);
+	  } else if (typeof process !== 'undefined') {
+	    // For node use HTTP adapter
+	    adapter = __webpack_require__(53);
+	  }
+	  return adapter;
+	}
+	
 	module.exports = {
+	  adapter: getDefaultAdapter(),
+	
 	  transformRequest: [function transformRequest(data, headers) {
 	    normalizeHeaderName(headers, 'Content-Type');
 	    if (utils.isFormData(data) ||
@@ -20959,168 +21010,11 @@
 	    return status >= 200 && status < 300;
 	  }
 	};
-
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(51)))
 
 /***/ },
 /* 51 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var utils = __webpack_require__(47);
-	
-	module.exports = function normalizeHeaderName(headers, normalizedName) {
-	  utils.forEach(headers, function processHeader(value, name) {
-	    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
-	      headers[normalizedName] = value;
-	      delete headers[name];
-	    }
-	  });
-	};
-
-
-/***/ },
-/* 52 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var utils = __webpack_require__(47);
-	
-	function InterceptorManager() {
-	  this.handlers = [];
-	}
-	
-	/**
-	 * Add a new interceptor to the stack
-	 *
-	 * @param {Function} fulfilled The function to handle `then` for a `Promise`
-	 * @param {Function} rejected The function to handle `reject` for a `Promise`
-	 *
-	 * @return {Number} An ID used to remove interceptor later
-	 */
-	InterceptorManager.prototype.use = function use(fulfilled, rejected) {
-	  this.handlers.push({
-	    fulfilled: fulfilled,
-	    rejected: rejected
-	  });
-	  return this.handlers.length - 1;
-	};
-	
-	/**
-	 * Remove an interceptor from the stack
-	 *
-	 * @param {Number} id The ID that was returned by `use`
-	 */
-	InterceptorManager.prototype.eject = function eject(id) {
-	  if (this.handlers[id]) {
-	    this.handlers[id] = null;
-	  }
-	};
-	
-	/**
-	 * Iterate over all the registered interceptors
-	 *
-	 * This method is particularly useful for skipping over any
-	 * interceptors that may have become `null` calling `eject`.
-	 *
-	 * @param {Function} fn The function to call for each interceptor
-	 */
-	InterceptorManager.prototype.forEach = function forEach(fn) {
-	  utils.forEach(this.handlers, function forEachHandler(h) {
-	    if (h !== null) {
-	      fn(h);
-	    }
-	  });
-	};
-	
-	module.exports = InterceptorManager;
-
-
-/***/ },
-/* 53 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-	
-	var utils = __webpack_require__(47);
-	var transformData = __webpack_require__(55);
-	
-	/**
-	 * Dispatch a request to the server using whichever adapter
-	 * is supported by the current environment.
-	 *
-	 * @param {object} config The config that is to be used for the request
-	 * @returns {Promise} The Promise to be fulfilled
-	 */
-	module.exports = function dispatchRequest(config) {
-	  // Ensure headers exist
-	  config.headers = config.headers || {};
-	
-	  // Transform request data
-	  config.data = transformData(
-	    config.data,
-	    config.headers,
-	    config.transformRequest
-	  );
-	
-	  // Flatten headers
-	  config.headers = utils.merge(
-	    config.headers.common || {},
-	    config.headers[config.method] || {},
-	    config.headers || {}
-	  );
-	
-	  utils.forEach(
-	    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-	    function cleanHeaderConfig(method) {
-	      delete config.headers[method];
-	    }
-	  );
-	
-	  var adapter;
-	
-	  if (typeof config.adapter === 'function') {
-	    // For custom adapter support
-	    adapter = config.adapter;
-	  } else if (typeof XMLHttpRequest !== 'undefined') {
-	    // For browsers use XHR adapter
-	    adapter = __webpack_require__(56);
-	  } else if (typeof process !== 'undefined') {
-	    // For node use HTTP adapter
-	    adapter = __webpack_require__(56);
-	  }
-	
-	  return Promise.resolve(config)
-	    // Wrap synchronous adapter errors and pass configuration
-	    .then(adapter)
-	    .then(function onFulfilled(response) {
-	      // Transform response data
-	      response.data = transformData(
-	        response.data,
-	        response.headers,
-	        config.transformResponse
-	      );
-	
-	      return response;
-	    }, function onRejected(error) {
-	      // Transform response data
-	      if (error && error.response) {
-	        error.response.data = transformData(
-	          error.response.data,
-	          error.response.headers,
-	          config.transformResponse
-	        );
-	      }
-	
-	      return Promise.reject(error);
-	    });
-	};
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(54)))
-
-/***/ },
-/* 54 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -21306,44 +21200,36 @@
 
 
 /***/ },
-/* 55 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var utils = __webpack_require__(47);
 	
-	/**
-	 * Transform the data for a request or a response
-	 *
-	 * @param {Object|String} data The data to be transformed
-	 * @param {Array} headers The headers for the request or response
-	 * @param {Array|Function} fns A single function or Array of functions
-	 * @returns {*} The resulting transformed data
-	 */
-	module.exports = function transformData(data, headers, fns) {
-	  /*eslint no-param-reassign:0*/
-	  utils.forEach(fns, function transform(fn) {
-	    data = fn(data, headers);
+	module.exports = function normalizeHeaderName(headers, normalizedName) {
+	  utils.forEach(headers, function processHeader(value, name) {
+	    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+	      headers[normalizedName] = value;
+	      delete headers[name];
+	    }
 	  });
-	
-	  return data;
 	};
 
 
 /***/ },
-/* 56 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
 	var utils = __webpack_require__(47);
-	var settle = __webpack_require__(57);
-	var buildURL = __webpack_require__(60);
-	var parseHeaders = __webpack_require__(61);
-	var isURLSameOrigin = __webpack_require__(62);
-	var createError = __webpack_require__(58);
-	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(63);
+	var settle = __webpack_require__(54);
+	var buildURL = __webpack_require__(57);
+	var parseHeaders = __webpack_require__(58);
+	var isURLSameOrigin = __webpack_require__(59);
+	var createError = __webpack_require__(55);
+	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(60);
 	
 	module.exports = function xhrAdapter(config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -21392,7 +21278,9 @@
 	
 	      // The request errored out and we didn't get a response, this will be
 	      // handled by onerror instead
-	      if (request.status === 0) {
+	      // With one exception: request that using file: protocol, most browsers
+	      // will return status as 0 even though it's a successful request
+	      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
 	        return;
 	      }
 	
@@ -21437,7 +21325,7 @@
 	    // This is only done if running in a standard browser environment.
 	    // Specifically not if we're in a web worker, or react-native.
 	    if (utils.isStandardBrowserEnv()) {
-	      var cookies = __webpack_require__(64);
+	      var cookies = __webpack_require__(61);
 	
 	      // Add xsrf header
 	      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -21488,6 +21376,19 @@
 	      request.upload.addEventListener('progress', config.onUploadProgress);
 	    }
 	
+	    if (config.cancelToken) {
+	      // Handle cancellation
+	      config.cancelToken.promise.then(function onCanceled(cancel) {
+	        if (!request) {
+	          return;
+	        }
+	
+	        request.abort();
+	        reject(cancel);
+	        // Clean up request
+	        request = null;
+	      });
+	    }
 	
 	    if (requestData === undefined) {
 	      requestData = null;
@@ -21498,15 +21399,15 @@
 	  });
 	};
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(54)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(51)))
 
 /***/ },
-/* 57 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var createError = __webpack_require__(58);
+	var createError = __webpack_require__(55);
 	
 	/**
 	 * Resolve or reject a Promise based on response status.
@@ -21532,12 +21433,12 @@
 
 
 /***/ },
-/* 58 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var enhanceError = __webpack_require__(59);
+	var enhanceError = __webpack_require__(56);
 	
 	/**
 	 * Create an Error with the specified message, config, error code, and response.
@@ -21555,7 +21456,7 @@
 
 
 /***/ },
-/* 59 */
+/* 56 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21580,7 +21481,7 @@
 
 
 /***/ },
-/* 60 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21654,7 +21555,7 @@
 
 
 /***/ },
-/* 61 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21697,7 +21598,7 @@
 
 
 /***/ },
-/* 62 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21771,7 +21672,7 @@
 
 
 /***/ },
-/* 63 */
+/* 60 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21813,7 +21714,7 @@
 
 
 /***/ },
-/* 64 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21872,7 +21773,187 @@
 
 
 /***/ },
+/* 62 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(47);
+	
+	function InterceptorManager() {
+	  this.handlers = [];
+	}
+	
+	/**
+	 * Add a new interceptor to the stack
+	 *
+	 * @param {Function} fulfilled The function to handle `then` for a `Promise`
+	 * @param {Function} rejected The function to handle `reject` for a `Promise`
+	 *
+	 * @return {Number} An ID used to remove interceptor later
+	 */
+	InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+	  this.handlers.push({
+	    fulfilled: fulfilled,
+	    rejected: rejected
+	  });
+	  return this.handlers.length - 1;
+	};
+	
+	/**
+	 * Remove an interceptor from the stack
+	 *
+	 * @param {Number} id The ID that was returned by `use`
+	 */
+	InterceptorManager.prototype.eject = function eject(id) {
+	  if (this.handlers[id]) {
+	    this.handlers[id] = null;
+	  }
+	};
+	
+	/**
+	 * Iterate over all the registered interceptors
+	 *
+	 * This method is particularly useful for skipping over any
+	 * interceptors that may have become `null` calling `eject`.
+	 *
+	 * @param {Function} fn The function to call for each interceptor
+	 */
+	InterceptorManager.prototype.forEach = function forEach(fn) {
+	  utils.forEach(this.handlers, function forEachHandler(h) {
+	    if (h !== null) {
+	      fn(h);
+	    }
+	  });
+	};
+	
+	module.exports = InterceptorManager;
+
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(47);
+	var transformData = __webpack_require__(64);
+	var isCancel = __webpack_require__(65);
+	var defaults = __webpack_require__(50);
+	
+	/**
+	 * Throws a `Cancel` if cancellation has been requested.
+	 */
+	function throwIfCancellationRequested(config) {
+	  if (config.cancelToken) {
+	    config.cancelToken.throwIfRequested();
+	  }
+	}
+	
+	/**
+	 * Dispatch a request to the server using the configured adapter.
+	 *
+	 * @param {object} config The config that is to be used for the request
+	 * @returns {Promise} The Promise to be fulfilled
+	 */
+	module.exports = function dispatchRequest(config) {
+	  throwIfCancellationRequested(config);
+	
+	  // Ensure headers exist
+	  config.headers = config.headers || {};
+	
+	  // Transform request data
+	  config.data = transformData(
+	    config.data,
+	    config.headers,
+	    config.transformRequest
+	  );
+	
+	  // Flatten headers
+	  config.headers = utils.merge(
+	    config.headers.common || {},
+	    config.headers[config.method] || {},
+	    config.headers || {}
+	  );
+	
+	  utils.forEach(
+	    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+	    function cleanHeaderConfig(method) {
+	      delete config.headers[method];
+	    }
+	  );
+	
+	  var adapter = config.adapter || defaults.adapter;
+	
+	  return adapter(config).then(function onAdapterResolution(response) {
+	    throwIfCancellationRequested(config);
+	
+	    // Transform response data
+	    response.data = transformData(
+	      response.data,
+	      response.headers,
+	      config.transformResponse
+	    );
+	
+	    return response;
+	  }, function onAdapterRejection(reason) {
+	    if (!isCancel(reason)) {
+	      throwIfCancellationRequested(config);
+	
+	      // Transform response data
+	      if (reason && reason.response) {
+	        reason.response.data = transformData(
+	          reason.response.data,
+	          reason.response.headers,
+	          config.transformResponse
+	        );
+	      }
+	    }
+	
+	    return Promise.reject(reason);
+	  });
+	};
+
+
+/***/ },
+/* 64 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(47);
+	
+	/**
+	 * Transform the data for a request or a response
+	 *
+	 * @param {Object|String} data The data to be transformed
+	 * @param {Array} headers The headers for the request or response
+	 * @param {Array|Function} fns A single function or Array of functions
+	 * @returns {*} The resulting transformed data
+	 */
+	module.exports = function transformData(data, headers, fns) {
+	  /*eslint no-param-reassign:0*/
+	  utils.forEach(fns, function transform(fn) {
+	    data = fn(data, headers);
+	  });
+	
+	  return data;
+	};
+
+
+/***/ },
 /* 65 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = function isCancel(value) {
+	  return !!(value && value.__CANCEL__);
+	};
+
+
+/***/ },
+/* 66 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21892,7 +21973,7 @@
 
 
 /***/ },
-/* 66 */
+/* 67 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21910,7 +21991,95 @@
 
 
 /***/ },
-/* 67 */
+/* 68 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * A `Cancel` is an object that is thrown when an operation is canceled.
+	 *
+	 * @class
+	 * @param {string=} message The message.
+	 */
+	function Cancel(message) {
+	  this.message = message;
+	}
+	
+	Cancel.prototype.toString = function toString() {
+	  return 'Cancel' + (this.message ? ': ' + this.message : '');
+	};
+	
+	Cancel.prototype.__CANCEL__ = true;
+	
+	module.exports = Cancel;
+
+
+/***/ },
+/* 69 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Cancel = __webpack_require__(68);
+	
+	/**
+	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
+	 *
+	 * @class
+	 * @param {Function} executor The executor function.
+	 */
+	function CancelToken(executor) {
+	  if (typeof executor !== 'function') {
+	    throw new TypeError('executor must be a function.');
+	  }
+	
+	  var resolvePromise;
+	  this.promise = new Promise(function promiseExecutor(resolve) {
+	    resolvePromise = resolve;
+	  });
+	
+	  var token = this;
+	  executor(function cancel(message) {
+	    if (token.reason) {
+	      // Cancellation has already been requested
+	      return;
+	    }
+	
+	    token.reason = new Cancel(message);
+	    resolvePromise(token.reason);
+	  });
+	}
+	
+	/**
+	 * Throws a `Cancel` if cancellation has been requested.
+	 */
+	CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+	  if (this.reason) {
+	    throw this.reason;
+	  }
+	};
+	
+	/**
+	 * Returns an object that contains a new `CancelToken` and a function that, when called,
+	 * cancels the `CancelToken`.
+	 */
+	CancelToken.source = function source() {
+	  var cancel;
+	  var token = new CancelToken(function executor(c) {
+	    cancel = c;
+	  });
+	  return {
+	    token: token,
+	    cancel: cancel
+	  };
+	};
+	
+	module.exports = CancelToken;
+
+
+/***/ },
+/* 70 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21943,7 +22112,7 @@
 
 
 /***/ },
-/* 68 */
+/* 71 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -21962,7 +22131,7 @@
 	exports.default = todoUrl;
 
 /***/ },
-/* 69 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -21975,7 +22144,7 @@
 	
 	var _inferno2 = _interopRequireDefault(_inferno);
 	
-	var _formSerialize = __webpack_require__(70);
+	var _formSerialize = __webpack_require__(73);
 	
 	var _formSerialize2 = _interopRequireDefault(_formSerialize);
 	
@@ -22123,7 +22292,7 @@
 	exports.default = view;
 
 /***/ },
-/* 70 */
+/* 73 */
 /***/ function(module, exports) {
 
 	// get successful control from form and assemble into object
@@ -22389,7 +22558,7 @@
 
 
 /***/ },
-/* 71 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22398,24 +22567,24 @@
 	  value: true
 	});
 	
-	var _model = __webpack_require__(72);
+	var _model = __webpack_require__(75);
 	
-	var _actions = __webpack_require__(73);
+	var _actions = __webpack_require__(76);
 	
-	var _receive = __webpack_require__(74);
+	var _receive = __webpack_require__(77);
 	
 	var _receive2 = _interopRequireDefault(_receive);
 	
-	var _nextAction = __webpack_require__(79);
+	var _nextAction = __webpack_require__(82);
 	
 	var _nextAction2 = _interopRequireDefault(_nextAction);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var todoFormConfig = function todoFormConfig(_ref) {
-	  var services = _ref.services;
-	  var view = _ref.view;
-	  var setup = _ref.setup;
+	  var services = _ref.services,
+	      view = _ref.view,
+	      setup = _ref.setup;
 	
 	  return {
 	    Action: _actions.Action,
@@ -22433,7 +22602,7 @@
 	exports.default = todoFormConfig;
 
 /***/ },
-/* 72 */
+/* 75 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22460,7 +22629,7 @@
 	exports.emptyTodo = emptyTodo;
 
 /***/ },
-/* 73 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22518,7 +22687,7 @@
 	exports.createActions = createActions;
 
 /***/ },
-/* 74 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22529,9 +22698,9 @@
 	
 	var _ramda = __webpack_require__(35);
 	
-	var _model = __webpack_require__(72);
+	var _model = __webpack_require__(75);
 	
-	var _validation = __webpack_require__(75);
+	var _validation = __webpack_require__(78);
 	
 	var _validation2 = _interopRequireDefault(_validation);
 	
@@ -22550,10 +22719,6 @@
 	    },
 	    ClearForm: function ClearForm() {
 	      return { todo: (0, _model.emptyTodo)(), validationErrors: {} };
-	    },
-	
-	    _: function _() {
-	      return null;
 	    }
 	  });
 	
@@ -22566,7 +22731,7 @@
 	exports.default = receive;
 
 /***/ },
-/* 75 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22579,7 +22744,7 @@
 	  return (0, _validate2.default)(model, validationSpec) || {};
 	};
 	
-	var _validate = __webpack_require__(76);
+	var _validate = __webpack_require__(79);
 	
 	var _validate2 = _interopRequireDefault(_validate);
 	
@@ -22609,7 +22774,7 @@
 	};
 
 /***/ },
-/* 76 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/*!
@@ -23745,16 +23910,16 @@
 	    }
 	  };
 	
-	  validate.exposeModule(validate, this, exports, module, __webpack_require__(78));
+	  validate.exposeModule(validate, this, exports, module, __webpack_require__(81));
 	}).call(this,
 	         true ? /* istanbul ignore next */ exports : null,
 	         true ? /* istanbul ignore next */ module : null,
-	        __webpack_require__(78));
+	        __webpack_require__(81));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(77)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(80)(module)))
 
 /***/ },
-/* 77 */
+/* 80 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -23770,14 +23935,14 @@
 
 
 /***/ },
-/* 78 */
+/* 81 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 79 */
+/* 82 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -23802,7 +23967,7 @@
 	exports.default = nextAction;
 
 /***/ },
-/* 80 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -23815,7 +23980,7 @@
 	
 	var _inferno2 = _interopRequireDefault(_inferno);
 	
-	var _viewInferno = __webpack_require__(81);
+	var _viewInferno = __webpack_require__(84);
 	
 	var _viewInferno2 = _interopRequireDefault(_viewInferno);
 	
@@ -23903,7 +24068,7 @@
 	exports.default = view;
 
 /***/ },
-/* 81 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -23998,7 +24163,7 @@
 	exports.default = view;
 
 /***/ },
-/* 82 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -24007,23 +24172,23 @@
 	  value: true
 	});
 	
-	var _model = __webpack_require__(83);
+	var _model = __webpack_require__(86);
 	
 	var _model2 = _interopRequireDefault(_model);
 	
-	var _actions = __webpack_require__(84);
+	var _actions = __webpack_require__(87);
 	
-	var _receive = __webpack_require__(85);
+	var _receive = __webpack_require__(88);
 	
 	var _receive2 = _interopRequireDefault(_receive);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var todoListConfig = function todoListConfig(_ref) {
-	  var ActionForm = _ref.ActionForm;
-	  var services = _ref.services;
-	  var view = _ref.view;
-	  var setup = _ref.setup;
+	  var ActionForm = _ref.ActionForm,
+	      services = _ref.services,
+	      view = _ref.view,
+	      setup = _ref.setup;
 	  return {
 	    initialModel: _model2.default,
 	    actions: (0, _actions.createActions)(ActionForm, services),
@@ -24039,7 +24204,7 @@
 	exports.default = todoListConfig;
 
 /***/ },
-/* 83 */
+/* 86 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -24057,7 +24222,7 @@
 	exports.default = initialModel;
 
 /***/ },
-/* 84 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -24108,7 +24273,7 @@
 	exports.createActions = createActions;
 
 /***/ },
-/* 85 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -24149,10 +24314,6 @@
 	      return maybeTodoId.map(function (todoId) {
 	        return { todos: (0, _ramda.filter)((0, _ramda.complement)((0, _ramda.propEq)("id", todoId)), model.todos), message: "" };
 	      }).getOrElse({ todos: model.todos, message: "An error occured when deleting a Todo." });
-	    },
-	
-	    _: function _() {
-	      return null;
 	    }
 	  });
 	

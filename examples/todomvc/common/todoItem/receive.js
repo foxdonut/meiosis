@@ -20,23 +20,19 @@
   function(ItemAction) {
     return function(todoStorage) {
       return function(model, proposal) {
-        return ItemAction.case({
+        ItemAction.case({
           SetCompleted: function(todoId, completed) {
             model.todos = todoStorage.setCompleted(todoId, completed);
-            return model;
           },
           EditTodo: function(todo) {
             model.editTodo = todo;
-            return model;
           },
           DeleteTodo: function(todoId) {
             model.todos = todoStorage.deleteTodoId(todoId);
-            return model;
-          },
-          _: function() {
-            return model;
           }
         }, proposal);
+
+        return model;
       };
     };
   }

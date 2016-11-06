@@ -20,10 +20,9 @@
   function(meiosis, FooterAction) {
     return function(todoStorage) {
       return function(model, proposal) {
-        return FooterAction.case({
+        FooterAction.case({
           ClearCompleted: function() {
             model.todos = todoStorage.clearCompleted();
-            return model;
           },
           Filter: function(by) {
             if (by === model.filter) {
@@ -31,12 +30,10 @@
             }
             model.todos = todoStorage.loadAll();
             model.filter = by;
-            return model;
-          },
-          _: function() {
-            return model;
           }
         }, proposal);
+
+        return model;
       };
     };
   }

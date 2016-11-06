@@ -8,13 +8,13 @@
     return { counter: model.counter + proposal.add };
   };
 
-  var Meiosis = meiosis.init();
+  var Meiosis = meiosis.newInstance();
 
   var Main = Meiosis.createComponent({
-    initialModel: initialModel,
     view: view,
     receive: receive
   });
 
-  Meiosis.run(meiosisReact.renderer().intoId(document, "reactApp"), Main);
+  Meiosis.run({ renderer: meiosisReact.renderer().intoId(document, "reactApp"),
+    initialModel: initialModel, rootComponent: Main });
 })();

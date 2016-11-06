@@ -22,7 +22,7 @@
       Type.check = false;
 
       var root = rootComponent(todoStorage);
-      var renderRoot = meiosis.run(meiosisRender.renderer().intoId(document, "app"), root);
+      var renderRoot = meiosis.run({ renderer: meiosisRender.renderer().intoId(document, "app"), rootComponent: root });
       meiosisTracer(meiosis.createComponent, renderRoot, "#tracer");
     };
   }
