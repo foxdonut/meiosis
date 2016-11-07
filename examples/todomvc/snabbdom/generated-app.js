@@ -969,6 +969,7 @@
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function newInstance() {
 	    var allInitialModels = [];
+	    var allStates = [];
 	    var allReceives = [];
 	    var allReadies = [];
 	    var allPostRenders = [];
@@ -984,6 +985,7 @@
 	            !config.initialModel &&
 	            !config.ready &&
 	            !config.receive &&
+	            !config.state &&
 	            !config.view &&
 	            !config.postRender)) {
 	            throw new Error("Please specify a config when calling createComponent.");
@@ -994,6 +996,10 @@
 	                throw new Error("initialModel in createComponent must be a function. You can pass the root initialModel object to the run function.");
 	            }
 	            allInitialModels.push(initialModel);
+	        }
+	        var state = config.state;
+	        if (state) {
+	            allStates.push(state);
 	        }
 	        var actions = config.actions ? config.actions(propose) : propose;
 	        var receive = config.receive;
@@ -1012,14 +1018,19 @@
 	        if (nextAction) {
 	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
 	        }
-	        return function (model) {
-	            return config.view ? config.view(model, actions) : undefined;
+	        return function (state) {
+	            return config.view ? config.view(state, actions) : undefined;
 	        };
 	    }
 	    ;
 	    var run = function (runConfig) {
 	        var rootModel = runConfig.initialModel || {};
 	        allInitialModels.forEach(function (initialModel) { return rootModel = initialModel(rootModel); });
+	        var rootState = runConfig.state || (function (model) { return model; });
+	        allStates.forEach(function (stateFunction) {
+	            var prevState = rootState;
+	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
+	        });
 	        componentWire.listen(function (proposal) {
 	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
@@ -1039,14 +1050,15 @@
 	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	            }
 	        });
-	        var renderRoot_ = function (model) {
-	            var result = runConfig.renderer(model, runConfig.rootComponent);
-	            allPostRenders.forEach(function (postRender) { return postRender(model); });
+	        var renderRoot_ = function (state) {
+	            var result = runConfig.renderer(state, runConfig.rootComponent);
+	            allPostRenders.forEach(function (postRender) { return postRender(state); });
 	            return result;
 	        };
 	        renderRoot_.initialModel = rootModel;
+	        renderRoot_.state = rootState;
 	        var renderRoot = renderRoot_;
-	        rootWire.listen(renderRoot);
+	        rootWire.listen(function (model) { return renderRoot(rootState(model)); });
 	        rootWire.emit(rootModel);
 	        allReadies.forEach(function (ready) { return ready(); });
 	        var devtool = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
@@ -1067,7 +1079,7 @@
 	            });
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-	                    renderRoot(evt.data.model);
+	                    renderRoot(evt.data.state);
 	                }
 	                else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
 	                    window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: initialModel_1 }, "*");
@@ -1076,6 +1088,11 @@
 	                        var _a = bufferedReceives_1[i], model = _a.model, proposal = _a.proposal;
 	                        window.postMessage({ type: "MEIOSIS_RECEIVE", model: model, proposal: proposal }, "*");
 	                    }
+	                }
+	                else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+	                    var state = renderRoot.state(evt.data.model);
+	                    var ts = evt.data.ts;
+	                    window.postMessage({ type: "MEIOSIS_STATE", state: state, ts: ts }, "*");
 	                }
 	            });
 	        }
@@ -4064,78 +4081,9 @@
 
 /***/ },
 /* 68 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-	
-	var isAbsolute = function isAbsolute(pathname) {
-	  return pathname.charAt(0) === '/';
-	};
-	
-	// About 1.5x faster than the two-arg version of Array#splice()
-	var spliceOne = function spliceOne(list, index) {
-	  for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1) {
-	    list[i] = list[k];
-	  }list.pop();
-	};
-	
-	// This implementation is based heavily on node's url.parse
-	var resolvePathname = function resolvePathname(to) {
-	  var from = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-	
-	  var toParts = to && to.split('/') || [];
-	  var fromParts = from && from.split('/') || [];
-	
-	  var isToAbs = to && isAbsolute(to);
-	  var isFromAbs = from && isAbsolute(from);
-	  var mustEndAbs = isToAbs || isFromAbs;
-	
-	  if (to && isAbsolute(to)) {
-	    // to is absolute
-	    fromParts = toParts;
-	  } else if (toParts.length) {
-	    // to is relative, drop the filename
-	    fromParts.pop();
-	    fromParts = fromParts.concat(toParts);
-	  }
-	
-	  if (!fromParts.length) return '/';
-	
-	  var hasTrailingSlash = void 0;
-	  if (fromParts.length) {
-	    var last = fromParts[fromParts.length - 1];
-	    hasTrailingSlash = last === '.' || last === '..' || last === '';
-	  } else {
-	    hasTrailingSlash = false;
-	  }
-	
-	  var up = 0;
-	  for (var i = fromParts.length; i >= 0; i--) {
-	    var part = fromParts[i];
-	
-	    if (part === '.') {
-	      spliceOne(fromParts, i);
-	    } else if (part === '..') {
-	      spliceOne(fromParts, i);
-	      up++;
-	    } else if (up) {
-	      spliceOne(fromParts, i);
-	      up--;
-	    }
-	  }
-	
-	  if (!mustEndAbs) for (; up--; up) {
-	    fromParts.unshift('..');
-	  }if (mustEndAbs && fromParts[0] !== '' && (!fromParts[0] || !isAbsolute(fromParts[0]))) fromParts.unshift('');
-	
-	  var result = fromParts.join('/');
-	
-	  if (hasTrailingSlash && result.substr(-1) !== '/') result += '/';
-	
-	  return result;
-	};
-	
-	module.exports = resolvePathname;
+	!function(t,e){ true?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.resolvePathname=e():t.resolvePathname=e()}(this,function(){return function(t){function e(n){if(r[n])return r[n].exports;var o=r[n]={exports:{},id:n,loaded:!1};return t[n].call(o.exports,o,o.exports,e),o.loaded=!0,o.exports}var r={};return e.m=t,e.c=r,e.p="",e(0)}([function(t,e){"use strict";var r=function(t){return"/"===t.charAt(0)},n=function(t,e){for(var r=e,n=r+1,o=t.length;o>n;r+=1,n+=1)t[r]=t[n];t.pop()},o=function(t){var e=arguments.length<=1||void 0===arguments[1]?"":arguments[1],o=t&&t.split("/")||[],i=e&&e.split("/")||[],f=t&&r(t),s=e&&r(e),u=f||s;if(t&&r(t)?i=o:o.length&&(i.pop(),i=i.concat(o)),!i.length)return"/";var p=void 0;if(i.length){var a=i[i.length-1];p="."===a||".."===a||""===a}else p=!1;for(var c=0,l=i.length;l>=0;l--){var v=i[l];"."===v?n(i,l):".."===v?(n(i,l),c++):c&&(n(i,l),c--)}if(!u)for(;c--;c)i.unshift("..");!u||""===i[0]||i[0]&&r(i[0])||i.unshift("");var d=i.join("/");return p&&"/"!==d.substr(-1)&&(d+="/"),d};t.exports=o}])});
 
 /***/ },
 /* 69 */
