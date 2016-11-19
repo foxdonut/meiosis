@@ -154,7 +154,7 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
     rootWire.emit(rootModel);
     allReadies.forEach((ready: Function) => ready());
 
-    const devtool: any = window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
+    const devtool: any = window && window["__MEIOSIS_TRACER_DEVTOOLS_GLOBAL_HOOK__"];
     if (devtool) {
       const initialModel = copy(rootModel);
       const bufferedReceives: Array<any> = [];

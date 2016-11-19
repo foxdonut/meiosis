@@ -3,6 +3,6 @@
   "main": "lib/index.d.ts",
   "globalDependencies": {
     "mithril": "registry:dt/mithril#0.0.0+20160501155657",
-    "node": "registry:dt/node#6.0.0+20161019125345"
+    "node": "registry:dt/node#6.0.0+20161110151007"
   }
 }
