@@ -23,8 +23,7 @@ export interface MeiosisApp<M, S, V, P> {
     createComponent: CreateComponent<M, S, V, P>;
     run: Run<M, S, V>;
 }
-declare const REFUSE_PROPOSAL: {};
 declare function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P>;
 declare const createComponent: CreateComponent<any, any, any, any>;
 declare const run: Run<any, any, any>;
-export { newInstance, createComponent, run, REFUSE_PROPOSAL };
+export { newInstance, createComponent, run };

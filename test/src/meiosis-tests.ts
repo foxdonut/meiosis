@@ -2,7 +2,7 @@ import test from "ava";
 import { Promise } from "es6-promise";
 const h = require("snabbdom/h");
 
-import { newInstance, REFUSE_PROPOSAL } from "../../lib/index";
+import { newInstance } from "../../lib/index";
 
 let createComponent = null;
 let run = null;
@@ -620,68 +620,6 @@ test("calls the postRender function", t => {
     view: view,
     postRender: model => t.is(model, initialModel)
   }) });
-});
-
-test("can refuse a proposal", t => {
-  t.plan(1);
-
-  let propose = null;
-  let counter = 0;
-
-  const Main = createComponent({
-    initialModel: () => ({ value: 1 }),
-    view: (model, propose_) => {
-      counter++;
-      propose = propose_;
-      if (counter === 3) {
-        t.is(model.value, 4);
-      }
-      return h("span", model.value);
-    },
-    receive: (_model, proposal) => {
-      if (proposal.value % 2 > 0) {
-        return REFUSE_PROPOSAL;
-      }
-      return proposal;
-    }
-  });
-
-  run({ renderer, rootComponent: Main });
-
-  propose({ value: 2 });
-  propose({ value: 3 });
-  propose({ value: 4 });
-});
-
-test("does not mistake empty object for REFUSE_PROPOSAL", t => {
-  t.plan(1);
-
-  let propose = null;
-  let counter = 0;
-
-  const Main = createComponent({
-    initialModel: () => ({ value: 1 }),
-    view: (model, propose_) => {
-      counter++;
-      propose = propose_;
-      if (counter === 4) {
-        t.is(model.value, 4);
-      }
-      return h("span", model.value);
-    },
-    receive: (_model, proposal) => {
-      if (proposal.value % 2 > 0) {
-        return {};
-      }
-      return proposal;
-    }
-  });
-
-  run({ renderer, rootComponent: Main });
-
-  propose({ value: 2 });
-  propose({ value: 3 });
-  propose({ value: 4 });
 });
 
 test("can use a display function for an initial viewModel", t => {

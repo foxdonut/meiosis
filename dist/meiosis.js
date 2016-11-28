@@ -68,8 +68,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var wire_1 = __webpack_require__(2);
-	var REFUSE_PROPOSAL = {};
-	exports.REFUSE_PROPOSAL = REFUSE_PROPOSAL;
 	var nextId = 1;
 	var copy = function (obj) { return JSON.parse(JSON.stringify(obj)); };
 	function newInstance() {
@@ -137,23 +135,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            rootState = function (model, state) { return stateFunction(model, prevState(model)); };
 	        });
 	        componentWire.listen(function (proposal) {
-	            var accepted = true;
 	            for (var i = 0; i < allReceives.length; i++) {
 	                var receive = allReceives[i];
 	                var received = receive(rootModel, proposal);
-	                if (received === REFUSE_PROPOSAL) {
-	                    accepted = false;
-	                    break;
-	                }
-	                else {
-	                    rootModel = received;
-	                }
+	                rootModel = received;
 	            }
 	            ;
-	            if (accepted) {
-	                rootWire.emit(rootModel);
-	                allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
-	            }
+	            rootWire.emit(rootModel);
+	            allNextActions.forEach(function (nextAction) { return nextAction(rootModel, proposal); });
 	        });
 	        var renderRoot_ = function (state) {
 	            var result = runConfig.renderer(state, runConfig.rootComponent);

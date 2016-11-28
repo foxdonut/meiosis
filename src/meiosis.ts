@@ -34,7 +34,6 @@ export interface MeiosisApp<M, S, V, P> {
   run: Run<M, S, V>;
 }
 
-const REFUSE_PROPOSAL = {};
 let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
@@ -118,25 +117,15 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
     });
 
     componentWire.listen((proposal: any) => {
-      let accepted = true;
-
       for (let i: number = 0; i < allReceives.length; i++) {
         const receive: Receive<M, P> = allReceives[i];
         const received: M = receive(rootModel, proposal);
 
-        if (received === REFUSE_PROPOSAL) {
-          accepted = false;
-          break;
-        }
-        else {
-          rootModel = received;
-        }
+        rootModel = received;
       };
 
-      if (accepted) {
-        rootWire.emit(rootModel);
-        allNextActions.forEach((nextAction: NextActionFromActions<M, P>) => nextAction(rootModel, proposal));
-      }
+      rootWire.emit(rootModel);
+      allNextActions.forEach((nextAction: NextActionFromActions<M, P>) => nextAction(rootModel, proposal));
     });
 
     const renderRoot_: any = (state: S) => {
@@ -208,6 +197,5 @@ const run = instance.run;
 export {
   newInstance,
   createComponent,
-  run,
-  REFUSE_PROPOSAL
+  run
 };
