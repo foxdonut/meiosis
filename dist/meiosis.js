@@ -104,14 +104,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (state) {
 	            allStates.push(state);
 	        }
-	        var actions = config.actions ? config.actions(propose) : propose;
+	        var hasActions = !!config.actions;
+	        var actions = hasActions ? config.actions(propose) : null;
+	        var actionsOrPropose = hasActions ? actions : propose;
 	        var receive = config.receive;
 	        if (receive) {
 	            allReceives.push(receive);
 	        }
 	        var ready = config.ready;
 	        if (ready) {
-	            allReadies.push(function () { return ready(actions); });
+	            allReadies.push(function () { return ready(actionsOrPropose); });
 	        }
 	        var postRender = config.postRender;
 	        if (postRender) {
@@ -119,10 +121,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var nextAction = config.nextAction;
 	        if (nextAction) {
-	            allNextActions.push(function (model, proposal) { return nextAction(model, proposal, actions); });
+	            allNextActions.push(function (model, proposal) {
+	                var context = { model: model, proposal: proposal };
+	                if (hasActions) {
+	                    context.actions = actions;
+	                }
+	                else {
+	                    context.propose = propose;
+	                }
+	                nextAction(context);
+	            });
 	        }
 	        return function (state) {
-	            return config.view ? config.view(state, actions) : undefined;
+	            return config.view ? config.view(state, actionsOrPropose) : undefined;
 	        };
 	    }
 	    ;

@@ -113,7 +113,7 @@ test("nextAction", t => {
       }
       return model;
     },
-    nextAction: (model, proposal, actions) => {
+    nextAction: ({model, proposal, actions}) => {
       if (proposal === CHANGE) {
         actions.refresh();
       }
@@ -469,10 +469,10 @@ test("sends proposal through to the nextAction function", t => {
       t.is(proposal.name, "two");
       return { name: "three" };
     },
-    nextAction: (model, proposal, propose_) => {
-      t.is(model.name, "three");
-      t.deepEqual(proposal, { name: "two" });
-      t.is(propose_, propose);
+    nextAction: context => {
+      t.is(context.model.name, "three");
+      t.deepEqual(context.proposal, { name: "two" });
+      t.is(context.propose, propose);
     }
   });
 
@@ -552,9 +552,9 @@ test("calls all nextAction functions and passes correct actions to the each one"
       formActionsRef = actions;
       return h("span");
     },
-    nextAction: (_model, _proposal, actions) => {
-      t.truthy(actions.formAction);
-      t.falsy(actions.listAction);
+    nextAction: context => {
+      t.truthy(context.actions.formAction);
+      t.falsy(context.actions.listAction);
     }
   });
 
@@ -568,9 +568,9 @@ test("calls all nextAction functions and passes correct actions to the each one"
       listActionsRef = actions;
       return h("span");
     },
-    nextAction: (_model, _proposal, actions) => {
-      t.truthy(actions.listAction);
-      t.falsy(actions.formAction);
+    nextAction: context => {
+      t.truthy(context.actions.listAction);
+      t.falsy(context.actions.formAction);
     }
   });
 

@@ -1,5 +1,6 @@
 import { Component } from "./component";
 import { Config, InitialModel } from "./config";
+import { Context } from "./context";
 import { NextAction, NextActionFromActions } from "./nextAction";
 import { PostRender } from "./postRender";
 import { Ready } from "./ready";
@@ -79,7 +80,9 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
       allStates.push(state);
     }
 
-    const actions: A | Emitter<P> = config.actions ? config.actions(propose) : propose;
+    const hasActions: boolean = !!config.actions;
+    const actions: A = hasActions ? config.actions(propose) : null;
+    const actionsOrPropose: A | Emitter<P> = hasActions ? actions : propose;
 
     const receive: Receive<M, P> = config.receive;
     if (receive) {
@@ -88,7 +91,7 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
 
     const ready: Ready<P, A> = config.ready;
     if (ready) {
-      allReadies.push(() => ready(actions));
+      allReadies.push(() => ready(actionsOrPropose));
     }
 
     const postRender: PostRender<S> = config.postRender;
@@ -98,11 +101,20 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
 
     const nextAction: NextAction<M, P, A> = config.nextAction;
     if (nextAction) {
-      allNextActions.push((model: M, proposal: P) => nextAction(model, proposal, actions));
+      allNextActions.push((model: M, proposal: P) => {
+        const context: Context<M, P, A> = { model, proposal };
+        if (hasActions) {
+          context.actions = actions;
+        }
+        else {
+          context.propose = propose;
+        }
+        nextAction(context);
+      });
     }
 
     return function(state: S): V {
-      return config.view ? config.view(state, actions) : undefined;
+      return config.view ? config.view(state, actionsOrPropose) : undefined;
     };
   };
 

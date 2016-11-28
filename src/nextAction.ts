@@ -1,7 +1,8 @@
+import { Context } from "./context";
 import { Emitter } from "./wire";
 
 export interface NextAction<M, P, A> {
-  (model: M, proposal: P, actions: A | Emitter<P>): void;
+  (context: Context<M, P, A>): void;
 }
 
 export interface NextActionFromActions<M, P> {

@@ -1,7 +1,7 @@
 import test, { TestContext } from "ava";
 import * as m from "mithril";
 
-import { ActionCreator, CreateComponent, Component, Emitter, MeiosisApp,
+import { ActionCreator, Component, Context, CreateComponent, Emitter, MeiosisApp,
   Ready, Renderer, RenderRoot, Run, newInstance } from "../../lib/index";
 
 interface Model {
@@ -61,9 +61,9 @@ test("takes advantage of typescript features", (t: TestContext): void => {
       }
       return model;
     },
-    nextAction: (model: Model, proposal: Proposal, actions: Actions): void => {
-      if (proposal.increment === 0) {
-        actions.decrease();
+    nextAction: (context: Context<Model, Proposal, Actions>): void => {
+      if (context.proposal.increment === 0) {
+        context.actions.decrease();
       }
     }
   });

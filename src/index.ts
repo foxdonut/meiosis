@@ -2,6 +2,7 @@ export * from "./meiosis";
 export * from "./actions";
 export * from "./component";
 export * from "./config";
+export * from "./context";
 export * from "./nextAction";
 export * from "./postRender";
 export * from "./ready";
