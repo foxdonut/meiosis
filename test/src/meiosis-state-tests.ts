@@ -1,5 +1,5 @@
 import test from "ava";
-const h = require("snabbdom/h");
+import * as m from "mithril";
 
 import { newInstance } from "../../lib/index";
 
@@ -20,7 +20,7 @@ test.beforeEach(function() {
 test("can use a main application state function", t => {
   const rootComponent = createComponent({
     view: (state, actions) =>
-      h("span", `Counter: ${state.counter} Length: ${state.descriptionLength}`)
+      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength}`)
   });
 
   const state = model => ({
@@ -43,7 +43,7 @@ test("can use just component state functions", t => {
   const rootComponent = createComponent({
     state: state1,
     view: (state, actions) =>
-      h("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`)
+      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`)
   });
 
   const state2 = (model, state) => {
@@ -65,7 +65,7 @@ test("can use both main and component state functions", t => {
       return state;
     },
     view: (state, actions) =>
-      h("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even} Duck: ${state.duck}`)
+      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even} Duck: ${state.duck}`)
   });
 
   createComponent({

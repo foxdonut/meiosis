@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Meiosis manages the data flow of your web applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -36,10 +36,9 @@
     "ava": "^0.17.0",
     "browser-env": "^2.0.16",
     "es6-promise": "^4.0.5",
-    "mithril": "^0.2.5",
-    "snabbdom": "^0.5.4",
-    "ts-loader": "^1.2.2",
-    "typescript": "^2.0.10",
-    "webpack": "^1.13.3"
+    "mithril": "^1.0.0-rc.6",
+    "ts-loader": "^1.3.2",
+    "typescript": "^2.1.4",
+    "webpack": "^1.14.0"
   }
 }

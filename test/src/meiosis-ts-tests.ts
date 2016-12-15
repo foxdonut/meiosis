@@ -9,7 +9,7 @@ interface Model {
   description?: string;
 }
 
-type View = Mithril.VirtualElement;
+type View = any; // until 1.0 typings are available. Was Mithril.VirtualElement;
 
 interface Proposal {
   increment: number;
@@ -73,10 +73,10 @@ test("takes advantage of typescript features", (t: TestContext): void => {
     rootComponent: Main,
     initialModel: { counter: 1, description: "test" }
   });
-  t.is(vnode.children[0], "test 1");
+  t.is(vnode.text, "test 1");
 
   actionsRef.increase();
-  t.is(vnode.children[0], "test 2");
+  t.is(vnode.text, "test 2");
 });
 
 test("can create components with propose or actions", (t: TestContext): void => {
@@ -117,10 +117,10 @@ test("can create components with propose or actions", (t: TestContext): void => 
     rootComponent: Main,
     initialModel: { counter: 1, description: "test" }
   });
-  t.is(vnode.children[0], "test 1");
+  t.is(vnode.text, "test 1");
 
   proposeRef(INCREASE);
-  t.is(vnode.children[0], "test 2");
+  t.is(vnode.text, "test 2");
 });
 
 test("can create initial model using functions", (t: TestContext): void => {
@@ -141,5 +141,5 @@ test("can create initial model using functions", (t: TestContext): void => {
 
   run({ renderer, rootComponent: Component1 });
 
-  t.is(vnode.children[0], "test 42");
+  t.is(vnode.text, "test 42");
 });

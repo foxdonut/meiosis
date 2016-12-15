@@ -15,7 +15,7 @@ interface AppState {
   even?: boolean;
 }
 
-type View = Mithril.VirtualElement;
+type View = any; // until 1.0 typings are available. Was Mithril.VirtualElement;
 
 interface Proposal {
   increment: number;
@@ -58,7 +58,7 @@ test("can use a main application state function", (t: TestContext): void => {
 
   run({ renderer, initialModel, state, rootComponent });
 
-  t.is(vnode.children[0], "Counter: 2 Length: 4");
+  t.is(vnode.text, "Counter: 2 Length: 4");
 });
 
 test("can use just a component state function", (t: TestContext): void => {
@@ -77,7 +77,7 @@ test("can use just a component state function", (t: TestContext): void => {
 
   run({ renderer, initialModel, rootComponent });
 
-  t.is(vnode.children[0], "Counter: 2 Length: 4 Even: true");
+  t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
 });
 
 test("can use both a main and a component state function", (t: TestContext): void => {
@@ -97,5 +97,5 @@ test("can use both a main and a component state function", (t: TestContext): voi
 
   run({ renderer, initialModel, state, rootComponent });
 
-  t.is(vnode.children[0], "Counter: 2 Length: 4 Even: true");
+  t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
 });
