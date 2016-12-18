@@ -4,14 +4,20 @@ import flyd from "flyd";
 import m from "mithril";
 import * as R from "ramda";
 
-const meiosis = (initialModel, receives) => {
+const meiosis = (initialModel) => {
+  const components = [];
   const propose = flyd.stream();
-  const receive = (model, proposal) => receives.reduce((model, rcv) => rcv(model, proposal), model);
+
+  const receive = (model, proposal) => components
+    .map(R.prop("receive"))
+    .reduce((model, rcv) => rcv(model, proposal), model);
+
   const model = flyd.scan(receive, initialModel, propose);
 
   return {
-    propose,
-    model
+    components,
+    model,
+    propose
   };
 };
 
@@ -48,49 +54,75 @@ const zip = sources => {
   }, withIdxs);
 };
 
-// App
+// Counter
 
-const events = propose => ({
-  onIncrease: _evt => propose({ add:  1 }),
-  onDecrease: _evt => propose({ add: -1 })
-});
+const counterComponent = (propose, id) => {
+  id = id || "counter_" + String(new Date().getTime());
 
-const createView = events => model => m("div",
-  m("span", "Counter: " + model.counter + " " + (model.even ? "Even" : "Odd")),
-  m("button", { onclick: events.onIncrease }, "Increase"),
-  m("button", { onclick: events.onDecrease }, "Decrease"),
-  m("div", JSON.stringify(model)));
+  const events = propose => ({
+    onIncrease: _evt => propose({ counterId: id, add:  1 }),
+    onDecrease: _evt => propose({ counterId: id, add: -1 })
+  });
 
-let initialModel = { counter: 0 };
+  const createView = events => model => m("div",
+    m("span", "Counter: " + model.counter + " " + (model.even ? "Even" : "Odd")),
+    m("button", { onclick: events.onIncrease }, "Increase"),
+    m("button", { onclick: events.onDecrease }, "Decrease"));
 
-const receive1 = (model, proposal) => {
-  if (proposal.add > 0) {
-    model.counter += proposal.add;
-  }
-  return model;
+  const initialModel = { counter: 0 };
+
+  const receive = (model, proposal) => {
+    if (proposal.counterId === id && proposal.add) {
+      model.counter += proposal.add;
+    }
+    return model;
+  };
+
+  const view = pipeIn(propose, events, createView);
+
+  const state = model => Object.assign({}, model, { even: model.counter % 2 === 0 });
+
+  return { initialModel, receive, view, state };
 };
 
-const receive2 = (model, proposal) => {
-  if (proposal.add < 0) {
-    model.counter += proposal.add;
-  }
-  return model;
-};
-
-const { propose, model } = meiosis(initialModel, [receive1, receive2]);
-
-const view = pipeIn(propose, events, createView);
-
-const state = model => Object.assign({}, model, { even: model.counter % 2 === 0 });
+const initialModel = { counter: 0, counterIds: [], countersById: {} };
+const { propose, model, components } = meiosis(initialModel);
+const counter = counterComponent(propose);
+components.push(counter);
 
 const nextAction = (model, _proposal) => {
-  if (model.counter % 10 === 0) {
+  if (model.counter > 0 && model.counter % 10 === 0) {
     propose({ add: 2 });
   }
 };
 
 flyd.on(pair => nextAction(pair[0], pair[1]), zip([model, propose]));
 
+const events = propose => ({
+  onAddCounter: _evt => propose({ addCounter: true }),
+  onRemoveCounter: _evt => propose({ removeCounter: -1 })
+});
+
+const createView = events => model => m("div",
+  components.filter(component => component.view).map(component => component.view(model)),
+  m("button", { onclick: events.onAddCounter }, "Add Counter"),
+  m("div", JSON.stringify(model)));
+
+const view = pipeIn(propose, events, createView);
+
+const counterContainer = {
+  receive: (model, proposal) => {
+    if (proposal.addCounter) {
+      const id = "counter_" + String(new Date().getTime());
+      const counter = counterComponent(propose, id);
+      model[id] = counter.initialModel;
+      components.push(counter);
+    }
+    return model;
+  }
+};
+components.push(counterContainer);
+
 const element = document.getElementById("app");
-flyd.on(model => m.render(element, view(model)), flyd.map(state, model));
+flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
 
