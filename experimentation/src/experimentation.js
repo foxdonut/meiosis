@@ -1,5 +1,9 @@
 // Meiosis
 
+import flyd from "flyd";
+import m from "mithril";
+import * as R from "ramda";
+
 const meiosis = (initialModel, receives) => {
   const propose = flyd.stream();
   const receive = (model, proposal) => receives.reduce((model, rcv) => rcv(model, proposal), model);
@@ -47,14 +51,15 @@ const zip = sources => {
 // App
 
 const events = propose => ({
-  onIncrease: evt => propose({ add:  1 }),
-  onDecrease: evt => propose({ add: -1 })
+  onIncrease: _evt => propose({ add:  1 }),
+  onDecrease: _evt => propose({ add: -1 })
 });
 
 const createView = events => model => m("div",
   m("span", "Counter: " + model.counter + " " + (model.even ? "Even" : "Odd")),
   m("button", { onclick: events.onIncrease }, "Increase"),
-  m("button", { onclick: events.onDecrease }, "Decrease"));
+  m("button", { onclick: events.onDecrease }, "Decrease"),
+  m("div", JSON.stringify(model)));
 
 let initialModel = { counter: 0 };
 
@@ -66,7 +71,7 @@ const receive1 = (model, proposal) => {
 };
 
 const receive2 = (model, proposal) => {
-  if (proposal.add < 0) {1
+  if (proposal.add < 0) {
     model.counter += proposal.add;
   }
   return model;
@@ -78,7 +83,7 @@ const view = pipeIn(propose, events, createView);
 
 const state = model => Object.assign({}, model, { even: model.counter % 2 === 0 });
 
-const nextAction = (model, proposal) => {
+const nextAction = (model, _proposal) => {
   if (model.counter % 10 === 0) {
     propose({ add: 2 });
   }
