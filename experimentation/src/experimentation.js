@@ -3,12 +3,14 @@
 import flyd from "flyd";
 import m from "mithril";
 import * as R from "ramda";
+import objectPath from "object-path";
 
 const meiosis = (initialModel) => {
-  const components = [];
+  const components = {};
   const propose = flyd.stream();
 
-  const receive = (model, proposal) => components
+  const receive = (model, proposal) => Object.keys(components)
+    .map(key => components[key])
     .map(R.prop("receive"))
     .reduce((model, rcv) => rcv(model, proposal), model);
 
@@ -25,6 +27,17 @@ const meiosis = (initialModel) => {
 
 const pipeIn = function() {
   return R.pipe.apply(R, Array.prototype.slice.call(arguments, 1))(arguments[0]);
+};
+
+const nestComponent = function(component, path) {
+  return {
+    receive: component.receive && ((model, proposal) => {
+      component.receive(objectPath.get(model, path), proposal);
+      return model;
+    }),
+    view: component.view && (model => component.view((component.state || R.identity)(objectPath.get(model, path)))),
+    initialModel: component.initialModel
+  };
 };
 
 // Credit: source: https://github.com/jayrbolton/flyd-zip
@@ -56,7 +69,7 @@ const zip = sources => {
 
 // Counter
 
-const counterComponent = (propose, id) => {
+const counterComponent = (propose, id) => {;
   id = id || "counter_" + String(new Date().getTime());
 
   const events = propose => ({
@@ -88,7 +101,7 @@ const counterComponent = (propose, id) => {
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
 const { propose, model, components } = meiosis(initialModel);
 const counter = counterComponent(propose);
-components.push(counter);
+components["counter"] = counter;
 
 const nextAction = (model, _proposal) => {
   if (model.counter > 0 && model.counter % 10 === 0) {
@@ -104,7 +117,8 @@ const events = propose => ({
 });
 
 const createView = events => model => m("div",
-  components.filter(component => component.view).map(component => component.view(model)),
+  components["counter"].view(model),
+  model.counterIds.map(id => components[id]).map(component => component.view(model)),
   m("button", { onclick: events.onAddCounter }, "Add Counter"),
   m("div", JSON.stringify(model)));
 
@@ -114,14 +128,15 @@ const counterContainer = {
   receive: (model, proposal) => {
     if (proposal.addCounter) {
       const id = "counter_" + String(new Date().getTime());
-      const counter = counterComponent(propose, id);
-      model[id] = counter.initialModel;
-      components.push(counter);
+      const counter = nestComponent(counterComponent(propose, id), "countersById." + id);
+      model.countersById[id] = counter.initialModel;
+      model.counterIds.push(id);
+      components[id] = counter;
     }
     return model;
   }
 };
-components.push(counterContainer);
+components["counterContainer"] = counterContainer;
 
 const element = document.getElementById("app");
 flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
