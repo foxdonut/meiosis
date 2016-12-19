@@ -4,6 +4,7 @@ import flyd from "flyd";
 import m from "mithril";
 import * as R from "ramda";
 import objectPath from "object-path";
+import meiosisTracer from "meiosis-tracer";
 
 const meiosis = (initialModel) => {
   const components = {};
@@ -69,18 +70,21 @@ const zip = sources => {
 
 // Counter
 
-const counterComponent = (propose, id) => {;
+const counterComponent = (propose, id) => {
+  const remove = !!id;
   id = id || "counter_" + String(new Date().getTime());
 
   const events = propose => ({
     onIncrease: _evt => propose({ counterId: id, add:  1 }),
-    onDecrease: _evt => propose({ counterId: id, add: -1 })
+    onDecrease: _evt => propose({ counterId: id, add: -1 }),
+    onRemove: _evt => propose({ counterId: id, removeCounter: true })
   });
 
   const createView = events => model => m("div",
     m("span", "Counter: " + model.counter + " " + (model.even ? "Even" : "Odd")),
-    m("button", { onclick: events.onIncrease }, "Increase"),
-    m("button", { onclick: events.onDecrease }, "Decrease"));
+    m("button.btn.btn-primary", { onclick: events.onIncrease }, "Increase"),
+    m("button.btn.btn-default", { onclick: events.onDecrease }, "Decrease"),
+    remove ? m("button.btn.btn-danger", { onclick: events.onRemove }, "Remove") : null);
 
   const initialModel = { counter: 0 };
 
@@ -112,15 +116,13 @@ const nextAction = (model, _proposal) => {
 flyd.on(pair => nextAction(pair[0], pair[1]), zip([model, propose]));
 
 const events = propose => ({
-  onAddCounter: _evt => propose({ addCounter: true }),
-  onRemoveCounter: _evt => propose({ removeCounter: -1 })
+  onAddCounter: _evt => propose({ addCounter: true })
 });
 
 const createView = events => model => m("div",
   components["counter"].view(model),
-  model.counterIds.map(id => components[id]).map(component => component.view(model)),
-  m("button", { onclick: events.onAddCounter }, "Add Counter"),
-  m("div", JSON.stringify(model)));
+  m("button.btn.btn-primary", { onclick: events.onAddCounter }, "Add Counter"),
+  model.counterIds.map(id => components[id]).map(component => component.view(model)));
 
 const view = pipeIn(propose, events, createView);
 
@@ -133,6 +135,12 @@ const counterContainer = {
       model.counterIds.push(id);
       components[id] = counter;
     }
+    else if (proposal.removeCounter) {
+      const id = proposal.counterId;
+      delete components[id];
+      delete model.countersById[id];
+      model.counterIds.splice(model.counterIds.indexOf(id), 1);
+    }
     return model;
   }
 };
@@ -141,3 +149,11 @@ components["counterContainer"] = counterContainer;
 const element = document.getElementById("app");
 flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
 
+const createComponent = component => {
+  components["tracer"] = component;
+};
+const renderRoot = model => m.render(element, view(model));
+renderRoot.initialModel = initialModel;
+renderRoot.state = R.identity;
+
+meiosisTracer(createComponent, renderRoot, "#tracer");
