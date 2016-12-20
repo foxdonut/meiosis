@@ -6,19 +6,12 @@ import * as R from "ramda";
 import objectPath from "object-path";
 import meiosisTracer from "meiosis-tracer";
 
-const meiosis = (initialModel) => {
-  const components = {};
+const meiosis = (initialModel, receive) => {
   const propose = flyd.stream();
-
-  const receive = (model, proposal) => Object.keys(components)
-    .map(key => components[key])
-    .map(R.prop("receive"))
-    .reduce((model, rcv) => rcv(model, proposal), model);
 
   const model = flyd.scan(receive, initialModel, propose);
 
   return {
-    components,
     model,
     propose
   };
@@ -103,7 +96,17 @@ const counterComponent = (propose, id) => {
 };
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
-const { propose, model, components } = meiosis(initialModel);
+
+const components = {};
+const additionalComponents = [];
+
+const receive = (model, proposal) => Object.keys(components)
+  .map(key => components[key])
+  .concat(additionalComponents)
+  .map(R.prop("receive"))
+  .reduce((model, rcv) => rcv(model, proposal), model);
+
+const { propose, model } = meiosis(initialModel, receive);
 const counter = counterComponent(propose);
 components["counter"] = counter;
 
@@ -150,7 +153,7 @@ const element = document.getElementById("app");
 flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
 
 const createComponent = component => {
-  components["tracer"] = component;
+  additionalComponents.push(component);
 };
 const renderRoot = model => m.render(element, view(model));
 renderRoot.initialModel = initialModel;
