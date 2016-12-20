@@ -29,7 +29,8 @@ const nestComponent = function(component, path) {
       component.receive(objectPath.get(model, path), proposal);
       return model;
     }),
-    view: component.view && (model => component.view((component.state || R.identity)(objectPath.get(model, path)))),
+    state: component.state && (model => component.state(objectPath.get(model, path))),
+    view: component.view && (model => component.view(objectPath.get(model, path))),
     initialModel: component.initialModel
   };
 };
@@ -148,6 +149,13 @@ const counterContainer = {
   }
 };
 components["counterContainer"] = counterContainer;
+
+const state = model => Object.keys(components)
+  .map(key => components[key])
+  .concat(additionalComponents)
+  .map(R.prop("state"))
+  .reduce((model, stateFn) => stateFn(model), model);
+
 
 const element = document.getElementById("app");
 flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
