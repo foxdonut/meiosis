@@ -94,7 +94,7 @@ const counterComponent = (propose, id) => {
 
   const view = pipeIn(propose, events, createView);
 
-  const state = (state, model) => Object.assign({}, JSON.parse(JSON.stringify(model)), { even: model.counter % 2 === 0 });
+  const state = (state, model) => Object.assign(JSON.parse(JSON.stringify(model)), { even: model.counter % 2 === 0 });
 
   return { initialModel, receive, view, state };
 };
