@@ -29,7 +29,10 @@ const nestComponent = function(component, path) {
       component.receive(objectPath.get(model, path), proposal);
       return model;
     }),
-    state: component.state && (model => component.state(objectPath.get(model, path))),
+    state: component.state && ((state, model) => {
+      objectPath.set(state, path, component.state(objectPath.get(state, path), objectPath.get(model, path)));
+      return state;
+    }),
     view: component.view && (model => component.view(objectPath.get(model, path))),
     initialModel: component.initialModel
   };
@@ -76,9 +79,9 @@ const counterComponent = (propose, id) => {
 
   const createView = events => model => m("div",
     m("span", "Counter: " + model.counter + " " + (model.even ? "Even" : "Odd")),
-    m("button.btn.btn-primary", { onclick: events.onIncrease }, "Increase"),
-    m("button.btn.btn-default", { onclick: events.onDecrease }, "Decrease"),
-    remove ? m("button.btn.btn-danger", { onclick: events.onRemove }, "Remove") : null);
+    m("button.btn.btn-sm.btn-primary", { onclick: events.onIncrease }, "Increase"),
+    m("button.btn.btn-sm.btn-default", { onclick: events.onDecrease }, "Decrease"),
+    remove ? m("button.btn.btn-sm.btn-danger", { onclick: events.onRemove }, "Remove") : null);
 
   const initialModel = { counter: 0 };
 
@@ -91,7 +94,7 @@ const counterComponent = (propose, id) => {
 
   const view = pipeIn(propose, events, createView);
 
-  const state = model => Object.assign({}, model, { even: model.counter % 2 === 0 });
+  const state = (state, model) => Object.assign({}, JSON.parse(JSON.stringify(model)), { even: model.counter % 2 === 0 });
 
   return { initialModel, receive, view, state };
 };
@@ -105,15 +108,16 @@ const receive = (model, proposal) => Object.keys(components)
   .map(key => components[key])
   .concat(additionalComponents)
   .map(R.prop("receive"))
+  .filter(R.identity)
   .reduce((model, rcv) => rcv(model, proposal), model);
 
 const { propose, model } = meiosis(initialModel, receive);
 const counter = counterComponent(propose);
 components["counter"] = counter;
 
-const nextAction = (model, _proposal) => {
+const nextAction = (model, proposal) => {
   if (model.counter > 0 && model.counter % 10 === 0) {
-    propose({ add: 2 });
+    propose({ counterId: proposal.counterId, add: 2 });
   }
 };
 
@@ -150,21 +154,21 @@ const counterContainer = {
 };
 components["counterContainer"] = counterContainer;
 
-const state = model => Object.keys(components)
+const appState = model => Object.keys(components)
   .map(key => components[key])
   .concat(additionalComponents)
   .map(R.prop("state"))
-  .reduce((model, stateFn) => stateFn(model), model);
-
+  .filter(R.identity)
+  .reduce((state, stateFn) => stateFn(state, model), {});
 
 const element = document.getElementById("app");
-flyd.on(model => m.render(element, view(model)), flyd.map(counter.state, model));
+const renderRoot = model => m.render(element, view(model));
+flyd.on(renderRoot, flyd.map(appState, model));
 
 const createComponent = component => {
   additionalComponents.push(component);
 };
-const renderRoot = model => m.render(element, view(model));
 renderRoot.initialModel = initialModel;
-renderRoot.state = R.identity;
+renderRoot.state = appState;
 
 meiosisTracer(createComponent, renderRoot, "#tracer");
