@@ -29,6 +29,9 @@ const nestComponent = function(component, path) {
       component.receive(objectPath.get(model, path), proposal);
       return model;
     }),
+    nextAction: component.nextAction && ((model, proposal) => {
+      component.nextAction(objectPath.get(model, path), proposal);
+    }),
     state: component.state && ((state, model) => {
       objectPath.set(state, path, component.state(objectPath.get(state, path), objectPath.get(model, path)));
       return state;
@@ -94,9 +97,16 @@ const counterComponent = (propose, id) => {
 
   const view = pipeIn(propose, events, createView);
 
-  const state = (state, model) => Object.assign(JSON.parse(JSON.stringify(model)), { even: model.counter % 2 === 0 });
+  const state = (state, model) => Object.assign(JSON.parse(JSON.stringify(model)),
+    { even: model.counter % 2 === 0 });
 
-  return { initialModel, receive, view, state };
+  const nextAction = (model, proposal) => {
+    if (proposal.counterId === id && model.counter === 3) {
+      propose({ counterId: id, add: 2 });
+    }
+  };
+
+  return { initialModel, receive, view, state, nextAction };
 };
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
@@ -104,22 +114,21 @@ const initialModel = { counter: 0, counterIds: [], countersById: {} };
 const components = {};
 const additionalComponents = [];
 
-const receive = (model, proposal) => Object.keys(components)
-  .map(key => components[key])
-  .concat(additionalComponents)
-  .map(R.prop("receive"))
-  .filter(R.identity)
+const getComponentFunctions = (components, property) =>
+  R.values(components)
+   .concat(additionalComponents)
+   .map(R.prop(property))
+   .filter(R.identity);
+
+const receive = (model, proposal) => getComponentFunctions(components, "receive")
   .reduce((model, rcv) => rcv(model, proposal), model);
 
 const { propose, model } = meiosis(initialModel, receive);
 const counter = counterComponent(propose);
 components["counter"] = counter;
 
-const nextAction = (model, proposal) => {
-  if (model.counter > 0 && model.counter % 10 === 0) {
-    propose({ counterId: proposal.counterId, add: 2 });
-  }
-};
+const nextAction = (model, proposal) => getComponentFunctions(components, "nextAction")
+  .forEach(nxtAct => nxtAct(model, proposal));
 
 flyd.on(pair => nextAction(pair[0], pair[1]), zip([model, propose]));
 
@@ -154,11 +163,7 @@ const counterContainer = {
 };
 components["counterContainer"] = counterContainer;
 
-const appState = model => Object.keys(components)
-  .map(key => components[key])
-  .concat(additionalComponents)
-  .map(R.prop("state"))
-  .filter(R.identity)
+const appState = model => getComponentFunctions(components, "state")
   .reduce((state, stateFn) => stateFn(state, model), {});
 
 const element = document.getElementById("app");
