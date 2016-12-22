@@ -41,6 +41,33 @@ const nestComponent = function(component, path) {
   };
 };
 
+// Credit: source: https://github.com/jayrbolton/flyd-zip
+const zip = sources => {
+  var withIdxs = R.addIndex(R.map)(function(s, i) {
+    return flyd.map(function(v) {
+      return [v, i];
+    }, s);
+  }, sources);
+
+  var buffer = [];
+
+  return flyd.combine(function() {
+    var changes = R.last(arguments);
+
+    R.map(R.apply(function(val, idx) {
+      buffer[idx] = val;
+    }), R.map(R.call, changes));
+
+    if (R.filter(function(n) {
+      return n !== undefined;
+    }, buffer).length === sources.length) {
+      var _self = arguments[arguments.length - 2];
+      _self(buffer);
+      buffer = [];
+    }
+  }, withIdxs);
+};
+
 // Counter
 
 const counterComponent = (propose, id) => {
@@ -74,7 +101,7 @@ const counterComponent = (propose, id) => {
     { even: model.counter % 2 === 0 });
 
   const nextAction = (model, proposal) => {
-    if (proposal.counterId === id && model.counter === 5) {
+    if (proposal.counterId === id && model.counter === 3) {
       propose({ counterId: id, add: 2 });
     }
   };
@@ -107,7 +134,7 @@ componentList.push(topCounter);
 const nextAction = (model, proposal) => getComponentFunctions(componentsById, componentList, "nextAction")
   .forEach(f => f(model, proposal));
 
-flyd.on(model => propose() && nextAction(model, propose()), model);
+flyd.on(pair => nextAction(pair[0], pair[1]), zip([model, propose]));
 
 const events = propose => ({
   onAddCounter: _evt => propose({ addCounter: true })
