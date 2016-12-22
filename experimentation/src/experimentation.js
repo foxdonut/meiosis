@@ -111,24 +111,28 @@ const counterComponent = (propose, id) => {
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
 
-const components = {};
-const additionalComponents = [];
+const componentsById = {};
+const componentList = [];
 
-const getComponentFunctions = (components, property) =>
-  R.values(components)
-   .concat(additionalComponents)
+// FIXME: order should not matter.
+const getComponentFunctions = (componentsById, componentList, property) =>
+  componentList.concat(R.values(componentsById))
+  /*
+  R.values(componentsById)
+   .concat(componentList)
+  */
    .map(R.prop(property))
    .filter(R.identity);
 
-const receive = (model, proposal) => getComponentFunctions(components, "receive")
-  .reduce((model, rcv) => rcv(model, proposal), model);
+const receive = (model, proposal) => getComponentFunctions(componentsById, componentList, "receive")
+  .reduce((model, f) => f(model, proposal), model);
 
 const { propose, model } = meiosis(initialModel, receive);
-const counter = counterComponent(propose);
-components["counter"] = counter;
+const topCounter = counterComponent(propose);
+componentList.push(topCounter);
 
-const nextAction = (model, proposal) => getComponentFunctions(components, "nextAction")
-  .forEach(nxtAct => nxtAct(model, proposal));
+const nextAction = (model, proposal) => getComponentFunctions(componentsById, componentList, "nextAction")
+  .forEach(f => f(model, proposal));
 
 flyd.on(pair => nextAction(pair[0], pair[1]), zip([model, propose]));
 
@@ -137,9 +141,9 @@ const events = propose => ({
 });
 
 const createView = events => model => m("div",
-  components["counter"].view(model),
+  topCounter.view(model),
   m("button.btn.btn-primary", { onclick: events.onAddCounter }, "Add Counter"),
-  model.counterIds.map(id => components[id]).map(component => component.view(model)));
+  model.counterIds.map(id => componentsById[id]).map(component => component.view(model)));
 
 const view = pipeIn(propose, events, createView);
 
@@ -150,28 +154,28 @@ const counterContainer = {
       const counter = nestComponent(counterComponent(propose, id), "countersById." + id);
       model.countersById[id] = counter.initialModel;
       model.counterIds.push(id);
-      components[id] = counter;
+      componentsById[id] = counter;
     }
     else if (proposal.removeCounter) {
       const id = proposal.counterId;
-      delete components[id];
+      delete componentsById[id];
       delete model.countersById[id];
       model.counterIds.splice(model.counterIds.indexOf(id), 1);
     }
     return model;
   }
 };
-components["counterContainer"] = counterContainer;
+componentList.push(counterContainer);
 
-const appState = model => getComponentFunctions(components, "state")
-  .reduce((state, stateFn) => stateFn(state, model), {});
+const appState = model => getComponentFunctions(componentsById, componentList, "state")
+  .reduce((state, f) => f(state, model), {});
 
 const element = document.getElementById("app");
 const renderRoot = model => m.render(element, view(model));
 flyd.on(renderRoot, flyd.map(appState, model));
 
 const createComponent = component => {
-  additionalComponents.push(component);
+  componentList.push(component);
 };
 renderRoot.initialModel = initialModel;
 renderRoot.state = appState;
