@@ -1,35 +1,32 @@
 import test from "ava";
 import { Promise } from "es6-promise";
+import * as flyd from "flyd";
 import * as m from "mithril";
 
-import { newInstance } from "../../lib/index";
-
-let createComponent = null;
-let run = null;
 let vnode = null;
 
-const renderer = (model, root) => { vnode = root(model); };
+const render = view => model => vnode = view(model);
+let propose = null;
 
 test.beforeEach(function() {
-  const Meiosis = newInstance();
-  createComponent = Meiosis.createComponent;
-  run = Meiosis.run;
+  propose = flyd.stream();
 });
 
-test("calls the view with model and propose", t => {
-  t.plan(3);
+test("calls the view with the model", t => {
+  t.plan(2);
 
   const initialModel = { duck: "quack" };
 
-  run({ renderer, initialModel, rootComponent: createComponent({
-    view: (model, propose) => {
-      t.truthy(model);
-      t.truthy(propose);
-      t.deepEqual(model, initialModel);
-    }
-  }) });
+  const view = model => {
+    t.truthy(model);
+    t.deepEqual(model, initialModel);
+  };
+
+  const model = flyd.scan(m => m, initialModel, propose);
+  flyd.on(render(view), model);
 });
 
+/*
 test("renders a view", t => {
   const initialModel = { duck: "quack" };
 
@@ -690,3 +687,4 @@ test("can use a state object in receive, and to decide which view to display", t
   propose(CHANGE);
   t.is(vnode.text, "go");
 });
+*/

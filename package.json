@@ -40,5 +40,8 @@
     "ts-loader": "^1.3.2",
     "typescript": "^2.1.4",
     "webpack": "^1.14.0"
+  },
+  "dependencies": {
+    "flyd": "^0.2.2"
   }
 }

@@ -1,34 +1,29 @@
 import test from "ava";
+import * as flyd from "flyd";
 import * as m from "mithril";
 
-import { newInstance } from "../../lib/index";
-
-let createComponent = null;
-let run = null;
+let propose = null;
 let vnode = null;
 
-const renderer = (state, root) => { vnode = root(state); };
+const render = view => state => { vnode = view(state); };
 
-const initialModel = { counter: 2, description: "test" };
+let initialModel = null;
 
-test.beforeEach(function() {
-  const Meiosis = newInstance();
-  createComponent = Meiosis.createComponent;
-  run = Meiosis.run;
+test.beforeEach(function(): void {
+  initialModel = { counter: 2, description: "test" };
+  propose = flyd.stream();
 });
 
 test("can use a main application state function", t => {
-  const rootComponent = createComponent({
-    view: (state, actions) =>
-      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength}`)
-  });
+  const view = state => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength}`);
 
   const state = model => ({
     counter: model.counter,
     descriptionLength: model.description.length
   });
 
-  run({ renderer, initialModel, state, rootComponent });
+  const model = flyd.scan(m => m, initialModel, propose);
+  flyd.on(render(view), flyd.map(state, model));
 
   t.is(vnode.text, "Counter: 2 Length: 4");
 });
@@ -40,47 +35,18 @@ test("can use just component state functions", t => {
     return state;
   };
 
-  const rootComponent = createComponent({
-    state: state1,
-    view: (state, actions) =>
-      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`)
-  });
+  const view = state =>
+    m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
 
   const state2 = (model, state) => {
     state.even = model.counter % 2 === 0;
     return state;
   };
 
-  createComponent({ state: state2 });
+  const state = model => [state1, state2].reduce((state, f) => f(model, state), {});
 
-  run({ renderer, initialModel, rootComponent });
+  const model = flyd.scan(m => m, initialModel, propose);
+  flyd.on(render(view), flyd.map(state, model));
 
   t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
-});
-
-test("can use both main and component state functions", t => {
-  const rootComponent = createComponent({
-    state: (model, state) => {
-      state.even = model.counter % 2 === 0;
-      return state;
-    },
-    view: (state, actions) =>
-      m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even} Duck: ${state.duck}`)
-  });
-
-  createComponent({
-    state: (model, state) => {
-      state.duck = "Quack";
-      return state;
-    }
-  });
-
-  const state = model => ({
-    counter: model.counter,
-    descriptionLength: model.description.length
-  });
-
-  run({ renderer, initialModel, state, rootComponent });
-
-  t.is(vnode.text, "Counter: 2 Length: 4 Even: true Duck: Quack");
 });
