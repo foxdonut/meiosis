@@ -1,8 +1,4 @@
-import { Emitter } from "./wire";
-
-export interface Context<M, P, A> {
+export interface Context<M, P> {
   model: M;
   proposal: P;
-  actions?: A;
-  propose?: Emitter<P>;
 }

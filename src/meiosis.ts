@@ -1,19 +1,9 @@
 import { Component } from "./component";
-import { Config, InitialModel } from "./config";
+import { InitialModel } from "./model";
 import { Context } from "./context";
-import { NextAction, NextActionFromActions } from "./nextAction";
-import { PostRender } from "./postRender";
-import { Ready } from "./ready";
+import { NextAction } from "./nextAction";
 import { Receive } from "./receive";
-import { Renderer } from "./renderer";
 import { State } from "./state";
-import { Emitter, Listener, WireCreator, Wire, defaultWireCreator } from "./wire";
-
-export interface RenderRoot<M, S> {
-  (state: S): any;
-  initialModel: M;
-  state: State<M, S>;
-}
 
 export interface RunConfig<M, S, V> {
   renderer: Renderer<S, V>;
@@ -22,36 +12,27 @@ export interface RunConfig<M, S, V> {
   state?: State<M, S>;
 }
 
-export interface Run<M, S, V> {
-  (runConfig: RunConfig<M, S, V>): RenderRoot<M, S>;
+export interface MeiosisInstance<M, P, S> {
+
 }
 
-export interface CreateComponent<M, S, V, P> {
-  <A>(config: Config<M, S, V, P, A>): Component<S, V>;
+export interface Run<M, P, S> {
+  (runConfig: RunConfig<M, P, S>): MeiosisInstance<M, P, S>;
 }
 
-export interface MeiosisApp<M, S, V, P> {
-  createComponent: CreateComponent<M, S, V, P>;
-  run: Run<M, S, V>;
+export interface MeiosisApp<M, P, S> {
+  run: Run<M, P, S>;
 }
-
-let nextId = 1;
 
 const copy = (obj: any): any => JSON.parse(JSON.stringify(obj));
 
-function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
+function newInstance<M, P, S>(): MeiosisApp<M, P, S> {
   let allInitialModels: Array<InitialModel<M>> = [];
   let allStates: Array<State<M, S>> = [];
   let allReceives: Array<Receive<M, P>> = [];
-  let allReadies: Array<Ready<P, any>> = [];
-  let allPostRenders: Array<PostRender<S>> = [];
-  let allNextActions: Array<NextActionFromActions<M, P>> = [];
+  let allNextActions: Array<NextAction<M, P>> = [];
 
-  const createRootWire: WireCreator<M> = defaultWireCreator();
-  const createComponentWire: WireCreator<P> = defaultWireCreator();
-  const rootWire: Wire<M> = createRootWire("meiosis_" + (nextId++));
-  const componentWire: Wire<P> = createComponentWire();
-  const propose: Emitter<P> = componentWire.emit;
+  const propose: Emitter<P> = null;
 
   function createComponent<A>(config: Config<M, S, V, P, A>): Component<S, V> {
     if (!config || (
@@ -197,17 +178,14 @@ function newInstance<M, S, V, P>(): MeiosisApp<M, S, V, P> {
   };
 
   return {
-    createComponent,
     run
   };
 }
 
 const instance = newInstance<any, any, any, any>();
-const createComponent = instance.createComponent;
 const run = instance.run;
 
 export {
   newInstance,
-  createComponent,
   run
 };
