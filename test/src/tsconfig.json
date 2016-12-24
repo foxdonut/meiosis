@@ -18,7 +18,8 @@
   },
   "include": [
     "./*.ts",
-    "../../typings/index.d.ts"
+    "../../typings/index.d.ts",
+    "../../localTypings/index.d.ts"
   ],
   "compileOnSave": false,
   "buildOnSave": false,
