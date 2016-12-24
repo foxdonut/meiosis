@@ -70,10 +70,8 @@ const counterComponent = (propose, id) => {
 
   const view = pipeIn(propose, events, createView);
 
-  const state = (state, model) => {
-    state.even = model.counter % 2 === 0;
-    return state;
-  };
+  const state = (state, model) => Object.assign(JSON.parse(JSON.stringify(model)),
+    { even: model.counter % 2 === 0 });
 
   const nextAction = (model, proposal) => {
     if (proposal.counterId === id && model.counter === 5) {
@@ -89,9 +87,13 @@ const initialModel = { counter: 0, counterIds: [], countersById: {} };
 const componentsById = {};
 const componentList = [];
 
+// FIXME: order should not matter.
 const getComponentFunctions = (componentsById, componentList, property) =>
+  componentList.concat(R.values(componentsById))
+  /*
   R.values(componentsById)
    .concat(componentList)
+  */
    .map(R.prop(property))
    .filter(R.identity);
 
@@ -139,7 +141,7 @@ const counterContainer = {
 componentList.push(counterContainer);
 
 const appState = model => getComponentFunctions(componentsById, componentList, "state")
-  .reduce((state, f) => f(state, model), JSON.parse(JSON.stringify(model)));
+  .reduce((state, f) => f(state, model), {});
 
 const element = document.getElementById("app");
 const renderRoot = model => m.render(element, view(model));
