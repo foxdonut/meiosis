@@ -8,15 +8,15 @@ import meiosisTracer from "meiosis-tracer";
 
 const meiosis = initialModel => {
   const nestComponent = (component, path) => ({
-    accept: component.accept && ((model, proposal) => {
-      component.accept(objectPath.get(model, path), proposal);
+    receive: component.receive && ((model, proposal) => {
+      component.receive(objectPath.get(model, path), proposal);
       return model;
     }),
     nextAction: component.nextAction && ((model, proposal) => {
       component.nextAction(objectPath.get(model, path), proposal);
     }),
     state: component.state && ((model, state) => {
-      objectPath.set(state, path, component.state(objectPath.get(state, path), objectPath.get(model, path)));
+      objectPath.set(state, path, component.state(objectPath.get(model, path), objectPath.get(state, path)));
       return state;
     }),
     view: component.view && (model => component.view(objectPath.get(model, path))),
@@ -27,19 +27,19 @@ const meiosis = initialModel => {
     components.map(R.prop(property)).filter(R.identity);
 
   const propose = flyd.stream();
-  const components = flyd.stream();
+  const components = flyd.stream([]);
 
-  const accepts = flyd.map(getComponentFunctions("accept"), components);
-  const accept = flyd.map(fns => (model, proposal) =>
-    fns.reduce((model, fn) => fn(model, proposal), model), accepts);
+  const receives = flyd.map(getComponentFunctions("receive"), components);
+  const receive = flyd.map(fns => (model, proposal) =>
+    fns.reduce((model, fn) => fn(model, proposal), model), receives);
 
-  const model = flyd.scan(accept(), initialModel, propose);
+  const model = flyd.scan((model, proposal) => receive()(model, proposal), initialModel, propose);
 
   const states = flyd.map(getComponentFunctions("state"), components);
   const state = flyd.map(fns => model =>
     fns.reduce((state, fn) => fn(model, state), JSON.parse(JSON.stringify(model))), states);
 
-  const nexts = flyd.map(getComponentFunctions("nextAction", components));
+  const nexts = flyd.map(getComponentFunctions("nextAction"), components);
   const nextAction = flyd.map(fns => (model, proposal) =>
     fns.forEach(fn => fn(model, proposal)), nexts);
 
@@ -80,7 +80,7 @@ const counterComponent = (propose, id) => {
 
   const initialModel = { counter: 0 };
 
-  const accept = (model, proposal) => {
+  const receive = (model, proposal) => {
     if (proposal.counterId === id && proposal.add) {
       model.counter += proposal.add;
     }
@@ -100,7 +100,7 @@ const counterComponent = (propose, id) => {
     }
   };
 
-  return { initialModel, accept, view, state, nextAction };
+  return { initialModel, receive, view, state, nextAction };
 };
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
@@ -122,19 +122,21 @@ const createView = events => model => m("div",
 const view = pipeIn(propose, events, createView);
 
 const counterContainer = {
-  accept: (model, proposal) => {
+  receive: (model, proposal) => {
     if (proposal.addCounter) {
       const id = "counter_" + String(new Date().getTime());
       const counter = nestComponent(counterComponent(propose, id), "countersById." + id);
       model.countersById[id] = counter.initialModel;
       model.counterIds.push(id);
       componentsById[id] = counter;
+      components(componentList.concat(R.values(componentsById)));
     }
     else if (proposal.removeCounter) {
       const id = proposal.counterId;
       delete componentsById[id];
       delete model.countersById[id];
       model.counterIds.splice(model.counterIds.indexOf(id), 1);
+      components(componentList.concat(R.values(componentsById)));
     }
     return model;
   }
@@ -144,14 +146,14 @@ const componentList = [topCounter, counterContainer];
 components(componentList);
 
 const element = document.getElementById("app");
-const renderRoot = model => m.render(element, view(model));
-flyd.on(renderRoot, flyd.map(state(), model));
+const render = model => m.render(element, view(model));
+flyd.on(render, flyd.map(model => state()(model), model));
 
 const createComponent = component => {
   componentList.push(component);
   components(componentList);
 };
-renderRoot.initialModel = initialModel;
-renderRoot.state = state();
+render.initialModel = initialModel;
+render.state = model => state()(model);
 
-meiosisTracer(createComponent, renderRoot, "#tracer");
+meiosisTracer(createComponent, render, "#tracer");
