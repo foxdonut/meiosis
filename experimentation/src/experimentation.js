@@ -36,8 +36,10 @@ const meiosis = initialModel => {
   const model = flyd.scan((model, proposal) => receive()(model, proposal), initialModel, propose);
 
   const states = flyd.map(getComponentFunctions("state"), components);
-  const state = flyd.map(fns => model =>
+  const stateFn = flyd.map(fns => model =>
     fns.reduce((state, fn) => fn(model, state), JSON.parse(JSON.stringify(model))), states);
+
+  const state = flyd.combine((model, stateFn) => stateFn()(model()), [model, stateFn]);
 
   const nexts = flyd.map(getComponentFunctions("nextAction"), components);
   const nextAction = flyd.map(fns => (model, proposal) =>
@@ -49,6 +51,7 @@ const meiosis = initialModel => {
     propose,
     components,
     model,
+    stateFn,
     state,
     nestComponent
   };
@@ -104,7 +107,7 @@ const counterComponent = (propose, id) => {
 };
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
-const { propose, components, model, state, nestComponent } = meiosis(initialModel);
+const { propose, components, stateFn, state, nestComponent } = meiosis(initialModel);
 
 const componentsById = {};
 
@@ -146,14 +149,14 @@ const componentList = [topCounter, counterContainer];
 components(componentList);
 
 const element = document.getElementById("app");
-const render = model => m.render(element, view(model));
-flyd.on(render, flyd.map(model => state()(model), model));
+const render = state => m.render(element, view(state));
+flyd.on(render, state);
 
 const createComponent = component => {
   componentList.push(component);
   components(componentList);
 };
 render.initialModel = initialModel;
-render.state = model => state()(model);
+render.state = model => stateFn()(model);
 
 meiosisTracer(createComponent, render, "#tracer");
