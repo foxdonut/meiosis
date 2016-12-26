@@ -13,10 +13,18 @@ const meiosis = initialModel => {
       return model;
     }),
     nextAction: component.nextAction && ((model, proposal) => {
-      component.nextAction(objectPath.get(model, path), proposal);
+      const subModel = objectPath.get(model, path);
+
+      if (subModel) {
+        component.nextAction(subModel, proposal);
+      }
     }),
     state: component.state && ((model, state) => {
-      objectPath.set(state, path, component.state(objectPath.get(model, path), objectPath.get(state, path)));
+      const subModel = objectPath.get(state, path);
+
+      if (subModel) {
+        objectPath.set(state, path, component.state(objectPath.get(model, path), subModel));
+      }
       return state;
     }),
     initialModel: component.initialModel
@@ -65,8 +73,6 @@ const pipeIn = function() {
 // Counter
 
 const counterComponent = (propose, id) => {
-  const remove = !!id;
-
   const initialModel = { counter: 0 };
 
   const receive = (model, proposal) => {
