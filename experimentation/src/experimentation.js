@@ -8,6 +8,7 @@ import meiosisTracer from "meiosis-tracer";
 
 const meiosis = initialModel => {
   const nestComponent = (component, path) => ({
+    initialModel: component.initialModel,
     receive: component.receive && ((model, proposal) => {
       component.receive(objectPath.get(model, path), proposal);
       return model;
@@ -26,8 +27,7 @@ const meiosis = initialModel => {
         objectPath.set(state, path, component.state(objectPath.get(model, path), subModel));
       }
       return state;
-    }),
-    initialModel: component.initialModel
+    })
   });
 
   const getComponentFunctions = property => components =>
@@ -137,14 +137,14 @@ const counterContainer = {
       model.countersById[id] = counter.initialModel;
       model.counterIds.push(id);
       componentsById[id] = counter;
-      components(componentList.concat(R.values(componentsById)));
+      components(R.values(componentsById).concat(componentList));
     }
     else if (proposal.removeCounter) {
       const id = proposal.counterId;
       delete componentsById[id];
       delete model.countersById[id];
       model.counterIds.splice(model.counterIds.indexOf(id), 1);
-      components(componentList.concat(R.values(componentsById)));
+      components(R.values(componentsById).concat(componentList));
     }
     return model;
   }
