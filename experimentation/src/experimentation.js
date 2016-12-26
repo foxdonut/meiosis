@@ -90,7 +90,7 @@ const counterComponent = (propose, id) => {
   return { initialModel, receive, state, nextAction };
 };
 
-const counterView = (propose, id, remove, model) => {
+const counterView = ({propose, id, remove, model}) => {
   const events = ({
     onIncrease: _evt => propose({ counterId: id, add:  1 }),
     onDecrease: _evt => propose({ counterId: id, add: -1 }),
@@ -117,9 +117,9 @@ const events = propose => ({
 });
 
 const createView = events => model => m("div",
-  counterView(propose, id, false, model),
+  counterView({ propose, id, remove: false, model }),
   m("button.btn.btn-primary", { onclick: events.onAddCounter }, "Add Counter"),
-  model.counterIds.map(id => counterView(propose, id, true, model)));
+  model.counterIds.map(id => counterView({ propose, id, remove: true, model: model.countersById[id] })));
 
 const view = pipeIn(propose, events, createView);
 
