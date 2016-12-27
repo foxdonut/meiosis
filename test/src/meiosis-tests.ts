@@ -284,13 +284,13 @@ test("supports multiple functions that receive proposals, in order of creation",
   t.is(vnode.text, "10");
 });
 
-/*
-test("returns a function to render a view from a model", t => {
+test("use a function to render a view from a model", t => {
   const initialModel = { duck: "quack" };
 
-  const view = (model, _actions) => m("span", `A duck says ${model.duck}`);
+  const view = model => m("span", `A duck says ${model.duck}`);
 
-  const renderRoot = run({ renderer, initialModel, rootComponent: createComponent({ view: view }) });
+  const renderRoot = render(view);
+  renderRoot(initialModel);
 
   t.truthy(vnode);
   t.is(vnode.tag, "span");
@@ -301,150 +301,57 @@ test("returns a function to render a view from a model", t => {
   t.is(vnode.text, "A duck says " + sound2);
 });
 
-test("returns the combined initial model", t => {
-  createComponent({ initialModel: model => { model.duck = "quack"; return model; } });
-  const Root = createComponent({ initialModel: model => { model.color = "yellow"; return model; } });
-  const renderRoot = run({ renderer, initialModel: { one: "two" }, rootComponent: Root });
-  t.deepEqual(renderRoot.initialModel, { one: "two", duck: "quack", color: "yellow" });
-});
-
 test("sends proposal through to the nextAction function", t => {
   t.plan(7);
 
-  let propose = null;
+  const initialModel = { name: "one" };
 
-  const Main = createComponent({
-    initialModel: () => ({ name: "one" }),
-    view: (model, propose_) => {
-      propose = propose_;
-      return m("span", model.name);
-    },
+  const Main = model => m("span", model.name);
+
+  const component = {
     receive: (model, proposal) => {
       t.is(model.name, "one");
       t.is(proposal.name, "two");
       return { name: "three" };
     },
-    nextAction: context => {
-      t.is(context.model.name, "three");
-      t.deepEqual(context.proposal, { name: "two" });
-      t.is(context.propose, propose);
+    nextAction: (model, proposal) => {
+      t.is(model.name, "three");
+      t.deepEqual(proposal, { name: "two" });
+      t.is(propose, propose);
     }
-  });
+  };
 
-  run({ renderer, rootComponent: Main });
+  const model = run({ initialModel, components: [ component ] }).model;
+  flyd.on(render(Main), model);
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
   t.is(vnode.text, "three");
 });
 
-test("passes correct actions to each view", t => {
-  const formActions = propose => ({
-    formAction: () => propose("formAction")
-  });
+test("calls all nextAction functions", t => {
+  t.plan(2);
 
-  const Form = createComponent({
-    initialModel: model => { model.formText = "F1"; return model; },
-    actions: formActions,
-    view: (model, actions) => {
-      t.truthy(actions.formAction);
-      return m("span", model.formText);
+  const Form = {
+    nextAction: (model, proposal) => {
+      t.truthy(model);
     }
-  });
+  };
 
-  const listActions = propose => ({
-    listAction: () => propose("listAction")
-  });
-
-  const List = createComponent({
-    initialModel: model => { model.listText = "L1"; return model; },
-    actions: listActions,
-    view: (model, actions) => {
-      t.truthy(actions.listAction);
-      return m("span", model.listText);
+  const List = {
+    nextAction: (model, proposal) => {
+      t.truthy(model);
     }
-  });
+  };
 
-  const mainActions = propose => ({
-    mainAction: () => propose("mainAction")
-  });
+  const initialModel = { name: "one" };
 
-  const Main = createComponent({
-    initialModel: model => { model.name = "one"; return model; },
-    actions: mainActions,
-    view: (model, actions) => {
-      t.truthy(actions.mainAction);
-      return m("div",
-        [ m("span", model.name)
-        , Form(model)
-        , List(model)
-        ]
-      );
-    }
-  });
+  run({ initialModel, components: [ Form, List ] });
 
-  run({ renderer, rootComponent: Main });
-
-  t.is(vnode.children.length, 3);
-  t.is(vnode.children[0].text, "one");
-  t.is(vnode.children[1].text, "F1");
-  t.is(vnode.children[2].text, "L1");
+  propose({});
 });
 
-test("calls all nextAction functions and passes correct actions to the each one", t => {
-  t.plan(8);
-
-  let formActionsRef = null;
-  let listActionsRef = null;
-
-  const formActions = propose => ({
-    formAction: () => propose("formAction")
-  });
-
-  const Form = createComponent({
-    actions: formActions,
-    view: (_model, actions) => {
-      formActionsRef = actions;
-      return m("span");
-    },
-    nextAction: context => {
-      t.truthy(context.actions.formAction);
-      t.falsy(context.actions.listAction);
-    }
-  });
-
-  const listActions = propose => ({
-    listAction: () => propose("listAction")
-  });
-
-  const List = createComponent({
-    actions: listActions,
-    view: (_model, actions) => {
-      listActionsRef = actions;
-      return m("span");
-    },
-    nextAction: context => {
-      t.truthy(context.actions.listAction);
-      t.falsy(context.actions.formAction);
-    }
-  });
-
-  const Main = createComponent({
-    initialModel: () => ({ name: "one" }),
-    view: (model, _actions) => m("div",
-      [ m("span", model.name)
-      , Form(model)
-      , List(model)
-      ]
-    )
-  });
-
-  run({ renderer, rootComponent: Main });
-
-  formActionsRef.formAction();
-  listActionsRef.listAction();
-});
-
+/*
 test("calls the ready function with propose", t => {
   t.plan(5);
 
