@@ -113,8 +113,6 @@ const counterView = ({propose, id, remove, model}) => {
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
 const { propose, components, stateFn, state, nestComponent } = meiosis(initialModel);
 
-const componentsById = {};
-
 const id = "counter_" + String(new Date().getTime());
 const topCounter = counterComponent(propose, id);
 
@@ -136,17 +134,29 @@ const counterContainer = {
       const counter = nestComponent(counterComponent(propose, id), "countersById." + id);
       model.countersById[id] = counter.initialModel;
       model.counterIds.push(id);
-      componentsById[id] = counter;
-      components(R.values(componentsById).concat(componentList));
     }
     else if (proposal.removeCounter) {
       const id = proposal.counterId;
-      delete componentsById[id];
       delete model.countersById[id];
       model.counterIds.splice(model.counterIds.indexOf(id), 1);
-      components(R.values(componentsById).concat(componentList));
+    }
+    else if (proposal.counterId) {
+      model.counterIds.forEach(id => {
+        nestComponent(counterComponent(propose, id), "countersById." + id).receive(model, proposal);
+      });
     }
     return model;
+  },
+  state: (model, state) => {
+    model.counterIds.forEach(id => {
+      nestComponent(counterComponent(propose, id), "countersById." + id).state(model, state);
+    });
+    return state;
+  },
+  nextAction: (model, proposal) => {
+    model.counterIds.forEach(id => {
+      nestComponent(counterComponent(propose, id), "countersById." + id).nextAction(model, proposal);
+    });
   }
 };
 
