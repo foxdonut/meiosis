@@ -1,4 +1,5 @@
 import test, { TestContext } from "ava";
+import { Component, MeiosisInstance, MeiosisRun, newInstance } from "../../lib/index";
 import * as flyd from "flyd";
 import * as m from "mithril";
 
@@ -21,10 +22,13 @@ interface Actions {
 }
 
 let propose: Propose = null;
+let run: MeiosisRun<Model, Proposal, any> = null;
 let vnode: View = null;
 
 test.beforeEach(function(): void {
-  propose = flyd.stream<Proposal>();
+  let meiosis: MeiosisInstance<Model, Proposal, any> = newInstance<Model, Proposal, any>();
+  propose = meiosis.propose;
+  run = meiosis.run;
 });
 
 test("takes advantage of typescript features", (t: TestContext): void => {
@@ -40,15 +44,17 @@ test("takes advantage of typescript features", (t: TestContext): void => {
 
   const view = (model: Model): View => m("span", model.description + " " + model.counter);
 
-  const receive = (model: Model, proposal: Proposal): Model => {
-    if (proposal.increment) {
-      model.counter = model.counter + proposal.increment;
+  const component: Component<Model, Proposal, any> = {
+    receive: (model: Model, proposal: Proposal): Model => {
+      if (proposal.increment) {
+        model.counter = model.counter + proposal.increment;
+        return model;
+      }
       return model;
     }
-    return model;
   };
 
-  const model: Flyd.Stream<Model> = flyd.scan(receive, initialModel, propose);
+  const model: Flyd.Stream<Model> = run({ initialModel, components: [ component ] }).model;
 
   const render = (model: Model) => vnode = view(model);
   flyd.on<Model, void>(render, model);
@@ -75,23 +81,22 @@ test("can have nextAction", (t: TestContext): void => {
 
   const view = (model: Model): View => m("span", model.description + " " + model.counter);
 
-  const receive = (model: Model, proposal: Proposal): Model => {
-    if (proposal.increment) {
-      model.counter = model.counter + proposal.increment;
+  const component: Component<Model, Proposal, any> = {
+    receive: (model: Model, proposal: Proposal): Model => {
+      if (proposal.increment) {
+        model.counter = model.counter + proposal.increment;
+        return model;
+      }
       return model;
+    },
+    nextAction: (model: Model, proposal: Proposal): void => {
+      if (model.counter === 3 && proposal.increment === 1) {
+        actions.increase();
+      }
     }
-    return model;
   };
 
-  const model: Flyd.Stream<Model> = flyd.scan(receive, initialModel, propose);
-
-  const nextAction = (actions => (model: Model, proposal: Proposal): void => {
-    if (model.counter === 3 && proposal.increment === 1) {
-      actions.increase();
-    }
-  })(actions);
-
-  flyd.on<Model, void>(model => propose() && nextAction(model, propose()), model);
+  const model: Flyd.Stream<Model> = run({ initialModel, components: [ component ] }).model;
 
   const render = (model: Model) => vnode = view(model);
   flyd.on<Model, void>(render, model);

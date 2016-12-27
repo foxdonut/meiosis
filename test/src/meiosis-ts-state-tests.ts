@@ -1,7 +1,7 @@
 import test, { TestContext } from "ava";
+import { Component, MeiosisInstance, MeiosisRun, newInstance } from "../../lib/index";
 import * as flyd from "flyd";
 import * as m from "mithril";
-import { ComponentState } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -33,59 +33,51 @@ const render = (view: View) => (state: AppState) => vnode = view(state);
 
 let initialModel: Model = null;
 let propose: Propose = null;
+let run: MeiosisRun<Model, Proposal, any> = null;
 
 test.beforeEach(function(): void {
   initialModel = { counter: 2, description: "test" };
-  propose = flyd.stream<Proposal>();
+  let meiosis: MeiosisInstance<Model, Proposal, any> = newInstance<Model, Proposal, any>();
+  propose = meiosis.propose;
+  run = meiosis.run;
 });
 
-test("can use a main application state function", (t: TestContext): void => {
+test("can use a state function", (t: TestContext): void => {
   const view = (state: AppState): View => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength}`);
 
-  const state: Flyd.Mapper<Model, AppState> = (model: Model): AppState => ({
-    counter: model.counter,
-    descriptionLength: model.description.length
-  });
+  const component: Component<Model, Proposal, AppState> = {
+    state: (model: Model, state: AppState): AppState => {
+      state.descriptionLength = model.description.length;
+      return state;
+    }
+  };
 
-  const model = flyd.scan(m => m, initialModel, propose);
-  flyd.on(render(view), flyd.map(state, model));
+  const state: Flyd.Stream<AppState> = run({ initialModel, components: [ component ] }).state;
+  flyd.on(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4");
 });
 
-test("can use just a component state function", (t: TestContext): void => {
-  const state: Flyd.Mapper<Model, AppState> = (model: Model): AppState => ({
-    counter: model.counter,
-    descriptionLength: model.description.length,
-    even: model.counter % 2 === 0
-  });
+test("can use multiple state functions", (t: TestContext): void => {
+  const component1: Component<Model, Proposal, AppState> = {
+    state: (model: Model, state: AppState): AppState => {
+      state.even = model.counter % 2 === 0;
+      return state;
+    }
+  };
 
-  const view = (state: AppState): View => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
-
-  const model: Flyd.Stream<Model> = flyd.scan(m => m, initialModel, propose);
-  flyd.on<AppState, void>(render(view), flyd.map(state, model));
-
-  t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
-});
-
-test("can use both a main and a component state function", (t: TestContext): void => {
-  const state1: ComponentState<Model, AppState> = (model: Model, state: AppState) => {
-    state.even = model.counter % 2 === 0;
-    return state;
+  const component2: Component<Model, Proposal, AppState> = {
+    state: (model: Model, state: AppState): AppState => {
+      state.counter = model.counter;
+      state.descriptionLength = model.description.length;
+      return state;
+    }
   };
 
   const view = (state: AppState): View => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
 
-  const state2: ComponentState<Model, AppState> = (model: Model, state: AppState): AppState => {
-    state.counter = model.counter;
-    state.descriptionLength = model.description.length;
-    return state;
-  };
-
-  const state: Flyd.Mapper<Model, AppState> = model => [state1, state2].reduce((state, f) => f(model, state), {});
-
-  const model: Flyd.Stream<Model> = flyd.scan(m => m, initialModel, propose);
-  flyd.on<AppState, void>(render(view), flyd.map(state, model));
+  const state: Flyd.Stream<AppState> = run({ initialModel, components: [ component1, component2 ] }).state;
+  flyd.on<AppState, void>(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
 });

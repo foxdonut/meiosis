@@ -33,7 +33,8 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "flyd": "^0.2.2"
+    "flyd": "^0.2.2",
+    "object-path": "^0.11.3"
   },
   "devDependencies": {
     "ava": "^0.17.0",

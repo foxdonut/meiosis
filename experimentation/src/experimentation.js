@@ -6,10 +6,10 @@ import * as R from "ramda";
 import objectPath from "object-path";
 import meiosisTracer from "meiosis-tracer";
 
-const meiosis = ({ initialModel }) => {
+const meiosis = () => {
   const propose = flyd.stream();
 
-  const run = ({ components }) => {
+  const run = ({ initialModel, components }) => {
     const getComponentFunctions = (property, components) =>
       components.map(R.prop(property)).filter(R.identity);
 
@@ -141,7 +141,7 @@ const counterView = ({propose, id, remove, model}) => {
 };
 
 const initialModel = { counter: 0, counterIds: [], countersById: {} };
-const { propose, run } = meiosis({ initialModel });
+const { propose, run } = meiosis();
 
 const id = "counter_" + String(new Date().getTime());
 const topCounter = counterComponent(propose, id);
@@ -185,7 +185,7 @@ const element = document.getElementById("app");
 const render = state => m.render(element, view(state));
 
 const tracer = meiosisTracer({ selector: "#tracer", initialModel, render });
-const { stateFn, state } = run({ components: [topCounter, counterContainer, tracer.component] });
+const { stateFn, state } = run({ initialModel, components: [topCounter, counterContainer, tracer.component] });
 tracer.setStateFn(stateFn);
 
 flyd.on(render, state);
