@@ -1,7 +1,7 @@
 import test, { TestContext } from "ava";
 import * as flyd from "flyd";
 import * as m from "mithril";
-import { State } from "../../lib/index";
+import { ComponentState } from "../../lib/index";
 
 interface Model {
   counter: number;
@@ -69,14 +69,14 @@ test("can use just a component state function", (t: TestContext): void => {
 });
 
 test("can use both a main and a component state function", (t: TestContext): void => {
-  const state1: State<Model, AppState> = (model: Model, state: AppState) => {
+  const state1: ComponentState<Model, AppState> = (model: Model, state: AppState) => {
     state.even = model.counter % 2 === 0;
     return state;
   };
 
   const view = (state: AppState): View => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
 
-  const state2: State<Model, AppState> = (model: Model, state: AppState): AppState => {
+  const state2: ComponentState<Model, AppState> = (model: Model, state: AppState): AppState => {
     state.counter = model.counter;
     state.descriptionLength = model.description.length;
     return state;

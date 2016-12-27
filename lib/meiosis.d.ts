@@ -1,7 +1,14 @@
 import { Component } from "./component";
-export interface MeiosisApp<M, P, S> {
-    model: Flyd.Stream<M>;
-    propose: Flyd.Stream<P>;
+import { State } from "./state";
+export interface InstanceParameters<M> {
+    initialModel: M;
 }
-declare function newInstance<M, P, S>(component: Component<M, P, S>): MeiosisApp<M, P, S>;
+export interface MeiosisApp<M, P, S> {
+    propose: Flyd.Stream<P>;
+    components: Flyd.Stream<Array<Component<M, P, S>>>;
+    model: Flyd.Stream<M>;
+    stateFn: Flyd.Stream<State<M, S>>;
+    state: Flyd.Stream<S>;
+}
+declare function newInstance<M, P, S>(params: InstanceParameters<M>): MeiosisApp<M, P, S>;
 export { newInstance };

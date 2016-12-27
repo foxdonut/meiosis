@@ -32,6 +32,17 @@ declare namespace Flyd {
     stream<T>(): Stream<T>;
 
     /**
+     * Creates a stream with an initial value.
+     */
+    stream<T>(value: T): Stream<T>;
+
+    /**
+     * Combines streams.
+     */
+    combine<A, B, C>(combinator: (stream1: Stream<A>, stream2: Stream<B>) => C,
+      streams: Array<Stream<any>>): Stream<C>;
+
+    /**
      * Maps over a stream.
      */
     map<T, R>(mapper: Mapper<T, R>, stream: Stream<T>): Stream<R>;
