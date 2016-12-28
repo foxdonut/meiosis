@@ -351,56 +351,8 @@ test("calls all nextAction functions", t => {
   propose({});
 });
 
-/*
-test("calls the ready function with propose", t => {
-  t.plan(5);
-
-  const initialModel = { duck: "quack" };
-
-  const view = model => m("span", `A duck says ${model.duck}`);
-
-  run({ renderer, initialModel, rootComponent: createComponent({
-    view: view,
-    ready: propose => {
-      t.truthy(propose);
-      t.is(typeof propose, "function");
-    }
-  }) });
-
-  t.truthy(vnode);
-  t.is(vnode.tag, "span");
-  t.is(vnode.text, "A duck says quack");
-});
-
-test("calls the postRender function", t => {
-  t.plan(1);
-
-  const initialModel = { duck: "quack" };
-  const view = model => m("span", `A duck says ${model.duck}`);
-
-  run({ renderer, initialModel, rootComponent: createComponent({
-    view: view,
-    postRender: model => t.is(model, initialModel)
-  }) });
-});
-
-test("can use a display function for an initial viewModel", t => {
-  const initialModel = { value: 2 };
-
-  const display = view => model => view({ value: model.value * 2 });
-  const view = model => m("span", String(model.value));
-
-  const Main = createComponent({ view: display(view) });
-
-  run({ renderer, initialModel, rootComponent: Main });
-
-  t.is(vnode.text, "4");
-});
-
 test("can use a state object in receive, and to decide which view to display", t => {
   const CHANGE = "change";
-
-  let propose = null;
 
   const state = {
     isReady: model => model.value === 1,
@@ -409,23 +361,20 @@ test("can use a state object in receive, and to decide which view to display", t
   };
 
   const view = {
-    ready: (model, propose_) => {
-      propose = propose_;
-      return m("span", "ready");
-    },
-    set: (model, propose_) => m("span", "set"),
-    go: (model, propose_) => m("span", "go")
+    ready: model => m("span", "ready"),
+    set: model => m("span", "set"),
+    go: model => m("span", "go")
   };
 
-  const display = (state, view) => (model, propose) => {
+  const display = (state, view) => model => {
     if (state.isReady(model)) {
-      return view.ready(model, propose);
+      return view.ready(model);
     }
     else if (state.isSet(model)) {
-      return view.set(model, propose);
+      return view.set(model);
     }
     else if (state.isGo(model)) {
-      return view.go(model, propose);
+      return view.go(model);
     }
   };
 
@@ -438,12 +387,12 @@ test("can use a state object in receive, and to decide which view to display", t
     }
   };
 
-  const Main = createComponent({
-    view: display(state, view),
+  const Main = {
     receive: receive(state)
-  });
+  };
 
-  run({ renderer, initialModel: { value: 1 }, rootComponent: Main });
+  const model = run({ initialModel: { value: 1 }, components: [ Main ] }).model;
+  flyd.on(render(display(state, view)), model);
   t.is(vnode.text, "ready");
 
   propose(CHANGE);
@@ -452,4 +401,3 @@ test("can use a state object in receive, and to decide which view to display", t
   propose(CHANGE);
   t.is(vnode.text, "go");
 });
-*/
