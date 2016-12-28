@@ -1,6 +1,5 @@
 import test from "ava";
-import { newInstance } from "../../lib/index";
-import * as flyd from "flyd";
+import { newInstance, on } from "../../lib/index";
 import * as m from "mithril";
 
 let propose = null;
@@ -29,7 +28,7 @@ test("can use a state function", t => {
   };
 
   const state = run({ initialModel, components: [ component ] }).state;
-  flyd.on(render(view), state);
+  on(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4");
 });
@@ -54,7 +53,7 @@ test("can use multiple state functions", t => {
     m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
 
   const state = run({ initialModel, components: [ component1, component2 ] }).state;
-  flyd.on(render(view), state);
+  on(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
 });

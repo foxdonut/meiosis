@@ -48,6 +48,11 @@ declare namespace Flyd {
     map<T, R>(mapper: Mapper<T, R>, stream: Stream<T>): Stream<R>;
 
     /**
+     * Merges two streams.
+     */
+    merge<T>(stream1: Stream<T>, stream2: Stream<T>): Stream<T>;
+
+    /**
      * Scans over a stream.
      */
     scan<T, R>(scanner: Scanner<T, R>, initial: R, stream: Stream<T>): Stream<R>;

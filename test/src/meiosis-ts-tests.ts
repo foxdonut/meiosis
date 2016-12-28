@@ -1,6 +1,5 @@
 import test, { TestContext } from "ava";
-import { Component, MeiosisInstance, MeiosisRun, newInstance } from "../../lib/index";
-import * as flyd from "flyd";
+import { Component, MeiosisInstance, MeiosisRun, Stream, newInstance, on } from "../../lib/index";
 import * as m from "mithril";
 
 interface Model {
@@ -14,7 +13,7 @@ interface Proposal {
   increment: number;
 }
 
-type Propose = Flyd.Stream<Proposal>;
+type Propose = Stream<Proposal>;
 
 interface Actions {
   increase: () => void;
@@ -54,10 +53,10 @@ test("takes advantage of typescript features", (t: TestContext): void => {
     }
   };
 
-  const model: Flyd.Stream<Model> = run({ initialModel, components: [ component ] }).model;
+  const model: Stream<Model> = run({ initialModel, components: [ component ] }).model;
 
   const render = (model: Model) => vnode = view(model);
-  flyd.on<Model, void>(render, model);
+  on<Model, void>(render, model);
 
   t.is(vnode.text, "test 1");
 
@@ -96,10 +95,10 @@ test("can have nextAction", (t: TestContext): void => {
     }
   };
 
-  const model: Flyd.Stream<Model> = run({ initialModel, components: [ component ] }).model;
+  const model: Stream<Model> = run({ initialModel, components: [ component ] }).model;
 
   const render = (model: Model) => vnode = view(model);
-  flyd.on<Model, void>(render, model);
+  on<Model, void>(render, model);
 
   t.is(vnode.text, "test 1");
 

@@ -1,6 +1,7 @@
 import * as flyd from "flyd";
 import * as objectPath from "object-path";
 import { Component } from "./component";
+import { InitialModel } from "./initialModel";
 import { Receive } from "./receive";
 import { ComponentState, State } from "./state";
 import { NextAction } from "./nextAction";
@@ -41,19 +42,33 @@ function newInstance<M, P, S>(): MeiosisInstance<M, P, S> {
     const getComponentFunctions = <M, P, S>(property: string, components: Array<Component<M, P, S>>) =>
       components.map(prop(property)).filter(identity);
 
-    const receives: Array<Receive<M, P>> = getComponentFunctions("receive", params.components);
+    const addAllComponents = <M, P, S>(components: Array<Component<M, P, S>>, list: Array<Component<M, P, S>>) => {
+      const children: Array<Component<M, P, S>> = list || [];
+      children.forEach(child => {
+        components.push(child);
+        addAllComponents(components, child.components);
+      });
+    };
+
+    const components: Array<Component<M, P, S>> = [];
+    addAllComponents(components, params.components);
+
+    const initialModels: Array<InitialModel<M>> = getComponentFunctions("initialModel", components);
+    const initialModel: M = initialModels.reduce((model, fn) => fn(model), params.initialModel);
+
+    const receives: Array<Receive<M, P>> = getComponentFunctions("receive", components);
     const receive: Receive<M, P> = (model: M, proposal: P) =>
       receives.reduce((model, fn) => fn(model, proposal), model);
 
-    const model: Stream<M> = flyd.scan<P, M>(receive, params.initialModel, propose);
+    const model: Stream<M> = flyd.scan<P, M>(receive, initialModel, propose);
 
-    const states: Array<ComponentState<M, S>> = getComponentFunctions("state", params.components);
+    const states: Array<ComponentState<M, S>> = getComponentFunctions("state", components);
     const stateFn: State<M, S> = (model: M) =>
       states.reduce((state, fn) => fn(model, state), copy(model));
 
     const state: Stream<S> = flyd.map<M, S>(stateFn, model);
 
-    const nexts: Array<NextAction<M, P>> = getComponentFunctions("nextAction", params.components);
+    const nexts: Array<NextAction<M, P>> = getComponentFunctions("nextAction", components);
     const nextAction: NextAction<M, P> = (model: M, proposal: P) => nexts.forEach(fn => fn(model, proposal));
 
     flyd.on(model => propose() && nextAction(model, propose()), model);
@@ -149,9 +164,12 @@ const propose = instance.propose;
 const run = instance.run;
 
 export {
+  Stream,
   newInstance,
   propose,
   run,
   nestComponent,
   componentContainer
 };
+
+export const { combine, map, merge, on, scan } = flyd;

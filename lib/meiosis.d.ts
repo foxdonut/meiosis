@@ -1,5 +1,6 @@
 import { Component } from "./component";
 import { State } from "./state";
+declare type Stream<T> = Flyd.Stream<T>;
 export interface RunParameters<M, P, S> {
     initialModel: M;
     components: Array<Component<M, P, S>>;
@@ -30,4 +31,5 @@ export interface ComponentContainer<M, P, S> {
 declare function componentContainer<M, P, S>(params: ComponentContainer<M, P, S>): Component<M, P, S>;
 declare const propose: Flyd.Stream<any>;
 declare const run: MeiosisRun<any, any, any>;
-export { newInstance, propose, run, nestComponent, componentContainer };
+export { Stream, newInstance, propose, run, nestComponent, componentContainer };
+export declare const combine: <A, B, C>(combinator: (stream1: Flyd.Stream<A>, stream2: Flyd.Stream<B>) => C, streams: Flyd.Stream<any>[]) => Flyd.Stream<C>, map: <T, R>(mapper: Flyd.Mapper<T, R>, stream: Flyd.Stream<T>) => Flyd.Stream<R>, merge: <T>(stream1: Flyd.Stream<T>, stream2: Flyd.Stream<T>) => Flyd.Stream<T>, on: <T, R>(mapper: Flyd.Mapper<T, R>, stream: Flyd.Stream<T>) => Flyd.Stream<R>, scan: <T, R>(scanner: Flyd.Scanner<T, R>, initial: R, stream: Flyd.Stream<T>) => Flyd.Stream<R>;

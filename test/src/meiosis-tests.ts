@@ -1,7 +1,6 @@
 import test from "ava";
-import { newInstance } from "../../lib/index";
+import { newInstance, on } from "../../lib/index";
 import { Promise } from "es6-promise";
-import * as flyd from "flyd";
 import * as m from "mithril";
 
 let vnode = null;
@@ -27,7 +26,7 @@ test("calls the view with the model", t => {
   };
 
   const model = run({ initialModel, components: [ ] }).model;
-  flyd.on(render(view), model);
+  on(render(view), model);
 });
 
 test("renders a view", t => {
@@ -36,7 +35,7 @@ test("renders a view", t => {
   const view = model => m("span", `A duck says ${model.duck}`);
 
   const model = run({ initialModel, components: [ ] }).model;
-  flyd.on(render(view), model);
+  on(render(view), model);
 
   t.truthy(vnode);
   t.is(vnode.tag, "span");
@@ -52,7 +51,7 @@ test("renders a tree of views", t => {
   const Main = model => m("div", Form(model), List(model));
 
   const model = run({ initialModel: { }, components: [ ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
 
   t.truthy(vnode);
   t.is(vnode.tag, "div");
@@ -79,7 +78,7 @@ test("triggers a proposal", t => {
   const view = model => m("span", model.name);
 
   const model = run({ initialModel, components: [ Main ] }).model;
-  flyd.on(render(view), model);
+  on(render(view), model);
 
   t.is(vnode.text, "one");
 
@@ -117,12 +116,112 @@ test("nextAction", t => {
 
   const model = run({ initialModel, components: [ Main ] }).model;
   const view = model => m("span", model.name);
-  flyd.on(render(view), model);
+  on(render(view), model);
 
   t.is(vnode.text, "one");
 
   actions.change();
   t.is(vnode.text, "four");
+});
+
+test("merges the models into a single root model", t => {
+  const PROPOSAL = "proposal";
+
+  const actions = (propose => ({
+    doIt: () => propose(PROPOSAL)
+  }))(propose);
+
+  const FormView = model => m("span", model.formText);
+
+  const FormComponent = {
+    initialModel: model => { model.formText = "F1"; return model; }
+  };
+
+  const ListView = model => m("span", model.listText);
+
+  const ListComponent = {
+    initialModel: model => { model.listText = "L1"; return model; }
+  };
+
+  const MainView = model => m("div",
+    m("span", model.name),
+    FormView(model),
+    ListView(model)
+  );
+
+  const MainComponent = {
+    initialModel: model => { model.name = "one"; return model; },
+    receive: (model, proposal) => {
+      if (proposal === PROPOSAL) {
+        return { name: "two", formText: "F2", listText: "L2" };
+      }
+      return model;
+    }
+  };
+
+  const model = run({ initialModel: {}, components: [ MainComponent, ListComponent, FormComponent ] }).model;
+  on(render(MainView), model);
+
+  t.is(vnode.children.length, 3);
+  t.is(vnode.children[0].text, "one");
+  t.is(vnode.children[1].text, "F1");
+  t.is(vnode.children[2].text, "L1");
+
+  actions.doIt();
+  t.is(vnode.children[0].text, "two");
+  t.is(vnode.children[1].text, "F2");
+  t.is(vnode.children[2].text, "L2");
+});
+
+test("recursively merges child components", t => {
+  const PROPOSAL = "proposal";
+
+  const actions = (propose => ({
+    doIt: () => propose(PROPOSAL)
+  }))(propose);
+
+  const FormView = model => m("span", model.formText);
+
+  const FormComponent = {
+    initialModel: model => { model.formText = "F1"; return model; }
+  };
+
+  const ListView = model => m("span", model.listText);
+
+  const ListComponent = {
+    initialModel: model => { model.listText = "L1"; return model; },
+    components: [ FormComponent ]
+  };
+
+  const MainView = model => m("div",
+    m("span", model.name),
+    FormView(model),
+    ListView(model)
+  );
+
+  const MainComponent = {
+    initialModel: model => { model.name = "one"; return model; },
+    receive: (model, proposal) => {
+      if (proposal === PROPOSAL) {
+        return { name: "two", formText: "F2", listText: "L2" };
+      }
+      return model;
+    },
+    components: [ ListComponent ]
+  };
+
+  const model = run({ initialModel: {}, components: [ MainComponent ] }).model;
+  on(render(MainView), model);
+
+  t.is(vnode.children.length, 3);
+  t.is(vnode.children[0].text, "one");
+  t.is(vnode.children[1].text, "F1");
+  t.is(vnode.children[2].text, "L1");
+
+  actions.doIt();
+  t.is(vnode.children[0].text, "two");
+  t.is(vnode.children[1].text, "F2");
+  t.is(vnode.children[2].text, "L2");
 });
 
 test("reflects change from one view in another view", t => {
@@ -150,7 +249,7 @@ test("reflects change from one view in another view", t => {
   );
 
   const model = run({ initialModel, components: [ component ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
 
   t.is(vnode.children.length, 3);
   t.is(vnode.children[0].text, "one");
@@ -198,7 +297,7 @@ test("accepts only specifying the view", t => {
   const Main = model => m("div", Form(model), List(model));
 
   const model = run({ initialModel: { }, components: [ ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
 
   t.truthy(vnode);
   t.is(vnode.tag, "div");
@@ -228,7 +327,7 @@ test("runs proposals through receive", t => {
   };
 
   const model = run({ initialModel, components: [ component ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -248,7 +347,7 @@ test("calls one component's receive with another component's proposal", t => {
   };
 
   const model = run({ initialModel: { name: "one" }, components: [ component ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -277,7 +376,7 @@ test("supports multiple functions that receive proposals, in order of creation",
   };
 
   const model = run({ initialModel: { value: 2 }, components: [ component1, component2 ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
   t.is(vnode.text, "2");
 
   propose({ value: 3 });
@@ -322,7 +421,7 @@ test("sends proposal through to the nextAction function", t => {
   };
 
   const model = run({ initialModel, components: [ component ] }).model;
-  flyd.on(render(Main), model);
+  on(render(Main), model);
   t.is(vnode.text, "one");
 
   propose({ name: "two" });
@@ -392,7 +491,7 @@ test("can use a state object in receive, and to decide which view to display", t
   };
 
   const model = run({ initialModel: { value: 1 }, components: [ Main ] }).model;
-  flyd.on(render(display(state, view)), model);
+  on(render(display(state, view)), model);
   t.is(vnode.text, "ready");
 
   propose(CHANGE);

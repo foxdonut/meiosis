@@ -1,6 +1,5 @@
 import test, { TestContext } from "ava";
-import { Component, MeiosisInstance, MeiosisRun, newInstance } from "../../lib/index";
-import * as flyd from "flyd";
+import { Component, MeiosisInstance, MeiosisRun, Stream, newInstance, on } from "../../lib/index";
 import * as m from "mithril";
 
 interface Model {
@@ -20,7 +19,7 @@ interface Proposal {
   increment: number;
 }
 
-type Propose = Flyd.Stream<Proposal>;
+type Propose = Stream<Proposal>;
 
 interface Actions {
   increase: () => void;
@@ -52,8 +51,8 @@ test("can use a state function", (t: TestContext): void => {
     }
   };
 
-  const state: Flyd.Stream<AppState> = run({ initialModel, components: [ component ] }).state;
-  flyd.on(render(view), state);
+  const state: Stream<AppState> = run({ initialModel, components: [ component ] }).state;
+  on(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4");
 });
@@ -76,8 +75,8 @@ test("can use multiple state functions", (t: TestContext): void => {
 
   const view = (state: AppState): View => m("span", `Counter: ${state.counter} Length: ${state.descriptionLength} Even: ${state.even}`);
 
-  const state: Flyd.Stream<AppState> = run({ initialModel, components: [ component1, component2 ] }).state;
-  flyd.on<AppState, void>(render(view), state);
+  const state: Stream<AppState> = run({ initialModel, components: [ component1, component2 ] }).state;
+  on<AppState, void>(render(view), state);
 
   t.is(vnode.text, "Counter: 2 Length: 4 Even: true");
 });
