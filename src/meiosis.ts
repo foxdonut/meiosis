@@ -86,37 +86,39 @@ function newInstance<M, P, S>(): MeiosisInstance<M, P, S> {
   };
 }
 
-export interface NestComponent<N, P, T> {
-  component: Component<N, P, T>;
+export interface NestComponent {
+  component: Component<any, any, any>;
   path: string;
 }
 
-function nestComponent<M, N, P, S, T>(params: NestComponent<N, P, T>): Component<M, P, S> {
-  const component: Component<N, P, T> = params.component;
+function nestComponent(params: NestComponent): Component<any, any, any> {
+  const component: Component<any, any, any> = params.component;
   const path: string = params.path;
 
-  const nested: Component<M, P, S> = {
-    receive: component.receive && ((model: M, proposal: P) => {
-      const subModel: N = objectPath.get<M, N>(model, path);
+  const nested: Component<any, any, any> = {
+    initialModel: component.initialModel,
+    components: component.components,
+    receive: component.receive && ((model: any, proposal: any) => {
+      const subModel: any = objectPath.get(model, path);
 
       if (subModel) {
         component.receive(subModel, proposal);
       }
       return model;
     }),
-    nextAction: component.nextAction && ((model: M, proposal: P) => {
-      const subModel: N = objectPath.get<M, N>(model, path);
+    nextAction: component.nextAction && ((model: any, proposal: any) => {
+      const subModel: any = objectPath.get(model, path);
 
       if (subModel) {
         component.nextAction(subModel, proposal);
       }
     }),
-    state: component.state && ((model: M, state: S) => {
-      const subModel: N = objectPath.get<M, N>(model, path);
-      const subState: T = objectPath.get<S, T>(state, path);
+    state: component.state && ((model: any, state: any) => {
+      const subModel: any = objectPath.get(model, path);
+      const subState: any = objectPath.get(state, path);
 
       if (subModel && subState) {
-        objectPath.set<S, T>(state, path, component.state(subModel, subState));
+        objectPath.set(state, path, component.state(subModel, subState));
       }
       return state;
     })
@@ -126,34 +128,26 @@ function nestComponent<M, N, P, S, T>(params: NestComponent<N, P, T>): Component
 
 export interface ComponentContainer<M, P, S> {
   component: Component<M, P, S>;
-  getComponentIds: (model: M) => Array<string>;
-  getComponentById: (id: string) => Component<M, P, S>;
+  getComponents: (model: M) => Array<Component<M, P, S>>;
 }
 
 function componentContainer<M, P, S>(params: ComponentContainer<M, P, S>): Component<M, P, S> {
   const container: Component<M, P, S> = {
+    initialModel: params.component.initialModel,
+    components: params.component.components,
     receive: (model: M, proposal: P) => {
       params.component.receive && params.component.receive(model, proposal);
-      params.getComponentIds(model).forEach(id => {
-        const child: Component<M, P, S> = params.getComponentById(id);
-        child.receive && child.receive(model, proposal);
-      });
+      params.getComponents(model).forEach((child: Component<M, P, S>) => child.receive && child.receive(model, proposal));
       return model;
     },
     state: (model: M, state: S) => {
       params.component.state && params.component.state(model, state);
-      params.getComponentIds(model).forEach(id => {
-        const child: Component<M, P, S> = params.getComponentById(id);
-        child.state && child.state(model, state);
-      });
+      params.getComponents(model).forEach((child: Component<M, P, S>) => child.state && child.state(model, state));
       return state;
     },
     nextAction: (model: M, proposal: P) => {
       params.component.nextAction && params.component.nextAction(model, proposal);
-      params.getComponentIds(model).forEach(id => {
-        const child: Component<M, P, S> = params.getComponentById(id);
-        child.nextAction && child.nextAction(model, proposal);
-      });
+      params.getComponents(model).forEach((child: Component<M, P, S>) => child.nextAction && child.nextAction(model, proposal));
     }
   };
   return container;

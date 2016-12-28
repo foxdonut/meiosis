@@ -120,6 +120,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var component = params.component;
 	    var path = params.path;
 	    var nested = {
+	        initialModel: component.initialModel,
+	        components: component.components,
 	        receive: component.receive && (function (model, proposal) {
 	            var subModel = objectPath.get(model, path);
 	            if (subModel) {
@@ -147,28 +149,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.nestComponent = nestComponent;
 	function componentContainer(params) {
 	    var container = {
+	        initialModel: params.component.initialModel,
+	        components: params.component.components,
 	        receive: function (model, proposal) {
 	            params.component.receive && params.component.receive(model, proposal);
-	            params.getComponentIds(model).forEach(function (id) {
-	                var child = params.getComponentById(id);
-	                child.receive && child.receive(model, proposal);
-	            });
+	            params.getComponents(model).forEach(function (child) { return child.receive && child.receive(model, proposal); });
 	            return model;
 	        },
 	        state: function (model, state) {
 	            params.component.state && params.component.state(model, state);
-	            params.getComponentIds(model).forEach(function (id) {
-	                var child = params.getComponentById(id);
-	                child.state && child.state(model, state);
-	            });
+	            params.getComponents(model).forEach(function (child) { return child.state && child.state(model, state); });
 	            return state;
 	        },
 	        nextAction: function (model, proposal) {
 	            params.component.nextAction && params.component.nextAction(model, proposal);
-	            params.getComponentIds(model).forEach(function (id) {
-	                var child = params.getComponentById(id);
-	                child.nextAction && child.nextAction(model, proposal);
-	            });
+	            params.getComponents(model).forEach(function (child) { return child.nextAction && child.nextAction(model, proposal); });
 	        }
 	    };
 	    return container;

@@ -37,7 +37,7 @@ const meiosis = () => {
 
   return {
     propose,
-    run,
+    run
   };
 };
 
@@ -66,30 +66,21 @@ const nestComponent = (component, path) => ({
   })
 });
 
-const componentContainer = ({ component, getComponentIds, getComponentById }) => {
+const componentContainer = ({ component, getComponents }) => {
   return {
     receive: (model, proposal) => {
       component.receive && component.receive(model, proposal);
-      getComponentIds(model).forEach(id => {
-        const child = getComponentById(id);
-        child.receive && child.receive(model, proposal);
-      });
+      getComponents(model).forEach(child => child.receive && child.receive(model, proposal));
       return model;
     },
     state: (model, state) => {
       component.state && component.state(model, state);
-      getComponentIds(model).forEach(id => {
-        const child = getComponentById(id);
-        child.state && child.state(model, state);
-      });
+      getComponents(model).forEach(child => child.state && child.state(model, state));
       return state;
     },
     nextAction: (model, proposal) => {
       component.nextAction && component.nextAction(model, proposal);
-      getComponentIds(model).forEach(id => {
-        const child = getComponentById(id);
-        child.nextAction && child.nextAction(model, proposal);
-      });
+      getComponents(model).forEach(child => child.nextAction && child.nextAction(model, proposal));
     }
   };
 };
@@ -176,8 +167,7 @@ const counterContainer = (propose => {
         return model;
       }
     },
-    getComponentIds: model => model.counterIds,
-    getComponentById
+    getComponents: model => model.counterIds.map(getComponentById)
   });
 })(propose);
 

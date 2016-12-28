@@ -18,15 +18,14 @@ export interface MeiosisApp<M, P, S> {
     state: Flyd.Stream<S>;
 }
 declare function newInstance<M, P, S>(): MeiosisInstance<M, P, S>;
-export interface NestComponent<N, P, T> {
-    component: Component<N, P, T>;
+export interface NestComponent {
+    component: Component<any, any, any>;
     path: string;
 }
-declare function nestComponent<M, N, P, S, T>(params: NestComponent<N, P, T>): Component<M, P, S>;
+declare function nestComponent(params: NestComponent): Component<any, any, any>;
 export interface ComponentContainer<M, P, S> {
     component: Component<M, P, S>;
-    getComponentIds: (model: M) => Array<string>;
-    getComponentById: (id: string) => Component<M, P, S>;
+    getComponents: (model: M) => Array<Component<M, P, S>>;
 }
 declare function componentContainer<M, P, S>(params: ComponentContainer<M, P, S>): Component<M, P, S>;
 declare const propose: Flyd.Stream<any>;
