@@ -9,30 +9,23 @@ import meiosisTracer from "meiosis-tracer";
 const meiosis = () => {
   const propose = flyd.stream();
 
-  const run = ({ initialModel, components }) => {
-    const getComponentFunctions = (property, components) =>
-      components.map(R.prop(property)).filter(R.identity);
+  const run = ({ initialContext, mappers }) => {
+    const streams = {};
+    let lastStream = null;
 
-    const receive = (model, proposal) =>
-      getComponentFunctions("receive", components(model)).reduce((model, fn) => fn(model, proposal), model);
+    mappers.forEach(mapper => {
+      if (lastStream) {
+        lastStream = flyd.map(mapper.fn, lastStream);
+      }
+      else {
+        lastStream = flyd.scan(
+          (context, proposal) => mapper.fn(Object.assign(context, { proposal })),
+          initialContext, propose);
+      }
+      streams[mapper.name] = lastStream;
+    });
 
-    const model = flyd.scan(receive, initialModel, propose);
-
-    const stateFn = model => getComponentFunctions("state", components(model)).reduce(
-      (state, fn) => fn(model, state), JSON.parse(JSON.stringify(model)));
-
-    const state = flyd.map(stateFn, model);
-
-    const nextAction = (model, proposal) => getComponentFunctions("nextAction", components(model)).forEach(
-      fn => fn(model, proposal));
-
-    flyd.on(model => propose() && nextAction(model, propose()), model);
-
-    return {
-      model,
-      stateFn,
-      state
-    };
+    return streams;
   };
 
   return {
@@ -41,64 +34,35 @@ const meiosis = () => {
   };
 };
 
-// meiosis-component
+// Initialize Meiosis
 
-const nestComponent = (component, path) => ({
-  initialModel: component.initialModel,
-  receive: component.receive && ((model, proposal) => {
-    component.receive(objectPath.get(model, path), proposal);
-    return model;
-  }),
-  nextAction: component.nextAction && ((model, proposal) => {
-    const subModel = objectPath.get(model, path);
-
-    if (subModel) {
-      component.nextAction(subModel, proposal);
-    }
-  }),
-  state: component.state && ((model, state) => {
-    const subModel = objectPath.get(state, path);
-
-    if (subModel) {
-      objectPath.set(state, path, component.state(objectPath.get(model, path), subModel));
-    }
-    return state;
-  })
-});
-
-// Util
-
-const pipeIn = function() {
-  return R.pipe.apply(R, Array.prototype.slice.call(arguments, 1))(arguments[0]);
-};
+const { propose, run } = meiosis();
 
 // Counter
 
-const counterComponent = (propose, id) => {
-  const initialModel = { counter: 0 };
+const counterComponent = {
+  initialModel: () => ({ counter: 0 }),
 
-  const receive = (model, proposal) => {
-    if (proposal.counterId === id && proposal.add) {
+  receive: ({ model, proposal }) => {
+    if (proposal.add) {
       model.counter += proposal.add;
     }
     return model;
-  };
+  },
 
-  const state = (model, state) => {
+  state: ({ model, state }) => {
     state.even = model.counter % 2 === 0;
     return state;
-  };
+  },
 
-  const nextAction = (model, proposal) => {
-    if (proposal.counterId === id && model.counter === 5) {
-      propose({ counterId: id, add: 2 });
+  nextAction: ({ model, proposal }) => {
+    if (model.counter === 5) {
+      propose({ counterId: proposal.counterId, add: 2 });
     }
-  };
-
-  return { initialModel, receive, state, nextAction };
+  }
 };
 
-const counterView = ({propose, id, remove, model}) => {
+const counterView = ({ id, remove, model }) => {
   const events = ({
     onIncrease: _evt => propose({ counterId: id, add:  1 }),
     onDecrease: _evt => propose({ counterId: id, add: -1 }),
@@ -112,48 +76,73 @@ const counterView = ({propose, id, remove, model}) => {
     remove ? m("button.btn.btn-sm.btn-danger", { onclick: events.onRemove }, "Remove") : null);
 };
 
-const initialModel = { counter: 0, counterIds: [], countersById: {} };
-const { propose, run } = meiosis();
+// Counter container
 
-const id = "counter_" + String(new Date().getTime());
-const topCounter = counterComponent(propose, id);
+const counterContainer = {
+  receive: context => {
+    const { model, proposal } = context;
+    if (proposal.addCounter) {
+      const id = "counter_" + String(new Date().getTime());
+      model.countersById[id] = counterComponent.initialModel();
+      model.counterIds.push(id);
+    }
+    else if (proposal.removeCounter) {
+      const id = proposal.counterId;
+      delete model.countersById[id];
+      model.counterIds.splice(model.counterIds.indexOf(id), 1);
+    }
+    else if (proposal.counterId) {
+      counterComponent.receive({ model: model.countersById[proposal.counterId], proposal });
+    }
+    return context;
+  }
+};
 
+// App
+
+const singleCounterId = "counter_single";
+const initialContext = {
+  model: {
+    counterIds: [ ],
+    countersById: {
+      [singleCounterId]: counterComponent.initialModel()
+    }
+  }
+};
 const events = propose => ({
   onAddCounter: _evt => propose({ addCounter: true })
 });
 
 const createView = events => model => m("div",
-  counterView({ propose, id, remove: false, model }),
+  counterView({ id: singleCounterId, remove: false, model: model.countersById[singleCounterId] }),
   m("button.btn.btn-primary", { onclick: events.onAddCounter }, "Add Counter"),
-  model.counterIds.map(id => counterView({ propose, id, remove: true, model: model.countersById[id] })));
+  model.counterIds.map(id => counterView({ id, remove: true, model: model.countersById[id] })));
 
-const view = pipeIn(propose, events, createView);
+const view = createView(events(propose));
 
-const counterContainer = (propose => model => {
-  const getComponentById = id => nestComponent(counterComponent(propose, id), "countersById." + id);
-  return model.counterIds.map(getComponentById).concat([{
-    receive: (model, proposal) => {
-      if (proposal.addCounter) {
-        const id = "counter_" + String(new Date().getTime());
-        model.countersById[id] = getComponentById(id).initialModel;
-        model.counterIds.push(id);
-      }
-      else if (proposal.removeCounter) {
-        const id = proposal.counterId;
-        delete model.countersById[id];
-        model.counterIds.splice(model.counterIds.indexOf(id), 1);
-      }
-      return model;
-    }
-  }]);
-})(propose);
+/*
+const tracer = meiosisTracer({ selector: "#tracer", initialContext, render });
+const { stateFn, state } = run({ initialContext, receive });
+tracer.setStateFn(stateFn);
+*/
+
+const receive = counterContainer.receive;
+const state = context => {
+  Object.keys(context.state.countersById).forEach(id =>
+    counterComponent.state({ model: context.model.countersById[id], state: context.state.countersById[id] }));
+  return context;
+};
+
+const mappers = [
+  { name: "model$", fn: receive },
+  { name: "cleanState", fn: context => { context.state = JSON.parse(JSON.stringify(context.model)); return context; } },
+  { name: "state$", fn: state },
+  { name: "viewModel$", fn: R.prop("state") }
+];
+
+const { /*state$,*/ viewModel$ } = run({ initialContext, mappers });
 
 const element = document.getElementById("app");
-const render = state => m.render(element, view(state));
-
-const tracer = meiosisTracer({ selector: "#tracer", initialModel, render });
-const { stateFn, state } = run({ initialModel, components:
-  model => counterContainer(model).concat([topCounter, tracer.component]) });
-tracer.setStateFn(stateFn);
-
-flyd.on(render, state);
+const render = context => m.render(element, view(context));
+flyd.on(render, viewModel$);
+//flyd.on(value => console.log(JSON.stringify(value)), state$);
