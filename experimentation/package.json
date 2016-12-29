@@ -22,6 +22,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "flyd": "^0.2.2",
+    "immutable": "^3.8.1",
     "mithril": "^1.0.0-rc.6",
     "object-path": "^0.11.3",
     "ramda": "^0.22.1"
