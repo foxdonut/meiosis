@@ -13,18 +13,18 @@ const meiosis = () => {
     const getComponentFunctions = (property, components) =>
       components.map(R.prop(property)).filter(R.identity);
 
-    const receives = getComponentFunctions("receive", components);
-    const receive = (model, proposal) => receives.reduce((model, fn) => fn(model, proposal), model);
+    const receive = (model, proposal) =>
+      getComponentFunctions("receive", components(model)).reduce((model, fn) => fn(model, proposal), model);
 
     const model = flyd.scan(receive, initialModel, propose);
 
-    const states = getComponentFunctions("state", components);
-    const stateFn = model => states.reduce((state, fn) => fn(model, state), JSON.parse(JSON.stringify(model)));
+    const stateFn = model => getComponentFunctions("state", components(model)).reduce(
+      (state, fn) => fn(model, state), JSON.parse(JSON.stringify(model)));
 
     const state = flyd.map(stateFn, model);
 
-    const nexts = getComponentFunctions("nextAction", components);
-    const nextAction = (model, proposal) => nexts.forEach(fn => fn(model, proposal));
+    const nextAction = (model, proposal) => getComponentFunctions("nextAction", components(model)).forEach(
+      fn => fn(model, proposal));
 
     flyd.on(model => propose() && nextAction(model, propose()), model);
 
@@ -65,25 +65,6 @@ const nestComponent = (component, path) => ({
     return state;
   })
 });
-
-const componentContainer = ({ component, getComponents }) => {
-  return {
-    receive: (model, proposal) => {
-      component.receive && component.receive(model, proposal);
-      getComponents(model).forEach(child => child.receive && child.receive(model, proposal));
-      return model;
-    },
-    state: (model, state) => {
-      component.state && component.state(model, state);
-      getComponents(model).forEach(child => child.state && child.state(model, state));
-      return state;
-    },
-    nextAction: (model, proposal) => {
-      component.nextAction && component.nextAction(model, proposal);
-      getComponents(model).forEach(child => child.nextAction && child.nextAction(model, proposal));
-    }
-  };
-};
 
 // Util
 
@@ -148,34 +129,31 @@ const createView = events => model => m("div",
 
 const view = pipeIn(propose, events, createView);
 
-const counterContainer = (propose => {
+const counterContainer = (propose => model => {
   const getComponentById = id => nestComponent(counterComponent(propose, id), "countersById." + id);
-
-  return componentContainer({
-    component: {
-      receive: (model, proposal) => {
-        if (proposal.addCounter) {
-          const id = "counter_" + String(new Date().getTime());
-          model.countersById[id] = getComponentById(id).initialModel;
-          model.counterIds.push(id);
-        }
-        else if (proposal.removeCounter) {
-          const id = proposal.counterId;
-          delete model.countersById[id];
-          model.counterIds.splice(model.counterIds.indexOf(id), 1);
-        }
-        return model;
+  return model.counterIds.map(getComponentById).concat([{
+    receive: (model, proposal) => {
+      if (proposal.addCounter) {
+        const id = "counter_" + String(new Date().getTime());
+        model.countersById[id] = getComponentById(id).initialModel;
+        model.counterIds.push(id);
       }
-    },
-    getComponents: model => model.counterIds.map(getComponentById)
-  });
+      else if (proposal.removeCounter) {
+        const id = proposal.counterId;
+        delete model.countersById[id];
+        model.counterIds.splice(model.counterIds.indexOf(id), 1);
+      }
+      return model;
+    }
+  }]);
 })(propose);
 
 const element = document.getElementById("app");
 const render = state => m.render(element, view(state));
 
 const tracer = meiosisTracer({ selector: "#tracer", initialModel, render });
-const { stateFn, state } = run({ initialModel, components: [topCounter, counterContainer, tracer.component] });
+const { stateFn, state } = run({ initialModel, components:
+  model => counterContainer(model).concat([topCounter, tracer.component]) });
 tracer.setStateFn(stateFn);
 
 flyd.on(render, state);
