@@ -9,22 +9,26 @@ import meiosisTracer from "meiosis-tracer";
 const meiosis = () => {
   const propose = flyd.stream();
 
-  const run = ({ initialContext, mappers }) => {
+  const getName = value => typeof value === "function" ? undefined : Object.keys(value)[0];
+  const getFn = value => {
+    const name = getName(value);
+    return name ? value[name] : value;
+  };
+
+  const run = ({ initialContext, scanner, mappers }) => {
     const streams = {};
-    let lastStream = null;
+
+    const name = getName(scanner);
+    const fn = getFn(scanner);
+
+    let lastStream = flyd.scan(fn, initialContext, propose);
+    name && (streams[name] = lastStream);
 
     mappers.forEach(mapper => {
-      const name = typeof mapper === "function" ? undefined : Object.keys(mapper)[0];
-      const fn = name ? mapper[name] : mapper;
+      const name = getName(mapper);
+      const fn = getFn(mapper);
 
-      if (!lastStream) {
-        // First
-        lastStream = flyd.scan(fn, initialContext, propose);
-      }
-      else {
-        // Rest
-        lastStream = flyd.map(fn, lastStream);
-      }
+      lastStream = flyd.map(fn, lastStream);
       name && (streams[name] = lastStream);
     });
 
@@ -136,15 +140,16 @@ const state = context => {
   return context;
 };
 
+const scanner = { model$: (context, proposal) => receive(Object.assign(context, { proposal })) };
+
 const mappers = [
-  { model$: (context, proposal) => receive(Object.assign(context, { proposal })) },
   context => { context.state = JSON.parse(JSON.stringify(context.model)); return context; },
   //{ name: "state$", fn: state },
   state,
   { viewModel$: R.prop("state") }
 ];
 
-const { /*state$,*/ viewModel$ } = run({ initialContext, mappers });
+const { /*state$,*/ viewModel$ } = run({ initialContext, scanner, mappers });
 
 const element = document.getElementById("app");
 const render = context => m.render(element, view(context));
