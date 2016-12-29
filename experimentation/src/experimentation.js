@@ -14,15 +14,18 @@ const meiosis = () => {
     let lastStream = null;
 
     mappers.forEach(mapper => {
-      if (lastStream) {
-        lastStream = flyd.map(mapper.fn, lastStream);
+      const name = typeof mapper === "function" ? undefined : Object.keys(mapper)[0];
+      const fn = name ? mapper[name] : mapper;
+
+      if (!lastStream) {
+        // First
+        lastStream = flyd.scan(fn, initialContext, propose);
       }
       else {
-        lastStream = flyd.scan(
-          (context, proposal) => mapper.fn(Object.assign(context, { proposal })),
-          initialContext, propose);
+        // Rest
+        lastStream = flyd.map(fn, lastStream);
       }
-      streams[mapper.name] = lastStream;
+      name && (streams[name] = lastStream);
     });
 
     return streams;
@@ -134,10 +137,11 @@ const state = context => {
 };
 
 const mappers = [
-  { name: "model$", fn: receive },
-  { name: "cleanState", fn: context => { context.state = JSON.parse(JSON.stringify(context.model)); return context; } },
-  { name: "state$", fn: state },
-  { name: "viewModel$", fn: R.prop("state") }
+  { model$: (context, proposal) => receive(Object.assign(context, { proposal })) },
+  context => { context.state = JSON.parse(JSON.stringify(context.model)); return context; },
+  //{ name: "state$", fn: state },
+  state,
+  { viewModel$: R.prop("state") }
 ];
 
 const { /*state$,*/ viewModel$ } = run({ initialContext, mappers });
