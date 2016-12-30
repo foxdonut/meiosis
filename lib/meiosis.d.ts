@@ -1,34 +1,29 @@
-import { Component } from "./component";
-import { State } from "./state";
-declare type Stream<T> = Flyd.Stream<T>;
-export interface RunParameters<M, P, S> {
-    initialModel: M;
-    components: Array<Component<M, P, S>>;
+export declare type Stream<T> = Flyd.Stream<T>;
+export declare type Scanner<T, R> = Flyd.Scanner<T, R>;
+export declare type Mapper<T, R> = Flyd.Mapper<T, R>;
+export interface ScannerSpec<T, R> {
+    [name: string]: Scanner<T, R> | Scanner<T, R>;
 }
-export interface MeiosisRun<M, P, S> {
-    (params: RunParameters<M, P, S>): MeiosisApp<M, P, S>;
+export interface MapperSpec<T, R> {
+    [name: string]: Mapper<T, R> | Mapper<T, R>;
 }
-export interface MeiosisInstance<M, P, S> {
-    propose: Flyd.Stream<P>;
-    run: MeiosisRun<M, P, S>;
+export interface RunParameters<C, P> {
+    initial: C;
+    scanner: ScannerSpec<P, C>;
+    mappers?: Array<MapperSpec<any, any>>;
 }
-export interface MeiosisApp<M, P, S> {
-    model: Flyd.Stream<M>;
-    stateFn: State<M, S>;
-    state: Flyd.Stream<S>;
+export interface MeiosisRun<C, P> {
+    (params: RunParameters<C, P>): MeiosisApp;
 }
-declare function newInstance<M, P, S>(): MeiosisInstance<M, P, S>;
-export interface NestComponent {
-    component: Component<any, any, any>;
-    path: string;
+export interface MeiosisInstance<C, P> {
+    propose: Stream<P>;
+    run: MeiosisRun<C, P>;
 }
-declare function nestComponent(params: NestComponent): Component<any, any, any>;
-export interface ComponentContainer<M, P, S> {
-    component: Component<M, P, S>;
-    getComponents: (model: M) => Array<Component<M, P, S>>;
+export interface MeiosisApp {
+    [key: string]: Stream<any>;
 }
-declare function componentContainer<M, P, S>(params: ComponentContainer<M, P, S>): Component<M, P, S>;
+declare function newInstance<C, P>(): MeiosisInstance<C, P>;
 declare const propose: Flyd.Stream<any>;
-declare const run: MeiosisRun<any, any, any>;
-export { Stream, newInstance, propose, run, nestComponent, componentContainer };
+declare const run: MeiosisRun<any, any>;
+export { newInstance, propose, run };
 export declare const combine: <A, B, C>(combinator: (stream1: Flyd.Stream<A>, stream2: Flyd.Stream<B>) => C, streams: Flyd.Stream<any>[]) => Flyd.Stream<C>, map: <T, R>(mapper: Flyd.Mapper<T, R>, stream: Flyd.Stream<T>) => Flyd.Stream<R>, merge: <T>(stream1: Flyd.Stream<T>, stream2: Flyd.Stream<T>) => Flyd.Stream<T>, on: <T, R>(mapper: Flyd.Mapper<T, R>, stream: Flyd.Stream<T>) => Flyd.Stream<R>, scan: <T, R>(scanner: Flyd.Scanner<T, R>, initial: R, stream: Flyd.Stream<T>) => Flyd.Stream<R>;
