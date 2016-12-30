@@ -5,6 +5,7 @@ import m from "mithril";
 import * as R from "ramda";
 import objectPath from "object-path";
 import meiosisTracer from "meiosis-tracer";
+import Immutable from "immutable";
 
 const meiosis = () => {
   const propose = flyd.stream();
@@ -50,11 +51,12 @@ const { propose, run } = meiosis();
 const counterComponent = {
   initialModel: () => ({ counter: 0 }),
 
-  receive: ({ model, proposal }) => {
-    if (proposal.add) {
-      model.counter += proposal.add;
+  receive: context => {
+    const add = context.get("proposal").add;
+    if (add) {
+      context = context.setIn(["model", "counter"], add);
     }
-    return model;
+    return context;
   },
 
   state: ({ model, state }) => {
@@ -87,7 +89,7 @@ const counterView = ({ id, remove, model }) => {
 
 const counterContainer = {
   receive: context => {
-    const { model, proposal } = context;
+    const proposal = context.get("proposal");
     if (proposal.addCounter) {
       const id = "counter_" + String(new Date().getTime());
       model.countersById[id] = counterComponent.initialModel();
@@ -108,14 +110,14 @@ const counterContainer = {
 // App
 
 const singleCounterId = "counter_single";
-const initialContext = {
+const initialContext = Immutable.fromJS({
   model: {
     counterIds: [ ],
     countersById: {
       [singleCounterId]: counterComponent.initialModel()
     }
   }
-};
+});
 const events = propose => ({
   onAddCounter: _evt => propose({ addCounter: true })
 });
@@ -139,27 +141,20 @@ const state = context => {
     counterComponent.state({ model: context.model.countersById[id], state: context.state.countersById[id] }));
   return context;
 };
-const nextAction = ({ model, proposal }) => {
-  if (proposal && proposal.counterId) {
-    counterComponent.nextAction({ model: model.countersById[proposal.counterId], proposal });
-  }
-};
 
-const scanner = { model$: (context, proposal) => receive(Object.assign({}, context, { proposal })) };
+const scanner = { model$: (context, proposal) => receive(context.merge({ proposal })) };
 
 const mappers = [
-  context => { context.state = JSON.parse(JSON.stringify(context.model)); return context; }
-  //, { name: "state$", fn: state }
-  , { state$: state }
-  //, { viewModel$: R.prop("state") }
+  context => context.set("state", context.get("model")),
+  context => context.toJS(),
+  //{ name: "state$", fn: state },
+  state,
+  { viewModel$: R.prop("state") }
 ];
 
-const { state$ /*,viewModel$*/ } = run({ initialContext, scanner, mappers });
+const { /*state$,*/ viewModel$ } = run({ initialContext, scanner, mappers });
 
 const element = document.getElementById("app");
-const render = context => {
-  m.render(element, view(context.state));
-  nextAction(context);
-};
-flyd.on(render, state$);
+const render = context => m.render(element, view(context));
+flyd.on(render, viewModel$);
 //flyd.on(value => console.log(JSON.stringify(value)), state$);
