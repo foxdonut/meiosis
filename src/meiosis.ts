@@ -16,6 +16,7 @@ export interface RunParameters<C, P> {
   initial: C;
   scanner: ScannerSpec<P, C>;
   mappers?: Array<MapperSpec<any, any>>;
+  render?: any;//FIXME
 }
 
 export interface MeiosisRun<C, P> {
@@ -60,6 +61,43 @@ function newInstance<C, P>(): MeiosisInstance<C, P> {
       lastStream = flyd.map(fn, lastStream);
       name && (streams[name] = lastStream);
     });
+
+    const devtool: any = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
+    if (devtool && params.render) {
+      const bufferedReceives: Array<any> = [];
+      let devtoolInitialized: boolean = false;
+
+      createComponent({
+        receive: (model: any, proposal: any) => {
+          if (devtoolInitialized) {
+            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+          }
+          else {
+            bufferedReceives.push({model: copy(model), proposal});
+          }
+          return model;
+        }
+      });
+      window.addEventListener("message", evt => {
+        if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
+          renderRoot(evt.data.state);
+        }
+        else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
+          window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: params.initial }, "*");
+          devtoolInitialized = true;
+
+          for (let i: number = 0; i < bufferedReceives.length; i++) {
+            const { model, proposal }: any = bufferedReceives[i];
+            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+          }
+        }
+        else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
+          const state: S = renderRoot.state(evt.data.model);
+          const ts: string = evt.data.ts;
+          window.postMessage({ type: "MEIOSIS_STATE", state, ts }, "*");
+        }
+      });
+    }
 
     return streams;
   };
