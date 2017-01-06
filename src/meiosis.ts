@@ -48,18 +48,18 @@ function newInstance<C, P>(): MeiosisInstance<C, P> {
     const streams: MeiosisApp = {};
 
     const scanner: ScannerSpec<P, C> = params.scanner;
-    const name: string = getName(scanner);
-    const fn: Scanner<P, C> = getFn(scanner);
+    const scannerName: string = getName(scanner);
+    const scannerFn: Scanner<P, C> = getFn(scanner);
 
-    let lastStream: Stream<any> = flyd.scan(fn, params.initial, propose);
-    name && (streams[name] = lastStream);
+    let lastStream: Stream<any> = flyd.scan(scannerFn, params.initial, propose);
+    name && (streams[scannerName] = lastStream);
 
     (params.mappers || []).forEach(mapper => {
-      const name: string = getName(mapper);
-      const fn: Mapper<any, any> = getFn(mapper);
+      const mapperName: string = getName(mapper);
+      const mapperFn: Mapper<any, any> = getFn(mapper);
 
-      lastStream = flyd.map(fn, lastStream);
-      name && (streams[name] = lastStream);
+      lastStream = flyd.map(mapperFn, lastStream);
+      name && (streams[mapperName] = lastStream);
     });
 
     const devtool: any = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
