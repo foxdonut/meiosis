@@ -99,26 +99,24 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
         }
         else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
           devtoolInitialized = true;
-          bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values }, "*"));
+          bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES_NEW", values }, "*"));
         }
       });
 
       on(() => {
         const proposal: P = propose();
-        // Don't emit if proposal has not changed, because that means the value is coming
-        // from the tracer itself. Do emit on the first set of values (no proposal).
-        if (!lastProposal || proposal !== lastProposal) {
-          lastProposal = proposal;
-          const values: Array<NamedValue> = allStreams.map((namedStream: NamedStream) =>
-            ({ name: namedStream.name, value: copy(namedStream.stream()) }));
-          values.unshift({ name: "proposal", value: proposal });
+        const update: boolean =  proposal !== lastProposal;
+        lastProposal = proposal;
 
-          if (devtoolInitialized) {
-            window.postMessage({ type: "MEIOSIS_VALUES", values }, "*");
-          }
-          else {
-            bufferedValues.push(values);
-          }
+        const values: Array<NamedValue> = allStreams.map((namedStream: NamedStream) =>
+          ({ name: namedStream.name, value: copy(namedStream.stream()) }));
+        values.unshift({ name: "proposal", value: proposal });
+
+        if (devtoolInitialized) {
+          window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
+        }
+        else {
+          bufferedValues.push(values);
         }
       }, lastStream);
     }
