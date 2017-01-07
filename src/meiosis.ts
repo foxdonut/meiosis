@@ -12,25 +12,44 @@ export interface MapperSpec<T, R> {
   [name: string]: Mapper<T, R> | Mapper<T, R>;
 }
 
-export interface RunParameters<C, P> {
-  initial: C;
-  scanner: ScannerSpec<P, C>;
+export interface RunParameters<M, P> {
+  initial: M;
+  scanner: ScannerSpec<P, M>;
   mappers?: Array<MapperSpec<any, any>>;
-  render?: any;//FIXME
+  copy?: any;//FIXME
 }
 
-export interface MeiosisRun<C, P> {
-  (params: RunParameters<C, P>): MeiosisApp;
+export interface MeiosisRun<M, P> {
+  (params: RunParameters<M, P>): MeiosisApp;
 }
 
-export interface MeiosisInstance<C, P> {
+export interface MeiosisInstance<M, P> {
   propose: Stream<P>;
-  run: MeiosisRun<C, P>;
+  run: MeiosisRun<M, P>;
 }
 
 export interface MeiosisApp {
   [key: string]: Stream<any>;
 }
+
+interface NamedStream {
+  name: string;
+  stream: Stream<any>;
+}
+
+interface NamedValue {
+  name: string;
+  value: any;
+}
+
+export const {
+  combine,
+  map,
+  merge,
+  on,
+  scan,
+  stream
+} = flyd;
 
 const getName = (value: any) => typeof value === "function" ? undefined : Object.keys(value)[0];
 const getFn = (value: any) => {
@@ -38,65 +57,70 @@ const getFn = (value: any) => {
   return name ? value[name] : value;
 };
 
-function newInstance<C, P>(): MeiosisInstance<C, P> {
-  const propose: Stream<P> = flyd.stream<P>();
+function newInstance<M, P>(): MeiosisInstance<M, P> {
+  const propose: Stream<P> = stream<P>();
 
-  const run = (params: RunParameters<C, P>): MeiosisApp => {
+  const run = (params: RunParameters<M, P>): MeiosisApp => {
     if (!params.initial || !params.scanner) {
       throw new Error("Please specify initial and scanner.");
     }
     const streams: MeiosisApp = {};
+    const allStreams: Array<NamedStream> = [];
 
-    const scanner: ScannerSpec<P, C> = params.scanner;
+    const scanner: ScannerSpec<P, M> = params.scanner;
     const scannerName: string = getName(scanner);
-    const scannerFn: Scanner<P, C> = getFn(scanner);
+    const scannerFn: Scanner<P, M> = getFn(scanner);
 
-    let lastStream: Stream<any> = flyd.scan(scannerFn, params.initial, propose);
-    name && (streams[scannerName] = lastStream);
+    let lastStream: Stream<any> = scan(scannerFn, params.initial, propose);
+    const scannerStream = lastStream;
+    scannerName && (streams[scannerName] = lastStream);
+    allStreams.push({ name: (scannerName || ""), stream: lastStream });
 
     (params.mappers || []).forEach(mapper => {
       const mapperName: string = getName(mapper);
       const mapperFn: Mapper<any, any> = getFn(mapper);
 
-      lastStream = flyd.map(mapperFn, lastStream);
-      name && (streams[mapperName] = lastStream);
+      lastStream = map(mapperFn, lastStream);
+      mapperName && (streams[mapperName] = lastStream);
+      allStreams.push({ name: (mapperName || ""), stream: lastStream });
     });
 
-    const devtool: any = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
-    if (devtool && params.render) {
-      const bufferedReceives: Array<any> = [];
+    //const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
+    const devtool: boolean = !!window;
+    if (devtool) {
+      const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
+      const bufferedValues: Array<any> = [];
       let devtoolInitialized: boolean = false;
+      let lastProposal: P = propose();
 
-      createComponent({
-        receive: (model: any, proposal: any) => {
+      window.addEventListener("message", evt => {
+        if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
+          scannerStream(evt.data.model);
+        }
+        else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
+          devtoolInitialized = true;
+          bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values }, "*"));
+        }
+      });
+
+      on(() => {
+        const proposal: P = propose();
+        // Don't emit if proposal has not changed, because that means the value is coming
+        // from the tracer itself. Do emit on the first set of values (no proposal).
+        if (!lastProposal || proposal !== lastProposal) {
+          lastProposal = proposal;
+          const values: Array<NamedValue> = allStreams.map((namedStream: NamedStream) =>
+            ({ name: namedStream.name, value: copy(namedStream.stream()) }));
+          values.unshift({ name: "proposal", value: proposal });
+
           if (devtoolInitialized) {
-            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+            window.postMessage({ type: "MEIOSIS_VALUES", values }, "*");
           }
           else {
-            bufferedReceives.push({model: copy(model), proposal});
-          }
-          return model;
-        }
-      });
-      window.addEventListener("message", evt => {
-        if (evt.data.type === "MEIOSIS_RENDER_ROOT") {
-          renderRoot(evt.data.state);
-        }
-        else if (evt.data.type === "MEIOSIS_REQUEST_INITIAL_MODEL") {
-          window.postMessage({ type: "MEIOSIS_INITIAL_MODEL", model: params.initial }, "*");
-          devtoolInitialized = true;
-
-          for (let i: number = 0; i < bufferedReceives.length; i++) {
-            const { model, proposal }: any = bufferedReceives[i];
-            window.postMessage({ type: "MEIOSIS_RECEIVE", model, proposal }, "*");
+            bufferedValues.push(values);
           }
         }
-        else if (evt.data.type === "MEIOSIS_REQUEST_STATE") {
-          const state: S = renderRoot.state(evt.data.model);
-          const ts: string = evt.data.ts;
-          window.postMessage({ type: "MEIOSIS_STATE", state, ts }, "*");
-        }
-      });
+      }, lastStream);
     }
 
     return streams;
@@ -117,11 +141,3 @@ export {
   propose,
   run
 };
-
-export const {
-  combine,
-  map,
-  merge,
-  on,
-  scan
-} = flyd;
