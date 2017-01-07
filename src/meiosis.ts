@@ -99,7 +99,7 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
         }
         else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
           devtoolInitialized = true;
-          bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES_NEW", values }, "*"));
+          bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values }, "*"));
         }
       });
 
