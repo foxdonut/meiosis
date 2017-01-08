@@ -8,7 +8,7 @@ export interface MapperSpec<T, R> {
     [name: string]: Mapper<T, R> | Mapper<T, R>;
 }
 export interface RunParameters<M, P> {
-    initial: M;
+    initialModel: M;
     scanner: ScannerSpec<P, M>;
     mappers?: Array<MapperSpec<any, any>>;
     copy?: any;

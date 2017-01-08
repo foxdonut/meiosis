@@ -76,15 +76,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	function newInstance() {
 	    var propose = exports.stream();
 	    var run = function (params) {
-	        if (!params.initial || !params.scanner) {
-	            throw new Error("Please specify initial and scanner.");
+	        if (!params.initialModel || !params.scanner) {
+	            throw new Error("Please specify initialModel and scanner.");
 	        }
 	        var streams = {};
 	        var allStreams = [];
 	        var scanner = params.scanner;
 	        var scannerName = getName(scanner);
 	        var scannerFn = getFn(scanner);
-	        var lastStream = exports.scan(scannerFn, params.initial, propose);
+	        var lastStream = exports.scan(scannerFn, params.initialModel, propose);
 	        var scannerStream = lastStream;
 	        scannerName && (streams[scannerName] = lastStream);
 	        allStreams.push({ name: (scannerName || ""), stream: lastStream });
@@ -101,8 +101,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var bufferedValues_1 = [];
 	            var devtoolInitialized_1 = false;
 	            var lastProposal_1 = propose();
+	            var sendValues_1 = exports.stream(true);
 	            window.addEventListener("message", function (evt) {
 	                if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
+	                    sendValues_1(evt.data.sendValuesBack);
 	                    scannerStream(evt.data.model);
 	                }
 	                else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
@@ -118,11 +120,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return ({ name: namedStream.name, value: copy_1(namedStream.stream()) });
 	                });
 	                values.unshift({ name: "proposal", value: proposal });
-	                if (devtoolInitialized_1) {
-	                    window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: update }, "*");
-	                }
-	                else {
-	                    bufferedValues_1.push(values);
+	                if (sendValues_1()) {
+	                    if (devtoolInitialized_1) {
+	                        window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: update }, "*");
+	                    }
+	                    else {
+	                        bufferedValues_1.push(values);
+	                    }
 	                }
 	            }, lastStream);
 	        }

@@ -13,7 +13,7 @@ export interface MapperSpec<T, R> {
 }
 
 export interface RunParameters<M, P> {
-  initial: M;
+  initialModel: M;
   scanner: ScannerSpec<P, M>;
   mappers?: Array<MapperSpec<any, any>>;
   copy?: any;//FIXME
@@ -61,8 +61,8 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
   const propose: Stream<P> = stream<P>();
 
   const run = (params: RunParameters<M, P>): MeiosisApp => {
-    if (!params.initial || !params.scanner) {
-      throw new Error("Please specify initial and scanner.");
+    if (!params.initialModel || !params.scanner) {
+      throw new Error("Please specify initialModel and scanner.");
     }
     const streams: MeiosisApp = {};
     const allStreams: Array<NamedStream> = [];
@@ -71,7 +71,7 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
     const scannerName: string = getName(scanner);
     const scannerFn: Scanner<P, M> = getFn(scanner);
 
-    let lastStream: Stream<any> = scan(scannerFn, params.initial, propose);
+    let lastStream: Stream<any> = scan(scannerFn, params.initialModel, propose);
     const scannerStream = lastStream;
     scannerName && (streams[scannerName] = lastStream);
     allStreams.push({ name: (scannerName || ""), stream: lastStream });
@@ -92,9 +92,11 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
       const bufferedValues: Array<any> = [];
       let devtoolInitialized: boolean = false;
       let lastProposal: P = propose();
+      const sendValues: Stream<boolean> = stream(true);
 
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
+          sendValues(evt.data.sendValuesBack);
           scannerStream(evt.data.model);
         }
         else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
@@ -112,11 +114,13 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
           ({ name: namedStream.name, value: copy(namedStream.stream()) }));
         values.unshift({ name: "proposal", value: proposal });
 
-        if (devtoolInitialized) {
-          window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
-        }
-        else {
-          bufferedValues.push(values);
+        if (sendValues()) {
+          if (devtoolInitialized) {
+            window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
+          }
+          else {
+            bufferedValues.push(values);
+          }
         }
       }, lastStream);
     }
