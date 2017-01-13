@@ -1,3 +1,5 @@
+/// <reference path="../lib/flyd.d.ts" />
+
 import * as flyd from "flyd";
 
 export type Stream<T> = Flyd.Stream<T>;

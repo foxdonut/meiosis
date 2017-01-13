@@ -18,7 +18,6 @@
   },
   "include": [
     "typings/index.d.ts",
-    "localTypings/index.d.ts",
     "src/*.ts"
   ],
   "compileOnSave": false,

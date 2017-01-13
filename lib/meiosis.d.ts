@@ -1,3 +1,4 @@
+/// <reference path="flyd.d.ts" />
 export declare type Stream<T> = Flyd.Stream<T>;
 export declare type Scanner<T, R> = Flyd.Scanner<T, R>;
 export declare type Mapper<T, R> = Flyd.Mapper<T, R>;
