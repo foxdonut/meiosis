@@ -3,20 +3,20 @@
 import * as flyd from "flyd";
 
 export type Stream<T> = Flyd.Stream<T>;
-export type Scanner<T, R> = Flyd.Scanner<T, R>;
-export type Mapper<T, R> = Flyd.Mapper<T, R>;
+export type Scanner<M, P> = Flyd.Scanner<M, P>;
+export type Mapper<A, B> = Flyd.Mapper<A, B>;
 
-export interface ScannerSpec<T, R> {
-  [name: string]: Scanner<T, R> | Scanner<T, R>;
+export interface ScannerSpec<M, P> {
+  [name: string]: Scanner<M, P> | Scanner<M, P>;
 }
 
-export interface MapperSpec<T, R> {
-  [name: string]: Mapper<T, R> | Mapper<T, R>;
+export interface MapperSpec<A, B> {
+  [name: string]: Mapper<A, B> | Mapper<A, B>;
 }
 
 export interface RunParameters<M, P> {
   initialModel: M;
-  scanner: ScannerSpec<P, M>;
+  scanner: ScannerSpec<M, P>;
   mappers?: Array<MapperSpec<any, any>>;
   copy?: any;//FIXME
 }
@@ -69,9 +69,9 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
     const streams: MeiosisApp = {};
     const allStreams: Array<NamedStream> = [];
 
-    const scanner: ScannerSpec<P, M> = params.scanner;
+    const scanner: ScannerSpec<M, P> = params.scanner;
     const scannerName: string = getName(scanner);
-    const scannerFn: Scanner<P, M> = getFn(scanner);
+    const scannerFn: Scanner<M, P> = getFn(scanner);
 
     let lastStream: Stream<any> = scan(scannerFn, params.initialModel, propose);
     const scannerStream = lastStream;

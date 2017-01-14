@@ -18,8 +18,8 @@ declare namespace Flyd {
     (value: T): R;
   }
 
-  interface Scanner<T, R> {
-    (acc: R, next: T): R;
+  interface Scanner<A, B> {
+    (acc: A, next: B): A;
   }
 
   /**
@@ -55,7 +55,7 @@ declare namespace Flyd {
     /**
      * Scans over a stream.
      */
-    scan<T, R>(scanner: Scanner<T, R>, initial: R, stream: Stream<T>): Stream<R>;
+    scan<A, B>(scanner: Scanner<A, B>, initial: A, stream: Stream<B>): Stream<A>;
 
     /**
      * Similar to map, but for doing side effects and returns an empty stream.
