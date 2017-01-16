@@ -12,6 +12,7 @@ export interface RunParameters<M, P> {
     initialModel: M;
     scanner: ScannerSpec<M, P>;
     mappers?: Array<MapperSpec<any, any>>;
+    nextAction?: Function;
     copy?: any;
 }
 export interface MeiosisRun<M, P> {

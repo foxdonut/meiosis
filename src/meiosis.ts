@@ -18,6 +18,7 @@ export interface RunParameters<M, P> {
   initialModel: M;
   scanner: ScannerSpec<M, P>;
   mappers?: Array<MapperSpec<any, any>>;
+  nextAction?: Function;
   copy?: any;//FIXME
 }
 
@@ -87,13 +88,28 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
       allStreams.push({ name: (mapperName || ""), stream: lastStream });
     });
 
-    //const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
+    if (params.nextAction) {
+      const rendered: Stream<any> = stream();
+      let lastProposal: P = propose();
+
+      on((value: any) => {
+        const proposal: P = propose();
+
+        if (proposal !== lastProposal) {
+          params.nextAction(value);
+        }
+        lastProposal = proposal;
+      }, rendered);
+
+      streams["rendered"] = rendered;
+    }
+
     const devtool: boolean = !!window;
     if (devtool) {
       const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
       const bufferedValues: Array<any> = [];
       let devtoolInitialized: boolean = false;
-      let lastProposal: P = propose();
+      let devLastProposal: P = propose();
       const sendValues: Stream<boolean> = stream(true);
 
       window.addEventListener("message", evt => {
@@ -109,8 +125,8 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
 
       on(() => {
         const proposal: P = propose();
-        const update: boolean =  proposal !== lastProposal;
-        lastProposal = proposal;
+        const update: boolean = proposal !== devLastProposal;
+        devLastProposal = proposal;
 
         const values: Array<NamedValue> = allStreams.map((namedStream: NamedStream) =>
           ({ name: namedStream.name, value: copy(namedStream.stream()) }));
