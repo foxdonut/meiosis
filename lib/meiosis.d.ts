@@ -8,10 +8,14 @@ export interface ScannerSpec<M, P> {
 export interface MapperSpec<A, B> {
     [name: string]: Mapper<A, B> | Mapper<A, B>;
 }
+export interface NextAction<P> {
+    (model: any, proposal: P): void;
+}
 export interface RunParameters<M, P> {
     initialModel: M;
     scanner: ScannerSpec<M, P>;
     mappers?: Array<MapperSpec<any, any>>;
+    nextAction: NextAction<P>;
     copy?: any;
 }
 export interface MeiosisRun<M, P> {

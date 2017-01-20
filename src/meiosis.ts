@@ -14,10 +14,15 @@ export interface MapperSpec<A, B> {
   [name: string]: Mapper<A, B> | Mapper<A, B>;
 }
 
+export interface NextAction<P> {
+  (model: any, proposal: P): void;
+}
+
 export interface RunParameters<M, P> {
   initialModel: M;
   scanner: ScannerSpec<M, P>;
   mappers?: Array<MapperSpec<any, any>>;
+  nextAction: NextAction<P>;
   copy?: any;//FIXME
 }
 
@@ -86,6 +91,27 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
       mapperName && (streams[mapperName] = lastStream);
       allStreams.push({ name: (mapperName || ""), stream: lastStream });
     });
+
+    const render: Stream<any> = stream();
+
+    if (params.nextAction) {
+      let lastProposal: P = propose();
+
+      on((value: any) => {
+        const proposal: P = propose();
+
+        render(value);
+        if (proposal !== lastProposal) {
+          params.nextAction(value, proposal);
+        }
+        lastProposal = proposal;
+      }, lastStream);
+    }
+    else {
+      on(render, lastStream);
+    }
+
+    streams["render"] = render;
 
     const devtool: boolean = !!window;
     if (devtool) {
