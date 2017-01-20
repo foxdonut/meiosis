@@ -7,11 +7,11 @@ export type Scanner<M, P> = Flyd.Scanner<M, P>;
 export type Mapper<A, B> = Flyd.Mapper<A, B>;
 
 export interface ScannerSpec<M, P> {
-  [name: string]: Scanner<M, P> | Scanner<M, P>;
+  [name: string]: Scanner<M, P>;
 }
 
 export interface MapperSpec<A, B> {
-  [name: string]: Mapper<A, B> | Mapper<A, B>;
+  [name: string]: Mapper<A, B>;
 }
 
 export interface NextAction<P> {
@@ -20,8 +20,8 @@ export interface NextAction<P> {
 
 export interface RunParameters<M, P> {
   initialModel: M;
-  scanner: ScannerSpec<M, P>;
-  mappers?: Array<MapperSpec<any, any>>;
+  scanner: ScannerSpec<M, P> | Scanner<M, P>;
+  mappers?: Array<MapperSpec<any, any> | Mapper<any, any>>;
   nextAction?: NextAction<P>;
   copy?: any;//FIXME
 }
@@ -74,7 +74,7 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
     const streams: MeiosisApp = {};
     const allStreams: Array<NamedStream> = [];
 
-    const scanner: ScannerSpec<M, P> = params.scanner;
+    const scanner: ScannerSpec<M, P> | Scanner<M, P> = params.scanner;
     const scannerName: string = getName(scanner);
     const scannerFn: Scanner<M, P> = getFn(scanner);
 

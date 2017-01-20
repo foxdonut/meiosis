@@ -3,18 +3,18 @@ export declare type Stream<T> = Flyd.Stream<T>;
 export declare type Scanner<M, P> = Flyd.Scanner<M, P>;
 export declare type Mapper<A, B> = Flyd.Mapper<A, B>;
 export interface ScannerSpec<M, P> {
-    [name: string]: Scanner<M, P> | Scanner<M, P>;
+    [name: string]: Scanner<M, P>;
 }
 export interface MapperSpec<A, B> {
-    [name: string]: Mapper<A, B> | Mapper<A, B>;
+    [name: string]: Mapper<A, B>;
 }
 export interface NextAction<P> {
     (model: any, proposal: P): void;
 }
 export interface RunParameters<M, P> {
     initialModel: M;
-    scanner: ScannerSpec<M, P>;
-    mappers?: Array<MapperSpec<any, any>>;
+    scanner: ScannerSpec<M, P> | Scanner<M, P>;
+    mappers?: Array<MapperSpec<any, any> | Mapper<any, any>>;
     nextAction?: NextAction<P>;
     copy?: any;
 }
