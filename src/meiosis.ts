@@ -22,7 +22,7 @@ export interface RunParameters<M, P> {
   initialModel: M;
   scanner: ScannerSpec<M, P>;
   mappers?: Array<MapperSpec<any, any>>;
-  nextAction: NextAction<P>;
+  nextAction?: NextAction<P>;
   copy?: any;//FIXME
 }
 
