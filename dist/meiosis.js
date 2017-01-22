@@ -111,7 +111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            exports.on(render, lastStream);
 	        }
 	        streams["render"] = render;
-	        var devtool = !!window;
+	        var devtool = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
 	        if (devtool) {
 	            var copy_1 = params.copy || (function (model) { return JSON.parse(JSON.stringify(model)); });
 	            var bufferedValues_1 = [];

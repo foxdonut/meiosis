@@ -113,7 +113,7 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
 
     streams["render"] = render;
 
-    const devtool: boolean = !!window;
+    const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
     if (devtool) {
       const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
       const bufferedValues: Array<any> = [];
