@@ -3,36 +3,35 @@
 import * as flyd from "flyd";
 
 export type Stream<T> = Flyd.Stream<T>;
-export type Scanner<M, P> = Flyd.Scanner<M, P>;
+export type Scanner<A, B> = Flyd.Scanner<A, B>;
 export type Mapper<A, B> = Flyd.Mapper<A, B>;
-
-export interface ScannerSpec<M, P> {
-  [name: string]: Scanner<M, P>;
-}
 
 export interface MapperSpec<A, B> {
   [name: string]: Mapper<A, B>;
 }
 
-export interface NextAction<P> {
-  (model: any, proposal: P): void;
+export interface ModelChange<M> {
+  (model: M): M;
 }
 
-export interface RunParameters<M, P> {
+export interface NextAction {
+  (model: any): void;
+}
+
+export interface RunParameters<M> {
   initialModel: M;
-  scanner: ScannerSpec<M, P> | Scanner<M, P>;
+  modelChanges: Stream<ModelChange<M>>;
   mappers?: Array<MapperSpec<any, any> | Mapper<any, any>>;
-  nextAction?: NextAction<P>;
+  nextAction?: NextAction;
   copy?: any;//FIXME
 }
 
-export interface MeiosisRun<M, P> {
-  (params: RunParameters<M, P>): MeiosisApp;
+export interface MeiosisRun<M> {
+  (params: RunParameters<M>): MeiosisApp;
 }
 
-export interface MeiosisInstance<M, P> {
-  propose: Stream<P>;
-  run: MeiosisRun<M, P>;
+export interface MeiosisInstance<M> {
+  run: MeiosisRun<M>;
 }
 
 export interface MeiosisApp {
@@ -64,24 +63,21 @@ const getFn = (value: any) => {
   return name ? value[name] : value;
 };
 
-function newInstance<M, P>(): MeiosisInstance<M, P> {
-  const propose: Stream<P> = stream<P>();
-
-  const run = (params: RunParameters<M, P>): MeiosisApp => {
-    if (!params.initialModel || !params.scanner) {
-      throw new Error("Please specify initialModel and scanner.");
+function newInstance<M>(): MeiosisInstance<M> {
+  const run = (params: RunParameters<M>): MeiosisApp => {
+    if (!params.initialModel || !params.modelChanges) {
+      throw new Error("Please specify initialModel and modelChanges.");
     }
     const streams: MeiosisApp = {};
     const allStreams: Array<NamedStream> = [];
 
-    const scanner: ScannerSpec<M, P> | Scanner<M, P> = params.scanner;
-    const scannerName: string = getName(scanner);
-    const scannerFn: Scanner<M, P> = getFn(scanner);
+    let lastStream: Stream<M> = scan((model: M, modelChange: ModelChange<M>) => modelChange(model),
+      params.initialModel, params.modelChanges);
 
-    let lastStream: Stream<any> = scan(scannerFn, params.initialModel, propose);
     const scannerStream = lastStream;
-    scannerName && (streams[scannerName] = lastStream);
-    allStreams.push({ name: (scannerName || ""), stream: lastStream });
+    const scannerName = "modelChanges";
+    streams[scannerName] = lastStream;
+    allStreams.push({ name: scannerName, stream: lastStream });
 
     (params.mappers || []).forEach(mapper => {
       const mapperName: string = getName(mapper);
@@ -94,6 +90,7 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
 
     const render: Stream<any> = stream();
 
+    /*
     if (params.nextAction) {
       let lastProposal: P = propose();
 
@@ -108,11 +105,13 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
       }, lastStream);
     }
     else {
+    */
       on(render, lastStream);
-    }
+    //}
 
     streams["render"] = render;
 
+    /*
     const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
     if (devtool) {
       const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
@@ -151,22 +150,20 @@ function newInstance<M, P>(): MeiosisInstance<M, P> {
         }
       }, lastStream);
     }
+    */
 
     return streams;
   };
 
   return {
-    propose,
     run
   };
 }
 
-const instance = newInstance<any, any>();
-const propose = instance.propose;
+const instance = newInstance<any>();
 const run = instance.run;
 
 export {
   newInstance,
-  propose,
   run
 };

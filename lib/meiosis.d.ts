@@ -1,29 +1,28 @@
 /// <reference path="flyd.d.ts" />
 export declare type Stream<T> = Flyd.Stream<T>;
-export declare type Scanner<M, P> = Flyd.Scanner<M, P>;
+export declare type Scanner<A, B> = Flyd.Scanner<A, B>;
 export declare type Mapper<A, B> = Flyd.Mapper<A, B>;
-export interface ScannerSpec<M, P> {
-    [name: string]: Scanner<M, P>;
-}
 export interface MapperSpec<A, B> {
     [name: string]: Mapper<A, B>;
 }
-export interface NextAction<P> {
-    (model: any, proposal: P): void;
+export interface ModelChange<M> {
+    (model: M): M;
 }
-export interface RunParameters<M, P> {
+export interface NextAction {
+    (model: any): void;
+}
+export interface RunParameters<M> {
     initialModel: M;
-    scanner: ScannerSpec<M, P> | Scanner<M, P>;
+    modelChanges: Stream<ModelChange<M>>;
     mappers?: Array<MapperSpec<any, any> | Mapper<any, any>>;
-    nextAction?: NextAction<P>;
+    nextAction?: NextAction;
     copy?: any;
 }
-export interface MeiosisRun<M, P> {
-    (params: RunParameters<M, P>): MeiosisApp;
+export interface MeiosisRun<M> {
+    (params: RunParameters<M>): MeiosisApp;
 }
-export interface MeiosisInstance<M, P> {
-    propose: Stream<P>;
-    run: MeiosisRun<M, P>;
+export interface MeiosisInstance<M> {
+    run: MeiosisRun<M>;
 }
 export interface MeiosisApp {
     [key: string]: Stream<any>;
@@ -32,7 +31,6 @@ export declare const combine: <A, B, C>(combinator: (stream1: Flyd.Stream<A>, st
     <T>(): Flyd.Stream<T>;
     <T>(value: T): Flyd.Stream<T>;
 };
-declare function newInstance<M, P>(): MeiosisInstance<M, P>;
-declare const propose: Flyd.Stream<any>;
-declare const run: MeiosisRun<any, any>;
-export { newInstance, propose, run };
+declare function newInstance<M>(): MeiosisInstance<M>;
+declare const run: MeiosisRun<any>;
+export { newInstance, run };
