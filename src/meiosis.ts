@@ -111,14 +111,16 @@ function newInstance<M>(): MeiosisInstance<M> {
 
     streams["render"] = render;
 
-    /*
     const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
     if (devtool) {
       const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
       const bufferedValues: Array<any> = [];
       let devtoolInitialized: boolean = false;
-      let lastProposal: P = propose();
       const sendValues: Stream<boolean> = stream(true);
+
+      let changes: Stream<Date> = stream(new Date());
+      let lastChange: Date = changes();
+      on(() => changes(new Date()), params.modelChanges);
 
       window.addEventListener("message", evt => {
         if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
@@ -132,13 +134,12 @@ function newInstance<M>(): MeiosisInstance<M> {
       });
 
       on(() => {
-        const proposal: P = propose();
-        const update: boolean = proposal !== lastProposal;
-        lastProposal = proposal;
+        const change: Date = changes();
+        const update: boolean = change !== lastChange;
+        lastChange = change;
 
         const values: Array<NamedValue> = allStreams.map((namedStream: NamedStream) =>
           ({ name: namedStream.name, value: copy(namedStream.stream()) }));
-        values.unshift({ name: "proposal", value: proposal });
 
         if (sendValues()) {
           if (devtoolInitialized) {
@@ -150,7 +151,6 @@ function newInstance<M>(): MeiosisInstance<M> {
         }
       }, lastStream);
     }
-    */
 
     return streams;
   };
