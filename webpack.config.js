@@ -13,23 +13,23 @@ module.exports = {
     libraryTarget: "umd"
   },
   resolve: {
-    extensions: ["", ".js", ".ts"]
+    extensions: [".js", ".ts"]
   },
   module: {
-    loaders: [
+    rules: [
       {
-        loader: "ts",
         test: /\.ts$/,
-        exclude: /node_modules/
+        loader: "ts-loader",
+        exclude: /node_modules/,
+        options: {
+          compilerOptions: {
+            declaration: false
+          }
+        }
       }
     ]
   },
-  ts: {
-    compilerOptions: {
-      declaration: false
-    }
-  },
   plugins: isProd ? [
-    new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin({ sourceMap: true })
   ] : []
 };

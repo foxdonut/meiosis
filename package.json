@@ -33,15 +33,15 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "flyd": "^0.2.2"
+    "flyd": "^0.2.4"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
-    "browser-env": "^2.0.16",
+    "ava": "^0.18.1",
+    "browser-env": "^2.0.20",
     "es6-promise": "^4.0.5",
-    "mithril": "^1.0.0-rc.6",
-    "ts-loader": "^1.3.2",
-    "typescript": "^2.1.4",
-    "webpack": "^1.14.0"
+    "mithril": "^1.0.1",
+    "ts-loader": "^2.0.0",
+    "typescript": "^2.1.6",
+    "webpack": "^2.2.1"
   }
 }
