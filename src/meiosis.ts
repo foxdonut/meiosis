@@ -57,6 +57,12 @@ export const {
   stream
 } = flyd;
 
+export const mergeAll = (streams: Array<Stream<any>>) => {
+  const merged = stream();
+  streams.forEach(s => map(merged, s));
+  return merged;
+};
+
 const getName = (value: any) => typeof value === "function" ? undefined : Object.keys(value)[0];
 const getFn = (value: any) => {
   const name = getName(value);

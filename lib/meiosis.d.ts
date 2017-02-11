@@ -31,6 +31,7 @@ export declare const combine: <A, B, C>(combinator: (stream1: Flyd.Stream<A>, st
     <T>(): Flyd.Stream<T>;
     <T>(value: T): Flyd.Stream<T>;
 };
+export declare const mergeAll: (streams: Flyd.Stream<any>[]) => Flyd.Stream<{}>;
 declare function newInstance<M>(): MeiosisInstance<M>;
 declare const run: MeiosisRun<any>;
 export { newInstance, run };

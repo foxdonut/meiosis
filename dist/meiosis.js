@@ -68,6 +68,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var flyd = __webpack_require__(2);
 	exports.combine = flyd.combine, exports.map = flyd.map, exports.merge = flyd.merge, exports.on = flyd.on, exports.scan = flyd.scan, exports.stream = flyd.stream;
+	exports.mergeAll = function (streams) {
+	    var merged = exports.stream();
+	    streams.forEach(function (s) { return exports.map(merged, s); });
+	    return merged;
+	};
 	var getName = function (value) { return typeof value === "function" ? undefined : Object.keys(value)[0]; };
 	var getFn = function (value) {
 	    var name = getName(value);
