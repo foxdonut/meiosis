@@ -18,8 +18,7 @@
   },
   "include": [
     "./*.ts",
-    "../../typings/index.d.ts",
-    "../../lib/flyd.d.ts"
+    "../../typings/index.d.ts"
   ],
   "compileOnSave": false,
   "buildOnSave": false,

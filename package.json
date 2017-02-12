@@ -32,13 +32,11 @@
     "url": "https://github.com/foxdonut/meiosis/issues"
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
-  "dependencies": {
-    "flyd": "^0.2.4"
-  },
   "devDependencies": {
     "ava": "^0.18.1",
     "browser-env": "^2.0.20",
     "es6-promise": "^4.0.5",
+    "flyd": "^0.2.4",
     "mithril": "^1.0.1",
     "ts-loader": "^2.0.0",
     "typescript": "^2.1.6",
