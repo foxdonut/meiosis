@@ -119,7 +119,7 @@ function trace(params) {
             }
             else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
                 devtoolInitialized_1 = true;
-                bufferedValues_1.forEach(function (values) { return window.postMessage({ type: "MEIOSIS_VALUES", values: values }, "*"); });
+                bufferedValues_1.forEach(function (values) { return window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: true }, "*"); });
             }
         });
         lastStream.map(function () {

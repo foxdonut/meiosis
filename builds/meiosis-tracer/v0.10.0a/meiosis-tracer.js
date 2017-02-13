@@ -147,14 +147,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	var tracerContainerId = "tracerContainer";
+	var streamContainerId = "streamContainer";
 	var tracerId = "tracerSlider";
 	var tracerToggleId = "tracerToggle";
 	var tracerResetId = "tracerReset";
 	var tracerIndexId = "tracerIndex";
 	var tracerModelId = "tracerModel";
-	var tracerStateId = "tracerState";
 	var errorMessageId = "errorMessage";
 	var errorMessage = null;
+	var divStyle = null;
 	
 	var tracerView = function tracerView(values, tracerModel) {
 	  var tracer = document.getElementById(tracerId);
@@ -167,8 +168,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var tracerModelEl = document.getElementById(tracerModelId);
 	  tracerModelEl.value = (0, _jsonFormat2.default)(values[0].value, jsonFormatConfig);
 	
-	  var tracerStateEl = document.getElementById(tracerStateId);
-	  tracerStateEl.value = (0, _jsonFormat2.default)(values[values.length - 1].value, jsonFormatConfig);
+	  var streamValueDivs = document.querySelectorAll("div.stream");
+	
+	  if (streamValueDivs.length === 0) {
+	    var streamValueDivsMarkup = "";
+	
+	    for (var i = 0, t = values.length - 1; i < t; i++) {
+	      streamValueDivsMarkup += "<div class='stream'>" + "<textarea rows='5' cols='40'></textarea>" + "</div>";
+	    }
+	    document.getElementById(streamContainerId).innerHTML = streamValueDivsMarkup;
+	  }
+	
+	  var streamTextareas = document.querySelectorAll("div.stream textarea");
+	
+	  for (i = 0, t = values.length - 1; i < t; i++) {
+	    streamTextareas[i].value = (0, _jsonFormat2.default)(values[i].value, jsonFormatConfig);
+	  }
 	};
 	
 	var onSliderChange = function onSliderChange(renderModel, tracerModel) {
@@ -226,9 +241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var target = document.querySelector(selector);
 	
 	  if (target) {
-	    var divStyle = horizontal ? " style='float: left'" : "";
+	    divStyle = horizontal ? " style='float: left'" : "";
 	
-	    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + "><div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea>" + "<div id='" + errorMessageId + "' style='display: none'><span style='color:red'>Invalid JSON</span></div></div>" + "<div" + divStyle + "><div>State:</div>" + "<textarea id='" + tracerStateId + "' rows='5' cols='40'></textarea></div></div>";
+	    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + ">" + "<div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea>" + "<div id='" + errorMessageId + "' style='display: none'><span style='color:red'>Invalid JSON</span></div>" + "</div>" + "<span id='" + streamContainerId + "'></span>" + "</div>";
 	
 	    target.innerHTML = viewHtml;
 	
