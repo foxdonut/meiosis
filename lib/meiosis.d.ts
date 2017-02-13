@@ -14,10 +14,12 @@ export interface StreamLibrary {
 export interface Scanner<A, B> {
     (acc: A, next: B): A;
 }
-export interface RunParameters<M> {
-    streams: Array<Stream<any>>;
+export interface TraceParameters<M> {
     streamLibrary: StreamLibrary;
+    modelChanges: Stream<any>;
+    streams: Array<Stream<any>>;
     copy?: any;
 }
-export declare const createMergeAll: (streamLibrary: StreamLibrary) => (streams: Stream<any>[]) => Stream<{}>;
+export declare const createMergeIntoOne: (streamLibrary: StreamLibrary) => (streams: Stream<any>[]) => Stream<{}>;
 export declare const createScan: (lib: StreamLibrary) => <A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) => Stream<A>;
+export declare function trace<M>(params: TraceParameters<M>): void;

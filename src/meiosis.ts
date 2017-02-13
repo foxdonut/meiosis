@@ -39,37 +39,19 @@ export interface StreamLibrary {
   combine<T>(combinator: (...streams: Array<Stream<any>>) => T,
     streams: Array<Stream<any>>): Stream<T>;
 }
-  /**
-   * Maps over a stream.
-   */
-  //map<T, R>(mapper: Mapper<T, R>, stream: Stream<T>): Stream<R>;
-
-  /**
-   * Merges two streams.
-   */
-  //merge<T>(stream1: Stream<T>, stream2: Stream<T>): Stream<T>;
-
-  /**
-   * Scans over a stream.
-   */
-  //scan<A, B>(scanner: Scanner<A, B>, initial: A, stream: Stream<B>): Stream<A>;
-
-  /**
-   * Similar to map, but for doing side effects and returns an empty stream.
-   */
-  //on<T, R>(mapper: Mapper<T, R>, stream: Stream<T>): Stream<R>;
 
 export interface Scanner<A, B> {
   (acc: A, next: B): A;
 }
 
-export interface RunParameters<M> {
-  streams: Array<Stream<any>>;
+export interface TraceParameters<M> {
   streamLibrary: StreamLibrary;
+  modelChanges: Stream<any>;
+  streams: Array<Stream<any>>;
   copy?: any;//FIXME
 }
 
-export const createMergeAll = (streamLibrary: StreamLibrary) => (streams: Array<Stream<any>>) => {
+export const createMergeIntoOne = (streamLibrary: StreamLibrary) => (streams: Array<Stream<any>>) => {
   const merged = streamLibrary.stream();
   streams.forEach(s => s.map(merged));
   return merged;
@@ -87,10 +69,9 @@ export const createScan = (lib: StreamLibrary) => function<A, B>(fn: Scanner<A, 
   return result;
 };
 
-/*
-export function trace<M>(params: RunParameters<M>): void {
-  if (!params.streams) {
-    throw new Error("Please specify streams.");
+export function trace<M>(params: TraceParameters<M>): void {
+  if (!params.streamLibrary || !params.modelChanges || !params.streams) {
+    throw new Error("Please specify streamLibrary, modelChanges, and streams.");
   }
 
   const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
@@ -102,26 +83,29 @@ export function trace<M>(params: RunParameters<M>): void {
 
     let changes: Stream<Date> = params.streamLibrary.stream(new Date());
     let lastChange: Date = changes();
-    on(() => changes(new Date()), params.modelChanges);
+    params.modelChanges.map(() => changes(new Date()));
+
+    const firstStream = params.streams[0];
+    const lastStream = params.streams[params.streams.length - 1];
 
     window.addEventListener("message", evt => {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
         sendValues(evt.data.sendValuesBack);
-        scannerStream(evt.data.model);
+        params.streams[0](evt.data.model);
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
         devtoolInitialized = true;
-        bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values }, "*"));
+        bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values, update: true }, "*"));
       }
     });
 
-    on(() => {
+    lastStream.map(() => {
       const change: Date = changes();
       const update: boolean = change !== lastChange;
       lastChange = change;
 
-      const values: Array<NamedValue> = streams.map((namedStream: NamedStream) =>
-        ({ name: namedStream.name, value: copy(namedStream.stream()) }));
+      const values: Array<any> = params.streams.map((stream: Stream<any>) =>
+        ({ value: copy(stream()) }));
 
       if (sendValues()) {
         if (devtoolInitialized) {
@@ -131,7 +115,6 @@ export function trace<M>(params: RunParameters<M>): void {
           bufferedValues.push(values);
         }
       }
-    }, lastStream);
+    });
   }
 };
-*/
