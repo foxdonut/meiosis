@@ -107,7 +107,7 @@ export function trace<M>(params: TraceParameters<M>): void {
       const values: Array<any> = params.streams.map((stream: Stream<any>) =>
         ({ value: copy(stream()) }));
 
-      if (sendValues()) {
+      if (sendValues() || update) {
         if (devtoolInitialized) {
           window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
         }
