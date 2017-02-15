@@ -32,7 +32,9 @@ export interface StreamLibrary {
    * Creates a stream with an initial value.
    */
   stream<T>(value: T): Stream<T>;
+}
 
+export interface StreamLibraryCombine extends StreamLibrary {
   /**
    * Combines streams.
    */
@@ -48,7 +50,7 @@ export interface TraceParameters<M> {
   streamLibrary: StreamLibrary;
   modelChanges: Stream<any>;
   streams: Array<Stream<any>>;
-  copy?: any;//FIXME
+  copy?: Function;
 }
 
 export const createMergeIntoOne = (streamLibrary: StreamLibrary) => (streams: Array<Stream<any>>) => {
@@ -57,8 +59,8 @@ export const createMergeIntoOne = (streamLibrary: StreamLibrary) => (streams: Ar
   return merged;
 };
 
-export const createScan = (lib: StreamLibrary) => function<A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) {
-  const result = lib.combine(s => {
+export const createScan = (streamLibrary: StreamLibraryCombine) => function<A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) {
+  const result = streamLibrary.combine(s => {
     acc = fn(acc, s());
     return acc;
   }, [s]);
@@ -68,6 +70,8 @@ export const createScan = (lib: StreamLibrary) => function<A, B>(fn: Scanner<A, 
   }
   return result;
 };
+
+export const applyModelChange = (model: any, modelChange: Function) => modelChange(model);
 
 export function trace<M>(params: TraceParameters<M>): void {
   if (!params.streamLibrary || !params.modelChanges || !params.streams) {
