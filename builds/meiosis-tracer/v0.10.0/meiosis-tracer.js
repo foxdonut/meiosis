@@ -173,7 +173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (streamValueDivs.length === 0) {
 	    var streamValueDivsMarkup = "";
 	
-	    for (var i = 0, t = values.length - 1; i < t; i++) {
+	    for (var i = 1, t = values.length; i < t; i++) {
 	      streamValueDivsMarkup += "<div class='stream'>" + "<textarea rows='5' cols='40'></textarea>" + "</div>";
 	    }
 	    document.getElementById(streamContainerId).innerHTML = streamValueDivsMarkup;
@@ -181,8 +181,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  var streamTextareas = document.querySelectorAll("div.stream textarea");
 	
-	  for (i = 0, t = values.length - 1; i < t; i++) {
-	    streamTextareas[i].value = (0, _jsonFormat2.default)(values[i].value, jsonFormatConfig);
+	  for (i = 1, t = values.length; i < t; i++) {
+	    streamTextareas[i - 1].value = (0, _jsonFormat2.default)(values[i].value, jsonFormatConfig);
 	  }
 	};
 	
