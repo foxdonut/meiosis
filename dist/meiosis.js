@@ -82,6 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMergeIntoOne = function (streamLibrary) { return function (streams) {
     var merged = streamLibrary.stream();
     streams.forEach(function (s) { return s.map(merged); });
@@ -154,6 +155,7 @@ exports.trace = trace;
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
+Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(0));
 
 

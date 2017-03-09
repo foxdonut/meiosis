@@ -1,11 +1,11 @@
 {
   "name": "meiosis",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "Meiosis manages the data flow of your web applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "prestart": "typings i && tsc",
+    "prestart": "tsc",
     "start": "NODE_ENV=prod webpack && NODE_ENV=dev webpack",
     "pretest": "npm start && tsc -p test/src",
     "test": "ava"
@@ -33,14 +33,14 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "ava": "^0.18.1",
-    "browser-env": "^2.0.20",
-    "es6-promise": "^4.0.5",
+    "@types/node": "^7.0.6",
+    "ava": "^0.18.2",
+    "browser-env": "^2.0.24",
+    "es6-promise": "^4.1.0",
     "flyd": "^0.2.4",
     "mithril": "^1.0.1",
-    "ts-loader": "^2.0.0",
-    "typescript": "^2.1.6",
-    "typings": "^2.1.0",
+    "ts-loader": "^2.0.1",
+    "typescript": "^2.2.1",
     "webpack": "^2.2.1"
   }
 }

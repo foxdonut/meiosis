@@ -6,22 +6,34 @@ http://meiosis.js.org
 
 ## Do you Mei-O?
 
-**Meiosis** is a library that manages the data flow of your web applications,
+**Meiosis** is a small library that manages the data flow of your web applications,
 _while letting you keep using the tools that you already love._
 
 For example, you can use [React](https://facebook.github.io/react/), [Inferno](https://github.com/trueadm/inferno),
-[snabbdom](https://github.com/paldepind/snabbdom), [Mithril](http://mithril.js.org), [jQuery](http://jquery.com/),
-[Handlebars](http://handlebarsjs.com), or no libraries at all and just plain vanilla JavaScript.
+[Mithril](http://mithril.js.org), [snabbdom](https://github.com/paldepind/snabbdom), [Preact](https://preactjs.com/),
+[jQuery](http://jquery.com/), or no libraries at all and just plain vanilla JavaScript.
 
 Meiosis implements the [SAM pattern](http://sam.js.org) by [Jean-Jacques Dubray](http://www.ebpml.org/about).
-
-Please see [http://meiosis.js.org](http://meiosis.js.org) for more details.
 
 Try out the examples online: http://meiosis.js.org/example-index.html
 
 For documentation please refer to the [Meiosis Guide](https://www.gitbook.com/book/foxdonut/meiosis-guide/).
 
 You can also discuss on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
+
+## NEW in version 1.0
+
+With version 1.0 comes a different approach to Meiosis. The core goals are the same, but the library is much
+smaller - just a few of utility functions. As such, you could say Meiosis is more of an *approach* to managing web
+application data flow, rather than a library.
+
+[Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer) provides a tool to experiment with and debug an
+application. You can trace back through model snapshots, even modify them directly, and see the resulting view.
+
+## PREVIOUS version 0.9
+
+Version 0.9 is the last version to implement the previous approach to Meiosis. The examples and guide corresponding
+to that version are still available.
 
 ## Why the name _Meiosis_?
 

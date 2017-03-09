@@ -17,7 +17,6 @@
     "target": "es5"
   },
   "include": [
-    "typings/index.d.ts",
     "src/*.ts"
   ],
   "compileOnSave": false,
@@ -25,8 +24,5 @@
   "formatCodeOptions": {
     "indentSize": 2,
     "tabSize": 2
-  },
-  "atom": {
-    "rewriteTsconfig": false
   }
 }

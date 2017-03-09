@@ -17,16 +17,12 @@
     "target": "es2015"
   },
   "include": [
-    "./*.ts",
-    "../../typings/index.d.ts"
+    "./*.ts"
   ],
   "compileOnSave": false,
   "buildOnSave": false,
   "formatCodeOptions": {
     "indentSize": 2,
     "tabSize": 2
-  },
-  "atom": {
-    "rewriteTsconfig": false
   }
 }
