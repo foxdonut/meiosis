@@ -22,7 +22,5 @@ export interface TraceParameters<M> {
     streams: Array<Stream<any>>;
     copy?: Function;
 }
-export declare const createMergeIntoOne: (streamLibrary: StreamLibrary) => (streams: Stream<any>[]) => Stream<{}>;
 export declare const createScan: (streamLibrary: StreamLibraryCombine) => <A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) => Stream<A>;
-export declare const applyModelChange: (model: any, modelChange: Function) => any;
 export declare function trace<M>(params: TraceParameters<M>): void;

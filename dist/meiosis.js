@@ -83,11 +83,6 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMergeIntoOne = function (streamLibrary) { return function (streams) {
-    var merged = streamLibrary.stream();
-    streams.forEach(function (s) { return s.map(merged); });
-    return merged;
-}; };
 exports.createScan = function (streamLibrary) { return function (fn, acc, s) {
     var result = streamLibrary.combine(function (s) {
         acc = fn(acc, s());
@@ -98,7 +93,6 @@ exports.createScan = function (streamLibrary) { return function (fn, acc, s) {
     }
     return result;
 }; };
-exports.applyModelChange = function (model, modelChange) { return modelChange(model); };
 function trace(params) {
     if (!params.streamLibrary || !params.modelChanges || !params.streams) {
         throw new Error("Please specify streamLibrary, modelChanges, and streams.");

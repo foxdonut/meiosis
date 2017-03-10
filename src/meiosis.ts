@@ -53,12 +53,6 @@ export interface TraceParameters<M> {
   copy?: Function;
 }
 
-export const createMergeIntoOne = (streamLibrary: StreamLibrary) => (streams: Array<Stream<any>>) => {
-  const merged = streamLibrary.stream();
-  streams.forEach(s => s.map(merged));
-  return merged;
-};
-
 export const createScan = (streamLibrary: StreamLibraryCombine) => function<A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) {
   const result = streamLibrary.combine(s => {
     acc = fn(acc, s());
@@ -70,8 +64,6 @@ export const createScan = (streamLibrary: StreamLibraryCombine) => function<A, B
   }
   return result;
 };
-
-export const applyModelChange = (model: any, modelChange: Function) => modelChange(model);
 
 export function trace<M>(params: TraceParameters<M>): void {
   if (!params.streamLibrary || !params.modelChanges || !params.streams) {
