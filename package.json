@@ -33,7 +33,6 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "@types/node": "^7.0.6",
     "ava": "^0.18.2",
     "browser-env": "^2.0.24",
     "es6-promise": "^4.1.0",
