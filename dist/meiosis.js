@@ -93,6 +93,10 @@ exports.createScan = function (streamLibrary) { return function (fn, acc, s) {
     }
     return result;
 }; };
+function applyModelChange(model, modelChange) {
+    return modelChange(model);
+}
+exports.applyModelChange = applyModelChange;
 function trace(params) {
     if (!params.streamLibrary || !params.modelChanges || !params.streams) {
         throw new Error("Please specify streamLibrary, modelChanges, and streams.");

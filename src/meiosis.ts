@@ -65,6 +65,10 @@ export const createScan = (streamLibrary: StreamLibraryCombine) => function<A, B
   return result;
 };
 
+export function applyModelChange<M>(model: M, modelChange: Function) {
+  return modelChange(model);
+}
+
 export function trace<M>(params: TraceParameters<M>): void {
   if (!params.streamLibrary || !params.modelChanges || !params.streams) {
     throw new Error("Please specify streamLibrary, modelChanges, and streams.");

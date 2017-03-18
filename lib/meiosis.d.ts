@@ -23,4 +23,5 @@ export interface TraceParameters<M> {
     copy?: Function;
 }
 export declare const createScan: (streamLibrary: StreamLibraryCombine) => <A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) => Stream<A>;
+export declare function applyModelChange<M>(model: M, modelChange: Function): any;
 export declare function trace<M>(params: TraceParameters<M>): void;
