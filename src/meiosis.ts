@@ -69,13 +69,16 @@ export function applyModelChange<M>(model: M, modelChange: Function) {
   return modelChange(model);
 }
 
+export function isMeiosisTracerOn(): boolean {
+  return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
+}
+
 export function trace<M>(params: TraceParameters<M>): void {
   if (!params.streamLibrary || !params.modelChanges || !params.streams) {
     throw new Error("Please specify streamLibrary, modelChanges, and streams.");
   }
 
-  const devtool: boolean = window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
-  if (devtool) {
+  if (isMeiosisTracerOn()) {
     const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
     const bufferedValues: Array<any> = [];
     let devtoolInitialized: boolean = false;
