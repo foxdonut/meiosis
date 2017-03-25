@@ -6,23 +6,19 @@ export interface Stream<T> {
     (value: T): Stream<T>;
     map<T, R>(mapper: Mapper<T, R>): Stream<R>;
 }
-export interface StreamLibrary {
-    stream<T>(): Stream<T>;
-    stream<T>(value: T): Stream<T>;
-}
-export interface StreamLibraryCombine extends StreamLibrary {
-    combine<T>(combinator: (...streams: Array<Stream<any>>) => T, streams: Array<Stream<any>>): Stream<T>;
-}
 export interface Scanner<A, B> {
     (acc: A, next: B): A;
 }
 export interface TraceParameters<M> {
-    streamLibrary: StreamLibrary;
     modelChanges: Stream<any>;
     streams: Array<Stream<any>>;
     copy?: Function;
 }
-export declare const createScan: (streamLibrary: StreamLibraryCombine) => <A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) => Stream<A>;
+export interface EventType {
+    type: string;
+    data: any;
+}
 export declare function applyModelChange<M>(model: M, modelChange: Function): any;
+export declare const createEvents: (eventStream: Stream<EventType>, events: any, connections: any) => any;
 export declare function isMeiosisTracerOn(): boolean;
 export declare function trace<M>(params: TraceParameters<M>): void;

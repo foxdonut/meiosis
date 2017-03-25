@@ -19,62 +19,73 @@ export interface Stream<T> {
   map<T, R>(mapper: Mapper<T, R>): Stream<R>;
 }
 
-/**
- * Top-level stream library declarations.
- */
-export interface StreamLibrary {
-  /**
-   * Creates a stream.
-   */
-  stream<T>(): Stream<T>;
-
-  /**
-   * Creates a stream with an initial value.
-   */
-  stream<T>(value: T): Stream<T>;
-}
-
-export interface StreamLibraryCombine extends StreamLibrary {
-  /**
-   * Combines streams.
-   */
-  combine<T>(combinator: (...streams: Array<Stream<any>>) => T,
-    streams: Array<Stream<any>>): Stream<T>;
-}
-
 export interface Scanner<A, B> {
   (acc: A, next: B): A;
 }
 
 export interface TraceParameters<M> {
-  streamLibrary: StreamLibrary;
   modelChanges: Stream<any>;
   streams: Array<Stream<any>>;
   copy?: Function;
 }
 
-export const createScan = (streamLibrary: StreamLibraryCombine) => function<A, B>(fn: Scanner<A, B>, acc: A, s: Stream<B>) {
-  const result = streamLibrary.combine(s => {
-    acc = fn(acc, s());
-    return acc;
-  }, [s]);
-
-  if (!result()) {
-    result(acc);
-  }
-  return result;
-};
+export interface EventType {
+  type: string;
+  data: any;
+}
 
 export function applyModelChange<M>(model: M, modelChange: Function) {
   return modelChange(model);
 }
+
+const createEventFor = (eventStream: Stream<EventType>, section: any, created: any, prefix: string) => {
+  Object.keys(section).forEach(key => {
+    created[key] = {};
+
+    if (section[key].length) {
+      section[key].forEach((sectionKey: string) => {
+        const type = prefix + key + "." + sectionKey;
+
+        const fn: any = (data: any) => eventStream({ type, data });
+
+        fn.map = (callback: Function) => eventStream.map((event: EventType) => {
+          if (event.type === type) {
+            callback(event.data);
+          }
+        });
+
+        created[key][sectionKey] = fn;
+        created[type] = fn;
+      });
+    }
+    else {
+      createEventFor(eventStream, section[key], created[key], prefix + key + ".");
+    }
+  });
+
+  return created;
+};
+
+export const createEvents = (eventStream: Stream<EventType>, events: any, connections: any) => {
+  const createdEvents = createEventFor(eventStream, events, {}, "");
+
+  if (connections) {
+    Object.keys(connections).forEach(type =>
+      connections[type].forEach((listener: string) =>
+        createdEvents[type].map((data: any) => createdEvents[listener](data))
+      )
+    );
+  }
+
+  return createdEvents;
+};
 
 export function isMeiosisTracerOn(): boolean {
   return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
 }
 
 export function trace<M>(params: TraceParameters<M>): void {
-  if (!params.streamLibrary || !params.modelChanges || !params.streams) {
+  if (!params.modelChanges || !params.streams) {
     throw new Error("Please specify streamLibrary, modelChanges, and streams.");
   }
 
@@ -82,18 +93,18 @@ export function trace<M>(params: TraceParameters<M>): void {
     const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
     const bufferedValues: Array<any> = [];
     let devtoolInitialized: boolean = false;
-    const sendValues: Stream<boolean> = params.streamLibrary.stream(true);
+    let sendValues: boolean = true;
 
-    let changes: Stream<Date> = params.streamLibrary.stream(new Date());
-    let lastChange: Date = changes();
-    params.modelChanges.map(() => changes(new Date()));
+    let changes: Date = new Date();
+    let lastChange: Date = changes;
+    params.modelChanges.map(() => changes = new Date());
 
     const firstStream = params.streams[0];
     const lastStream = params.streams[params.streams.length - 1];
 
     window.addEventListener("message", evt => {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
-        sendValues(evt.data.sendValuesBack);
+        sendValues = evt.data.sendValuesBack;
         params.streams[0](evt.data.model);
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
@@ -103,14 +114,14 @@ export function trace<M>(params: TraceParameters<M>): void {
     });
 
     lastStream.map(() => {
-      const change: Date = changes();
+      const change: Date = changes;
       const update: boolean = change !== lastChange;
       lastChange = change;
 
       const values: Array<any> = params.streams.map((stream: Stream<any>) =>
         ({ value: copy(stream()) }));
 
-      if (sendValues() || update) {
+      if (sendValues || update) {
         if (devtoolInitialized) {
           window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
         }
