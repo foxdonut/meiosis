@@ -87,36 +87,47 @@ function applyModelChange(model, modelChange) {
     return modelChange(model);
 }
 exports.applyModelChange = applyModelChange;
-var createEventsFor = function (eventStream, section, top, prefix) {
-    return createEventFor(eventStream, section, top, top, prefix);
+var createEventsFor = function (eventStream, emit, listen, top, prefix) {
+    createEventFor(eventStream, emit, true, top, top, prefix);
+    if (listen) {
+        createEventFor(eventStream, listen, false, top, top, prefix);
+    }
+    return top;
 };
-var createEventFor = function (eventStream, section, top, created, prefix) {
+var createEventFor = function (eventStream, section, emit, top, created, prefix) {
     Object.keys(section).forEach(function (key) {
         created[key] = {};
         if (section[key].length) {
             section[key].forEach(function (sectionKey) {
                 var type = prefix + key + "." + sectionKey;
-                var fn = function (data) { return eventStream({ type: type, data: data }); };
-                fn.map = function (callback) { return eventStream.map(function (event) {
-                    if (event.type === type) {
-                        callback(event.data);
-                    }
-                }); };
+                var fn = null;
+                if (emit) {
+                    fn = function (data) { return eventStream({ type: type, data: data }); };
+                    fn.map = function (callback) { return eventStream.map(function (event) {
+                        if (event.type === type) {
+                            callback(event.data);
+                        }
+                    }); };
+                }
+                else {
+                    fn = function (data) { return fn.callback(data); };
+                    fn.map = function (callback) { return fn.callback = callback; };
+                }
                 created[key][sectionKey] = fn;
                 top[type] = fn;
             });
         }
         else {
-            createEventFor(eventStream, section[key], top, created[key], prefix + key + ".");
+            createEventFor(eventStream, section[key], emit, top, created[key], prefix + key + ".");
         }
     });
     return created;
 };
-exports.createEvents = function (eventStream, events, connections) {
-    var createdEvents = createEventsFor(eventStream, events, {}, "");
-    if (connections) {
-        Object.keys(connections).forEach(function (type) {
-            return connections[type].forEach(function (listener) {
+exports.createEvents = function (params) {
+    var createdEvents = createEventsFor(params.eventStream, params.emit, params.listen, {}, "");
+    if (params.connect) {
+        Object.keys(params.connect).forEach(function (type) {
+            return params.connect[type].forEach(function (listener) {
                 return createdEvents[type].map(function (data) { return createdEvents[listener](data); });
             });
         });
