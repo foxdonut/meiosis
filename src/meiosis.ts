@@ -38,7 +38,11 @@ export function applyModelChange<M>(model: M, modelChange: Function) {
   return modelChange(model);
 }
 
-const createEventFor = (eventStream: Stream<EventType>, section: any, created: any, prefix: string) => {
+const createEventsFor = (eventStream: Stream<EventType>, section: any, top: any, prefix: string) => {
+  return createEventFor(eventStream, section, top, top, prefix);
+};
+
+const createEventFor = (eventStream: Stream<EventType>, section: any, top: any, created: any, prefix: string) => {
   Object.keys(section).forEach(key => {
     created[key] = {};
 
@@ -55,11 +59,11 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, created: a
         });
 
         created[key][sectionKey] = fn;
-        created[type] = fn;
+        top[type] = fn;
       });
     }
     else {
-      createEventFor(eventStream, section[key], created[key], prefix + key + ".");
+      createEventFor(eventStream, section[key], top, created[key], prefix + key + ".");
     }
   });
 
@@ -67,7 +71,7 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, created: a
 };
 
 export const createEvents = (eventStream: Stream<EventType>, events: any, connections: any) => {
-  const createdEvents = createEventFor(eventStream, events, {}, "");
+  const createdEvents = createEventsFor(eventStream, events, {}, "");
 
   if (connections) {
     Object.keys(connections).forEach(type =>
