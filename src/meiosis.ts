@@ -58,7 +58,9 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, emit: bool
     top: any, created: any, prefix: string) =>
 {
   Object.keys(section).forEach(key => {
-    created[key] = {};
+    if (!created[key]) {
+      created[key] = {};
+    }
 
     if (section[key].length) {
       section[key].forEach((sectionKey: string) => {

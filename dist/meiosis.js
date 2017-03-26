@@ -96,7 +96,9 @@ var createEventsFor = function (eventStream, emit, listen, top, prefix) {
 };
 var createEventFor = function (eventStream, section, emit, top, created, prefix) {
     Object.keys(section).forEach(function (key) {
-        created[key] = {};
+        if (!created[key]) {
+            created[key] = {};
+        }
         if (section[key].length) {
             section[key].forEach(function (sectionKey) {
                 var type = prefix + key + "." + sectionKey;
