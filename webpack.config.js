@@ -7,7 +7,7 @@ module.exports = {
   entry: "./src/index.ts",
   devtool: "source-map",
   output: {
-    path: "./dist",
+    path: __dirname + "/dist",
     filename: isProd ? "meiosis.min.js" : "meiosis.js",
     library: "meiosis",
     libraryTarget: "umd"

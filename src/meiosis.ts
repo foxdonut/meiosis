@@ -78,7 +78,7 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, emit: bool
           });
         }
         else {
-          fn = (data: any) => fn.callback(data);
+          fn = (data: any) => fn.callback && fn.callback(data);
           fn.map = (callback: Function) => fn.callback = callback;
         }
 

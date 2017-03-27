@@ -11,9 +11,6 @@
     "test": "ava"
   },
   "ava": {
-    "require": [
-      "./test/build/setup-browser-env.js"
-    ],
     "files": [
       "test/build/*-tests.js"
     ],
@@ -34,12 +31,9 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "ava": "^0.18.2",
-    "browser-env": "^2.0.24",
-    "es6-promise": "^4.1.0",
     "flyd": "^0.2.4",
-    "mithril": "^1.0.1",
-    "ts-loader": "^2.0.1",
+    "ts-loader": "^2.0.3",
     "typescript": "^2.2.1",
-    "webpack": "^2.2.1"
+    "webpack": "^2.3.2"
   }
 }
