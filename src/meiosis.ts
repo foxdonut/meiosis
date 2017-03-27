@@ -36,8 +36,7 @@ export interface EventType {
 
 export interface CreateEvents {
   eventStream: Stream<EventType>;
-  emit: any;
-  listen?: any;
+  events: any;
   connect?: any;
 }
 
@@ -45,26 +44,30 @@ export function applyModelChange<M>(model: M, modelChange: Function) {
   return modelChange(model);
 }
 
-const createEventsFor = (eventStream: Stream<EventType>, emit: any, listen: any, top: any, prefix: string) => {
-  createEventFor(eventStream, emit, true, top, top, prefix);
-
-  if (listen) {
-    createEventFor(eventStream, listen, false, top, top, prefix);
-  }
+const createEventsFor = (eventStream: Stream<EventType>, events: any, top: any) => {
+  createEventFor(eventStream, events, top, top, "");
   return top;
 };
 
-const createEventFor = (eventStream: Stream<EventType>, section: any, emit: boolean,
+const createEventFor = (eventStream: Stream<EventType>, section: any,
     top: any, created: any, prefix: string) =>
 {
   Object.keys(section).forEach(key => {
-    if (!created[key]) {
-      created[key] = {};
-    }
-
     if (section[key].length) {
-      section[key].forEach((sectionKey: string) => {
-        const type = prefix + key + "." + sectionKey;
+      let emit: boolean = null;
+
+      if (key === "emit") {
+        emit = true;
+      }
+      else if (key === "listen") {
+        emit = false;
+      }
+      else {
+        throw new Error("key for events must be 'emit' or 'listen'.");
+      }
+
+      section[key].forEach((eventName: string) => {
+        const type = prefix + eventName;
 
         let fn: any = null;
 
@@ -82,12 +85,13 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, emit: bool
           fn.map = (callback: Function) => fn.callback = callback;
         }
 
-        created[key][sectionKey] = fn;
+        created[eventName] = fn;
         top[type] = fn;
       });
     }
     else {
-      createEventFor(eventStream, section[key], emit, top, created[key], prefix + key + ".");
+      created[key] = {};
+      createEventFor(eventStream, section[key], top, created[key], prefix + key + ".");
     }
   });
 
@@ -95,7 +99,7 @@ const createEventFor = (eventStream: Stream<EventType>, section: any, emit: bool
 };
 
 export const createEvents = (params: CreateEvents) => {
-  const createdEvents = createEventsFor(params.eventStream, params.emit, params.listen, {}, "");
+  const createdEvents = createEventsFor(params.eventStream, params.events, {});
 
   if (params.connect) {
     Object.keys(params.connect).forEach(type =>

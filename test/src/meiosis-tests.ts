@@ -5,42 +5,24 @@ import * as flyd from "flyd";
 test("create events with nested components", t => {
   const formComponent = {
     events: {
-      emit: ["saveStart", "saveSuccess"],
-      listen: ["edit"]
+      emit: ["saveTodoFailure", "saveTodoStart", "saveTodoSuccess"],
+      listen: ["editTodo"]
     }
   };
 
   const listComponent = {
     events: {
-      emit: ["edit"],
-      listen: ["pleaseWait", "saveSuccess"]
+      emit: ["editTodo"],
+      listen: ["error", "pleaseWait", "todoList", "updateTodo"]
     }
   };
 
   const eventStream = flyd.stream();
-  // This was the old way, use it to make sure the tests work.
   const events = createEvents({
     eventStream,
-    emit: {
-      form: [
-        "saveTodoFailure",
-        "saveTodoStart",
-        "saveTodoSuccess",
-      ],
-      list: [
-        "editTodo"
-      ]
-    },
-    listen: {
-      form: [
-        "editTodo"
-      ],
-      list: [
-        "error",
-        "pleaseWait",
-        "todoList",
-        "updateTodo"
-      ]
+    events: {
+      form: formComponent.events,
+      list: listComponent.events
     },
     connect: {
       "form.saveTodoFailure": ["list.error"],
@@ -58,23 +40,29 @@ test("create events with nested components", t => {
 
 test("create events with reusable components", t => {
   const randomGif = {
-    events: ["newGifSuccess"]
+    events: {
+      emit: ["newGifSuccess"]
+    }
+  };
+
+  const increment = {
+    events: {
+      listen: ["newGifSuccess"]
+    }
   };
 
   const eventStream = flyd.stream();
   const events = createEvents({
     eventStream,
-    emit: {
+    events: {
       randomGif: randomGif.events,
       randomGifCounter1: {
-        randomGif: randomGif.events
+        randomGif: randomGif.events,
       },
       randomGifCounter2: {
-        randomGif: randomGif.events
-      }
-    },
-    listen: {
-      increment: randomGif.events
+        randomGif: randomGif.events,
+      },
+      increment: increment.events
     },
     connect: {
       "randomGif.newGifSuccess": ["increment.newGifSuccess"],

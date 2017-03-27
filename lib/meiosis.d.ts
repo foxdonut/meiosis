@@ -20,8 +20,7 @@ export interface EventType {
 }
 export interface CreateEvents {
     eventStream: Stream<EventType>;
-    emit: any;
-    listen?: any;
+    events: any;
     connect?: any;
 }
 export declare function applyModelChange<M>(model: M, modelChange: Function): any;
