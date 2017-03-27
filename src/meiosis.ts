@@ -25,7 +25,8 @@ export interface Scanner<A, B> {
 
 export interface TraceParameters<M> {
   modelChanges: Stream<any>;
-  streams: Array<Stream<any>>;
+  dataStreams: Array<Stream<any>>;
+  otherStreams?: Array<Stream<any>>;
   copy?: Function;
 }
 
@@ -117,43 +118,110 @@ export function isMeiosisTracerOn(): boolean {
 }
 
 export function trace<M>(params: TraceParameters<M>): void {
-  if (!params.modelChanges || !params.streams) {
-    throw new Error("Please specify streamLibrary, modelChanges, and streams.");
+  if (!params.modelChanges || !params.dataStreams) {
+    throw new Error("Please specify streamLibrary, modelChanges, and dataStreams.");
   }
+
+  /*
+  Any change to lastStream automatically re-renders the view.
+
+  "Live" changes are changes to the modelChanges stream.
+
+  Keep track of the date of the last live change with the liveChange date.
+
+  1. Live change
+  - update the liveChange date
+  - since liveChange !== lastChange, update=true
+  - set lastChange = liveChange
+  - send values to tracer with update=true. This will add to the tracer's history
+    and increase the slider max.
+
+  2. Time-travel change
+  - receive MEIOSIS_RENDER_MODEL with sendValuesBack=false
+  - send the data to the first stream, which then goes thru all streams
+  - the view automatically re-renders
+  - since liveChange === lastChange, update=false
+  - don't send anything back to the tracer.
+
+  3. Typing in model textarea
+  - receive MEIOSIS_RENDER_MODEL with sendValuesBack=true. The tracer needs to be
+    sent the computed values from the other streams.
+  - send the data to the first stream, which then goes thru all streams
+  - the view automatically re-renders
+  - since liveChange === lastChange, update=false
+  - since sendValuesBack=true, send the values to the tracer. But, update=false so
+    this will not add to the tracer's history.
+
+  4. Changes in otherStreams
+  - initially send the ids of the streams
+  - send new values with ids
+  */
 
   if (isMeiosisTracerOn()) {
     const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
     const bufferedValues: Array<any> = [];
+    const bufferedStreamValues: Array<any> = [];
     let devtoolInitialized: boolean = false;
     let sendValues: boolean = true;
 
-    let changes: Date = new Date();
-    let lastChange: Date = changes;
-    params.modelChanges.map(() => changes = new Date());
+    let liveChange: Date = new Date();
+    let lastChange: Date = liveChange;
+    params.modelChanges.map(() => liveChange = new Date());
 
-    const firstStream = params.streams[0];
-    const lastStream = params.streams[params.streams.length - 1];
+    const lastStream = params.dataStreams[params.dataStreams.length - 1];
+
+    let otherStreamIds: Array<string> = [];
+    let otherStreamsById: any = {};
+
+    if (params.otherStreams && params.otherStreams.length) {
+      params.otherStreams.forEach(otherStream => {
+        const streamId: string = "stream_" + new Date().getTime();
+        otherStreamIds.push(streamId);
+        otherStreamsById[streamId] = otherStream;
+
+        otherStream.map(value => {
+          const data: any = { type: "MEIOSIS_STREAM_VALUE", value, streamId };
+
+          if (devtoolInitialized) {
+            window.postMessage(data, "*");
+          }
+          else {
+            bufferedStreamValues.push(data);
+          }
+        });
+      });
+    }
 
     window.addEventListener("message", evt => {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
         sendValues = evt.data.sendValuesBack;
-        params.streams[0](evt.data.model);
+        params.dataStreams[0](evt.data.model);
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
         devtoolInitialized = true;
+
+        if (otherStreamIds.length > 0) {
+          window.postMessage({ type: "MEIOSIS_STREAM_IDS", streamIds: otherStreamIds }, "*");
+        }
         bufferedValues.forEach(values => window.postMessage({ type: "MEIOSIS_VALUES", values, update: true }, "*"));
+        bufferedStreamValues.forEach(data => window.postMessage(data, "*"));
+      }
+      else if (evt.data.type === "MEIOSIS_TRIGGER_STREAM_VALUE") {
+        const streamId: string = evt.data.streamId;
+        const value: any = evt.data.value;
+
+        otherStreamsById[streamId](value);
       }
     });
 
     lastStream.map(() => {
-      const change: Date = changes;
-      const update: boolean = change !== lastChange;
-      lastChange = change;
-
-      const values: Array<any> = params.streams.map((stream: Stream<any>) =>
-        ({ value: copy(stream()) }));
+      const update: boolean = liveChange !== lastChange;
+      lastChange = liveChange;
 
       if (sendValues || update) {
+        const values: Array<any> = params.dataStreams.map((stream: Stream<any>) =>
+          ({ value: copy(stream()) }));
+
         if (devtoolInitialized) {
           window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
         }

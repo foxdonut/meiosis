@@ -11,7 +11,8 @@ export interface Scanner<A, B> {
 }
 export interface TraceParameters<M> {
     modelChanges: Stream<any>;
-    streams: Array<Stream<any>>;
+    dataStreams: Array<Stream<any>>;
+    otherStreams?: Array<Stream<any>>;
     copy?: Function;
 }
 export interface EventType {
