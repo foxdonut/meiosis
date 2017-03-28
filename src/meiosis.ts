@@ -119,7 +119,7 @@ export function isMeiosisTracerOn(): boolean {
 
 export function trace<M>(params: TraceParameters<M>): void {
   if (!params.modelChanges || !params.dataStreams) {
-    throw new Error("Please specify streamLibrary, modelChanges, and dataStreams.");
+    throw new Error("Please specify modelChanges and dataStreams.");
   }
 
   /*
