@@ -10,7 +10,7 @@ export interface Scanner<A, B> {
     (acc: A, next: B): A;
 }
 export interface TraceParameters<M> {
-    modelChanges: Stream<any>;
+    update: Stream<any>;
     dataStreams: Array<Stream<any>>;
     otherStreams?: Array<Stream<any>>;
     copy?: Function;
@@ -24,7 +24,7 @@ export interface CreateEvents {
     events: any;
     connect?: any;
 }
-export declare function applyModelChange<M>(model: M, modelChange: Function): any;
+export declare function applyUpdate<M>(model: M, update: Function): any;
 export declare const createEvents: (params: CreateEvents) => any;
 export declare function isMeiosisTracerOn(): boolean;
 export declare function trace<M>(params: TraceParameters<M>): void;

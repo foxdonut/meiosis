@@ -24,7 +24,7 @@ export interface Scanner<A, B> {
 }
 
 export interface TraceParameters<M> {
-  modelChanges: Stream<any>;
+  update: Stream<any>;
   dataStreams: Array<Stream<any>>;
   otherStreams?: Array<Stream<any>>;
   copy?: Function;
@@ -41,8 +41,8 @@ export interface CreateEvents {
   connect?: any;
 }
 
-export function applyModelChange<M>(model: M, modelChange: Function) {
-  return modelChange(model);
+export function applyUpdate<M>(model: M, update: Function) {
+  return update(model);
 }
 
 const createEventsFor = (eventStream: Stream<EventType>, events: any, top: any) => {
@@ -118,14 +118,14 @@ export function isMeiosisTracerOn(): boolean {
 }
 
 export function trace<M>(params: TraceParameters<M>): void {
-  if (!params.modelChanges || !params.dataStreams) {
-    throw new Error("Please specify modelChanges and dataStreams.");
+  if (!params.update || !params.dataStreams) {
+    throw new Error("Please specify update and dataStreams.");
   }
 
   /*
   Any change to lastStream automatically re-renders the view.
 
-  "Live" changes are changes to the modelChanges stream.
+  "Live" changes are changes to the update stream.
 
   Keep track of the date of the last live change with the liveChange date.
 
@@ -166,7 +166,7 @@ export function trace<M>(params: TraceParameters<M>): void {
 
     let liveChange: Date = new Date();
     let lastChange: Date = liveChange;
-    params.modelChanges.map(() => liveChange = new Date());
+    params.update.map(() => liveChange = new Date());
 
     const lastStream = params.dataStreams[params.dataStreams.length - 1];
 
