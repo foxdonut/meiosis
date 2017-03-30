@@ -77,3 +77,103 @@ test("create events with reusable components", t => {
 
   events.randomGifCounter2.randomGif.newGifSuccess(1);
 });
+
+test("create events at the root", t => {
+  const eventStream = flyd.stream();
+  const events = createEvents({
+    eventStream,
+    events: {
+      emit: ["send"],
+      listen: ["receive"]
+    },
+    connect: {
+      "send": ["receive"]
+    }
+  });
+
+  t.plan(1);
+
+  events.receive.map(() => t.pass());
+
+  events.send(true);
+});
+
+test("create events with single string connect", t => {
+  const eventStream = flyd.stream();
+  const events = createEvents({
+    eventStream,
+    events: {
+      emit: ["send"],
+      listen: ["receive"]
+    },
+    connect: {
+      "send": "receive"
+    }
+  });
+
+  t.plan(1);
+
+  events.receive.map(() => t.pass());
+
+  events.send(true);
+});
+
+test("create events with '*.something' connect, many to one", t => {
+  const eventStream = flyd.stream();
+  const events = createEvents({
+    eventStream,
+    events: {
+      form: {
+        emit: ["routeChange"]
+      },
+      list: {
+        emit: ["routeChange"]
+      },
+      router: {
+        listen: ["onRouteChange"]
+      }
+    },
+    connect: {
+      "*.routeChange": "router.onRouteChange"
+    }
+  });
+
+  t.plan(2);
+
+  events.router.onRouteChange.map(() => t.pass());
+
+  events.form.routeChange(true);
+  events.list.routeChange(true);
+});
+
+test("create events with '*.something' connect, many to many", t => {
+  const eventStream = flyd.stream();
+  const events = createEvents({
+    eventStream,
+    events: {
+      form: {
+        emit: ["routeChange"]
+      },
+      list: {
+        emit: ["routeChange"]
+      },
+      router: {
+        listen: ["onRouteChange"]
+      },
+      another: {
+        listen: ["onRouteChange"]
+      }
+    },
+    connect: {
+      "*.routeChange": "*.onRouteChange"
+    }
+  });
+
+  t.plan(4);
+
+  events.router.onRouteChange.map(() => t.pass());
+  events.another.onRouteChange.map(() => t.pass());
+
+  events.form.routeChange(true);
+  events.list.routeChange(true);
+});

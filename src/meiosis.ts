@@ -103,11 +103,47 @@ export const createEvents = (params: CreateEvents) => {
   const createdEvents = createEventsFor(params.eventStream, params.events, {});
 
   if (params.connect) {
-    Object.keys(params.connect).forEach(type =>
-      params.connect[type].forEach((listener: string) =>
-        createdEvents[type].map((data: any) => createdEvents[listener](data))
-      )
-    );
+    Object.keys(params.connect).forEach(type => {
+      const types: Array<string> = [];
+
+      // *.something
+      if (type.indexOf("*") === 0) {
+        const suffix: string = type.substring(1);
+
+        Object.keys(createdEvents).forEach(eventType => {
+          if (eventType.indexOf(suffix) > 0) {
+            types.push(eventType);
+          }
+        });
+      }
+      else {
+        types.push(type);
+      }
+
+      const listeners: any = params.connect[type];
+      const listenerArray: Array<string> = (typeof listeners === "string" ? [listeners] : listeners);
+
+      listenerArray.forEach((listener: string) => {
+        const listenerEvents: Array<string> = [];
+
+        // *.something
+        if (listener.indexOf("*") === 0) {
+          const suffix: string = listener.substring(1);
+
+          Object.keys(createdEvents).forEach(eventType => {
+            if (eventType.indexOf(suffix) > 0) {
+              listenerEvents.push(eventType);
+            }
+          });
+        }
+        else {
+          listenerEvents.push(listener);
+        }
+
+        types.forEach(type => listenerEvents.forEach(listenerEvent =>
+          createdEvents[type].map((data: any) => createdEvents[listenerEvent](data))));
+      })
+    });
   }
 
   return createdEvents;

@@ -134,8 +134,36 @@ exports.createEvents = function (params) {
     var createdEvents = createEventsFor(params.eventStream, params.events, {});
     if (params.connect) {
         Object.keys(params.connect).forEach(function (type) {
-            return params.connect[type].forEach(function (listener) {
-                return createdEvents[type].map(function (data) { return createdEvents[listener](data); });
+            var types = [];
+            if (type.indexOf("*") === 0) {
+                var suffix_1 = type.substring(1);
+                Object.keys(createdEvents).forEach(function (eventType) {
+                    if (eventType.indexOf(suffix_1) > 0) {
+                        types.push(eventType);
+                    }
+                });
+            }
+            else {
+                types.push(type);
+            }
+            var listeners = params.connect[type];
+            var listenerArray = (typeof listeners === "string" ? [listeners] : listeners);
+            listenerArray.forEach(function (listener) {
+                var listenerEvents = [];
+                if (listener.indexOf("*") === 0) {
+                    var suffix_2 = listener.substring(1);
+                    Object.keys(createdEvents).forEach(function (eventType) {
+                        if (eventType.indexOf(suffix_2) > 0) {
+                            listenerEvents.push(eventType);
+                        }
+                    });
+                }
+                else {
+                    listenerEvents.push(listener);
+                }
+                types.forEach(function (type) { return listenerEvents.forEach(function (listenerEvent) {
+                    return createdEvents[type].map(function (data) { return createdEvents[listenerEvent](data); });
+                }); });
             });
         });
     }
