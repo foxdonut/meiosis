@@ -1,3 +1,5 @@
+export declare type UpdateFunction = (model: any) => any;
+export declare type ViewFunction = (model: any) => any;
 export interface Mapper<A, B> {
     (value: A): B;
 }

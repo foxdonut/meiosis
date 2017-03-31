@@ -1,3 +1,7 @@
+export type UpdateFunction = (model: any) => any;
+
+export type ViewFunction = (model: any) => any;
+
 export interface Mapper<A, B> {
   (value: A): B;
 }
@@ -107,11 +111,13 @@ export const createEvents = (params: CreateEvents) => {
       const types: Array<string> = [];
 
       // *.something
-      if (type.indexOf("*") === 0) {
-        const suffix: string = type.substring(1);
+      const wildcard = "*.";
+
+      if (type.indexOf(wildcard) === 0) {
+        const suffix: string = type.substring(wildcard.length);
 
         Object.keys(createdEvents).forEach(eventType => {
-          if (eventType.indexOf(suffix) > 0) {
+          if (eventType.indexOf(suffix) >= 0) {
             types.push(eventType);
           }
         });
@@ -127,11 +133,11 @@ export const createEvents = (params: CreateEvents) => {
         const listenerEvents: Array<string> = [];
 
         // *.something
-        if (listener.indexOf("*") === 0) {
-          const suffix: string = listener.substring(1);
+        if (listener.indexOf(wildcard) === 0) {
+          const suffix: string = listener.substring(wildcard.length);
 
           Object.keys(createdEvents).forEach(eventType => {
-            if (eventType.indexOf(suffix) > 0) {
+            if (eventType.indexOf(suffix) >= 0) {
               listenerEvents.push(eventType);
             }
           });
