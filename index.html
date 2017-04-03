@@ -13,9 +13,9 @@
     <section class="page-header">
       <h1 class="project-name">Meiosis</h1>
       <h2 class="project-tagline">Manage the data flow of your web applications</h2>
-      <a href="http://meiosis.js.org/builds/" class="btn">Download</a>
-      <a href="https://foxdonut.gitbooks.io/meiosis-guide/content/what_is_meiosis.html" class="btn">Documentation</a>
-      <a href="/example-index.html" class="btn">Examples</a>
+      <a href="http://meiosis.js.org/download/" class="btn">Download</a>
+      <a href="https://github.com/foxdonut/meiosis/wiki" class="btn">Documentation</a>
+      <a href="/examples.html" class="btn">Examples</a>
       <a href="https://github.com/foxdonut/meiosis" class="btn">View on GitHub</a>
     </section>
 
@@ -27,56 +27,29 @@
 
 <h2>Do you Mei-O?</h2>
 
-<p>Meiosis is a library and an architecture pattern for dividing a web application into small,
-independent, manageable, and testable parts, <i>while letting you keep using the tools that you
-already love</i>. Meiosis manages the data flow and lets you choose whatever you like for
-rendering views.</p>
-
-<p>For example, you can use
-<a href="https://facebook.github.io/react/">React</a>, <a href="https://github.com/trueadm/inferno">Inferno</a>,
-<a href="https://github.com/paldepind/snabbdom">Snabbdom</a>,
-<a href="http://mithril.js.org">Mithril</a>, <a href="http://jquery.com/">jQuery</a>,
-<a href="http://handlebarsjs.com">Handlebars</a>, or no libraries at all and just plain vanilla JavaScript.
+<p>Meiosis is an architecture pattern to manage the data flow of your web applications.
+All you need is a simple stream library such as
+<a target="_blank" href="https://github.com/paldepind/flyd">Flyd</a> or
+<a target="_blank" href="https://mithril.js.org/stream.html">Mithril Stream</a> to implement the pattern.
+<i>You do not need anything else, not even Meiosis itself.</i>
+Add your favourite virtual dom library (React, Mithril, Snabbdom, Inferno, Preact, etc.)
+and you are good to go.
 </p>
 
-<p>Meiosis implements the <a href="http://sam.js.org">SAM pattern</a> by <a href="http://www.ebpml.org/about">Jean-Jacques Dubray</a>.</p>
-
-<p>Developing a web application with Meiosis involves three simple concepts:</p>
-
-<ol>
-  <li>
-    Start with a model. This is the <i>single source of truth</i>. It can be a plain JavaScript object. Whether it is mutable or immutable is up to you. Optionally, write a <code>state</code> function that takes the model and computes additional properties to produce the complete <i>application state</i>.
-  </li>
-  <li>
-    Write the view as a function of the model/application state.
-  </li>
-  <li>
-    Have a way to <i>propose</i> changes to the model. After the changes have been accepted,
-    Meiosis re-renders the view by calling the view function with the new model/application state.
-  </li>
-</ol>
-
-<p>Meiosis is a small, simple library with no dependencies. It helps you build components with minimal effort,
-providing an architecture to structure your code that scales well as your application gets larger and more complex.
+<p>Meiosis is more about the approach to managing the data flow rather than about the code
+in the library. That being said, Meiosis <i>does</i> contain a simple event system that you
+may find useful. Further, Meiosis and be combined with
+<a target="_blank" href="https://github.com/foxdonut/meiosis-tracer">Meiosis-Tracer</a>
+to provide development-time tracing capabilities. This is a nifty and useful tool to view what is
+going on in your application. You can trace back through snapshots of the model and see the changes
+in the UI. You can also change the model directly in the tool to see the resulting UI, and, if you
+are using events, simulate behaviour by triggering new events.
 </p>
-
-<p>You choose what you like to use for creating views. Meiosis organizes how the data flows in your application by:</p>
-<ul>
-<li>Creating and maintaining a <i>single root model</i>, and (optionally) calling your <code>state</code> function to produce the <i>application state</i>.</li>
-<li>Letting you hook in functions that receive <i>proposals</i> and change the model accordingly</li>
-<li>Passing action objects to your views so that they can trigger proposals</li>
-<li>Automatically re-rendering your views</li>
-<li>Letting you define logic for actions that should automatically trigger.</li>
-</ul>
-
-<p>Meiosis is about managing the application data flow. Create components by specifying functions,
-and Meiosis takes care of the wiring. Every part of the process is optional,
-so you can specify what you need for each component.</p>
 
 <p>For documentation please refer to the
-<a href="https://foxdonut.gitbooks.io/meiosis-guide/content/what_is_meiosis.html">Meiosis Guide</a>.</p>
+<a href="https://github.com/foxdonut/meiosis/wiki">Meiosis Wiki</a>.</p>
 
-<p>Try out the examples online: <a href="http://meiosis.js.org/example-index.html">http://meiosis.js.org/example-index.html</a></p>
+<p>Try out the examples online: <a href="http://meiosis.js.org/examples.html">http://meiosis.js.org/examples.html</a></p>
 
 <p>Example code: <a href="https://github.com/foxdonut/meiosis-examples">https://github.com/foxdonut/meiosis-examples</a></p>
 
