@@ -78,6 +78,9 @@ discussing ideas!
 - [Redux](http://redux.js.org/), by
 [Dan Abramov](https://github.com/gaearon).
 
+- [hyperapp](https://github.com/hyperapp/hyperapp), by
+[Jorge Bucaran](https://twitter.com/jbucaran).
+
 - [CycleJS](http://cycle.js.org/), by
 [André Staltz/Medeiros](http://staltz.com/).
 
