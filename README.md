@@ -46,7 +46,48 @@ just improve upon it; and
 3. it's a relatively unique name in the JavaScript world, thus making it easy to find information
 using search engines.
 
---
+----
+
+## Credits
+
+Meiosis is the result of a whole adventure of exploring other architectures. Credit goes to their authors; I am grateful
+for their work and that of their respective communities.
+
+- [CycleJS driven by state](http://www.christianalfoni.com/articles/2016_04_06_CycleJS-driven-by-state)
+by [Christian Alfoni](http://www.christianalfoni.com/). This article was very inspirational to me and
+I am very grateful to Christian! I also find Christian's other projects very interesting, including
+(but not limited to) [Cerebral](http://cerebraljs.com) and
+[function-tree](https://github.com/cerebral/cerebral/tree/master/packages/function-tree#readme).
+
+- The [SAM pattern](http://sam.js.org/) by
+[Jean-Jacques Dubray](http://www.ebpml.org/about). There are some very sound principles to the SAM
+pattern, and I very much appreciate discussing and learning from Jean-Jacques as he is always gratious
+and willing to share his knowledge and experience.
+
+- [Simon Friis Vindum](https://twitter.com/paldepind), creator of
+[Flyd](https://github.com/paldepind/flyd),
+[Snabbdom](https://github.com/snabbdom/snabbdom), and others. I use Flyd as a stream library for Meiosis.
+
+- [Mithril](http://mithril.js.org) and its fantastic community. Special thanks to
+[James Forbes](https://twitter.com/james_a_forbes) for all the help, sharing your knowledge, and
+discussing ideas!
+
+- [The Elm Architecture](http://guide.elm-lang.org/architecture/index.html), by
+[Evan Czaplicki](http://evan.czaplicki.us/home).
+
+- [Redux](http://redux.js.org/), by
+[Dan Abramov](https://github.com/gaearon).
+
+- [CycleJS](http://cycle.js.org/), by
+[André Staltz/Medeiros](http://staltz.com/).
+
+- Other reactive Libraries such as
+[RxJS](https://github.com/ReactiveX/rxjs),
+[Kefir](https://rpominov.github.io/kefir/),
+[most](https://github.com/cujojs/most), and
+[Bacon.js](https://baconjs.github.io/).
+
+----
 
 _Meiosis is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
