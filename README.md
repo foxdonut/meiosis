@@ -72,6 +72,10 @@ and willing to share his knowledge and experience.
 [James Forbes](https://twitter.com/james_a_forbes) for all the help, sharing your knowledge, and
 discussing ideas!
 
+- [Vesa Karvonen](https://twitter.com/VesaKarvonen), creator of
+[partial.lenses](https://github.com/calmm-js/partial.lenses) and
+[Calmm](https://github.com/calmm-js/documentation).
+
 - [The Elm Architecture](http://guide.elm-lang.org/architecture/index.html), by
 [Evan Czaplicki](http://evan.czaplicki.us/home).
 
