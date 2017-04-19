@@ -15,7 +15,8 @@ export interface TraceParameters<M> {
     update: Stream<any>;
     dataStreams: Array<Stream<any>>;
     otherStreams?: Array<Stream<any>>;
-    copy?: Function;
+    toJS?: Function;
+    fromJS?: Function;
 }
 export interface EventType {
     type: string;

@@ -31,7 +31,8 @@ export interface TraceParameters<M> {
   update: Stream<any>;
   dataStreams: Array<Stream<any>>;
   otherStreams?: Array<Stream<any>>;
-  copy?: Function;
+  toJS?: Function;
+  fromJS?: Function;
 }
 
 export interface EventType {
@@ -200,7 +201,8 @@ export function trace<M>(params: TraceParameters<M>): void {
   */
 
   if (isMeiosisTracerOn()) {
-    const copy: any = params.copy || ((model: M) => JSON.parse(JSON.stringify(model)));
+    const toJS: Function = params.toJS || ((model: M) => JSON.parse(JSON.stringify(model)));
+    const fromJS: Function = params.fromJS || ((model: M) => model);
     const bufferedValues: Array<any> = [];
     const bufferedStreamValues: Array<any> = [];
     let devtoolInitialized: boolean = false;
@@ -237,7 +239,7 @@ export function trace<M>(params: TraceParameters<M>): void {
     window.addEventListener("message", evt => {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
         sendValues = evt.data.sendValuesBack;
-        params.dataStreams[0](evt.data.model);
+        params.dataStreams[0](fromJS(evt.data.model));
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
         devtoolInitialized = true;
@@ -262,7 +264,7 @@ export function trace<M>(params: TraceParameters<M>): void {
 
       if (sendValues || update) {
         const values: Array<any> = params.dataStreams.map((stream: Stream<any>) =>
-          ({ value: copy(stream()) }));
+          ({ value: toJS(stream()) }));
 
         if (devtoolInitialized) {
           window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");

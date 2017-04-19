@@ -179,7 +179,8 @@ function trace(params) {
         throw new Error("Please specify update and dataStreams.");
     }
     if (isMeiosisTracerOn()) {
-        var copy_1 = params.copy || (function (model) { return JSON.parse(JSON.stringify(model)); });
+        var toJS_1 = params.toJS || (function (model) { return JSON.parse(JSON.stringify(model)); });
+        var fromJS_1 = params.fromJS || (function (model) { return model; });
         var bufferedValues_1 = [];
         var bufferedStreamValues_1 = [];
         var devtoolInitialized_1 = false;
@@ -209,7 +210,7 @@ function trace(params) {
         window.addEventListener("message", function (evt) {
             if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
                 sendValues_1 = evt.data.sendValuesBack;
-                params.dataStreams[0](evt.data.model);
+                params.dataStreams[0](fromJS_1(evt.data.model));
             }
             else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
                 devtoolInitialized_1 = true;
@@ -230,7 +231,7 @@ function trace(params) {
             lastChange_1 = liveChange_1;
             if (sendValues_1 || update) {
                 var values = params.dataStreams.map(function (stream) {
-                    return ({ value: copy_1(stream()) });
+                    return ({ value: toJS_1(stream()) });
                 });
                 if (devtoolInitialized_1) {
                     window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: update }, "*");
