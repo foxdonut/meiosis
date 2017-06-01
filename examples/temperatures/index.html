@@ -3,30 +3,29 @@
   <head>
     <link rel="shortcut icon" size="16x16, 32x32, 48x48, 64x64, 128x128, 256x256" href="/favicon.ico">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/public/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/public/css/bootstrap.flatly.min.css">
-    <link rel="stylesheet" href="/public/css/style.css">
-    <script src="/public/lib/jquery-2.2.3.min.js"></script>
-    <script src="/public/lib/bootstrap.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/public/css/base-min.css">
+    <link rel="stylesheet" href="/public/css/pure-min.css">
     <title>Meiosis Example - Temperatures</title>
   </head>
-  <body class="container">
-    <div>
-      <a href="http://meiosis.js.org"><img src="/public/images/meiosis.png" style="padding-bottom: 20px; margin-right: 8px" width="53px"></a>
-      <h2 style="display: inline;">Meiosis Example - Temperatures</h2>
-      <div><a href="/example-index.html">Back to list of examples</a></div>
-      <div><a href="https://github.com/foxdonut/meiosis-examples/tree/v0.9.0/examples/temperatures">Source code</a></div>
-      
+  <body class="pure-g">
+    <div class="pure-u-1-4"></div>
+    <div class="pure-u-1-2">
+      <div class="pure-g">
+        <span class="pure-u-1-16">
+          <a href="http://meiosis.js.org" target="_blank"><img src="/public/images/meiosis.png" style="margin-right: 8px; margin-top: 8px" width="53px"></a>
+        </span>
+        <span class="pure-u-1-2">
+          <h2>Meiosis Example - Temperatures</h2>
+        </span>
+      </div>
+      <div><a href="/examples.html">Back to list of examples</a></div>
+      <div><a href="https://github.com/foxdonut/meiosis-examples/tree/master/examples/temperatures" target="_blank">Source code</a></div>
       <hr>
 
       <div id="app"></div>
       <div id="tracer" style="position: fixed; top: 0px; right: 0px;"></div>
     </div>
-
-    
-  <script src="/examples/temperatures/generated-app.js"></script>
-
   </body>
+  <script src="/examples/temperatures/build/generated-app.js"></script>
 </html>
-

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="shortcut icon" size="16x16, 32x32, 48x48, 64x64, 128x128, 256x256" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/examples-v0.9.x/todomvc/css/index.css">
+
+    <title>Meiosis Example - Snabbdom</title>
+  </head>
+  <body class="container">
+    <div>
+      <a href="http://meiosis.js.org"><img src="/public/images/meiosis.png" style="margin-right: 8px" width="53px"></a>
+      <h2 style="display: inline">Meiosis TodoMVC - Snabbdom</h2>
+      <div><a href="/example-index.html">Back to list of examples</a></div>
+      <div><a href="https://github.com/foxdonut/meiosis-examples/tree/v0.9.0/examples/todomvc">Source code</a></div>
+      <hr>
+
+      <div id="app"></div>
+      <div id="tracer" style="position: fixed; top: 0px; right: 0px;"></div>
+    </div>
+
+    <hr/><div>Todo MVC example idea credit: <a href="http://todomvc.com">todomvc.com</a></div>
+  </body>
+
+  <script src="/public/lib/meiosis.min.js"></script>
+  <script src="/public/lib/meiosis-tracer.min.js"></script> <!-- development only -->
+  <script src="/public/lib/history.min.js"></script>
+  <script src="/public/lib/classnames.min.js"></script>
+  <script src="/public/lib/union-type.js"></script>
+
+  <script src="/examples-v0.9.x/todomvc/common/store.js"></script>
+
+  
+
+<script src="/public/lib/meiosis-snabbdom.min.js"></script>
+
+
+
+  <script src="/examples-v0.9.x/todomvc/snabbdom/header/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoEdit/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoItem/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/main/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/footer/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoapp/view.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/root/view.js"></script>
+
+  <script src="/examples-v0.9.x/todomvc/common/header/actionTypes.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/header/actions.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/header/receive.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/header/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/footer/actionTypes.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/footer/actions.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/footer/receive.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/footer/ready.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/footer/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoItem/state.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoEdit/actionTypes.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoEdit/actions.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoEdit/display.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoEdit/receive.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoEdit/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoItem/actionTypes.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoItem/actions.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoItem/display.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/todoItem/receive.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoItem/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/main/actionTypes.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/main/actions.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/main/receive.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/main/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/todoapp/component.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/root/model.js"></script>
+  <script src="/examples-v0.9.x/todomvc/common/root/state.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/root/component.js"></script>
+
+  <script src="/examples-v0.9.x/todomvc/snabbdom/runapp.js"></script>
+  <script src="/examples-v0.9.x/todomvc/snabbdom/app.js"></script>
+</html>
+
