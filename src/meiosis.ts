@@ -274,5 +274,8 @@ export function trace<M>(params: TraceParameters<M>): void {
         }
       }
     });
+
+    // Send ping in case tracer was already loaded.
+    window.postMessage({ type: "MEIOSIS_PING" }, "*");
   }
 };
