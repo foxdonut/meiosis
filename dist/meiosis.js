@@ -16,9 +16,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
+/******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/ 		}
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -87,89 +87,6 @@ function applyUpdate(model, update) {
     return update(model);
 }
 exports.applyUpdate = applyUpdate;
-var createEventsFor = function (eventStream, events, top) {
-    createEventFor(eventStream, events, top, top, "");
-    return top;
-};
-var createEventFor = function (eventStream, section, top, created, prefix) {
-    Object.keys(section).forEach(function (key) {
-        if (section[key].length) {
-            var emit_1 = null;
-            if (key === "emit") {
-                emit_1 = true;
-            }
-            else if (key === "listen") {
-                emit_1 = false;
-            }
-            else {
-                throw new Error("key for events must be 'emit' or 'listen'.");
-            }
-            section[key].forEach(function (eventName) {
-                var type = prefix + eventName;
-                var fn = null;
-                if (emit_1) {
-                    fn = function (data) { return eventStream({ type: type, data: data }); };
-                    fn.map = function (callback) { return eventStream.map(function (event) {
-                        if (event.type === type) {
-                            callback(event.data);
-                        }
-                    }); };
-                }
-                else {
-                    fn = function (data) { return fn.callback && fn.callback(data); };
-                    fn.map = function (callback) { return fn.callback = callback; };
-                }
-                created[eventName] = fn;
-                top[type] = fn;
-            });
-        }
-        else {
-            created[key] = {};
-            createEventFor(eventStream, section[key], top, created[key], prefix + key + ".");
-        }
-    });
-    return created;
-};
-exports.createEvents = function (params) {
-    var createdEvents = createEventsFor(params.eventStream, params.events, {});
-    if (params.connect) {
-        Object.keys(params.connect).forEach(function (type) {
-            var types = [];
-            var wildcard = "*.";
-            if (type.indexOf(wildcard) === 0) {
-                var suffix_1 = type.substring(wildcard.length);
-                Object.keys(createdEvents).forEach(function (eventType) {
-                    if (eventType.indexOf(suffix_1) >= 0) {
-                        types.push(eventType);
-                    }
-                });
-            }
-            else {
-                types.push(type);
-            }
-            var listeners = params.connect[type];
-            var listenerArray = (typeof listeners === "string" ? [listeners] : listeners);
-            listenerArray.forEach(function (listener) {
-                var listenerEvents = [];
-                if (listener.indexOf(wildcard) === 0) {
-                    var suffix_2 = listener.substring(wildcard.length);
-                    Object.keys(createdEvents).forEach(function (eventType) {
-                        if (eventType.indexOf(suffix_2) >= 0) {
-                            listenerEvents.push(eventType);
-                        }
-                    });
-                }
-                else {
-                    listenerEvents.push(listener);
-                }
-                types.forEach(function (type) { return listenerEvents.forEach(function (listenerEvent) {
-                    return createdEvents[type].map(function (data) { return createdEvents[listenerEvent](data); });
-                }); });
-            });
-        });
-    }
-    return createdEvents;
-};
 function isMeiosisTracerOn() {
     return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
 }

@@ -18,16 +18,6 @@ export interface TraceParameters<M> {
     toJS?: Function;
     fromJS?: Function;
 }
-export interface EventType {
-    type: string;
-    data: any;
-}
-export interface CreateEvents {
-    eventStream: Stream<EventType>;
-    events: any;
-    connect?: any;
-}
 export declare function applyUpdate<M>(model: M, update: Function): any;
-export declare const createEvents: (params: CreateEvents) => any;
 export declare function isMeiosisTracerOn(): boolean;
 export declare function trace<M>(params: TraceParameters<M>): void;
