@@ -12,10 +12,11 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Meiosis</h1>
-      <h2 class="project-tagline">Manage the data flow of your web applications</h2>
-      <a href="http://meiosis.js.org/download/" class="btn">Download</a>
+      <h2 class="project-tagline">Awesome State Management for Web Applications</h2>
       <a href="https://github.com/foxdonut/meiosis/wiki" class="btn">Documentation</a>
       <a href="/examples.html" class="btn">Examples</a>
+      <a href="https://github.com/foxdonut/meiosis-tracer" class="btn">Tracer</a>
+      <a href="http://meiosis.js.org/download/" class="btn">Download</a>
       <a href="https://github.com/foxdonut/meiosis" class="btn">View on GitHub</a>
     </section>
 
@@ -23,7 +24,7 @@
       <h1>
 <a id="meiosis" class="anchor" href="#meiosis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Meiosis</h1>
 
-<blockquote>It's what you already love, only better.</blockquote>
+<blockquote>It's not a library. It's a simple pattern.</blockquote>
 
 <h2>Do you Mei-O?</h2>
 
@@ -31,16 +32,17 @@
 All you need is a simple stream library such as
 <a target="_blank" href="https://github.com/paldepind/flyd">Flyd</a> or
 <a target="_blank" href="https://mithril.js.org/stream.html">Mithril Stream</a> to implement the pattern.
+Or, you could implement the pattern yourself with just a few lines of code.
 <i>You do not need anything else, not even Meiosis itself.</i>
 Add your favourite virtual dom library (React, Mithril, Snabbdom, Inferno, Preact, etc.)
 and you are good to go.
 </p>
 
-<p>Meiosis is more about the approach to managing the data flow rather than about the code
-in the library. That being said, Meiosis <i>does</i> contain a simple event system that you
-may find useful. Further, Meiosis and be combined with
+<p>Meiosis is an approach to managing the data flow of your web application <i>that frees you from being tied to a library API.</i>
+</p>
+<p>Meiosis does provide code to be combined with
 <a target="_blank" href="https://github.com/foxdonut/meiosis-tracer">Meiosis-Tracer</a>
-to provide development-time tracing capabilities. This is a nifty and useful tool to view what is
+during development. This is a nifty and useful tool to view what is
 going on in your application. You can trace back through snapshots of the model and see the changes
 in the UI. You can also change the model directly in the tool to see the resulting UI, and, if you
 are using events, simulate behaviour by triggering new events.
