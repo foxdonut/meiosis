@@ -4,20 +4,23 @@
 
 http://meiosis.js.org
 
-> _It's what you already love, only better._
+> Meiosis is not a library. It's a simple pattern.
 
 ## Do you Mei-O?
 
 **Meiosis** is an architecture pattern to manage the data flow of your web applications. All you need is a simple
 stream library such as [Flyd](https://github.com/paldepind/flyd) or [Mithril Stream](http://mithril.js.org/stream.html)
-to implement the pattern. You do not need anything else, not even Meiosis itself. Add your favourite virtual dom
+to implement the pattern. Or, you could implement the pattern yourself with just a few lines of code. You do not need
+anything else, not even Meiosis itself. Add your favourite virtual dom
 library (React, Mithril, Snabbdom, Inferno, Preact, etc.) and you are good to go.
 
-Meiosis is more about the approach to managing the data flow rather than about the code in the library. That being said,
-Meiosis does contain a simple event system that you may find useful. Further, Meiosis and be combined with
-[Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer) to provide development-time tracing capabilities. This is a
-nifty and useful tool to view what is going on in your application. You can trace back through snapshots of the model
-and see the changes in the UI. You can also change the model directly in the tool to see the resulting UI, and, if you
+Meiosis is an approach to managing the data flow of your web application _that frees you from being tied to a library API._
+
+Meiosis does provide code to be combined with
+[Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer)
+during development. This is a nifty and useful tool to view what is
+going on in your application. You can trace back through snapshots of the model and see the changes
+in the UI. You can also change the model directly in the tool to see the resulting UI, and, if you
 are using events, simulate behaviour by triggering new events.
 
 For documentation please refer to the [Meiosis Wiki](https://github.com/foxdonut/meiosis/wiki).
@@ -41,7 +44,7 @@ I picked the name **Meiosis** for three reasons:
 an analogy to the idea of dividing your application into smaller pieces;
 2. it's a [figure of speech](https://en.wikipedia.org/wiki/Meiosis_(figure_of_speech) that
 _intentionally understates something or implies that it is lesser in significance or size than it
-really is_, meaning that this library is meant to be small, humble, and not replace what people use,
+really is_, meaning that this is meant to be small, humble, and not replace what people use,
 just improve upon it; and
 3. it's a relatively unique name in the JavaScript world, thus making it easy to find information
 using search engines.
