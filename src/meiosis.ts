@@ -1,19 +1,15 @@
-export type UpdateFunction = (model: any) => any;
-
-export type ViewFunction = (model: any) => any;
-
 export interface Mapper<A, B> {
   (value: A): B;
 }
 
 export interface Stream<T> {
   /**
-   * Gets the current value of the stream.
+   * Gets the latest value from the stream.
    */
   (): T;
 
   /**
-   * Sets a new value on the stream.
+   * Pushes a new value onto the stream.
    */
   (value: T): Stream<T>;
 
@@ -23,20 +19,12 @@ export interface Stream<T> {
   map<T, R>(mapper: Mapper<T, R>): Stream<R>;
 }
 
-export interface Scanner<A, B> {
-  (acc: A, next: B): A;
-}
-
 export interface TraceParameters<M> {
   update: Stream<any>;
   dataStreams: Array<Stream<any>>;
   otherStreams?: Array<Stream<any>>;
   toJS?: Function;
   fromJS?: Function;
-}
-
-export function applyUpdate<M>(model: M, update: Function) {
-  return update(model);
 }
 
 export function isMeiosisTracerOn(): boolean {
