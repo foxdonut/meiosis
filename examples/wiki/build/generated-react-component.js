@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 381);
+/******/ 	return __webpack_require__(__webpack_require__.s = 448);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -74,6 +74,13 @@ module.exports = function _isPlaceholder(a) {
          a['@@functional/placeholder'] === true;
 };
 
+
+/***/ }),
+
+/***/ 130:
+/***/ (function(module, exports) {
+
+module.exports = ReactDOM;
 
 /***/ }),
 
@@ -1033,6 +1040,13 @@ module.exports = function _curryN(length, received, fn) {
   };
 };
 
+
+/***/ }),
+
+/***/ 331:
+/***/ (function(module, exports) {
+
+module.exports = React;
 
 /***/ }),
 
@@ -2686,17 +2700,29 @@ module.exports = function(json, config){
 
 /***/ }),
 
-/***/ 381:
+/***/ 448:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _flyd = __webpack_require__(25);
 
 var _flyd2 = _interopRequireDefault(_flyd);
 
-var _app = __webpack_require__(382);
+var _react = __webpack_require__(331);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = __webpack_require__(130);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _fp = __webpack_require__(338);
+
+var _fp2 = _interopRequireDefault(_fp);
 
 var _meiosis = __webpack_require__(23);
 
@@ -2706,279 +2732,316 @@ var _meiosisTracer2 = _interopRequireDefault(_meiosisTracer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/* global ReactDOM */
-var update = _flyd2.default.stream();
-var app = (0, _app.createApp)(update);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*global $*/
+
+var nest = function nest(update, path) {
+  return function (modelUpdate) {
+    return update(_fp2.default.update(path, modelUpdate));
+  };
+};
+
+var nestComponent = function nestComponent(create, update, path) {
+  var view = create(nest(update, path));
+
+  // This is equivalent to:
+  // return model => view(_.get(path, model));
+  return _fp2.default.flow([_fp2.default.get(path), view]);
+};
+
+var entry = {
+  model: function model() {
+    return {
+      value: ""
+    };
+  },
+
+  create: function create(update) {
+    var updates = {
+      editEntryValue: function editEntryValue(value) {
+        return update(_fp2.default.set("value", value));
+      }
+    };
+
+    var actions = {
+      editEntryValue: function editEntryValue(evt) {
+        return updates.editEntryValue(evt.target.value);
+      }
+    };
+
+    return function (model) {
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement(
+          "span",
+          null,
+          "Entry number:"
+        ),
+        _react2.default.createElement("input", { type: "text", size: "2", value: model.value, onChange: actions.editEntryValue })
+      );
+    };
+  }
+};
+
+var DateField = function (_React$Component) {
+  _inherits(DateField, _React$Component);
+
+  function DateField() {
+    _classCallCheck(this, DateField);
+
+    return _possibleConstructorReturn(this, (DateField.__proto__ || Object.getPrototypeOf(DateField)).apply(this, arguments));
+  }
+
+  _createClass(DateField, [{
+    key: "componentWillMount",
+    value: function componentWillMount() {
+      var update = this.props.update;
+
+      var updates = {
+        editDateValue: function editDateValue(value) {
+          return update(_fp2.default.set("value", value));
+        }
+      };
+
+      this.actions = {
+        editDateValue: function editDateValue(evt) {
+          return updates.editDateValue(evt.target.value);
+        },
+        showDatepicker: function showDatepicker() {
+          return update(_fp2.default.set("datepickerOpen", true));
+        }
+      };
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var update = this.props.update;
+
+      $(this.refs.dateField).on("changeDate", function (evt) {
+        update(_fp2.default.flow([_fp2.default.set("datepickerOpen", false), _fp2.default.set("value", evt.target.value)]));
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var model = this.props.model;
+      var actions = this.actions;
+
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement(
+          "span",
+          null,
+          "Date:"
+        ),
+        _react2.default.createElement("input", { ref: "dateField", type: "text", size: "10", value: model.value,
+          onFocus: actions.showDatepicker, onChange: actions.editDateValue })
+      );
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      var model = this.props.model;
+      var trigger = model.datepickerOpen ? "show" : "hide";
+      $(this.refs.dateField).datepicker(trigger);
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      $(this.refs.dateField).datepicker("destroy");
+    }
+  }], [{
+    key: "model",
+    value: function model() {
+      return {
+        value: "",
+        datepickerOpen: false
+      };
+    }
+  }]);
+
+  return DateField;
+}(_react2.default.Component);
+
+var temperature = {
+  model: function model(label) {
+    return {
+      label: label,
+      value: 20,
+      units: "C"
+    };
+  },
+
+  create: function create(update) {
+    var updates = {
+      increase: function increase(value) {
+        return update(_fp2.default.update("value", _fp2.default.add(value)));
+      },
+
+      changeUnits: function changeUnits() {
+        return update(function (model) {
+          if (model.units === "C") {
+            model.units = "F";
+            model.value = Math.round(model.value * 9 / 5 + 32);
+          } else {
+            model.units = "C";
+            model.value = Math.round((model.value - 32) / 9 * 5);
+          }
+          return model;
+        });
+      }
+    };
+
+    var actions = {
+      increase: function increase(value) {
+        return function (evt) {
+          evt.preventDefault();
+          updates.increase(value);
+        };
+      },
+      changeUnits: function changeUnits(evt) {
+        evt.preventDefault();
+        updates.changeUnits();
+      }
+    };
+
+    return function (model) {
+      return _react2.default.createElement(
+        "div",
+        { className: "row" },
+        _react2.default.createElement(
+          "div",
+          { className: "col-md-3" },
+          _react2.default.createElement(
+            "span",
+            null,
+            model.label,
+            " Temperature: ",
+            model.value,
+            "\xB0",
+            model.units,
+            " "
+          )
+        ),
+        _react2.default.createElement(
+          "div",
+          { className: "col-md-6" },
+          _react2.default.createElement(
+            "button",
+            { className: "btn btn-sm btn-default", onClick: actions.increase(1) },
+            "Increase"
+          ),
+          " ",
+          _react2.default.createElement(
+            "button",
+            { className: "btn btn-sm btn-default", onClick: actions.increase(-1) },
+            "Decrease"
+          ),
+          " ",
+          _react2.default.createElement(
+            "button",
+            { className: "btn btn-sm btn-info", onClick: actions.changeUnits },
+            "Change Units"
+          )
+        )
+      );
+    };
+  }
+};
+
+var app = {
+  model: function model() {
+    return {
+      entry: entry.model(),
+      date: DateField.model(),
+      temperature: {
+        air: temperature.model("Air"),
+        water: temperature.model("Water")
+      },
+      saved: ""
+    };
+  },
+
+  create: function create(update) {
+    var displayTemperature = function displayTemperature(temperature) {
+      return temperature.label + ": " + temperature.value + "\xB0" + temperature.units;
+    };
+
+    var updates = {
+      save: function save() {
+        return update(function (model) {
+          model.saved = " Entry #" + model.entry.value + " on " + model.date.value + ":" + " Temperatures: " + displayTemperature(model.temperature.air) + " " + displayTemperature(model.temperature.water);
+
+          model.entry.value = "";
+          model.date.value = "";
+
+          return model;
+        });
+      }
+    };
+
+    var actions = {
+      save: function save(evt) {
+        evt.preventDefault();
+        updates.save();
+      }
+    };
+
+    var components = {
+      entry: nestComponent(entry.create, update, "entry"),
+      temperature: {
+        air: nestComponent(temperature.create, update, "temperature.air"),
+        water: nestComponent(temperature.create, update, ["temperature", "water"])
+      }
+    };
+
+    return function (model) {
+      return _react2.default.createElement(
+        "form",
+        null,
+        components.entry(model),
+        _react2.default.createElement(DateField, { model: model.date, update: nest(update, "date") }),
+        components.temperature.air(model),
+        components.temperature.water(model),
+        _react2.default.createElement(
+          "div",
+          null,
+          _react2.default.createElement(
+            "button",
+            { className: "btn btn-primary", onClick: actions.save },
+            "Save"
+          ),
+          _react2.default.createElement(
+            "span",
+            null,
+            model.saved
+          )
+        )
+      );
+    };
+  }
+};
+
 var initialModel = app.model();
+var update = _flyd2.default.stream();
 var applyUpdate = function applyUpdate(model, modelUpdate) {
   return modelUpdate(model);
 };
 var models = _flyd2.default.scan(applyUpdate, initialModel, update);
 
 var element = document.getElementById("app");
+var view = app.create(update);
 models.map(function (model) {
-  return ReactDOM.render(app.view(model), element);
+  return _reactDom2.default.render(view(model), element);
 });
-
-// Only for using Meiosis Tracer in development.
 
 (0, _meiosis.trace)({ update: update, dataStreams: [models] });
-
 (0, _meiosisTracer2.default)({ selector: "#tracer" });
-
-/***/ }),
-
-/***/ 382:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createApp = undefined;
-
-var _view = __webpack_require__(383);
-
-var _temperature = __webpack_require__(384);
-
-var _nest = __webpack_require__(387);
-
-var createApp = exports.createApp = function createApp(update) {
-  var components = (0, _nest.createComponents)(update, {
-    air: _temperature.createTemperature,
-    water: _temperature.createTemperature
-  });
-
-  return {
-    model: (0, _nest.combineComponents)(components, "model"),
-    view: (0, _view.createView)(components)
-  };
-};
-
-/***/ }),
-
-/***/ 383:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var createView = exports.createView = function createView(components) {
-  return function (model) {
-    return React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "h4",
-        null,
-        "App"
-      ),
-      components.air.view(model),
-      components.water.view(model)
-    );
-  };
-};
-
-/***/ }),
-
-/***/ 384:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createTemperature = undefined;
-
-var _actions = __webpack_require__(385);
-
-var _view = __webpack_require__(386);
-
-var createTemperature = exports.createTemperature = function createTemperature(update) {
-  return {
-    model: function model() {
-      return {
-        date: "",
-        value: 20,
-        units: "C"
-      };
-    },
-
-    view: (0, _view.createView)((0, _actions.createActions)(update))
-  };
-};
-
-/***/ }),
-
-/***/ 385:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createActions = undefined;
-
-var _fp = __webpack_require__(338);
-
-var _fp2 = _interopRequireDefault(_fp);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var createActions = exports.createActions = function createActions(update) {
-  return {
-    editDate: function editDate(evt) {
-      return update(_fp2.default.set("date", evt.target.value));
-    },
-
-    increase: function increase(amount) {
-      return function () {
-        return update(_fp2.default.update("value", _fp2.default.add(amount)));
-      };
-    },
-
-    changeUnits: function changeUnits() {
-      return update(function (model) {
-        return (model.units === "C" ? _fp2.default.compose(_fp2.default.set("units", "F"), _fp2.default.set("value", Math.round(model.value * 9 / 5 + 32))) : _fp2.default.compose(_fp2.default.set("units", "C"), _fp2.default.set("value", Math.round((model.value - 32) / 9 * 5))))(model);
-      });
-    }
-  };
-};
-
-/***/ }),
-
-/***/ 386:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var createView = exports.createView = function createView(actions) {
-  return function (model) {
-    return React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "div",
-        null,
-        "Date: ",
-        React.createElement("input", { type: "text", size: "10", value: model.date, onChange: actions.editDate })
-      ),
-      React.createElement(
-        "span",
-        null,
-        "Temperature: ",
-        model.value,
-        "\xB0",
-        model.units,
-        " "
-      ),
-      React.createElement(
-        "div",
-        null,
-        React.createElement(
-          "button",
-          { onClick: actions.increase(1) },
-          "Increase"
-        ),
-        React.createElement(
-          "button",
-          { onClick: actions.increase(-1) },
-          "Decrease"
-        )
-      ),
-      React.createElement(
-        "div",
-        null,
-        React.createElement(
-          "button",
-          { onClick: actions.changeUnits },
-          "Change Units"
-        )
-      )
-    );
-  };
-};
-
-/***/ }),
-
-/***/ 387:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.combineComponents = exports.createComponents = exports.nestComponent = exports.nestUpdate = undefined;
-
-var _fp = __webpack_require__(338);
-
-var _fp2 = _interopRequireDefault(_fp);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var nestUpdate = exports.nestUpdate = function nestUpdate(update, path) {
-  return function (modelUpdate) {
-    return update(_fp2.default.update(path, modelUpdate));
-  };
-};
-
-var nestFunction = function nestFunction(path, fn) {
-  return function (model) {
-    return fn(_fp2.default.get(path, model));
-  };
-};
-
-var noNest = function noNest(path, fn) {
-  return fn;
-};
-
-var defaultConfig = {
-  view: nestFunction
-};
-
-var nestComponent = exports.nestComponent = function nestComponent(create, update, path, customConfig) {
-  var config = customConfig ? Object.assign({}, defaultConfig, customConfig) : defaultConfig;
-
-  var component = create(nestUpdate(update, path));
-  var nestedComponent = Object.keys(component).reduce(function (result, key) {
-    var modifier = _fp2.default.defaultTo(noNest, config[key]);
-    return _fp2.default.set(key, modifier(path, component[key]), result);
-  }, {});
-  return nestedComponent;
-};
-
-var createComponents = exports.createComponents = function createComponents(update, componentStructure, customConfig) {
-  return Object.keys(componentStructure).reduce(function (result, path) {
-    return _fp2.default.set(path, nestComponent(_fp2.default.get(path, componentStructure), update, path, customConfig), result);
-  }, {});
-};
-
-var combineComponents = exports.combineComponents = function combineComponents(components, componentKey) {
-  return function (model) {
-    return Object.keys(components).reduce(function (result, key) {
-      var target = _fp2.default.get([key, componentKey], components);
-      if (target) {
-        result = _fp2.default.set(key, target(model), result);
-      }
-      return result;
-    }, {});
-  };
-};
 
 /***/ })
 

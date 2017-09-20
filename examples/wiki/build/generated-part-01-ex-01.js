@@ -6,9 +6,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -32,9 +32,6 @@
 /******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
 /******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
@@ -63,155 +60,12 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 551);
+/******/ 	return __webpack_require__(__webpack_require__.s = 350);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 106:
-/***/ (function(module, exports, __webpack_require__) {
-
-var _arity = __webpack_require__(70);
-var _curry1 = __webpack_require__(71);
-var _curry2 = __webpack_require__(107);
-var _curryN = __webpack_require__(108);
-
-
-/**
- * Returns a curried equivalent of the provided function, with the specified
- * arity. The curried function has two unusual capabilities. First, its
- * arguments needn't be provided one at a time. If `g` is `R.curryN(3, f)`, the
- * following are equivalent:
- *
- *   - `g(1)(2)(3)`
- *   - `g(1)(2, 3)`
- *   - `g(1, 2)(3)`
- *   - `g(1, 2, 3)`
- *
- * Secondly, the special placeholder value `R.__` may be used to specify
- * "gaps", allowing partial application of any combination of arguments,
- * regardless of their positions. If `g` is as above and `_` is `R.__`, the
- * following are equivalent:
- *
- *   - `g(1, 2, 3)`
- *   - `g(_, 2, 3)(1)`
- *   - `g(_, _, 3)(1)(2)`
- *   - `g(_, _, 3)(1, 2)`
- *   - `g(_, 2)(1)(3)`
- *   - `g(_, 2)(1, 3)`
- *   - `g(_, 2)(_, 3)(1)`
- *
- * @func
- * @memberOf R
- * @since v0.5.0
- * @category Function
- * @sig Number -> (* -> a) -> (* -> a)
- * @param {Number} length The arity for the returned function.
- * @param {Function} fn The function to curry.
- * @return {Function} A new, curried function.
- * @see R.curry
- * @example
- *
- *      var sumArgs = (...args) => R.sum(args);
- *
- *      var curriedAddFourNumbers = R.curryN(4, sumArgs);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
- *      g(4); //=> 10
- */
-module.exports = _curry2(function curryN(length, fn) {
-  if (length === 1) {
-    return _curry1(fn);
-  }
-  return _arity(length, _curryN(length, [], fn));
-});
-
-
-/***/ }),
-
-/***/ 107:
-/***/ (function(module, exports, __webpack_require__) {
-
-var _curry1 = __webpack_require__(71);
-var _isPlaceholder = __webpack_require__(38);
-
-
-/**
- * Optimized internal two-arity curry function.
- *
- * @private
- * @category Function
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-module.exports = function _curry2(fn) {
-  return function f2(a, b) {
-    switch (arguments.length) {
-      case 0:
-        return f2;
-      case 1:
-        return _isPlaceholder(a) ? f2
-             : _curry1(function(_b) { return fn(a, _b); });
-      default:
-        return _isPlaceholder(a) && _isPlaceholder(b) ? f2
-             : _isPlaceholder(a) ? _curry1(function(_a) { return fn(_a, b); })
-             : _isPlaceholder(b) ? _curry1(function(_b) { return fn(a, _b); })
-             : fn(a, b);
-    }
-  };
-};
-
-
-/***/ }),
-
-/***/ 108:
-/***/ (function(module, exports, __webpack_require__) {
-
-var _arity = __webpack_require__(70);
-var _isPlaceholder = __webpack_require__(38);
-
-
-/**
- * Internal curryN function.
- *
- * @private
- * @category Function
- * @param {Number} length The arity of the curried function.
- * @param {Array} received An array of arguments received thus far.
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-module.exports = function _curryN(length, received, fn) {
-  return function() {
-    var combined = [];
-    var argsIdx = 0;
-    var left = length;
-    var combinedIdx = 0;
-    while (combinedIdx < received.length || argsIdx < arguments.length) {
-      var result;
-      if (combinedIdx < received.length &&
-          (!_isPlaceholder(received[combinedIdx]) ||
-           argsIdx >= arguments.length)) {
-        result = received[combinedIdx];
-      } else {
-        result = arguments[argsIdx];
-        argsIdx += 1;
-      }
-      combined[combinedIdx] = result;
-      if (!_isPlaceholder(result)) {
-        left -= 1;
-      }
-      combinedIdx += 1;
-    }
-    return left <= 0 ? fn.apply(this, combined)
-                     : _arity(left, _curryN(length, combined, fn));
-  };
-};
-
-
-/***/ }),
-
-/***/ 38:
+/***/ 10:
 /***/ (function(module, exports) {
 
 module.exports = function _isPlaceholder(a) {
@@ -223,73 +77,7 @@ module.exports = function _isPlaceholder(a) {
 
 /***/ }),
 
-/***/ 551:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _flyd = __webpack_require__(72);
-
-var _flyd2 = _interopRequireDefault(_flyd);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var element = document.getElementById("app");
-
-var total = 3;
-
-for (var n = 1; n <= total; n++) {
-  element.innerHTML = element.innerHTML + "<div id='stream" + n + "'>Stream " + n + " values:</div>";
-}
-
-var log = function log(number) {
-  return function (value) {
-    var streamElement = document.getElementById("stream" + number);
-    streamElement.innerHTML = streamElement.innerHTML + " " + value;
-  };
-};
-
-var stream1 = _flyd2.default.stream();
-stream1.map(log(1));
-stream1(5);
-stream1("2 pancakes");
-log(1)(stream1());
-
-var amounts = _flyd2.default.stream();
-var add = function add(total, next) {
-  return total + next;
-};
-
-var stream2 = _flyd2.default.scan(add, 0, amounts);
-stream2.map(log(2));
-
-amounts(2);
-amounts(3);
-amounts(4);
-
-var operations = _flyd2.default.stream();
-
-var applyOperation = function applyOperation(total, nextOperation) {
-  if (nextOperation.operation === "add") {
-    total = total + nextOperation.value;
-  } else if (nextOperation.operation === "sub") {
-    total = total - nextOperation.value;
-  }
-  return total;
-};
-
-var stream3 = _flyd2.default.scan(applyOperation, 0, operations);
-stream3.map(log(3));
-
-operations({ operation: "add", value: 4 });
-operations({ operation: "sub", value: 6 });
-operations({ operation: "add", value: 10 });
-operations({ operation: "add", value: 5 });
-
-/***/ }),
-
-/***/ 70:
+/***/ 15:
 /***/ (function(module, exports) {
 
 module.exports = function _arity(n, fn) {
@@ -313,10 +101,10 @@ module.exports = function _arity(n, fn) {
 
 /***/ }),
 
-/***/ 71:
+/***/ 16:
 /***/ (function(module, exports, __webpack_require__) {
 
-var _isPlaceholder = __webpack_require__(38);
+var _isPlaceholder = __webpack_require__(10);
 
 
 /**
@@ -340,13 +128,13 @@ module.exports = function _curry1(fn) {
 
 /***/ }),
 
-/***/ 72:
+/***/ 25:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var curryN = __webpack_require__(106);
+var curryN = __webpack_require__(26);
 
 // Utility
 function isFunction(obj) {
@@ -974,6 +762,215 @@ StreamTransformer.prototype['@@transducer/step'] = function(s, v) { return v; };
 
 module.exports = flyd;
 
+
+/***/ }),
+
+/***/ 26:
+/***/ (function(module, exports, __webpack_require__) {
+
+var _arity = __webpack_require__(15);
+var _curry1 = __webpack_require__(16);
+var _curry2 = __webpack_require__(27);
+var _curryN = __webpack_require__(28);
+
+
+/**
+ * Returns a curried equivalent of the provided function, with the specified
+ * arity. The curried function has two unusual capabilities. First, its
+ * arguments needn't be provided one at a time. If `g` is `R.curryN(3, f)`, the
+ * following are equivalent:
+ *
+ *   - `g(1)(2)(3)`
+ *   - `g(1)(2, 3)`
+ *   - `g(1, 2)(3)`
+ *   - `g(1, 2, 3)`
+ *
+ * Secondly, the special placeholder value `R.__` may be used to specify
+ * "gaps", allowing partial application of any combination of arguments,
+ * regardless of their positions. If `g` is as above and `_` is `R.__`, the
+ * following are equivalent:
+ *
+ *   - `g(1, 2, 3)`
+ *   - `g(_, 2, 3)(1)`
+ *   - `g(_, _, 3)(1)(2)`
+ *   - `g(_, _, 3)(1, 2)`
+ *   - `g(_, 2)(1)(3)`
+ *   - `g(_, 2)(1, 3)`
+ *   - `g(_, 2)(_, 3)(1)`
+ *
+ * @func
+ * @memberOf R
+ * @since v0.5.0
+ * @category Function
+ * @sig Number -> (* -> a) -> (* -> a)
+ * @param {Number} length The arity for the returned function.
+ * @param {Function} fn The function to curry.
+ * @return {Function} A new, curried function.
+ * @see R.curry
+ * @example
+ *
+ *      var sumArgs = (...args) => R.sum(args);
+ *
+ *      var curriedAddFourNumbers = R.curryN(4, sumArgs);
+ *      var f = curriedAddFourNumbers(1, 2);
+ *      var g = f(3);
+ *      g(4); //=> 10
+ */
+module.exports = _curry2(function curryN(length, fn) {
+  if (length === 1) {
+    return _curry1(fn);
+  }
+  return _arity(length, _curryN(length, [], fn));
+});
+
+
+/***/ }),
+
+/***/ 27:
+/***/ (function(module, exports, __webpack_require__) {
+
+var _curry1 = __webpack_require__(16);
+var _isPlaceholder = __webpack_require__(10);
+
+
+/**
+ * Optimized internal two-arity curry function.
+ *
+ * @private
+ * @category Function
+ * @param {Function} fn The function to curry.
+ * @return {Function} The curried function.
+ */
+module.exports = function _curry2(fn) {
+  return function f2(a, b) {
+    switch (arguments.length) {
+      case 0:
+        return f2;
+      case 1:
+        return _isPlaceholder(a) ? f2
+             : _curry1(function(_b) { return fn(a, _b); });
+      default:
+        return _isPlaceholder(a) && _isPlaceholder(b) ? f2
+             : _isPlaceholder(a) ? _curry1(function(_a) { return fn(_a, b); })
+             : _isPlaceholder(b) ? _curry1(function(_b) { return fn(a, _b); })
+             : fn(a, b);
+    }
+  };
+};
+
+
+/***/ }),
+
+/***/ 28:
+/***/ (function(module, exports, __webpack_require__) {
+
+var _arity = __webpack_require__(15);
+var _isPlaceholder = __webpack_require__(10);
+
+
+/**
+ * Internal curryN function.
+ *
+ * @private
+ * @category Function
+ * @param {Number} length The arity of the curried function.
+ * @param {Array} received An array of arguments received thus far.
+ * @param {Function} fn The function to curry.
+ * @return {Function} The curried function.
+ */
+module.exports = function _curryN(length, received, fn) {
+  return function() {
+    var combined = [];
+    var argsIdx = 0;
+    var left = length;
+    var combinedIdx = 0;
+    while (combinedIdx < received.length || argsIdx < arguments.length) {
+      var result;
+      if (combinedIdx < received.length &&
+          (!_isPlaceholder(received[combinedIdx]) ||
+           argsIdx >= arguments.length)) {
+        result = received[combinedIdx];
+      } else {
+        result = arguments[argsIdx];
+        argsIdx += 1;
+      }
+      combined[combinedIdx] = result;
+      if (!_isPlaceholder(result)) {
+        left -= 1;
+      }
+      combinedIdx += 1;
+    }
+    return left <= 0 ? fn.apply(this, combined)
+                     : _arity(left, _curryN(length, combined, fn));
+  };
+};
+
+
+/***/ }),
+
+/***/ 350:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _flyd = __webpack_require__(25);
+
+var _flyd2 = _interopRequireDefault(_flyd);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var element = document.getElementById("app");
+
+var total = 3;
+
+for (var n = 1; n <= total; n++) {
+  element.innerHTML = element.innerHTML + "<div id='stream" + n + "'>Stream " + n + " values:</div>";
+}
+
+var log = function log(number) {
+  return function (value) {
+    var streamElement = document.getElementById("stream" + number);
+    streamElement.innerHTML = streamElement.innerHTML + " " + value;
+  };
+};
+
+var stream1 = _flyd2.default.stream();
+stream1.map(log(1));
+stream1(5);
+stream1("2 pancakes");
+log(1)(stream1());
+
+var amounts = _flyd2.default.stream();
+var add = function add(total, next) {
+  return total + next;
+};
+
+var stream2 = _flyd2.default.scan(add, 0, amounts);
+stream2.map(log(2));
+
+amounts(2);
+amounts(3);
+amounts(4);
+
+var operations = _flyd2.default.stream();
+
+var applyOperation = function applyOperation(total, nextOperation) {
+  if (nextOperation.operation === "add") {
+    total = total + nextOperation.value;
+  } else if (nextOperation.operation === "sub") {
+    total = total - nextOperation.value;
+  }
+  return total;
+};
+
+var stream3 = _flyd2.default.scan(applyOperation, 0, operations);
+stream3.map(log(3));
+
+operations({ operation: "add", value: 4 });
+operations({ operation: "sub", value: 6 });
+operations({ operation: "add", value: 10 });
+operations({ operation: "add", value: 5 });
 
 /***/ })
 

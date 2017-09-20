@@ -16,3 +16,9 @@ span.has-error {
 #tracer {
   font-size: 8pt;
 }
+h4 {
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  border: 1px solid #e7e7e7;
+  padding: 8px;
+}

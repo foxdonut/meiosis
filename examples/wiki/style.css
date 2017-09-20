@@ -8,3 +8,8 @@ label, .control-label {
   width: 100%;
   height: 40px;
 }
+#tracer {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
