@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Meiosis manages the data flow of your web applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,8 +23,8 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "flyd": "^0.2.4",
-    "ts-loader": "^2.3.6",
-    "typescript": "^2.5.2",
-    "webpack": "^3.5.6"
+    "ts-loader": "^2.3.7",
+    "typescript": "^2.5.3",
+    "webpack": "^3.6.0"
   }
 }

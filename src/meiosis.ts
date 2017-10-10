@@ -79,9 +79,7 @@ export function trace<M>(params: TraceParameters<M>): void {
     let devtoolInitialized: boolean = false;
     let sendValues: boolean = true;
 
-    let liveChange: Date = new Date();
-    let lastChange: Date = liveChange;
-    params.update.map(() => liveChange = new Date());
+    let liveChange = true;
 
     const lastStream = params.dataStreams[params.dataStreams.length - 1];
 
@@ -110,7 +108,8 @@ export function trace<M>(params: TraceParameters<M>): void {
     window.addEventListener("message", evt => {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
         sendValues = evt.data.sendValuesBack;
-        params.dataStreams[0](fromJS(evt.data.model));
+        liveChange = false;
+        params.update(() => fromJS(evt.data.model));
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
         devtoolInitialized = true;
@@ -130,20 +129,18 @@ export function trace<M>(params: TraceParameters<M>): void {
     });
 
     lastStream.map(() => {
-      const update: boolean = liveChange !== lastChange;
-      lastChange = liveChange;
-
-      if (sendValues || update) {
+      if (sendValues || liveChange) {
         const values: Array<any> = params.dataStreams.map((stream: Stream<any>) =>
           ({ value: toJS(stream()) }));
 
         if (devtoolInitialized) {
-          window.postMessage({ type: "MEIOSIS_VALUES", values, update }, "*");
+          window.postMessage({ type: "MEIOSIS_VALUES", values, update: true }, "*");
         }
         else {
           bufferedValues.push(values);
         }
       }
+      liveChange = true;
     });
 
     // Send ping in case tracer was already loaded.
