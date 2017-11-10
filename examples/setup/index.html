@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="shortcut icon" size="16x16, 32x32, 48x48, 64x64, 128x128, 256x256" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/public/css/bootstrap.yeti.min.css">
+    <link rel="stylesheet" href="/examples/setup/style.css">
+    <title>Meiosis Setup</title>
+  </head>
+  <body class="container">
+    <div class="row">
+      <div class="col-md-1">
+        <a href="http://meiosis.js.org" target="_blank"><img src="/public/images/meiosis.png" style="margin-right: 8px; margin-top: 8px" width="53px"></a>
+      </div>
+      <div class="col-md-8">
+        <h2>Meiosis Setup</h2>
+      </div>
+    </div>
+    <div><a href="/examples.html">Back to list of examples</a></div>
+    <div><a href="https://github.com/foxdonut/meiosis-examples/tree/master/examples/setup" target="_blank">Source code</a></div>
+    <hr>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>Alphabetical<br></th>
+          <th>Speed<sup>1</sup><br>1 is fastest</th>
+          <th>Size<sup>2</sup><br>1 is smallest</th>
+          <th>Combined<br>(Speed+Size)</th>
+        </tr>
+        <tr>
+          <td>
+            <ol>
+              <li><a href="https://github.com/anthonyshort/deku" target="_blank">[site]</a> <a href="deku/index.html">Deku</a></li>
+              <li><a href="https://dio.js.org/" target="_blank">[site]</a> <a href="diojs/index.html">DIO</a></li>
+              <li class="hl"><a href="https://github.com/leeoniya/domvm" target="_blank">[site]</a> <a href="domvm/index.html">Domvm</a></li>
+              <li><a href="https://infernojs.org/" target="_blank">[site]</a> <a href="inferno/index.html">Inferno</a></li>
+              <li><a href="http://mithril.js.org/" target="_blank">[site]</a> <a href="mithril/index.html">Mithril</a></li>
+              <li class="hl"><a href="https://github.com/yelouafi/petit-dom" target="_blank">[site]</a> <a href="petit-dom/index.html">Petit-dom</a></li>
+              <li><a href="https://github.com/picodom/picodom" target="_blank">[site]</a> <a href="picodom/index.html">Picodom</a></li>
+              <li><a href="https://preactjs.com/" target="_blank">[site]</a> <a href="preact/index.html">Preact</a></li>
+              <li><a href="https://reactjs.org/" target="_blank">[site]</a> <a href="react/index.html">React</a></li>
+              <li><a href="https://github.com/snabbdom/snabbdom/" target="_blank">[site]</a> <a href="snabbdom/index.html">Snabbdom</a></li>
+            </ol>
+          </td>
+          <td>
+            <ol>
+              <li class="hl"><a href="petit-dom/index.html">Petit-dom</a></li>
+              <li><a href="inferno/index.html">Inferno</a></li>
+              <li class="hl"><a href="domvm/index.html">Domvm</a></li>
+              <li><a href="diojs/index.html">DIO</a></li>
+              <li><a href="snabbdom/index.html">Snabbdom</a></li>
+              <li><a href="preact/index.html">Preact</a></li>
+              <li><a href="mithril/index.html">Mithril</a></li>
+              <li><a href="react/index.html">React</a></li>
+              <li><a href="deku/index.html">Deku</a></li>
+              <li><a href="picodom/index.html">Picodom</a></li>
+            </ol>
+          </td>
+          <td>
+            <ol>
+              <li><a href="picodom/index.html">Picodom</a></li>
+              <li class="hl"><a href="domvm/index.html">Domvm</a></li>
+              <li class="hl"><a href="petit-dom/index.html">Petit-dom</a></li>
+              <li><a href="preact/index.html">Preact</a></li>
+              <li><a href="snabbdom/index.html">Snabbdom</a></li>
+              <li><a href="deku/index.html">Deku</a></li>
+              <li><a href="mithril/index.html">Mithril</a></li>
+              <li><a href="diojs/index.html">DIO</a></li>
+              <li><a href="inferno/index.html">Inferno</a></li>
+              <li><a href="react/index.html">React</a></li>
+            </ol>
+          </td>
+          <td>
+            <ul>
+              <li class="hl">4. <a href="petit-dom/index.html">Petit-dom</a></li>
+              <li class="hl">5. <a href="domvm/index.html">Domvm</a></li>
+              <li>10. <a href="preact/index.html">Preact</a></li>
+              <li>10. <a href="snabbdom/index.html">Snabbdom</a></li>
+              <li>11. <a href="inferno/index.html">Inferno</a></li>
+              <li>11. <a href="picodom/index.html">Picodom</a></li>
+              <li>12. <a href="diojs/index.html">DIO</a></li>
+              <li>14. <a href="mithril/index.html">Mithril</a></li>
+              <li>15. <a href="deku/index.html">Deku</a></li>
+              <li>18. <a href="react/index.html">React</a></li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!--
+      Bobril: http://bobril.com (no formal JSX support, difficult/incompatible event handling.)
+      High speed, large size.
+
+      Ivi: https://github.com/ivijs/ivi (not designed for JSX support.)
+      High speed, large size.
+
+      Maquette: https://maquettejs.org (different setup, difficult/incompatible event handling - no higher-order functions allowed.)
+      Low speed, medium size.
+
+      Vidom: https://github.com/dfilatov/vidom (does not have JSX-compatible function, needs separate JSX plugin istead.)
+      Medium speed, medium-large size.
+    -->
+
+    <div>
+      <ul>
+        <li><sup>1</sup> <small>Speed based on running <a href="https://github.com/krausest/js-framework-benchmark" target="_blank">js-framework-benchmark</a> on my local machine.</small></li>
+        <li><sup>2</sup> <small>Size based on bundle generated by <a href="https://webpack.github.io/" target="_blank">Webpack</a>.</small></li>
+      </ul>
+    </div>
+  </body>
+</html>
