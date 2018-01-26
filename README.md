@@ -25,7 +25,7 @@ are using events, simulate behaviour by triggering new events.
 
 For documentation please refer to the [Meiosis Wiki](https://github.com/foxdonut/meiosis/wiki).
 
-Try out the examples online: http://meiosis.js.org/examples.index.html
+Try out the examples online: http://meiosis.js.org/examples.html
 
 Example code: https://github.com/foxdonut/meiosis-examples
 
