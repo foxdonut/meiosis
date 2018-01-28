@@ -1639,7 +1639,8 @@ var coreRenderer = function($window) {
 		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
-		if ($doc.activeElement !== active) active.focus()
+		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+		if (active != null && $doc.activeElement !== active) active.focus()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
@@ -1905,7 +1906,7 @@ m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.1.3"
+m.version = "1.1.4"
 m.vnode = Vnode
 if (true) module["exports"] = m
 else window.m = m
@@ -3281,7 +3282,7 @@ module.exports = _curry3(function mergeDeepWithKey(fn, lObj, rObj) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createRandomGif = exports.randomGifEvent = undefined;
+exports.createRandomGif = exports.randomGif = exports.randomGifEvent = undefined;
 
 var _mithril = __webpack_require__(14);
 
@@ -3328,47 +3329,72 @@ var imgsrc = function imgsrc(model) {
 
 var randomGifEvent = exports.randomGifEvent = _util.Case.cases(["newGifSuccess"]);
 
-var createRandomGif = exports.createRandomGif = function createRandomGif(event, id) {
-  return function (update) {
-    var editTag = function editTag(evt) {
-      return update((0, _ramda.assoc)("tag", evt.target.value));
-    };
+var editTag = function editTag(update) {
+  return function (evt) {
+    return update((0, _ramda.assoc)("tag", evt.target.value));
+  };
+};
 
-    var newGif = function newGif(id, tag) {
-      return function () {
-        update(function (model) {
-          return (0, _ramda.merge)(model, newGifStart());
-        });
-        _mithril2.default.request({ url: gif_new_url, data: { api_key: api_key, tag: tag } }).then(function (response) {
-          return update(function (model) {
-            return (0, _ramda.merge)(model, newGifSuccess(response.data));
-          });
-        }).then(function () {
-          return event(_util.Case.of(randomGifEvent.newGifSuccess, id));
-        }).catch(function () {
-          return update(function (model) {
-            return (0, _ramda.merge)(model, newGifError());
-          });
-        });
-      };
-    };
+var newGif = function newGif(_ref) {
+  var update = _ref.update,
+      event = _ref.event,
+      id = _ref.id,
+      tag = _ref.tag;
+  return function () {
+    update(function (model) {
+      return (0, _ramda.merge)(model, newGifStart());
+    });
+    _mithril2.default.request({ url: gif_new_url, data: { api_key: api_key, tag: tag } }).then(function (response) {
+      return update(function (model) {
+        return (0, _ramda.merge)(model, newGifSuccess(response.data));
+      });
+    }).then(function () {
+      return event(_util.Case.of(randomGifEvent.newGifSuccess, id));
+    }).catch(function () {
+      return update(function (model) {
+        return (0, _ramda.merge)(model, newGifError());
+      });
+    });
+  };
+};
+
+var randomGif = exports.randomGif = {
+  model: function model(id) {
+    id = id || _uuid2.default.v1();
 
     return {
-      model: function model() {
-        id = id || _uuid2.default.v1();
+      id: id,
+      isLoading: false,
+      isError: false,
+      tag: "",
+      image_url: ""
+    };
+  },
 
-        return {
-          id: id,
-          isLoading: false,
-          isError: false,
-          tag: "",
-          image_url: ""
-        };
+  reload: function reload(_ref2) {
+    var update = _ref2.update,
+        event = _ref2.event,
+        model = _ref2.model;
+    return newGif({ update: update, event: event, id: model.id, tag: model.tag })();
+  },
+
+  view: function view(_ref3) {
+    var event = _ref3.event,
+        update = _ref3.update;
+    return function (model) {
+      return (0, _mithril2.default)("div.ma2.ba.b--green.pa2", [(0, _mithril2.default)("span.mr2", "Tag:"), (0, _mithril2.default)("input.mr2[type=text]", { value: model.tag, onkeyup: editTag(update) }), (0, _mithril2.default)("button.db.mt2.white.bg-blue.b--blue.ba.br2.pv1.ph2.link.w4", { onclick: newGif({ update: update, event: event, id: model.id, tag: model.tag }) }, "Random Gif"), (0, _mithril2.default)("div.mt2", [(0, _mithril2.default)("img", { width: 200, height: 200, src: imgsrc(model) })])]);
+    };
+  }
+};
+
+var createRandomGif = exports.createRandomGif = function createRandomGif(event, id) {
+  return function (update) {
+    return {
+      model: function model() {
+        return randomGif.model(id);
       },
 
-      view: function view(model) {
-        return (0, _mithril2.default)("div.ma2.ba.b--green.pa2", [(0, _mithril2.default)("span.mr2", "Tag:"), (0, _mithril2.default)("input.mr2[type=text]", { value: model.tag, onkeyup: editTag }), (0, _mithril2.default)("button.db.mt2.white.bg-blue.b--blue.ba.br2.pv1.ph2.link.w4", { onclick: newGif(model.id, model.tag) }, "Random Gif"), (0, _mithril2.default)("div.mt2", [(0, _mithril2.default)("img", { width: 200, height: 200, src: imgsrc(model) })])]);
-      }
+      view: randomGif.view({ event: event, update: update })
     };
   };
 };
@@ -14752,24 +14778,21 @@ var _uuid = __webpack_require__(126);
 
 var _uuid2 = _interopRequireDefault(_uuid);
 
+var _ramda = __webpack_require__(22);
+
 var _randomGif = __webpack_require__(47);
 
 var _nest = __webpack_require__(21);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var randomGifComponentsById = {};
-
-var add = function add(update, event) {
+var add = function add(update) {
   return function () {
     return update(function (model) {
       var id = _uuid2.default.v1();
 
-      var randomGifComponent = (0, _nest.nestComponent)((0, _randomGif.createRandomGif)(event, id), update, ["randomGifsById", id]);
-      randomGifComponentsById[id] = randomGifComponent;
-
       model.randomGifIds.push(id);
-      model.randomGifsById[id] = randomGifComponent.model();
+      model.randomGifsById[id] = _randomGif.randomGif.model(id);
 
       return model;
     });
@@ -14786,11 +14809,27 @@ var remove = function remove(update, id) {
   };
 };
 
+var reloadAll = function reloadAll(_ref) {
+  var update = _ref.update,
+      event = _ref.event,
+      model = _ref.model;
+  return function () {
+    return (0, _ramda.values)(model.randomGifsById).forEach(function (model) {
+      return _randomGif.randomGif.reload({ update: (0, _nest.nestUpdate)(update, ["randomGifsById", model.id]), event: event, model: model });
+    });
+  };
+};
+
+var buttonStyle = "button.f8.link.dim.ph2.br2.ba.blue.b--blue.bg-white";
+
 var createRandomGifList = exports.createRandomGifList = function createRandomGifList(event) {
   return function (update) {
     var renderRandomGif = function renderRandomGif(model) {
       return function (id) {
-        return (0, _mithril2.default)("div.dib", { key: id }, [randomGifComponentsById[id].view(model), (0, _mithril2.default)("button.f8.link.dim.ph2.br2.ba.red.b--red.bg-white", { onclick: remove(update, id) }, "Remove")]);
+        return (0, _mithril2.default)("div.dib", { key: id }, [_randomGif.randomGif.view({
+          event: event,
+          update: (0, _nest.nestUpdate)(update, ["randomGifsById", id])
+        })(model.randomGifsById[id]), (0, _mithril2.default)("button.f8.link.dim.ph2.br2.ba.red.b--red.bg-white", { onclick: remove(update, id) }, "Remove")]);
       };
     };
 
@@ -14802,7 +14841,7 @@ var createRandomGifList = exports.createRandomGifList = function createRandomGif
         };
       },
       view: function view(model) {
-        return (0, _mithril2.default)("div.ba.br2.b--orange.pa2", [(0, _mithril2.default)("div", [(0, _mithril2.default)("button.f8.link.dim.ph2.br2.ba.blue.b--blue.bg-white", { onclick: add(update, event) }, "Add")]), (0, _mithril2.default)("div", model.randomGifIds.map(renderRandomGif(model)))]);
+        return (0, _mithril2.default)("div.ba.br2.b--orange.pa2", [(0, _mithril2.default)("div", "Contains one or more gifs: ", String((0, _ramda.any)((0, _ramda.prop)("image_url"), (0, _ramda.values)(model.randomGifsById)))), (0, _mithril2.default)("div", [(0, _mithril2.default)(buttonStyle, { onclick: add(update) }, "Add"), (0, _mithril2.default)(buttonStyle + ".ml1", { onclick: reloadAll({ update: update, event: event, model: model }) }, "Reload All")]), (0, _mithril2.default)("div", model.randomGifIds.map(renderRandomGif(model)))]);
       }
     };
   };
@@ -14926,9 +14965,7 @@ function trace(params) {
         var bufferedStreamValues_1 = [];
         var devtoolInitialized_1 = false;
         var sendValues_1 = true;
-        var liveChange_1 = new Date();
-        var lastChange_1 = liveChange_1;
-        params.update.map(function () { return liveChange_1 = new Date(); });
+        var liveChange_1 = true;
         var lastStream = params.dataStreams[params.dataStreams.length - 1];
         var otherStreamIds_1 = [];
         var otherStreamsById_1 = {};
@@ -14951,7 +14988,8 @@ function trace(params) {
         window.addEventListener("message", function (evt) {
             if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
                 sendValues_1 = evt.data.sendValuesBack;
-                params.dataStreams[0](fromJS_1(evt.data.model));
+                liveChange_1 = false;
+                params.update(function () { return fromJS_1(evt.data.model); });
             }
             else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
                 devtoolInitialized_1 = true;
@@ -14968,19 +15006,18 @@ function trace(params) {
             }
         });
         lastStream.map(function () {
-            var update = liveChange_1 !== lastChange_1;
-            lastChange_1 = liveChange_1;
-            if (sendValues_1 || update) {
+            if (sendValues_1 || liveChange_1) {
                 var values = params.dataStreams.map(function (stream) {
                     return ({ value: toJS_1(stream()) });
                 });
                 if (devtoolInitialized_1) {
-                    window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: update }, "*");
+                    window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: true }, "*");
                 }
                 else {
                     bufferedValues_1.push(values);
                 }
             }
+            liveChange_1 = true;
         });
         window.postMessage({ type: "MEIOSIS_PING" }, "*");
     }
@@ -15029,9 +15066,6 @@ module.exports =
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -15059,11 +15093,40 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _meiosisTracer = __webpack_require__(1);
+
+/*
+1. Live change
+- receive values from meiosis with update=true. This will add to the tracer's history
+  and increase the slider max.
+- re-render the tracer view with update=true.
+
+2. Time-travel change
+- send MEIOSIS_RENDER_MODEL with sendValuesBack=false
+- we already have the values in the snapshot, so don't need anything back
+- re-render the tracer view with update=false.
+
+3. Typing in model textarea
+- send MEIOSIS_RENDER_MODEL with sendValuesBack=true. The tracer needs to get
+  the computed values from the other streams.
+- receive values from meiosis with update=false so this will not add to the tracer's history.
+- re-render the tracer view with update=false.
+*/
+
+module.exports = _meiosisTracer.meiosisTracer;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15076,9 +15139,9 @@ exports.meiosisTracer = undefined;
 
 var _model = __webpack_require__(2);
 
-var _view = __webpack_require__(4);
+var _view = __webpack_require__(3);
 
-var _receive = __webpack_require__(3);
+var _receive = __webpack_require__(5);
 
 window["__MEIOSIS_TRACER_GLOBAL_HOOK__"] = true;
 
@@ -15142,35 +15205,6 @@ var meiosisTracer = function meiosisTracer(_ref) {
 exports.meiosisTracer = meiosisTracer;
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _meiosisTracer = __webpack_require__(0);
-
-/*
-1. Live change
-- receive values from meiosis with update=true. This will add to the tracer's history
-  and increase the slider max.
-- re-render the tracer view with update=true.
-
-2. Time-travel change
-- send MEIOSIS_RENDER_MODEL with sendValuesBack=false
-- we already have the values in the snapshot, so don't need anything back
-- re-render the tracer view with update=false.
-
-3. Typing in model textarea
-- send MEIOSIS_RENDER_MODEL with sendValuesBack=true. The tracer needs to get
-  the computed values from the other streams.
-- receive values from meiosis with update=false so this will not add to the tracer's history.
-- re-render the tracer view with update=false.
-*/
-
-module.exports = _meiosisTracer.meiosisTracer;
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15198,31 +15232,9 @@ exports.tracerModel = tracerModel;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var createReceiveValues = function createReceiveValues(tracerModel, view) {
-  return function (values, update) {
-    if (update) {
-      tracerModel.tracerStates.push(values);
-      tracerModel.tracerIndex = tracerModel.tracerStates.length - 1;
-    }
-    view(values, tracerModel);
-  };
-};
-
-exports.createReceiveValues = createReceiveValues;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 exports.updateStreamValue = exports.initStreamIds = exports.reset = exports.tracerView = exports.initialView = undefined;
 
-var _jsonFormat = __webpack_require__(5);
+var _jsonFormat = __webpack_require__(4);
 
 var _jsonFormat2 = _interopRequireDefault(_jsonFormat);
 
@@ -15406,7 +15418,7 @@ exports.initStreamIds = initStreamIds;
 exports.updateStreamValue = updateStreamValue;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /*
@@ -15488,6 +15500,31 @@ module.exports = function(json, config){
   return JSONFormat(JSON.stringify(json), indentType);
 }
 
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var createReceiveValues = function createReceiveValues(tracerModel, view) {
+  return function (values, update) {
+    if (update) {
+      if (tracerModel.tracerStates.length > 0) {
+        tracerModel.tracerStates.length = tracerModel.tracerIndex + 1;
+      }
+      tracerModel.tracerStates.push(values);
+      tracerModel.tracerIndex = tracerModel.tracerStates.length - 1;
+    }
+    view(values, tracerModel);
+  };
+};
+
+exports.createReceiveValues = createReceiveValues;
 
 /***/ })
 /******/ ]);
