@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 91);
+/******/ 	return __webpack_require__(__webpack_require__.s = 118);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -68,36 +68,68 @@
 /***/ 0:
 /***/ (function(module, exports) {
 
-module.exports = function _isPlaceholder(a) {
-  return a != null &&
-         typeof a === 'object' &&
-         a['@@functional/placeholder'] === true;
-};
-
+function _isPlaceholder(a) {
+       return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;
+}
+module.exports = _isPlaceholder;
 
 /***/ }),
 
 /***/ 1:
 /***/ (function(module, exports) {
 
-module.exports = function _arity(n, fn) {
+function _arity(n, fn) {
   /* eslint-disable no-unused-vars */
   switch (n) {
-    case 0: return function() { return fn.apply(this, arguments); };
-    case 1: return function(a0) { return fn.apply(this, arguments); };
-    case 2: return function(a0, a1) { return fn.apply(this, arguments); };
-    case 3: return function(a0, a1, a2) { return fn.apply(this, arguments); };
-    case 4: return function(a0, a1, a2, a3) { return fn.apply(this, arguments); };
-    case 5: return function(a0, a1, a2, a3, a4) { return fn.apply(this, arguments); };
-    case 6: return function(a0, a1, a2, a3, a4, a5) { return fn.apply(this, arguments); };
-    case 7: return function(a0, a1, a2, a3, a4, a5, a6) { return fn.apply(this, arguments); };
-    case 8: return function(a0, a1, a2, a3, a4, a5, a6, a7) { return fn.apply(this, arguments); };
-    case 9: return function(a0, a1, a2, a3, a4, a5, a6, a7, a8) { return fn.apply(this, arguments); };
-    case 10: return function(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) { return fn.apply(this, arguments); };
-    default: throw new Error('First argument to _arity must be a non-negative integer no greater than ten');
+    case 0:
+      return function () {
+        return fn.apply(this, arguments);
+      };
+    case 1:
+      return function (a0) {
+        return fn.apply(this, arguments);
+      };
+    case 2:
+      return function (a0, a1) {
+        return fn.apply(this, arguments);
+      };
+    case 3:
+      return function (a0, a1, a2) {
+        return fn.apply(this, arguments);
+      };
+    case 4:
+      return function (a0, a1, a2, a3) {
+        return fn.apply(this, arguments);
+      };
+    case 5:
+      return function (a0, a1, a2, a3, a4) {
+        return fn.apply(this, arguments);
+      };
+    case 6:
+      return function (a0, a1, a2, a3, a4, a5) {
+        return fn.apply(this, arguments);
+      };
+    case 7:
+      return function (a0, a1, a2, a3, a4, a5, a6) {
+        return fn.apply(this, arguments);
+      };
+    case 8:
+      return function (a0, a1, a2, a3, a4, a5, a6, a7) {
+        return fn.apply(this, arguments);
+      };
+    case 9:
+      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8) {
+        return fn.apply(this, arguments);
+      };
+    case 10:
+      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+        return fn.apply(this, arguments);
+      };
+    default:
+      throw new Error('First argument to _arity must be a non-negative integer no greater than ten');
   }
-};
-
+}
+module.exports = _arity;
 
 /***/ }),
 
@@ -106,207 +138,16 @@ module.exports = function _arity(n, fn) {
 
 "use strict";
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var createActions = exports.createActions = function createActions(update) {
-  return {
-    togglePrecipitations: function togglePrecipitations(evt) {
-      return update(function (model) {
-        model.precipitations = evt.target.checked;
-        return model;
-      });
-    },
-
-    changePrecipitation: function changePrecipitation(evt) {
-      return update(function (model) {
-        model.precipitation = evt.target.value;
-        return model;
-      });
-    },
-
-    editDate: function editDate(evt) {
-      return update(function (model) {
-        model.date = evt.target.value;
-        return model;
-      });
-    },
-
-    increase: function increase(amount) {
-      return update(function (model) {
-        model.value = model.value + amount;
-        return model;
-      });
-    },
-
-    changeUnits: function changeUnits() {
-      return update(function (model) {
-        if (model.units === "C") {
-          model.units = "F";
-          model.value = Math.round(model.value * 9 / 5 + 32);
-        } else {
-          model.units = "C";
-          model.value = Math.round((model.value - 32) / 9 * 5);
-        }
-        return model;
-      });
-    }
-  };
-};
-
-/***/ }),
-
-/***/ 11:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createView = undefined;
-
-var _handler = __webpack_require__(12);
-
-var precipitationOption = function precipitationOption(_ref) {
-  var model = _ref.model,
-      actions = _ref.actions,
-      id = _ref.id,
-      value = _ref.value,
-      label = _ref.label;
-  return jsx(
-    "span",
-    null,
-    jsx("input", { type: "radio", id: id, name: "precipitation", value: value,
-      checked: model.precipitation === value,
-      onClick: (0, _handler.safe)(actions.changePrecipitation) }),
-    jsx(
-      "label",
-      { htmlFor: id },
-      label
-    )
-  );
-};
-
-var createView = exports.createView = function createView(actions) {
-  return function (model) {
-    return jsx(
-      "div",
-      null,
-      jsx(
-        "div",
-        null,
-        jsx("input", { type: "checkbox", checked: model.precipitations,
-          onClick: (0, _handler.safe)(actions.togglePrecipitations), id: "precipitations" }),
-        jsx(
-          "label",
-          { htmlFor: "precipitations" },
-          "Precipitations"
-        )
-      ),
-      jsx(
-        "div",
-        null,
-        precipitationOption({ model: model, actions: actions, id: "rain", value: "RAIN", label: "Rain" }),
-        precipitationOption({ model: model, actions: actions, id: "snow", value: "SNOW", label: "Snow" }),
-        precipitationOption({ model: model, actions: actions, id: "sleet", value: "SLEET", label: "Sleet" })
-      ),
-      jsx(
-        "div",
-        null,
-        "Date:",
-        jsx("input", { type: "text", size: "10", value: model.date, onInput: (0, _handler.safe)(actions.editDate) })
-      ),
-      jsx(
-        "span",
-        null,
-        "Temperature: "
-      ),
-      jsx(
-        "span",
-        { className: "tempValue" },
-        model.value
-      ),
-      "\xB0",
-      jsx(
-        "span",
-        { className: "tempUnits" },
-        model.units
-      ),
-      jsx(
-        "div",
-        null,
-        jsx(
-          "button",
-          { className: "btn btn-default increase", onClick: (0, _handler.wrap)(actions.increase, 1) },
-          "Increase"
-        ),
-        jsx(
-          "button",
-          { className: "btn btn-default decrease", onClick: (0, _handler.wrap)(actions.increase, -1) },
-          "Decrease"
-        )
-      ),
-      jsx(
-        "div",
-        null,
-        jsx(
-          "button",
-          { className: "btn btn-primary changeUnits", onClick: (0, _handler.safe)(actions.changeUnits) },
-          "Change Units"
-        )
-      )
-    );
-  };
-};
-
-/***/ }),
-
-/***/ 12:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var wrap = exports.wrap = function wrap(fn) {
-  var args = Array.from(arguments).slice(1);
-
-  return function (_evt) {
-    if (fn) {
-      fn.apply(null, args);
-    }
-  };
-};
-
-var safe = exports.safe = function safe(fn) {
-  if (fn) {
-    return fn;
-  }
-  return function (_evt) {};
-};
-
-/***/ }),
-
-/***/ 13:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(14));
+__export(__webpack_require__(11));
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 
-/***/ 14:
+/***/ 11:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -390,7 +231,56 @@ exports.trace = trace;
 
 /***/ }),
 
-/***/ 15:
+/***/ 118:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _setup = __webpack_require__(119);
+
+(0, _setup.setupApp)();
+
+/***/ }),
+
+/***/ 119:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setupApp = exports.setupRender = undefined;
+
+var _ultradom = __webpack_require__(120);
+
+var _common = __webpack_require__(13);
+
+var _jsx = __webpack_require__(16);
+
+var jsxUltradom = (0, _jsx.jsx)({
+  "onChange": "onchange",
+  "onClick": "onclick",
+  "onInput": "oninput"
+});
+
+var setupRender = exports.setupRender = function setupRender() {
+  global.jsx = jsxUltradom(_ultradom.h);
+  return function (view, element) {
+    return (0, _ultradom.patch)(view, element);
+  };
+};
+
+var setupApp = exports.setupApp = function setupApp() {
+  return (0, _common.setup)(setupRender());
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ }),
+
+/***/ 12:
 /***/ (function(module, exports) {
 
 module.exports =
@@ -901,6 +791,601 @@ exports.createReceiveValues = createReceiveValues;
 
 /***/ }),
 
+/***/ 120:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__h__ = __webpack_require__(121);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_0__h__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__patch__ = __webpack_require__(122);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "patch", function() { return __WEBPACK_IMPORTED_MODULE_1__patch__["a"]; });
+
+
+
+
+/***/ }),
+
+/***/ 121:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = h;
+function h(name, attributes) {
+  var rest = []
+  var children = []
+  var length = arguments.length
+
+  while (length-- > 2) rest.push(arguments[length])
+
+  while (rest.length) {
+    var node = rest.pop()
+    if (node && node.pop) {
+      for (length = node.length; length--; ) {
+        rest.push(node[length])
+      }
+    } else if (node != null && node !== true && node !== false) {
+      children.push(node)
+    }
+  }
+
+  return typeof name === "function"
+    ? name(attributes || {}, children) // h(Component)
+    : {
+        nodeName: name,
+        attributes: attributes || {},
+        children: children,
+        key: attributes && attributes.key
+      }
+}
+
+
+/***/ }),
+
+/***/ 122:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = patch;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__recycleElement__ = __webpack_require__(123);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__patchElement__ = __webpack_require__(124);
+
+
+
+function patch(node, element) {
+  var lifecycle = []
+
+  element = element
+    ? Object(__WEBPACK_IMPORTED_MODULE_1__patchElement__["a" /* patchElement */])(
+        element.parentNode,
+        element,
+        element.node == null ? Object(__WEBPACK_IMPORTED_MODULE_0__recycleElement__["a" /* recycleElement */])(element, [].map) : element.node,
+        node,
+        lifecycle,
+        element.node == null // isRecycling
+      )
+    : Object(__WEBPACK_IMPORTED_MODULE_1__patchElement__["a" /* patchElement */])(null, null, null, node, lifecycle)
+
+  element.node = node
+
+  while (lifecycle.length) lifecycle.pop()()
+
+  return element
+}
+
+
+/***/ }),
+
+/***/ 123:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = recycleElement;
+function recycleElement(element, map) {
+  return {
+    nodeName: element.nodeName.toLowerCase(),
+    attributes: {},
+    children: map.call(element.childNodes, function(element) {
+      return element.nodeType === 3 // Node.TEXT_NODE
+        ? element.nodeValue
+        : recycleElement(element, map)
+    })
+  }
+}
+
+
+/***/ }),
+
+/***/ 124:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = patchElement;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__createElement__ = __webpack_require__(125);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__removeElement__ = __webpack_require__(127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__updateElement__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__getKey__ = __webpack_require__(130);
+
+
+
+
+
+function patchElement(
+  parent,
+  element,
+  oldNode,
+  node,
+  lifecycle,
+  isRecycling,
+  isSVG
+) {
+  if (node === oldNode) {
+  } else if (oldNode == null || oldNode.nodeName !== node.nodeName) {
+    var newElement = Object(__WEBPACK_IMPORTED_MODULE_0__createElement__["a" /* createElement */])(node, lifecycle, isSVG)
+    if (parent) {
+      parent.insertBefore(newElement, element)
+      if (oldNode != null) {
+        Object(__WEBPACK_IMPORTED_MODULE_1__removeElement__["a" /* removeElement */])(parent, element, oldNode)
+      }
+    }
+    element = newElement
+  } else if (oldNode.nodeName == null) {
+    element.nodeValue = node
+  } else {
+    Object(__WEBPACK_IMPORTED_MODULE_2__updateElement__["a" /* updateElement */])(
+      element,
+      oldNode.attributes,
+      node.attributes,
+      lifecycle,
+      isRecycling,
+      (isSVG = isSVG || node.nodeName === "svg")
+    )
+
+    var oldKeyed = {}
+    var newKeyed = {}
+    var oldElements = []
+    var oldChildren = oldNode.children
+    var children = node.children
+
+    for (var i = 0; i < oldChildren.length; i++) {
+      oldElements[i] = element.childNodes[i]
+
+      var oldKey = Object(__WEBPACK_IMPORTED_MODULE_3__getKey__["a" /* getKey */])(oldChildren[i])
+      if (oldKey != null) {
+        oldKeyed[oldKey] = [oldElements[i], oldChildren[i]]
+      }
+    }
+
+    var i = 0
+    var k = 0
+
+    while (k < children.length) {
+      var oldKey = Object(__WEBPACK_IMPORTED_MODULE_3__getKey__["a" /* getKey */])(oldChildren[i])
+      var newKey = Object(__WEBPACK_IMPORTED_MODULE_3__getKey__["a" /* getKey */])(children[k])
+
+      if (newKeyed[oldKey]) {
+        i++
+        continue
+      }
+
+      if (newKey == null || isRecycling) {
+        if (oldKey == null) {
+          patchElement(
+            element,
+            oldElements[i],
+            oldChildren[i],
+            children[k],
+            lifecycle,
+            isRecycling,
+            isSVG
+          )
+          k++
+        }
+        i++
+      } else {
+        var keyedNode = oldKeyed[newKey] || []
+
+        if (oldKey === newKey) {
+          patchElement(
+            element,
+            keyedNode[0],
+            keyedNode[1],
+            children[k],
+            lifecycle,
+            isRecycling,
+            isSVG
+          )
+          i++
+        } else if (keyedNode[0]) {
+          patchElement(
+            element,
+            element.insertBefore(keyedNode[0], oldElements[i]),
+            keyedNode[1],
+            children[k],
+            lifecycle,
+            isRecycling,
+            isSVG
+          )
+        } else {
+          patchElement(
+            element,
+            oldElements[i],
+            null,
+            children[k],
+            lifecycle,
+            isRecycling,
+            isSVG
+          )
+        }
+
+        newKeyed[newKey] = children[k]
+        k++
+      }
+    }
+
+    while (i < oldChildren.length) {
+      if (Object(__WEBPACK_IMPORTED_MODULE_3__getKey__["a" /* getKey */])(oldChildren[i]) == null) {
+        Object(__WEBPACK_IMPORTED_MODULE_1__removeElement__["a" /* removeElement */])(element, oldElements[i], oldChildren[i])
+      }
+      i++
+    }
+
+    for (var i in oldKeyed) {
+      if (!newKeyed[i]) {
+        Object(__WEBPACK_IMPORTED_MODULE_1__removeElement__["a" /* removeElement */])(element, oldKeyed[i][0], oldKeyed[i][1])
+      }
+    }
+  }
+  return element
+}
+
+
+/***/ }),
+
+/***/ 125:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = createElement;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__updateAttribute__ = __webpack_require__(46);
+
+
+function createElement(node, lifecycle, isSVG) {
+  var element =
+    typeof node === "string" || typeof node === "number"
+      ? document.createTextNode(node)
+      : (isSVG = isSVG || node.nodeName === "svg")
+        ? document.createElementNS("http://www.w3.org/2000/svg", node.nodeName)
+        : document.createElement(node.nodeName)
+
+  var attributes = node.attributes
+  if (attributes) {
+    if (attributes.oncreate) {
+      lifecycle.push(function() {
+        attributes.oncreate(element)
+      })
+    }
+
+    for (var i = 0; i < node.children.length; i++) {
+      element.appendChild(createElement(node.children[i], lifecycle, isSVG))
+    }
+
+    for (var name in attributes) {
+      Object(__WEBPACK_IMPORTED_MODULE_0__updateAttribute__["a" /* updateAttribute */])(element, name, attributes[name], null, isSVG)
+    }
+  }
+
+  return element
+}
+
+
+/***/ }),
+
+/***/ 126:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = eventListener;
+function eventListener(event) {
+  return event.currentTarget.events[event.type](event)
+}
+
+
+/***/ }),
+
+/***/ 127:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = removeElement;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__removeChildren__ = __webpack_require__(128);
+
+
+function removeElement(parent, element, node) {
+  function done() {
+    parent.removeChild(Object(__WEBPACK_IMPORTED_MODULE_0__removeChildren__["a" /* removeChildren */])(element, node))
+  }
+
+  var cb = node.attributes && node.attributes.onremove
+  if (cb) {
+    cb(element, done)
+  } else {
+    done()
+  }
+}
+
+
+/***/ }),
+
+/***/ 128:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = removeChildren;
+function removeChildren(element, node) {
+  var attributes = node.attributes
+  if (attributes) {
+    for (var i = 0; i < node.children.length; i++) {
+      removeChildren(element.childNodes[i], node.children[i])
+    }
+
+    if (attributes.ondestroy) {
+      attributes.ondestroy(element)
+    }
+  }
+  return element
+}
+
+
+/***/ }),
+
+/***/ 129:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = updateElement;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clone__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__updateAttribute__ = __webpack_require__(46);
+
+
+
+function updateElement(
+  element,
+  oldAttributes,
+  attributes,
+  lifecycle,
+  isRecycling,
+  isSVG
+) {
+  for (var name in Object(__WEBPACK_IMPORTED_MODULE_0__clone__["a" /* clone */])(oldAttributes, attributes)) {
+    if (
+      attributes[name] !==
+      (name === "value" || name === "checked"
+        ? element[name]
+        : oldAttributes[name])
+    ) {
+      Object(__WEBPACK_IMPORTED_MODULE_1__updateAttribute__["a" /* updateAttribute */])(
+        element,
+        name,
+        attributes[name],
+        oldAttributes[name],
+        isSVG
+      )
+    }
+  }
+
+  var cb = isRecycling ? attributes.oncreate : attributes.onupdate
+  if (cb) {
+    lifecycle.push(function() {
+      cb(element, oldAttributes)
+    })
+  }
+}
+
+
+/***/ }),
+
+/***/ 13:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setup = undefined;
+
+var _flyd = __webpack_require__(4);
+
+var _flyd2 = _interopRequireDefault(_flyd);
+
+var _temperature = __webpack_require__(14);
+
+var _meiosis = __webpack_require__(10);
+
+var _meiosisTracer = __webpack_require__(12);
+
+var _meiosisTracer2 = _interopRequireDefault(_meiosisTracer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Only for using Meiosis Tracer in development.
+var setup = exports.setup = function setup(render) {
+  var update = _flyd2.default.stream();
+  var temperature = (0, _temperature.createTemperature)(update);
+  var initialModel = temperature.model();
+  var applyUpdate = function applyUpdate(model, modelUpdate) {
+    return modelUpdate(model);
+  };
+  var models = _flyd2.default.scan(applyUpdate, initialModel, update);
+
+  var element = document.getElementById("app");
+  models.map(function (model) {
+    return render(temperature.view(model), element);
+  });
+
+  // Only for using Meiosis Tracer in development.
+  (0, _meiosis.trace)({ update: update, dataStreams: [models] });
+  (0, _meiosisTracer2.default)({ selector: "#tracer" });
+
+  return { models: models, view: temperature.view, render: render, element: element };
+};
+
+/***/ }),
+
+/***/ 130:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = getKey;
+function getKey(node) {
+  return node ? node.key : null
+}
+
+
+/***/ }),
+
+/***/ 14:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createTemperature = undefined;
+
+var _actions = __webpack_require__(8);
+
+var _view = __webpack_require__(15);
+
+var createTemperature = exports.createTemperature = function createTemperature(update) {
+  return {
+    model: function model() {
+      return {
+        precipitations: false,
+        precipitation: null,
+        date: "",
+        value: 20,
+        units: "C"
+      };
+    },
+
+    view: (0, _view.createView)((0, _actions.createActions)(update))
+  };
+};
+
+/***/ }),
+
+/***/ 15:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createView = undefined;
+
+var _handler = __webpack_require__(9);
+
+var precipitationOption = function precipitationOption(_ref) {
+  var model = _ref.model,
+      actions = _ref.actions,
+      id = _ref.id,
+      value = _ref.value,
+      label = _ref.label;
+  return jsx(
+    "span",
+    null,
+    jsx("input", { type: "radio", id: id, name: "precipitation", value: value,
+      checked: model.precipitation === value,
+      onClick: (0, _handler.safe)(actions.changePrecipitation) }),
+    jsx(
+      "label",
+      { htmlFor: id },
+      label
+    )
+  );
+};
+
+var createView = exports.createView = function createView(actions) {
+  return function (model) {
+    return jsx(
+      "div",
+      null,
+      jsx(
+        "div",
+        null,
+        jsx("input", { type: "checkbox", checked: model.precipitations,
+          onClick: (0, _handler.safe)(actions.togglePrecipitations), id: "precipitations" }),
+        jsx(
+          "label",
+          { htmlFor: "precipitations" },
+          "Precipitations"
+        )
+      ),
+      jsx(
+        "div",
+        null,
+        precipitationOption({ model: model, actions: actions, id: "rain", value: "RAIN", label: "Rain" }),
+        precipitationOption({ model: model, actions: actions, id: "snow", value: "SNOW", label: "Snow" }),
+        precipitationOption({ model: model, actions: actions, id: "sleet", value: "SLEET", label: "Sleet" })
+      ),
+      jsx(
+        "div",
+        null,
+        "Date:",
+        jsx("input", { type: "text", size: "10", value: model.date, onInput: (0, _handler.safe)(actions.editDate) })
+      ),
+      jsx(
+        "span",
+        null,
+        "Temperature: "
+      ),
+      jsx(
+        "span",
+        { className: "tempValue" },
+        model.value
+      ),
+      "\xB0",
+      jsx(
+        "span",
+        { className: "tempUnits" },
+        model.units
+      ),
+      jsx(
+        "div",
+        null,
+        jsx(
+          "button",
+          { className: "btn btn-default increase", onClick: (0, _handler.wrap)(actions.increase, 1) },
+          "Increase"
+        ),
+        jsx(
+          "button",
+          { className: "btn btn-default decrease", onClick: (0, _handler.wrap)(actions.increase, -1) },
+          "Decrease"
+        )
+      ),
+      jsx(
+        "div",
+        null,
+        jsx(
+          "button",
+          { className: "btn btn-primary changeUnits", onClick: (0, _handler.safe)(actions.changeUnits) },
+          "Change Units"
+        )
+      )
+    );
+  };
+};
+
+/***/ }),
+
 /***/ 16:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -938,8 +1423,7 @@ var jsx = exports.jsx = function jsx(propMap) {
 /***/ 2:
 /***/ (function(module, exports, __webpack_require__) {
 
-var _isPlaceholder = __webpack_require__(0);
-
+var _isPlaceholder = /*#__PURE__*/__webpack_require__(0);
 
 /**
  * Optimized internal one-arity curry function.
@@ -949,7 +1433,9 @@ var _isPlaceholder = __webpack_require__(0);
  * @param {Function} fn The function to curry.
  * @return {Function} The curried function.
  */
-module.exports = function _curry1(fn) {
+
+
+function _curry1(fn) {
   return function f1(a) {
     if (arguments.length === 0 || _isPlaceholder(a)) {
       return f1;
@@ -957,8 +1443,8 @@ module.exports = function _curry1(fn) {
       return fn.apply(this, arguments);
     }
   };
-};
-
+}
+module.exports = _curry1;
 
 /***/ }),
 
@@ -990,96 +1476,13 @@ module.exports = g;
 
 /***/ }),
 
-/***/ 36:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = h;
-var i
-var stack = []
-
-function h(type, props) {
-  var node
-  var children = []
-
-  for (i = arguments.length; i-- > 2; ) {
-    stack.push(arguments[i])
-  }
-
-  while (stack.length) {
-    if (Array.isArray((node = stack.pop()))) {
-      for (i = node.length; i--; ) {
-        stack.push(node[i])
-      }
-    } else if (node != null && node !== true && node !== false) {
-      children.push(typeof node === "number" ? (node = node + "") : node)
-    }
-  }
-
-  return typeof type === "string"
-    ? { type: type, props: props || {}, children: children }
-    : type(props || {}, children)
-}
-
-
-/***/ }),
-
 /***/ 4:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setup = undefined;
-
-var _flyd = __webpack_require__(5);
-
-var _flyd2 = _interopRequireDefault(_flyd);
-
-var _temperature = __webpack_require__(9);
-
-var _meiosis = __webpack_require__(13);
-
-var _meiosisTracer = __webpack_require__(15);
-
-var _meiosisTracer2 = _interopRequireDefault(_meiosisTracer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Only for using Meiosis Tracer in development.
-var setup = exports.setup = function setup(render) {
-  var update = _flyd2.default.stream();
-  var temperature = (0, _temperature.createTemperature)(update);
-  var initialModel = temperature.model();
-  var applyUpdate = function applyUpdate(model, modelUpdate) {
-    return modelUpdate(model);
-  };
-  var models = _flyd2.default.scan(applyUpdate, initialModel, update);
-
-  var element = document.getElementById("app");
-  models.map(function (model) {
-    return render(temperature.view(model), element);
-  });
-
-  // Only for using Meiosis Tracer in development.
-  (0, _meiosis.trace)({ update: update, dataStreams: [models] });
-  (0, _meiosisTracer2.default)({ selector: "#tracer" });
-
-  return { models: models, view: temperature.view, render: render, element: element };
-};
-
-/***/ }),
-
-/***/ 5:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var curryN = __webpack_require__(6);
+var curryN = __webpack_require__(5);
 
 // Utility
 function isFunction(obj) {
@@ -1118,12 +1521,12 @@ flyd.stream = function(initialValue) {
   s.end = endStream;
   s.fnArgs = [];
   endStream.listeners.push(s);
-  s.toJSON = function() {
-    return s();
-  };
   if (arguments.length > 0) s(initialValue);
   return s;
 }
+// fantasy-land Applicative
+flyd.stream['fantasy-land/of'] = flyd.stream.of = flyd.stream;
+
 
 /**
  * Create a new dependent stream
@@ -1262,6 +1665,55 @@ flyd.endsOn = function(endS, s) {
 flyd.map = curryN(2, function(f, s) {
   return combine(function(s, self) { self(f(s.val)); }, [s]);
 })
+
+/**
+ * Chain a stream
+ *
+ * also known as flatMap
+ *
+ * Where `fn` returns a stream this function will flatten the resulting streams.
+ * Every time `fn` is called the context of the returned stream will "switch" to that stream.
+ *
+ * __Signature__: `(a -> Stream b) -> Stream a -> Stream b`
+ *
+ * @name flyd.chain
+ * @param {Function} fn - the function that produces the streams to be flattened
+ * @param {stream} stream - the stream to map
+ * @return {stream} a new stream with the mapped values
+ *
+ * @example
+ * var filter = flyd.stream('who');
+ * var items = flyd.chain(function(filter){
+ *   return flyd.stream(findUsers(filter));
+ * }, filter);
+ */
+flyd.chain = curryN(2, chain);
+
+/**
+ * Apply a stream
+ *
+ * Applies the value in `s2` to the function in `s1`.
+ *
+ * __Signature__: `Stream (a -> b) -> Stream a -> Stream b`
+ *
+ * @name flyd.ap
+ * @param {stream} s1 - The value to be applied
+ * @param {stream} s2 - The function expecting the value
+ * @return {stream} a new stream with the mapped values
+ *
+ * @example
+ * var add = stream(a => b => a + b)
+ * var n1 = stream(1)
+ * var n2 = stream(2)
+ *
+ * var added = flyd.ap(n2, flyd.ap(n1, add)) // stream(3)
+ * // can also be written using pipe
+ * var added_pipe = add
+ *   .pipe(ap(n1))
+ *   .pipe(ap(n2));
+ * added_pipe() // 3
+ */
+flyd.ap = curryN(2, ap);
 
 /**
  * Listen to stream events
@@ -1412,6 +1864,71 @@ flyd.curryN = curryN
 function boundMap(f) { return flyd.map(f, this); }
 
 /**
+ * Returns the result of applying function `fn` to this stream
+ *
+ * __Signature__: Called bound to `Stream a`: `(a -> Stream b) -> Stream b`
+ *
+ * @name stream.pipe
+ * @param {Function} fn - the function to apply
+ * @return {stream} A new stream
+ *
+ * @example
+ * var numbers = flyd.stream(0);
+ * var squaredNumbers = numbers.pipe(flyd.map(function(n){ return n*n; }));
+ */
+function operator_pipe(f) { return f(this) }
+
+function boundChain(f) {
+  return chain(f, this);
+}
+
+function chain(f, s) {
+  // Internal state to end flat map stream
+  var flatEnd = flyd.stream(1);
+  var internalEnded = flyd.on(function() {
+    var alive = flatEnd() - 1;
+    flatEnd(alive);
+    if (alive <= 0) {
+      flatEnd.end(true);
+    }
+  });
+
+  internalEnded(s.end);
+  var last = flyd.stream();
+  var flatStream = flyd.combine(function(s, own) {
+    last.end(true)
+    // Our fn stream makes streams
+    var newS = f(s());
+    flatEnd(flatEnd() + 1);
+    internalEnded(newS.end);
+
+    // Update self on call -- newS is never handed out so deps don't matter
+    last = flyd.map(own, newS);
+  }, [s]);
+
+  flyd.endsOn(flatEnd.end, flatStream);
+
+  return flatStream;
+}
+
+flyd.fromPromise = function fromPromise(p) {
+  var s = flyd.stream();
+  p.then(function(val) {
+    s(val);
+    s.end(true);
+  });
+  return s;
+}
+
+/* istanbul ignore next */
+flyd.flattenPromise = function flattenPromise(s) {
+  return combine(function(s, self) {
+    s().then(self);
+  }, [s])
+}
+
+
+/**
  * Returns a new stream which is the result of applying the
  * functions from `this` stream to the values in `stream` parameter.
  *
@@ -1433,9 +1950,19 @@ function boundMap(f) { return flyd.map(f, this); }
  * var addToNumbers1 = flyd.map(add, numbers1);
  * var added = addToNumbers1.ap(numbers2);
  */
-function ap(s2) {
-  var s1 = this;
+function ap(s2, s1) {
   return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);
+}
+
+function boundAp(s2) {
+  return ap(s2, this);
+}
+
+/**
+ * @private
+ */
+function fantasy_land_ap(s1) {
+  return ap(this, s1);
 }
 
 /**
@@ -1489,9 +2016,24 @@ function createStream() {
   s.listeners = [];
   s.queued = false;
   s.end = undefined;
-  s.map = boundMap;
-  s.ap = ap;
-  s.of = flyd.stream;
+
+  // fantasy-land compatibility
+  s.ap = boundAp;
+  s['fantasy-land/map'] = s.map = boundMap;
+  s['fantasy-land/ap'] = fantasy_land_ap;
+  s['fantasy-land/of'] = s.of = flyd.stream;
+  s['fantasy-land/chain'] = s.chain = boundChain;
+
+  s.pipe = operator_pipe;
+
+  // According to the fantasy-land Applicative specification
+  // Given a value f, one can access its type representative via the constructor property:
+  // `f.constructor.of`
+  s.constructor = flyd.stream;
+
+  s.toJSON = function() {
+    return s.val;
+  }
   s.toString = streamToString;
   return s;
 }
@@ -1535,9 +2077,11 @@ function initialDepsNotMet(stream) {
  */
 function updateStream(s) {
   if ((s.depsMet !== true && initialDepsNotMet(s)) ||
-      (s.end !== undefined && s.end.val === true)) return;
+    (s.end !== undefined && s.end.val === true)) return;
   if (inStream !== undefined) {
-    toUpdate.push(s);
+    toUpdate.push(function() {
+      updateStream(s);
+    });
     return;
   }
   inStream = s;
@@ -1601,9 +2145,8 @@ function findDeps(s) {
 function flushUpdate() {
   flushing = true;
   while (toUpdate.length > 0) {
-    var s = toUpdate.shift();
-    if (s.vals.length > 0) s.val = s.vals.shift();
-    updateDeps(s);
+    var updater = toUpdate.shift();
+    updater();
   }
   flushing = false;
 }
@@ -1615,7 +2158,9 @@ function flushUpdate() {
  * @param {*} value
  */
 function updateStreamValue(s, n) {
+  /* istanbul ignore if  */
   if (n !== undefined && n !== null && isFunction(n.then)) {
+    console.warn('flyd: Promise swallowing has been deprecated, please see https://github.com/paldepind/flyd#promises for more info');
     n.then(s);
     return;
   }
@@ -1628,8 +2173,9 @@ function updateStreamValue(s, n) {
   } else if (inStream === s) {
     markListeners(s, s.listeners);
   } else {
-    s.vals.push(n);
-    toUpdate.push(s);
+    toUpdate.push(function() {
+      updateStreamValue(s, n);
+    });
   }
 }
 
@@ -1698,6 +2244,9 @@ function endStream(s) {
 
 /**
  * @private
+ */
+/**
+ * @private
  * transducer stream transformer
  */
 function StreamTransformer() { }
@@ -1710,14 +2259,82 @@ module.exports = flyd;
 
 /***/ }),
 
-/***/ 6:
+/***/ 46:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = updateAttribute;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clone__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__eventListener__ = __webpack_require__(126);
+
+
+
+function updateAttribute(element, name, value, oldValue, isSVG) {
+  if (name === "key") {
+  } else if (name === "style") {
+    for (var i in Object(__WEBPACK_IMPORTED_MODULE_0__clone__["a" /* clone */])(oldValue, value)) {
+      var style = value == null || value[i] == null ? "" : value[i]
+      if (i[0] === "-") {
+        element[name].setProperty(i, style)
+      } else {
+        element[name][i] = style
+      }
+    }
+  } else {
+    if (name[0] === "o" && name[1] === "n") {
+      if (!element.events) {
+        element.events = {}
+      }
+      element.events[(name = name.slice(2))] = value
+      if (value) {
+        if (!oldValue) {
+          element.addEventListener(name, __WEBPACK_IMPORTED_MODULE_1__eventListener__["a" /* eventListener */])
+        }
+      } else {
+        element.removeEventListener(name, __WEBPACK_IMPORTED_MODULE_1__eventListener__["a" /* eventListener */])
+      }
+    } else if (name in element && name !== "list" && !isSVG) {
+      element[name] = value == null ? "" : value
+    } else if (value != null && value !== false) {
+      element.setAttribute(name, value)
+    }
+
+    if (value == null || value === false) {
+      element.removeAttribute(name)
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 47:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = clone;
+function clone(target, source) {
+  var obj = {}
+
+  for (var i in target) obj[i] = target[i]
+  for (var i in source) obj[i] = source[i]
+
+  return obj
+}
+
+
+/***/ }),
+
+/***/ 5:
 /***/ (function(module, exports, __webpack_require__) {
 
-var _arity = __webpack_require__(1);
-var _curry1 = __webpack_require__(2);
-var _curry2 = __webpack_require__(7);
-var _curryN = __webpack_require__(8);
+var _arity = /*#__PURE__*/__webpack_require__(1);
 
+var _curry1 = /*#__PURE__*/__webpack_require__(2);
+
+var _curry2 = /*#__PURE__*/__webpack_require__(6);
+
+var _curryN = /*#__PURE__*/__webpack_require__(7);
 
 /**
  * Returns a curried equivalent of the provided function, with the specified
@@ -1730,10 +2347,10 @@ var _curryN = __webpack_require__(8);
  *   - `g(1, 2)(3)`
  *   - `g(1, 2, 3)`
  *
- * Secondly, the special placeholder value `R.__` may be used to specify
+ * Secondly, the special placeholder value [`R.__`](#__) may be used to specify
  * "gaps", allowing partial application of any combination of arguments,
- * regardless of their positions. If `g` is as above and `_` is `R.__`, the
- * following are equivalent:
+ * regardless of their positions. If `g` is as above and `_` is [`R.__`](#__),
+ * the following are equivalent:
  *
  *   - `g(1, 2, 3)`
  *   - `g(_, 2, 3)(1)`
@@ -1761,22 +2378,24 @@ var _curryN = __webpack_require__(8);
  *      var g = f(3);
  *      g(4); //=> 10
  */
-module.exports = _curry2(function curryN(length, fn) {
+
+
+var curryN = /*#__PURE__*/_curry2(function curryN(length, fn) {
   if (length === 1) {
     return _curry1(fn);
   }
   return _arity(length, _curryN(length, [], fn));
 });
-
+module.exports = curryN;
 
 /***/ }),
 
-/***/ 7:
+/***/ 6:
 /***/ (function(module, exports, __webpack_require__) {
 
-var _curry1 = __webpack_require__(2);
-var _isPlaceholder = __webpack_require__(0);
+var _curry1 = /*#__PURE__*/__webpack_require__(2);
 
+var _isPlaceholder = /*#__PURE__*/__webpack_require__(0);
 
 /**
  * Optimized internal two-arity curry function.
@@ -1786,32 +2405,36 @@ var _isPlaceholder = __webpack_require__(0);
  * @param {Function} fn The function to curry.
  * @return {Function} The curried function.
  */
-module.exports = function _curry2(fn) {
+
+
+function _curry2(fn) {
   return function f2(a, b) {
     switch (arguments.length) {
       case 0:
         return f2;
       case 1:
-        return _isPlaceholder(a) ? f2
-             : _curry1(function(_b) { return fn(a, _b); });
+        return _isPlaceholder(a) ? f2 : _curry1(function (_b) {
+          return fn(a, _b);
+        });
       default:
-        return _isPlaceholder(a) && _isPlaceholder(b) ? f2
-             : _isPlaceholder(a) ? _curry1(function(_a) { return fn(_a, b); })
-             : _isPlaceholder(b) ? _curry1(function(_b) { return fn(a, _b); })
-             : fn(a, b);
+        return _isPlaceholder(a) && _isPlaceholder(b) ? f2 : _isPlaceholder(a) ? _curry1(function (_a) {
+          return fn(_a, b);
+        }) : _isPlaceholder(b) ? _curry1(function (_b) {
+          return fn(a, _b);
+        }) : fn(a, b);
     }
   };
-};
-
+}
+module.exports = _curry2;
 
 /***/ }),
 
-/***/ 8:
+/***/ 7:
 /***/ (function(module, exports, __webpack_require__) {
 
-var _arity = __webpack_require__(1);
-var _isPlaceholder = __webpack_require__(0);
+var _arity = /*#__PURE__*/__webpack_require__(1);
 
+var _isPlaceholder = /*#__PURE__*/__webpack_require__(0);
 
 /**
  * Internal curryN function.
@@ -1823,17 +2446,17 @@ var _isPlaceholder = __webpack_require__(0);
  * @param {Function} fn The function to curry.
  * @return {Function} The curried function.
  */
-module.exports = function _curryN(length, received, fn) {
-  return function() {
+
+
+function _curryN(length, received, fn) {
+  return function () {
     var combined = [];
     var argsIdx = 0;
     var left = length;
     var combinedIdx = 0;
     while (combinedIdx < received.length || argsIdx < arguments.length) {
       var result;
-      if (combinedIdx < received.length &&
-          (!_isPlaceholder(received[combinedIdx]) ||
-           argsIdx >= arguments.length)) {
+      if (combinedIdx < received.length && (!_isPlaceholder(received[combinedIdx]) || argsIdx >= arguments.length)) {
         result = received[combinedIdx];
       } else {
         result = arguments[argsIdx];
@@ -1845,11 +2468,66 @@ module.exports = function _curryN(length, received, fn) {
       }
       combinedIdx += 1;
     }
-    return left <= 0 ? fn.apply(this, combined)
-                     : _arity(left, _curryN(length, combined, fn));
+    return left <= 0 ? fn.apply(this, combined) : _arity(left, _curryN(length, combined, fn));
+  };
+}
+module.exports = _curryN;
+
+/***/ }),
+
+/***/ 8:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var createActions = exports.createActions = function createActions(update) {
+  return {
+    togglePrecipitations: function togglePrecipitations(evt) {
+      return update(function (model) {
+        model.precipitations = evt.target.checked;
+        return model;
+      });
+    },
+
+    changePrecipitation: function changePrecipitation(evt) {
+      return update(function (model) {
+        model.precipitation = evt.target.value;
+        return model;
+      });
+    },
+
+    editDate: function editDate(evt) {
+      return update(function (model) {
+        model.date = evt.target.value;
+        return model;
+      });
+    },
+
+    increase: function increase(amount) {
+      return update(function (model) {
+        model.value = model.value + amount;
+        return model;
+      });
+    },
+
+    changeUnits: function changeUnits() {
+      return update(function (model) {
+        if (model.units === "C") {
+          model.units = "F";
+          model.value = Math.round(model.value * 9 / 5 + 32);
+        } else {
+          model.units = "C";
+          model.value = Math.round((model.value - 32) / 9 * 5);
+        }
+        return model;
+      });
+    }
   };
 };
-
 
 /***/ }),
 
@@ -1862,310 +2540,22 @@ module.exports = function _curryN(length, received, fn) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createTemperature = undefined;
+var wrap = exports.wrap = function wrap(fn) {
+  var args = Array.from(arguments).slice(1);
 
-var _actions = __webpack_require__(10);
-
-var _view = __webpack_require__(11);
-
-var createTemperature = exports.createTemperature = function createTemperature(update) {
-  return {
-    model: function model() {
-      return {
-        precipitations: false,
-        precipitation: null,
-        date: "",
-        value: 20,
-        units: "C"
-      };
-    },
-
-    view: (0, _view.createView)((0, _actions.createActions)(update))
+  return function (_evt) {
+    if (fn) {
+      fn.apply(null, args);
+    }
   };
 };
 
-/***/ }),
-
-/***/ 91:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _setup = __webpack_require__(92);
-
-(0, _setup.setupApp)();
-
-/***/ }),
-
-/***/ 92:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setupApp = exports.setupRender = undefined;
-
-var _picodom = __webpack_require__(93);
-
-var _common = __webpack_require__(4);
-
-var _jsx = __webpack_require__(16);
-
-var jsxPicodom = (0, _jsx.jsx)({
-  "onChange": "onchange",
-  "onClick": "onclick",
-  "onInput": "oninput"
-});
-
-var setupRender = exports.setupRender = function setupRender() {
-  global.jsx = jsxPicodom(_picodom.h);
-  var el = null;
-  return function (view, element) {
-    return (0, _picodom.patch)(el, el = view, element);
-  };
+var safe = exports.safe = function safe(fn) {
+  if (fn) {
+    return fn;
+  }
+  return function (_evt) {};
 };
-
-var setupApp = exports.setupApp = function setupApp() {
-  return (0, _common.setup)(setupRender());
-};
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
-
-/***/ }),
-
-/***/ 93:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__h__ = __webpack_require__(36);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_0__h__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__patch__ = __webpack_require__(94);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "patch", function() { return __WEBPACK_IMPORTED_MODULE_1__patch__["a"]; });
-
-
-
-
-/***/ }),
-
-/***/ 94:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = patch;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__h__ = __webpack_require__(36);
-
-
-var callbacks = []
-
-function patch(oldNode, node, container, cb) {
-  var element = patchElement(
-    container || (container = document.body),
-    container.children[0],
-    oldNode,
-    node
-  )
-
-  while ((cb = callbacks.pop())) cb()
-
-  return element
-}
-
-function merge(target, source) {
-  var result = {}
-
-  for (var i in target) {
-    result[i] = target[i]
-  }
-  for (var i in source) {
-    result[i] = source[i]
-  }
-
-  return result
-}
-
-function createElement(node, isSVG) {
-  if (typeof node === "string") {
-    var element = document.createTextNode(node)
-  } else {
-    var element = (isSVG = isSVG || node.type === "svg")
-      ? document.createElementNS("http://www.w3.org/2000/svg", node.type)
-      : document.createElement(node.type)
-
-    if (node.props && node.props.oncreate) {
-      callbacks.push(function() {
-        node.props.oncreate(element)
-      })
-    }
-
-    for (var i = 0; i < node.children.length; i++) {
-      element.appendChild(createElement(node.children[i], isSVG))
-    }
-
-    for (var i in node.props) {
-      setElementProp(element, i, node.props[i])
-    }
-  }
-  return element
-}
-
-function setElementProp(element, name, value, oldValue) {
-  if (name === "key") {
-  } else if (name === "style") {
-    for (var name in merge(oldValue, (value = value || {}))) {
-      element.style[name] = value[name] || ""
-    }
-  } else {
-    try {
-      element[name] = value
-    } catch (_) {}
-
-    if (typeof value !== "function") {
-      if (value) {
-        element.setAttribute(name, value)
-      } else {
-        element.removeAttribute(name)
-      }
-    }
-  }
-}
-
-function updateElement(element, oldProps, props) {
-  for (var i in merge(oldProps, props)) {
-    var value = props[i]
-    var oldValue = i === "value" || i === "checked" ? element[i] : oldProps[i]
-
-    if (value !== oldValue) {
-      value !== oldValue && setElementProp(element, i, value, oldValue)
-    }
-  }
-
-  if (props && props.onupdate) {
-    callbacks.push(function() {
-      props.onupdate(element, oldProps)
-    })
-  }
-}
-
-function removeElement(parent, element, props) {
-  if (
-    props &&
-    props.onremove &&
-    typeof (props = props.onremove(element)) === "function"
-  ) {
-    props(remove)
-  } else {
-    remove()
-  }
-
-  function remove() {
-    parent.removeChild(element)
-  }
-}
-
-function getKey(node) {
-  if (node && node.props) {
-    return node.props.key
-  }
-}
-
-function patchElement(parent, element, oldNode, node, isSVG, nextSibling) {
-  if (oldNode == null) {
-    element = parent.insertBefore(createElement(node, isSVG), element)
-  } else if (node.type != null && node.type === oldNode.type) {
-    updateElement(element, oldNode.props, node.props)
-
-    isSVG = isSVG || node.type === "svg"
-
-    var len = node.children.length
-    var oldLen = oldNode.children.length
-    var oldKeyed = {}
-    var oldElements = []
-    var keyed = {}
-
-    for (var i = 0; i < oldLen; i++) {
-      var oldElement = (oldElements[i] = element.childNodes[i])
-      var oldChild = oldNode.children[i]
-      var oldKey = getKey(oldChild)
-
-      if (null != oldKey) {
-        oldKeyed[oldKey] = [oldElement, oldChild]
-      }
-    }
-
-    var i = 0
-    var j = 0
-
-    while (j < len) {
-      var oldElement = oldElements[i]
-      var oldChild = oldNode.children[i]
-      var newChild = node.children[j]
-
-      var oldKey = getKey(oldChild)
-      if (keyed[oldKey]) {
-        i++
-        continue
-      }
-
-      var newKey = getKey(newChild)
-
-      var keyedNode = oldKeyed[newKey] || []
-
-      if (null == newKey) {
-        if (null == oldKey) {
-          patchElement(element, oldElement, oldChild, newChild, isSVG)
-          j++
-        }
-        i++
-      } else {
-        if (oldKey === newKey) {
-          patchElement(element, keyedNode[0], keyedNode[1], newChild, isSVG)
-          i++
-        } else if (keyedNode[0]) {
-          element.insertBefore(keyedNode[0], oldElement)
-          patchElement(element, keyedNode[0], keyedNode[1], newChild, isSVG)
-        } else {
-          patchElement(element, oldElement, null, newChild, isSVG)
-        }
-
-        j++
-        keyed[newKey] = newChild
-      }
-    }
-
-    while (i < oldLen) {
-      var oldChild = oldNode.children[i]
-      var oldKey = getKey(oldChild)
-      if (null == oldKey) {
-        removeElement(element, oldElements[i], oldChild.props)
-      }
-      i++
-    }
-
-    for (var i in oldKeyed) {
-      var keyedNode = oldKeyed[i]
-      var reusableNode = keyedNode[1]
-      if (!keyed[reusableNode.props.key]) {
-        removeElement(element, keyedNode[0], reusableNode.props)
-      }
-    }
-  } else if (element && node !== element.nodeValue) {
-    if (typeof node === "string" && typeof oldNode === "string") {
-      element.nodeValue = node
-    } else {
-      element = parent.insertBefore(
-        createElement(node, isSVG),
-        (nextSibling = element)
-      )
-      removeElement(parent, nextSibling, oldNode.props)
-    }
-  }
-  return element
-}
-
 
 /***/ })
 
