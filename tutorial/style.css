@@ -24,10 +24,6 @@ blockquote {
 img {
   max-width: 100%;
 }
-a, button {
-  min-width: 48px;
-  min-height: 48px;
-}
 .CodeMirror pre {
   font-size: 1.6rem !important;
 }
