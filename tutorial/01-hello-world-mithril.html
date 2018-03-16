@@ -1,0 +1,47 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>01 - Hello World</h2><p>The first thing that we will do is render something onto the page - a &quot;Hello, world&quot; message,
+of course. With Mithril, this is accomplished using <code>m.render</code>. When calling this function, we
+must pass two parameters:</p>
+<ol>
+<li>the DOM element into which we want to render, and</li>
+<li>what we want to render.</li>
+</ol>
+<p>We can use the <code>m()</code> function to describe the HTML structure of what we want to render.</p>
+<h3>Our First Example</h3><p>Here is the code to render a message onto the page:</p>
+  <div id="flems1" class="flemscode"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "01-hello-world.js", content: "/*global m*/\nvar element = document.getElementById(\"app\");\nm.render(element, m(\"h1\", \"Hello, world\"));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}]
+    })
+  </script>
+
+
+<p>Notice that the <code>element</code> into which we render is the element that has the <code>app</code> id. You can
+see this element in the <code>app.html</code> file. This file represents our HTML page.</p>
+<p><img src="01-hello-world-01.svg" alt="The Render Function"></p>
+<p>You can also use <code>document.body</code> as the element. The reason I am using an HTML file with an
+element inside it is that this enables you to render other things on the page, and have your
+app (or multiple apps) occupy specific places on the page.</p>
+<h3>Exercises</h3><p>Edit the code above and try out these exercises. You can see the output on the right, so you
+can confirm that your code works as expected.</p>
+<ol>
+<li>Change the <code>h1</code> tag to something else, and change the message.</li>
+<li>In <code>app.html</code>, add something before and after the <code>id</code> element, and confirm that they are
+displayed before and after the message that you are rendering.</li>
+<li>Change the <code>element</code> into which to render, to <code>document.body</code>. Notice that your message
+now overwrites anything that you had in the <code>app.html</code> file.</li>
+</ol>
+<p>When you are ready, move on to the next lesson: <a href="02-view-function-mithril.html">02 - View Function</a>.</p>
+
+</body></html>

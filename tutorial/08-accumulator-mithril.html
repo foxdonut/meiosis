@@ -1,0 +1,22 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>08 - Accumulator</h2><p>In the previous lesson, <a href="07-stream-lib-mithril.html">07 - Stream Library</a>,</p>
+  <div id="flems1" class="flemscode" style="height:800px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "08-accumulator.js", content: "/*global m*/\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createView = function(update) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return [\n      m(\"span\", \"Temperature: \", model.value),\n      m.trust(\"&deg;\"),\n      m(\"span\", model.units),\n      m(\"div\",\n        m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n        m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n      ),\n      m(\"div\",\n        m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n      )\n    ];\n  };\n  return view;\n};\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar model = {\n  value: 20,\n  units: \"C\"\n};\n\nvar models = m.stream.scan(function(model, value) {\n  return Object.assign(model, value);\n}, model, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}]
+    })
+  </script>
+
+
+</body></html>
