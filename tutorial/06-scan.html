@@ -1,0 +1,23 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<h1>Meiosis Tutorial</h1><h2>06 - Scan</h2><p>In the previous lesson, <a href="05-stream-mithril.html">05 - Stream</a>,</p>
+  <div id="flems1" class="flemscode" style="height:800px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "06-scan.js", content: "/*global m*/\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\nvar stream = function(initial) {\n  var callbacks = [];\n  var createdStream = function(value) {\n    for (var i = 0, t = callbacks.length; i < t; i++) {\n      var callback = callbacks[i];\n      callback(value);\n    }\n  };\n  createdStream.map = function(callback) {\n    var newStream = stream();\n\n    callbacks.push(function(value) {\n      newStream(callback(value));\n    });\n\n    if (initial !== undefined) {\n      callback(initial);\n    }\n\n    return newStream;\n  };\n  return createdStream;\n};\n\nvar scan = function(accumulator, initial, st) {\n  var newStream = stream(initial);\n  var accumulated = initial;\n\n  st.map(function(value) {\n    accumulated = accumulator(accumulated, value);\n    newStream(accumulated);\n  });\n\n  return newStream;\n};\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar models = scan(function(model, value) {\n  return model + value;\n}, model, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}]
+    })
+  </script>
+
+
+<p><a href="07-stream-library-mithril.html">07 - Stream Library</a></p>
+
+</body></html>
