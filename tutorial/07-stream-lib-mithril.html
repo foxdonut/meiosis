@@ -3,22 +3,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="container">
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>07 - Stream Library</h2><p>In the previous lesson, <a href="06-scan-mithril.html">06 - Scan</a>,</p>
+<h2>07 - Stream Library</h2><p>In the previous lesson, <a href="06-scan-mithril.html">06 - Scan</a>, we improved our <code>stream</code> implementation
+by supporting an initial value, and we implemented <code>scan</code>. With <code>scan</code> being a great fit for our
+reactive loop, we used it for our setup code.</p>
+<h3>Use a stream library or your own implementation - it&#39;s your choice!</h3><p>Hopefully, having implemented a simple stream with <code>map</code> and <code>scan</code> has solidified your
+understanding of how to use them to set up the Meiosis pattern.</p>
+<p>In doing so, we&#39;ve also seen how you can implement the Meiosis pattern without any dependencies,
+with just a handful of lines of code.</p>
+<p>That being said, you can also use a stream library. It&#39;s your choice. In this lesson, we will
+use <a href="https://mithril.js.org/stream.html">mithril-stream</a>. Another good choice is
+<a href="https://github.com/paldepind/flyd">flyd</a>, which works the same way. You can also use another
+stream library simply by using its equivalent of <code>map</code>, <code>scan</code>, and pushing a value onto a
+stream.</p>
+<h3>Using <code>mithril-stream</code></h3><p>The example below uses <a href="https://mithril.js.org/stream.html">mithril-stream</a>. The equivalent
+of our <code>stream</code> and <code>scan</code> functions are <code>m.stream</code> and <code>m.stream.scan</code> respectively. The <code>map</code>
+method works the same way.</p>
+<p>The code also implements a solution to the exercise at the end of the
+<a href="06-scan-mithril.html">previous lesson</a>, pushing objects onto the <code>update</code> stream and handling
+them in the accumulator function.</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "07-stream-lib.js", content: "/*global m*/\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar model = 0;\n\nvar models = m.stream.scan(function(model, value) {\n  return model + value;\n}, model, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}]
+      files: [{name: "07-stream-lib.js", content: "/*global m*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var oper = function(obj) {\n    return function(_event) {\n      update(obj);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: oper({ oper: \"add\", value: 1 }) }, \"+1\"),\n      m(\"button\", { onclick: oper({ oper: \"times\", value: 2 }) }, \"*2\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar models = m.stream.scan(function(model, obj) {\n  if (obj.oper === \"add\") {\n    return model + obj.value;\n  }\n  else if (obj.oper === \"times\") {\n    return model * obj.value;\n  }\n  else {\n    return model;\n  }\n}, 0, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}],
+      middle: 75
     })
   </script>
 
 
-<p><a href="08-accumulator-mithril.html">08 - Accumulator</a></p>
+<p>As you can see, the streams work the same way as before. So, it&#39;s really up to your preference
+whether to use a stream library or use your own implementation.</p>
+<p>When you are ready, continue on to <a href="08-accumulator-mithril.html">08 - Accumulator</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

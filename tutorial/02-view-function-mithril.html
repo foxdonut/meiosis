@@ -3,10 +3,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="container">
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>02 - View Function</h2><p>In the previous lesson, <a href="01-hello-world-mithril.html">01 - Hello World</a>, we rendered a simple
 message onto the page. Now, let&#39;s write a <strong>function</strong> that produces what to render. We&#39;ll call
@@ -16,12 +18,13 @@ this the <strong>view</strong>:</p>
   <script>
     window.Flems(flems1, {
       files: [{name: "02-view-function.js", content: "/*global m*/\nvar view = function(model) {\n  return m(\"div\", \"Counter: \" + model);\n};\n\nvar initial = 0;\nvar element = document.getElementById(\"app\");\nm.render(element, view(initial));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}]
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      middle: 75
     })
   </script>
 
 
-<h3>View = function(model)</h3><p>In the code above, <code>view</code> is a function that produces what to render. Since it is a function,
+<h3>View = function(model)</h3><p>In the code above, <code>view</code> is a function that produces the vnode to render. Since it is a function,
 it can receive parameters - namely, the <strong>model</strong>. This is a plain JavaScript object that
 represents the state of the application.</p>
 <p>In our example, the model is a counter. We&#39;ve created an <strong>initial</strong> model with a value of <code>0</code>.
@@ -45,5 +48,6 @@ It is just a simple function of the model.</p>
 model to produce the view.</li>
 </ol>
 <p>When you are ready, continue on to <a href="03-update-model-mithril.html">03 - Update Model</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

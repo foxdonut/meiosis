@@ -3,20 +3,103 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="container">
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>08 - Accumulator</h2><p>In the previous lesson, <a href="07-stream-lib-mithril.html">07 - Stream Library</a>,</p>
+<h2>08 - Accumulator</h2><p>In the previous lesson, <a href="07-stream-lib-mithril.html">07 - Stream Library</a>, we used
+<a href="https://mithril.js.org/stream.html">mithril-stream</a> instead of our own stream implementation.
+Another good choice is <a href="https://github.com/paldepind/flyd">flyd</a>.</p>
+<p>From this point on, I will use <a href="https://mithril.js.org/stream.html">mithril-stream</a>. Of course,
+our own implementation works fine as well, so feel free to use that if you prefer to have less
+external dependencies and more control over the source code.</p>
+<h3>Model and accumulator function</h3><p>Our example so far has been a simple counter. The model was just a number, representing the
+counter&#39;s value. The accumulator function took updates and did some simple math to produce the
+updated model.</p>
+<p>Obviously, for more complex examples, we will need more than just a number as the model. We will
+need an object with properties. For example, let&#39;s say we had a temperature with a value and the
+units, Celsius or Farenheit. We could represent the model as:</p>
+<pre><code class="language-js">{
+  value: 22,
+  units: &quot;C&quot;
+}
+</code></pre>
+<p>Not only can we increase or decrease the value, we can also change the units between <code>C</code> and
+<code>F</code>. Changing the units should automatically change the value to the equivalent in the units
+to which we are switching.</p>
+<p>The accumulator function needs to produce an updated model object. It&#39;s our choice how we want
+to issue updates and handle them in the accumulator function.</p>
+<h3>Using <code>Object.assign</code></h3><p>One way to issue updates and handle them in the accumulator function is with <code>Object.assign</code>.
+This method copies properties from one or more source objects to a target object. For example:</p>
+<pre><code class="language-js">var result = Object.assign({ value: 22, units: &quot;C&quot; }, { value: 24 });
+// result is { value: 24, units: &quot;C&quot; }
+</code></pre>
+<p>As you can see, <code>Object.assign</code> copies over properties from the source object to the target
+object, and leaves untouched any properties that are in the target but not the source.</p>
+<p>If we issue source objects onto our <code>update</code> stream, we can use <code>Object.assign</code> to update the
+model in the accumulator function:</p>
+<pre><code class="language-js">var models = m.stream.scan(
+  function(model, value) {
+    return Object.assign(model, value);
+  }, { value: 22, units: &quot;C&quot; }, update);
+</code></pre>
+<p>Our initial model is <code>{ value: 22, units: &quot;C&quot; }</code> and the accumulator function calls
+<code>Object.assign</code> to update the model. Thus, we could call <code>update({ value: 21 })</code> to set the
+temperature <code>value</code> to <code>21</code> and keep the same units.</p>
+<h3>Passing functions as parameters</h3><p>But wait! Notice the accumulator function that we are passing as a parameter to <code>scan</code>:</p>
+<pre><code class="language-js">function(model, value) {
+  return Object.assign(model, value);
+}
+</code></pre>
+<p>We have a function that takes <code>(model, value)</code> and calls <code>Object.assign</code> with <code>(model, value)</code>.
+But <code>Object.assign</code> already does what we want, so we can pass it directly to <code>scan</code>:</p>
+<pre><code class="language-js">var models = m.stream.scan(Object.assign,
+  { value: 22, units: &quot;C&quot; }, update);
+</code></pre>
+<p>Whenever you are passing a function that looks like:</p>
+<pre><code class="language-js">callSomething(
+  function(params) {
+    return someFunction(params);
+  }
+);
+</code></pre>
+<p>You are creating a function that takes some parameters and calls a function with the same
+parameters. There is no need to create that outer function - you can instead just pass
+<code>someFunction</code> directly:</p>
+<pre><code class="language-js">callSomething(someFunction);
+</code></pre>
+<p>Passing functions as parameters is very useful!</p>
+<h3>Building out the example</h3><p>Our temperature example will display the current temperature&#39;s value and units.
+The value can be changed with <code>Increase</code> and <code>Decrease</code> buttons. The units can be switched
+between Celsius and Farenheit with a <code>Change Units</code> button. When changing the units, the
+value is converted to the new units.</p>
+<p>Here is the example:</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "08-accumulator.js", content: "/*global m*/\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createView = function(update) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return [\n      m(\"span\", \"Temperature: \", model.value),\n      m.trust(\"&deg;\"),\n      m(\"span\", model.units),\n      m(\"div\",\n        m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n        m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n      ),\n      m(\"div\",\n        m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n      )\n    ];\n  };\n  return view;\n};\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar model = {\n  value: 20,\n  units: \"C\"\n};\n\nvar models = m.stream.scan(function(model, value) {\n  return Object.assign(model, value);\n}, model, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}]
+      files: [{name: "08-accumulator.js", content: "/*global m*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createView = function(update) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return [\n      \"Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n      m(\"div\",\n        m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n        m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n      ),\n      m(\"div\",\n        m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n      )\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar models = m.stream.scan(Object.assign,\n  { value: 22, units: \"C\" }, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}],
+      middle: 75
     })
   </script>
 
+
+<p>As you can see, <code>convert</code> is just a matter of simple math to convert the temperature value
+between units.</p>
+<p>We pass the current model to both <code>increase</code> and <code>changeUnits</code> so that they can use the current
+model values to determine how to change the temperature value and units. Then, those functions
+call <code>update()</code>, passing an object that represents how we want to change the model. Since the
+accumulator function uses <code>Object.assign</code>, the objects that we pass to <code>update</code> will be merged
+in with the current model to produce the updated model.</p>
+<h3>Exercise</h3><ul>
+<li>Add a <code>Reset</code> button that resets the temperature. If the current temperature is in Celsius,
+the temperature should be reset to <code>22</code>. For Farenheit, the reset button should set the
+temperature to <code>72</code>.</li>
+</ul>
+<p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

@@ -3,22 +3,187 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="container">
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>06 - Scan</h2><p>In the previous lesson, <a href="05-stream-mithril.html">05 - Stream</a>,</p>
+<h2>06 - Scan</h2><p>In the previous lesson, <a href="05-stream-mithril.html">05 - Stream</a>, we learned about streams and
+wrote a simple implementation with a <code>map</code> method. Using a stream for <code>update</code>, we were able
+to have a better separation between a way for the view to issue updates, and the functions
+that use these updates to change the model and re-render the view.</p>
+<p>Recall that our Meiosis pattern setup code was:</p>
+<pre><code class="language-js">var model = 0;
+var update = stream();
+var view = createView(update);
+
+var element = document.getElementById(&quot;app&quot;);
+
+update.map(function(value) {
+  model = model + value;
+  m.render(element, view(model));
+});
+
+m.render(element, view(model));
+</code></pre>
+<ul>
+<li>We have an <strong>initial model</strong> of 0.</li>
+<li>We render the view with that initial model (on the last line).</li>
+<li>When an update comes in, our function gets called to:<ul>
+<li>Update the model, and</li>
+<li>Re-render the view.</li>
+</ul>
+</li>
+</ul>
+<p>Notice that when we update the model, <code>model = model + value</code>, we are <strong>combining</strong> the incoming
+value with the current model (here, by addition), and the result becomes the current model for
+next time. Let&#39;s call this an <strong>accumulator</strong>.</p>
+<h3>Introducing <code>scan</code></h3><p>It turns out that streams have, besides <code>map</code>, another method called <code>scan</code>. In fact, stream
+libraries have a number of other methods (also called operators), ranging from a handful to an
+overwhelming amount! But, we <strong>only</strong> need <code>map</code> and <code>scan</code>. Furthermore, we only need to use
+them in <strong>one place</strong> - the Meiosis pattern setup code.</p>
+<p>Like <code>map</code>, <code>scan</code> takes a source stream and produces a new stream. Remember that with <code>map</code>,
+whenever a new value arrives on the source stream, the function that we passed to <code>map</code> gets
+called, and the result is the next value on the new stream.</p>
+<p>With <code>scan</code>, instead of passing a function of one parameter, we pass a function of <strong>two</strong>
+parameters. This function is called an <strong>accumulator</strong>.</p>
+<p>When a new value arrives on the source stream, the accumulator function gets called with the
+<strong>latest</strong> result that we returned, and the incoming value from the source stream. The result that
+we return from the accumulator function is the next value on the new stream, <strong>and</strong> it also
+becomes the <strong>latest</strong> result.</p>
+<p>Finally, since at first there is no latest result, we pass to <code>scan</code> an <strong>initial value</strong>, which
+becomes starting point for the latest result, and the first value on the new stream.</p>
+<p>Let&#39;s look at an example. Say we start with an <code>update</code> stream:</p>
+<pre><code class="language-js">var update = stream();
+</code></pre>
+<p>Next, we create an <code>otherStream</code> with <code>scan</code>:</p>
+<pre><code class="language-js">var otherStream = scan(function(latest, next) {
+  return latest + next;
+}, 0, update);
+</code></pre>
+<p>As you can see, we need to pass three parameters to <code>scan</code>:</p>
+<ul>
+<li>The accumulator function. Here, the function adds the next value coming in from <code>update</code> to the
+latest value.</li>
+<li>The initial value, <code>0</code>. So, <code>otherStream</code> will start with a value of <code>0</code>.</li>
+<li>The source stream, <code>update</code>.</li>
+</ul>
+<p>If we call <code>update(5)</code>, the next value on <code>otherStream</code> will be <code>0 + 5 = 5</code>. If we then call
+<code>update(-3)</code>, now the latest value is <code>5</code>, the next value is <code>-3</code>, and the result is <code>5 + -3 = 2</code>.
+The sequence continues, always adding the incoming value to the latest result, as illustrated
+below:</p>
+<p><img src="06-scan-01.svg" alt="Scan"></p>
+<p>As you can certainly guess, this will fit in nicely for our Meiosis pattern setup code.</p>
+<h3>Implementing <code>scan</code></h3><p>To implement <code>scan</code>, first we&#39;ll improve our <code>stream</code> by adding a feature: optionally passing
+in an initial value for the stream:</p>
+<pre><code class="language-js">var stream = function(initial) {
+  var mapFunctions = [];
+  var createdStream = function(value) {
+    for (var i in mapFunctions) {
+      mapFunctions[i](value);
+    }
+  };
+  createdStream.map = function(mapFunction) {
+    var newInitial = undefined;
+    if (initial !== undefined) {
+      newInitial = mapFunction(initial);
+    }
+    var newStream = stream(newInitial);
+
+    mapFunctions.push(function(value) {
+      newStream(mapFunction(value));
+    });
+
+    return newStream;
+  };
+  return createdStream;
+};
+</code></pre>
+<p>We&#39;ve added the <code>initial</code> parameter. Then, when <code>map</code> is called, we check whether there was an
+initial value for the source stream. If there was, then the initial value for the new stream
+is the result of calling the passed in <code>mapFunction</code>.</p>
+<p>Now that we can specify an initial value for a stream, we can implement <code>scan</code>:</p>
+<pre><code class="language-js">var scan = function(accumulator, initial, sourceStream) {
+  var newStream = stream(initial);
+  var accumulated = initial;
+
+  sourceStream.map(function(value) {
+    accumulated = accumulator(accumulated, value);
+    newStream(accumulated);
+  });
+
+  return newStream;
+};
+</code></pre>
+<p>As we discussed, <code>scan</code> takes an accumulator function, an initial value, and a source streawm.
+The new stream starts with the initial value. This is also the starting point for the
+<code>accumulated</code> value, which is the latest result. Then, we <code>map</code> on the source stream, passing in
+a function that takes the incoming value, calls the <code>accumulator</code> function with the latest
+<code>accumulated</code> value and the incoming value, and pushes the result onto the new stream.</p>
+<h3>Putting it all together</h3><p>Now that we have <code>scan</code>, we can improve our Meiosis pattern setup code. Previously, we had:</p>
+<pre><code class="language-js">var model = 0;
+var update = stream();
+var view = createView(update);
+
+var element = document.getElementById(&quot;app&quot;);
+
+update.map(function(value) {
+  model = model + value;
+  m.render(element, view(model));
+});
+
+m.render(element, view(model));
+</code></pre>
+<p>We can change this to:</p>
+<pre><code class="language-js">var update = stream();
+var view = createView(update);
+
+var models = scan(function(model, value) {
+  return model + value;
+}, 0, update);
+
+var element = document.getElementById(&quot;app&quot;);
+
+models.map(function(model) {
+  m.render(element, view(model));
+});
+</code></pre>
+<p>Notice the improvements:</p>
+<ul>
+<li>We no longer have a <code>model</code> variable that we keep reassigning. Instead, our accumulator function
+is cleaner and more self-contained: it receives the latest model and the next value, and returns
+the result. It does not refer to variables that are on the outside.</li>
+<li>The initial value is simply passed to <code>scan</code>.</li>
+<li>The result of <code>scan</code> is a stream of models. We can <code>map</code> on that and re-render the view every
+time we have a new model value on the stream.</li>
+<li>Since <code>scan</code> produces the initial value on the resulting stream, we no longer have to call
+<code>m.render</code> initially (this was done at the bottom of our previous setup code). Instead, we have
+the initial model on the <code>models</code> stream, and the function that we pass to <code>map</code> will get
+called to render the initial view.</li>
+</ul>
+<p>You can try out the complete example below.</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "06-scan.js", content: "/*global m*/\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\nvar stream = function(initial) {\n  var callbacks = [];\n  var createdStream = function(value) {\n    for (var i = 0, t = callbacks.length; i < t; i++) {\n      var callback = callbacks[i];\n      callback(value);\n    }\n  };\n  createdStream.map = function(callback) {\n    var newStream = stream();\n\n    callbacks.push(function(value) {\n      newStream(callback(value));\n    });\n\n    if (initial !== undefined) {\n      callback(initial);\n    }\n\n    return newStream;\n  };\n  return createdStream;\n};\n\nvar scan = function(accumulator, initial, st) {\n  var newStream = stream(initial);\n  var accumulated = initial;\n\n  st.map(function(value) {\n    accumulated = accumulator(accumulated, value);\n    newStream(accumulated);\n  });\n\n  return newStream;\n};\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar models = scan(function(model, value) {\n  return model + value;\n}, model, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}]
+      files: [{name: "06-scan.js", content: "/*global m*/\n\n// -- Utility code\n\nvar stream = function(initial) {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newInitial = undefined;\n    if (initial !== undefined) {\n      newInitial = mapFunction(initial);\n    }\n    var newStream = stream(newInitial);\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\nvar scan = function(accumulator, initial, sourceStream) {\n  var newStream = stream(initial);\n  var accumulated = initial;\n\n  sourceStream.map(function(value) {\n    accumulated = accumulator(accumulated, value);\n    newStream(accumulated);\n  });\n\n  return newStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = stream();\nvar view = createView(update);\n\nvar models = scan(function(model, value) {\n  return model + value;\n}, 0, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      middle: 75
     })
   </script>
 
 
-<p><a href="07-stream-lib-mithril.html">07 - Stream Library</a></p>
+<h3>Exercise</h3><p>In our example, both the <code>model</code> and the values coming in on the <code>update</code> stream are numbers.
+However, <code>scan</code> also works with values of different types.</p>
+<p>Keep the <code>model</code> as a number, but change the values that are sent on <code>update</code> to be objects of the
+form <code>{ oper: &quot;add&quot;, value: 1 }</code>. Use this for the <code>+1</code> button.</p>
+<p>Change the <code>-1</code> button&#39;s label to <code>*2</code>, and have its <code>onclick</code> function call
+<code>update({ oper: &quot;times&quot;, value: 2 })</code>.</p>
+<p>Finally, change the accumulator function that is passed to <code>scan</code> so that it looks at the object&#39;s
+<code>oper</code> and <code>value</code>, and performs the operation on the model accordingly and returns the result.</p>
+<p>When you are ready, continue on to <a href="07-stream-lib-mithril.html">07 - Stream Library</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

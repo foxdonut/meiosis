@@ -27,3 +27,9 @@ img {
 .CodeMirror pre {
   font-size: 1.6rem !important;
 }
+pre[class*="language-"] {
+  padding: 0;
+}
+ul li {
+  list-style-type: square;
+}
