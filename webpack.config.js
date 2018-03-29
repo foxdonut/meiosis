@@ -1,11 +1,10 @@
 /*global process*/
 var isProd = process.env.NODE_ENV === "prod";
 
-var webpack = require("webpack");
-
 module.exports = {
   entry: "./src/index.ts",
   devtool: "source-map",
+  mode: isProd ? "production" : "development",
   output: {
     path: __dirname + "/dist",
     filename: isProd ? "meiosis.min.js" : "meiosis.js",
@@ -28,8 +27,5 @@ module.exports = {
         }
       }
     ]
-  },
-  plugins: isProd ? [
-    new webpack.optimize.UglifyJsPlugin({ sourceMap: true })
-  ] : []
+  }
 };

@@ -12,6 +12,7 @@ export interface TraceParameters<M> {
     otherStreams?: Array<Stream<any>>;
     toJS?: Function;
     fromJS?: Function;
+    toUpdate?: Function;
 }
 export declare function isMeiosisTracerOn(): boolean;
 export declare function trace<M>(params: TraceParameters<M>): void;

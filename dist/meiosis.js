@@ -7,7 +7,7 @@
 		exports["meiosis"] = factory();
 	else
 		root["meiosis"] = factory();
-})(this, function() {
+})(window, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -54,6 +54,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 		}
 /******/ 	};
 /******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
 /******/ 	__webpack_require__.n = function(module) {
 /******/ 		var getter = module && module.__esModule ?
@@ -69,12 +74,18 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.ts");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -83,11 +94,16 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(1));
+__export(__webpack_require__(/*! ./meiosis */ "./src/meiosis.ts"));
 
 
 /***/ }),
-/* 1 */
+
+/***/ "./src/meiosis.ts":
+/*!************************!*\
+  !*** ./src/meiosis.ts ***!
+  \************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -104,6 +120,7 @@ function trace(params) {
     if (isMeiosisTracerOn()) {
         var toJS_1 = params.toJS || (function (model) { return JSON.parse(JSON.stringify(model)); });
         var fromJS_1 = params.fromJS || (function (model) { return model; });
+        var toUpdate_1 = params.toUpdate || (function (model) { return function () { return model; }; });
         var bufferedValues_1 = [];
         var bufferedStreamValues_1 = [];
         var devtoolInitialized_1 = false;
@@ -132,7 +149,7 @@ function trace(params) {
             if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
                 sendValues_1 = evt.data.sendValuesBack;
                 liveChange_1 = false;
-                params.update(function () { return fromJS_1(evt.data.model); });
+                params.update(toUpdate_1(fromJS_1(evt.data.model)));
             }
             else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
                 devtoolInitialized_1 = true;
@@ -170,6 +187,7 @@ exports.trace = trace;
 
 
 /***/ })
-/******/ ]);
+
+/******/ });
 });
 //# sourceMappingURL=meiosis.js.map

@@ -25,6 +25,7 @@ export interface TraceParameters<M> {
   otherStreams?: Array<Stream<any>>;
   toJS?: Function;
   fromJS?: Function;
+  toUpdate?: Function;
 }
 
 export function isMeiosisTracerOn(): boolean {
@@ -74,6 +75,7 @@ export function trace<M>(params: TraceParameters<M>): void {
   if (isMeiosisTracerOn()) {
     const toJS: Function = params.toJS || ((model: M) => JSON.parse(JSON.stringify(model)));
     const fromJS: Function = params.fromJS || ((model: M) => model);
+    const toUpdate: Function = params.toUpdate || ((model: any) => () => model);
     const bufferedValues: Array<any> = [];
     const bufferedStreamValues: Array<any> = [];
     let devtoolInitialized: boolean = false;
@@ -109,7 +111,7 @@ export function trace<M>(params: TraceParameters<M>): void {
       if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
         sendValues = evt.data.sendValuesBack;
         liveChange = false;
-        params.update(() => fromJS(evt.data.model));
+        params.update(toUpdate(fromJS(evt.data.model)));
       }
       else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
         devtoolInitialized = true;
