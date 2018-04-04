@@ -78,7 +78,8 @@ function and render the label in the view:</p>
   var water = createTemperature(update, &quot;Water&quot;);
 </code></pre>
 <p>That way, we can clearly see the <code>Air</code> and <code>Water</code> temperature in the view. Below is the code that
-we have so far:</p>
+we have so far. Note that updates don&#39;t work yet, so clicking on <code>Increase</code>, <code>Decrease</code>, and
+<code>Change Units</code> won&#39;t have any effect.</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
@@ -93,8 +94,7 @@ we have so far:</p>
 <p>You can see each temperature being rendered from the top-level model, without the temperature view
 needing to know about the <code>air</code> and <code>water</code> -- instead, it continues to use <code>model.value</code> and
 <code>model.units</code> as before.</p>
-<p>The problem now is, how do we get updates to work? Above, try clicking on <code>Increase</code>, <code>Decrease</code>,
-and <code>Change Units</code>. They don&#39;t work yet. Let&#39;s address that next.</p>
+<p>The problem now is, how do we get updates to work? Let&#39;s address that next.</p>
 <h3>Nesting Updates</h3><p>The reason that updates don&#39;t work is that our temperatures are sending updates as:</p>
 <pre><code class="language-js">update({ value: 85 });
 </code></pre>
@@ -105,7 +105,7 @@ we end up with:</p>
   value: 85
 }
 </code></pre>
-<p>What we want instead is to <strong>nest</strong> the <code>air</code> and <code>water</code> updates at their respective properties:</p>
+<p><strong>What we want instead</strong> is to <strong>nest</strong> the <code>air</code> and <code>water</code> updates at their respective properties:</p>
 <p><img src="09-nesting-03.svg" alt="Nesting Updates"></p>
 <p>We can achieve this by <strong>wrapping the update</strong> function so that when a temperature calls:</p>
 <pre><code class="language-js">update({ value: 85 });

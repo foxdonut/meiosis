@@ -10,20 +10,193 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>11 - Components</h2><p>In the previous lesson, <a href="10-deep-merge-mithril.html">10 - Deep Merge</a>,</p>
-<p>Here is the example:</p>
+<h2>11 - Components</h2><p>In the previous lesson, <a href="10-deep-merge-mithril.html">10 - Deep Merge</a>, we used plain objects to
+signal updates. In our accumulator function, we deep-merged updates into the model. We also looked
+at how nesting could be done at multiple levels.</p>
+<p>Now that we have the tools to nest and reuse blocks of code, let&#39;s organize them into components.</p>
+<h3>What is a Component?</h3><p>Components mean different things in different contexts, libraries, and frameworks. Often, they have
+magical properties, lifecycle methods, and so on. In Meiosis, components are just a way to organize
+code. <strong>You decide</strong> on the structure. We&#39;ll look at one way to structure components, but remember
+that ultimately, much like most everything else in Meiosis, <strong>you are in control</strong> and you can use
+what you prefer.</p>
+<h3>A Component with a Model and a View</h3><p>Our last example had a <code>temperature</code> and a <code>temperaturePair</code>, with the latter containing two
+instances of the former. Let&#39;s turn these into components with a <strong>model</strong> and a <strong>view</strong>.</p>
+<p>Previously, we had:</p>
+<pre><code class="language-js">var createTemperature = function(update, label) {
+  // ...
+  var view = function(model) {
+      // ...
+  }
+  return view;
+}
+</code></pre>
+<p>That created the view function. Now, instead, we&#39;ll create a plain JavaScript object that returns
+<code>{ model: ..., view: ... }</code> where <code>model</code> is a function that creates the initial model for the
+component, and <code>view</code> is the view function:</p>
+<pre><code class="language-js">var createTemperature = function(label, init) {
+  return function(update) {
+    // ...
+    var model = function() {
+      return Object.assign({ value: 22, units: &quot;C&quot; }, init);
+    };
+    var view = function(model) {
+      // ...
+    };
+    return { model: model, view: view };
+  };
+};
+</code></pre>
+<p>Notice that we&#39;re accepting the <code>label</code> as before to show the temperature label. Now, we also
+accept an optional <code>init</code> parameter for the initial model, but if it&#39;s not provided, we default
+the initial model to <code>{ value: 22, units: &quot;C&quot; }</code>. The <code>model()</code> function is useful to create
+components that produce their initial model, so that you don&#39;t necessarily need to specify it from
+the outside when creating the component.</p>
+<p>Also realize that from <code>createTemperature(label, init)</code>, we are returning <code>function(update)</code>. This
+is so that we can pass that to <code>nest</code>, in case we want to nest the component.</p>
+<p>If we don&#39;t need parameters, we can directly return <code>function(update)</code>:</p>
+<pre><code class="language-js">var createTemperaturePair = function(update) {
+  // ...
+  var model = // ...
+  var view = // ...
+  return { model: model, view: view };
+};
+</code></pre>
+<h3>Nesting Components</h3><p>Now that we have components with a <code>model</code> and a <code>view</code>, we can decide how we nest components.
+Previously, we only nested the <code>update</code> function:</p>
+<pre><code class="language-js">var nest = function(update, prop) {
+  return function(obj) {
+    var result = {};
+    result[prop] = obj;
+    update(result);
+  };
+};
+// ...
+var air = createTemperature(nest(update, &quot;air&quot;), &quot;Air&quot;);
+var water = createTemperature(nest(update, &quot;water&quot;), &quot;Water&quot;);
+
+return function(model) {
+  return [
+    air(model.air),
+    water(model.water)
+  ];
+};
+</code></pre>
+<p>In the code above, notice how we have to match <code>nest(update, &quot;air&quot;)</code> with <code>air(model.air)</code>. That
+is, we have to make sure that the property we use when calling <code>nest()</code> matches the property of
+the model that we pass to the view function.</p>
+<p>We could eliminate that requirement (and risk of error) by wrapping the <code>view</code> function so that
+it automatically receives the correct property of the model. That is, after nesting the component
+at <code>&quot;air&quot;</code>, we can just call <code>view(model)</code> and it would automatically pass <code>model.air</code> to the
+view function.</p>
+<p>At the same time, we can wrap the <code>model()</code> function so that if it returns
+<code>{ value: 22, units: &quot;C&quot; }</code> and we nest the component with the <code>&quot;air&quot;</code> property, the <code>model()</code>
+function automatically returns <code>{ air: { value: 22, units: &quot;C&quot; } }</code>.</p>
+<p>Putting that together, we have:</p>
+<pre><code class="language-js">// Same as &quot;nest&quot; function that we had before
+var nestUpdate = function(update, prop) {
+  return function(obj) {
+    var result = {};
+    result[prop] = obj;
+    update(result);
+  };
+};
+
+// Now &quot;nest&quot; works on a component&#39;s &quot;create&quot; function
+var nest = function(create, prop, update) {
+  var component = create(nestUpdate(update, prop));
+  var result = Object.assign({}, component);
+  if (component.model) {
+    result.model = function() {
+      var initialModel = {};
+      initialModel[prop] = component.model();
+      return initialModel;
+    };
+  }
+  if (component.view) {
+    result.view = function(model) {
+      return component.view(model[prop]);
+    };
+  }
+  return result;
+};
+</code></pre>
+<p>The <code>nest</code> function takes the component&#39;s <code>create</code> function, the property at which to nest, and
+the <code>update</code> function. We create the component, passing in the nested <code>update</code>, just like we did
+before.</p>
+<p>Now, <code>component</code> is our freshly created component with a <code>model</code> function and a <code>view</code> function.
+We&#39;ll create a shallow copy using <code>Object.assign</code>, and that will be our <code>result</code>. This ensures that
+if you ever decide to add more properties to your component, they will be copied over.</p>
+<p>Then, we reassign the <code>model</code> function to call the original <code>model</code> function and put the return
+value inside an object with the property, such as <code>{ air: ... }</code>.</p>
+<p>Finally, we reassign the <code>view</code> function to call the original <code>view</code> function but passing
+<code>model[prop]</code>, such as <code>model[&quot;air&quot;]</code> which is the same as <code>model.air</code>.</p>
+<h3>Creating and using nested components</h3><p>Having done this, we can create and use nested components like so:</p>
+<pre><code class="language-js">var createTemperaturePair = function(update) {
+  var air = nest(createTemperature(&quot;Air&quot;), &quot;air&quot;, update);
+  var water = nest(createTemperature(&quot;Water&quot;, { value: 84, units: &quot;F&quot; }),
+    &quot;water&quot;, update);
+
+  var model = function() {
+    return Object.assign(air.model(), water.model());
+  };
+
+  var view = function(model) {
+    return [
+      air.view(model),
+      water.view(model)
+    ];
+  };
+  return { model: model, view: view };
+};
+</code></pre>
+<p>Remember that <code>createTemperature(...)</code> returns <code>function(update)</code>. That is the <code>create</code> function
+that we pass to <code>nest</code>, along with the property to nest at and the <code>update</code> function.</p>
+<p>Notice how we use the default initial model for <code>air</code>, but we can also specify a different
+initial model, like we&#39;re doing for <code>water</code>.</p>
+<p>Now, we&#39;re in turn creating a component for <code>temperaturePair</code>. Its <code>model</code> is simply the
+combination of the <code>air</code> and <code>water</code> models. Here, we&#39;re benefitting from our nesting utility:
+we don&#39;t have to specify the <code>&quot;air&quot;</code> and <code>&quot;water&quot;</code> properties.</p>
+<p>We also have that benefit in the <code>view</code> function: we can just call <code>air.view(model)</code> and
+<code>water.view(model)</code>, that is, just pass <code>model</code> without having to remember to call <code>model.air</code>
+and <code>model.water</code>.</p>
+<p>Finally, to demonstrate that multiple nesting still works, we can nest <code>temperaturePair</code>
+at <code>&quot;temperatures&quot;</code>:</p>
+<pre><code class="language-js">var createApp = function(update) {
+  return nest(createTemperaturePair, &quot;temperatures&quot;, update);
+};
+
+var update = m.stream();
+var app = createApp(update);
+
+var models = m.stream.scan(_.merge, app.model(), update);
+
+var element = document.getElementById(&quot;app&quot;);
+
+models.map(function(model) {
+  m.render(element, app.view(model));
+});
+</code></pre>
+<p>Now, our top-level <code>app</code> is a component composed of our other components. We can get the
+initial top-level model simply by calling <code>app.model()</code>, and we can render the top-level
+view with <code>app.view(model)</code>.</p>
+<h3>Putting it all together</h3><p>Here is the completed example:</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "11-components.js", content: "/*global m, _*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\nvar Component = function(create) {\n  function nest(prop) {\n    return Component(function(update) {\n      var component = create(nestUpdate(update, prop));\n      var result = {};\n      if (component.model) {\n        result.model = function() {\n          var initialModel = {};\n          initialModel[prop] = component.model();\n          return initialModel;\n        };\n      }\n      if (component.view) {\n        result.view = function(model) {\n          return component.view(model[prop]);\n        };\n      }\n      return result;\n    });\n  }\n  return { nest: nest, create: create };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(model, amount) {\n      return function(_event) {\n        update({ value: model.value + amount });\n      };\n    };\n    var changeUnits = function(model) {\n      return function(_event) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        var newValue = convert(model.value, newUnits);\n        update({ value: newValue, units: newUnits });\n      };\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return [\n        label, \" Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n        m(\"div\",\n          m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n          m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n        ),\n        m(\"div\",\n          m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n        )\n      ];\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = Component(createTemperature(\"Air\")).nest(\"air\").create(update);\n  var water = Component(createTemperature(\"Water\", { value: 84, units: \"F\" }))\n    .nest(\"water\").create(update);\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return [\n      air.view(model),\n      water.view(model)\n    ];\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return Component(createTemperaturePair).nest(\"temperatures\").create(update);\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar app = Component(createApp).create(update);\n\nvar models = m.stream.scan(_.merge, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, app.view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      files: [{name: "11-components.js", content: "/*global m, _*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\nvar nest = function(create, prop, update) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(model, amount) {\n      return function(_event) {\n        update({ value: model.value + amount });\n      };\n    };\n    var changeUnits = function(model) {\n      return function(_event) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        var newValue = convert(model.value, newUnits);\n        update({ value: newValue, units: newUnits });\n      };\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return [\n        label, \" Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n        m(\"div\",\n          m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n          m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n        ),\n        m(\"div\",\n          m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n        )\n      ];\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = nest(createTemperature(\"Air\"), \"air\", update);\n  var water = nest(createTemperature(\"Water\", { value: 84, units: \"F\" }),\n    \"water\", update);\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return [\n      air.view(model),\n      water.view(model)\n    ];\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperaturePair, \"temperatures\", update);\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar app = createApp(update);\n\nvar models = m.stream.scan(_.merge, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, app.view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
       links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "lodash", type: "js", url: "https://unpkg.com/lodash@4.17.5"}],
       middle: 75
     })
   </script>
 
 
-<h3>Exercise</h3><p>When you are ready, continue on to <a href="12-func-update-1-mithril.html">12 - Function Update 1</a>.</p>
+<h3>Exercise</h3><ul>
+<li>Add another component next to <code>temperatures</code>. Start with a component that does not accept any
+parameters and creates its initial model. Then, modify the component so that it accepts an optional
+initial model. What did you have to change?</li>
+</ul>
+<p>When you are ready, continue on to <a href="12-func-update-mithril.html">12 - Function Update</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

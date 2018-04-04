@@ -1,0 +1,28 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
+<h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>13 - Object Function Update</h2><p>In the previous lesson, <a href="12-func-update-mithril.html">12 - Function Update</a>,</p>
+<p>Here is the example:</p>
+  <div id="flems1" class="flemscode" style="height:800px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "13-obj-func-update.js", content: "/*global m*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(modelUpdate) {\n    var fn = modelUpdate.fn;\n\n    update(Object.assign(modelUpdate, {\n      fn: function(model) {\n        model[prop] = fn(model[prop]);\n        return model;\n      }\n    }));\n  };\n};\n\nvar nest = function(create, prop, update) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\nvar generateId = function() {\n  return \"uid-\" + new Date().getTime();\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(model, amount) {\n      return function(_event) {\n        update({ id: model.id, fn: function(model) {\n          model.value += amount;\n          return model;\n        } });\n      };\n    };\n    var changeUnits = function(model) {\n      return function(_event) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        var newValue = convert(model.value, newUnits);\n        update({ id: model.id, fn: function(model) {\n          model.value = newValue;\n          model.units = newUnits;\n          return model;\n        } });\n      };\n    };\n\n    var model = function() {\n      return Object.assign({ id: generateId(), value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return [\n        label, \" Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n        m(\"div\",\n          m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n          m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n        ),\n        m(\"div\",\n          m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n        )\n      ];\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperatureList = function(update) {\n  var temperature = createTemperature()(function(modelUpdate) {\n    var fn = modelUpdate.fn;\n    update({ fn: function(model) {\n      model.temperaturesById[modelUpdate.id] = fn(model.temperaturesById[modelUpdate.id]);\n      return model;\n    } });\n  });\n\n  var model = function() {\n    return {\n      temperatureIds: [],\n      temperaturesById: {}\n    };\n  };\n\n  var addTemperature = function(_event) {\n    update({ fn: function(model) {\n      var temperatureModel = temperature.model();\n      var id = temperatureModel.id;\n\n      model.temperatureIds.push(id);\n      model.temperaturesById[id] = temperatureModel;\n\n      return model;\n    } });\n  };\n\n  var removeTemperature = function(id) {\n    return function(_event) {\n      update({ fn: function(model) {\n        delete model.temperaturesById[id];\n        model.temperatureIds.splice(model.temperatureIds.indexOf(id), 1);\n        return model;\n      } });\n    };\n  };\n\n  var renderTemperature = function(model) {\n    return function(id) {\n      return m(\"div\", { key: id }, [\n        temperature.view(model.temperaturesById[id]),\n        m(\"button\", { onclick: removeTemperature(id) }, \"Remove\")\n      ]);\n    };\n  };\n\n  var view = function(model) {\n    return m(\"div\", [\n      m(\"button\", { onclick: addTemperature }, \"Add\"),\n      model.temperatureIds.map(renderTemperature(model))\n    ]);\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperatureList, \"temperatures\", update);\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar app = createApp(update);\n\nvar models = m.stream.scan(function(model, modelUpdate) {\n  return modelUpdate.fn(model);\n}, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, app.view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}],
+      middle: 75
+    })
+  </script>
+
+
+<h3>Exercise</h3><p><a href="toc.html">Table of Contents</a></p>
+
+</body></html>
