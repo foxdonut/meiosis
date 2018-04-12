@@ -10,17 +10,17 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>04 - Update Function</h2><p>In the previous lesson, <a href="03-update-model-mithril.html">03 - Update Model</a>, we added a button
+<h2>04 - Update Function</h2><p>In the previous lesson, <a href="03-update-model-react.html">03 - Update Model</a>, we added a button
 to the view and associated a function to <code>onclick</code>. That function made a change to the model
 and re-rendered the view with the updated model.</p>
 <pre><code class="language-js">var increase = function(_event) {
   model = model + 1;
-  m.render(element, view(model));
+  ReactDOM.render(view(model), element);
 };
 </code></pre>
 <h3>Extracting out the details</h3><p>Notice that the function above needs to &quot;know&quot; about the details of how to re-render the view:</p>
 <ul>
-<li>It calls <code>m.render</code></li>
+<li>It calls <code>ReactDOM.render</code></li>
 <li>It references the <code>element</code></li>
 <li>It references the <code>model</code></li>
 <li>It references the <code>view</code> function.</li>
@@ -31,7 +31,7 @@ handler functions, and we don&#39;t want all these references tied in everywhere
 <p>Let&#39;s extract those details out into an <code>update</code> function:</p>
 <pre><code class="language-js">var update = function(value) {
   model = model + value;
-  m.render(element, view(model));
+  ReactDOM.render(view(model), element);
 };
 </code></pre>
 <p>Now the <code>increase</code> function just needs to call <code>update(1)</code> to increase the value by 1 and re-render
@@ -59,8 +59,8 @@ the view. As you will see, this <code>update</code> function will only be in one
 result of calling a function. They can also be passed as values to other functions.</p>
 <p>So what does this buy us? We can call <code>increase(1)</code> and <code>increase(-1)</code> to associate event handlers
 to the <code>increase</code> and <code>decrease</code> buttons:</p>
-<pre><code class="language-js">m(&quot;button&quot;, { onclick: increase( 1) }, &quot;+1&quot;),
-m(&quot;button&quot;, { onclick: increase(-1) }, &quot;-1&quot;)
+<pre><code class="language-html">&lt;button onClick={increase( 1)}&gt;+1&lt;/button&gt;
+&lt;button onClick={increase(-1)}&gt;-1&lt;/button&gt;
 </code></pre>
 <p>Remember that <code>onclick</code> needs a <code>function(event)</code>, and that is what we are getting by calling
 <code>increase(1)</code> and <code>increase(-1)</code>.</p>
@@ -74,11 +74,11 @@ needs <code>update</code>, we&#39;ll write a <code>createView</code> function th
     };
   };
   var view = function(model) {
-    return [
-      m(&quot;div&quot;, &quot;Counter: &quot; + model),
-      m(&quot;button&quot;, { onclick: increase( 1) }, &quot;+1&quot;),
-      m(&quot;button&quot;, { onclick: increase(-1) }, &quot;-1&quot;)
-    ];
+    return (&lt;div&gt;
+      &lt;div&gt;Counter: {model}&lt;/div&gt;
+      &lt;button onClick={increase( 1)}&gt;+1&lt;/button&gt;
+      &lt;button onClick={increase(-1)}&gt;-1&lt;/button&gt;
+    &lt;/div&gt;);
   };
   return view;
 };
@@ -93,8 +93,8 @@ function that takes a <code>model</code> and returns a view.</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "04-update-function.js", content: "/*global m*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar element = document.getElementById(\"app\");\nvar view = null;\n\nvar update = function(value) {\n  model = model + value;\n  m.render(element, view(model));\n};\n\nview = createView(update);\nm.render(element, view(model));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      files: [{name: "04-update-function.js", content: "/*global ReactDOM*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar element = document.getElementById(\"app\");\nvar view = null;\n\nvar update = function(value) {\n  model = model + value;\n  ReactDOM.render(view(model), element);\n};\n\nview = createView(update);\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })
   </script>
@@ -116,7 +116,7 @@ two lines of code to do this.</li>
 <strong>multiplying</strong> instead of adding the incoming value. Verify that <code>+1</code> has no effect, <code>-1</code>
 only changes the sign, and <code>+5</code> and<code>-5</code> multiply by <code>5</code> and <code>-5</code> respectively.</li>
 </ol>
-<p>When you are ready, continue on to <a href="05-stream-mithril.html">05 - Stream</a>.</p>
+<p>When you are ready, continue on to <a href="05-stream-react.html">05 - Stream</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

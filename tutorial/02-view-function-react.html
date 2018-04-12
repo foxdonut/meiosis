@@ -10,17 +10,17 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>02 - View Function</h2><p>In the previous lesson, <a href="01-hello-world-mithril.html">01 - Hello World</a>, we rendered a simple
+<h2>02 - View Function</h2><p>In the previous lesson, <a href="01-hello-world-react.html">01 - Hello World</a>, we rendered a simple
 message onto the page. Now, let&#39;s write a <strong>function</strong> that produces what to render. We&#39;ll call
 this the <strong>view</strong> function.</p>
 <h3>View = function(model)</h3><p>The <code>view</code> function produces the vnode to render. Since it is a function, it can receive
 parameters - namely, the <strong>model</strong>. This is a plain JavaScript object that represents the state of
 the application.</p>
 <p>In our example, the model is a counter. We&#39;ll create an <strong>initial</strong> model with a value of <code>0</code>.
-When rendering with <code>m.render</code>, we pass the DOM element as before, but instead of directly
+When rendering with <code>ReactDOM.render</code>, we pass the DOM element as before, but instead of directly
 passing what to render, we pass the <strong>result</strong> of calling the <code>view</code> function with the value
 <code>0</code>.</p>
-<p><img src="02-view-function-01.svg" alt="The View Function"></p>
+<p><img src="02-view-function-02.svg" alt="The View Function"></p>
 <p>Within the <code>view</code> function, we can create a view as we see fit, using the <code>model</code>. In this
 case, we are simply creating a <code>div</code> element with the text <code>Counter:</code> and the value that was
 passed in:</p>
@@ -28,8 +28,8 @@ passed in:</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "02-view-function.js", content: "/*global m*/\nvar view = function(model) {\n  return m(\"div\", \"Counter: \" + model);\n};\n\nvar initial = 0;\nvar element = document.getElementById(\"app\");\nm.render(element, view(initial));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      files: [{name: "02-view-function.js", content: "/*global ReactDOM*/\nvar view = function(model) {\n  return <div>Counter: {model}</div>;\n};\n\nvar initial = 0;\nvar element = document.getElementById(\"app\");\nReactDOM.render(view(initial), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })
   </script>
@@ -47,7 +47,7 @@ It is just a simple function of the model.</p>
 <code>{ label: &quot;The Counter&quot;, value: 0 }</code> as the model. Change the <code>view</code> function so that it uses the
 model to produce the view.</li>
 </ol>
-<p>When you are ready, continue on to <a href="03-update-model-mithril.html">03 - Update Model</a>.</p>
+<p>When you are ready, continue on to <a href="03-update-model-react.html">03 - Update Model</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

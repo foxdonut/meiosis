@@ -10,18 +10,46 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>01 - Hello World</h2><p>This is the first React lesson.</p>
+<h2>01 - Hello World</h2><p>The first thing that we will do is render something onto the page - a &quot;Hello, world&quot; message,
+of course. With React, this is accomplished using <code>ReactDOM.render</code>. When calling this function, we
+must pass two parameters:</p>
+<ol>
+<li>What we want to render. This is a virtual-DOM node, or <strong>vnode</strong> for short.</li>
+<li>The DOM element into which we want to render.</li>
+</ol>
+<p>We can use JSX to describe the HTML structure of what we want to render and produce a vnode
+suitable for passing to <code>ReactDOM.render</code>.</p>
+<h3>Our First Example</h3><p>The DOM element into which we want to render could be <code>document.body</code>. However, I will use an
+HTML file with an element inside of it. The element that has the <code>app</code> id and can be retrieved
+using <code>document.getElementById(&quot;app&quot;)</code>. The reason I am using an HTML file is that this enables you
+to render other things on the page, and have your app (or multiple apps) occupy specific places on
+the page.</p>
+<p>To produce the vnode for our message, we can simply use <code>&lt;h1&gt;Hello, world&lt;/h1&gt;</code>.</p>
+<p>Here is the code to render the message onto the page:</p>
   <div id="flems1" class="flemscode"></div>
 
   <script>
     window.Flems(flems1, {
       files: [{name: "01-hello-world.js", content: "/*global ReactDOM*/\nvar element = document.getElementById(\"app\");\nReactDOM.render(<h1>Hello, world</h1>, element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.2.0/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.2.0/umd/react-dom.development.js"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })
   </script>
 
 
-<p>This concludes the test.</p>
+<p>Notice that JSX produces the vnode, and <code>app.html</code> contains the <code>element</code> into which we render.
+These are the two arguments that we pass to <code>ReactDOM.render</code>.</p>
+<p><img src="01-hello-world-02.svg" alt="The Render Function"></p>
+<h3>Exercises</h3><p>Edit the code above and try out these exercises. You can see the output on the right, so you
+can confirm that your code works as expected.</p>
+<ol>
+<li>Change the <code>h1</code> tag to something else, and change the message.</li>
+<li>In <code>app.html</code>, add something before and after the <code>id</code> element, and confirm that they are
+displayed before and after the message that you are rendering.</li>
+<li>Change the <code>element</code> into which to render, to <code>document.body</code>. Notice that your message
+now overwrites anything that you had in the <code>app.html</code> file.</li>
+</ol>
+<p>When you are ready, move on to the next lesson: <a href="02-view-function-react.html">02 - View Function</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

@@ -10,20 +10,20 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>03 - Update Model</h2><p>In the previous lesson, <a href="02-view-function-mithril.html">02 - View Function</a>, we created a <code>view</code>
+<h2>03 - Update Model</h2><p>In the previous lesson, <a href="02-view-function-react.html">02 - View Function</a>, we created a <code>view</code>
 function that produces the vnode according to the <code>model</code> that is passed to the function.</p>
 <p>So, we can call <code>view(model)</code> and render it onto the page. Now, how do we make a change to the
 model and refresh the view?</p>
 <p>Our model is a counter that has a value of <code>0</code>. Let&#39;s add a button to increase the counter.</p>
 <h3>DOM Event Handler Functions</h3><p>We can add a <code>+1</code> button with this code:</p>
-<pre><code class="language-js">m(&quot;button&quot;, { onclick: increase }, &quot;+1&quot;)
+<pre><code class="language-html">&lt;button onClick={increase}&gt;+1&lt;/button&gt;
 </code></pre>
-<p>It is important to remember that what we associate to <code>onclick</code> must be a <strong>function</strong>. This
+<p>It is important to remember that what we associate to <code>onClick</code> must be a <strong>function</strong>. This
 function will automatically be called when the user clicks on the button, and the function gets
 passed a DOM event as a parameter. Here, the function is <code>increase</code>:</p>
 <pre><code class="language-js">var increase = function(_event) {
   model = model + 1;
-  m.render(element, view(model));
+  ReactDOM.render(view(model), element);
 };
 </code></pre>
 <blockquote>
@@ -33,8 +33,8 @@ the function declaration, prefixed with an underscore to indicate that the param
 used.</p>
 </blockquote>
 <h3>Updating the Model and Re-rendering the View</h3><p>As you can see in the code above, the <code>increase</code> function updates the model by adding 1 to the
-value. Then, it re-renders the view by calling <code>m.render</code> again.</p>
-<p><img src="03-update-model-01.svg" alt="The onclick Function"></p>
+value. Then, it re-renders the view by calling <code>ReactDOM.render</code> again.</p>
+<p><img src="03-update-model-02.svg" alt="The onclick Function"></p>
 <blockquote>
 <p><strong>Note:</strong> you might wonder about rebuilding the whole view and re-rendering it when something
 changes. Generally speaking, producing a vnode is not a performance concern. Further, re-rendering
@@ -46,20 +46,20 @@ make the real DOM reflect the view.</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "03-update-model.js", content: "/*global m*/\nvar model = 0;\n\nvar increase = function(_event) {\n  model = model + 1;\n  m.render(element, view(model));\n};\n\nvar view = function(model) {\n  return [\n    m(\"div\", \"Counter: \" + model),\n    m(\"button\", { onclick: increase }, \"+1\")\n  ];\n};\n\nvar element = document.getElementById(\"app\");\nm.render(element, view(model));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      files: [{name: "03-update-model.js", content: "/*global ReactDOM*/\nvar model = 0;\n\nvar increase = function(_event) {\n  model = model + 1;\n  ReactDOM.render(view(model), element);\n};\n\nvar view = function(model) {\n  return (<div>\n    <div>Counter: {model}</div>\n    <button onClick={increase}>+1</button>\n  </div>);\n};\n\nvar element = document.getElementById(\"app\");\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })
   </script>
 
 
 <h3>Exercises</h3><ol>
-<li>As in the <a href="02-view-function-mithril.html">previous lesson</a>, try passing in an object such as
+<li>As in the <a href="02-view-function-react.html">previous lesson</a>, try passing in an object such as
 <code>{ label: &quot;The Counter&quot;, value: 0 }</code> as the model. Change the <code>view</code> function so that it uses the
 model to produce the view, and change the <code>increase</code> function so that it increases the model value.</li>
 <li>Add a <code>-1</code> button that decreases the value by 1.</li>
 </ol>
-<p>When you are ready, continue on to <a href="04-update-function-mithril.html">04 - Update Function</a>.</p>
+<p>When you are ready, continue on to <a href="04-update-function-react.html">04 - Update Function</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>

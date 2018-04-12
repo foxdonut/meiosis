@@ -10,7 +10,7 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>13 - Object Function Update</h2><p>In the previous lesson, <a href="12-func-update-mithril.html">12 - Function Update</a>, we looked at a more
+<h2>13 - Object Function Update</h2><p>In the previous lesson, <a href="12-func-update-react.html">12 - Function Update</a>, we looked at a more
 flexible way of issuing updates, namely by passing functions to <code>update()</code>.</p>
 <p>The majority of the Meiosis examples use this strategy. However, there is a slightly different
 way that is even more flexible. We&#39;ll look at it here.</p>
@@ -23,7 +23,7 @@ way that is even more flexible. We&#39;ll look at it here.</p>
 </code></pre>
 <p>The only change we need to our Meiosis pattern setup code is to use the <code>fn</code> property to get
 the function that performs the update to the model:</p>
-<pre><code class="language-js">var models = m.stream.scan(function(model, modelUpdate) {
+<pre><code class="language-js">var models = flyd.scan(function(model, modelUpdate) {
   return modelUpdate.fn(model);
 }, app.model(), update);
 </code></pre>

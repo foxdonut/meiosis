@@ -12,36 +12,36 @@
 <!-- mrender -->
 <g id="node1" class="node">
 <title>mrender</title>
-<polygon fill="#add8e6" stroke="transparent" points="207,-118 9,-118 9,-82 207,-82 207,-118"/>
-<text text-anchor="start" x="16.5947" y="-96.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">m.render(</text>
-<text text-anchor="start" x="86.6953" y="-96.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">element,</text>
-<text text-anchor="start" x="149.9971" y="-96.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">vnode</text>
-<text text-anchor="start" x="191.8994" y="-96.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">)</text>
-</g>
-<!-- element -->
-<g id="node2" class="node">
-<title>element</title>
-<polygon fill="#ffff00" stroke="transparent" points="232,-46 0,-46 0,0 232,0 232,-46"/>
-<text text-anchor="start" x="7.9824" y="-28.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">document.getElementById(&quot;app&quot;)</text>
-<text text-anchor="start" x="43.9883" y="-10.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;</text>
-</g>
-<!-- mrender&#45;&gt;element -->
-<g id="edge1" class="edge">
-<title>mrender:element&#45;&gt;element:app</title>
-<path fill="none" stroke="#b03060" d="M116,-81.8716C116,-66.5265 116,-59.3194 116,-40"/>
-<polygon fill="#b03060" stroke="#b03060" points="112.5001,-82 116,-92 119.5001,-82 112.5001,-82"/>
+<polygon fill="#add8e6" stroke="transparent" points="207,-108 9,-108 9,-72 207,-72 207,-108"/>
+<text text-anchor="start" x="16.5947" y="-86.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">m.render(</text>
+<text text-anchor="start" x="86.6953" y="-86.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">element,</text>
+<text text-anchor="start" x="149.9971" y="-86.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">vnode</text>
+<text text-anchor="start" x="191.8994" y="-86.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">)</text>
 </g>
 <!-- view -->
 <g id="node3" class="node">
 <title>view</title>
-<polygon fill="#ffff00" stroke="transparent" points="257.5,-190 76.5,-190 76.5,-154 257.5,-154 257.5,-190"/>
-<text text-anchor="start" x="84.6865" y="-168.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">m(&quot;h1&quot;, &quot;Hello, world&quot;)</text>
+<polygon fill="#ffff00" stroke="transparent" points="257.5,-36 76.5,-36 76.5,0 257.5,0 257.5,-36"/>
+<text text-anchor="start" x="84.6865" y="-14.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">m(&quot;h1&quot;, &quot;Hello, world&quot;)</text>
 </g>
-<!-- view&#45;&gt;mrender -->
+<!-- mrender&#45;&gt;view -->
 <g id="edge2" class="edge">
-<title>view:mview&#45;&gt;mrender:view</title>
-<path fill="none" stroke="#b03060" d="M168,-163.7153C168,-153.5171 168,-135.4115 168,-118.0621"/>
-<polygon fill="#b03060" stroke="#b03060" points="171.5001,-118 168,-108 164.5001,-118 171.5001,-118"/>
+<title>mrender:view&#45;&gt;view:mview</title>
+<path fill="none" stroke="#b03060" d="M168,-71.9379C168,-54.5885 168,-36.4829 168,-26.2847"/>
+<polygon fill="#b03060" stroke="#b03060" points="164.5001,-72 168,-82 171.5001,-72 164.5001,-72"/>
+</g>
+<!-- element -->
+<g id="node2" class="node">
+<title>element</title>
+<polygon fill="#ffff00" stroke="transparent" points="232,-190 0,-190 0,-144 232,-144 232,-190"/>
+<text text-anchor="start" x="43.9883" y="-172.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;</text>
+<text text-anchor="start" x="7.9824" y="-154.4" font-family="Courier,monospace" font-size="12.00" fill="#000000">document.getElementById(&quot;app&quot;)</text>
+</g>
+<!-- element&#45;&gt;mrender -->
+<g id="edge1" class="edge">
+<title>element:app&#45;&gt;mrender:element</title>
+<path fill="none" stroke="#b03060" d="M116,-150C116,-130.6806 116,-123.4735 116,-108.1284"/>
+<polygon fill="#b03060" stroke="#b03060" points="119.5001,-108 116,-98 112.5001,-108 119.5001,-108"/>
 </g>
 </g>
 </svg>

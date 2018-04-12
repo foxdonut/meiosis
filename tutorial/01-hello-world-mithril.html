@@ -19,7 +19,14 @@ must pass two parameters:</p>
 </ol>
 <p>We can use the <code>m()</code> function to describe the HTML structure of what we want to render and
 produce a vnode suitable for passing to <code>m.render</code>.</p>
-<h3>Our First Example</h3><p>Here is the code to render a message onto the page:</p>
+<h3>Our First Example</h3><p>The DOM element into which we want to render could be <code>document.body</code>. However, I will use an
+HTML file with an element inside of it. The element that has the <code>app</code> id and can be retrieved
+using <code>document.getElementById(&quot;app&quot;)</code>. The reason I am using an HTML file is that this enables you
+to render other things on the page, and have your app (or multiple apps) occupy specific places on
+the page.</p>
+<p>To produce the vnode for our message, we can simply use <code>m(&quot;h1&quot;, &quot;Hello, world&quot;)</code>. This will render
+<code>&lt;h1&gt;Hello, world&lt;/h1&gt;</code>.</p>
+<p>Here is the code to render the message onto the page:</p>
   <div id="flems1" class="flemscode"></div>
 
   <script>
@@ -31,12 +38,9 @@ produce a vnode suitable for passing to <code>m.render</code>.</p>
   </script>
 
 
-<p>Notice that the <code>element</code> into which we render is the element that has the <code>app</code> id. You can
-see this element in the <code>app.html</code> file. This file represents our HTML page.</p>
+<p>Notice that <code>app.html</code> contains the <code>element</code> into which we render, and <code>m(...)</code> produces the
+vnode. These are the two arguments that we pass to <code>m.render</code>.</p>
 <p><img src="01-hello-world-01.svg" alt="The Render Function"></p>
-<p>You can also use <code>document.body</code> as the element. The reason I am using an HTML file with an
-element inside it is that this enables you to render other things on the page, and have your
-app (or multiple apps) occupy specific places on the page.</p>
 <h3>Exercises</h3><p>Edit the code above and try out these exercises. You can see the output on the right, so you
 can confirm that your code works as expected.</p>
 <ol>

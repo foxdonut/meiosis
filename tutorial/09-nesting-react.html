@@ -10,7 +10,7 @@
 <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
 <script src="prism.js" type="text/javascript"></script>
 <h1>Meiosis Tutorial</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>09 - Nesting</h2><p>In the previous lesson, <a href="08-accumulator-mithril.html">08 - Accumulator</a>, we changed our strategy
+<h2>09 - Nesting</h2><p>In the previous lesson, <a href="08-accumulator-react.html">08 - Accumulator</a>, we changed our strategy
 for accumulating updates. We switched to sending objects on the update stream, and we changed our
 accumulator function to use <code>Object.assign</code> to merge updates into the model. This enabled us to
 use objects for our model rather than just numbers.</p>
@@ -27,7 +27,7 @@ from the other:</p>
 </code></pre>
 <p>Having a single top-level model gives us a <strong>single source of truth</strong> and combined with a root
 <code>view = function(model)</code>, we continue having a simple reactive loop with the Meiosis pattern:</p>
-<p><img src="09-nesting-01.svg" alt="The Reactive Loop"></p>
+<p><img src="09-nesting-05.svg" alt="The Reactive Loop"></p>
 <p>To reach our goal, we use a technique that I call <strong>nesting</strong>.</p>
 <h3>Nesting Models</h3><p>Remember that we had a <code>createView</code> function which returned a <code>view</code> function. By calling
 <code>view(model)</code>, we were able to render (and re-render) the temperature.</p>
@@ -43,14 +43,14 @@ from the other:</p>
 <p>We&#39;ll rename the <code>createView</code> function to <code>createTemperature</code>, but it will work the same as
 before. Our top-level <code>createView</code> function will create two instances of temperature:</p>
 <pre><code class="language-js">var createView = function(update) {
-  var air = createTemperature(update);
-  var water = createTemperature(update);
+  var air = createTemperature(update, &quot;Air&quot;);
+  var water = createTemperature(update, &quot;Water&quot;);
 
   return function(model) {
-    return [
-      air(model.air),
-      water(model.water)
-    ];
+    return (&lt;div&gt;
+      {air(model.air)}
+      {water(model.water)}
+    &lt;/div&gt;);
   };
 };
 </code></pre>
@@ -65,10 +65,10 @@ function and render the label in the view:</p>
 <pre><code class="language-js">var createTemperature = function(update, label) {
   // ...
   var view = function(model) {
-    return [
-      label, &quot; Temperature: &quot;, // ...
+    return (&lt;div&gt;
+      &lt;span&gt;{label} Temperature: {model.value}&amp;deg;{model.units}&lt;/span&gt;
       // ...
-    ];
+    &lt;/div&gt;);
   };
   return view;
 }
@@ -84,8 +84,8 @@ we have so far. Note that updates don&#39;t work yet, so clicking on <code>Incre
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "09-nesting-a.js", content: "/*global m*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return [\n      label, \" Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n      m(\"div\",\n        m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n        m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n      ),\n      m(\"div\",\n        m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n      )\n    ];\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(update, \"Air\");\n  var water = createTemperature(update, \"Water\");\n\n  return function(model) {\n    return [\n      air(model.air),\n      water(model.water)\n    ];\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar models = m.stream.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}],
+      files: [{name: "09-nesting-a.js", content: "/*global ReactDOM, flyd*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div>\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(update, \"Air\");\n  var water = createTemperature(update, \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })
   </script>
@@ -114,7 +114,7 @@ we end up with:</p>
 <pre><code class="language-js">update({ path: &quot;water&quot;, data: { value: 85 } });
 </code></pre>
 <p>Then, our accumulator function can use <code>path</code> and <code>data</code> to update the top-level model accordingly:</p>
-<pre><code class="language-js">var models = m.stream.scan(
+<pre><code class="language-js">var models = flyd.scan(
   function(model, obj) {
     model[obj.path] = Object.assign(model[obj.path], obj.data);
     return model;
@@ -158,8 +158,8 @@ updates now work correctly, as you can see in the complete example below.</p>
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "09-nesting.js", content: "/*global m*/\n\n// -- Utility code\n\nvar nest = function(update, path) {\n  return function(data) {\n    update({ path: path, data: data });\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return [\n      label, \" Temperature: \", model.value, m.trust(\"&deg;\"), model.units,\n      m(\"div\",\n        m(\"button\", { onclick: increase(model, 1) }, \"Increase\"),\n        m(\"button\", { onclick: increase(model,-1) }, \"Decrease\")\n      ),\n      m(\"div\",\n        m(\"button\", { onclick: changeUnits(model) }, \"Change Units\")\n      )\n    ];\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return [\n      air(model.air),\n      water(model.water)\n    ];\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = m.stream();\nvar view = createView(update);\n\nvar models = m.stream.scan(\n  function(model, obj) {\n    model[obj.path] = Object.assign(model[obj.path], obj.data);\n    return model;\n  },\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  m.render(element, view(model));\n});\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"}],
+      files: [{name: "09-nesting.js", content: "/*global ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nest = function(update, path) {\n  return function(data) {\n    update({ path: path, data: data });\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div>\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(\n  function(model, obj) {\n    model[obj.path] = Object.assign(model[obj.path], obj.data);\n    return model;\n  },\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })
   </script>
@@ -170,7 +170,7 @@ updates now work correctly, as you can see in the complete example below.</p>
 that it works by trying it out in the application. Which code did you need to add or change? Which
 code did not need any changes?</li>
 </ul>
-<p>When you are ready, continue on to <a href="10-deep-merge-mithril.html">10 - Deep Merge</a>.</p>
+<p>When you are ready, continue on to <a href="10-deep-merge-react.html">10 - Deep Merge</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 
 </body></html>
