@@ -28,7 +28,7 @@ passed in:</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "02-view-function.js", content: "/*global m*/\nvar view = function(model) {\n  return m(\"div\", \"Counter: \" + model);\n};\n\nvar initial = 0;\nvar element = document.getElementById(\"app\");\nm.render(element, view(initial));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"}],
+      files: [{name: "02-view-function.js", content: "/*global m*/\nvar view = function(model) {\n  return m(\"div\", \"Counter: \" + model);\n};\n\nvar initial = 0;\nvar element = document.getElementById(\"app\");\nm.render(element, view(initial));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
       middle: 75
     })
