@@ -38,6 +38,6 @@ ul li {
   border-top: 1px solid gray;
   border-bottom: 1px solid gray;
 }
-pre.language-js {
+pre.language-js, pre.language-html {
   margin-bottom: 2rem;
 }
