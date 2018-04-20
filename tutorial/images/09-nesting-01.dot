@@ -1,0 +1,47 @@
+digraph meiosistutorial {
+  model [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>model</td>
+      </tr>
+    </table>
+  >]
+
+  view [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr>
+        <td>view(model)</td>
+      </tr>
+    </table>
+  >]
+
+  render [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr>
+        <td>m.render(element, vnode)</td>
+      </tr>
+    </table>
+  >]
+
+  update [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>update(...)</td>
+      </tr>
+    </table>
+  >]
+
+  modelupdate [shape="plaintext", style="filled", fillcolor="green", label=<
+    <table border="0">
+      <tr>
+        <td>model = &lt;updated model&gt;</td>
+      </tr>
+    </table>
+  >]
+
+  model -> view
+  view -> render [label="vnode"]
+  render -> update [label="event"]
+  update -> modelupdate
+  modelupdate -> view
+}

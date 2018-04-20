@@ -1,0 +1,46 @@
+digraph meiosistutorial {
+  nupdate [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>nest(update, "water");</td>
+      </tr>
+    </table>
+  >]
+
+  fdata [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr><td align="left">function(data) {</td></tr>
+      <tr><td align="left">    update({ path: "water", data: data });</td></tr>
+      <tr><td align="left">}</td></tr>
+    </table>
+  >]
+
+  createtemp [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>createTemperature(update)</td></tr>
+    </table>
+  >]
+
+  water [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>update({ value: 23 });</td></tr>
+    </table>
+  >]
+
+  update [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>update({ path: "water", data: { value: 23 } });</td>
+      </tr>
+    </table>
+  >]
+
+  nupdate -> fdata
+  fdata -> createtemp
+  createtemp -> water
+  water -> fdata
+  fdata -> update
+  water -> update [style="invis"]
+
+  {rank="same"; createtemp water}
+}

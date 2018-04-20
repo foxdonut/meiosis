@@ -1,0 +1,79 @@
+digraph meiosistutorial {
+  createview [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>createView(update)</td></tr>
+    </table>
+  >]
+
+  nupdate1 [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>nest(update, "temperatures");</td>
+      </tr>
+    </table>
+  >]
+
+  fdata1 [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr><td align="left">function(data) {</td></tr>
+      <tr><td align="left">    update({ temperatures: data });</td></tr>
+      <tr><td align="left">}</td></tr>
+    </table>
+  >]
+
+  createtemppair [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>createTemperaturePair(update)</td></tr>
+    </table>
+  >]
+
+  nupdate2 [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>nest(update, "air");</td>
+      </tr>
+    </table>
+  >]
+
+  fdata2 [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr><td align="left">function(data) {</td></tr>
+      <tr><td align="left">    update({ air: data });</td></tr>
+      <tr><td align="left">}</td></tr>
+    </table>
+  >]
+
+  createtemp [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>createTemperature(update)</td></tr>
+    </table>
+  >]
+
+  air [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>update({ value: 23 });</td></tr>
+    </table>
+  >]
+
+  update [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>update({ temperatures: { air: { value: 23 } } });</td>
+      </tr>
+    </table>
+  >]
+
+  createview -> nupdate1
+  nupdate1 -> fdata1
+  fdata1 -> createtemppair
+  createtemppair -> nupdate2
+  nupdate2 -> fdata2
+  fdata2 -> createtemp
+  createtemp -> air
+  air -> fdata2
+  fdata2 -> fdata1
+  fdata1 -> update
+  air -> update [style="invis"]
+
+  {rank="same"; createtemp air}
+}

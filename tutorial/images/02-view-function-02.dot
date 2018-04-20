@@ -1,0 +1,43 @@
+digraph meiosistutorial {
+  mrender [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>ReactDOM.render(</td>
+        <td port="vnode">vnode, </td>
+        <td port="element">element</td>
+        <td>)</td>
+      </tr>
+    </table>
+  >]
+
+  element [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr>
+        <td>document.getElementById("app")</td>
+      </tr>
+      <tr>
+        <td>&lt;div id="app"&gt;&lt;/div&gt;</td>
+      </tr>
+    </table>
+  >]
+
+  view [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr>
+        <td>m("div", "Counter: 0")</td>
+      </tr>
+    </table>
+  >]
+
+  vfunction [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr>
+        <td>view(0)</td>
+      </tr>
+    </table>
+  >]
+
+  mrender:element -> element [dir="back"]
+  view -> mrender:vnode
+  vfunction -> view
+}

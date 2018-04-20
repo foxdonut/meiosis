@@ -1,0 +1,26 @@
+digraph meiosistutorial {
+  nupdate [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>nestUpdate(update, "air");</td>
+      </tr>
+    </table>
+  >]
+
+  air [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>update({ value: 23 });</td></tr>
+    </table>
+  >]
+
+  update [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr>
+        <td>update({ air: { value: 23 } });</td>
+      </tr>
+    </table>
+  >]
+
+  air -> nupdate
+  nupdate -> update
+}

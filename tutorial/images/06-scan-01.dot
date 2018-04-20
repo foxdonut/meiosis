@@ -1,0 +1,84 @@
+digraph meiosistutorial {
+  stream [shape="none", label="var update = stream();"]
+
+  updateplus1 [shape="none", style="filled", fillcolor="yellow", label="update(5)"]
+  updateplus3 [shape="none", style="filled", fillcolor="yellow", label="update(-3)"]
+  updateplus4 [shape="none", style="filled", fillcolor="yellow", label="update(8)"]
+  updateplus2 [shape="none", style="filled", fillcolor="yellow", label="update(2)"]
+
+  thestream [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="1">
+      <tr>
+        <td port="plusone" border="0">5</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td port="plusthree" border="0">-3</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td port="plusfour" border="0">8</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td port="plustwo" border="0">2</td>
+      </tr>
+    </table>
+  >]
+
+  scan [shape="plaintext", label=<
+    <table border="0">
+      <tr>
+        <td align='left'>var otherStream = scan(function(latest, next) {</td>
+      </tr>
+      <tr>
+        <td align='left'>    return latest + next;</td>
+      </tr>
+      <tr>
+        <td align='left'>}, 0, update);</td>
+      </tr>
+    </table>
+  >]
+
+  thescanstream [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="1">
+      <tr>
+        <td border="0" port="initial">0</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td border="0" port="one">5</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td border="0" port="four">2</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td border="0" port="eight">10</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td border="0" port="ten">12</td>
+      </tr>
+    </table>
+  >]
+
+  scan0 [shape="none", style="filled", fillcolor="yellow", label="initial"]
+  scan1 [shape="none", style="filled", fillcolor="yellow", label="0 + 5 = 5"]
+  scan2 [shape="none", style="filled", fillcolor="yellow", label="5 + -3 = 2"]
+  scan3 [shape="none", style="filled", fillcolor="yellow", label="2 + 8 = 10"]
+  scan4 [shape="none", style="filled", fillcolor="yellow", label="10 + 2 = 12"]
+
+  updateplus1 -> thestream:plusone
+  updateplus3 -> thestream:plusthree
+  updateplus4 -> thestream:plusfour
+  updateplus2 -> thestream:plustwo
+  stream -> thestream [label="        "]
+
+  thescanstream -> scan [dir="back"]
+
+  scan0 -> thescanstream:initial
+  scan1 -> thescanstream:one
+  scan2 -> thescanstream:four
+  scan3 -> thescanstream:eight
+  scan4 -> thescanstream:ten
+
+  scan1 -> thescanstream:initial
+  scan2 -> thescanstream:one
+  scan3 -> thescanstream:four
+  scan4 -> thescanstream:eight
+
+  thestream:plusone -> scan1 [dir="back"]
+  thestream:plusthree -> scan2 [dir="back"]
+  thestream:plusfour -> scan3 [dir="back"]
+  thestream:plustwo -> scan4 [dir="back"]
+
+  {rank="same"; stream thestream}
+}

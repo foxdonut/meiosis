@@ -1,0 +1,23 @@
+digraph meiosistutorial {
+  stream [shape="none"]
+
+  updateplus1 [shape="none", style="filled", fillcolor="yellow", label="update(1)"]
+
+  updateminus1 [shape="none", style="filled", fillcolor="yellow", label="update(-1)"]
+
+  thestream [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="1">
+      <tr>
+        <td port="plusone" border="0">1</td>
+        <td border="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td port="minusone" border="0">-1</td>
+      </tr>
+    </table>
+  >]
+
+  updateplus1 -> thestream:plusone
+  updateminus1 -> thestream:minusone
+  stream -> thestream [label="        "]
+
+  {rank="same"; stream thestream}
+}

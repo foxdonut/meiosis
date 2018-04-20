@@ -1,0 +1,32 @@
+digraph meiosistutorial {
+  mrender [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>model = model + 1</td>
+      </tr>
+      <tr>
+        <td>ReactDOM.render(view(model), element)</td>
+      </tr>
+    </table>
+  >]
+
+  event [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr>
+        <td>function(event)</td>
+      </tr>
+    </table>
+  >]
+
+  efunction [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr>
+        <td>onclick</td>
+      </tr>
+    </table>
+  >]
+
+  event -> mrender
+  efunction -> event
+}
+

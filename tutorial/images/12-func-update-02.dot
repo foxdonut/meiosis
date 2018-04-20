@@ -1,0 +1,35 @@
+digraph meiosistutorial {
+  nupdate [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+    <table border="0">
+      <tr>
+        <td>nestUpdate(update, "air");</td>
+      </tr>
+    </table>
+  >]
+
+  air [shape="plaintext", style="filled", fillcolor="yellow", label=<
+    <table border="0">
+      <tr><td>update(func);</td></tr>
+    </table>
+  >]
+
+  update [shape="plaintext", style="filled", fillcolor="orange", label=<
+    <table border="0">
+      <tr>
+        <td align="left">update(function(model) {</td>
+      </tr>
+      <tr>
+        <td align="left">    model["air"] = func(model["air"]);</td>
+      </tr>
+      <tr>
+        <td align="left">    return model;</td>
+      </tr>
+      <tr>
+        <td align="left">});</td>
+      </tr>
+    </table>
+  >]
+
+  air -> nupdate
+  nupdate -> update
+}
