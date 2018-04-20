@@ -117,7 +117,7 @@ is the result of calling the passed in <code>mapFunction</code>.</p>
   return newStream;
 };
 </code></pre>
-<p>As we discussed, <code>scan</code> takes an accumulator function, an initial value, and a source streawm.
+<p>As we discussed, <code>scan</code> takes an accumulator function, an initial value, and a source stream.
 The new stream starts with the initial value. This is also the starting point for the
 <code>accumulated</code> value, which is the latest result. Then, we <code>map</code> on the source stream, passing in
 a function that takes the incoming value, calls the <code>accumulator</code> function with the latest
