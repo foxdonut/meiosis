@@ -1,0 +1,126 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
+<h1>Meiosis Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>Routing</h2><p>In this part of the Meiosis tutorial, we will look at routing. We&#39;ll use the simple page
+navigation example shown below.</p>
+<p><img src="routing-example.gif" alt="Routing"></p>
+<h3>Start Without Routing</h3><p>Routing does not have to be so notoriously difficult and complicated. We&#39;ll start implementing
+the application without routing, using the model as our single source of truth (as always) and
+actions to navigate to different pages. Then, we can add routes as simple mappings to actions.</p>
+<h3>Defining Navigation</h3><p>To identify the different pages of the application, we&#39;ll use simple constants:</p>
+<pre><code class="language-javascript">export const pages = {
+  home: { id: &quot;Home&quot;, tab: &quot;Home&quot; },
+  coffee: { id: &quot;Coffee&quot;, tab: &quot;Coffee&quot; },
+  beer: { id: &quot;Beer&quot;, tab: &quot;Beer&quot; },
+  beerDetails: { id: &quot;BeerDetails&quot;, tab: &quot;Beer&quot; }
+};
+</code></pre>
+<p>Then, to navigate, we can create a navigation object with convenient functions to navigate
+to different pages. We&#39;ll assign the current page and parameters to the model. Thus the
+model identifies the current location.</p>
+<pre><code class="language-javascript">export const createNavigation = update =&gt; {
+  const navigate = (page, params = {}) =&gt;
+    update(model =&gt; Object.assign(model, ({ page, params })));
+
+  const navigateToBeer = () =&gt; {
+    services.loadBeer().then(beerList =&gt; {
+      update(model =&gt; Object.assign(model, { beerList }));
+      navigate(pages.beer);
+    });
+  };
+  return { navigateToHome, navigateToBeer, ... };
+};
+</code></pre>
+<p>Notice that we can also define what needs to happen when navigating to a page, such as
+loading data from the server. Callers of these functions don&#39;t need to know what must
+happen when navigating to a page.</p>
+<h3>Creating the App</h3><p>When creating the app, we&#39;ll pass the navigation object over so that we can call its
+functions and navigate. Since the model identifies the current page, we&#39;ll create a
+lookup map to conveniently find the corresponding component. Then we can just call
+its <code>view</code> function to render the current page.</p>
+<pre><code class="language-javascript">export const createApp = (update, navigation) =&gt; {
+  const homeComponent = createHome(update); //more...
+  const pageMap = {
+    [pages.home.id]: homeComponent, //more...
+  };
+  return {
+    view: model =&gt; {
+      const component = pageMap[model.page.id];
+      return (
+        // render tabs, model.page.tab determines active tab
+        {component.view(model)}
+      );
+    }
+  };
+};
+</code></pre>
+<h3>Adding Routes</h3><p>Adding routes is a simple mapping between route and a plain object with the page id and the
+navigation action:</p>
+<pre><code class="language-javascript">export const createRouter = navigation =&gt; {
+  const routes = {
+    &quot;/&quot;: { id: pages.home.id,
+      action: navigation.navigateToHome },
+    &quot;/coffee/:id?&quot;: { id: pages.coffee.id,
+      action: navigation.navigateToCoffee },
+    &quot;/beer&quot;: { id: pages.beer.id,
+      action: navigation.navigateToBeer },
+    &quot;/beer/:id&quot;: { id: pages.beerDetails.id,
+      action: navigation.navigateToBeerDetails }
+  };
+</code></pre>
+<p>We can use a simple routing library such as <a href="https://github.com/cerebral/url-mapper">url-mapper</a>
+to resolve routes:</p>
+<pre><code class="language-javascript">import Mapper from &quot;url-mapper&quot;;
+
+const resolveRoute = () =&gt; {
+  const route = document.location.hash.substring(1);
+  const resolved = urlMapper.map(route, routes);
+  if (resolved) {
+    resolved.match.action(resolved.values);
+  }
+};
+
+window.onpopstate = resolveRoute;
+</code></pre>
+<p>Once a route is resolved, we can call its <code>action</code> function to navigate to the page.</p>
+<h3>Route Sync</h3><p>Everything works now, except for one detail: although navigating with actions or routes
+works the same way, navigating with an action does not reflect the corresponding route in
+the browser&#39;s location bar.</p>
+<p>We can fix this with a simple route sync function:</p>
+<pre><code class="language-javascript">const routeMap = Object.keys(routes).reduce((result, route) =&gt; {
+  result[routes[route].id] = route;
+  return result;
+}, {});
+
+const routeSync = model =&gt; {
+  const segment = routeMap[model.page.id] || &quot;/&quot;;
+  const route = urlMapper.stringify(segment, model.params||{});
+  if (document.location.hash.substring(1) !== route) {
+    window.history.pushState({}, &quot;&quot;, &quot;#&quot; + route);
+  }
+};
+</code></pre>
+<p>After building a page id to route lookup map, we can use it along with url-mapper&#39;s
+<code>stringify</code> function to generate the route from the model&#39;s current page id.
+Then, if the browser&#39;s location bar does not match the route, we can set it with
+<code>window.history.pushState</code>.</p>
+<p>Now, we can use actions and routes to navigate, and the browser&#39;s location bar
+reflects the correct route. The model is our source of truth: in fact, we can even change
+the model by typing in the textarea of the Meiosis Tracer, and see the correct route in
+the browser&#39;s location bar along with the correct page in the view.</p>
+<h3>Up Next</h3><p>In the next section, we&#39;ll try a different routing library,
+<a href="04-Routing-B-Universal-Router.html">Universal Router</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
+<hr>
+<p>Meiosis is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+
+</body></html>

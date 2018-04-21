@@ -1,0 +1,122 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
+<h1>Meiosis Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>Reusing Components</h2><p>Now that we have components, let&#39;s look at how we can make components
+reusable by having multiple instances within the same top-level model.</p>
+<h3>Multiple Component Instances</h3><p>Let&#39;s say we&#39;d like to reuse the temperature component from our
+<a href="01-Fundamentals-C-Components.html">previous example</a> twice
+on the same page: once for air and once for water temperature. We&#39;d like each component to keep
+managing its own model, but at the same time we want a single top-level model.</p>
+<p>Here is our app which contains two instances of the temperature component:</p>
+<pre><code class="language-javascript">export const createApp = update =&gt; {
+  const air = nest(createTemperature, update, &quot;air&quot;);
+  const water = nest(createTemperature, update, &quot;water&quot;);
+
+  return {
+    model: () =&gt; Object.assign(air.model(), water.model()),
+    view: createView({air, water})
+  };
+};
+</code></pre>
+<p>We&#39;ve created two instances of the temperature component. However, we did not pass the <code>update</code> function
+directly to <code>createTemperature</code>; instead, we called a <code>nest</code> function, passing <code>createTemperature</code>,
+the <code>update</code> function, and the path for each component.</p>
+<p>Also notice that our app&#39;s initial model has each component&#39;s model within the top-level, one for
+<code>air</code> and one at <code>water</code>.</p>
+<p>Finally, we pass our components to the view so that it can render them.</p>
+<h3>Nesting Updates</h3><p>The question is, what is <code>nest</code> and how do we write this function so that we nest components with a path?</p>
+<p>That is the beauty of the Meiosis pattern: because we are passing <em>functions</em> to <code>update</code>, and because
+these are functions that get the latest model and return the updated model, it&#39;s straightforward to
+write a <code>nestUpdate</code> function:</p>
+<pre><code class="language-javascript">const nestUpdate = (update, path) =&gt; func =&gt;
+  update(model =&gt; {
+    model[path] = func(model[path]);
+    return model;
+  });
+</code></pre>
+<p>What <code>nestUpdate</code> does is return a function that wraps <code>update</code>. It takes the incoming <code>func</code>
+and calls the original <code>update</code> by passing <code>model[path]</code> to <code>func</code> and assigning the result
+back to <code>model[path]</code>.</p>
+<p>For example, if the incoming <code>func</code> is the function that increases the <code>value</code> of the
+temperature:</p>
+<pre><code class="language-javascript">const func = model =&gt; {
+  model.value = model.value + amount;
+  return model;
+};
+</code></pre>
+<p>Then <code>nestUpdate(update, &quot;air&quot;)</code> will nest the update at the <code>&quot;air&quot;</code> property of the top-level model:</p>
+<pre><code class="language-javascript">update(model =&gt; {
+  model[&quot;air&quot;] = func(model[&quot;air&quot;]);
+  return model;
+});
+</code></pre>
+<p>We are ready to nest components.</p>
+<h3>Nesting Components</h3><p>Now that we have <code>nestUpdate</code>, we can write the <code>nest</code> function to nest components:</p>
+<pre><code class="language-js">export const nest = (create, update, path) =&gt; {
+  const component = create(nestUpdate(update, path));
+  const result = Object.assign({}, component);
+  if (component.model) {
+    result.model = () =&gt; ({ [path]: component.model() });
+  }
+  if (component.view) {
+    result.view = model =&gt; component.view(model[path]);
+  }
+  return result;
+};
+</code></pre>
+<p>We passed the component&#39;s <code>create</code> function to <code>nest</code>, and we call it to create the component,
+passing in the nested <code>update</code>. Now that we&#39;ve created the component, we can wrap its <code>model</code>
+and <code>view</code> functions:</p>
+<ul>
+<li>for <code>model</code>, we return an object with the <code>path</code> as the key and the model as the value,
+effectively nesting the model with <code>path</code></li>
+<li>for <code>view</code>, we simply pass <code>model[path]</code> to the <code>view</code> function. This lets us call <code>view(model)</code>
+for nested components instead of having to keep track of which nested model to pass to each
+component (such as <code>air.view(model.air)</code> and <code>water.view(model.water)</code>).</li>
+</ul>
+<p>We are ready to render the components in the view.</p>
+<h3>The View</h3><p>Having created our components containing temperature instances for air and water, we can pass them
+to the view and render them:</p>
+<pre><code class="language-javascript">export const createView = components =&gt; model =&gt; (
+  &lt;div&gt;
+    &lt;h4&gt;App&lt;/h4&gt;
+    {components.air.view(model)}
+    {components.water.view(model)}
+  &lt;/div&gt;
+);
+</code></pre>
+<p>Notice that when calling <code>view()</code>, we pass <code>model</code> to each instance. The <code>nest</code> function took care
+of wrapping <code>view()</code> to pass in the nested model.</p>
+  <div id="flems1" class="flemscode" style="height:800px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "nest.js", content: "const nestUpdate = (update, path) => func =>\n  update(model => {\n    model[path] = func(model[path]);\n    return model;\n  });\n\nconst nest = (create, update, path) => {\n  const component = create(nestUpdate(update, path));\n  const result = Object.assign({}, component);\n  if (component.model) {\n    result.model = () => ({ [path]: component.model() });\n  }\n  if (component.view) {\n    result.view = model => component.view(model[path]);\n  }\n  return result;\n};\n", compiler: "babel"},{name: "temperature.js", content: "const createActions = update => ({\n  editDate: evt =>\n    update(model => {\n      model.date = evt.target.value;\n      return model;\n    }),\n\n  increase: amount => _evt =>\n    update(model => {\n      model.value = model.value + amount;\n      return model;\n    }),\n\n  changeUnits: _evt => update(model => {\n    if (model.units === \"C\") {\n      model.units = \"F\";\n      model.value = Math.round( model.value * 9 / 5 + 32 );\n    }\n    else {\n      model.units = \"C\";\n      model.value = Math.round( (model.value - 32) / 9 * 5 );\n    }\n    return model;\n  })\n});\n\nconst createView = actions => model => (\n  <div>\n    <div>Date: <input type=\"text\" size=\"10\" value={model.date} onChange={actions.editDate}/></div>\n    <span>Temperature: {model.value}&deg;{model.units} </span>\n    <div>\n      <button onClick={actions.increase(1)}>Increase</button>\n      <button onClick={actions.increase(-1)}>Decrease</button>\n    </div>\n    <div>\n      <button onClick={actions.changeUnits}>Change Units</button>\n    </div>\n  </div>\n);\n\nconst createTemperature = update => ({\n  model: () => ({\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  }),\n\n  view: createView(createActions(update))\n});\n", compiler: "babel"},{name: "app.js", content: "const createApp = update => {\n  const air = nest(createTemperature, update, \"air\");\n  const water = nest(createTemperature, update, \"water\");\n\n  return {\n    model: () => Object.assign(air.model(), water.model()),\n    view: model => (\n      <div>\n        {air.view(model)}\n        {water.view(model)}\n      </div>\n    )\n  };\n};\n", compiler: "babel"},{name: "index.js", content: "/* global ReactDOM, flyd */\n\nconst update = flyd.stream();\nconst app = createApp(update);\nconst models = flyd.scan((model, func) => func(model),\n  app.model(), update);\n\nconst element = document.getElementById(\"app\");\nmodels.map(model => ReactDOM.render(app.view(model), element));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
+      middle: 75
+    })
+  </script>
+
+
+<h3>Principles / Takeaways</h3><ul>
+<li>Reusing components is simply a matter of nesting instances at different paths within the
+top-level model.</li>
+<li>We did not need to change the original component. Components can continue to work with just their
+own model, without being aware of where they are nested.</li>
+<li>Our top-level model is still the single source of truth.</li>
+</ul>
+<h3>Up Next</h3><p>In the next article, we will look at <a href="02-Reusable-Components-B-Computed-Properties.html">Computed Properties</a>.</p>
+<p><a href="toc.html">Table of Contents</a></p>
+<hr>
+<p>Meiosis is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+
+</body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html><html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<script src="prism.js" type="text/javascript"></script>
+<h1>Meiosis Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>Universal Router</h2><p><a href="04-Routing-A-url-mapper.html">So far</a>, we&#39;ve been using <a href="https://github.com/cerebral/url-mapper">url-mapper</a>,
+but you are free to use the routing library of your choice. To that point, let&#39;s try a
+different library, namely <a href="https://www.kriasoft.com/universal-router/">Universal Router</a>.</p>
+<h3>Creating Routes</h3><p>With Universal Router, we can create routes with the same patterns as before, such as
+<code>/beer/:id</code> for parameters and <code>/coffee/:id?</code> for optional parameters. Further, we can
+create <em>nested</em> routes by using <code>children</code> so that all the child routes are prefixed
+with the parent route:</p>
+<p><code>router.js</code></p>
+<pre><code class="language-javascript">export const createRouter = navigation =&gt; {
+  const wrap = action =&gt; ctx =&gt; {
+    action(ctx.params);
+    return true;
+  };
+
+  const routes = [
+    { path: &quot;/&quot;, name: pages.home.id, action: wrap(navigation.navigateToHome) },
+    { path: &quot;/coffee/:id?&quot;, name: pages.coffee.id, action: wrap(navigation.navigateToCoffee) },
+    { path: &quot;/beer&quot;, children: [
+      { path: &quot;/&quot;, name: pages.beer.id, action: wrap(navigation.navigateToBeer) },
+      { path: &quot;/:id&quot;, name: pages.beerDetails.id, action: wrap(navigation.navigateToBeerDetails) }
+    ]}
+  ];
+
+  const router = new UniversalRouter(routes);
+
+  const resolveRoute = () =&gt; {
+    const route = document.location.hash.substring(1);
+    router.resolve(route);
+  };
+
+  window.onpopstate = resolveRoute;
+};
+</code></pre>
+<p>As you can see, because each route has its own <code>action</code>, we only need to call
+<code>router.resolve(route)</code> and the action is automatically triggered. Using <code>children</code>, we
+avoid having to repeat <code>/beer</code> three times.</p>
+<p>Finally, notice that each route has a <code>name</code> property with the page id. We&#39;ll use that for
+keeping routes in sync.</p>
+<h3>Route Sync</h3><p>In the <a href="Routing">previous section</a>, we wrote a <code>routeSync</code> function that determined what
+the current route should be based on the page id, and set the browser&#39;s location bar to
+that route if it did not match. We built a reverse lookup <code>routeMap</code> to achieve this.</p>
+<p>With Universal Router, we can use a <code>generateUrls</code> function to create a function that
+produces routes for us. The <code>name</code> of each route is used for route lookup. Since we&#39;ve set
+<code>name</code> to the page id, we can pass the current page id and parameters to compute the
+current route:</p>
+<p><code>router.js</code></p>
+<pre><code class="language-javascript">import generateUrls from &quot;universal-router/generateUrls&quot;;
+
+const urlGenerator = generateUrls(router);
+
+const routeSync = model =&gt; {
+  const route = urlGenerator(model.page.id, model.params || {});
+  if (document.location.hash.substring(1) !== route) {
+    window.history.pushState({}, &quot;&quot;, &quot;#&quot; + route);
+  }
+};
+</code></pre>
+<p>The best part is that we only had to change code in one file, <code>router.js</code>, to use a
+different routing library. The rest of the code works unchanged.</p>
+<h3>Principles / Takeaways</h3><ul>
+<li>Universal Router supports nested (children) routes and generating routes from route ids.</li>
+<li>You can easily use a different routing library by changing the router code only.</li>
+<li>The rest of the code has no dependency on the routing library and should work without
+any changes.</li>
+</ul>
+<p><a href="toc.html">Table of Contents</a></p>
+<hr>
+<p>Meiosis is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+
+</body></html>
