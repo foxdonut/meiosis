@@ -4,37 +4,32 @@
 
 http://meiosis.js.org
 
-> Meiosis is not a library. It's a simple pattern.
+> It's not a library. It's a simple pattern to manage state in your web applications.
 
-## Do you Mei-O?
+Think Redux, MobX, Cerebral, React Context, etc. but without having library imports everywhere and
+being tied to a framework API. Instead, just plain functions and objects.
 
-**Meiosis** is an architecture pattern to manage the data flow of your web applications. All you need is a simple
-stream library such as [Flyd](https://github.com/paldepind/flyd) or [Mithril Stream](http://mithril.js.org/stream.html)
-to implement the pattern. Or, you could implement the pattern yourself with just a few lines of code. You do not need
-anything else, not even Meiosis itself. Add your favourite virtual dom
-library (React, Mithril, Snabbdom, Inferno, Preact, etc.) and you are good to go.
+All you need is a simple stream library such as Flyd or Mithril Stream in one place to implement
+the pattern. You do not need anything else, not even Meiosis itself. You could even implement the
+stream yourself with a handful of lines of code. Zero dependencies!
 
-Meiosis is an approach to managing the data flow of your web application _that frees you from being tied to a library API._
+Easily use the pattern with your favourite virtual dom library (React, Mithril, Snabbdom,
+Inferno, Preact, domvm) or even lit-html, hyperHTML, etc.
 
-Meiosis does provide code to be combined with
-[Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer)
-during development. This is a nifty and useful tool to view what is
-going on in your application. You can trace back through snapshots of the model and see the changes
-in the UI. You can also change the model directly in the tool to see the resulting UI, and, if you
-are using events, simulate behaviour by triggering new events.
+## Ready to have a closer look?
 
-For documentation please refer to the [Meiosis Wiki](https://github.com/foxdonut/meiosis/wiki).
+→ Read the [Meiosis Tutorial](http://meiosis.js.org/tutorial/toc.html) to get started.
 
-Try out the examples online: http://meiosis.js.org/examples.html
+→ Read the [Wiki](http://meiosis.js.org/wiki/toc.html) to learn more techniques.
 
-Example code: https://github.com/foxdonut/meiosis-examples
+## Ready for More?
 
-Please post questions and suggestions as Github issues on the [Meiosis repository](https://github.com/foxdonut/meiosis).
+- Try out more [examples](http://meiosis.js.org/examples.html).
+- Check out the [Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer).
+- Chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
 
-You can also chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
-
-**Please note** that Meiosis v0.9.x has been archived and is still available for reference purposes
-[here](http://meiosis.js.org/v0.9.x).
+Please post questions and suggestions as Github issues on the
+[Meiosis repository](https://github.com/foxdonut/meiosis).
 
 ## Why the name _Meiosis_?
 
