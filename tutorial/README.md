@@ -11,5 +11,5 @@ npm i
 npm start
 ```
 
-Then open [http://localhost:9000](http://localhost:9000). Edit the source code under the `code`
-directory and refresh the page in your browser to see your changes.
+Then open [http://localhost:9000](http://localhost:9000). Edit the source code under the `mithril`
+or `react` directory and refresh the page in your browser to see your changes.
