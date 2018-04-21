@@ -1,0 +1,35 @@
+{
+  "name": "tutorial",
+  "version": "1.0.0",
+  "description": "meiosis tutorial",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
+    "build": "harp compile build dist && (cd images && ./generate_all_diagrams.sh)",
+    "postbuild": "node add-struct.js dist && cp css/* images/*.svg images/*.png dist",
+    "onchange": "onchange app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/**' -- npm run build",
+    "start": "static-server -p 9000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "meiosis",
+    "reactive",
+    "react",
+    "virtual dom"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "devDependencies": {
+    "harp": "^0.25.0",
+    "onchange": "^3.3.0",
+    "static-server": "^2.2.1"
+  }
+}

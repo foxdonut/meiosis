@@ -37,3 +37,5 @@ meiosis*.tgz
 typings
 tutorial/build
 tutorial/dist
+wiki/build
+wiki/dist
