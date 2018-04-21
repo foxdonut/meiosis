@@ -124,6 +124,8 @@ Since it is curried, `_.set("date", evt.target.value)` returns a function of `mo
 pass to `update`. Notice that we don't need to specify the `model` parameter at all! This is called
 _point-free_ style.
 
+@flems code/03-Model-and-Nesting/A-Lodash-FP/nest.js,code/03-Model-and-Nesting/A-Lodash-FP/temperature.jsx,code/03-Model-and-Nesting/A-Lodash-FP/app.jsx,code/03-Model-and-Nesting/A-Lodash-FP/index.js,app.html,app.css react,react-dom,flyd,lodash-fp,meiosis,meiosis-tracer 800
+
 ### Principles / Takeaways
 
 - We have different ways of writing nice code using functional programming concepts.

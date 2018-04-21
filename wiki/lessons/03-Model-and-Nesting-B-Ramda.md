@@ -106,6 +106,8 @@ These functional programming constructs can be very nice, but perhaps harder to 
 we're not used to them. It's up to you to decide how "far" to go. The more concise form is
 arguably more elegant, but less explicit as to what is going on.
 
+@flems code/03-Model-and-Nesting/B-Ramda/nest.js,code/03-Model-and-Nesting/B-Ramda/temperature.jsx,code/03-Model-and-Nesting/B-Ramda/app.jsx,code/03-Model-and-Nesting/B-Ramda/index.js,app.html,app.css react,react-dom,flyd,ramda,meiosis,meiosis-tracer 800
+
 ### Principles / Takeaways
 
 - Ramda is another nice library for functional programming.

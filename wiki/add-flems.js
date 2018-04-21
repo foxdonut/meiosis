@@ -6,11 +6,13 @@ var toDir = process.argv[3];
 var linkMap = {
   "flyd": "https://unpkg.com/flyd@0.2.6/flyd.js",
   "lodash": "https://unpkg.com/lodash@4.17.5",
+  "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
   "meiosis": "https://unpkg.com/meiosis@1.3.0/dist/meiosis.min.js",
   "meiosis-tracer": "https://unpkg.com/meiosis-tracer@1.3.0/dist/meiosis-tracer.min.js",
   "mithril": "https://unpkg.com/mithril@1.1.6",
   "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
   "patchinko": "https://unpkg.com/patchinko@3.0.0",
+  "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   "react": "https://unpkg.com/react@16.3.1/umd/react.development.js",
   "react-dom": "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"
 };
