@@ -1,4 +1,4 @@
-# Meiosis Wiki
+# [Meiosis](http://meiosis.js.org) Wiki
 
 [Table of Contents](toc.html)
 
@@ -123,4 +123,4 @@ In the next section, we'll look at using [Patchinko](03-Model-and-Nesting-C-Patc
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

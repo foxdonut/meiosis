@@ -1,4 +1,4 @@
-# Meiosis Wiki
+# [Meiosis](http://meiosis.js.org) Wiki
 
 [Table of Contents](toc.html)
 
@@ -81,4 +81,4 @@ strategies for nesting models: [Lodash FP](03-Model-and-Nesting-A-Lodash-FP.html
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

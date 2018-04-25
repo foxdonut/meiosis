@@ -1,4 +1,4 @@
-# Meiosis Tutorial
+# [Meiosis](http://meiosis.js.org) Tutorial
 
 [Table of Contents](toc.html)
 
@@ -196,4 +196,4 @@ This concludes the Meiosis tutorial. Thanks for reading, I hope you enjoy Meiosi
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

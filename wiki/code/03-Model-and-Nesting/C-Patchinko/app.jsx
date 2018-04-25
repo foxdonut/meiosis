@@ -1,6 +1,6 @@
 const createApp = update => {
-  const air = nest(createTemperature, update, "air", I);
-  const water = nest(createTemperature, update, "water", I);
+  const air = nest(createTemperature, update, "air");
+  const water = nest(createTemperature, update, "water");
 
   return {
     model: () => P(air.model(), water.model()),

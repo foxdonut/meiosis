@@ -1,4 +1,4 @@
-# Meiosis Wiki
+# [Meiosis](http://meiosis.js.org) Wiki
 
 [Table of Contents](toc.html)
 
@@ -133,4 +133,4 @@ Next, we'll look at structuring code into [components](01-Fundamentals-C-Compone
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

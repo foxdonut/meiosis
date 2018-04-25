@@ -26,7 +26,14 @@
 - [A - Routing with url-mapper](04-Routing-A-url-mapper.html)
 - [B - Universal Router](04-Routing-B-Universal-Router.html)
 
+### 05 - Lifecycle Methods and other Techniques
+
+- [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html)
+- [B - Preventing Rerenders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html)
+- [C - React Context](05-Lifecycle-and-other-Techniques-C-React-Context.html)
+- [D - Render Props](05-Lifecycle-and-other-Techniques-D-Render-Props.html)
+
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
 

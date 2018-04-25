@@ -1,4 +1,4 @@
-# Meiosis Wiki
+# [Meiosis](http://meiosis.js.org) Wiki
 
 [Table of Contents](toc.html)
 
@@ -217,4 +217,4 @@ Whew! I promise there will be a lot less theory from here on out. I just needed 
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

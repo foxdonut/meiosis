@@ -1,10 +1,10 @@
-# Meiosis Tutorial
+# [Meiosis](http://meiosis.js.org) Tutorial
 
 [Table of Contents](toc.html)
 
 ## 00 - Introduction
 
-Welcome to the Meiosis Tutorial!
+Welcome to the [Meiosis](http://meiosis.js.org) Tutorial!
 
 The purpose of this tutorial is to explain the Meiosis pattern from the ground up, hopefully
 without assuming too much prior knowledge beyond the basics of JavaScript.
@@ -64,4 +64,4 @@ Let's get started! Please continue by choosing a version:
 
 -----
 
-Meiosis is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
