@@ -1,12 +1,3 @@
-/*global $*/
-
-import flyd from "flyd";
-import React from "react";
-import ReactDOM from "react-dom";
-import _ from "lodash/fp";
-import { trace } from "meiosis";
-import meiosisTracer from "meiosis-tracer";
-
 const nestUpdate = (update, path) => func => update(_.update(path, func));
 
 const nest = (create, update, path) => {
@@ -190,6 +181,3 @@ const models = flyd.scan((model, func) => func(model),
 
 const element = document.getElementById("app");
 models.map(model => ReactDOM.render(app.view(model), element));
-
-trace({ update, dataStreams: [ models ] });
-meiosisTracer({ selector: "#tracer" });

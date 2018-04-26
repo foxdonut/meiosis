@@ -19,7 +19,7 @@
 
 - [A - Lodash FP](03-Model-and-Nesting-A-Lodash-FP.html)
 - [B - Ramda](03-Model-and-Nesting-B-Ramda.html)
-- [C - Patchinko](03-Model-and-Nesting-C-Patchinko.html)
+- [C - Patchinko](03-Model-and-Nesting-C-Patchinko.html) (coming soon)
 
 ### 04 - Routing
 
@@ -28,10 +28,10 @@
 
 ### 05 - Lifecycle Methods and other Techniques
 
-- [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html)
-- [B - Preventing Rerenders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html)
-- [C - React Context](05-Lifecycle-and-other-Techniques-C-React-Context.html)
-- [D - Render Props](05-Lifecycle-and-other-Techniques-D-Render-Props.html)
+- [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html) (coming soon)
+- [B - Preventing Rerenders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html) (coming soon)
+- [C - React Context](05-Lifecycle-and-other-Techniques-C-React-Context.html) (coming soon)
+- [D - Render Props](05-Lifecycle-and-other-Techniques-D-Render-Props.html) (coming soon)
 
 -----
 

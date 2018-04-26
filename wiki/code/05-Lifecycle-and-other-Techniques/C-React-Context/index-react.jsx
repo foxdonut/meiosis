@@ -1,5 +1,3 @@
-/*global ReactDOM, flyd*/
-
 // -- Utility code
 
 var nestUpdate = function(update, prop) {
@@ -67,16 +65,17 @@ var createTemperature = function(label, init) {
     };
 
     var view = function(model) {
+      var btnClass = (model.context.theme === "dark" ? "btn-primary" : "btn-default");
       return (<div className="temperature">
         <span>{label} Temperature: {model.value}&deg;{model.units}</span>
         <div>
-          <button className={model.context.theme}
+          <button className={btnClass}
             onClick={increase( 1)}>Increase</button>
-          <button className={model.context.theme}
+          <button className={btnClass}
             onClick={increase( -1)}>Decrease</button>
         </div>
         <div>
-          <button className={model.context.theme}
+          <button className={btnClass}
             onClick={changeUnits}>Change Units</button>
         </div>
       </div>);
@@ -113,7 +112,7 @@ var createThemeChanger = function(update) {
   var view = function(model) {
     return (<div>
       <div>Theme: {model.context.theme}</div>
-      <button className={model.context.theme}
+      <button className={model.context.theme === "dark" ? "btn-primary" : "btn-default"}
         onClick={changeTheme}>Change Theme</button>
     </div>);
   };

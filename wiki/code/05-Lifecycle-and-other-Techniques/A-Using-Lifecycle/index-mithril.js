@@ -1,11 +1,3 @@
-/*global $*/
-
-import m from "mithril";
-import stream from "mithril/stream";
-import _ from "lodash/fp";
-import { trace } from "meiosis";
-import meiosisTracer from "meiosis-tracer";
-
 const nestUpdate = (update, path) => func => update(_.update(path, func));
 
 const nest = (create, update, path, isMithril) => {
@@ -181,13 +173,10 @@ const createApp = update => {
   };
 };
 
-const update = stream();
+const update = m.stream();
 const app = createApp(update);
-const models = stream.scan((model, func) => func(model),
+const models = m.stream.scan((model, func) => func(model),
   app.model(), update);
 
 const element = document.getElementById("app");
 models.map(model => m.render(element, app.view(model)));
-
-trace({ update, dataStreams: [ models ] });
-meiosisTracer({ selector: "#tracer" });

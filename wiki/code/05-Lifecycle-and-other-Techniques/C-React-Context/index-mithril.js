@@ -1,5 +1,3 @@
-/*global m*/
-
 // -- Utility code
 
 var nestUpdate = function(update, prop) {
@@ -67,7 +65,7 @@ var createTemperature = function(label, init) {
     };
 
     var view = function(model) {
-      var btn = "button." + model.context.theme;
+      var btn = "button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default");
       return m("div.temperature", [
         label, " Temperature: ", model.value, m.trust("&deg;"), model.units,
         m("div",
@@ -113,7 +111,7 @@ var createThemeChanger = function(update) {
   var view = function(model) {
     return m("div", [
       m("div", "Theme: " + model.context.theme),
-      m("button." + model.context.theme,
+      m("button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default"),
         { onclick: changeTheme }, "Change Theme")
     ]);
   };
