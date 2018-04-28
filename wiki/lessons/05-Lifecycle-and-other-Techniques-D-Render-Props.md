@@ -6,6 +6,14 @@
 
 _Coming Soon!_
 
+React version:
+
+@flems code/05-Lifecycle-and-other-Techniques/D-Render-Props/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd 800 50
+
+Mithril version:
+
+@flems code/05-Lifecycle-and-other-Techniques/D-Render-Props/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream 800 50
+
 [Table of Contents](toc.html)
 
 -----

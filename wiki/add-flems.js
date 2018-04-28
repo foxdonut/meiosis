@@ -4,7 +4,10 @@ var fromDir = process.argv[2];
 var toDir = process.argv[3];
 
 var linkMap = {
+  "datepicker": "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
   "flyd": "https://unpkg.com/flyd@0.2.6/flyd.js",
+  "immutable": "https://unpkg.com/immutable@3.8.2/dist/immutable.js",
+  "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
   "lodash": "https://unpkg.com/lodash@4.17.5",
   "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
   "meiosis": "https://unpkg.com/meiosis@1.3.0/dist/meiosis.min.js",
@@ -67,6 +70,10 @@ filenames.forEach(source => {
       if (parts.length > 3) {
         style = " style=\"height:" + parts[3] + "px\"";
       }
+      var middle = "75";
+      if (parts.length > 4) {
+        middle = parts[4];
+      }
 
       line = `
   <div id="flems${flemNumber}" class="flemscode"${style}></div>
@@ -75,7 +82,7 @@ filenames.forEach(source => {
     window.Flems(flems${flemNumber}, {
       files: ${fileString},
       links: ${linkString},
-      middle: 75
+      middle: ${middle}
     })
   </script>
       `;

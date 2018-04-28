@@ -6,6 +6,14 @@
 
 _Coming Soon!_
 
+React version:
+
+@flems code/05-Lifecycle-and-other-Techniques/A-Using-Lifecycle/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css,public/css/datepicker.min.css react,react-dom,flyd,lodash-fp,jquery,datepicker 800 60
+
+Mithril version:
+
+@flems code/05-Lifecycle-and-other-Techniques/A-Using-Lifecycle/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css,public/css/datepicker.min.css mithril,mithril-stream,lodash-fp,jquery,datepicker 800 60
+
 [Table of Contents](toc.html)
 
 -----
