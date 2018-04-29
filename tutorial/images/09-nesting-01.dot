@@ -23,7 +23,7 @@ digraph meiosistutorial {
     </table>
   >]
 
-  update [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+  update [shape="plaintext", style="filled", fillcolor="green", label=<
     <table border="0">
       <tr>
         <td>update(...)</td>
@@ -31,7 +31,7 @@ digraph meiosistutorial {
     </table>
   >]
 
-  modelupdate [shape="plaintext", style="filled", fillcolor="green", label=<
+  modelupdate [shape="plaintext", style="filled", fillcolor="lightblue", label=<
     <table border="0">
       <tr>
         <td>model = &lt;updated model&gt;</td>
@@ -39,9 +39,9 @@ digraph meiosistutorial {
     </table>
   >]
 
-  model -> view
+  model -> view [label=" passed to"]
   view -> render [label="vnode"]
   render -> update [label="event"]
-  update -> modelupdate
-  modelupdate -> view
+  update -> modelupdate [label=" produces"]
+  modelupdate -> view [label=" passed to"]
 }
