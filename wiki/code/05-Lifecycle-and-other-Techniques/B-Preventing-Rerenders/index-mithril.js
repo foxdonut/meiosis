@@ -1,3 +1,5 @@
+/* global m, R */
+
 const nestUpdate = (update, prop) => func =>
   update(R.over(R.lensProp(prop), func));
 
@@ -23,6 +25,7 @@ const createEntryNumber = update => {
       value: ""
     }),
     view: vnode => {
+      // eslint-disable-next-line no-console
       console.log("render Entry");
       const model = vnode.attrs.model;
 
@@ -48,6 +51,7 @@ const createEntryDate = update => {
       value: ""
     }),
     view: vnode => {
+      // eslint-disable-next-line no-console
       console.log("render Date");
       const model = vnode.attrs.model;
 
@@ -67,7 +71,7 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(R.over(R.lensProp("value"), R.add(value)))
+      update(R.over(R.lensProp("value"), R.add(value)));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -96,6 +100,7 @@ const createTemperature = label => update => {
     }),
     view: vnode => {
       const model = vnode.attrs.model;
+      // eslint-disable-next-line no-console
       console.log("render Temperature", model.label);
 
       return (
@@ -124,16 +129,15 @@ const createApp = update => {
   const actions = {
     save: evt => {
       evt.preventDefault();
-      update(model => Object.assign(model,
-        { saved: "Entry #" + model.entry.value +
+      update(model => Object.assign(model, {
+        saved: "Entry #" + model.entry.value +
             " on " + model.date.value + ":" +
             " Temperatures: " +
             displayTemperature(model.airTemperature) + " " +
             displayTemperature(model.waterTemperature),
-          entry: Object.assign(model.entry, { value: "" }),
-          date: Object.assign(model.date, { value: "" })
-        }
-      ));
+        entry: Object.assign(model.entry, { value: "" }),
+        date: Object.assign(model.date, { value: "" })
+      }));
     }
   };
 

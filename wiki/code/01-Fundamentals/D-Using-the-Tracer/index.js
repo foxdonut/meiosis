@@ -1,4 +1,4 @@
-/* global ReactDOM, flyd */
+/* global ReactDOM, flyd, createTemperature, meiosis, meiosisTracer */
 
 const update = flyd.stream();
 const temperature = createTemperature(update);

@@ -1,3 +1,5 @@
+/* global ReactDOM, flyd */
+
 // -- Utility code
 
 var nestUpdate = function(update, prop) {

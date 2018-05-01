@@ -1,3 +1,6 @@
+/* global createHome, createCoffee, createBeer, createBeerDetails, pages */
+
+// eslint-disable-next-line no-unused-vars
 const createApp = (update, navigation) => {
   const homeComponent = createHome(update);
   const coffeeComponent = createCoffee(update);
@@ -37,15 +40,15 @@ const createApp = (update, navigation) => {
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={evt => navigation.navigateToHome()}>Home</button>
+                  onClick={_evt => navigation.navigateToHome()}>Home</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={evt => navigation.navigateToCoffee()}>Coffee</button>
+                  onClick={_evt => navigation.navigateToCoffee()}>Coffee</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={evt => navigation.navigateToBeer()}>Beer</button>
+                  onClick={_evt => navigation.navigateToBeer()}>Beer</button>
               </li>
             </ul>
           </nav>

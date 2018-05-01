@@ -1,4 +1,4 @@
-/* global m */
+/*global ReactDOM, flyd*/
 
 // -- Utility code
 
@@ -34,15 +34,6 @@ var nest = function(create, update, prop) {
 
 // -- Application code
 
-var convert = function(value, to) {
-  if (to === "C") {
-    return Math.round( (value - 32) / 9 * 5 );
-  }
-  else {
-    return Math.round( value * 9 / 5 + 32 );
-  }
-};
-
 var createTemperature = function(label, init) {
   return function(update) {
     var increase = function(amount) {
@@ -53,86 +44,71 @@ var createTemperature = function(label, init) {
         });
       };
     };
-    var changeUnits = function(_event) {
-      update(function(model) {
-        var newUnits = model.units === "C" ? "F" : "C";
-        model.value = convert(model.value, newUnits);
-        model.units = newUnits;
-        return model;
-      });
-    };
 
     var model = function() {
-      return Object.assign({ value: 22, units: "C" }, init);
+      return Object.assign({ value: 22 }, init);
     };
 
     var view = function(model) {
-      var btn = "button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default");
-      return m("div.temperature", [
-        label, " Temperature: ", model.value, m.trust("&deg;"), model.units,
-        m("div",
-          m(btn, { onclick: increase( 1) }, "Increase"),
-          m(btn, { onclick: increase(-1) }, "Decrease")
-        ),
-        m("div",
-          m(btn, { onclick: changeUnits }, "Change Units")
-        )
-      ]);
+      return (<div className="temperature">
+        <span>{label} Temperature: {model.value}&deg;{model.context.units}</span>
+        <div>
+          <button onClick={increase( 1)}>Increase</button>
+          <button onClick={increase(-1)}>Decrease</button>
+        </div>
+      </div>);
     };
+
     return { model: model, view: view };
   };
 };
 
 var createTemperaturePair = function(update) {
   var air = nest(createTemperature("Air"), update, "air");
-  var water = nest(createTemperature("Water", { value: 84, units: "F" }),
-    update, "water");
+  var water = nest(createTemperature("Water"), update, "water");
 
   var model = function() {
     return Object.assign(air.model(), water.model());
   };
 
   var view = function(model) {
-    return [
-      air.view(model),
-      water.view(
-        Object.assign(model, { context: { theme: "light" } })
-      )
-    ];
+    return (<div>
+      {air.view(model)}
+      {water.view(model)}
+    </div>);
   };
   return { model: model, view: view };
 };
 
-var createThemeChanger = function(update) {
-  var changeTheme = function(_event) {
+var createUnitChanger = function(update) {
+  var changeUnits = function(_event) {
     update(function(model) {
-      model.context.theme = model.context.theme === "light" ? "dark" : "light";
+      model.context.units = model.context.units === "C" ? "F" : "C";
       return model;
     });
   };
   var view = function(model) {
-    return m("div", [
-      m("div", "Theme: " + model.context.theme),
-      m("button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default"),
-        { onclick: changeTheme }, "Change Theme")
-    ]);
+    return (<div className="temperature">
+      <div>Units: &deg;{model.context.units}</div>
+      <button onClick={changeUnits}>Change Units</button>
+    </div>);
   };
   return { view: view };
 };
 
 var createApp = function(update) {
   var temperaturePair = nest(createTemperaturePair, update, "temperatures");
-  var themeChanger = createThemeChanger(update);
+  var unitChanger = createUnitChanger(update);
   var view = function(model) {
-    return [
-      temperaturePair.view(model),
-      themeChanger.view(model)
-    ];
+    return (<div>
+      {unitChanger.view(model)}
+      {temperaturePair.view(model)}
+    </div>);
   };
   return {
     model: function() {
       return Object.assign(
-        { context: { theme: "light" } },
+        { context: { units: "C" } },
         temperaturePair.model()
       );
     },
@@ -142,15 +118,15 @@ var createApp = function(update) {
 
 // -- Meiosis pattern setup code
 
-var update = m.stream();
+var update = flyd.stream();
 var app = createApp(update);
 
-var models = m.stream.scan(function(model, func) {
+var models = flyd.scan(function(model, func) {
   return func(model);
 }, app.model(), update);
 
 var element = document.getElementById("app");
 
 models.map(function(model) {
-  m.render(element, app.view(model));
+  ReactDOM.render(app.view(model), element);
 });

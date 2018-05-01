@@ -1,3 +1,4 @@
+/* global React, ReactDOM, flyd, _, $ */
 const nestUpdate = (update, path) => func => update(_.update(path, func));
 
 const nest = (create, update, path) => {
@@ -59,7 +60,7 @@ class DateField extends React.Component {
       .datepicker({ autoHide: true })
       .on("pick.datepicker", _evt =>
         update(_.set("value", $datepicker.datepicker("getDate", true)))
-      )
+      );
   }
 
   render() {
@@ -98,7 +99,7 @@ const createTemperature = label => update => {
           model.value = Math.round( (model.value - 32) / 9 * 5 );
         }
         return model;
-      })
+      });
     }
   };
 

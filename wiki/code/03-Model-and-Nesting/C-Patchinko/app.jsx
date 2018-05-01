@@ -1,9 +1,11 @@
+/* global O, nest, createTemperature */
+// eslint-disable-next-line no-unused-vars
 const createApp = update => {
   const air = nest(createTemperature, update, "air");
   const water = nest(createTemperature, update, "water");
 
   return {
-    model: () => P(air.model(), water.model()),
+    model: () => O({}, air.model(), water.model()),
     view: model => (
       <div>
         {air.view(model)}

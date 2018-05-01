@@ -1,4 +1,4 @@
-/* global m */
+/*global m*/
 
 // -- Utility code
 
@@ -53,40 +53,34 @@ var createTemperature = function(label, init) {
         });
       };
     };
-    var changeUnits = function(_event) {
-      update(function(model) {
-        var newUnits = model.units === "C" ? "F" : "C";
-        model.value = convert(model.value, newUnits);
-        model.units = newUnits;
-        return model;
-      });
-    };
 
     var model = function() {
-      return Object.assign({ value: 22, units: "C" }, init);
+      return Object.assign({ value: 22 }, init);
     };
 
     var view = function(model) {
-      var btn = "button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default");
       return m("div.temperature", [
-        label, " Temperature: ", model.value, m.trust("&deg;"), model.units,
+        label, " Temperature: ", model.value, m.trust("&deg;"), model.context.units,
         m("div",
-          m(btn, { onclick: increase( 1) }, "Increase"),
-          m(btn, { onclick: increase(-1) }, "Decrease")
-        ),
-        m("div",
-          m(btn, { onclick: changeUnits }, "Change Units")
+          m("button", { onclick: increase( 1) }, "Increase"),
+          m("button", { onclick: increase(-1) }, "Decrease")
         )
       ]);
     };
-    return { model: model, view: view };
+
+    var changeUnits = function(newUnits) {
+      update(function(model) {
+        model.value = convert(model.value, newUnits);
+        return model;
+      });
+    };
+    return { model: model, view: view, changeUnits: changeUnits };
   };
 };
 
 var createTemperaturePair = function(update) {
   var air = nest(createTemperature("Air"), update, "air");
-  var water = nest(createTemperature("Water", { value: 84, units: "F" }),
-    update, "water");
+  var water = nest(createTemperature("Water"), update, "water");
 
   var model = function() {
     return Object.assign(air.model(), water.model());
@@ -95,26 +89,32 @@ var createTemperaturePair = function(update) {
   var view = function(model) {
     return [
       air.view(model),
-      water.view(
-        Object.assign(model, { context: { theme: "light" } })
-      )
+      water.view(model)
     ];
   };
-  return { model: model, view: view };
+
+  var changeUnits = function(newUnits) {
+    air.changeUnits(newUnits);
+    water.changeUnits(newUnits);
+  };
+  return { model: model, view: view, changeUnits: changeUnits };
 };
 
-var createThemeChanger = function(update) {
-  var changeTheme = function(_event) {
-    update(function(model) {
-      model.context.theme = model.context.theme === "light" ? "dark" : "light";
-      return model;
-    });
+var createUnitChanger = function(update, temperaturePair) {
+  var changeUnits = function(currentUnits) {
+    return function(_event) {
+      var newUnits = currentUnits === "C" ? "F" : "C";
+      temperaturePair.changeUnits(newUnits);
+      update(function(model) {
+        model.context.units = newUnits;
+        return model;
+      });
+    };
   };
   var view = function(model) {
-    return m("div", [
-      m("div", "Theme: " + model.context.theme),
-      m("button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default"),
-        { onclick: changeTheme }, "Change Theme")
+    return m("div.temperature", [
+      m("div", "Units: ", m.trust("&deg;"), model.context.units),
+      m("button", { onclick: changeUnits(model.context.units) }, "Change Units")
     ]);
   };
   return { view: view };
@@ -122,17 +122,17 @@ var createThemeChanger = function(update) {
 
 var createApp = function(update) {
   var temperaturePair = nest(createTemperaturePair, update, "temperatures");
-  var themeChanger = createThemeChanger(update);
+  var unitChanger = createUnitChanger(update, temperaturePair);
   var view = function(model) {
     return [
-      temperaturePair.view(model),
-      themeChanger.view(model)
+      unitChanger.view(model),
+      temperaturePair.view(model)
     ];
   };
   return {
     model: function() {
       return Object.assign(
-        { context: { theme: "light" } },
+        { context: { units: "C" } },
         temperaturePair.model()
       );
     },

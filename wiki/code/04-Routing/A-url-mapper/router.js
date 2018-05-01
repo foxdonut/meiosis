@@ -1,3 +1,6 @@
+/* global urlMapper, pages */
+
+// eslint-disable-next-line no-unused-vars
 const createRouter = navigation => {
   const mapper = urlMapper();
 

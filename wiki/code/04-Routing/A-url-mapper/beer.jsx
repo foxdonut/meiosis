@@ -1,6 +1,7 @@
+// eslint-disable-next-line no-unused-vars
 const createBeer = (update, navigation) => {
   const actions = {
-    beerDetails: id => evt => navigation.navigateToBeerDetails({ id }),
+    beerDetails: id => _evt => navigation.navigateToBeerDetails({ id }),
   };
 
   return {

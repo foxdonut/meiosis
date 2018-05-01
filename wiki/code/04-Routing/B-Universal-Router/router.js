@@ -1,3 +1,6 @@
+/* global UniversalRouter, generateUrls, pages */
+
+// eslint-disable-next-line no-unused-vars
 const createRouter = navigation => {
   const wrap = action => ctx => {
     action(ctx.params);

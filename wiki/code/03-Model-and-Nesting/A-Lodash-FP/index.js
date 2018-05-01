@@ -1,4 +1,4 @@
-/* global ReactDOM, flyd */
+/* global ReactDOM, flyd, createApp, meiosis, meiosisTracer */
 
 const update = flyd.stream();
 const app = createApp(update);

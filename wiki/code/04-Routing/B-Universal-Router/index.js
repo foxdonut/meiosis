@@ -1,3 +1,5 @@
+/* global flyd, createNavigation, createApp, createRouter, ReactDOM, meiosis, meiosisTracer */
+
 // Meiosis Setup
 const update = flyd.stream();
 const navigation = createNavigation(update);

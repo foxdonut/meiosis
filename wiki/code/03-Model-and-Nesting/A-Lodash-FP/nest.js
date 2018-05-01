@@ -1,6 +1,9 @@
+/* global _ */
+
 const nestUpdate = (update, path) => func =>
   update(_.update(path, func));
 
+// eslint-disable-next-line no-unused-vars
 const nest = (create, update, path) => {
   const component = create(nestUpdate(update, path));
   const result = _.merge({}, component);

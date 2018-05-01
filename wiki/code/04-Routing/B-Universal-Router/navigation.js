@@ -1,3 +1,4 @@
+/* global services */
 const compose = (f1, f2) => x => f1(f2(x));
 
 const pages = {
@@ -19,6 +20,7 @@ const pages = {
   }
 };
 
+// eslint-disable-next-line no-unused-vars
 const createNavigation = update => {
   const navigate = (page, params = {}) =>
     model => Object.assign(model, { page, params });

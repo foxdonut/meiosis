@@ -1,3 +1,4 @@
+/* global React, ReactDOM, flyd, Immutable */
 const nestUpdate = (update, prop) => func =>
   update(model => model.update(prop, func));
 
@@ -31,6 +32,7 @@ const createEntryNumber = update => {
     }
 
     render() {
+      // eslint-disable-next-line no-console
       console.log("render Entry");
       const model = this.props.model;
 
@@ -57,6 +59,7 @@ const createEntryDate = update => {
     }
 
     render() {
+      // eslint-disable-next-line no-console
       console.log("render Date");
       const model = this.props.model;
 
@@ -102,6 +105,7 @@ const createTemperature = label => update => {
     }
 
     render() {
+      // eslint-disable-next-line no-console
       console.log("render Temperature", this.props.model.get("label"));
       const model = this.props.model;
 

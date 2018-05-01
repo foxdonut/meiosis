@@ -28,6 +28,8 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-plugin-react": "^7.7.0",
     "harp": "^0.25.0",
     "onchange": "^3.3.0",
     "static-server": "^2.2.1"

@@ -4,6 +4,7 @@ const nestUpdate = (update, path) => func =>
     return model;
   });
 
+// eslint-disable-next-line no-unused-vars
 const nest = (create, update, path) => {
   const component = create(nestUpdate(update, path));
   const result = Object.assign({}, component);

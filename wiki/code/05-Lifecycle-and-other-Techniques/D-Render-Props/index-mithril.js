@@ -1,3 +1,5 @@
+/* global m */
+
 // https://reactjs.org/docs/render-props.html
 const duck = {
   view: model =>

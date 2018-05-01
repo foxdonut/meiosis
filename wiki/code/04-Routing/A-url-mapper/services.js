@@ -13,6 +13,7 @@ const beerList = [
   { id: "b2", title: "Beer 2" }
 ];
 
+// eslint-disable-next-line no-unused-vars
 const services =  {
   loadCoffees: () => new Promise(resolve =>
     setTimeout(() => resolve(coffees), 1)

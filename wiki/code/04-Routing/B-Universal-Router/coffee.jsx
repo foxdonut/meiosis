@@ -1,4 +1,5 @@
-const createCoffee = update => ({
+// eslint-disable-next-line no-unused-vars
+const createCoffee = _update => ({
   view: model => (
     <div>
       <p>Coffee Page</p>

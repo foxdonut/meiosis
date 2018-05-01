@@ -1,3 +1,5 @@
+/* global _ */
+
 const createActions = update => ({
   editDate: evt =>
     update(_.set("date", evt.target.value)),
@@ -35,6 +37,7 @@ const createView = actions => model => (
   </div>
 );
 
+// eslint-disable-next-line no-unused-vars
 const createTemperature = update => ({
   model: () => ({
     date: "",

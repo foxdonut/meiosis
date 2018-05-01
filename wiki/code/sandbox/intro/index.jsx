@@ -1,4 +1,4 @@
-/*global ReactDOM, flyd*/
+/* global ReactDOM, flyd, meiosis, meiosisTracer */
 
 // -- Utility code
 
