@@ -147,6 +147,8 @@ reflects the correct route. The model is our source of truth: in fact, we can ev
 the model by typing in the textarea of the Meiosis Tracer, and see the correct route in
 the browser's location bar along with the correct page in the view.
 
+@flems app.html,lib/url-mapper.js,code/04-Routing/A-url-mapper/navigation.js,code/04-Routing/A-url-mapper/app.jsx,code/04-Routing/A-url-mapper/index.js,public/css/bootstrap.min.css react,react-dom,flyd,meiosis,meiosis-tracer 800 70
+
 ### Up Next
 
 In the next section, we'll try a different routing library,

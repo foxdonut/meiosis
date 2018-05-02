@@ -78,6 +78,8 @@ const routeSync = model => {
 The best part is that we only had to change code in one file, `router.js`, to use a
 different routing library. The rest of the code works unchanged.
 
+@flems code/04-Routing/B-Universal-Router/navigation.js,code/04-Routing/B-Universal-Router/app.jsx,code/04-Routing/B-Universal-Router/index.js,app.html,public/css/bootstrap.min.css react,react-dom,flyd,universal-router,universal-router-generate-urls,meiosis,meiosis-tracer 800 70
+
 ### Principles / Takeaways
 
 - Universal Router supports nested (children) routes and generating routes from route ids.
