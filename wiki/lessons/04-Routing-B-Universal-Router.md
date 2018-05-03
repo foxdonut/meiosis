@@ -15,7 +15,6 @@ With Universal Router, we can create routes with the same patterns as before, su
 create _nested_ routes by using `children` so that all the child routes are prefixed
 with the parent route:
 
-`router.js`
 ```javascript
 export const createRouter = navigation => {
   const wrap = action => ctx => {
@@ -61,7 +60,6 @@ produces routes for us. The `name` of each route is used for route lookup. Since
 `name` to the page id, we can pass the current page id and parameters to compute the
 current route:
 
-`router.js`
 ```javascript
 import generateUrls from "universal-router/generateUrls";
 
@@ -75,7 +73,7 @@ const routeSync = model => {
 };
 ```
 
-The best part is that we only had to change code in one file, `router.js`, to use a
+The best part is that we only had to change code in one area, the router, to use a
 different routing library. The rest of the code works unchanged.
 
 @flems code/04-Routing/B-Universal-Router/navigation.js,code/04-Routing/B-Universal-Router/app.jsx,code/04-Routing/B-Universal-Router/index.js,app.html,public/css/bootstrap.min.css react,react-dom,flyd,universal-router,universal-router-generate-urls,meiosis,meiosis-tracer 800 70

@@ -1,3 +1,5 @@
+/* global urlMapper */
+
 const compose = (f1, f2) => x => f1(f2(x));
 
 const coffees = [

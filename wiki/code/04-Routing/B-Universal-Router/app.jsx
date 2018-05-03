@@ -1,6 +1,6 @@
 /* global pages */
 
-const createBeerDetails = update => ({
+const createBeerDetails = _update => ({
   view: model => (<p>Details of beer {model.params.id}</p>)
 });
 

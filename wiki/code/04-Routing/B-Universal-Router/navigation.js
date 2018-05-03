@@ -1,3 +1,5 @@
+/* global UniversalRouter, generateUrls */
+
 const compose = (f1, f2) => x => f1(f2(x));
 
 const coffees = [
