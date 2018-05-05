@@ -22,7 +22,7 @@ const createRouter = () => {
 
   const routeSync = model => {
     try {
-      const route = urlGenerator(model.page.id, model.params || {});
+      const route = urlGenerator(model.page.name, model.params || {});
       if (document.location.hash.substring(1) !== route) {
         window.history.pushState({}, "", "#" + route);
       }
