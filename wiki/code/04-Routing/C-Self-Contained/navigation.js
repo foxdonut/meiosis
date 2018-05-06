@@ -1,10 +1,14 @@
 /* global UniversalRouter, generateUrls */
 
 const pages = [];
+const pageMap = {};
 
 // eslint-disable-next-line no-unused-vars
 const addPage = (page, action) => {
   pages.push(Object.assign({ action }, page));
+  pageMap[page.name] = {
+    toPath: UniversalRouter.pathToRegexp.compile(page.path)
+  };
 };
 
 // eslint-disable-next-line no-unused-vars

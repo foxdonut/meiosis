@@ -1,4 +1,4 @@
-/* global addPage */
+/* global addPage, pageMap */
 
 // Utilities
 
@@ -52,7 +52,7 @@ const createCoffee = update => {
   const page = {
     name: "Coffee",
     tab: "Coffee",
-    path: "/coffee/:id"
+    path: "/coffee/:id?"
   };
 
   const navigateToCoffee = params => {
@@ -158,8 +158,8 @@ const createApp = update => {
       params: {}
     }),
     view: model => {
-      const currentPageName = findPage(model.page.name) ? model.page.name : components[0].page.name;
-      const component = findPage(currentPageName);
+      const pageName = findPage(model.page.name) ? model.page.name : components[0].page.name;
+      const component = findPage(pageName);
       const currentTab = model.page.tab;
       const isActive = tab => tab === currentTab ? "active" : "";
 
@@ -169,7 +169,7 @@ const createApp = update => {
             <ul className="nav navbar-nav">
               {components.map(component => (
                 <li key={component.page.name} className={isActive(component.page.tab)}>
-                  <a href={"#" + component.page.path}>{component.page.tab}</a>
+                  <a href={"#" + pageMap[component.page.name].toPath()}>{component.page.tab}</a>
                 </li>
               ))}
               {/*
