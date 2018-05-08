@@ -1,5 +1,0 @@
-{
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "workbench.editor.enablePreview": false,
-  "vsicons.presets.angular": false
-}
