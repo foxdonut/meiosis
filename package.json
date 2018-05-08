@@ -1,6 +1,6 @@
 {
   "name": "meiosis",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Meiosis manages the data flow of your web applications.",
   "main": "lib/index.js",
   "unpkg": "dist/meiosis.js",
