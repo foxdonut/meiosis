@@ -76,7 +76,7 @@ const createCoffee = update => {
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={"#/coffee/" + coffee.id}>{coffee.id}</a>
+        <a href={"#" + pageMap[page.name].toPath({ id: coffee.id })}>{coffee.id}</a>
         {" "}
       </span>)}
       {model.coffee}
@@ -87,17 +87,6 @@ const createCoffee = update => {
 };
 
 // Beer
-
-/*
-const pageBeerDetails = {
-  name: "BeerDetails",
-  tab: "Beer"
-};
-
-const createBeerDetails = _update => ({
-  view: model => (<p>Details of beer {model.params.id}</p>)
-});
-*/
 
 const createBeer = update => {
   const beerList = [
@@ -172,20 +161,6 @@ const createApp = update => {
                   <a href={"#" + pageMap[component.page.name].toPath()}>{component.page.tab}</a>
                 </li>
               ))}
-              {/*
-              <li className="btn">
-                <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToHome()}>Home</button>
-              </li>
-              <li className="btn">
-                <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToCoffee()}>Coffee</button>
-              </li>
-              <li className="btn">
-                <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToBeer()}>Beer</button>
-              </li>
-              */}
             </ul>
           </nav>
           {component.view(model)}
