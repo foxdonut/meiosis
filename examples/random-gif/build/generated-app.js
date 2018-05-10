@@ -44,7 +44,7 @@ var shorts = Object.create(null);
 
 var cssProperties = Object.keys(
   findWidth(document.documentElement.style)
-).filter(function (p) { return p.indexOf('-') === -1; });
+).filter(function (p) { return p.indexOf('-') === -1 && p !== 'length'; });
 
 function findWidth(obj) {
   return obj.hasOwnProperty('width')
@@ -80,7 +80,7 @@ var stringToObject = memoize(function (string) {
       var key = hyphenToCamelCase(tokens.shift().trim());
       prev = shorts[key] || key;
 
-      acc[prev] = tokens.filter(function (a) { return a; }).map(function (t) { return addPx(prev, t.trim()); }).join(' ');
+      acc[prev] = tokens.filter(function (a) { return a; }).reduce(function (acc, t) { return acc + addPx(prev, t.trim()) + ' '; }, '').trim();
     }
     return acc
   }, {})
@@ -199,7 +199,7 @@ function selectorBlock(selector, style) {
 }
 
 function stylesToCss(style) {
-  return Object.keys(style).map(function (k) { return propToString(style, k); }).join('')
+  return Object.keys(style).reduce(function (acc, k) { return acc + propToString(style, k); }, '')
 }
 
 function propToString(style, k) {
@@ -247,18 +247,18 @@ function insert(rule, index) {
 }
 
 function createClass(style) {
+  var json = JSON.stringify(style);
+
+  if (json in classes)
+    { return classes[json] }
+
   var rules = objectToRules(style)
-      , css = rules.join('');;
+      , className = classPrefix + (++count);;
 
-  if (css in classes)
-    { return classes[css] }
+  for(var i = 0; i < rules.length; i++)
+    { insert(rules[i].replace(/\.\$/, '.' + className)); }
 
-  var className = classPrefix + (++count);
-
-  rules.map(function (rule) { return insert(rule.replace(/\.\$/, '.' + className)); }
-  );
-
-  classes[css] = className;
+  classes[json] = className;
 
   return className
 }
@@ -267,8 +267,8 @@ var count$1 = 0;
 var keyframeCache = {};
 
 function keyframes(props) {
-  var content = Object.keys(props).map(function (key) { return selectorBlock(key, props[key].style || props[key]); }
-  ).join('');
+  var content = Object.keys(props).reduce(function (acc, key) { return acc + selectorBlock(key, props[key].style || props[key]); }
+  , '');
 
   if (content in keyframeCache)
     { return keyframeCache[content] }
@@ -349,12 +349,17 @@ function setProp(prop, value) {
   });
 }
 
+Object.defineProperty(bss, 'valueOf', {
+  configurable: true,
+  writable: true,
+  value: function ValueOf() {
+    return '.' + this.class
+  }
+});
+
 bss.style = {};
 
 setProp('setDebug', setDebug);
-setProp('valueOf', function ValueOf() {
-  return '.' + this.class
-});
 
 setProp('$keyframes', keyframes);
 setProp('getSheet', getSheet);
@@ -480,7 +485,7 @@ return bss;
 
 
 },{}],2:[function(require,module,exports){
-module.exports=function(e){var t={};function r(n){if(t[n])return t[n].exports;var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r),a.l=!0,a.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n})},r.r=function(e){Object.defineProperty(e,"__esModule",{value:!0})},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=4)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.createReceiveValues=function(e,t){return function(r,n){n&&(e.tracerStates.length>0&&(e.tracerStates.length=e.tracerIndex+1),e.tracerStates.push(r),e.tracerIndex=e.tracerStates.length-1),t(r,e)}}},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n=null,a=null,i=function(e,t){var r=document.getElementById("tracerSlider");if(r.setAttribute("max",String(t.tracerStates.length-1)),r.value=String(t.tracerIndex),document.getElementById("tracerIndex").innerHTML=String(t.tracerIndex),document.getElementById("tracerModel").value=JSON.stringify(e[0].value,null,4),0===document.querySelectorAll("div.dataStream").length){for(var n="",i=1,d=e.length;i<d;i++)n+="<div"+a+" class='dataStream'><textarea rows='5' cols='40'></textarea></div>";document.getElementById("dataStreamContainer").innerHTML=n}var o=document.querySelectorAll("div.dataStream textarea");for(i=1,d=e.length;i<d;i++)o[i-1].value=JSON.stringify(e[i].value,null,4)},d=function(e){var t=e.tracerStates[0];e.tracerStates.length=0,e.tracerIndex=0,i(t,e)},o=function(e,t){var r=document.getElementById(e),n=r.getElementsByTagName("textarea")[0],a=r.getElementsByTagName("input")[0],i=r.getElementsByTagName("div")[0];n.value=JSON.stringify(t.values[t.index],null,4),a.setAttribute("max",String(t.values.length-1)),a.value=String(t.index),i.innerHTML=String(t.index)};t.initialView=function(e,t,r,o){var l=document.querySelector(e);if(l){a=o?" style='float: left'":"";var u="<div style='text-align: right'><button id='tracerToggle'>Hide</button></div><div id='tracerContainer'><div style='text-align: right'><button id='tracerReset'>Reset</button></div><div>Data streams:</div><input id='tracerSlider' type='range' min='0' max='"+String(t.tracerStates.length-1)+"' value='"+String(t.tracerIndex)+"' style='width: 100%'/><div id='tracerIndex'>"+String(t.tracerIndex)+"</div><div"+a+"><div>Model: (you can type into this box)</div><textarea id='tracerModel' rows='5' cols='40'></textarea><div id='errorMessage' style='display: none'><span style='color:red'>Invalid JSON</span></div></div><span id='dataStreamContainer'></span><span id='otherStreamContainer'></span></div>";l.innerHTML=u;var s=document.getElementById("tracerContainer");n=document.getElementById("errorMessage"),document.getElementById("tracerSlider").addEventListener("input",function(e,t){return function(r){var n=parseInt(r.target.value,10),a=t.tracerStates[n];t.tracerIndex=n;var d=a[0].value;e(d,!1),i(a,t)}}(r,t)),document.getElementById("tracerModel").addEventListener("keyup",function(e){return function(t){try{var r=JSON.parse(t.target.value);e(r,!0),n.style.display="none"}catch(e){n.style.display="block"}}}(r)),document.getElementById("tracerToggle").addEventListener("click",function(e){return function(t){var r=t.target;"none"===e.style.display?(e.style.display="block",r.innerHTML="Hide"):(e.style.display="none",r.innerHTML="Show")}}(s)),document.getElementById("tracerReset").addEventListener("click",function(e){return function(){d(e)}}(t))}},t.tracerView=i,t.reset=d,t.initStreamIds=function(e,t,r){var i="<div>Other streams:</div>";e.forEach(function(e){return i+="<div"+a+" class='otherStream' id='"+e+"'><input type='range' min='0' max='0' value='0' style='width: 100%'/><div>0</div><textarea rows='5' cols='40'></textarea><div><button>Trigger</button></div></div>"}),document.getElementById("otherStreamContainer").innerHTML=i,e.forEach(function(e){var a=document.getElementById(e);a.getElementsByTagName("input")[0].addEventListener("input",function(e,t){return function(r){var n=e[t],a=parseInt(r.target.value,10);n.index=a,o(t,n)}}(t,e));var i=a.getElementsByTagName("button")[0],d=a.getElementsByTagName("textarea")[0];i.addEventListener("click",function(e,t,r){return function(){try{var a=JSON.parse(t.value);r(e,a),n.style.display="none"}catch(e){n.style.display="block"}}}(e,d,r))})},t.updateStreamValue=o},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.tracerModel={tracerStates:[],tracerIndex:0,streams:{}}},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.meiosisTracer=void 0;var n=r(2),a=r(1),i=r(0);window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.meiosisTracer=function(e){var t=e.selector,r=e.renderModel,d=e.triggerStreamValue,o=e.horizontal;if(document.querySelector(t)){var l=(0,i.createReceiveValues)(n.tracerModel,a.tracerView);r=r||function(e,t){return window.postMessage({type:"MEIOSIS_RENDER_MODEL",model:e,sendValuesBack:t},"*")},(0,a.initialView)(t,n.tracerModel,r,o),d=d||function(e,t){return window.postMessage({type:"MEIOSIS_TRIGGER_STREAM_VALUE",streamId:e,value:t},"*")};var u=function(e){e.forEach(function(e){return n.tracerModel.streams[e]={index:0,values:[]}}),(0,a.initStreamIds)(e,n.tracerModel.streams,d)},s=function(e,t){var r=n.tracerModel.streams[e];r.values.push(t),r.index=r.values.length-1,(0,a.updateStreamValue)(e,r)};return window.addEventListener("message",function(e){if("MEIOSIS_VALUES"===e.data.type)l(e.data.values,e.data.update);else if("MEIOSIS_STREAM_IDS"===e.data.type){var t=e.data.streamIds;u(t)}else"MEIOSIS_STREAM_VALUE"===e.data.type&&s(e.data.streamId,e.data.value)}),window.postMessage({type:"MEIOSIS_TRACER_INIT"},"*"),{receiveValues:l,initStreamIdModel:u,receiveStreamValue:s,reset:function(){return(0,a.reset)(n.tracerModel)}}}}},function(e,t,r){"use strict";var n=r(3);e.exports=n.meiosisTracer}]);
+module.exports=function(e){var t={};function r(n){if(t[n])return t[n].exports;var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r),a.l=!0,a.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n})},r.r=function(e){Object.defineProperty(e,"__esModule",{value:!0})},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=4)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.createReceiveValues=function(e,t){return function(r,n){n&&(e.tracerStates.length>0&&(e.tracerStates.length=e.tracerIndex+1),e.tracerStates.push(r),e.tracerIndex=e.tracerStates.length-1),t(r,e)}}},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n=null,a=null,i=function(e,t){var r=document.getElementById("tracerSlider");if(r.setAttribute("max",String(t.tracerStates.length-1)),r.value=String(t.tracerIndex),document.getElementById("tracerStepBack").disabled=0===t.tracerIndex,document.getElementById("tracerStepForward").disabled=t.tracerIndex===t.tracerStates.length-1,document.getElementById("tracerIndex").innerHTML=String(t.tracerIndex),document.getElementById("tracerModel").value=JSON.stringify(e[0].value,null,4),0===document.querySelectorAll("div.dataStream").length){for(var n="",i=1,d=e.length;i<d;i++)n+="<div"+a+" class='dataStream'><textarea rows='5' cols='40'></textarea></div>";document.getElementById("dataStreamContainer").innerHTML=n}var c=document.querySelectorAll("div.dataStream textarea");for(i=1,d=e.length;i<d;i++)c[i-1].value=JSON.stringify(e[i].value,null,4)},d=function(e,t){return function(r){var n=parseInt(r.target.value,10),a=t.tracerStates[n];t.tracerIndex=n;var d=a[0].value;e(d,!1),i(a,t)}},c=function(e){var t=e.tracerStates[0];e.tracerStates.length=0,e.tracerIndex=0,i(t,e)},o=function(e,t){var r=document.getElementById(e),n=r.getElementsByTagName("textarea")[0],a=r.getElementsByTagName("input")[0],i=r.getElementsByTagName("div")[0];n.value=JSON.stringify(t.values[t.index],null,4),a.setAttribute("max",String(t.values.length-1)),a.value=String(t.index),i.innerHTML=String(t.index)};t.initialView=function(e,t,r,i){var o=document.querySelector(e);if(o){a=i?" style='float: left'":"";var l="<div style='text-align: right'><button id='tracerToggle'>Hide</button></div><div id='tracerContainer'><div style='text-align: right'><button id='tracerReset'>Reset</button></div><div>Data streams:</div><input id='tracerSlider' type='range' min='0' max='"+String(t.tracerStates.length-1)+"' value='"+String(t.tracerIndex)+"' style='width: 100%'/><button id='tracerStepBack'>&lt;</button> <button id='tracerStepForward'>&gt;</button> <span id='tracerIndex'>"+String(t.tracerIndex)+"</span><div"+a+"><div>Model: (you can type into this box)</div><textarea id='tracerModel' rows='5' cols='40'></textarea><div id='errorMessage' style='display: none'><span style='color:red'>Invalid JSON</span></div></div><span id='dataStreamContainer'></span><span id='otherStreamContainer'></span></div>";o.innerHTML=l;var u=document.getElementById("tracerContainer");n=document.getElementById("errorMessage"),document.getElementById("tracerSlider").addEventListener("input",d(r,t)),document.getElementById("tracerModel").addEventListener("keyup",function(e){return function(t){try{var r=JSON.parse(t.target.value);e(r,!0),n.style.display="none"}catch(e){n.style.display="block"}}}(r)),document.getElementById("tracerToggle").addEventListener("click",function(e){return function(t){var r=t.target;"none"===e.style.display?(e.style.display="block",r.innerHTML="Hide"):(e.style.display="none",r.innerHTML="Show")}}(u)),document.getElementById("tracerReset").addEventListener("click",function(e){return function(){c(e)}}(t)),document.getElementById("tracerStepBack").addEventListener("click",function(){d(r,t)({target:{value:Math.max(0,t.tracerIndex-1)}})}),document.getElementById("tracerStepForward").addEventListener("click",function(){d(r,t)({target:{value:Math.min(t.tracerStates.length-1,t.tracerIndex+1)}})})}},t.tracerView=i,t.reset=c,t.initStreamIds=function(e,t,r){var i="<div>Other streams:</div>";e.forEach(function(e){return i+="<div"+a+" class='otherStream' id='"+e+"'><input type='range' min='0' max='0' value='0' style='width: 100%'/><div>0</div><textarea rows='5' cols='40'></textarea><div><button>Trigger</button></div></div>"}),document.getElementById("otherStreamContainer").innerHTML=i,e.forEach(function(e){var a=document.getElementById(e);a.getElementsByTagName("input")[0].addEventListener("input",function(e,t){return function(r){var n=e[t],a=parseInt(r.target.value,10);n.index=a,o(t,n)}}(t,e));var i=a.getElementsByTagName("button")[0],d=a.getElementsByTagName("textarea")[0];i.addEventListener("click",function(e,t,r){return function(){try{var a=JSON.parse(t.value);r(e,a),n.style.display="none"}catch(e){n.style.display="block"}}}(e,d,r))})},t.updateStreamValue=o},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.tracerModel={tracerStates:[],tracerIndex:0,streams:{}}},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.meiosisTracer=void 0;var n=r(2),a=r(1),i=r(0);window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.meiosisTracer=function(e){var t=e.selector,r=e.renderModel,d=e.triggerStreamValue,c=e.horizontal;if(document.querySelector(t)){var o=(0,i.createReceiveValues)(n.tracerModel,a.tracerView);r=r||function(e,t){return window.postMessage({type:"MEIOSIS_RENDER_MODEL",model:e,sendValuesBack:t},"*")},(0,a.initialView)(t,n.tracerModel,r,c),d=d||function(e,t){return window.postMessage({type:"MEIOSIS_TRIGGER_STREAM_VALUE",streamId:e,value:t},"*")};var l=function(e){e.forEach(function(e){return n.tracerModel.streams[e]={index:0,values:[]}}),(0,a.initStreamIds)(e,n.tracerModel.streams,d)},u=function(e,t){var r=n.tracerModel.streams[e];r.values.push(t),r.index=r.values.length-1,(0,a.updateStreamValue)(e,r)};return window.addEventListener("message",function(e){if("MEIOSIS_VALUES"===e.data.type)o(e.data.values,e.data.update);else if("MEIOSIS_STREAM_IDS"===e.data.type){var t=e.data.streamIds;l(t)}else"MEIOSIS_STREAM_VALUE"===e.data.type&&u(e.data.streamId,e.data.value)}),window.postMessage({type:"MEIOSIS_TRACER_INIT"},"*"),{receiveValues:o,initStreamIdModel:l,receiveStreamValue:u,reset:function(){return(0,a.reset)(n.tracerModel)}}}}},function(e,t,r){"use strict";var n=r(3);e.exports=n.meiosisTracer}]);
 
 },{}],3:[function(require,module,exports){
 "use strict";
@@ -14243,23 +14248,23 @@ var createRandomGifPairPair = require("../random-gif-pair-pair").createRandomGif
 var createRandomGifList = require("../random-gif-list").createRandomGifList;
 exports.createApp = function (update) {
     var actions = {
-        newGif: function () { return update({ fn: function (model) {
-                var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
-                return R.over(R.lensPath(["counter", "value"]), R.add(increment), model);
-            } }); }
+        newGif: function () { return update(function (model) {
+            var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
+            return R.over(R.lensPath(["counter", "value"]), R.add(increment), model);
+        }); }
     };
-    var button = nest(createButton, ["button"], update);
-    var counter = nest(createCounter("Counter"), ["counter"], update);
+    var button = nest(createButton, update, ["button"]);
+    var counter = nest(createCounter("Counter"), update, ["counter"]);
     var createRandomGif = RandomGif.createRandomGif(actions);
-    var randomGif1 = nest(createRandomGif, ["randomGif1"], update);
-    var randomGif2 = nest(createRandomGif, ["randomGif2"], update);
+    var randomGif1 = nest(createRandomGif, update, ["randomGif1"]);
+    var randomGif2 = nest(createRandomGif, update, ["randomGif2"]);
     var createRandomGifPair = RandomGifPair.createRandomGifPair(createRandomGif);
-    var randomGifPair = nest(createRandomGifPair, ["randomGifPair"], update);
-    var randomGifPairPair = nest(createRandomGifPairPair(createRandomGifPair), ["randomGifPairPair"], update);
-    var randomGifList = nest(createRandomGifList(createRandomGif), ["randomGifList"], update);
+    var randomGifPair = nest(createRandomGifPair, update, ["randomGifPair"]);
+    var randomGifPairPair = nest(createRandomGifPairPair(createRandomGifPair), update, ["randomGifPairPair"]);
+    var randomGifList = nest(createRandomGifList(createRandomGif), update, ["randomGifList"]);
     return {
         model: function () { return Object.assign({}, button.model(), counter.model(), randomGif1.model(), randomGif2.model(), randomGifPair.model(), randomGifPairPair.model(), randomGifList.model()); },
-        state: R.compose(randomGifList.state),
+        state: randomGifList.state,
         view: function (model) { return [
             counter.view(model),
             m("div" + b.mt(8), "Button:"),
@@ -14284,7 +14289,7 @@ var b = require("bss");
 var _a = require("ramda"), lensPath = _a.lensPath, not = _a.not, over = _a.over;
 var button = require("../util/ui").button;
 var createActions = function (update) { return ({
-    toggle: function (_event) { return update({ fn: over(lensPath(["active"]), not) }); }
+    toggle: function (_event) { return update(over(lensPath(["active"]), not)); }
 }); };
 exports.createButton = function (update) {
     var actions = createActions(update);
@@ -14317,46 +14322,44 @@ var stream = require("mithril/stream");
 var createApp = require("./app").createApp;
 var update = stream();
 var app = createApp(update);
-var models = stream.scan(function (model, modelUpdate) { return modelUpdate.fn(model); }, app.model(), update);
+var models = stream.scan(function (model, func) { return func(model); }, app.model(), update);
 var states = models.map(app.state);
 var element = document.getElementById("app");
 states.map(function (state) { return m.render(element, app.view(state)); });
 var trace = require("meiosis").trace;
 var meiosisTracer = require("meiosis-tracer");
-trace({ update: update, dataStreams: [models, states], toUpdate: function (state) { return ({ fn: function () { return state; } }); } });
+trace({ update: update, dataStreams: [models, states] });
 meiosisTracer({ selector: "#tracer" });
 
 },{"./app":334,"meiosis":3,"meiosis-tracer":2,"mithril":5,"mithril/stream":6}],338:[function(require,module,exports){
+var R = require("ramda");
 exports.createActions = function (update, randomGif) { return ({
-    add: function (_event) { return update({ fn: function (model) {
-            var randomGifModel = randomGif.model();
-            var id = randomGifModel.id;
-            model.randomGifIds.push(id);
-            model.randomGifsById[id] = randomGifModel;
-            return model;
-        } }); },
-    remove: function (id) { return update({ fn: function (model) {
-            delete model.randomGifsById[id];
-            model.randomGifIds.splice(model.randomGifIds.indexOf(id), 1);
-            return model;
-        } }); },
-    resetAll: function (model) { return model.randomGifIds.forEach(randomGif.actions.reset); }
+    add: function (_event) { return update(function (model) {
+        var randomGifModel = randomGif.model();
+        model.randomGifs.push(randomGifModel);
+        return model;
+    }); },
+    remove: function (id) { return update(function (model) {
+        var index = R.findIndex(R.propEq("id", id), model.randomGifs);
+        model.randomGifs.splice(index, 1);
+        return model;
+    }); },
+    resetAll: function (model) { return model.randomGifs.forEach(randomGif.actions.reset); }
 }); };
 
-},{}],339:[function(require,module,exports){
+},{"ramda":92}],339:[function(require,module,exports){
 var R = require("ramda");
 var createActions = require("./actions").createActions;
 var createView = require("./view").createView;
-var state = function (model) { return R.assoc("hasGifs", R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), R.values(model.randomGifsById))), model); };
+var state = function (model) { return R.assoc("hasGifs", R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), model.randomGifs)), model); };
 exports.createRandomGifList = function (createRandomGif) { return function (update) {
-    var randomGif = createRandomGif(function (modelUpdate) {
-        return update({ fn: R.over(R.lensPath(["randomGifsById", modelUpdate.id]), modelUpdate.fn) });
+    var randomGif = createRandomGif(function (func) {
+        return update(R.over(R.lensPath(["randomGifs", 0]), func));
     });
     var actions = createActions(update, randomGif);
     return {
         model: function () { return ({
-            randomGifIds: [],
-            randomGifsById: {}
+            randomGifs: []
         }); },
         state: state,
         view: createView(actions, randomGif)
@@ -14368,18 +14371,18 @@ var m = require("mithril");
 var b = require("bss");
 var button = require("../util/ui").button;
 exports.createView = function (actions, randomGif) {
-    var renderRandomGif = function (model) { return function (id) {
-        return m("div" + b.d("inline-block").mr(8), { key: id }, [
-            randomGif.view(model.randomGifsById[id]),
-            m("button" + button.bc("red"), { onclick: function () { return actions.remove(id); } }, "Remove")
+    var renderRandomGif = function (model) {
+        return m("div" + b.d("inline-block").mr(8), { key: model.id }, [
+            randomGif.view(model),
+            m("button" + button.bc("red"), { onclick: function () { return actions.remove(model.id); } }, "Remove")
         ]);
-    }; };
+    };
     return function (model) {
         return m("div" + b.border("1px solid blue").p(8).mt(4), [
             m("div", "Has gif(s): ", model.hasGifs ? "Yes" : "No"),
             m("button" + button.bc("green"), { onclick: actions.add }, "Add"),
-            m("button" + button.bc("red"), { onclick: function () { return actions.resetAll(model); } }, "Reset All"),
-            m("div", model.randomGifIds.map(renderRandomGif(model)))
+            m("button" + button.bc("red"), { onclick: function () { return actions.resetAll(); } }, "Reset All"),
+            m("div", model.randomGifs.map(renderRandomGif))
         ]);
     };
 };
@@ -14389,8 +14392,8 @@ var m = require("mithril");
 var b = require("bss");
 var nest = require("../util/nest").nest;
 exports.createRandomGifPairPair = function (createRandomGifPair) { return function (update) {
-    var randomGifPairOne = nest(createRandomGifPair, ["randomGifPairOne"], update);
-    var randomGifPairTwo = nest(createRandomGifPair, ["randomGifPairTwo"], update);
+    var randomGifPairOne = nest(createRandomGifPair, update, ["randomGifPairOne"]);
+    var randomGifPairTwo = nest(createRandomGifPair, update, ["randomGifPairTwo"]);
     return {
         model: function () { return Object.assign({}, randomGifPairOne.model(), randomGifPairTwo.model()); },
         view: function (model) { return m("div" + b.border("1px solid orange").p(8).mt(4), [
@@ -14405,8 +14408,8 @@ var m = require("mithril");
 var b = require("bss");
 var nest = require("../util/nest").nest;
 exports.createRandomGifPair = function (createRandomGif) { return function (update) {
-    var randomGifFirst = nest(createRandomGif, ["randomGifFirst"], update);
-    var randomGifSecond = nest(createRandomGif, ["randomGifSecond"], update);
+    var randomGifFirst = nest(createRandomGif, update, ["randomGifFirst"]);
+    var randomGifSecond = nest(createRandomGif, update, ["randomGifSecond"]);
     return {
         model: function () { return Object.assign({}, randomGifFirst.model(), randomGifSecond.model()); },
         view: function (model) { return m("div" + b.border("1px solid purple").p(8).mt(4), [
@@ -14423,17 +14426,17 @@ var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _
 var gif_new_url = "https://api.giphy.com/v1/gifs/random";
 var api_key = "dc6zaTOxFJmzC";
 exports.createActions = function (update, actions) { return ({
-    editTag: function (id) { return function (event) { return update({ id: id, fn: assoc("tag", event.target.value) }); }; },
-    newGif: function (id, tag) {
+    editTag: function (event) { return update(assoc("tag", event.target.value)); },
+    newGif: function (tag) {
         actions.newGif();
-        update({ id: id, fn: assoc("image", Loaded.N()) });
+        update(assoc("image", Loaded.N()));
         m.request({ url: gif_new_url, data: { api_key: api_key, tag: tag } }).
             then(function (response) {
-            return update({ id: id, fn: assoc("image", Loaded.Y(Success.Y(Image.Y(response.data.image_url)))) });
+            return update(assoc("image", Loaded.Y(Success.Y(Image.Y(response.data.image_url)))));
         }).
-            catch(function () { return update({ id: id, fn: assoc("image", Loaded.Y(Success.N())) }); });
+            catch(function () { return update(assoc("image", Loaded.Y(Success.N()))); });
     },
-    reset: function (id) { return update({ id: id, fn: assoc("image", Loaded.Y(Success.Y(Image.N()))) }); }
+    reset: function () { return update(assoc("image", Loaded.Y(Success.Y(Image.N())))); }
 }); };
 
 },{"./types":345,"mithril":5,"ramda":92}],344:[function(require,module,exports){
@@ -14485,21 +14488,21 @@ var imgsrc = function (image) {
 exports.createView = function (actions) { return function (model) {
     return m("div" + b.border("1px solid green").p(8).mt(4), [
         m("span" + b.mr(4), "Tag:"),
-        m("input[type=text]", { value: model.tag, onkeyup: actions.editTag(model.id) }),
-        m("button" + button.bc("#357edd"), { onclick: function () { return actions.newGif(model.id, model.tag); } }, "Random Gif"),
-        m("button" + button.bc("red"), { onclick: function () { return actions.reset(model.id); } }, "Reset"),
+        m("input[type=text]", { value: model.tag, onkeyup: actions.editTag }),
+        m("button" + button.bc("#357edd"), { onclick: function () { return actions.newGif(model.tag); } }, "Random Gif"),
+        m("button" + button.bc("red"), { onclick: actions.reset }, "Reset"),
         m("div" + b.mt(4), [m("img", { width: 200, height: 200, src: imgsrc(model.image) })])
     ]);
 }; };
 
 },{"../util/ui":348,"./types":345,"bss":1,"mithril":5,"ramda":92,"static-sum-type":327}],347:[function(require,module,exports){
 var R = require("ramda");
-var nestUpdate = function (update, path) { return function (modelUpdate) {
-    return update(R.merge(modelUpdate, { fn: R.over(R.lensPath(path), modelUpdate.fn) }));
+var nestUpdate = function (update, path) { return function (func) {
+    return update(R.over(R.lensPath(path), func));
 }; };
-var nest = function (create, path, update) {
+var nest = function (create, update, path) {
     var component = create(nestUpdate(update, path));
-    var result = {};
+    var result = Object.assign({}, component);
     if (component.model) {
         result.model = function () { return R.assocPath(path, component.model(), {}); };
     }

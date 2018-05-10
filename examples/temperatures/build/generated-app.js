@@ -1111,7 +1111,7 @@
 
   /**
    * Clones the given VNode, optionally adding attributes/props and replacing its children.
-   * @param {VNode} vnode		The virutal DOM element to clone
+   * @param {VNode} vnode		The virtual DOM element to clone
    * @param {Object} props	Attributes/props to add when cloning
    * @param {VNode} rest		Any additional arguments will be used as replacement children.
    */
@@ -1146,7 +1146,7 @@
    *
    * @param {Node} node			DOM Node to compare
    * @param {VNode} vnode			Virtual DOM node to compare
-   * @param {boolean} [hyrdating=false]	If true, ignores component constructors when comparing.
+   * @param {boolean} [hydrating=false]	If true, ignores component constructors when comparing.
    * @private
    */
   function isSameNodeType(node, vnode, hydrating) {
@@ -1224,9 +1224,7 @@
   function setAccessor(node, name, old, value, isSvg) {
   	if (name === 'className') { name = 'class'; }
 
-  	if (name === 'key') {
-  		// ignore
-  	} else if (name === 'ref') {
+  	if (name === 'key') ; else if (name === 'ref') {
   		if (old) { old(null); }
   		if (value) { value(node); }
   	} else if (name === 'class' && !isSvg) {
@@ -1260,7 +1258,7 @@
   		setProperty(node, name, value == null ? '' : value);
   		if (value == null || value === false) { node.removeAttribute(name); }
   	} else {
-  		var ns = isSvg && name !== (name = name.replace(/^xlink\:?/, ''));
+  		var ns = isSvg && name !== (name = name.replace(/^xlink:?/, ''));
   		if (value == null || value === false) {
   			if (ns) { node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase()); }else { node.removeAttribute(name); }
   		} else if (typeof value !== 'function') {
@@ -1999,7 +1997,7 @@
     var undefined;
 
     /** Used as the semantic version number. */
-    var VERSION = '4.17.5';
+    var VERSION = '4.17.10';
 
     /** Used as the size to enable large array optimizations. */
     var LARGE_ARRAY_SIZE = 200;
@@ -2409,7 +2407,7 @@
     var root = freeGlobal || freeSelf || Function('return this')();
 
     /** Detect free variable `exports`. */
-    var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
+    var freeExports = exports && !exports.nodeType && exports;
 
     /** Detect free variable `module`. */
     var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
@@ -2423,6 +2421,14 @@
     /** Used to access faster Node.js helpers. */
     var nodeUtil = (function() {
       try {
+        // Use `util.types` for Node.js 10+.
+        var types = freeModule && freeModule.require && freeModule.require('util').types;
+
+        if (types) {
+          return types;
+        }
+
+        // Legacy `process.binding('util')` for Node.js < 10.
         return freeProcess && freeProcess.binding && freeProcess.binding('util');
       } catch (e) {}
     }());
@@ -20964,9 +20970,7 @@
                           } else {
                               description.flags[flag] = this$1._flags[flag];
                           }
-                      } else if (flag === 'lazy' || flag === 'label') {
-                          // We don't want it in the description
-                      } else {
+                      } else if (flag === 'lazy' || flag === 'label') ; else {
                           description.flags[flag] = this$1._flags[flag];
                       }
                   }
@@ -23600,7 +23604,7 @@
 
   try {
   	// This works if eval is allowed (see CSP)
-  	g = g || Function("return this")() || (eval)("this");
+  	g = g || Function("return this")() || (0, eval)("this");
   } catch(e) {
   	// This works if the window reference is available
   	if(typeof window === "object")
@@ -30589,7 +30593,8 @@
   	{
   		!(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
   			return punycode;
-  		}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  		}.call(exports, __webpack_require__, exports, module),
+  				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   	}
 
   }(this));
@@ -31070,7 +31075,7 @@
 
   function reduceToSingleString(output, base, braces) {
     var length = output.reduce(function(prev, cur) {
-      if (cur.indexOf('\n') >= 0) { }
+      if (cur.indexOf('\n') >= 0) ;
       return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
     }, 0);
 
@@ -35811,7 +35816,10 @@
           }
 
           if (options.convert && this._flags.momentFormat) {
-              var date = moment(value, this._flags.momentFormat, true);
+              var date = this._flags.utc
+                  ? moment.utc(value, this._flags.momentFormat, true)
+                  : moment(value, this._flags.momentFormat, true);
+
               if (date.isValid()) {
                   return date.toDate();
               }
@@ -35835,6 +35843,22 @@
               setup: function setup(params) {
 
                   this._flags.momentFormat = params.format;
+              },
+              validate: function validate(params, value, state, options) {
+
+                  // No-op just to enable description
+                  return value;
+              }
+          },
+          {
+              name: 'utc',
+              description: function description(params) {
+
+                  return 'Date should be interpreted in UTC';
+              },
+              setup: function setup(params) {
+
+                  this._flags.utc = true;
               },
               validate: function validate(params, value, state, options) {
 
@@ -35891,7 +35915,7 @@
 
   var nestUpdate = function (update, path) { return function (func) { return update(function (model) { return lodash.update(model, path, func); }); }; };
 
-  var nest = function (create, path, update) {
+  var nest = function (create, update, path) {
     var component = create(nestUpdate(update, path));
     var result = {};
     if (component.model) {
@@ -35935,11 +35959,11 @@
 
   var createApp = function (update) {
     var components = {
-      entryNumber: nest(createEntryNumber, ["entryNumber"], update),
-      entryDateFrom: nest(createEntryDate("From Date:"), ["entryDate", "from"], update),
-      entryDateTo: nest(createEntryDate("To Date:"), ["entryDate", "to"], update),
-      airTemperature: nest(createTemperature("Air temperature"), ["temperature", "air"], update),
-      waterTemperature: nest(createTemperature("Water temperature"), ["temperature", "water"], update)
+      entryNumber: nest(createEntryNumber, update, ["entryNumber"]),
+      entryDateFrom: nest(createEntryDate("From Date:"), update, ["entryDate", "from"]),
+      entryDateTo: nest(createEntryDate("To Date:"), update, ["entryDate", "to"]),
+      airTemperature: nest(createTemperature("Air temperature"), update, ["temperature", "air"]),
+      waterTemperature: nest(createTemperature("Water temperature"), update, ["temperature", "water"])
     };
 
     return {
@@ -36048,7 +36072,7 @@
   var lib_1 = lib$2.trace;
 
   var meiosisTracer = createCommonjsModule(function (module) {
-  module.exports=function(e){var t={};function r(n){if(t[n]){ return t[n].exports; }var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r), a.l=!0, a.exports}return r.m=e, r.c=t, r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n});}, r.r=function(e){Object.defineProperty(e,"__esModule",{value:!0});}, r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t), t}, r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)}, r.p="", r(r.s=4)}([function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});t.createReceiveValues=function(e,t){return function(r,n){n&&(e.tracerStates.length>0&&(e.tracerStates.length=e.tracerIndex+1), e.tracerStates.push(r), e.tracerIndex=e.tracerStates.length-1), t(r,e);}};},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});var n=null,a=null,i=function(e,t){var r=document.getElementById("tracerSlider");if(r.setAttribute("max",String(t.tracerStates.length-1)), r.value=String(t.tracerIndex), document.getElementById("tracerIndex").innerHTML=String(t.tracerIndex), document.getElementById("tracerModel").value=JSON.stringify(e[0].value,null,4), 0===document.querySelectorAll("div.dataStream").length){for(var n="",i=1,d=e.length;i<d;i++){ n+="<div"+a+" class='dataStream'><textarea rows='5' cols='40'></textarea></div>"; }document.getElementById("dataStreamContainer").innerHTML=n;}var o=document.querySelectorAll("div.dataStream textarea");for(i=1, d=e.length;i<d;i++){ o[i-1].value=JSON.stringify(e[i].value,null,4); }},d=function(e){var t=e.tracerStates[0];e.tracerStates.length=0, e.tracerIndex=0, i(t,e);},o=function(e,t){var r=document.getElementById(e),n=r.getElementsByTagName("textarea")[0],a=r.getElementsByTagName("input")[0],i=r.getElementsByTagName("div")[0];n.value=JSON.stringify(t.values[t.index],null,4), a.setAttribute("max",String(t.values.length-1)), a.value=String(t.index), i.innerHTML=String(t.index);};t.initialView=function(e,t,r,o){var l=document.querySelector(e);if(l){a=o?" style='float: left'":"";var u="<div style='text-align: right'><button id='tracerToggle'>Hide</button></div><div id='tracerContainer'><div style='text-align: right'><button id='tracerReset'>Reset</button></div><div>Data streams:</div><input id='tracerSlider' type='range' min='0' max='"+String(t.tracerStates.length-1)+"' value='"+String(t.tracerIndex)+"' style='width: 100%'/><div id='tracerIndex'>"+String(t.tracerIndex)+"</div><div"+a+"><div>Model: (you can type into this box)</div><textarea id='tracerModel' rows='5' cols='40'></textarea><div id='errorMessage' style='display: none'><span style='color:red'>Invalid JSON</span></div></div><span id='dataStreamContainer'></span><span id='otherStreamContainer'></span></div>";l.innerHTML=u;var s=document.getElementById("tracerContainer");n=document.getElementById("errorMessage"), document.getElementById("tracerSlider").addEventListener("input",function(e,t){return function(r){var n=parseInt(r.target.value,10),a=t.tracerStates[n];t.tracerIndex=n;var d=a[0].value;e(d,!1), i(a,t);}}(r,t)), document.getElementById("tracerModel").addEventListener("keyup",function(e){return function(t){try{var r=JSON.parse(t.target.value);e(r,!0), n.style.display="none";}catch(e){n.style.display="block";}}}(r)), document.getElementById("tracerToggle").addEventListener("click",function(e){return function(t){var r=t.target;"none"===e.style.display?(e.style.display="block", r.innerHTML="Hide"):(e.style.display="none", r.innerHTML="Show");}}(s)), document.getElementById("tracerReset").addEventListener("click",function(e){return function(){d(e);}}(t));}}, t.tracerView=i, t.reset=d, t.initStreamIds=function(e,t,r){var i="<div>Other streams:</div>";e.forEach(function(e){return i+="<div"+a+" class='otherStream' id='"+e+"'><input type='range' min='0' max='0' value='0' style='width: 100%'/><div>0</div><textarea rows='5' cols='40'></textarea><div><button>Trigger</button></div></div>"}), document.getElementById("otherStreamContainer").innerHTML=i, e.forEach(function(e){var a=document.getElementById(e);a.getElementsByTagName("input")[0].addEventListener("input",function(e,t){return function(r){var n=e[t],a=parseInt(r.target.value,10);n.index=a, o(t,n);}}(t,e));var i=a.getElementsByTagName("button")[0],d=a.getElementsByTagName("textarea")[0];i.addEventListener("click",function(e,t,r){return function(){try{var a=JSON.parse(t.value);r(e,a), n.style.display="none";}catch(e){n.style.display="block";}}}(e,d,r));});}, t.updateStreamValue=o;},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});t.tracerModel={tracerStates:[],tracerIndex:0,streams:{}};},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0}), t.meiosisTracer=void 0;var n=r(2),a=r(1),i=r(0);window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.meiosisTracer=function(e){var t=e.selector,r=e.renderModel,d=e.triggerStreamValue,o=e.horizontal;if(document.querySelector(t)){var l=(0, i.createReceiveValues)(n.tracerModel,a.tracerView);r=r||function(e,t){return window.postMessage({type:"MEIOSIS_RENDER_MODEL",model:e,sendValuesBack:t},"*")}, (0, a.initialView)(t,n.tracerModel,r,o), d=d||function(e,t){return window.postMessage({type:"MEIOSIS_TRIGGER_STREAM_VALUE",streamId:e,value:t},"*")};var u=function(e){e.forEach(function(e){return n.tracerModel.streams[e]={index:0,values:[]}}), (0, a.initStreamIds)(e,n.tracerModel.streams,d);},s=function(e,t){var r=n.tracerModel.streams[e];r.values.push(t), r.index=r.values.length-1, (0, a.updateStreamValue)(e,r);};return window.addEventListener("message",function(e){if("MEIOSIS_VALUES"===e.data.type){ l(e.data.values,e.data.update); }else if("MEIOSIS_STREAM_IDS"===e.data.type){var t=e.data.streamIds;u(t);}else{ "MEIOSIS_STREAM_VALUE"===e.data.type&&s(e.data.streamId,e.data.value); }}), window.postMessage({type:"MEIOSIS_TRACER_INIT"},"*"), {receiveValues:l,initStreamIdModel:u,receiveStreamValue:s,reset:function(){return(0, a.reset)(n.tracerModel)}}}};},function(e,t,r){var n=r(3);e.exports=n.meiosisTracer;}]);
+  module.exports=function(e){var t={};function r(n){if(t[n]){ return t[n].exports; }var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r),a.l=!0,a.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n});},r.r=function(e){Object.defineProperty(e,"__esModule",{value:!0});},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=4)}([function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});t.createReceiveValues=function(e,t){return function(r,n){n&&(e.tracerStates.length>0&&(e.tracerStates.length=e.tracerIndex+1),e.tracerStates.push(r),e.tracerIndex=e.tracerStates.length-1),t(r,e);}};},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});var n=null,a=null,i=function(e,t){var r=document.getElementById("tracerSlider");if(r.setAttribute("max",String(t.tracerStates.length-1)),r.value=String(t.tracerIndex),document.getElementById("tracerStepBack").disabled=0===t.tracerIndex,document.getElementById("tracerStepForward").disabled=t.tracerIndex===t.tracerStates.length-1,document.getElementById("tracerIndex").innerHTML=String(t.tracerIndex),document.getElementById("tracerModel").value=JSON.stringify(e[0].value,null,4),0===document.querySelectorAll("div.dataStream").length){for(var n="",i=1,d=e.length;i<d;i++){ n+="<div"+a+" class='dataStream'><textarea rows='5' cols='40'></textarea></div>"; }document.getElementById("dataStreamContainer").innerHTML=n;}var c=document.querySelectorAll("div.dataStream textarea");for(i=1,d=e.length;i<d;i++){ c[i-1].value=JSON.stringify(e[i].value,null,4); }},d=function(e,t){return function(r){var n=parseInt(r.target.value,10),a=t.tracerStates[n];t.tracerIndex=n;var d=a[0].value;e(d,!1),i(a,t);}},c=function(e){var t=e.tracerStates[0];e.tracerStates.length=0,e.tracerIndex=0,i(t,e);},o=function(e,t){var r=document.getElementById(e),n=r.getElementsByTagName("textarea")[0],a=r.getElementsByTagName("input")[0],i=r.getElementsByTagName("div")[0];n.value=JSON.stringify(t.values[t.index],null,4),a.setAttribute("max",String(t.values.length-1)),a.value=String(t.index),i.innerHTML=String(t.index);};t.initialView=function(e,t,r,i){var o=document.querySelector(e);if(o){a=i?" style='float: left'":"";var l="<div style='text-align: right'><button id='tracerToggle'>Hide</button></div><div id='tracerContainer'><div style='text-align: right'><button id='tracerReset'>Reset</button></div><div>Data streams:</div><input id='tracerSlider' type='range' min='0' max='"+String(t.tracerStates.length-1)+"' value='"+String(t.tracerIndex)+"' style='width: 100%'/><button id='tracerStepBack'>&lt;</button> <button id='tracerStepForward'>&gt;</button> <span id='tracerIndex'>"+String(t.tracerIndex)+"</span><div"+a+"><div>Model: (you can type into this box)</div><textarea id='tracerModel' rows='5' cols='40'></textarea><div id='errorMessage' style='display: none'><span style='color:red'>Invalid JSON</span></div></div><span id='dataStreamContainer'></span><span id='otherStreamContainer'></span></div>";o.innerHTML=l;var u=document.getElementById("tracerContainer");n=document.getElementById("errorMessage"),document.getElementById("tracerSlider").addEventListener("input",d(r,t)),document.getElementById("tracerModel").addEventListener("keyup",function(e){return function(t){try{var r=JSON.parse(t.target.value);e(r,!0),n.style.display="none";}catch(e){n.style.display="block";}}}(r)),document.getElementById("tracerToggle").addEventListener("click",function(e){return function(t){var r=t.target;"none"===e.style.display?(e.style.display="block",r.innerHTML="Hide"):(e.style.display="none",r.innerHTML="Show");}}(u)),document.getElementById("tracerReset").addEventListener("click",function(e){return function(){c(e);}}(t)),document.getElementById("tracerStepBack").addEventListener("click",function(){d(r,t)({target:{value:Math.max(0,t.tracerIndex-1)}});}),document.getElementById("tracerStepForward").addEventListener("click",function(){d(r,t)({target:{value:Math.min(t.tracerStates.length-1,t.tracerIndex+1)}});});}},t.tracerView=i,t.reset=c,t.initStreamIds=function(e,t,r){var i="<div>Other streams:</div>";e.forEach(function(e){return i+="<div"+a+" class='otherStream' id='"+e+"'><input type='range' min='0' max='0' value='0' style='width: 100%'/><div>0</div><textarea rows='5' cols='40'></textarea><div><button>Trigger</button></div></div>"}),document.getElementById("otherStreamContainer").innerHTML=i,e.forEach(function(e){var a=document.getElementById(e);a.getElementsByTagName("input")[0].addEventListener("input",function(e,t){return function(r){var n=e[t],a=parseInt(r.target.value,10);n.index=a,o(t,n);}}(t,e));var i=a.getElementsByTagName("button")[0],d=a.getElementsByTagName("textarea")[0];i.addEventListener("click",function(e,t,r){return function(){try{var a=JSON.parse(t.value);r(e,a),n.style.display="none";}catch(e){n.style.display="block";}}}(e,d,r));});},t.updateStreamValue=o;},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0});t.tracerModel={tracerStates:[],tracerIndex:0,streams:{}};},function(e,t,r){Object.defineProperty(t,"__esModule",{value:!0}),t.meiosisTracer=void 0;var n=r(2),a=r(1),i=r(0);window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.meiosisTracer=function(e){var t=e.selector,r=e.renderModel,d=e.triggerStreamValue,c=e.horizontal;if(document.querySelector(t)){var o=(0, i.createReceiveValues)(n.tracerModel,a.tracerView);r=r||function(e,t){return window.postMessage({type:"MEIOSIS_RENDER_MODEL",model:e,sendValuesBack:t},"*")},(0, a.initialView)(t,n.tracerModel,r,c),d=d||function(e,t){return window.postMessage({type:"MEIOSIS_TRIGGER_STREAM_VALUE",streamId:e,value:t},"*")};var l=function(e){e.forEach(function(e){return n.tracerModel.streams[e]={index:0,values:[]}}),(0, a.initStreamIds)(e,n.tracerModel.streams,d);},u=function(e,t){var r=n.tracerModel.streams[e];r.values.push(t),r.index=r.values.length-1,(0, a.updateStreamValue)(e,r);};return window.addEventListener("message",function(e){if("MEIOSIS_VALUES"===e.data.type){ o(e.data.values,e.data.update); }else if("MEIOSIS_STREAM_IDS"===e.data.type){var t=e.data.streamIds;l(t);}else{ "MEIOSIS_STREAM_VALUE"===e.data.type&&u(e.data.streamId,e.data.value); }}),window.postMessage({type:"MEIOSIS_TRACER_INIT"},"*"),{receiveValues:o,initStreamIdModel:l,receiveStreamValue:u,reset:function(){return(0, a.reset)(n.tracerModel)}}}};},function(e,t,r){var n=r(3);e.exports=n.meiosisTracer;}]);
 
   });
 
@@ -36056,8 +36080,8 @@
 
   var update = lib.stream();
   var app = createApp(update);
-  var models = lib.scan(function (model, modelUpdate) { return modelUpdate(model); },
-     app.model(), update);
+  var models = lib.scan(function (model, func) { return func(model); },
+    app.model(), update);
 
   var element = document.getElementById("app");
   models.map(function (model) { return render(app.view(model), element, element.lastElementChild); });

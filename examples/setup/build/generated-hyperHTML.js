@@ -44,1091 +44,9 @@
 /******/ 		}
 /******/ 	};
 /******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 86);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports) {
-
-module.exports = function _isPlaceholder(a) {
-  return a != null &&
-         typeof a === 'object' &&
-         a['@@functional/placeholder'] === true;
-};
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = function _arity(n, fn) {
-  /* eslint-disable no-unused-vars */
-  switch (n) {
-    case 0: return function() { return fn.apply(this, arguments); };
-    case 1: return function(a0) { return fn.apply(this, arguments); };
-    case 2: return function(a0, a1) { return fn.apply(this, arguments); };
-    case 3: return function(a0, a1, a2) { return fn.apply(this, arguments); };
-    case 4: return function(a0, a1, a2, a3) { return fn.apply(this, arguments); };
-    case 5: return function(a0, a1, a2, a3, a4) { return fn.apply(this, arguments); };
-    case 6: return function(a0, a1, a2, a3, a4, a5) { return fn.apply(this, arguments); };
-    case 7: return function(a0, a1, a2, a3, a4, a5, a6) { return fn.apply(this, arguments); };
-    case 8: return function(a0, a1, a2, a3, a4, a5, a6, a7) { return fn.apply(this, arguments); };
-    case 9: return function(a0, a1, a2, a3, a4, a5, a6, a7, a8) { return fn.apply(this, arguments); };
-    case 10: return function(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) { return fn.apply(this, arguments); };
-    default: throw new Error('First argument to _arity must be a non-negative integer no greater than ten');
-  }
-};
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _isPlaceholder = __webpack_require__(0);
-
-
-/**
- * Optimized internal one-arity curry function.
- *
- * @private
- * @category Function
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-module.exports = function _curry1(fn) {
-  return function f1(a) {
-    if (arguments.length === 0 || _isPlaceholder(a)) {
-      return f1;
-    } else {
-      return fn.apply(this, arguments);
-    }
-  };
-};
-
-
-/***/ }),
-/* 3 */,
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var curryN = __webpack_require__(5);
-
-// Utility
-function isFunction(obj) {
-  return !!(obj && obj.constructor && obj.call && obj.apply);
-}
-function trueFn() { return true; }
-
-// Globals
-var toUpdate = [];
-var inStream;
-var order = [];
-var orderNextIdx = -1;
-var flushing = false;
-
-/** @namespace */
-var flyd = {}
-
-// /////////////////////////// API ///////////////////////////////// //
-
-/**
- * Creates a new stream
- *
- * __Signature__: `a -> Stream a`
- *
- * @name flyd.stream
- * @param {*} initialValue - (Optional) the initial value of the stream
- * @return {stream} the stream
- *
- * @example
- * var n = flyd.stream(1); // Stream with initial value `1`
- * var s = flyd.stream(); // Stream with no initial value
- */
-flyd.stream = function(initialValue) {
-  var endStream = createDependentStream([], trueFn);
-  var s = createStream();
-  s.end = endStream;
-  s.fnArgs = [];
-  endStream.listeners.push(s);
-  s.toJSON = function() {
-    return s();
-  };
-  if (arguments.length > 0) s(initialValue);
-  return s;
-}
-
-/**
- * Create a new dependent stream
- *
- * __Signature__: `(...Stream * -> Stream b -> b) -> [Stream *] -> Stream b`
- *
- * @name flyd.combine
- * @param {Function} fn - the function used to combine the streams
- * @param {Array<stream>} dependencies - the streams that this one depends on
- * @return {stream} the dependent stream
- *
- * @example
- * var n1 = flyd.stream(0);
- * var n2 = flyd.stream(0);
- * var max = flyd.combine(function(n1, n2, self, changed) {
- *   return n1() > n2() ? n1() : n2();
- * }, [n1, n2]);
- */
-flyd.combine = curryN(2, combine);
-function combine(fn, streams) {
-  var i, s, deps, depEndStreams;
-  var endStream = createDependentStream([], trueFn);
-  deps = []; depEndStreams = [];
-  for (i = 0; i < streams.length; ++i) {
-    if (streams[i] !== undefined) {
-      deps.push(streams[i]);
-      if (streams[i].end !== undefined) depEndStreams.push(streams[i].end);
-    }
-  }
-  s = createDependentStream(deps, fn);
-  s.depsChanged = [];
-  s.fnArgs = s.deps.concat([s, s.depsChanged]);
-  s.end = endStream;
-  endStream.listeners.push(s);
-  addListeners(depEndStreams, endStream);
-  endStream.deps = depEndStreams;
-  updateStream(s);
-  return s;
-}
-
-/**
- * Returns `true` if the supplied argument is a Flyd stream and `false` otherwise.
- *
- * __Signature__: `* -> Boolean`
- *
- * @name flyd.isStream
- * @param {*} value - the value to test
- * @return {Boolean} `true` if is a Flyd streamn, `false` otherwise
- *
- * @example
- * var s = flyd.stream(1);
- * var n = 1;
- * flyd.isStream(s); //=> true
- * flyd.isStream(n); //=> false
- */
-flyd.isStream = function(stream) {
-  return isFunction(stream) && 'hasVal' in stream;
-}
-
-/**
- * Invokes the body (the function to calculate the value) of a dependent stream
- *
- * By default the body of a dependent stream is only called when all the streams
- * upon which it depends has a value. `immediate` can circumvent this behaviour.
- * It immediately invokes the body of a dependent stream.
- *
- * __Signature__: `Stream a -> Stream a`
- *
- * @name flyd.immediate
- * @param {stream} stream - the dependent stream
- * @return {stream} the same stream
- *
- * @example
- * var s = flyd.stream();
- * var hasItems = flyd.immediate(flyd.combine(function(s) {
- *   return s() !== undefined && s().length > 0;
- * }, [s]);
- * console.log(hasItems()); // logs `false`. Had `immediate` not been
- *                          // used `hasItems()` would've returned `undefined`
- * s([1]);
- * console.log(hasItems()); // logs `true`.
- * s([]);
- * console.log(hasItems()); // logs `false`.
- */
-flyd.immediate = function(s) {
-  if (s.depsMet === false) {
-    s.depsMet = true;
-    updateStream(s);
-  }
-  return s;
-}
-
-/**
- * Changes which `endsStream` should trigger the ending of `s`.
- *
- * __Signature__: `Stream a -> Stream b -> Stream b`
- *
- * @name flyd.endsOn
- * @param {stream} endStream - the stream to trigger the ending
- * @param {stream} stream - the stream to be ended by the endStream
- * @param {stream} the stream modified to be ended by endStream
- *
- * @example
- * var n = flyd.stream(1);
- * var killer = flyd.stream();
- * // `double` ends when `n` ends or when `killer` emits any value
- * var double = flyd.endsOn(flyd.merge(n.end, killer), flyd.combine(function(n) {
- *   return 2 * n();
- * }, [n]);
-*/
-flyd.endsOn = function(endS, s) {
-  detachDeps(s.end);
-  endS.listeners.push(s.end);
-  s.end.deps.push(endS);
-  return s;
-}
-
-/**
- * Map a stream
- *
- * Returns a new stream consisting of every value from `s` passed through
- * `fn`. I.e. `map` creates a new stream that listens to `s` and
- * applies `fn` to every new value.
- * __Signature__: `(a -> result) -> Stream a -> Stream result`
- *
- * @name flyd.map
- * @param {Function} fn - the function that produces the elements of the new stream
- * @param {stream} stream - the stream to map
- * @return {stream} a new stream with the mapped values
- *
- * @example
- * var numbers = flyd.stream(0);
- * var squaredNumbers = flyd.map(function(n) { return n*n; }, numbers);
- */
-// Library functions use self callback to accept (null, undefined) update triggers.
-flyd.map = curryN(2, function(f, s) {
-  return combine(function(s, self) { self(f(s.val)); }, [s]);
-})
-
-/**
- * Listen to stream events
- *
- * Similar to `map` except that the returned stream is empty. Use `on` for doing
- * side effects in reaction to stream changes. Use the returned stream only if you
- * need to manually end it.
- *
- * __Signature__: `(a -> result) -> Stream a -> Stream undefined`
- *
- * @name flyd.on
- * @param {Function} cb - the callback
- * @param {stream} stream - the stream
- * @return {stream} an empty stream (can be ended)
- */
-flyd.on = curryN(2, function(f, s) {
-  return combine(function(s) { f(s.val); }, [s]);
-})
-
-/**
- * Creates a new stream with the results of calling the function on every incoming
- * stream with and accumulator and the incoming value.
- *
- * __Signature__: `(a -> b -> a) -> a -> Stream b -> Stream a`
- *
- * @name flyd.scan
- * @param {Function} fn - the function to call
- * @param {*} val - the initial value of the accumulator
- * @param {stream} stream - the stream source
- * @return {stream} the new stream
- *
- * @example
- * var numbers = flyd.stream();
- * var sum = flyd.scan(function(sum, n) { return sum+n; }, 0, numbers);
- * numbers(2)(3)(5);
- * sum(); // 10
- */
-flyd.scan = curryN(3, function(f, acc, s) {
-  var ns = combine(function(s, self) {
-    self(acc = f(acc, s.val));
-  }, [s]);
-  if (!ns.hasVal) ns(acc);
-  return ns;
-});
-
-/**
- * Creates a new stream down which all values from both `stream1` and `stream2`
- * will be sent.
- *
- * __Signature__: `Stream a -> Stream a -> Stream a`
- *
- * @name flyd.merge
- * @param {stream} source1 - one stream to be merged
- * @param {stream} source2 - the other stream to be merged
- * @return {stream} a stream with the values from both sources
- *
- * @example
- * var btn1Clicks = flyd.stream();
- * button1Elm.addEventListener(btn1Clicks);
- * var btn2Clicks = flyd.stream();
- * button2Elm.addEventListener(btn2Clicks);
- * var allClicks = flyd.merge(btn1Clicks, btn2Clicks);
- */
-flyd.merge = curryN(2, function(s1, s2) {
-  var s = flyd.immediate(combine(function(s1, s2, self, changed) {
-    if (changed[0]) {
-      self(changed[0]());
-    } else if (s1.hasVal) {
-      self(s1.val);
-    } else if (s2.hasVal) {
-      self(s2.val);
-    }
-  }, [s1, s2]));
-  flyd.endsOn(combine(function() {
-    return true;
-  }, [s1.end, s2.end]), s);
-  return s;
-});
-
-/**
- * Creates a new stream resulting from applying `transducer` to `stream`.
- *
- * __Signature__: `Transducer -> Stream a -> Stream b`
- *
- * @name flyd.transduce
- * @param {Transducer} xform - the transducer transformation
- * @param {stream} source - the stream source
- * @return {stream} the new stream
- *
- * @example
- * var t = require('transducers.js');
- *
- * var results = [];
- * var s1 = flyd.stream();
- * var tx = t.compose(t.map(function(x) { return x * 2; }), t.dedupe());
- * var s2 = flyd.transduce(tx, s1);
- * flyd.combine(function(s2) { results.push(s2()); }, [s2]);
- * s1(1)(1)(2)(3)(3)(3)(4);
- * results; // => [2, 4, 6, 8]
- */
-flyd.transduce = curryN(2, function(xform, source) {
-  xform = xform(new StreamTransformer());
-  return combine(function(source, self) {
-    var res = xform['@@transducer/step'](undefined, source.val);
-    if (res && res['@@transducer/reduced'] === true) {
-      self.end(true);
-      return res['@@transducer/value'];
-    } else {
-      return res;
-    }
-  }, [source]);
-});
-
-/**
- * Returns `fn` curried to `n`. Use this function to curry functions exposed by
- * modules for Flyd.
- *
- * @name flyd.curryN
- * @function
- * @param {Integer} arity - the function arity
- * @param {Function} fn - the function to curry
- * @return {Function} the curried function
- *
- * @example
- * function add(x, y) { return x + y; };
- * var a = flyd.curryN(2, add);
- * a(2)(4) // => 6
- */
-flyd.curryN = curryN
-
-/**
- * Returns a new stream identical to the original except every
- * value will be passed through `f`.
- *
- * _Note:_ This function is included in order to support the fantasy land
- * specification.
- *
- * __Signature__: Called bound to `Stream a`: `(a -> b) -> Stream b`
- *
- * @name stream.map
- * @param {Function} function - the function to apply
- * @return {stream} a new stream with the values mapped
- *
- * @example
- * var numbers = flyd.stream(0);
- * var squaredNumbers = numbers.map(function(n) { return n*n; });
- */
-function boundMap(f) { return flyd.map(f, this); }
-
-/**
- * Returns a new stream which is the result of applying the
- * functions from `this` stream to the values in `stream` parameter.
- *
- * `this` stream must be a stream of functions.
- *
- * _Note:_ This function is included in order to support the fantasy land
- * specification.
- *
- * __Signature__: Called bound to `Stream (a -> b)`: `a -> Stream b`
- *
- * @name stream.ap
- * @param {stream} stream - the values stream
- * @return {stream} a new stream with the functions applied to values
- *
- * @example
- * var add = flyd.curryN(2, function(x, y) { return x + y; });
- * var numbers1 = flyd.stream();
- * var numbers2 = flyd.stream();
- * var addToNumbers1 = flyd.map(add, numbers1);
- * var added = addToNumbers1.ap(numbers2);
- */
-function ap(s2) {
-  var s1 = this;
-  return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);
-}
-
-/**
- * Get a human readable view of a stream
- * @name stream.toString
- * @return {String} the stream string representation
- */
-function streamToString() {
-  return 'stream(' + this.val + ')';
-}
-
-/**
- * @name stream.end
- * @memberof stream
- * A stream that emits `true` when the stream ends. If `true` is pushed down the
- * stream the parent stream ends.
- */
-
-/**
- * @name stream.of
- * @function
- * @memberof stream
- * Returns a new stream with `value` as its initial value. It is identical to
- * calling `flyd.stream` with one argument.
- *
- * __Signature__: Called bound to `Stream (a)`: `b -> Stream b`
- *
- * @param {*} value - the initial value
- * @return {stream} the new stream
- *
- * @example
- * var n = flyd.stream(1);
- * var m = n.of(1);
- */
-
-// /////////////////////////// PRIVATE ///////////////////////////////// //
-/**
- * @private
- * Create a stream with no dependencies and no value
- * @return {Function} a flyd stream
- */
-function createStream() {
-  function s(n) {
-    if (arguments.length === 0) return s.val
-    updateStreamValue(s, n)
-    return s
-  }
-  s.hasVal = false;
-  s.val = undefined;
-  s.vals = [];
-  s.listeners = [];
-  s.queued = false;
-  s.end = undefined;
-  s.map = boundMap;
-  s.ap = ap;
-  s.of = flyd.stream;
-  s.toString = streamToString;
-  return s;
-}
-
-/**
- * @private
- * Create a dependent stream
- * @param {Array<stream>} dependencies - an array of the streams
- * @param {Function} fn - the function used to calculate the new stream value
- * from the dependencies
- * @return {stream} the created stream
- */
-function createDependentStream(deps, fn) {
-  var s = createStream();
-  s.fn = fn;
-  s.deps = deps;
-  s.depsMet = false;
-  s.depsChanged = deps.length > 0 ? [] : undefined;
-  s.shouldUpdate = false;
-  addListeners(deps, s);
-  return s;
-}
-
-/**
- * @private
- * Check if all the dependencies have values
- * @param {stream} stream - the stream to check depencencies from
- * @return {Boolean} `true` if all dependencies have vales, `false` otherwise
- */
-function initialDepsNotMet(stream) {
-  stream.depsMet = stream.deps.every(function(s) {
-    return s.hasVal;
-  });
-  return !stream.depsMet;
-}
-
-/**
- * @private
- * Update a dependent stream using its dependencies in an atomic way
- * @param {stream} stream - the stream to update
- */
-function updateStream(s) {
-  if ((s.depsMet !== true && initialDepsNotMet(s)) ||
-    (s.end !== undefined && s.end.val === true)) return;
-  if (inStream !== undefined) {
-    toUpdate.push(function() {
-      updateStream(s);
-    });
-    return;
-  }
-  inStream = s;
-  if (s.depsChanged) s.fnArgs[s.fnArgs.length - 1] = s.depsChanged;
-  var returnVal = s.fn.apply(s.fn, s.fnArgs);
-  if (returnVal !== undefined) {
-    s(returnVal);
-  }
-  inStream = undefined;
-  if (s.depsChanged !== undefined) s.depsChanged = [];
-  s.shouldUpdate = false;
-  if (flushing === false) flushUpdate();
-}
-
-/**
- * @private
- * Update the dependencies of a stream
- * @param {stream} stream
- */
-function updateDeps(s) {
-  var i, o, list
-  var listeners = s.listeners;
-  for (i = 0; i < listeners.length; ++i) {
-    list = listeners[i];
-    if (list.end === s) {
-      endStream(list);
-    } else {
-      if (list.depsChanged !== undefined) list.depsChanged.push(s);
-      list.shouldUpdate = true;
-      findDeps(list);
-    }
-  }
-  for (; orderNextIdx >= 0; --orderNextIdx) {
-    o = order[orderNextIdx];
-    if (o.shouldUpdate === true) updateStream(o);
-    o.queued = false;
-  }
-}
-
-/**
- * @private
- * Add stream dependencies to the global `order` queue.
- * @param {stream} stream
- * @see updateDeps
- */
-function findDeps(s) {
-  var i
-  var listeners = s.listeners;
-  if (s.queued === false) {
-    s.queued = true;
-    for (i = 0; i < listeners.length; ++i) {
-      findDeps(listeners[i]);
-    }
-    order[++orderNextIdx] = s;
-  }
-}
-
-/**
- * @private
- */
-function flushUpdate() {
-  flushing = true;
-  while (toUpdate.length > 0) {
-    var updater = toUpdate.shift();
-    updater();
-  }
-  flushing = false;
-}
-
-/**
- * @private
- * Push down a value into a stream
- * @param {stream} stream
- * @param {*} value
- */
-function updateStreamValue(s, n) {
-  if (n !== undefined && n !== null && isFunction(n.then)) {
-    n.then(s);
-    return;
-  }
-  s.val = n;
-  s.hasVal = true;
-  if (inStream === undefined) {
-    flushing = true;
-    updateDeps(s);
-    if (toUpdate.length > 0) flushUpdate(); else flushing = false;
-  } else if (inStream === s) {
-    markListeners(s, s.listeners);
-  } else {
-    toUpdate.push(function() {
-      updateStreamValue(s, n);
-    });
-  }
-}
-
-/**
- * @private
- */
-function markListeners(s, lists) {
-  var i, list;
-  for (i = 0; i < lists.length; ++i) {
-    list = lists[i];
-    if (list.end !== s) {
-      if (list.depsChanged !== undefined) {
-        list.depsChanged.push(s);
-      }
-      list.shouldUpdate = true;
-    } else {
-      endStream(list);
-    }
-  }
-}
-
-/**
- * @private
- * Add dependencies to a stream
- * @param {Array<stream>} dependencies
- * @param {stream} stream
- */
-function addListeners(deps, s) {
-  for (var i = 0; i < deps.length; ++i) {
-    deps[i].listeners.push(s);
-  }
-}
-
-/**
- * @private
- * Removes an stream from a dependency array
- * @param {stream} stream
- * @param {Array<stream>} dependencies
- */
-function removeListener(s, listeners) {
-  var idx = listeners.indexOf(s);
-  listeners[idx] = listeners[listeners.length - 1];
-  listeners.length--;
-}
-
-/**
- * @private
- * Detach a stream from its dependencies
- * @param {stream} stream
- */
-function detachDeps(s) {
-  for (var i = 0; i < s.deps.length; ++i) {
-    removeListener(s, s.deps[i].listeners);
-  }
-  s.deps.length = 0;
-}
-
-/**
- * @private
- * Ends a stream
- */
-function endStream(s) {
-  if (s.deps !== undefined) detachDeps(s);
-  if (s.end !== undefined) detachDeps(s.end);
-}
-
-/**
- * @private
- * transducer stream transformer
- */
-function StreamTransformer() { }
-StreamTransformer.prototype['@@transducer/init'] = function() { };
-StreamTransformer.prototype['@@transducer/result'] = function() { };
-StreamTransformer.prototype['@@transducer/step'] = function(s, v) { return v; };
-
-module.exports = flyd;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _arity = __webpack_require__(1);
-var _curry1 = __webpack_require__(2);
-var _curry2 = __webpack_require__(6);
-var _curryN = __webpack_require__(7);
-
-
-/**
- * Returns a curried equivalent of the provided function, with the specified
- * arity. The curried function has two unusual capabilities. First, its
- * arguments needn't be provided one at a time. If `g` is `R.curryN(3, f)`, the
- * following are equivalent:
- *
- *   - `g(1)(2)(3)`
- *   - `g(1)(2, 3)`
- *   - `g(1, 2)(3)`
- *   - `g(1, 2, 3)`
- *
- * Secondly, the special placeholder value `R.__` may be used to specify
- * "gaps", allowing partial application of any combination of arguments,
- * regardless of their positions. If `g` is as above and `_` is `R.__`, the
- * following are equivalent:
- *
- *   - `g(1, 2, 3)`
- *   - `g(_, 2, 3)(1)`
- *   - `g(_, _, 3)(1)(2)`
- *   - `g(_, _, 3)(1, 2)`
- *   - `g(_, 2)(1)(3)`
- *   - `g(_, 2)(1, 3)`
- *   - `g(_, 2)(_, 3)(1)`
- *
- * @func
- * @memberOf R
- * @since v0.5.0
- * @category Function
- * @sig Number -> (* -> a) -> (* -> a)
- * @param {Number} length The arity for the returned function.
- * @param {Function} fn The function to curry.
- * @return {Function} A new, curried function.
- * @see R.curry
- * @example
- *
- *      var sumArgs = (...args) => R.sum(args);
- *
- *      var curriedAddFourNumbers = R.curryN(4, sumArgs);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
- *      g(4); //=> 10
- */
-module.exports = _curry2(function curryN(length, fn) {
-  if (length === 1) {
-    return _curry1(fn);
-  }
-  return _arity(length, _curryN(length, [], fn));
-});
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _curry1 = __webpack_require__(2);
-var _isPlaceholder = __webpack_require__(0);
-
-
-/**
- * Optimized internal two-arity curry function.
- *
- * @private
- * @category Function
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-module.exports = function _curry2(fn) {
-  return function f2(a, b) {
-    switch (arguments.length) {
-      case 0:
-        return f2;
-      case 1:
-        return _isPlaceholder(a) ? f2
-             : _curry1(function(_b) { return fn(a, _b); });
-      default:
-        return _isPlaceholder(a) && _isPlaceholder(b) ? f2
-             : _isPlaceholder(a) ? _curry1(function(_a) { return fn(_a, b); })
-             : _isPlaceholder(b) ? _curry1(function(_b) { return fn(a, _b); })
-             : fn(a, b);
-    }
-  };
-};
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _arity = __webpack_require__(1);
-var _isPlaceholder = __webpack_require__(0);
-
-
-/**
- * Internal curryN function.
- *
- * @private
- * @category Function
- * @param {Number} length The arity of the curried function.
- * @param {Array} received An array of arguments received thus far.
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-module.exports = function _curryN(length, received, fn) {
-  return function() {
-    var combined = [];
-    var argsIdx = 0;
-    var left = length;
-    var combinedIdx = 0;
-    while (combinedIdx < received.length || argsIdx < arguments.length) {
-      var result;
-      if (combinedIdx < received.length &&
-          (!_isPlaceholder(received[combinedIdx]) ||
-           argsIdx >= arguments.length)) {
-        result = received[combinedIdx];
-      } else {
-        result = arguments[argsIdx];
-        argsIdx += 1;
-      }
-      combined[combinedIdx] = result;
-      if (!_isPlaceholder(result)) {
-        left -= 1;
-      }
-      combinedIdx += 1;
-    }
-    return left <= 0 ? fn.apply(this, combined)
-                     : _arity(left, _curryN(length, combined, fn));
-  };
-};
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var createActions = exports.createActions = function createActions(update) {
-  return {
-    togglePrecipitations: function togglePrecipitations(evt) {
-      return update(function (model) {
-        model.precipitations = evt.target.checked;
-        return model;
-      });
-    },
-
-    changePrecipitation: function changePrecipitation(evt) {
-      return update(function (model) {
-        model.precipitation = evt.target.value;
-        return model;
-      });
-    },
-
-    editDate: function editDate(evt) {
-      return update(function (model) {
-        model.date = evt.target.value;
-        return model;
-      });
-    },
-
-    increase: function increase(amount) {
-      return update(function (model) {
-        model.value = model.value + amount;
-        return model;
-      });
-    },
-
-    changeUnits: function changeUnits() {
-      return update(function (model) {
-        if (model.units === "C") {
-          model.units = "F";
-          model.value = Math.round(model.value * 9 / 5 + 32);
-        } else {
-          model.units = "C";
-          model.value = Math.round((model.value - 32) / 9 * 5);
-        }
-        return model;
-      });
-    }
-  };
-};
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var wrap = exports.wrap = function wrap(fn) {
-  var args = Array.from(arguments).slice(1);
-
-  return function (_evt) {
-    if (fn) {
-      fn.apply(null, args);
-    }
-  };
-};
-
-var safe = exports.safe = function safe(fn) {
-  if (fn) {
-    return fn;
-  }
-  return function (_evt) {};
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(11));
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function isMeiosisTracerOn() {
-    return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
-}
-exports.isMeiosisTracerOn = isMeiosisTracerOn;
-function trace(params) {
-    if (!params.update || !params.dataStreams) {
-        throw new Error("Please specify update and dataStreams.");
-    }
-    if (isMeiosisTracerOn()) {
-        var toJS_1 = params.toJS || (function (model) { return JSON.parse(JSON.stringify(model)); });
-        var fromJS_1 = params.fromJS || (function (model) { return model; });
-        var bufferedValues_1 = [];
-        var bufferedStreamValues_1 = [];
-        var devtoolInitialized_1 = false;
-        var sendValues_1 = true;
-        var liveChange_1 = true;
-        var lastStream = params.dataStreams[params.dataStreams.length - 1];
-        var otherStreamIds_1 = [];
-        var otherStreamsById_1 = {};
-        if (params.otherStreams && params.otherStreams.length) {
-            params.otherStreams.forEach(function (otherStream) {
-                var streamId = "stream_" + new Date().getTime();
-                otherStreamIds_1.push(streamId);
-                otherStreamsById_1[streamId] = otherStream;
-                otherStream.map(function (value) {
-                    var data = { type: "MEIOSIS_STREAM_VALUE", value: value, streamId: streamId };
-                    if (devtoolInitialized_1) {
-                        window.postMessage(data, "*");
-                    }
-                    else {
-                        bufferedStreamValues_1.push(data);
-                    }
-                });
-            });
-        }
-        window.addEventListener("message", function (evt) {
-            if (evt.data.type === "MEIOSIS_RENDER_MODEL") {
-                sendValues_1 = evt.data.sendValuesBack;
-                liveChange_1 = false;
-                params.update(function () { return fromJS_1(evt.data.model); });
-            }
-            else if (evt.data.type === "MEIOSIS_TRACER_INIT") {
-                devtoolInitialized_1 = true;
-                if (otherStreamIds_1.length > 0) {
-                    window.postMessage({ type: "MEIOSIS_STREAM_IDS", streamIds: otherStreamIds_1 }, "*");
-                }
-                bufferedValues_1.forEach(function (values) { return window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: true }, "*"); });
-                bufferedStreamValues_1.forEach(function (data) { return window.postMessage(data, "*"); });
-            }
-            else if (evt.data.type === "MEIOSIS_TRIGGER_STREAM_VALUE") {
-                var streamId = evt.data.streamId;
-                var value = evt.data.value;
-                otherStreamsById_1[streamId](value);
-            }
-        });
-        lastStream.map(function () {
-            if (sendValues_1 || liveChange_1) {
-                var values = params.dataStreams.map(function (stream) {
-                    return ({ value: toJS_1(stream()) });
-                });
-                if (devtoolInitialized_1) {
-                    window.postMessage({ type: "MEIOSIS_VALUES", values: values, update: true }, "*");
-                }
-                else {
-                    bufferedValues_1.push(values);
-                }
-            }
-            liveChange_1 = true;
-        });
-        window.postMessage({ type: "MEIOSIS_PING" }, "*");
-    }
-}
-exports.trace = trace;
-;
-//# sourceMappingURL=meiosis.js.map
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-module.exports =
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -1146,2236 +64,376 @@ module.exports =
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./hyperHTML/index.js");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ "./common/handler.js":
+/*!***************************!*\
+  !*** ./common/handler.js ***!
+  \***************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-
-var _meiosisTracer = __webpack_require__(1);
-
-/*
-1. Live change
-- receive values from meiosis with update=true. This will add to the tracer's history
-  and increase the slider max.
-- re-render the tracer view with update=true.
-
-2. Time-travel change
-- send MEIOSIS_RENDER_MODEL with sendValuesBack=false
-- we already have the values in the snapshot, so don't need anything back
-- re-render the tracer view with update=false.
-
-3. Typing in model textarea
-- send MEIOSIS_RENDER_MODEL with sendValuesBack=true. The tracer needs to get
-  the computed values from the other streams.
-- receive values from meiosis with update=false so this will not add to the tracer's history.
-- re-render the tracer view with update=false.
-*/
-
-module.exports = _meiosisTracer.meiosisTracer;
+eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nvar wrap = exports.wrap = function wrap(fn) {\n  var args = Array.from(arguments).slice(1);\n\n  return function (_evt) {\n    if (fn) {\n      fn.apply(null, args);\n    }\n  };\n};\n\nvar safe = exports.safe = function safe(fn) {\n  if (fn) {\n    return fn;\n  }\n  return function (_evt) {};\n};\n\n//# sourceURL=webpack:///./common/handler.js?");
 
 /***/ }),
-/* 1 */
+
+/***/ "./common/temperature/actions.js":
+/*!***************************************!*\
+  !*** ./common/temperature/actions.js ***!
+  \***************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.meiosisTracer = undefined;
-
-var _model = __webpack_require__(2);
-
-var _view = __webpack_require__(3);
-
-var _receive = __webpack_require__(5);
-
-window["__MEIOSIS_TRACER_GLOBAL_HOOK__"] = true;
-
-var meiosisTracer = function meiosisTracer(_ref) {
-  var selector = _ref.selector,
-      renderModel = _ref.renderModel,
-      triggerStreamValue = _ref.triggerStreamValue,
-      horizontal = _ref.horizontal;
-
-  var target = document.querySelector(selector);
-
-  if (!target) {
-    return;
-  }
-
-  var receiveValues = (0, _receive.createReceiveValues)(_model.tracerModel, _view.tracerView);
-
-  renderModel = renderModel || function (model, sendValuesBack) {
-    return window.postMessage({ type: "MEIOSIS_RENDER_MODEL", model: model, sendValuesBack: sendValuesBack }, "*");
-  };
-
-  (0, _view.initialView)(selector, _model.tracerModel, renderModel, horizontal);
-
-  triggerStreamValue = triggerStreamValue || function (streamId, value) {
-    return window.postMessage({ type: "MEIOSIS_TRIGGER_STREAM_VALUE", streamId: streamId, value: value }, "*");
-  };
-
-  var initStreamIdModel = function initStreamIdModel(streamIds) {
-    streamIds.forEach(function (streamId) {
-      return _model.tracerModel.streams[streamId] = { index: 0, values: [] };
-    });
-    (0, _view.initStreamIds)(streamIds, _model.tracerModel.streams, triggerStreamValue);
-  };
-
-  var receiveStreamValue = function receiveStreamValue(streamId, value) {
-    var streamState = _model.tracerModel.streams[streamId];
-
-    streamState.values.push(value);
-    streamState.index = streamState.values.length - 1;
-
-    (0, _view.updateStreamValue)(streamId, streamState);
-  };
-
-  window.addEventListener("message", function (evt) {
-    if (evt.data.type === "MEIOSIS_VALUES") {
-      receiveValues(evt.data.values, evt.data.update);
-    } else if (evt.data.type === "MEIOSIS_STREAM_IDS") {
-      var streamIds = evt.data.streamIds;
-      initStreamIdModel(streamIds);
-    } else if (evt.data.type === "MEIOSIS_STREAM_VALUE") {
-      receiveStreamValue(evt.data.streamId, evt.data.value);
-    }
-  });
-
-  window.postMessage({ type: "MEIOSIS_TRACER_INIT" }, "*");
-
-  return {
-    receiveValues: receiveValues,
-    initStreamIdModel: initStreamIdModel,
-    receiveStreamValue: receiveStreamValue,
-    reset: function reset() {
-      return (0, _view.reset)(_model.tracerModel);
-    }
-  };
-};
-
-exports.meiosisTracer = meiosisTracer;
+eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nvar createActions = exports.createActions = function createActions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(evt) {\n      return update(function (model) {\n        model.precipitations = evt.target.checked;\n        return model;\n      });\n    },\n\n    changePrecipitation: function changePrecipitation(evt) {\n      return update(function (model) {\n        model.precipitation = evt.target.value;\n        return model;\n      });\n    },\n\n    editDate: function editDate(evt) {\n      return update(function (model) {\n        model.date = evt.target.value;\n        return model;\n      });\n    },\n\n    increase: function increase(amount) {\n      return update(function (model) {\n        model.value = model.value + amount;\n        return model;\n      });\n    },\n\n    changeUnits: function changeUnits() {\n      return update(function (model) {\n        if (model.units === \"C\") {\n          model.units = \"F\";\n          model.value = Math.round(model.value * 9 / 5 + 32);\n        } else {\n          model.units = \"C\";\n          model.value = Math.round((model.value - 32) / 9 * 5);\n        }\n        return model;\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./common/temperature/actions.js?");
 
 /***/ }),
-/* 2 */
+
+/***/ "./hyperHTML/index.js":
+/*!****************************!*\
+  !*** ./hyperHTML/index.js ***!
+  \****************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var tracerModel = {
-  tracerStates: [],
-  tracerIndex: 0,
-  streams: {} // id: { index: N, values: [] }
-};
-
-exports.tracerModel = tracerModel;
+eval("\n\nvar _templateObject = _taggedTemplateLiteral([\"\", \"\"], [\"\", \"\"]);\n\nvar _flyd = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n\nvar _flyd2 = _interopRequireDefault(_flyd);\n\nvar _esm = __webpack_require__(/*! hyperhtml/esm */ \"./node_modules/hyperhtml/esm/index.js\");\n\nvar _esm2 = _interopRequireDefault(_esm);\n\nvar _temperature = __webpack_require__(/*! ./temperature */ \"./hyperHTML/temperature/index.js\");\n\nvar _meiosis = __webpack_require__(/*! meiosis */ \"./node_modules/meiosis/lib/index.js\");\n\nvar _meiosisTracer = __webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\");\n\nvar _meiosisTracer2 = _interopRequireDefault(_meiosisTracer);\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nfunction _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }\n\n// Only for using Meiosis Tracer in development.\n\n\nvar update = _flyd2.default.stream();\nvar temperature = (0, _temperature.createTemperature)(update);\nvar models = _flyd2.default.scan(function (model, func) {\n  return func(model);\n}, temperature.model(), update);\n\nvar element = document.getElementById(\"app\");\nvar render = _esm2.default.bind(element);\nmodels.map(function (model) {\n  return render(_templateObject, temperature.view(model));\n});\n\n// Only for using Meiosis Tracer in development.\n(0, _meiosis.trace)({ update: update, dataStreams: [models] });\n(0, _meiosisTracer2.default)({ selector: \"#tracer\" });\n\n//# sourceURL=webpack:///./hyperHTML/index.js?");
 
 /***/ }),
-/* 3 */
+
+/***/ "./hyperHTML/temperature/index.js":
+/*!****************************************!*\
+  !*** ./hyperHTML/temperature/index.js ***!
+  \****************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.updateStreamValue = exports.initStreamIds = exports.reset = exports.tracerView = exports.initialView = undefined;
-
-var _jsonFormat = __webpack_require__(4);
-
-var _jsonFormat2 = _interopRequireDefault(_jsonFormat);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var jsonFormatConfig = {
-  type: "space",
-  size: 2
-};
-
-var tracerContainerId = "tracerContainer";
-var dataStreamContainerId = "dataStreamContainer";
-var otherStreamContainerId = "otherStreamContainer";
-var tracerId = "tracerSlider";
-var tracerToggleId = "tracerToggle";
-var tracerResetId = "tracerReset";
-var tracerIndexId = "tracerIndex";
-var tracerModelId = "tracerModel";
-var errorMessageId = "errorMessage";
-var errorMessage = null;
-var divStyle = null;
-
-var tracerView = function tracerView(values, tracerModel) {
-  var tracer = document.getElementById(tracerId);
-  tracer.setAttribute("max", String(tracerModel.tracerStates.length - 1));
-  tracer.value = String(tracerModel.tracerIndex);
-
-  var tracerIndex = document.getElementById(tracerIndexId);
-  tracerIndex.innerHTML = String(tracerModel.tracerIndex);
-
-  var tracerModelEl = document.getElementById(tracerModelId);
-  tracerModelEl.value = (0, _jsonFormat2.default)(values[0].value, jsonFormatConfig);
-
-  var streamValueDivs = document.querySelectorAll("div.dataStream");
-
-  if (streamValueDivs.length === 0) {
-    var streamValueDivsMarkup = "";
-
-    for (var i = 1, t = values.length; i < t; i++) {
-      streamValueDivsMarkup += "<div" + divStyle + " class='dataStream'>" + "<textarea rows='5' cols='40'></textarea>" + "</div>";
-    }
-    document.getElementById(dataStreamContainerId).innerHTML = streamValueDivsMarkup;
-  }
-
-  var streamTextareas = document.querySelectorAll("div.dataStream textarea");
-
-  for (i = 1, t = values.length; i < t; i++) {
-    streamTextareas[i - 1].value = (0, _jsonFormat2.default)(values[i].value, jsonFormatConfig);
-  }
-};
-
-var onSliderChange = function onSliderChange(renderModel, tracerModel) {
-  return function (evt) {
-    var index = parseInt(evt.target.value, 10);
-    var snapshot = tracerModel.tracerStates[index];
-    tracerModel.tracerIndex = index;
-    var model = snapshot[0].value;
-    renderModel(model, false);
-    tracerView(snapshot, tracerModel);
-  };
-};
-
-var onStreamSliderChange = function onStreamSliderChange(streamModel, streamId) {
-  return function (evt) {
-    var streamState = streamModel[streamId];
-    var index = parseInt(evt.target.value, 10);
-
-    streamState.index = index;
-
-    updateStreamValue(streamId, streamState);
-  };
-};
-
-var onStreamValueChange = function onStreamValueChange(streamId, textarea, triggerStreamValue) {
-  return function () {
-    try {
-      var value = JSON.parse(textarea.value);
-      triggerStreamValue(streamId, value);
-      errorMessage.style.display = "none";
-    } catch (err) {
-      errorMessage.style.display = "block";
-    }
-  };
-};
-
-var onModelChange = function onModelChange(renderModel) {
-  return function (evt) {
-    try {
-      var model = JSON.parse(evt.target.value);
-      renderModel(model, true);
-      errorMessage.style.display = "none";
-    } catch (err) {
-      errorMessage.style.display = "block";
-    }
-  };
-};
-
-var onToggle = function onToggle(tracerContainer) {
-  return function (evt) {
-    var button = evt.target;
-
-    if (tracerContainer.style.display === "none") {
-      tracerContainer.style.display = "block";
-      button.innerHTML = "Hide";
-    } else {
-      tracerContainer.style.display = "none";
-      button.innerHTML = "Show";
-    }
-  };
-};
-
-var onReset = function onReset(tracerModel) {
-  return function () {
-    reset(tracerModel);
-  };
-};
-
-var reset = function reset(tracerModel) {
-  var snapshot = tracerModel.tracerStates[0];
-  tracerModel.tracerStates.length = 0;
-  tracerModel.tracerIndex = 0;
-  tracerView(snapshot, tracerModel);
-};
-
-var initialView = function initialView(selector, tracerModel, renderModel, horizontal) {
-  var target = document.querySelector(selector);
-
-  if (target) {
-    divStyle = horizontal ? " style='float: left'" : "";
-
-    var viewHtml = "<div style='text-align: right'><button id='" + tracerToggleId + "'>Hide</button></div>" + "<div id='" + tracerContainerId + "'>" + "<div style='text-align: right'><button id='" + tracerResetId + "'>Reset</button></div>" + "<div>Data streams:</div>" + "<input id='" + tracerId + "' type='range' min='0' max='" + String(tracerModel.tracerStates.length - 1) + "' value='" + String(tracerModel.tracerIndex) + "' style='width: 100%'/>" + "<div id='" + tracerIndexId + "'>" + String(tracerModel.tracerIndex) + "</div>" + "<div" + divStyle + ">" + "<div>Model: (you can type into this box)</div>" + "<textarea id='" + tracerModelId + "' rows='5' cols='40'></textarea>" + "<div id='" + errorMessageId + "' style='display: none'><span style='color:red'>Invalid JSON</span></div>" + "</div>" + "<span id='" + dataStreamContainerId + "'></span>" + "<span id='" + otherStreamContainerId + "'></span>" + "</div>";
-
-    target.innerHTML = viewHtml;
-
-    var tracerContainer = document.getElementById(tracerContainerId);
-    errorMessage = document.getElementById(errorMessageId);
-
-    document.getElementById(tracerId).addEventListener("input", onSliderChange(renderModel, tracerModel));
-    document.getElementById(tracerModelId).addEventListener("keyup", onModelChange(renderModel));
-    document.getElementById(tracerToggleId).addEventListener("click", onToggle(tracerContainer));
-    document.getElementById(tracerResetId).addEventListener("click", onReset(tracerModel));
-  }
-};
-
-var initStreamIds = function initStreamIds(streamIds, streamModel, triggerStreamValue) {
-  var streamValueDivsMarkup = "<div>Other streams:</div>";
-
-  streamIds.forEach(function (streamId) {
-    return streamValueDivsMarkup += "<div" + divStyle + " class='otherStream' id='" + streamId + "'>" + "<input type='range' min='0' max='0' value='0' style='width: 100%'/>" + "<div>0</div>" + "<textarea rows='5' cols='40'></textarea>" + "<div><button>Trigger</button></div>" + "</div>";
-  });
-  document.getElementById(otherStreamContainerId).innerHTML = streamValueDivsMarkup;
-
-  streamIds.forEach(function (streamId) {
-    var container = document.getElementById(streamId);
-
-    var input = container.getElementsByTagName("input")[0];
-    input.addEventListener("input", onStreamSliderChange(streamModel, streamId));
-
-    var button = container.getElementsByTagName("button")[0];
-    var textarea = container.getElementsByTagName("textarea")[0];
-    button.addEventListener("click", onStreamValueChange(streamId, textarea, triggerStreamValue));
-  });
-};
-
-var updateStreamValue = function updateStreamValue(streamId, streamState) {
-  var container = document.getElementById(streamId);
-  var textarea = container.getElementsByTagName("textarea")[0];
-  var input = container.getElementsByTagName("input")[0];
-  var div = container.getElementsByTagName("div")[0];
-
-  textarea.value = (0, _jsonFormat2.default)(streamState.values[streamState.index], jsonFormatConfig);
-  input.setAttribute("max", String(streamState.values.length - 1));
-  input.value = String(streamState.index);
-  div.innerHTML = String(streamState.index);
-};
-
-exports.initialView = initialView;
-exports.tracerView = tracerView;
-exports.reset = reset;
-exports.initStreamIds = initStreamIds;
-exports.updateStreamValue = updateStreamValue;
+eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.createTemperature = undefined;\n\nvar _actions = __webpack_require__(/*! ../../common/temperature/actions */ \"./common/temperature/actions.js\");\n\nvar _view = __webpack_require__(/*! ./view */ \"./hyperHTML/temperature/view.js\");\n\nvar createTemperature = exports.createTemperature = function createTemperature(update) {\n  return {\n    model: function model() {\n      return {\n        precipitations: false,\n        precipitation: null,\n        date: \"\",\n        value: 20,\n        units: \"C\"\n      };\n    },\n\n    view: (0, _view.createView)((0, _actions.createActions)(update))\n  };\n};\n\n//# sourceURL=webpack:///./hyperHTML/temperature/index.js?");
 
 /***/ }),
-/* 4 */
+
+/***/ "./hyperHTML/temperature/view.js":
+/*!***************************************!*\
+  !*** ./hyperHTML/temperature/view.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.createView = undefined;\n\nvar _templateObject = _taggedTemplateLiteral([\"\\n  <span>\\n    <input type=\\\"radio\\\" id=\\\"\", \"\\\" name=\\\"precipitation\\\" value=\\\"\", \"\\\"\\n      checked=\\\"\", \"\\\"\\n      onclick=\", \"/>\\n    <label for=\\\"\", \"\\\">\", \"</label>\\n  </span>\\n\"], [\"\\n  <span>\\n    <input type=\\\"radio\\\" id=\\\"\", \"\\\" name=\\\"precipitation\\\" value=\\\"\", \"\\\"\\n      checked=\\\"\", \"\\\"\\n      onclick=\", \"/>\\n    <label for=\\\"\", \"\\\">\", \"</label>\\n  </span>\\n\"]),\n    _templateObject2 = _taggedTemplateLiteral([\"\\n      <div>\\n        <div>\\n          <input type=\\\"checkbox\\\" checked=\\\"\", \"\\\"\\n            onclick=\", \" id=\\\"precipitations\\\"/>\\n          <label for=\\\"precipitations\\\">Precipitations</label>\\n        </div>\\n        <div>\\n          \", \"\\n          \", \"\\n          \", \"\\n        </div>\\n        <div>\\n          Date:\\n          <input type=\\\"text\\\" size=\\\"10\\\" oninput=\", \"/>\\n        </div>\\n        <span>Temperature: </span>\\n        <span class=\\\"tempValue\\\">\", \"</span>&deg;<span class=\\\"tempUnits\\\">\", \"</span>\\n        <div>\\n          <button class=\\\"btn btn-default increase\\\" onclick=\", \">Increase</button>\\n          <button class=\\\"btn btn-default decrease\\\" onclick=\", \">Decrease</button>\\n        </div>\\n        <div>\\n          <button class=\\\"btn btn-primary changeUnits\\\" onclick=\", \">Change Units</button>\\n        </div>\\n      </div>\\n    \"], [\"\\n      <div>\\n        <div>\\n          <input type=\\\"checkbox\\\" checked=\\\"\", \"\\\"\\n            onclick=\", \" id=\\\"precipitations\\\"/>\\n          <label for=\\\"precipitations\\\">Precipitations</label>\\n        </div>\\n        <div>\\n          \", \"\\n          \", \"\\n          \", \"\\n        </div>\\n        <div>\\n          Date:\\n          <input type=\\\"text\\\" size=\\\"10\\\" oninput=\", \"/>\\n        </div>\\n        <span>Temperature: </span>\\n        <span class=\\\"tempValue\\\">\", \"</span>&deg;<span class=\\\"tempUnits\\\">\", \"</span>\\n        <div>\\n          <button class=\\\"btn btn-default increase\\\" onclick=\", \">Increase</button>\\n          <button class=\\\"btn btn-default decrease\\\" onclick=\", \">Decrease</button>\\n        </div>\\n        <div>\\n          <button class=\\\"btn btn-primary changeUnits\\\" onclick=\", \">Change Units</button>\\n        </div>\\n      </div>\\n    \"]);\n\nvar _esm = __webpack_require__(/*! hyperhtml/esm */ \"./node_modules/hyperhtml/esm/index.js\");\n\nvar _handler = __webpack_require__(/*! ../../common/handler */ \"./common/handler.js\");\n\nfunction _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }\n\nvar precipitationOption = function precipitationOption(_ref) {\n  var model = _ref.model,\n      actions = _ref.actions,\n      id = _ref.id,\n      value = _ref.value,\n      label = _ref.label;\n  return (0, _esm.wire)(model, \":precip-\" + id)(_templateObject, id, value, model.precipitation === value, (0, _handler.safe)(actions.changePrecipitation), id, label);\n};\n\nvar createView = exports.createView = function createView(actions) {\n  return function (model) {\n    var w = (0, _esm.wire)(model, \":view\");\n    var el = w(_templateObject2, model.precipitations, (0, _handler.safe)(actions.togglePrecipitations), precipitationOption({ model: model, actions: actions, id: \"rain\", value: \"RAIN\", label: \"Rain\" }), precipitationOption({ model: model, actions: actions, id: \"snow\", value: \"SNOW\", label: \"Snow\" }), precipitationOption({ model: model, actions: actions, id: \"sleet\", value: \"SLEET\", label: \"Sleet\" }), (0, _handler.safe)(actions.editDate), model.value, model.units, (0, _handler.wrap)(actions.increase, 1), (0, _handler.wrap)(actions.increase, -1), (0, _handler.safe)(actions.changeUnits));\n\n    if (!w.default) {\n      w.default = model.date;\n      el.querySelector(\"input[type=text]\").value = model.date;\n    }\n    return el;\n  };\n};\n\n//# sourceURL=webpack:///./hyperHTML/temperature/view.js?");
+
+/***/ }),
+
+/***/ "./node_modules/flyd/lib/index.js":
+/*!****************************************!*\
+  !*** ./node_modules/flyd/lib/index.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("\n\nvar curryN = __webpack_require__(/*! ramda/src/curryN */ \"./node_modules/ramda/src/curryN.js\");\n\n// Utility\nfunction isFunction(obj) {\n  return !!(obj && obj.constructor && obj.call && obj.apply);\n}\nfunction trueFn() { return true; }\n\n// Globals\nvar toUpdate = [];\nvar inStream;\nvar order = [];\nvar orderNextIdx = -1;\nvar flushing = false;\n\n/** @namespace */\nvar flyd = {}\n\n// /////////////////////////// API ///////////////////////////////// //\n\n/**\n * Creates a new stream\n *\n * __Signature__: `a -> Stream a`\n *\n * @name flyd.stream\n * @param {*} initialValue - (Optional) the initial value of the stream\n * @return {stream} the stream\n *\n * @example\n * var n = flyd.stream(1); // Stream with initial value `1`\n * var s = flyd.stream(); // Stream with no initial value\n */\nflyd.stream = function(initialValue) {\n  var endStream = createDependentStream([], trueFn);\n  var s = createStream();\n  s.end = endStream;\n  s.fnArgs = [];\n  endStream.listeners.push(s);\n  if (arguments.length > 0) s(initialValue);\n  return s;\n}\n// fantasy-land Applicative\nflyd.stream['fantasy-land/of'] = flyd.stream.of = flyd.stream;\n\n\n/**\n * Create a new dependent stream\n *\n * __Signature__: `(...Stream * -> Stream b -> b) -> [Stream *] -> Stream b`\n *\n * @name flyd.combine\n * @param {Function} fn - the function used to combine the streams\n * @param {Array<stream>} dependencies - the streams that this one depends on\n * @return {stream} the dependent stream\n *\n * @example\n * var n1 = flyd.stream(0);\n * var n2 = flyd.stream(0);\n * var max = flyd.combine(function(n1, n2, self, changed) {\n *   return n1() > n2() ? n1() : n2();\n * }, [n1, n2]);\n */\nflyd.combine = curryN(2, combine);\nfunction combine(fn, streams) {\n  var i, s, deps, depEndStreams;\n  var endStream = createDependentStream([], trueFn);\n  deps = []; depEndStreams = [];\n  for (i = 0; i < streams.length; ++i) {\n    if (streams[i] !== undefined) {\n      deps.push(streams[i]);\n      if (streams[i].end !== undefined) depEndStreams.push(streams[i].end);\n    }\n  }\n  s = createDependentStream(deps, fn);\n  s.depsChanged = [];\n  s.fnArgs = s.deps.concat([s, s.depsChanged]);\n  s.end = endStream;\n  endStream.listeners.push(s);\n  addListeners(depEndStreams, endStream);\n  endStream.deps = depEndStreams;\n  updateStream(s);\n  return s;\n}\n\n/**\n * Returns `true` if the supplied argument is a Flyd stream and `false` otherwise.\n *\n * __Signature__: `* -> Boolean`\n *\n * @name flyd.isStream\n * @param {*} value - the value to test\n * @return {Boolean} `true` if is a Flyd streamn, `false` otherwise\n *\n * @example\n * var s = flyd.stream(1);\n * var n = 1;\n * flyd.isStream(s); //=> true\n * flyd.isStream(n); //=> false\n */\nflyd.isStream = function(stream) {\n  return isFunction(stream) && 'hasVal' in stream;\n}\n\n/**\n * Invokes the body (the function to calculate the value) of a dependent stream\n *\n * By default the body of a dependent stream is only called when all the streams\n * upon which it depends has a value. `immediate` can circumvent this behaviour.\n * It immediately invokes the body of a dependent stream.\n *\n * __Signature__: `Stream a -> Stream a`\n *\n * @name flyd.immediate\n * @param {stream} stream - the dependent stream\n * @return {stream} the same stream\n *\n * @example\n * var s = flyd.stream();\n * var hasItems = flyd.immediate(flyd.combine(function(s) {\n *   return s() !== undefined && s().length > 0;\n * }, [s]);\n * console.log(hasItems()); // logs `false`. Had `immediate` not been\n *                          // used `hasItems()` would've returned `undefined`\n * s([1]);\n * console.log(hasItems()); // logs `true`.\n * s([]);\n * console.log(hasItems()); // logs `false`.\n */\nflyd.immediate = function(s) {\n  if (s.depsMet === false) {\n    s.depsMet = true;\n    updateStream(s);\n  }\n  return s;\n}\n\n/**\n * Changes which `endsStream` should trigger the ending of `s`.\n *\n * __Signature__: `Stream a -> Stream b -> Stream b`\n *\n * @name flyd.endsOn\n * @param {stream} endStream - the stream to trigger the ending\n * @param {stream} stream - the stream to be ended by the endStream\n * @param {stream} the stream modified to be ended by endStream\n *\n * @example\n * var n = flyd.stream(1);\n * var killer = flyd.stream();\n * // `double` ends when `n` ends or when `killer` emits any value\n * var double = flyd.endsOn(flyd.merge(n.end, killer), flyd.combine(function(n) {\n *   return 2 * n();\n * }, [n]);\n*/\nflyd.endsOn = function(endS, s) {\n  detachDeps(s.end);\n  endS.listeners.push(s.end);\n  s.end.deps.push(endS);\n  return s;\n}\n\n/**\n * Map a stream\n *\n * Returns a new stream consisting of every value from `s` passed through\n * `fn`. I.e. `map` creates a new stream that listens to `s` and\n * applies `fn` to every new value.\n * __Signature__: `(a -> result) -> Stream a -> Stream result`\n *\n * @name flyd.map\n * @param {Function} fn - the function that produces the elements of the new stream\n * @param {stream} stream - the stream to map\n * @return {stream} a new stream with the mapped values\n *\n * @example\n * var numbers = flyd.stream(0);\n * var squaredNumbers = flyd.map(function(n) { return n*n; }, numbers);\n */\n// Library functions use self callback to accept (null, undefined) update triggers.\nflyd.map = curryN(2, function(f, s) {\n  return combine(function(s, self) { self(f(s.val)); }, [s]);\n})\n\n/**\n * Chain a stream\n *\n * also known as flatMap\n *\n * Where `fn` returns a stream this function will flatten the resulting streams.\n * Every time `fn` is called the context of the returned stream will \"switch\" to that stream.\n *\n * __Signature__: `(a -> Stream b) -> Stream a -> Stream b`\n *\n * @name flyd.chain\n * @param {Function} fn - the function that produces the streams to be flattened\n * @param {stream} stream - the stream to map\n * @return {stream} a new stream with the mapped values\n *\n * @example\n * var filter = flyd.stream('who');\n * var items = flyd.chain(function(filter){\n *   return flyd.stream(findUsers(filter));\n * }, filter);\n */\nflyd.chain = curryN(2, chain);\n\n/**\n * Apply a stream\n *\n * Applies the value in `s2` to the function in `s1`.\n *\n * __Signature__: `Stream (a -> b) -> Stream a -> Stream b`\n *\n * @name flyd.ap\n * @param {stream} s1 - The value to be applied\n * @param {stream} s2 - The function expecting the value\n * @return {stream} a new stream with the mapped values\n *\n * @example\n * var add = stream(a => b => a + b)\n * var n1 = stream(1)\n * var n2 = stream(2)\n *\n * var added = flyd.ap(n2, flyd.ap(n1, add)) // stream(3)\n * // can also be written using pipe\n * var added_pipe = add\n *   .pipe(ap(n1))\n *   .pipe(ap(n2));\n * added_pipe() // 3\n */\nflyd.ap = curryN(2, ap);\n\n/**\n * Listen to stream events\n *\n * Similar to `map` except that the returned stream is empty. Use `on` for doing\n * side effects in reaction to stream changes. Use the returned stream only if you\n * need to manually end it.\n *\n * __Signature__: `(a -> result) -> Stream a -> Stream undefined`\n *\n * @name flyd.on\n * @param {Function} cb - the callback\n * @param {stream} stream - the stream\n * @return {stream} an empty stream (can be ended)\n */\nflyd.on = curryN(2, function(f, s) {\n  return combine(function(s) { f(s.val); }, [s]);\n})\n\n/**\n * Creates a new stream with the results of calling the function on every incoming\n * stream with and accumulator and the incoming value.\n *\n * __Signature__: `(a -> b -> a) -> a -> Stream b -> Stream a`\n *\n * @name flyd.scan\n * @param {Function} fn - the function to call\n * @param {*} val - the initial value of the accumulator\n * @param {stream} stream - the stream source\n * @return {stream} the new stream\n *\n * @example\n * var numbers = flyd.stream();\n * var sum = flyd.scan(function(sum, n) { return sum+n; }, 0, numbers);\n * numbers(2)(3)(5);\n * sum(); // 10\n */\nflyd.scan = curryN(3, function(f, acc, s) {\n  var ns = combine(function(s, self) {\n    self(acc = f(acc, s.val));\n  }, [s]);\n  if (!ns.hasVal) ns(acc);\n  return ns;\n});\n\n/**\n * Creates a new stream down which all values from both `stream1` and `stream2`\n * will be sent.\n *\n * __Signature__: `Stream a -> Stream a -> Stream a`\n *\n * @name flyd.merge\n * @param {stream} source1 - one stream to be merged\n * @param {stream} source2 - the other stream to be merged\n * @return {stream} a stream with the values from both sources\n *\n * @example\n * var btn1Clicks = flyd.stream();\n * button1Elm.addEventListener(btn1Clicks);\n * var btn2Clicks = flyd.stream();\n * button2Elm.addEventListener(btn2Clicks);\n * var allClicks = flyd.merge(btn1Clicks, btn2Clicks);\n */\nflyd.merge = curryN(2, function(s1, s2) {\n  var s = flyd.immediate(combine(function(s1, s2, self, changed) {\n    if (changed[0]) {\n      self(changed[0]());\n    } else if (s1.hasVal) {\n      self(s1.val);\n    } else if (s2.hasVal) {\n      self(s2.val);\n    }\n  }, [s1, s2]));\n  flyd.endsOn(combine(function() {\n    return true;\n  }, [s1.end, s2.end]), s);\n  return s;\n});\n\n/**\n * Creates a new stream resulting from applying `transducer` to `stream`.\n *\n * __Signature__: `Transducer -> Stream a -> Stream b`\n *\n * @name flyd.transduce\n * @param {Transducer} xform - the transducer transformation\n * @param {stream} source - the stream source\n * @return {stream} the new stream\n *\n * @example\n * var t = require('transducers.js');\n *\n * var results = [];\n * var s1 = flyd.stream();\n * var tx = t.compose(t.map(function(x) { return x * 2; }), t.dedupe());\n * var s2 = flyd.transduce(tx, s1);\n * flyd.combine(function(s2) { results.push(s2()); }, [s2]);\n * s1(1)(1)(2)(3)(3)(3)(4);\n * results; // => [2, 4, 6, 8]\n */\nflyd.transduce = curryN(2, function(xform, source) {\n  xform = xform(new StreamTransformer());\n  return combine(function(source, self) {\n    var res = xform['@@transducer/step'](undefined, source.val);\n    if (res && res['@@transducer/reduced'] === true) {\n      self.end(true);\n      return res['@@transducer/value'];\n    } else {\n      return res;\n    }\n  }, [source]);\n});\n\n/**\n * Returns `fn` curried to `n`. Use this function to curry functions exposed by\n * modules for Flyd.\n *\n * @name flyd.curryN\n * @function\n * @param {Integer} arity - the function arity\n * @param {Function} fn - the function to curry\n * @return {Function} the curried function\n *\n * @example\n * function add(x, y) { return x + y; };\n * var a = flyd.curryN(2, add);\n * a(2)(4) // => 6\n */\nflyd.curryN = curryN\n\n/**\n * Returns a new stream identical to the original except every\n * value will be passed through `f`.\n *\n * _Note:_ This function is included in order to support the fantasy land\n * specification.\n *\n * __Signature__: Called bound to `Stream a`: `(a -> b) -> Stream b`\n *\n * @name stream.map\n * @param {Function} function - the function to apply\n * @return {stream} a new stream with the values mapped\n *\n * @example\n * var numbers = flyd.stream(0);\n * var squaredNumbers = numbers.map(function(n) { return n*n; });\n */\nfunction boundMap(f) { return flyd.map(f, this); }\n\n/**\n * Returns the result of applying function `fn` to this stream\n *\n * __Signature__: Called bound to `Stream a`: `(a -> Stream b) -> Stream b`\n *\n * @name stream.pipe\n * @param {Function} fn - the function to apply\n * @return {stream} A new stream\n *\n * @example\n * var numbers = flyd.stream(0);\n * var squaredNumbers = numbers.pipe(flyd.map(function(n){ return n*n; }));\n */\nfunction operator_pipe(f) { return f(this) }\n\nfunction boundChain(f) {\n  return chain(f, this);\n}\n\nfunction chain(f, s) {\n  // Internal state to end flat map stream\n  var flatEnd = flyd.stream(1);\n  var internalEnded = flyd.on(function() {\n    var alive = flatEnd() - 1;\n    flatEnd(alive);\n    if (alive <= 0) {\n      flatEnd.end(true);\n    }\n  });\n\n  internalEnded(s.end);\n  var last = flyd.stream();\n  var flatStream = flyd.combine(function(s, own) {\n    last.end(true)\n    // Our fn stream makes streams\n    var newS = f(s());\n    flatEnd(flatEnd() + 1);\n    internalEnded(newS.end);\n\n    // Update self on call -- newS is never handed out so deps don't matter\n    last = flyd.map(own, newS);\n  }, [s]);\n\n  flyd.endsOn(flatEnd.end, flatStream);\n\n  return flatStream;\n}\n\nflyd.fromPromise = function fromPromise(p) {\n  var s = flyd.stream();\n  p.then(function(val) {\n    s(val);\n    s.end(true);\n  });\n  return s;\n}\n\n/* istanbul ignore next */\nflyd.flattenPromise = function flattenPromise(s) {\n  return combine(function(s, self) {\n    s().then(self);\n  }, [s])\n}\n\n\n/**\n * Returns a new stream which is the result of applying the\n * functions from `this` stream to the values in `stream` parameter.\n *\n * `this` stream must be a stream of functions.\n *\n * _Note:_ This function is included in order to support the fantasy land\n * specification.\n *\n * __Signature__: Called bound to `Stream (a -> b)`: `a -> Stream b`\n *\n * @name stream.ap\n * @param {stream} stream - the values stream\n * @return {stream} a new stream with the functions applied to values\n *\n * @example\n * var add = flyd.curryN(2, function(x, y) { return x + y; });\n * var numbers1 = flyd.stream();\n * var numbers2 = flyd.stream();\n * var addToNumbers1 = flyd.map(add, numbers1);\n * var added = addToNumbers1.ap(numbers2);\n */\nfunction ap(s2, s1) {\n  return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);\n}\n\nfunction boundAp(s2) {\n  return ap(s2, this);\n}\n\n/**\n * @private\n */\nfunction fantasy_land_ap(s1) {\n  return ap(this, s1);\n}\n\n/**\n * Get a human readable view of a stream\n * @name stream.toString\n * @return {String} the stream string representation\n */\nfunction streamToString() {\n  return 'stream(' + this.val + ')';\n}\n\n/**\n * @name stream.end\n * @memberof stream\n * A stream that emits `true` when the stream ends. If `true` is pushed down the\n * stream the parent stream ends.\n */\n\n/**\n * @name stream.of\n * @function\n * @memberof stream\n * Returns a new stream with `value` as its initial value. It is identical to\n * calling `flyd.stream` with one argument.\n *\n * __Signature__: Called bound to `Stream (a)`: `b -> Stream b`\n *\n * @param {*} value - the initial value\n * @return {stream} the new stream\n *\n * @example\n * var n = flyd.stream(1);\n * var m = n.of(1);\n */\n\n// /////////////////////////// PRIVATE ///////////////////////////////// //\n/**\n * @private\n * Create a stream with no dependencies and no value\n * @return {Function} a flyd stream\n */\nfunction createStream() {\n  function s(n) {\n    if (arguments.length === 0) return s.val\n    updateStreamValue(s, n)\n    return s\n  }\n  s.hasVal = false;\n  s.val = undefined;\n  s.vals = [];\n  s.listeners = [];\n  s.queued = false;\n  s.end = undefined;\n\n  // fantasy-land compatibility\n  s.ap = boundAp;\n  s['fantasy-land/map'] = s.map = boundMap;\n  s['fantasy-land/ap'] = fantasy_land_ap;\n  s['fantasy-land/of'] = s.of = flyd.stream;\n  s['fantasy-land/chain'] = s.chain = boundChain;\n\n  s.pipe = operator_pipe;\n\n  // According to the fantasy-land Applicative specification\n  // Given a value f, one can access its type representative via the constructor property:\n  // `f.constructor.of`\n  s.constructor = flyd.stream;\n\n  s.toJSON = function() {\n    return s.val;\n  }\n  s.toString = streamToString;\n  return s;\n}\n\n/**\n * @private\n * Create a dependent stream\n * @param {Array<stream>} dependencies - an array of the streams\n * @param {Function} fn - the function used to calculate the new stream value\n * from the dependencies\n * @return {stream} the created stream\n */\nfunction createDependentStream(deps, fn) {\n  var s = createStream();\n  s.fn = fn;\n  s.deps = deps;\n  s.depsMet = false;\n  s.depsChanged = deps.length > 0 ? [] : undefined;\n  s.shouldUpdate = false;\n  addListeners(deps, s);\n  return s;\n}\n\n/**\n * @private\n * Check if all the dependencies have values\n * @param {stream} stream - the stream to check depencencies from\n * @return {Boolean} `true` if all dependencies have vales, `false` otherwise\n */\nfunction initialDepsNotMet(stream) {\n  stream.depsMet = stream.deps.every(function(s) {\n    return s.hasVal;\n  });\n  return !stream.depsMet;\n}\n\n/**\n * @private\n * Update a dependent stream using its dependencies in an atomic way\n * @param {stream} stream - the stream to update\n */\nfunction updateStream(s) {\n  if ((s.depsMet !== true && initialDepsNotMet(s)) ||\n    (s.end !== undefined && s.end.val === true)) return;\n  if (inStream !== undefined) {\n    toUpdate.push(function() {\n      updateStream(s);\n    });\n    return;\n  }\n  inStream = s;\n  if (s.depsChanged) s.fnArgs[s.fnArgs.length - 1] = s.depsChanged;\n  var returnVal = s.fn.apply(s.fn, s.fnArgs);\n  if (returnVal !== undefined) {\n    s(returnVal);\n  }\n  inStream = undefined;\n  if (s.depsChanged !== undefined) s.depsChanged = [];\n  s.shouldUpdate = false;\n  if (flushing === false) flushUpdate();\n}\n\n/**\n * @private\n * Update the dependencies of a stream\n * @param {stream} stream\n */\nfunction updateDeps(s) {\n  var i, o, list\n  var listeners = s.listeners;\n  for (i = 0; i < listeners.length; ++i) {\n    list = listeners[i];\n    if (list.end === s) {\n      endStream(list);\n    } else {\n      if (list.depsChanged !== undefined) list.depsChanged.push(s);\n      list.shouldUpdate = true;\n      findDeps(list);\n    }\n  }\n  for (; orderNextIdx >= 0; --orderNextIdx) {\n    o = order[orderNextIdx];\n    if (o.shouldUpdate === true) updateStream(o);\n    o.queued = false;\n  }\n}\n\n/**\n * @private\n * Add stream dependencies to the global `order` queue.\n * @param {stream} stream\n * @see updateDeps\n */\nfunction findDeps(s) {\n  var i\n  var listeners = s.listeners;\n  if (s.queued === false) {\n    s.queued = true;\n    for (i = 0; i < listeners.length; ++i) {\n      findDeps(listeners[i]);\n    }\n    order[++orderNextIdx] = s;\n  }\n}\n\n/**\n * @private\n */\nfunction flushUpdate() {\n  flushing = true;\n  while (toUpdate.length > 0) {\n    var updater = toUpdate.shift();\n    updater();\n  }\n  flushing = false;\n}\n\n/**\n * @private\n * Push down a value into a stream\n * @param {stream} stream\n * @param {*} value\n */\nfunction updateStreamValue(s, n) {\n  /* istanbul ignore if  */\n  if (n !== undefined && n !== null && isFunction(n.then)) {\n    console.warn('flyd: Promise swallowing has been deprecated, please see https://github.com/paldepind/flyd#promises for more info');\n    n.then(s);\n    return;\n  }\n  s.val = n;\n  s.hasVal = true;\n  if (inStream === undefined) {\n    flushing = true;\n    updateDeps(s);\n    if (toUpdate.length > 0) flushUpdate(); else flushing = false;\n  } else if (inStream === s) {\n    markListeners(s, s.listeners);\n  } else {\n    toUpdate.push(function() {\n      updateStreamValue(s, n);\n    });\n  }\n}\n\n/**\n * @private\n */\nfunction markListeners(s, lists) {\n  var i, list;\n  for (i = 0; i < lists.length; ++i) {\n    list = lists[i];\n    if (list.end !== s) {\n      if (list.depsChanged !== undefined) {\n        list.depsChanged.push(s);\n      }\n      list.shouldUpdate = true;\n    } else {\n      endStream(list);\n    }\n  }\n}\n\n/**\n * @private\n * Add dependencies to a stream\n * @param {Array<stream>} dependencies\n * @param {stream} stream\n */\nfunction addListeners(deps, s) {\n  for (var i = 0; i < deps.length; ++i) {\n    deps[i].listeners.push(s);\n  }\n}\n\n/**\n * @private\n * Removes an stream from a dependency array\n * @param {stream} stream\n * @param {Array<stream>} dependencies\n */\nfunction removeListener(s, listeners) {\n  var idx = listeners.indexOf(s);\n  listeners[idx] = listeners[listeners.length - 1];\n  listeners.length--;\n}\n\n/**\n * @private\n * Detach a stream from its dependencies\n * @param {stream} stream\n */\nfunction detachDeps(s) {\n  for (var i = 0; i < s.deps.length; ++i) {\n    removeListener(s, s.deps[i].listeners);\n  }\n  s.deps.length = 0;\n}\n\n/**\n * @private\n * Ends a stream\n */\nfunction endStream(s) {\n  if (s.deps !== undefined) detachDeps(s);\n  if (s.end !== undefined) detachDeps(s.end);\n}\n\n/**\n * @private\n */\n/**\n * @private\n * transducer stream transformer\n */\nfunction StreamTransformer() { }\nStreamTransformer.prototype['@@transducer/init'] = function() { };\nStreamTransformer.prototype['@@transducer/result'] = function() { };\nStreamTransformer.prototype['@@transducer/step'] = function(s, v) { return v; };\n\nmodule.exports = flyd;\n\n\n//# sourceURL=webpack:///./node_modules/flyd/lib/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/classes/Component.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/classes/Component.js ***!
+  \*********************************************************/
+/*! exports provided: default, setup */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return Component; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"setup\", function() { return setup; });\n/* harmony import */ var _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/poorlyfills.js */ \"./node_modules/hyperhtml/esm/shared/poorlyfills.js\");\n\n\n// hyperHTML.Component is a very basic class\n// able to create Custom Elements like components\n// including the ability to listen to connect/disconnect\n// events via onconnect/ondisconnect attributes\n// Components can be created imperatively or declaratively.\n// The main difference is that declared components\n// will not automatically render on setState(...)\n// to simplify state handling on render.\nfunction Component() {\n  return this; // this is needed in Edge !!!\n}\n\n// Component is lazily setup because it needs\n// wire mechanism as lazy content\nfunction setup(content) {\n  // there are various weakly referenced variables in here\n  // and mostly are to use Component.for(...) static method.\n  const children = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__[\"WeakMap\"];\n  const create = Object.create;\n  const createEntry = (wm, id, component) => {\n    wm.set(id, component);\n    return component;\n  };\n  const get = (Class, info, context, id) => {\n    const relation = info.get(Class) || relate(Class, info);\n    switch (typeof id) {\n      case 'object':\n      case 'function':\n        const wm = relation.w || (relation.w = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__[\"WeakMap\"]);\n        return wm.get(id) || createEntry(wm, id, new Class(context));\n      default:\n        const sm = relation.p || (relation.p = create(null));\n        return sm[id] || (sm[id] = new Class(context));\n    }\n  };\n  const relate = (Class, info) => {\n    const relation = {w: null, p: null};\n    info.set(Class, relation);\n    return relation;\n  };\n  const set = context => {\n    const info = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__[\"Map\"];\n    children.set(context, info);\n    return info;\n  };\n  // The Component Class\n  Object.defineProperties(\n    Component,\n    {\n      // Component.for(context[, id]) is a convenient way\n      // to automatically relate data/context to children components\n      // If not created yet, the new Component(context) is weakly stored\n      // and after that same instance would always be returned.\n      for: {\n        configurable: true,\n        value(context, id) {\n          return get(\n            this,\n            children.get(context) || set(context),\n            context,\n            id == null ?\n              'default' : id\n          );\n        }\n      }\n    }\n  );\n  Object.defineProperties(\n    Component.prototype,\n    {\n      // all events are handled with the component as context\n      handleEvent: {value(e) {\n        const ct = e.currentTarget;\n        this[\n          ('getAttribute' in ct && ct.getAttribute('data-call')) ||\n          ('on' + e.type)\n        ](e);\n      }},\n      // components will lazily define html or svg properties\n      // as soon as these are invoked within the .render() method\n      // Such render() method is not provided by the base class\n      // but it must be available through the Component extend.\n      // Declared components could implement a\n      // render(props) method too and use props as needed.\n      html: lazyGetter('html', content),\n      svg: lazyGetter('svg', content),\n      // the state is a very basic/simple mechanism inspired by Preact\n      state: lazyGetter('state', function () { return this.defaultState; }),\n      // it is possible to define a default state that'd be always an object otherwise\n      defaultState: {get() { return {}; }},\n      // setting some property state through a new object\n      // or a callback, triggers also automatically a render\n      // unless explicitly specified to not do so (render === false)\n      setState: {value(state, render) {\n        const target = this.state;\n        const source = typeof state === 'function' ? state.call(this, target) : state;\n        for (const key in source) target[key] = source[key];\n        if (render !== false) this.render();\n        return this;\n      }}\n    }\n  );\n}\n\n// instead of a secret key I could've used a WeakMap\n// However, attaching a property directly will result\n// into better performance with thousands of components\n// hanging around, and less memory pressure caused by the WeakMap\nconst lazyGetter = (type, fn) => {\n  const secret = '_' + type + '$';\n  return {\n    get() {\n      return this[secret] || (this[type] = fn.call(this, type));\n    },\n    set(value) {\n      Object.defineProperty(this, secret, {configurable: true, value});\n    }\n  };\n};\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/classes/Component.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/classes/Wire.js":
+/*!****************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/classes/Wire.js ***!
+  \****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return Wire; });\n/* harmony import */ var _shared_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/utils.js */ \"./node_modules/hyperhtml/esm/shared/utils.js\");\n/* harmony import */ var _shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../shared/easy-dom.js */ \"./node_modules/hyperhtml/esm/shared/easy-dom.js\");\n\n\n\nfunction Wire(childNodes) {\n  this.childNodes = childNodes;\n  this.length = childNodes.length;\n  this.first = childNodes[0];\n  this.last = childNodes[this.length - 1];\n}\n\n// when a wire is inserted, all its nodes will follow\nWire.prototype.insert = function insert() {\n  const df = Object(_shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_1__[\"fragment\"])(this.first);\n  Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_0__[\"append\"])(df, this.childNodes);\n  return df;\n};\n\n// when a wire is removed, all its nodes must be removed as well\nWire.prototype.remove = function remove() {\n  const first = this.first;\n  const last = this.last;\n  if (this.length === 2) {\n    last.parentNode.removeChild(last);\n  } else {\n    const range = Object(_shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_1__[\"doc\"])(first).createRange();\n    range.setStartBefore(this.childNodes[1]);\n    range.setEndAfter(last);\n    range.deleteContents();\n  }\n  return first;\n};\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/classes/Wire.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/hyper/render.js":
+/*!****************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/hyper/render.js ***!
+  \****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/poorlyfills.js */ \"./node_modules/hyperhtml/esm/shared/poorlyfills.js\");\n/* harmony import */ var _shared_constants_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../shared/constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n/* harmony import */ var _objects_Updates_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../objects/Updates.js */ \"./node_modules/hyperhtml/esm/objects/Updates.js\");\n/* harmony import */ var _shared_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/utils.js */ \"./node_modules/hyperhtml/esm/shared/utils.js\");\n/* harmony import */ var _shared_re_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../shared/re.js */ \"./node_modules/hyperhtml/esm/shared/re.js\");\n\n\n\n\n\n\n\n// a weak collection of contexts that\n// are already known to hyperHTML\nconst bewitched = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__[\"WeakMap\"];\n\n// the collection of all template literals\n// since these are unique and immutable\n// for the whole application life-cycle\nconst templates = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_0__[\"Map\"];\n\n// better known as hyper.bind(node), the render is\n// the main tag function in charge of fully upgrading\n// or simply updating, contexts used as hyperHTML targets.\n// The `this` context is either a regular DOM node or a fragment.\nfunction render(template) {\n  const wicked = bewitched.get(this);\n  if (wicked && wicked.template === Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"unique\"])(template)) {\n    update.apply(wicked.updates, arguments);\n  } else {\n    upgrade.apply(this, arguments);\n  }\n  return this;\n}\n\n// an upgrade is in charge of collecting template info,\n// parse it once, if unknown, to map all interpolations\n// as single DOM callbacks, relate such template\n// to the current context, and render it after cleaning the context up\nfunction upgrade(template) {\n  template = Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"unique\"])(template);\n  const info =  templates.get(template) ||\n                createTemplate.call(this, template);\n  const fragment = Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"importNode\"])(this.ownerDocument, info.fragment);\n  const updates = _objects_Updates_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"].create(fragment, info.paths);\n  bewitched.set(this, {template, updates});\n  update.apply(updates, arguments);\n  this.textContent = '';\n  this.appendChild(fragment);\n}\n\n// an update simply loops over all mapped DOM operations\nfunction update() {\n  const length = arguments.length;\n  for (let i = 1; i < length; i++) {\n    this[i - 1](arguments[i]);\n  }\n}\n\n// a template can be used to create a document fragment\n// aware of all interpolations and with a list\n// of paths used to find once those nodes that need updates,\n// no matter if these are attributes, text nodes, or regular one\nfunction createTemplate(template) {\n  const paths = [];\n  const html = template.join(_shared_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"UIDC\"]).replace(SC_RE, SC_PLACE);\n  const fragment = Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"createFragment\"])(this, html);\n  _objects_Updates_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"].find(fragment, paths, template.slice());\n  const info = {fragment, paths};\n  templates.set(template, info);\n  return info;\n}\n\n// some node could be special though, like a custom element\n// with a self closing tag, which should work through these changes.\nconst SC_RE = _shared_re_js__WEBPACK_IMPORTED_MODULE_4__[\"selfClosing\"];\nconst SC_PLACE = ($0, $1, $2) => {\n  return _shared_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"VOID_ELEMENTS\"].test($1) ? $0 : ('<' + $1 + $2 + '></' + $1 + '>');\n};\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (render);\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/hyper/render.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/hyper/wire.js":
+/*!**************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/hyper/wire.js ***!
+  \**************************************************/
+/*! exports provided: content, weakly, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"content\", function() { return content; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"weakly\", function() { return weakly; });\n/* harmony import */ var _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n/* harmony import */ var _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../shared/poorlyfills.js */ \"./node_modules/hyperhtml/esm/shared/poorlyfills.js\");\n/* harmony import */ var _shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../shared/easy-dom.js */ \"./node_modules/hyperhtml/esm/shared/easy-dom.js\");\n/* harmony import */ var _shared_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/utils.js */ \"./node_modules/hyperhtml/esm/shared/utils.js\");\n/* harmony import */ var _classes_Wire_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../classes/Wire.js */ \"./node_modules/hyperhtml/esm/classes/Wire.js\");\n/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./render.js */ \"./node_modules/hyperhtml/esm/hyper/render.js\");\n\n\n\n\n\n\n\n// all wires used per each context\nconst wires = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_1__[\"WeakMap\"];\n\n// A wire is a callback used as tag function\n// to lazily relate a generic object to a template literal.\n// hyper.wire(user)`<div id=user>${user.name}</div>`; => the div#user\n// This provides the ability to have a unique DOM structure\n// related to a unique JS object through a reusable template literal.\n// A wire can specify a type, as svg or html, and also an id\n// via html:id or :id convention. Such :id allows same JS objects\n// to be associated to different DOM structures accordingly with\n// the used template literal without losing previously rendered parts.\nconst wire = (obj, type) => obj == null ?\n  content(type || 'html') :\n  weakly(obj, type || 'html');\n\n// A wire content is a virtual reference to one or more nodes.\n// It's represented by either a DOM node, or an Array.\n// In both cases, the wire content role is to simply update\n// all nodes through the list of related callbacks.\n// In few words, a wire content is like an invisible parent node\n// in charge of updating its content like a bound element would do.\nconst content = type => {\n  let wire, container, content, template, updates;\n  return function (statics) {\n    statics = Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"unique\"])(statics);\n    let setup = template !== statics;\n    if (setup) {\n      template = statics;\n      content = Object(_shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_2__[\"fragment\"])(document);\n      container = type === 'svg' ?\n        document.createElementNS(_shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"SVG_NAMESPACE\"], 'svg') :\n        content;\n      updates = _render_js__WEBPACK_IMPORTED_MODULE_5__[\"default\"].bind(container);\n    }\n    updates.apply(null, arguments);\n    if (setup) {\n      if (type === 'svg') {\n        Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"append\"])(content, _shared_utils_js__WEBPACK_IMPORTED_MODULE_3__[\"slice\"].call(container.childNodes));\n      }\n      wire = wireContent(content);\n    }\n    return wire;\n  };\n};\n\n// wires are weakly created through objects.\n// Each object can have multiple wires associated\n// and this is thanks to the type + :id feature.\nconst weakly = (obj, type) => {\n  const i = type.indexOf(':');\n  let wire = wires.get(obj);\n  let id = type;\n  if (-1 < i) {\n    id = type.slice(i + 1);\n    type = type.slice(0, i) || 'html';\n  }\n  if (!wire) wires.set(obj, wire = {});\n  return wire[id] || (wire[id] = content(type));\n};\n\n// a document fragment loses its nodes as soon\n// as it's appended into another node.\n// This would easily lose wired content\n// so that on a second render call, the parent\n// node wouldn't know which node was there\n// associated to the interpolation.\n// To prevent hyperHTML to forget about wired nodes,\n// these are either returned as Array or, if there's ony one entry,\n// as single referenced node that won't disappear from the fragment.\n// The initial fragment, at this point, would be used as unique reference.\nconst wireContent = node => {\n  const childNodes = node.childNodes;\n  const length = childNodes.length;\n  const wireNodes = [];\n  for (let i = 0; i < length; i++) {\n    let child = childNodes[i];\n    if (\n      child.nodeType === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"ELEMENT_NODE\"] ||\n      _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_1__[\"trim\"].call(child.textContent).length !== 0\n    ) {\n      wireNodes.push(child);\n    }\n  }\n  return wireNodes.length === 1 ? wireNodes[0] : new _classes_Wire_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"](wireNodes);\n};\n\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (wire);\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/hyper/wire.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/hyperhtml/esm/index.js ***!
+  \*********************************************/
+/*! exports provided: Component, bind, define, diff, hyper, wire, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"bind\", function() { return bind; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"define\", function() { return define; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hyper\", function() { return hyper; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return hyper; });\n/* harmony import */ var _classes_Component_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./classes/Component.js */ \"./node_modules/hyperhtml/esm/classes/Component.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"Component\", function() { return _classes_Component_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"]; });\n\n/* harmony import */ var _objects_Intent_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/Intent.js */ \"./node_modules/hyperhtml/esm/objects/Intent.js\");\n/* harmony import */ var _hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./hyper/wire.js */ \"./node_modules/hyperhtml/esm/hyper/wire.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"wire\", function() { return _hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"]; });\n\n/* harmony import */ var _hyper_render_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./hyper/render.js */ \"./node_modules/hyperhtml/esm/hyper/render.js\");\n/* harmony import */ var _shared_domdiff_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./shared/domdiff.js */ \"./node_modules/hyperhtml/esm/shared/domdiff.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"diff\", function() { return _shared_domdiff_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"]; });\n\n/*! (c) Andrea Giammarchi (ISC) */\n\n\n\n\n\n\n\n// all functions are self bound to the right context\n// you can do the following\n// const {bind, wire} = hyperHTML;\n// and use them right away: bind(node)`hello!`;\nconst bind = context => _hyper_render_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].bind(context);\nconst define = _objects_Intent_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"].define;\n\nhyper.Component = _classes_Component_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"];\nhyper.bind = bind;\nhyper.define = define;\nhyper.diff = _shared_domdiff_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"];\nhyper.hyper = hyper;\nhyper.wire = _hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"];\n\n// the wire content is the lazy defined\n// html or svg property of each hyper.Component\nObject(_classes_Component_js__WEBPACK_IMPORTED_MODULE_0__[\"setup\"])(_hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"content\"]);\n\n// everything is exported directly or through the\n// hyperHTML callback, when used as top level script\n\n\n// by default, hyperHTML is a smart function\n// that \"magically\" understands what's the best\n// thing to do with passed arguments\nfunction hyper(HTML) {\n  return arguments.length < 2 ?\n    (HTML == null ?\n      Object(_hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"content\"])('html') :\n      (typeof HTML === 'string' ?\n        hyper.wire(null, HTML) :\n        ('raw' in HTML ?\n          Object(_hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"content\"])('html')(HTML) :\n          ('nodeType' in HTML ?\n            hyper.bind(HTML) :\n            Object(_hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"weakly\"])(HTML, 'html')\n          )\n        )\n      )) :\n    ('raw' in HTML ?\n      Object(_hyper_wire_js__WEBPACK_IMPORTED_MODULE_2__[\"content\"])('html') : hyper.wire\n    ).apply(null, arguments);\n}\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/objects/Intent.js":
+/*!******************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/objects/Intent.js ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\nconst intents = {};\nconst keys = [];\nconst hasOwnProperty = intents.hasOwnProperty;\n\nlet length = 0;\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n\n  // hyperHTML.define('intent', (object, update) => {...})\n  // can be used to define a third parts update mechanism\n  // when every other known mechanism failed.\n  // hyper.define('user', info => info.name);\n  // hyper(node)`<p>${{user}}</p>`;\n  define: (intent, callback) => {\n    if (!(intent in intents)) {\n      length = keys.push(intent);\n    }\n    intents[intent] = callback;\n  },\n\n  // this method is used internally as last resort\n  // to retrieve a value out of an object\n  invoke: (object, callback) => {\n    for (let i = 0; i < length; i++) {\n      let key = keys[i];\n      if (hasOwnProperty.call(object, key)) {\n        return intents[key](object[key], callback);\n      }\n    }\n  }\n});\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/objects/Intent.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/objects/Path.js":
+/*!****************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/objects/Path.js ***!
+  \****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n\n\n// every template literal interpolation indicates\n// a precise target in the DOM the template is representing.\n// `<p id=${'attribute'}>some ${'content'}</p>`\n// hyperHTML finds only once per template literal,\n// hence once per entire application life-cycle,\n// all nodes that are related to interpolations.\n// These nodes are stored as indexes used to retrieve,\n// once per upgrade, nodes that will change on each future update.\n// A path example is [2, 0, 1] representing the operation:\n// node.childNodes[2].childNodes[0].childNodes[1]\n// Attributes are addressed via their owner node and their name.\nconst createPath = node => {\n  const path = [];\n  let parentNode;\n  switch (node.nodeType) {\n    case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"ELEMENT_NODE\"]:\n    case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"DOCUMENT_FRAGMENT_NODE\"]:\n      parentNode = node;\n      break;\n    case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"COMMENT_NODE\"]:\n      parentNode = node.parentNode;\n      prepend(path, parentNode, node);\n      break;\n    default:\n      parentNode = node.ownerElement;\n      break;\n  }\n  for (\n    node = parentNode;\n    (parentNode = parentNode.parentNode);\n    node = parentNode\n  ) {\n    prepend(path, parentNode, node);\n  }\n  return path;\n};\n\nconst prepend = (path, parent, node) => {\n  path.unshift(path.indexOf.call(parent.childNodes, node));\n};\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n  create: (type, node, name) => ({type, name, node, path: createPath(node)}),\n  find: (node, path) => {\n    const length = path.length;\n    for (let i = 0; i < length; i++) {\n      node = node.childNodes[path[i]];\n    }\n    return node;\n  }\n});\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/objects/Path.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/objects/Style.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/objects/Style.js ***!
+  \*****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n// from https://github.com/developit/preact/blob/33fc697ac11762a1cb6e71e9847670d047af7ce5/src/constants.js\nconst IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;\n\n// style is handled as both string and object\n// even if the target is an SVG element (consistency)\n/* harmony default export */ __webpack_exports__[\"default\"] = ((node, original, isSVG) => {\n  if (isSVG) {\n    const style = original.cloneNode(true);\n    style.value = '';\n    node.setAttributeNode(style);\n    return update(style, isSVG);\n  }\n  return update(node.style, isSVG);\n});\n\n// the update takes care or changing/replacing\n// only properties that are different or\n// in case of string, the whole node\nconst update = (style, isSVG) => {\n  let oldType, oldValue;\n  return newValue => {\n    switch (typeof newValue) {\n      case 'object':\n        if (newValue) {\n          if (oldType === 'object') {\n            if (!isSVG) {\n              if (oldValue !== newValue) {\n                for (const key in oldValue) {\n                  if (!(key in newValue)) {\n                    style[key] = '';\n                  }\n                }\n              }\n            }\n          } else {\n            if (isSVG) style.value = '';\n            else style.cssText = '';\n          }\n          const info = isSVG ? {} : style;\n          for (const key in newValue) {\n            const value = newValue[key];\n            info[key] = typeof value === 'number' &&\n                        !IS_NON_DIMENSIONAL.test(key) ?\n                          (value + 'px') : value;\n          }\n          oldType = 'object';\n          if (isSVG) style.value = toStyle((oldValue = info));\n          else oldValue = newValue;\n          break;\n        }\n      default:\n        if (oldValue != newValue) {\n          oldType = 'string';\n          oldValue = newValue;\n          if (isSVG) style.value = newValue || '';\n          else style.cssText = newValue || '';\n        }\n        break;\n    }\n  };\n};\n\nconst hyphen = /([^A-Z])([A-Z]+)/g;\nconst ized = ($0, $1, $2) => $1 + '-' + $2.toLowerCase();\nconst toStyle = object => {\n  const css = [];\n  for (const key in object) {\n    css.push(key.replace(hyphen, ized), ':', object[key], ';');\n  }\n  return css.join('');\n};\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/objects/Style.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/objects/Updates.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/objects/Updates.js ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../shared/constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n/* harmony import */ var _classes_Component_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../classes/Component.js */ \"./node_modules/hyperhtml/esm/classes/Component.js\");\n/* harmony import */ var _classes_Wire_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../classes/Wire.js */ \"./node_modules/hyperhtml/esm/classes/Wire.js\");\n/* harmony import */ var _Path_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Path.js */ \"./node_modules/hyperhtml/esm/objects/Path.js\");\n/* harmony import */ var _Style_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Style.js */ \"./node_modules/hyperhtml/esm/objects/Style.js\");\n/* harmony import */ var _Intent_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Intent.js */ \"./node_modules/hyperhtml/esm/objects/Intent.js\");\n/* harmony import */ var _shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../shared/domdiff.js */ \"./node_modules/hyperhtml/esm/shared/domdiff.js\");\n/* harmony import */ var _shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../shared/easy-dom.js */ \"./node_modules/hyperhtml/esm/shared/easy-dom.js\");\n/* harmony import */ var _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../shared/poorlyfills.js */ \"./node_modules/hyperhtml/esm/shared/poorlyfills.js\");\n/* harmony import */ var _shared_utils_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../shared/utils.js */ \"./node_modules/hyperhtml/esm/shared/utils.js\");\n\n\n\n\n\n\n\n\n// see /^script$/i.test(nodeName) bit down here\n// import { create as createElement, text } from '../shared/easy-dom.js';\n\n\n\n\n// hyper.Component have a connected/disconnected\n// mechanism provided by MutationObserver\n// This weak set is used to recognize components\n// as DOM node that needs to trigger connected/disconnected events\nconst components = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__[\"WeakSet\"];\n\n// a basic dictionary used to filter already cached attributes\n// while looking for special hyperHTML values.\nfunction Cache() {}\nCache.prototype = Object.create(null);\n\n// returns an intent to explicitly inject content as html\nconst asHTML = html => ({html});\n\n// returns nodes from wires and components\nconst asNode = (item, i) => {\n  return 'ELEMENT_NODE' in item ?\n    item :\n    (item.constructor === _classes_Wire_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"] ?\n      // in the Wire case, the content can be\n      // removed, post-pended, inserted, or pre-pended and\n      // all these cases are handled by domdiff already\n      /* istanbul ignore next */\n      ((1 / i) < 0 ?\n        (i ? item.remove() : item.last) :\n        (i ? item.insert() : item.first)) :\n      asNode(item.render(), i));\n}\n\n// returns true if domdiff can handle the value\nconst canDiff = value =>  'ELEMENT_NODE' in value ||\nvalue instanceof _classes_Wire_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"] ||\nvalue instanceof _classes_Component_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"];\n\n// updates are created once per context upgrade\n// within the main render function (../hyper/render.js)\n// These are an Array of callbacks to invoke passing\n// each interpolation value.\n// Updates can be related to any kind of content,\n// attributes, or special text-only cases such <style>\n// elements or <textarea>\nconst create = (root, paths) => {\n  const updates = [];\n  const length = paths.length;\n  for (let i = 0; i < length; i++) {\n    const info = paths[i];\n    const node = _Path_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].find(root, info.path);\n    switch (info.type) {\n      case 'any':\n        updates.push(setAnyContent(node, []));\n        break;\n      case 'attr':\n        updates.push(setAttribute(node, info.name, info.node));\n        break;\n      case 'text':\n        updates.push(setTextContent(node));\n        node.textContent = '';\n        break;\n    }\n  }\n  return updates;\n};\n\n// finding all paths is a one-off operation performed\n// when a new template literal is used.\n// The goal is to map all target nodes that will be\n// used to update content/attributes every time\n// the same template literal is used to create content.\n// The result is a list of paths related to the template\n// with all the necessary info to create updates as\n// list of callbacks that target directly affected nodes.\nconst find = (node, paths, parts) => {\n  const childNodes = node.childNodes;\n  const length = childNodes.length;\n  for (let i = 0; i < length; i++) {\n    let child = childNodes[i];\n    switch (child.nodeType) {\n      case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"ELEMENT_NODE\"]:\n        findAttributes(child, paths, parts);\n        find(child, paths, parts);\n        break;\n      case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"COMMENT_NODE\"]:\n        if (child.textContent === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"UID\"]) {\n          parts.shift();\n          paths.push(\n            // basicHTML or other non standard engines\n            // might end up having comments in nodes\n            // where they shouldn't, hence this check.\n            _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"SHOULD_USE_TEXT_CONTENT\"].test(node.nodeName) ?\n              _Path_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].create('text', node) :\n              _Path_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].create('any', child)\n          );\n        }\n        break;\n      case _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"TEXT_NODE\"]:\n        // the following ignore is actually covered by browsers\n        // only basicHTML ends up on previous COMMENT_NODE case\n        // instead of TEXT_NODE because it knows nothing about\n        // special style or textarea behavior\n        /* istanbul ignore if */\n        if (\n          _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"SHOULD_USE_TEXT_CONTENT\"].test(node.nodeName) &&\n          _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__[\"trim\"].call(child.textContent) === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"UIDC\"]\n        ) {\n          parts.shift();\n          paths.push(_Path_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].create('text', node));\n        }\n        break;\n    }\n  }\n};\n\n// attributes are searched via unique hyperHTML id value.\n// Despite HTML being case insensitive, hyperHTML is able\n// to recognize attributes by name in a caseSensitive way.\n// This plays well with Custom Elements definitions\n// and also with XML-like environments, without trusting\n// the resulting DOM but the template literal as the source of truth.\n// IE/Edge has a funny bug with attributes and these might be duplicated.\n// This is why there is a cache in charge of being sure no duplicated\n// attributes are ever considered in future updates.\nconst findAttributes = (node, paths, parts) => {\n  const cache = new Cache;\n  const attributes = node.attributes;\n  const array = _shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"slice\"].call(attributes);\n  const remove = [];\n  const length = array.length;\n  for (let i = 0; i < length; i++) {\n    const attribute = array[i];\n    if (attribute.value === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"UID\"]) {\n      const name = attribute.name;\n      // the following ignore is covered by IE\n      // and the IE9 double viewBox test\n      /* istanbul ignore else */\n      if (!(name in cache)) {\n        const realName = parts.shift().replace(/^(?:|[\\S\\s]*?\\s)(\\S+?)=['\"]?$/, '$1');\n        cache[name] = attributes[realName] ||\n                      // the following ignore is covered by browsers\n                      // while basicHTML is already case-sensitive\n                      /* istanbul ignore next */\n                      attributes[realName.toLowerCase()];\n        paths.push(_Path_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"].create('attr', cache[name], realName));\n      }\n      remove.push(attribute);\n    }\n  }\n  const len = remove.length;\n  for (let i = 0; i < len; i++) {\n    // Edge HTML bug #16878726\n    const attribute = remove[i];\n    if (/^id$/i.test(attribute.name))\n      node.removeAttribute(attribute.name);\n    // standard browsers would work just fine here\n    else\n      node.removeAttributeNode(remove[i]);\n  }\n\n  // This is a very specific Firefox/Safari issue\n  // but since it should be a not so common pattern,\n  // it's probably worth patching regardless.\n  // Basically, scripts created through strings are death.\n  // You need to create fresh new scripts instead.\n  // TODO: is there any other node that needs such nonsense?\n  const nodeName = node.nodeName;\n  if (/^script$/i.test(nodeName)) {\n    // this used to be like that\n    // const script = createElement(node, nodeName);\n    // then Edge arrived and decided that scripts created\n    // through template documents aren't worth executing\n    // so it became this ... hopefully it won't hurt in the wild\n    const script = document.createElement(nodeName);\n    for (let i = 0; i < attributes.length; i++) {\n      script.setAttributeNode(attributes[i].cloneNode(true));\n    }\n    script.textContent = node.textContent;\n    node.parentNode.replaceChild(script, node);\n  }\n};\n\n// when a Promise is used as interpolation value\n// its result must be parsed once resolved.\n// This callback is in charge of understanding what to do\n// with a returned value once the promise is resolved.\nconst invokeAtDistance = (value, callback) => {\n  callback(value.placeholder);\n  if ('text' in value) {\n    Promise.resolve(value.text).then(String).then(callback);\n  } else if ('any' in value) {\n    Promise.resolve(value.any).then(callback);\n  } else if ('html' in value) {\n    Promise.resolve(value.html).then(asHTML).then(callback);\n  } else {\n    Promise.resolve(_Intent_js__WEBPACK_IMPORTED_MODULE_5__[\"default\"].invoke(value, callback)).then(callback);\n  }\n};\n\n// quick and dirty way to check for Promise/ish values\nconst isPromise_ish = value => value != null && 'then' in value;\n\n// in a hyper(node)`<div>${content}</div>` case\n// everything could happen:\n//  * it's a JS primitive, stored as text\n//  * it's null or undefined, the node should be cleaned\n//  * it's a component, update the content by rendering it\n//  * it's a promise, update the content once resolved\n//  * it's an explicit intent, perform the desired operation\n//  * it's an Array, resolve all values if Promises and/or\n//    update the node with the resulting list of content\nconst setAnyContent = (node, childNodes) => {\n  let fastPath = false;\n  let oldValue;\n  const anyContent = value => {\n    switch (typeof value) {\n      case 'string':\n      case 'number':\n      case 'boolean':\n        if (fastPath) {\n          if (oldValue !== value) {\n            oldValue = value;\n            childNodes[0].textContent = value;\n          }\n        } else {\n          fastPath = true;\n          oldValue = value;\n          childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n            node.parentNode,\n            childNodes,\n            [Object(_shared_easy_dom_js__WEBPACK_IMPORTED_MODULE_7__[\"text\"])(node, value)],\n            asNode,\n            node\n          );\n        }\n        break;\n      case 'object':\n      case 'undefined':\n        if (value == null) {\n          fastPath = false;\n          childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n            node.parentNode,\n            childNodes,\n            [],\n            asNode,\n            node\n          );\n          break;\n        }\n      default:\n        fastPath = false;\n        oldValue = value;\n        if (Object(_shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__[\"isArray\"])(value)) {\n          if (value.length === 0) {\n            if (childNodes.length) {\n              childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n                node.parentNode,\n                childNodes,\n                [],\n                asNode,\n                node\n              );\n            }\n          } else {\n            switch (typeof value[0]) {\n              case 'string':\n              case 'number':\n              case 'boolean':\n                anyContent({html: value});\n                break;\n              case 'object':\n                if (Object(_shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__[\"isArray\"])(value[0])) {\n                  value = value.concat.apply([], value);\n                }\n                if (isPromise_ish(value[0])) {\n                  Promise.all(value).then(anyContent);\n                  break;\n                }\n              default:\n                childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n                  node.parentNode,\n                  childNodes,\n                  value,\n                  asNode,\n                  node\n                );\n                break;\n            }\n          }\n        } else if (canDiff(value)) {\n          childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n            node.parentNode,\n            childNodes,\n            value.nodeType === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"DOCUMENT_FRAGMENT_NODE\"] ?\n              _shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"slice\"].call(value.childNodes) :\n              [value],\n            asNode,\n            node\n          );\n        } else if (isPromise_ish(value)) {\n          value.then(anyContent);\n        } else if ('placeholder' in value) {\n          invokeAtDistance(value, anyContent);\n        } else if ('text' in value) {\n          anyContent(String(value.text));\n        } else if ('any' in value) {\n          anyContent(value.any);\n        } else if ('html' in value) {\n          childNodes = Object(_shared_domdiff_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\n            node.parentNode,\n            childNodes,\n            _shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"slice\"].call(\n              Object(_shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"createFragment\"])(\n                node,\n                [].concat(value.html).join('')\n              ).childNodes\n            ),\n            asNode,\n            node\n          );\n        } else if ('length' in value) {\n          anyContent(_shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"slice\"].call(value));\n        } else {\n          anyContent(_Intent_js__WEBPACK_IMPORTED_MODULE_5__[\"default\"].invoke(value, anyContent));\n        }\n        break;\n    }\n  };\n  return anyContent;\n};\n\n// there are four kind of attributes, and related behavior:\n//  * events, with a name starting with `on`, to add/remove event listeners\n//  * special, with a name present in their inherited prototype, accessed directly\n//  * regular, accessed through get/setAttribute standard DOM methods\n//  * style, the only regular attribute that also accepts an object as value\n//    so that you can style=${{width: 120}}. In this case, the behavior has been\n//    fully inspired by Preact library and its simplicity.\nconst setAttribute = (node, name, original) => {\n  const isSVG = _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"OWNER_SVG_ELEMENT\"] in node;\n  let oldValue;\n  // if the attribute is the style one\n  // handle it differently from others\n  if (name === 'style') {\n    return Object(_Style_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"])(node, original, isSVG);\n  }\n  // the name is an event one,\n  // add/remove event listeners accordingly\n  else if (/^on/.test(name)) {\n    let type = name.slice(2);\n    if (type === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"CONNECTED\"] || type === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"DISCONNECTED\"]) {\n      if (notObserving) {\n        notObserving = false;\n        observe();\n      }\n      components.add(node);\n    }\n    else if (name.toLowerCase() in node) {\n      type = type.toLowerCase();\n    }\n    return newValue => {\n      if (oldValue !== newValue) {\n        if (oldValue) node.removeEventListener(type, oldValue, false);\n        oldValue = newValue;\n        if (newValue) node.addEventListener(type, newValue, false);\n      }\n    };\n  }\n  // the attribute is special ('value' in input)\n  // and it's not SVG *or* the name is exactly data,\n  // in this case assign the value directly\n  else if (name === 'data' || (!isSVG && name in node)) {\n    return newValue => {\n      if (oldValue !== newValue) {\n        oldValue = newValue;\n        if (node[name] !== newValue) {\n          node[name] = newValue;\n          if (newValue == null) {\n            node.removeAttribute(name);\n          }\n        }\n      }\n    };\n  }\n  // in every other case, use the attribute node as it is\n  // update only the value, set it as node only when/if needed\n  else {\n    let owner = false;\n    const attribute = original.cloneNode(true);\n    return newValue => {\n      if (oldValue !== newValue) {\n        oldValue = newValue;\n        if (attribute.value !== newValue) {\n          if (newValue == null) {\n            if (owner) {\n              owner = false;\n              node.removeAttributeNode(attribute);\n            }\n            attribute.value = newValue;\n          } else {\n            attribute.value = newValue;\n            if (!owner) {\n              owner = true;\n              node.setAttributeNode(attribute);\n            }\n          }\n        }\n      }\n    };\n  }\n};\n\n// style or textareas don't accept HTML as content\n// it's pointless to transform or analyze anything\n// different from text there but it's worth checking\n// for possible defined intents.\nconst setTextContent = node => {\n  let oldValue;\n  const textContent = value => {\n    if (oldValue !== value) {\n      oldValue = value;\n      if (typeof value === 'object' && value) {\n        if (isPromise_ish(value)) {\n          value.then(textContent);\n        } else if ('placeholder' in value) {\n          invokeAtDistance(value, textContent);\n        } else if ('text' in value) {\n          textContent(String(value.text));\n        } else if ('any' in value) {\n          textContent(value.any);\n        } else if ('html' in value) {\n          textContent([].concat(value.html).join(''));\n        } else if ('length' in value) {\n          textContent(_shared_utils_js__WEBPACK_IMPORTED_MODULE_9__[\"slice\"].call(value).join(''));\n        } else {\n          textContent(_Intent_js__WEBPACK_IMPORTED_MODULE_5__[\"default\"].invoke(value, textContent));\n        }\n      } else {\n        node.textContent = value == null ? '' : value;\n      }\n    }\n  };\n  return textContent;\n};\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({create, find});\n\n// hyper.Components might need connected/disconnected notifications\n// used by components and their onconnect/ondisconnect callbacks.\n// When one of these callbacks is encountered,\n// the document starts being observed.\nlet notObserving = true;\nfunction observe() {\n\n  // when hyper.Component related DOM nodes\n  // are appended or removed from the live tree\n  // these might listen to connected/disconnected events\n  // This utility is in charge of finding all components\n  // involved in the DOM update/change and dispatch\n  // related information to them\n  const dispatchAll = (nodes, type) => {\n    const event = new _shared_poorlyfills_js__WEBPACK_IMPORTED_MODULE_8__[\"Event\"](type);\n    const length = nodes.length;\n    for (let i = 0; i < length; i++) {\n      let node = nodes[i];\n      if (node.nodeType === _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"ELEMENT_NODE\"]) {\n        dispatchTarget(node, event);\n      }\n    }\n  };\n\n  // the way it's done is via the components weak set\n  // and recursively looking for nested components too\n  const dispatchTarget = (node, event) => {\n    if (components.has(node)) {\n      node.dispatchEvent(event);\n    }\n\n    const children = node.children;\n    const length = children.length;\n    for (let i = 0; i < length; i++) {\n      dispatchTarget(children[i], event);\n    }\n  }\n\n  // The MutationObserver is the best way to implement that\n  // but there is a fallback to deprecated DOMNodeInserted/Removed\n  // so that even older browsers/engines can help components life-cycle\n  try {\n    (new MutationObserver(records => {\n      const length = records.length;\n      for (let i = 0; i < length; i++) {\n        let record = records[i];\n        dispatchAll(record.removedNodes, _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"DISCONNECTED\"]);\n        dispatchAll(record.addedNodes, _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"CONNECTED\"]);\n      }\n    })).observe(document, {subtree: true, childList: true});\n  } catch(o_O) {\n    document.addEventListener('DOMNodeRemoved', event => {\n      dispatchAll([event.target], _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"DISCONNECTED\"]);\n    }, false);\n    document.addEventListener('DOMNodeInserted', event => {\n      dispatchAll([event.target], _shared_constants_js__WEBPACK_IMPORTED_MODULE_0__[\"CONNECTED\"]);\n    }, false);\n  }\n}\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/objects/Updates.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/constants.js":
+/*!********************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/constants.js ***!
+  \********************************************************/
+/*! exports provided: G, ELEMENT_NODE, ATTRIBUTE_NODE, TEXT_NODE, COMMENT_NODE, DOCUMENT_FRAGMENT_NODE, VOID_ELEMENTS, OWNER_SVG_ELEMENT, SVG_NAMESPACE, CONNECTED, DISCONNECTED, EXPANDO, SHOULD_USE_TEXT_CONTENT, UID, UIDC */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"G\", function() { return G; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"ELEMENT_NODE\", function() { return ELEMENT_NODE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"ATTRIBUTE_NODE\", function() { return ATTRIBUTE_NODE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"TEXT_NODE\", function() { return TEXT_NODE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"COMMENT_NODE\", function() { return COMMENT_NODE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"DOCUMENT_FRAGMENT_NODE\", function() { return DOCUMENT_FRAGMENT_NODE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"VOID_ELEMENTS\", function() { return VOID_ELEMENTS; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"OWNER_SVG_ELEMENT\", function() { return OWNER_SVG_ELEMENT; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"SVG_NAMESPACE\", function() { return SVG_NAMESPACE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"CONNECTED\", function() { return CONNECTED; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"DISCONNECTED\", function() { return DISCONNECTED; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"EXPANDO\", function() { return EXPANDO; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"SHOULD_USE_TEXT_CONTENT\", function() { return SHOULD_USE_TEXT_CONTENT; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"UID\", function() { return UID; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"UIDC\", function() { return UIDC; });\nconst G = document.defaultView;\n\n// Node.CONSTANTS\n// 'cause some engine has no global Node defined\n// (i.e. Node, NativeScript, basicHTML ... )\nconst ELEMENT_NODE = 1;\nconst ATTRIBUTE_NODE = 2;\nconst TEXT_NODE = 3;\nconst COMMENT_NODE = 8;\nconst DOCUMENT_FRAGMENT_NODE = 11;\n\n// HTML related constants\nconst VOID_ELEMENTS = /^area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr$/i;\n\n// SVG related constants\nconst OWNER_SVG_ELEMENT = 'ownerSVGElement';\nconst SVG_NAMESPACE = 'http://www.w3.org/2000/svg';\n\n// Custom Elements / MutationObserver constants\nconst CONNECTED = 'connected';\nconst DISCONNECTED = 'dis' + CONNECTED;\n\n// hyperHTML related constants\nconst EXPANDO = '_hyper: ';\nconst SHOULD_USE_TEXT_CONTENT = /^style|textarea$/i;\nconst UID = EXPANDO + ((Math.random() * new Date) | 0) + ';';\nconst UIDC = '<!--' + UID + '-->';\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/constants.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/domdiff.js":
+/*!******************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/domdiff.js ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* AUTOMATICALLY IMPORTED, DO NOT MODIFY */\n/*! (c) 2017 Andrea Giammarchi (ISC) */\n\n/**\n * This code is a revisited port of the snabbdom vDOM diffing logic,\n * the same that fuels as fork Vue.js or other libraries.\n * @credits https://github.com/snabbdom/snabbdom\n */\n\nconst identity = O => O;\n\nconst remove = (parentNode, before, after) => {\n  const range = parentNode.ownerDocument.createRange();\n  range.setStartBefore(before);\n  range.setEndAfter(after);\n  range.deleteContents();\n};\n\nconst domdiff = (\n  parentNode,     // where changes happen\n  currentNodes,   // Array of current items/nodes\n  futureNodes,    // Array of future items/nodes\n  getNode,        // optional way to retrieve a node from an item\n  beforeNode      // optional item/node to use as insertBefore delimiter\n) => {\n  const get = getNode || identity;\n  const before = beforeNode == null ? null : get(beforeNode, 0);\n  let currentStart = 0, futureStart = 0;\n  let currentEnd = currentNodes.length - 1;\n  let currentStartNode = currentNodes[0];\n  let currentEndNode = currentNodes[currentEnd];\n  let futureEnd = futureNodes.length - 1;\n  let futureStartNode = futureNodes[0];\n  let futureEndNode = futureNodes[futureEnd];\n  while (currentStart <= currentEnd && futureStart <= futureEnd) {\n    if (currentStartNode == null) {\n      currentStartNode = currentNodes[++currentStart];\n    }\n    else if (currentEndNode == null) {\n      currentEndNode = currentNodes[--currentEnd];\n    }\n    else if (futureStartNode == null) {\n      futureStartNode = futureNodes[++futureStart];\n    }\n    else if (futureEndNode == null) {\n      futureEndNode = futureNodes[--futureEnd];\n    }\n    else if (currentStartNode == futureStartNode) {\n      currentStartNode = currentNodes[++currentStart];\n      futureStartNode = futureNodes[++futureStart];\n    }\n    else if (currentEndNode == futureEndNode) {\n      currentEndNode = currentNodes[--currentEnd];\n      futureEndNode = futureNodes[--futureEnd];\n    }\n    else if (currentStartNode == futureEndNode) {\n      parentNode.insertBefore(\n        get(currentStartNode, 1),\n        get(currentEndNode, -0).nextSibling\n      );\n      currentStartNode = currentNodes[++currentStart];\n      futureEndNode = futureNodes[--futureEnd];\n    }\n    else if (currentEndNode == futureStartNode) {\n      parentNode.insertBefore(\n        get(currentEndNode, 1),\n        get(currentStartNode, 0)\n      );\n      currentEndNode = currentNodes[--currentEnd];\n      futureStartNode = futureNodes[++futureStart];\n    }\n    else {\n      let index = currentNodes.indexOf(futureStartNode);\n      if (index < 0) {\n        parentNode.insertBefore(\n          get(futureStartNode, 1),\n          get(currentStartNode, 0)\n        );\n        futureStartNode = futureNodes[++futureStart];\n      }\n      else {\n        let i = index;\n        let f = futureStart;\n        while (\n          i <= currentEnd &&\n          f <= futureEnd &&\n          currentNodes[i] === futureNodes[f]\n        ) {\n          i++;\n          f++;\n        }\n        if (1 < (i - index)) {\n          if (--index === currentStart) {\n            parentNode.removeChild(get(currentStartNode, -1));\n          } else {\n            remove(\n              parentNode,\n              get(currentStartNode, -1),\n              get(currentNodes[index], -1)\n            );\n          }\n          currentStart = i;\n          futureStart = f;\n          currentStartNode = currentNodes[i];\n          futureStartNode = futureNodes[f];\n        } else {\n          const el = currentNodes[index];\n          currentNodes[index] = null;\n          parentNode.insertBefore(get(el, 1), get(currentStartNode, 0));\n          futureStartNode = futureNodes[++futureStart];\n        }\n      }\n    }\n  }\n  if (currentStart <= currentEnd || futureStart <= futureEnd) {\n    if (currentStart > currentEnd) {\n      const pin = futureNodes[futureEnd + 1];\n      const place = pin == null ? before : get(pin, 0);\n      if (futureStart === futureEnd) {\n        parentNode.insertBefore(get(futureNodes[futureStart], 1), place);\n      }\n      else {\n        const fragment = parentNode.ownerDocument.createDocumentFragment();\n        while (futureStart <= futureEnd) {\n          fragment.appendChild(get(futureNodes[futureStart++], 1));\n        }\n        parentNode.insertBefore(fragment, place);\n      }\n    }\n    else {\n      if (currentNodes[currentStart] == null) currentStart++;\n      if (currentStart === currentEnd) {\n        parentNode.removeChild(get(currentNodes[currentStart], -1));\n      }\n      else {\n        remove(\n          parentNode,\n          get(currentNodes[currentStart], -1),\n          get(currentNodes[currentEnd], -1)\n        );\n      }\n    }\n  }\n  return futureNodes;\n};\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (domdiff);\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/domdiff.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/easy-dom.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/easy-dom.js ***!
+  \*******************************************************/
+/*! exports provided: create, doc, fragment, text */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"create\", function() { return create; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"doc\", function() { return doc; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fragment\", function() { return fragment; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"text\", function() { return text; });\n// these are tiny helpers to simplify most common operations needed here\nconst create = (node, type) => doc(node).createElement(type);\nconst doc = node => node.ownerDocument || node;\nconst fragment = node => doc(node).createDocumentFragment();\nconst text = (node, text) => doc(node).createTextNode(text);\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/easy-dom.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/features-detection.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/features-detection.js ***!
+  \*****************************************************************/
+/*! exports provided: hasAppend, hasContent, hasDoomedCloneNode, hasImportNode */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasAppend\", function() { return hasAppend; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasContent\", function() { return hasContent; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasDoomedCloneNode\", function() { return hasDoomedCloneNode; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasImportNode\", function() { return hasImportNode; });\n/* harmony import */ var _easy_dom_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./easy-dom.js */ \"./node_modules/hyperhtml/esm/shared/easy-dom.js\");\n\n\nconst testFragment = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_0__[\"fragment\"])(document);\n\n// DOM4 node.append(...many)\nconst hasAppend = 'append' in testFragment;\n\n// detect old browsers without HTMLTemplateElement content support\nconst hasContent = 'content' in Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_0__[\"create\"])(document, 'template');\n\n// IE 11 has problems with cloning templates: it \"forgets\" empty childNodes\ntestFragment.appendChild(Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_0__[\"text\"])(testFragment, 'g'));\ntestFragment.appendChild(Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_0__[\"text\"])(testFragment, ''));\nconst hasDoomedCloneNode = testFragment.cloneNode(true).childNodes.length === 1;\n\n// old browsers need to fallback to cloneNode\n// Custom Elements V0 and V1 will work polyfilled\n// but native implementations need importNode instead\n// (specially Chromium and its old V0 implementation)\nconst hasImportNode = 'importNode' in document;\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/features-detection.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/poorlyfills.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/poorlyfills.js ***!
+  \**********************************************************/
+/*! exports provided: Event, Map, WeakMap, WeakSet, isArray, trim */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Event\", function() { return Event; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Map\", function() { return Map; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"WeakMap\", function() { return WeakMap; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"WeakSet\", function() { return WeakSet; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isArray\", function() { return isArray; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"trim\", function() { return trim; });\n/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n\n\n// you know that kind of basics you need to cover\n// your use case only but you don't want to bloat the library?\n// There's even a package in here:\n// https://www.npmjs.com/package/poorlyfills\n\n// used to dispatch simple events\nlet Event = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"G\"].Event;\ntry {\n  new Event('Event');\n} catch(o_O) {\n  Event = function (type) {\n    const e = document.createEvent('Event');\n    e.initEvent(type, false, false);\n    return e;\n  };\n}\n\n\n// used to store template literals\nconst Map = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"G\"].Map || function Map() {\n  const keys = [], values = [];\n  return {\n    get(obj) {\n      return values[keys.indexOf(obj)];\n    },\n    set(obj, value) {\n      values[keys.push(obj) - 1] = value;\n    }\n  };\n};\n\n// used to store wired content\nlet ID = 0;\nconst WeakMap = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"G\"].WeakMap || function WeakMap() {\n  const key = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"UID\"] + ID++;\n  return {\n    get(obj) { return obj[key]; },\n    set(obj, value) {\n      Object.defineProperty(obj, key, {\n        configurable: true,\n        value\n      });\n    }\n  };\n};\n\n// used to store hyper.Components\nconst WeakSet = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"G\"].WeakSet || function WeakSet() {\n  const wm = new WeakMap;\n  return {\n    add(obj) { wm.set(obj, true); },\n    has(obj) { return wm.get(obj) === true; }\n  };\n};\n\n// used to be sure IE9 or older Androids work as expected\nconst isArray = Array.isArray || (toString =>\n  arr => toString.call(arr) === '[object Array]'\n)({}.toString);\n\nconst trim = _constants_js__WEBPACK_IMPORTED_MODULE_0__[\"UID\"].trim || function () {\n  return this.replace(/^\\s+|\\s+$/g, '');\n};\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/poorlyfills.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/re.js":
+/*!*************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/re.js ***!
+  \*************************************************/
+/*! exports provided: attrName, attrSeeker, selfClosing */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"attrName\", function() { return attrName; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"attrSeeker\", function() { return attrSeeker; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"selfClosing\", function() { return selfClosing; });\n// TODO:  I'd love to code-cover RegExp too here\n//        these are fundamental for this library\n\nconst spaces = ' \\\\f\\\\n\\\\r\\\\t';\nconst almostEverything = '[^ ' + spaces + '\\\\/>\"\\'=]+';\nconst attrName = '[ ' + spaces + ']+' + almostEverything;\nconst tagName = '<([A-Za-z]+[A-Za-z0-9:_-]*)((?:';\nconst attrPartials = '(?:=(?:\\'[^\\']*?\\'|\"[^\"]*?\"|<[^>]*?>|' + almostEverything + '))?)';\n\nconst attrSeeker = new RegExp(\n  tagName + attrName + attrPartials + '+)([ ' + spaces + ']*/?>)',\n  'g'\n);\n\nconst selfClosing = new RegExp(\n  tagName + attrName + attrPartials + '*)([ ' + spaces + ']*/>)',\n  'g'\n);\n\n\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/re.js?");
+
+/***/ }),
+
+/***/ "./node_modules/hyperhtml/esm/shared/utils.js":
+/*!****************************************************!*\
+  !*** ./node_modules/hyperhtml/esm/shared/utils.js ***!
+  \****************************************************/
+/*! exports provided: append, createFragment, importNode, slice, unique */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"append\", function() { return append; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"createFragment\", function() { return createFragment; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"importNode\", function() { return importNode; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"slice\", function() { return slice; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"unique\", function() { return unique; });\n/* harmony import */ var _re_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./re.js */ \"./node_modules/hyperhtml/esm/shared/re.js\");\n/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants.js */ \"./node_modules/hyperhtml/esm/shared/constants.js\");\n/* harmony import */ var _features_detection_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./features-detection.js */ \"./node_modules/hyperhtml/esm/shared/features-detection.js\");\n/* harmony import */ var _easy_dom_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./easy-dom.js */ \"./node_modules/hyperhtml/esm/shared/easy-dom.js\");\n\n\n\n\n\n\n\n\n// appends an array of nodes\n// to a generic node/fragment\n// When available, uses append passing all arguments at once\n// hoping that's somehow faster, even if append has more checks on type\nconst append = _features_detection_js__WEBPACK_IMPORTED_MODULE_2__[\"hasAppend\"] ?\n  (node, childNodes) => {\n    node.append.apply(node, childNodes);\n  } :\n  (node, childNodes) => {\n    const length = childNodes.length;\n    for (let i = 0; i < length; i++) {\n      node.appendChild(childNodes[i]);\n    }\n  };\n\nconst findAttributes = new RegExp('(' + _re_js__WEBPACK_IMPORTED_MODULE_0__[\"attrName\"] + '=)([\\'\"]?)' + _constants_js__WEBPACK_IMPORTED_MODULE_1__[\"UIDC\"] + '\\\\2', 'gi');\nconst comments = ($0, $1, $2, $3) =>\n  '<' + $1 + $2.replace(findAttributes, replaceAttributes) + $3;\nconst replaceAttributes = ($0, $1, $2) => $1 + ($2 || '\"') + _constants_js__WEBPACK_IMPORTED_MODULE_1__[\"UID\"] + ($2 || '\"');\n\n// given a node and a generic HTML content,\n// create either an SVG or an HTML fragment\n// where such content will be injected\nconst createFragment = (node, html) =>\n  (_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"OWNER_SVG_ELEMENT\"] in node ?\n    SVGFragment :\n    HTMLFragment\n  )(node, html.replace(_re_js__WEBPACK_IMPORTED_MODULE_0__[\"attrSeeker\"], comments));\n\n// IE/Edge shenanigans proof cloneNode\n// it goes through all nodes manually\n// instead of relying the engine to suddenly\n// merge nodes together\nconst cloneNode = _features_detection_js__WEBPACK_IMPORTED_MODULE_2__[\"hasDoomedCloneNode\"] ?\n  node => {\n    const clone = node.cloneNode();\n    const childNodes = node.childNodes ||\n                      // this is an excess of caution\n                      // but some node, in IE, might not\n                      // have childNodes property.\n                      // The following fallback ensure working code\n                      // in older IE without compromising performance\n                      // or any other browser/engine involved.\n                      /* istanbul ignore next */\n                      [];\n    const length = childNodes.length;\n    for (let i = 0; i < length; i++) {\n      clone.appendChild(cloneNode(childNodes[i]));\n    }\n    return clone;\n  } :\n  // the following ignore is due code-coverage\n  // combination of not having document.importNode\n  // but having a working node.cloneNode.\n  // This shenario is common on older Android/WebKit browsers\n  // but basicHTML here tests just two major cases:\n  // with document.importNode or with broken cloneNode.\n  /* istanbul ignore next */\n  node => node.cloneNode(true);\n\n// used to import html into fragments\nconst importNode = _features_detection_js__WEBPACK_IMPORTED_MODULE_2__[\"hasImportNode\"] ?\n  (doc, node) => doc.importNode(node, true) :\n  (doc, node) => cloneNode(node)\n\n// just recycling a one-off array to use slice\n// in every needed place\nconst slice = [].slice;\n\n// lazy evaluated, returns the unique identity\n// of a template literal, as tempalte literal itself.\n// By default, ES2015 template literals are unique\n// tag`a${1}z` === tag`a${2}z`\n// even if interpolated values are different\n// the template chunks are in a frozen Array\n// that is identical each time you use the same\n// literal to represent same static content\n// around its own interpolations.\nconst unique = template => TL(template);\n\n// TL returns a unique version of the template\n// it needs lazy feature detection\n// (cannot trust literals with transpiled code)\nlet TL = template => {\n  if (\n    // TypeScript template literals are not standard\n    template.propertyIsEnumerable('raw') ||\n    (\n      // Firefox < 55 has not standard implementation neither\n      /Firefox\\/(\\d+)/.test((_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"G\"].navigator || {}).userAgent) &&\n      parseFloat(RegExp.$1) < 55\n    )\n  ) {\n    // in these cases, address templates once\n    const templateObjects = {};\n    // but always return the same template\n    TL = template => {\n      const key = '_' + template.join(_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"UID\"]);\n      return templateObjects[key] || (\n        templateObjects[key] = template\n      );\n    };\n  }\n  else {\n    // make TL an identity like function\n    TL = template => template;\n  }\n  return TL(template);\n};\n\n// create document fragments via native template\n// with a fallback for browsers that won't be able\n// to deal with some injected element such <td> or others\nconst HTMLFragment = _features_detection_js__WEBPACK_IMPORTED_MODULE_2__[\"hasContent\"] ?\n  (node, html) => {\n    const container = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"create\"])(node, 'template');\n    container.innerHTML = html;\n    return container.content;\n  } :\n  (node, html) => {\n    const container = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"create\"])(node, 'template');\n    const content = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"fragment\"])(node);\n    if (/^[^\\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {\n      const selector = RegExp.$1;\n      container.innerHTML = '<table>' + html + '</table>';\n      append(content, slice.call(container.querySelectorAll(selector)));\n    } else {\n      container.innerHTML = html;\n      append(content, slice.call(container.childNodes));\n    }\n    return content;\n  };\n\n// creates SVG fragment with a fallback for IE that needs SVG\n// within the HTML content\nconst SVGFragment = _features_detection_js__WEBPACK_IMPORTED_MODULE_2__[\"hasContent\"] ?\n  (node, html) => {\n    const content = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"fragment\"])(node);\n    const container = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"doc\"])(node).createElementNS(_constants_js__WEBPACK_IMPORTED_MODULE_1__[\"SVG_NAMESPACE\"], 'svg');\n    container.innerHTML = html;\n    append(content, slice.call(container.childNodes));\n    return content;\n  } :\n  (node, html) => {\n    const content = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"fragment\"])(node);\n    const container = Object(_easy_dom_js__WEBPACK_IMPORTED_MODULE_3__[\"create\"])(node, 'div');\n    container.innerHTML = '<svg xmlns=\"' + _constants_js__WEBPACK_IMPORTED_MODULE_1__[\"SVG_NAMESPACE\"] + '\">' + html + '</svg>';\n    append(content, slice.call(container.firstChild.childNodes));\n    return content;\n  };\n\n\n//# sourceURL=webpack:///./node_modules/hyperhtml/esm/shared/utils.js?");
+
+/***/ }),
+
+/***/ "./node_modules/meiosis-tracer/lib/meiosis-tracer.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/meiosis-tracer/lib/meiosis-tracer.js ***!
+  \***********************************************************/
+/*! no static exports found */
 /***/ (function(module, exports) {
 
-/*
-  change for npm modules.
-  by Luiz Estácio.
-
-  json-format v.1.1
-  http://github.com/phoboslab/json-format
-
-  Released under MIT license:
-  http://www.opensource.org/licenses/mit-license.php
-*/
-var p = [],
-  indentConfig = {
-    tab: { char: '\t', size: 1 },
-    space: { char: ' ', size: 4 }
-  },
-  configDefault = {
-    type: 'tab'
-  },
-  push = function( m ) { return '\\' + p.push( m ) + '\\'; },
-  pop = function( m, i ) { return p[i-1] },
-  tabs = function( count, indentType) { return new Array( count + 1 ).join( indentType ); };
-
-function JSONFormat ( json, indentType ) {
-  p = [];
-  var out = "",
-      indent = 0;
-
-  // Extract backslashes and strings
-  json = json
-    .replace( /\\./g, push )
-    .replace( /(".*?"|'.*?')/g, push )
-    .replace( /\s+/, '' );    
-
-  // Indent and insert newlines
-  for( var i = 0; i < json.length; i++ ) {
-    var c = json.charAt(i);
-
-    switch(c) {
-      case '{':
-      case '[':
-        out += c + "\n" + tabs(++indent, indentType);
-        break;
-      case '}':
-      case ']':
-        out += "\n" + tabs(--indent, indentType) + c;
-        break;
-      case ',':
-        out += ",\n" + tabs(indent, indentType);
-        break;
-      case ':':
-        out += ": ";
-        break;
-      default:
-        out += c;
-        break;      
-    }         
-  }
-
-  // Strip whitespace from numeric arrays and put backslashes 
-  // and strings back in
-  out = out
-    .replace( /\[[\d,\s]+?\]/g, function(m){ return m.replace(/\s/g,''); } )
-    .replace( /\\(\d+)\\/g, pop ) // strings
-    .replace( /\\(\d+)\\/g, pop ); // backslashes in strings
-
-  return out;
-};
-
-module.exports = function(json, config){
-  config = config || configDefault;
-  var indent = indentConfig[config.type];
-
-  if ( indent == null ) {
-    throw new Error('Unrecognized indent type: "' + config.type + '"');
-  }
-  var indentType = new Array((config.size || indent.size) + 1).join(indent.char);
-  return JSONFormat(JSON.stringify(json), indentType);
-}
-
+eval("module.exports=function(e){var t={};function r(n){if(t[n])return t[n].exports;var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r),a.l=!0,a.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n})},r.r=function(e){Object.defineProperty(e,\"__esModule\",{value:!0})},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,\"a\",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p=\"\",r(r.s=4)}([function(e,t,r){\"use strict\";Object.defineProperty(t,\"__esModule\",{value:!0});t.createReceiveValues=function(e,t){return function(r,n){n&&(e.tracerStates.length>0&&(e.tracerStates.length=e.tracerIndex+1),e.tracerStates.push(r),e.tracerIndex=e.tracerStates.length-1),t(r,e)}}},function(e,t,r){\"use strict\";Object.defineProperty(t,\"__esModule\",{value:!0});var n=null,a=null,i=function(e,t){var r=document.getElementById(\"tracerSlider\");if(r.setAttribute(\"max\",String(t.tracerStates.length-1)),r.value=String(t.tracerIndex),document.getElementById(\"tracerStepBack\").disabled=0===t.tracerIndex,document.getElementById(\"tracerStepForward\").disabled=t.tracerIndex===t.tracerStates.length-1,document.getElementById(\"tracerIndex\").innerHTML=String(t.tracerIndex),document.getElementById(\"tracerModel\").value=JSON.stringify(e[0].value,null,4),0===document.querySelectorAll(\"div.dataStream\").length){for(var n=\"\",i=1,d=e.length;i<d;i++)n+=\"<div\"+a+\" class='dataStream'><textarea rows='5' cols='40'></textarea></div>\";document.getElementById(\"dataStreamContainer\").innerHTML=n}var c=document.querySelectorAll(\"div.dataStream textarea\");for(i=1,d=e.length;i<d;i++)c[i-1].value=JSON.stringify(e[i].value,null,4)},d=function(e,t){return function(r){var n=parseInt(r.target.value,10),a=t.tracerStates[n];t.tracerIndex=n;var d=a[0].value;e(d,!1),i(a,t)}},c=function(e){var t=e.tracerStates[0];e.tracerStates.length=0,e.tracerIndex=0,i(t,e)},o=function(e,t){var r=document.getElementById(e),n=r.getElementsByTagName(\"textarea\")[0],a=r.getElementsByTagName(\"input\")[0],i=r.getElementsByTagName(\"div\")[0];n.value=JSON.stringify(t.values[t.index],null,4),a.setAttribute(\"max\",String(t.values.length-1)),a.value=String(t.index),i.innerHTML=String(t.index)};t.initialView=function(e,t,r,i){var o=document.querySelector(e);if(o){a=i?\" style='float: left'\":\"\";var l=\"<div style='text-align: right'><button id='tracerToggle'>Hide</button></div><div id='tracerContainer'><div style='text-align: right'><button id='tracerReset'>Reset</button></div><div>Data streams:</div><input id='tracerSlider' type='range' min='0' max='\"+String(t.tracerStates.length-1)+\"' value='\"+String(t.tracerIndex)+\"' style='width: 100%'/><button id='tracerStepBack'>&lt;</button> <button id='tracerStepForward'>&gt;</button> <span id='tracerIndex'>\"+String(t.tracerIndex)+\"</span><div\"+a+\"><div>Model: (you can type into this box)</div><textarea id='tracerModel' rows='5' cols='40'></textarea><div id='errorMessage' style='display: none'><span style='color:red'>Invalid JSON</span></div></div><span id='dataStreamContainer'></span><span id='otherStreamContainer'></span></div>\";o.innerHTML=l;var u=document.getElementById(\"tracerContainer\");n=document.getElementById(\"errorMessage\"),document.getElementById(\"tracerSlider\").addEventListener(\"input\",d(r,t)),document.getElementById(\"tracerModel\").addEventListener(\"keyup\",function(e){return function(t){try{var r=JSON.parse(t.target.value);e(r,!0),n.style.display=\"none\"}catch(e){n.style.display=\"block\"}}}(r)),document.getElementById(\"tracerToggle\").addEventListener(\"click\",function(e){return function(t){var r=t.target;\"none\"===e.style.display?(e.style.display=\"block\",r.innerHTML=\"Hide\"):(e.style.display=\"none\",r.innerHTML=\"Show\")}}(u)),document.getElementById(\"tracerReset\").addEventListener(\"click\",function(e){return function(){c(e)}}(t)),document.getElementById(\"tracerStepBack\").addEventListener(\"click\",function(){d(r,t)({target:{value:Math.max(0,t.tracerIndex-1)}})}),document.getElementById(\"tracerStepForward\").addEventListener(\"click\",function(){d(r,t)({target:{value:Math.min(t.tracerStates.length-1,t.tracerIndex+1)}})})}},t.tracerView=i,t.reset=c,t.initStreamIds=function(e,t,r){var i=\"<div>Other streams:</div>\";e.forEach(function(e){return i+=\"<div\"+a+\" class='otherStream' id='\"+e+\"'><input type='range' min='0' max='0' value='0' style='width: 100%'/><div>0</div><textarea rows='5' cols='40'></textarea><div><button>Trigger</button></div></div>\"}),document.getElementById(\"otherStreamContainer\").innerHTML=i,e.forEach(function(e){var a=document.getElementById(e);a.getElementsByTagName(\"input\")[0].addEventListener(\"input\",function(e,t){return function(r){var n=e[t],a=parseInt(r.target.value,10);n.index=a,o(t,n)}}(t,e));var i=a.getElementsByTagName(\"button\")[0],d=a.getElementsByTagName(\"textarea\")[0];i.addEventListener(\"click\",function(e,t,r){return function(){try{var a=JSON.parse(t.value);r(e,a),n.style.display=\"none\"}catch(e){n.style.display=\"block\"}}}(e,d,r))})},t.updateStreamValue=o},function(e,t,r){\"use strict\";Object.defineProperty(t,\"__esModule\",{value:!0});t.tracerModel={tracerStates:[],tracerIndex:0,streams:{}}},function(e,t,r){\"use strict\";Object.defineProperty(t,\"__esModule\",{value:!0}),t.meiosisTracer=void 0;var n=r(2),a=r(1),i=r(0);window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.meiosisTracer=function(e){var t=e.selector,r=e.renderModel,d=e.triggerStreamValue,c=e.horizontal;if(document.querySelector(t)){var o=(0,i.createReceiveValues)(n.tracerModel,a.tracerView);r=r||function(e,t){return window.postMessage({type:\"MEIOSIS_RENDER_MODEL\",model:e,sendValuesBack:t},\"*\")},(0,a.initialView)(t,n.tracerModel,r,c),d=d||function(e,t){return window.postMessage({type:\"MEIOSIS_TRIGGER_STREAM_VALUE\",streamId:e,value:t},\"*\")};var l=function(e){e.forEach(function(e){return n.tracerModel.streams[e]={index:0,values:[]}}),(0,a.initStreamIds)(e,n.tracerModel.streams,d)},u=function(e,t){var r=n.tracerModel.streams[e];r.values.push(t),r.index=r.values.length-1,(0,a.updateStreamValue)(e,r)};return window.addEventListener(\"message\",function(e){if(\"MEIOSIS_VALUES\"===e.data.type)o(e.data.values,e.data.update);else if(\"MEIOSIS_STREAM_IDS\"===e.data.type){var t=e.data.streamIds;l(t)}else\"MEIOSIS_STREAM_VALUE\"===e.data.type&&u(e.data.streamId,e.data.value)}),window.postMessage({type:\"MEIOSIS_TRACER_INIT\"},\"*\"),{receiveValues:o,initStreamIdModel:l,receiveStreamValue:u,reset:function(){return(0,a.reset)(n.tracerModel)}}}}},function(e,t,r){\"use strict\";var n=r(3);e.exports=n.meiosisTracer}]);\n//# sourceMappingURL=meiosis-tracer.js.map\n\n//# sourceURL=webpack:///./node_modules/meiosis-tracer/lib/meiosis-tracer.js?");
 
 /***/ }),
-/* 5 */
+
+/***/ "./node_modules/meiosis/lib/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/meiosis/lib/index.js ***!
+  \*******************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+eval("\nfunction __export(m) {\n    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];\n}\nObject.defineProperty(exports, \"__esModule\", { value: true });\n__export(__webpack_require__(/*! ./meiosis */ \"./node_modules/meiosis/lib/meiosis.js\"));\n//# sourceMappingURL=index.js.map\n\n//# sourceURL=webpack:///./node_modules/meiosis/lib/index.js?");
 
+/***/ }),
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var createReceiveValues = function createReceiveValues(tracerModel, view) {
-  return function (values, update) {
-    if (update) {
-      if (tracerModel.tracerStates.length > 0) {
-        tracerModel.tracerStates.length = tracerModel.tracerIndex + 1;
-      }
-      tracerModel.tracerStates.push(values);
-      tracerModel.tracerIndex = tracerModel.tracerStates.length - 1;
-    }
-    view(values, tracerModel);
-  };
-};
+/***/ "./node_modules/meiosis/lib/meiosis.js":
+/*!*********************************************!*\
+  !*** ./node_modules/meiosis/lib/meiosis.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-exports.createReceiveValues = createReceiveValues;
+"use strict";
+eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nfunction isMeiosisTracerOn() {\n    return window && window[\"__MEIOSIS_TRACER_GLOBAL_HOOK__\"];\n}\nexports.isMeiosisTracerOn = isMeiosisTracerOn;\nfunction trace(params) {\n    if (!params.update || !params.dataStreams) {\n        throw new Error(\"Please specify update and dataStreams.\");\n    }\n    if (isMeiosisTracerOn()) {\n        var toJS_1 = params.toJS || (function (model) { return JSON.parse(JSON.stringify(model)); });\n        var fromJS_1 = params.fromJS || (function (model) { return model; });\n        var toUpdate_1 = params.toUpdate || (function (model) { return function () { return model; }; });\n        var bufferedValues_1 = [];\n        var bufferedStreamValues_1 = [];\n        var devtoolInitialized_1 = false;\n        var sendValues_1 = true;\n        var liveChange_1 = true;\n        var lastStream = params.dataStreams[params.dataStreams.length - 1];\n        var otherStreamIds_1 = [];\n        var otherStreamsById_1 = {};\n        if (params.otherStreams && params.otherStreams.length) {\n            params.otherStreams.forEach(function (otherStream) {\n                var streamId = \"stream_\" + new Date().getTime();\n                otherStreamIds_1.push(streamId);\n                otherStreamsById_1[streamId] = otherStream;\n                otherStream.map(function (value) {\n                    var data = { type: \"MEIOSIS_STREAM_VALUE\", value: value, streamId: streamId };\n                    if (devtoolInitialized_1) {\n                        window.postMessage(data, \"*\");\n                    }\n                    else {\n                        bufferedStreamValues_1.push(data);\n                    }\n                });\n            });\n        }\n        window.addEventListener(\"message\", function (evt) {\n            if (evt.data.type === \"MEIOSIS_RENDER_MODEL\") {\n                sendValues_1 = evt.data.sendValuesBack;\n                liveChange_1 = false;\n                params.update(toUpdate_1(fromJS_1(evt.data.model)));\n            }\n            else if (evt.data.type === \"MEIOSIS_TRACER_INIT\") {\n                devtoolInitialized_1 = true;\n                if (otherStreamIds_1.length > 0) {\n                    window.postMessage({ type: \"MEIOSIS_STREAM_IDS\", streamIds: otherStreamIds_1 }, \"*\");\n                }\n                bufferedValues_1.forEach(function (values) { return window.postMessage({ type: \"MEIOSIS_VALUES\", values: values, update: true }, \"*\"); });\n                bufferedStreamValues_1.forEach(function (data) { return window.postMessage(data, \"*\"); });\n            }\n            else if (evt.data.type === \"MEIOSIS_TRIGGER_STREAM_VALUE\") {\n                var streamId = evt.data.streamId;\n                var value = evt.data.value;\n                otherStreamsById_1[streamId](value);\n            }\n        });\n        lastStream.map(function () {\n            if (sendValues_1 || liveChange_1) {\n                var values = params.dataStreams.map(function (stream) {\n                    return ({ value: toJS_1(stream()) });\n                });\n                if (devtoolInitialized_1) {\n                    window.postMessage({ type: \"MEIOSIS_VALUES\", values: values, update: true }, \"*\");\n                }\n                else {\n                    bufferedValues_1.push(values);\n                }\n            }\n            liveChange_1 = true;\n        });\n        window.postMessage({ type: \"MEIOSIS_PING\" }, \"*\");\n    }\n}\nexports.trace = trace;\n;\n//# sourceMappingURL=meiosis.js.map\n\n//# sourceURL=webpack:///./node_modules/meiosis/lib/meiosis.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/curryN.js":
+/*!******************************************!*\
+  !*** ./node_modules/ramda/src/curryN.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("var _arity = /*#__PURE__*/__webpack_require__(/*! ./internal/_arity */ \"./node_modules/ramda/src/internal/_arity.js\");\n\nvar _curry1 = /*#__PURE__*/__webpack_require__(/*! ./internal/_curry1 */ \"./node_modules/ramda/src/internal/_curry1.js\");\n\nvar _curry2 = /*#__PURE__*/__webpack_require__(/*! ./internal/_curry2 */ \"./node_modules/ramda/src/internal/_curry2.js\");\n\nvar _curryN = /*#__PURE__*/__webpack_require__(/*! ./internal/_curryN */ \"./node_modules/ramda/src/internal/_curryN.js\");\n\n/**\n * Returns a curried equivalent of the provided function, with the specified\n * arity. The curried function has two unusual capabilities. First, its\n * arguments needn't be provided one at a time. If `g` is `R.curryN(3, f)`, the\n * following are equivalent:\n *\n *   - `g(1)(2)(3)`\n *   - `g(1)(2, 3)`\n *   - `g(1, 2)(3)`\n *   - `g(1, 2, 3)`\n *\n * Secondly, the special placeholder value [`R.__`](#__) may be used to specify\n * \"gaps\", allowing partial application of any combination of arguments,\n * regardless of their positions. If `g` is as above and `_` is [`R.__`](#__),\n * the following are equivalent:\n *\n *   - `g(1, 2, 3)`\n *   - `g(_, 2, 3)(1)`\n *   - `g(_, _, 3)(1)(2)`\n *   - `g(_, _, 3)(1, 2)`\n *   - `g(_, 2)(1)(3)`\n *   - `g(_, 2)(1, 3)`\n *   - `g(_, 2)(_, 3)(1)`\n *\n * @func\n * @memberOf R\n * @since v0.5.0\n * @category Function\n * @sig Number -> (* -> a) -> (* -> a)\n * @param {Number} length The arity for the returned function.\n * @param {Function} fn The function to curry.\n * @return {Function} A new, curried function.\n * @see R.curry\n * @example\n *\n *      var sumArgs = (...args) => R.sum(args);\n *\n *      var curriedAddFourNumbers = R.curryN(4, sumArgs);\n *      var f = curriedAddFourNumbers(1, 2);\n *      var g = f(3);\n *      g(4); //=> 10\n */\n\n\nvar curryN = /*#__PURE__*/_curry2(function curryN(length, fn) {\n  if (length === 1) {\n    return _curry1(fn);\n  }\n  return _arity(length, _curryN(length, [], fn));\n});\nmodule.exports = curryN;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/curryN.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/internal/_arity.js":
+/*!***************************************************!*\
+  !*** ./node_modules/ramda/src/internal/_arity.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("function _arity(n, fn) {\n  /* eslint-disable no-unused-vars */\n  switch (n) {\n    case 0:\n      return function () {\n        return fn.apply(this, arguments);\n      };\n    case 1:\n      return function (a0) {\n        return fn.apply(this, arguments);\n      };\n    case 2:\n      return function (a0, a1) {\n        return fn.apply(this, arguments);\n      };\n    case 3:\n      return function (a0, a1, a2) {\n        return fn.apply(this, arguments);\n      };\n    case 4:\n      return function (a0, a1, a2, a3) {\n        return fn.apply(this, arguments);\n      };\n    case 5:\n      return function (a0, a1, a2, a3, a4) {\n        return fn.apply(this, arguments);\n      };\n    case 6:\n      return function (a0, a1, a2, a3, a4, a5) {\n        return fn.apply(this, arguments);\n      };\n    case 7:\n      return function (a0, a1, a2, a3, a4, a5, a6) {\n        return fn.apply(this, arguments);\n      };\n    case 8:\n      return function (a0, a1, a2, a3, a4, a5, a6, a7) {\n        return fn.apply(this, arguments);\n      };\n    case 9:\n      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8) {\n        return fn.apply(this, arguments);\n      };\n    case 10:\n      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {\n        return fn.apply(this, arguments);\n      };\n    default:\n      throw new Error('First argument to _arity must be a non-negative integer no greater than ten');\n  }\n}\nmodule.exports = _arity;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_arity.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/internal/_curry1.js":
+/*!****************************************************!*\
+  !*** ./node_modules/ramda/src/internal/_curry1.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("var _isPlaceholder = /*#__PURE__*/__webpack_require__(/*! ./_isPlaceholder */ \"./node_modules/ramda/src/internal/_isPlaceholder.js\");\n\n/**\n * Optimized internal one-arity curry function.\n *\n * @private\n * @category Function\n * @param {Function} fn The function to curry.\n * @return {Function} The curried function.\n */\n\n\nfunction _curry1(fn) {\n  return function f1(a) {\n    if (arguments.length === 0 || _isPlaceholder(a)) {\n      return f1;\n    } else {\n      return fn.apply(this, arguments);\n    }\n  };\n}\nmodule.exports = _curry1;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_curry1.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/internal/_curry2.js":
+/*!****************************************************!*\
+  !*** ./node_modules/ramda/src/internal/_curry2.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("var _curry1 = /*#__PURE__*/__webpack_require__(/*! ./_curry1 */ \"./node_modules/ramda/src/internal/_curry1.js\");\n\nvar _isPlaceholder = /*#__PURE__*/__webpack_require__(/*! ./_isPlaceholder */ \"./node_modules/ramda/src/internal/_isPlaceholder.js\");\n\n/**\n * Optimized internal two-arity curry function.\n *\n * @private\n * @category Function\n * @param {Function} fn The function to curry.\n * @return {Function} The curried function.\n */\n\n\nfunction _curry2(fn) {\n  return function f2(a, b) {\n    switch (arguments.length) {\n      case 0:\n        return f2;\n      case 1:\n        return _isPlaceholder(a) ? f2 : _curry1(function (_b) {\n          return fn(a, _b);\n        });\n      default:\n        return _isPlaceholder(a) && _isPlaceholder(b) ? f2 : _isPlaceholder(a) ? _curry1(function (_a) {\n          return fn(_a, b);\n        }) : _isPlaceholder(b) ? _curry1(function (_b) {\n          return fn(a, _b);\n        }) : fn(a, b);\n    }\n  };\n}\nmodule.exports = _curry2;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_curry2.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/internal/_curryN.js":
+/*!****************************************************!*\
+  !*** ./node_modules/ramda/src/internal/_curryN.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("var _arity = /*#__PURE__*/__webpack_require__(/*! ./_arity */ \"./node_modules/ramda/src/internal/_arity.js\");\n\nvar _isPlaceholder = /*#__PURE__*/__webpack_require__(/*! ./_isPlaceholder */ \"./node_modules/ramda/src/internal/_isPlaceholder.js\");\n\n/**\n * Internal curryN function.\n *\n * @private\n * @category Function\n * @param {Number} length The arity of the curried function.\n * @param {Array} received An array of arguments received thus far.\n * @param {Function} fn The function to curry.\n * @return {Function} The curried function.\n */\n\n\nfunction _curryN(length, received, fn) {\n  return function () {\n    var combined = [];\n    var argsIdx = 0;\n    var left = length;\n    var combinedIdx = 0;\n    while (combinedIdx < received.length || argsIdx < arguments.length) {\n      var result;\n      if (combinedIdx < received.length && (!_isPlaceholder(received[combinedIdx]) || argsIdx >= arguments.length)) {\n        result = received[combinedIdx];\n      } else {\n        result = arguments[argsIdx];\n        argsIdx += 1;\n      }\n      combined[combinedIdx] = result;\n      if (!_isPlaceholder(result)) {\n        left -= 1;\n      }\n      combinedIdx += 1;\n    }\n    return left <= 0 ? fn.apply(this, combined) : _arity(left, _curryN(length, combined, fn));\n  };\n}\nmodule.exports = _curryN;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_curryN.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ramda/src/internal/_isPlaceholder.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/ramda/src/internal/_isPlaceholder.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("function _isPlaceholder(a) {\n       return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;\n}\nmodule.exports = _isPlaceholder;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_isPlaceholder.js?");
 
 /***/ })
-/******/ ]);
-//# sourceMappingURL=meiosis-tracer.js.map
 
-/***/ }),
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */,
-/* 17 */,
-/* 18 */,
-/* 19 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const G = document.defaultView;
-/* harmony export (immutable) */ __webpack_exports__["f"] = G;
-
-
-// Node.CONSTANTS
-// 'cause some engine has no global Node defined
-// (i.e. Node, NativeScript, basicHTML ... )
-const ELEMENT_NODE = 1;
-/* harmony export (immutable) */ __webpack_exports__["e"] = ELEMENT_NODE;
-
-const ATTRIBUTE_NODE = 2;
-/* unused harmony export ATTRIBUTE_NODE */
-
-const TEXT_NODE = 3;
-/* harmony export (immutable) */ __webpack_exports__["j"] = TEXT_NODE;
-
-const COMMENT_NODE = 8;
-/* harmony export (immutable) */ __webpack_exports__["a"] = COMMENT_NODE;
-
-const DOCUMENT_FRAGMENT_NODE = 11;
-/* harmony export (immutable) */ __webpack_exports__["d"] = DOCUMENT_FRAGMENT_NODE;
-
-
-// HTML related constants
-const VOID_ELEMENTS = /^area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr$/i;
-/* harmony export (immutable) */ __webpack_exports__["m"] = VOID_ELEMENTS;
-
-
-// SVG related constants
-const OWNER_SVG_ELEMENT = 'ownerSVGElement';
-/* harmony export (immutable) */ __webpack_exports__["g"] = OWNER_SVG_ELEMENT;
-
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-/* harmony export (immutable) */ __webpack_exports__["i"] = SVG_NAMESPACE;
-
-
-// Custom Elements / MutationObserver constants
-const CONNECTED = 'connected';
-/* harmony export (immutable) */ __webpack_exports__["b"] = CONNECTED;
-
-const DISCONNECTED = 'dis' + CONNECTED;
-/* harmony export (immutable) */ __webpack_exports__["c"] = DISCONNECTED;
-
-
-// hyperHTML related constants
-const EXPANDO = '_hyper: ';
-/* unused harmony export EXPANDO */
-
-const SHOULD_USE_TEXT_CONTENT = /^style|textarea$/i;
-/* harmony export (immutable) */ __webpack_exports__["h"] = SHOULD_USE_TEXT_CONTENT;
-
-const UID = EXPANDO + ((Math.random() * new Date) | 0) + ';';
-/* harmony export (immutable) */ __webpack_exports__["k"] = UID;
-
-const UIDC = '<!--' + UID + '-->';
-/* harmony export (immutable) */ __webpack_exports__["l"] = UIDC;
-
-
-
-/***/ }),
-/* 20 */,
-/* 21 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-// these are tiny helpers to simplify most common operations needed here
-const create = (node, type) => doc(node).createElement(type);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-
-const doc = node => node.ownerDocument || node;
-/* harmony export (immutable) */ __webpack_exports__["b"] = doc;
-
-const fragment = node => doc(node).createDocumentFragment();
-/* harmony export (immutable) */ __webpack_exports__["c"] = fragment;
-
-const text = (node, text) => doc(node).createTextNode(text);
-/* harmony export (immutable) */ __webpack_exports__["d"] = text;
-
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__re_js__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_js__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__features_detection_js__ = __webpack_require__(88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__easy_dom_js__ = __webpack_require__(21);
-
-
-
-
-
-
-
-
-// appends an array of nodes
-// to a generic node/fragment
-// When available, uses append passing all arguments at once
-// hoping that's somehow faster, even if append has more checks on type
-const append = __WEBPACK_IMPORTED_MODULE_2__features_detection_js__["a" /* hasAppend */] ?
-  (node, childNodes) => {
-    node.append.apply(node, childNodes);
-  } :
-  (node, childNodes) => {
-    const length = childNodes.length;
-    for (let i = 0; i < length; i++) {
-      node.appendChild(childNodes[i]);
-    }
-  };
-/* harmony export (immutable) */ __webpack_exports__["a"] = append;
-
-
-const findAttributes = new RegExp('(' + __WEBPACK_IMPORTED_MODULE_0__re_js__["a" /* attrName */] + '=)([\'"]?)' + __WEBPACK_IMPORTED_MODULE_1__constants_js__["l" /* UIDC */] + '\\2', 'gi');
-const comments = ($0, $1, $2, $3) =>
-  '<' + $1 + $2.replace(findAttributes, replaceAttributes) + $3;
-const replaceAttributes = ($0, $1, $2) => $1 + ($2 || '"') + __WEBPACK_IMPORTED_MODULE_1__constants_js__["k" /* UID */] + ($2 || '"');
-
-// given a node and a generic HTML content,
-// create either an SVG or an HTML fragment
-// where such content will be injected
-const createFragment = (node, html) =>
-  (__WEBPACK_IMPORTED_MODULE_1__constants_js__["g" /* OWNER_SVG_ELEMENT */] in node ?
-    SVGFragment :
-    HTMLFragment
-  )(node, html.replace(__WEBPACK_IMPORTED_MODULE_0__re_js__["b" /* attrSeeker */], comments));
-/* harmony export (immutable) */ __webpack_exports__["b"] = createFragment;
-
-
-// IE/Edge shenanigans proof cloneNode
-// it goes through all nodes manually
-// instead of relying the engine to suddenly
-// merge nodes together
-const cloneNode = __WEBPACK_IMPORTED_MODULE_2__features_detection_js__["c" /* hasDoomedCloneNode */] ?
-  node => {
-    const clone = node.cloneNode();
-    const childNodes = node.childNodes ||
-                      // this is an excess of caution
-                      // but some node, in IE, might not
-                      // have childNodes property.
-                      // The following fallback ensure working code
-                      // in older IE without compromising performance
-                      // or any other browser/engine involved.
-                      /* istanbul ignore next */
-                      [];
-    const length = childNodes.length;
-    for (let i = 0; i < length; i++) {
-      clone.appendChild(cloneNode(childNodes[i]));
-    }
-    return clone;
-  } :
-  // the following ignore is due code-coverage
-  // combination of not having document.importNode
-  // but having a working node.cloneNode.
-  // This shenario is common on older Android/WebKit browsers
-  // but basicHTML here tests just two major cases:
-  // with document.importNode or with broken cloneNode.
-  /* istanbul ignore next */
-  node => node.cloneNode(true);
-
-// used to import html into fragments
-const importNode = __WEBPACK_IMPORTED_MODULE_2__features_detection_js__["d" /* hasImportNode */] ?
-  (doc, node) => doc.importNode(node, true) :
-  (doc, node) => cloneNode(node)
-/* harmony export (immutable) */ __webpack_exports__["c"] = importNode;
-
-
-// just recycling a one-off array to use slice
-// in every needed place
-const slice = [].slice;
-/* harmony export (immutable) */ __webpack_exports__["d"] = slice;
-
-
-// lazy evaluated, returns the unique identity
-// of a template literal, as tempalte literal itself.
-// By default, ES2015 template literals are unique
-// tag`a${1}z` === tag`a${2}z`
-// even if interpolated values are different
-// the template chunks are in a frozen Array
-// that is identical each time you use the same
-// literal to represent same static content
-// around its own interpolations.
-const unique = template => TL(template);
-/* harmony export (immutable) */ __webpack_exports__["e"] = unique;
-
-
-// TL returns a unique version of the template
-// it needs lazy feature detection
-// (cannot trust literals with transpiled code)
-let TL = template => {
-  if (
-    // TypeScript template literals are not standard
-    template.propertyIsEnumerable('raw') ||
-    (
-      // Firefox < 55 has not standard implementation neither
-      /Firefox\/(\d+)/.test((__WEBPACK_IMPORTED_MODULE_1__constants_js__["f" /* G */].navigator || {}).userAgent) &&
-      parseFloat(RegExp.$1) < 55
-    )
-  ) {
-    // in these cases, address templates once
-    const templateObjects = {};
-    // but always return the same template
-    TL = template => {
-      const key = '_' + template.join(__WEBPACK_IMPORTED_MODULE_1__constants_js__["k" /* UID */]);
-      return templateObjects[key] || (
-        templateObjects[key] = template
-      );
-    };
-  }
-  else {
-    // make TL an identity like function
-    TL = template => template;
-  }
-  return TL(template);
-};
-
-// create document fragments via native template
-// with a fallback for browsers that won't be able
-// to deal with some injected element such <td> or others
-const HTMLFragment = __WEBPACK_IMPORTED_MODULE_2__features_detection_js__["b" /* hasContent */] ?
-  (node, html) => {
-    const container = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["a" /* create */])(node, 'template');
-    container.innerHTML = html;
-    return container.content;
-  } :
-  (node, html) => {
-    const container = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["a" /* create */])(node, 'template');
-    const content = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["c" /* fragment */])(node);
-    if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-      const selector = RegExp.$1;
-      container.innerHTML = '<table>' + html + '</table>';
-      append(content, slice.call(container.querySelectorAll(selector)));
-    } else {
-      container.innerHTML = html;
-      append(content, slice.call(container.childNodes));
-    }
-    return content;
-  };
-
-// creates SVG fragment with a fallback for IE that needs SVG
-// within the HTML content
-const SVGFragment = __WEBPACK_IMPORTED_MODULE_2__features_detection_js__["b" /* hasContent */] ?
-  (node, html) => {
-    const content = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["c" /* fragment */])(node);
-    const container = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["b" /* doc */])(node).createElementNS(__WEBPACK_IMPORTED_MODULE_1__constants_js__["i" /* SVG_NAMESPACE */], 'svg');
-    container.innerHTML = html;
-    append(content, slice.call(container.childNodes));
-    return content;
-  } :
-  (node, html) => {
-    const content = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["c" /* fragment */])(node);
-    const container = Object(__WEBPACK_IMPORTED_MODULE_3__easy_dom_js__["a" /* create */])(node, 'div');
-    container.innerHTML = '<svg xmlns="' + __WEBPACK_IMPORTED_MODULE_1__constants_js__["i" /* SVG_NAMESPACE */] + '">' + html + '</svg>';
-    append(content, slice.call(container.firstChild.childNodes));
-    return content;
-  };
-
-
-/***/ }),
-/* 23 */,
-/* 24 */,
-/* 25 */,
-/* 26 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Event; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(19);
-
-
-// you know that kind of basics you need to cover
-// your use case only but you don't want to bloat the library?
-// There's even a package in here:
-// https://www.npmjs.com/package/poorlyfills
-
-// used to dispatch simple events
-let Event = __WEBPACK_IMPORTED_MODULE_0__constants_js__["f" /* G */].Event;
-try {
-  new Event('Event');
-} catch(o_O) {
-  Event = function (type) {
-    const e = document.createEvent('Event');
-    e.initEvent(type, false, false);
-    return e;
-  };
-}
-
-
-// used to store template literals
-const Map = __WEBPACK_IMPORTED_MODULE_0__constants_js__["f" /* G */].Map || function Map() {
-  const keys = [], values = [];
-  return {
-    get(obj) {
-      return values[keys.indexOf(obj)];
-    },
-    set(obj, value) {
-      values[keys.push(obj) - 1] = value;
-    }
-  };
-};
-/* harmony export (immutable) */ __webpack_exports__["b"] = Map;
-
-
-// used to store wired content
-const WeakMap = __WEBPACK_IMPORTED_MODULE_0__constants_js__["f" /* G */].WeakMap || function WeakMap() {
-  return {
-    get(obj) { return obj[__WEBPACK_IMPORTED_MODULE_0__constants_js__["k" /* UID */]]; },
-    set(obj, value) {
-      Object.defineProperty(obj, __WEBPACK_IMPORTED_MODULE_0__constants_js__["k" /* UID */], {
-        configurable: true,
-        value
-      });
-    }
-  };
-};
-/* harmony export (immutable) */ __webpack_exports__["c"] = WeakMap;
-
-
-// used to store hyper.Components
-const WeakSet = __WEBPACK_IMPORTED_MODULE_0__constants_js__["f" /* G */].WeakSet || function WeakSet() {
-  const wm = new WeakMap;
-  return {
-    add(obj) { wm.set(obj, true); },
-    has(obj) { return wm.get(obj) === true; }
-  };
-};
-/* harmony export (immutable) */ __webpack_exports__["d"] = WeakSet;
-
-
-// used to be sure IE9 or older Androids work as expected
-const isArray = Array.isArray || (toString =>
-  arr => toString.call(arr) === '[object Array]'
-)({}.toString);
-/* harmony export (immutable) */ __webpack_exports__["e"] = isArray;
-
-
-const trim = __WEBPACK_IMPORTED_MODULE_0__constants_js__["k" /* UID */].trim || function () {
-  return this.replace(/^\s+|\s+$/g, '');
-};
-/* harmony export (immutable) */ __webpack_exports__["f"] = trim;
-
-
-
-/***/ }),
-/* 27 */,
-/* 28 */,
-/* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */,
-/* 33 */,
-/* 34 */,
-/* 35 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bind", function() { return bind; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "define", function() { return define; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hyper", function() { return hyper; });
-/* harmony export (immutable) */ __webpack_exports__["default"] = hyper;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__classes_Component_js__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__objects_Intent_js__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__ = __webpack_require__(87);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hyper_render_js__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_domdiff_js__ = __webpack_require__(41);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Component", function() { return __WEBPACK_IMPORTED_MODULE_0__classes_Component_js__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "diff", function() { return __WEBPACK_IMPORTED_MODULE_4__shared_domdiff_js__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "wire", function() { return __WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["b"]; });
-/*! (c) Andrea Giammarchi (ISC) */
-
-
-
-
-
-
-
-// all functions are self bound to the right context
-// you can do the following
-// const {bind, wire} = hyperHTML;
-// and use them right away: bind(node)`hello!`;
-const bind = context => __WEBPACK_IMPORTED_MODULE_3__hyper_render_js__["a" /* default */].bind(context);
-const define = __WEBPACK_IMPORTED_MODULE_1__objects_Intent_js__["a" /* default */].define;
-
-hyper.Component = __WEBPACK_IMPORTED_MODULE_0__classes_Component_js__["a" /* default */];
-hyper.bind = bind;
-hyper.define = define;
-hyper.diff = __WEBPACK_IMPORTED_MODULE_4__shared_domdiff_js__["a" /* default */];
-hyper.hyper = hyper;
-hyper.wire = __WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["b" /* default */];
-
-// the wire content is the lazy defined
-// html or svg property of each hyper.Component
-Object(__WEBPACK_IMPORTED_MODULE_0__classes_Component_js__["b" /* setup */])(__WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["a" /* content */]);
-
-// everything is exported directly or through the
-// hyperHTML callback, when used as top level script
-
-
-// by default, hyperHTML is a smart function
-// that "magically" understands what's the best
-// thing to do with passed arguments
-function hyper(HTML) {
-  return arguments.length < 2 ?
-    (HTML == null ?
-      Object(__WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["a" /* content */])('html') :
-      (typeof HTML === 'string' ?
-        hyper.wire(null, HTML) :
-        ('raw' in HTML ?
-          Object(__WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["a" /* content */])('html')(HTML) :
-          ('nodeType' in HTML ?
-            hyper.bind(HTML) :
-            Object(__WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["c" /* weakly */])(HTML, 'html')
-          )
-        )
-      )) :
-    ('raw' in HTML ?
-      Object(__WEBPACK_IMPORTED_MODULE_2__hyper_wire_js__["a" /* content */])('html') : hyper.wire
-    ).apply(null, arguments);
-}
-
-
-/***/ }),
-/* 36 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = Component;
-/* harmony export (immutable) */ __webpack_exports__["b"] = setup;
-// hyperHTML.Component is a very basic class
-// able to create Custom Elements like components
-// including the ability to listen to connect/disconnect
-// events via onconnect/ondisconnect attributes
-function Component() {}
-
-// components will lazily define html or svg properties
-// as soon as these are invoked within the .render() method
-// Such render() method is not provided by the base class
-// but it must be available through the Component extend.
-function setup(content) {
-  Object.defineProperties(
-    Component.prototype,
-    {
-      handleEvent: {value(e) {
-        const ct = e.currentTarget;
-        this[
-          ('getAttribute' in ct && ct.getAttribute('data-call')) ||
-          ('on' + e.type)
-        ](e);
-      }},
-      html: lazyGetter('html', content),
-      svg: lazyGetter('svg', content),
-      state: lazyGetter('state', function () { return this.defaultState; }),
-      defaultState: {get() { return {}; }},
-      setState: {value(state) {
-        const target = this.state;
-        const source = typeof state === 'function' ? state.call(this, target) : state;
-        for (const key in source) target[key] = source[key];
-        this.render();
-      }}
-    }
-  );
-}
-
-// instead of a secret key I could've used a WeakMap
-// However, attaching a property directly will result
-// into better performance with thousands of components
-// hanging around, and less memory pressure caused by the WeakMap
-const lazyGetter = (type, fn) => {
-  const secret = '_' + type + '$';
-  return {
-    get() {
-      return this[secret] || (this[type] = fn.call(this, type));
-    },
-    set(value) {
-      Object.defineProperty(this, secret, {configurable: true, value});
-    }
-  };
-};
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const intents = {};
-const keys = [];
-const hasOwnProperty = intents.hasOwnProperty;
-
-let length = 0;
-
-/* harmony default export */ __webpack_exports__["a"] = ({
-
-  // hyperHTML.define('intent', (object, update) => {...})
-  // can be used to define a third parts update mechanism
-  // when every other known mechanism failed.
-  // hyper.define('user', info => info.name);
-  // hyper(node)`<p>${{user}}</p>`;
-  define: (intent, callback) => {
-    if (!(intent in intents)) {
-      length = keys.push(intent);
-    }
-    intents[intent] = callback;
-  },
-
-  // this method is used internally as last resort
-  // to retrieve a value out of an object
-  invoke: (object, callback) => {
-    for (let i = 0; i < length; i++) {
-      let key = keys[i];
-      if (hasOwnProperty.call(object, key)) {
-        return intents[key](object[key], callback);
-      }
-    }
-  }
-});
-
-
-/***/ }),
-/* 38 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return attrName; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return attrSeeker; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return selfClosing; });
-// TODO:  I'd love to code-cover RegExp too here
-//        these are fundamental for this library
-
-const spaces = ' \\f\\n\\r\\t';
-const almostEverything = '[^ ' + spaces + '\\/>"\'=]+';
-const attrName = '[ ' + spaces + ']+' + almostEverything;
-const tagName = '<([A-Za-z]+[A-Za-z0-9:_-]*)((?:';
-const attrPartials = '(?:=(?:\'[^\']*?\'|"[^"]*?"|<[^>]*?>|' + almostEverything + '))?)';
-
-const attrSeeker = new RegExp(
-  tagName + attrName + attrPartials + '+)([ ' + spaces + ']*/?>)',
-  'g'
-);
-
-const selfClosing = new RegExp(
-  tagName + attrName + attrPartials + '*)([ ' + spaces + ']*/>)',
-  'g'
-);
-
-
-
-
-/***/ }),
-/* 39 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = Wire;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shared_utils_js__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_easy_dom_js__ = __webpack_require__(21);
-
-
-
-function Wire(childNodes) {
-  this.childNodes = childNodes;
-  this.length = childNodes.length;
-  this.first = childNodes[0];
-  this.last = childNodes[this.length - 1];
-}
-
-// when a wire is inserted, all its nodes will follow
-Wire.prototype.insert = function insert() {
-  const df = Object(__WEBPACK_IMPORTED_MODULE_1__shared_easy_dom_js__["c" /* fragment */])(this.first);
-  Object(__WEBPACK_IMPORTED_MODULE_0__shared_utils_js__["a" /* append */])(df, this.childNodes);
-  return df;
-};
-
-// when a wire is removed, all its nodes must be removed as well
-Wire.prototype.remove = function remove() {
-  const first = this.first;
-  const last = this.last;
-  if (this.length === 2) {
-    last.parentNode.removeChild(last);
-  } else {
-    const range = Object(__WEBPACK_IMPORTED_MODULE_1__shared_easy_dom_js__["b" /* doc */])(first).createRange();
-    range.setStartBefore(this.childNodes[1]);
-    range.setEndAfter(last);
-    range.deleteContents();
-  }
-  return first;
-};
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shared_poorlyfills_js__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_constants_js__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__objects_Updates_js__ = __webpack_require__(89);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shared_utils_js__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_re_js__ = __webpack_require__(38);
-
-
-
-
-
-
-
-// a weak collection of contexts that
-// are already known to hyperHTML
-const bewitched = new __WEBPACK_IMPORTED_MODULE_0__shared_poorlyfills_js__["c" /* WeakMap */];
-
-// the collection of all template literals
-// since these are unique and immutable
-// for the whole application life-cycle
-const templates = new __WEBPACK_IMPORTED_MODULE_0__shared_poorlyfills_js__["b" /* Map */];
-
-// better known as hyper.bind(node), the render is
-// the main tag function in charge of fully upgrading
-// or simply updating, contexts used as hyperHTML targets.
-// The `this` context is either a regular DOM node or a fragment.
-function render(template) {
-  const wicked = bewitched.get(this);
-  if (wicked && wicked.template === Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["e" /* unique */])(template)) {
-    update.apply(wicked.updates, arguments);
-  } else {
-    upgrade.apply(this, arguments);
-  }
-  return this;
-}
-
-// an upgrade is in charge of collecting template info,
-// parse it once, if unknown, to map all interpolations
-// as single DOM callbacks, relate such template
-// to the current context, and render it after cleaning the context up
-function upgrade(template) {
-  template = Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["e" /* unique */])(template);
-  const info =  templates.get(template) ||
-                createTemplate.call(this, template);
-  const fragment = Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["c" /* importNode */])(this.ownerDocument, info.fragment);
-  const updates = __WEBPACK_IMPORTED_MODULE_2__objects_Updates_js__["a" /* default */].create(fragment, info.paths);
-  bewitched.set(this, {template, updates});
-  update.apply(updates, arguments);
-  this.textContent = '';
-  this.appendChild(fragment);
-}
-
-// an update simply loops over all mapped DOM operations
-function update() {
-  const length = arguments.length;
-  for (let i = 1; i < length; i++) {
-    this[i - 1](arguments[i]);
-  }
-}
-
-// a template can be used to create a document fragment
-// aware of all interpolations and with a list
-// of paths used to find once those nodes that need updates,
-// no matter if these are attributes, text nodes, or regular one
-function createTemplate(template) {
-  const paths = [];
-  const html = template.join(__WEBPACK_IMPORTED_MODULE_1__shared_constants_js__["l" /* UIDC */]).replace(SC_RE, SC_PLACE);
-  const fragment = Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["b" /* createFragment */])(this, html);
-  __WEBPACK_IMPORTED_MODULE_2__objects_Updates_js__["a" /* default */].find(fragment, paths, template.slice());
-  const info = {fragment, paths};
-  templates.set(template, info);
-  return info;
-}
-
-// some node could be special though, like a custom element
-// with a self closing tag, which should work through these changes.
-const SC_RE = __WEBPACK_IMPORTED_MODULE_4__shared_re_js__["c" /* selfClosing */];
-const SC_PLACE = ($0, $1, $2) => {
-  return __WEBPACK_IMPORTED_MODULE_1__shared_constants_js__["m" /* VOID_ELEMENTS */].test($1) ? $0 : ('<' + $1 + $2 + '></' + $1 + '>');
-};
-
-/* harmony default export */ __webpack_exports__["a"] = (render);
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* AUTOMATICALLY IMPORTED, DO NOT MODIFY */
-/*! (c) 2017 Andrea Giammarchi (ISC) */
-
-/**
- * This code is a revisited port of the snabbdom vDOM diffing logic,
- * the same that fuels as fork Vue.js or other libraries.
- * @credits https://github.com/snabbdom/snabbdom
- */
-
-const identity = O => O;
-
-const domdiff = (
-  parentNode,     // where changes happen
-  currentNodes,   // Array of current items/nodes
-  futureNodes,    // Array of future items/nodes
-  getNode,        // optional way to retrieve a node from an item
-  beforeNode      // optional item/node to use as insertBefore delimiter
-) => {
-  const get = getNode || identity;
-  const before = beforeNode == null ? null : get(beforeNode, 0);
-  let currentStart = 0, futureStart = 0;
-  let currentEnd = currentNodes.length - 1;
-  let currentStartNode = currentNodes[0];
-  let currentEndNode = currentNodes[currentEnd];
-  let futureEnd = futureNodes.length - 1;
-  let futureStartNode = futureNodes[0];
-  let futureEndNode = futureNodes[futureEnd];
-  while (currentStart <= currentEnd && futureStart <= futureEnd) {
-    if (currentStartNode == null) {
-      currentStartNode = currentNodes[++currentStart];
-    }
-    else if (currentEndNode == null) {
-      currentEndNode = currentNodes[--currentEnd];
-    }
-    else if (futureStartNode == null) {
-      futureStartNode = futureNodes[++futureStart];
-    }
-    else if (futureEndNode == null) {
-      futureEndNode = futureNodes[--futureEnd];
-    }
-    else if (currentStartNode == futureStartNode) {
-      currentStartNode = currentNodes[++currentStart];
-      futureStartNode = futureNodes[++futureStart];
-    }
-    else if (currentEndNode == futureEndNode) {
-      currentEndNode = currentNodes[--currentEnd];
-      futureEndNode = futureNodes[--futureEnd];
-    }
-    else if (currentStartNode == futureEndNode) {
-      parentNode.insertBefore(
-        get(currentStartNode, 1),
-        get(currentEndNode, -0).nextSibling
-      );
-      currentStartNode = currentNodes[++currentStart];
-      futureEndNode = futureNodes[--futureEnd];
-    }
-    else if (currentEndNode == futureStartNode) {
-      parentNode.insertBefore(
-        get(currentEndNode, 1),
-        get(currentStartNode, 0)
-      );
-      currentEndNode = currentNodes[--currentEnd];
-      futureStartNode = futureNodes[++futureStart];
-    }
-    else {
-      let index = currentNodes.indexOf(futureStartNode);
-      if (index < 0) {
-        parentNode.insertBefore(
-          get(futureStartNode, 1),
-          get(currentStartNode, 0)
-        );
-        futureStartNode = futureNodes[++futureStart];
-      }
-      else {
-        let el = currentNodes[index];
-        currentNodes[index] = null;
-        parentNode.insertBefore(
-          get(el, 1),
-          get(currentStartNode, 0)
-        );
-        futureStartNode = futureNodes[++futureStart];
-      }
-    }
-  }
-  if (currentStart <= currentEnd || futureStart <= futureEnd) {
-    if (currentStart > currentEnd) {
-      const pin = futureNodes[futureEnd + 1];
-      const place = pin == null ? before : get(pin, 0);
-      if (futureStart === futureEnd) {
-        parentNode.insertBefore(get(futureNodes[futureStart], 1), place);
-      }
-      else {
-        const fragment = parentNode.ownerDocument.createDocumentFragment();
-        while (futureStart <= futureEnd) {
-          fragment.appendChild(get(futureNodes[futureStart++], 1));
-        }
-        parentNode.insertBefore(fragment, place);
-      }
-    }
-    else {
-      if (currentNodes[currentStart] == null) currentStart++;
-      if (currentStart === currentEnd) {
-        parentNode.removeChild(get(currentNodes[currentStart], -1));
-      }
-      else {
-        const range = parentNode.ownerDocument.createRange();
-        range.setStartBefore(get(currentNodes[currentStart], -1));
-        range.setEndAfter(get(currentNodes[currentEnd], -1));
-        range.deleteContents();
-      }
-    }
-  }
-  return futureNodes;
-};
-
-/* harmony default export */ __webpack_exports__["a"] = (domdiff);
-
-
-/***/ }),
-/* 42 */,
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */,
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */,
-/* 62 */,
-/* 63 */,
-/* 64 */,
-/* 65 */,
-/* 66 */,
-/* 67 */,
-/* 68 */,
-/* 69 */,
-/* 70 */,
-/* 71 */,
-/* 72 */,
-/* 73 */,
-/* 74 */,
-/* 75 */,
-/* 76 */,
-/* 77 */,
-/* 78 */,
-/* 79 */,
-/* 80 */,
-/* 81 */,
-/* 82 */,
-/* 83 */,
-/* 84 */,
-/* 85 */,
-/* 86 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _templateObject = _taggedTemplateLiteral(["", ""], ["", ""]);
-
-var _flyd = __webpack_require__(4);
-
-var _flyd2 = _interopRequireDefault(_flyd);
-
-var _esm = __webpack_require__(35);
-
-var _esm2 = _interopRequireDefault(_esm);
-
-var _temperature = __webpack_require__(92);
-
-var _meiosis = __webpack_require__(10);
-
-var _meiosisTracer = __webpack_require__(12);
-
-var _meiosisTracer2 = _interopRequireDefault(_meiosisTracer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-// Only for using Meiosis Tracer in development.
-
-
-var update = _flyd2.default.stream();
-var temperature = (0, _temperature.createTemperature)(update);
-var initialModel = temperature.model();
-var applyUpdate = function applyUpdate(model, modelUpdate) {
-  return modelUpdate(model);
-};
-var models = _flyd2.default.scan(applyUpdate, initialModel, update);
-
-var element = document.getElementById("app");
-var render = _esm2.default.bind(element);
-models.map(function (model) {
-  return render(_templateObject, temperature.view(model));
-});
-
-// Only for using Meiosis Tracer in development.
-(0, _meiosis.trace)({ update: update, dataStreams: [models] });
-(0, _meiosisTracer2.default)({ selector: "#tracer" });
-
-/***/ }),
-/* 87 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return content; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return weakly; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_poorlyfills_js__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_easy_dom_js__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shared_utils_js__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__classes_Wire_js__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__render_js__ = __webpack_require__(40);
-
-
-
-
-
-
-
-// all wires used per each context
-const wires = new __WEBPACK_IMPORTED_MODULE_1__shared_poorlyfills_js__["c" /* WeakMap */];
-
-// A wire is a callback used as tag function
-// to lazily relate a generic object to a template literal.
-// hyper.wire(user)`<div id=user>${user.name}</div>`; => the div#user
-// This provides the ability to have a unique DOM structure
-// related to a unique JS object through a reusable template literal.
-// A wire can specify a type, as svg or html, and also an id
-// via html:id or :id convention. Such :id allows same JS objects
-// to be associated to different DOM structures accordingly with
-// the used template literal without losing previously rendered parts.
-const wire = (obj, type) => obj == null ?
-  content(type || 'html') :
-  weakly(obj, type || 'html');
-
-// A wire content is a virtual reference to one or more nodes.
-// It's represented by either a DOM node, or an Array.
-// In both cases, the wire content role is to simply update
-// all nodes through the list of related callbacks.
-// In few words, a wire content is like an invisible parent node
-// in charge of updating its content like a bound element would do.
-const content = type => {
-  let wire, container, content, template, updates;
-  return function (statics) {
-    statics = Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["e" /* unique */])(statics);
-    let setup = template !== statics;
-    if (setup) {
-      template = statics;
-      content = Object(__WEBPACK_IMPORTED_MODULE_2__shared_easy_dom_js__["c" /* fragment */])(document);
-      container = type === 'svg' ?
-        document.createElementNS(__WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["i" /* SVG_NAMESPACE */], 'svg') :
-        content;
-      updates = __WEBPACK_IMPORTED_MODULE_5__render_js__["a" /* default */].bind(container);
-    }
-    updates.apply(null, arguments);
-    if (setup) {
-      if (type === 'svg') {
-        Object(__WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["a" /* append */])(content, __WEBPACK_IMPORTED_MODULE_3__shared_utils_js__["d" /* slice */].call(container.childNodes));
-      }
-      wire = wireContent(content);
-    }
-    return wire;
-  };
-};
-
-// wires are weakly created through objects.
-// Each object can have multiple wires associated
-// and this is thanks to the type + :id feature.
-const weakly = (obj, type) => {
-  const i = type.indexOf(':');
-  let wire = wires.get(obj);
-  let id = type;
-  if (-1 < i) {
-    id = type.slice(i + 1);
-    type = type.slice(0, i) || 'html';
-  }
-  if (!wire) wires.set(obj, wire = {});
-  return wire[id] || (wire[id] = content(type));
-};
-
-// a document fragment loses its nodes as soon
-// as it's appended into another node.
-// This would easily lose wired content
-// so that on a second render call, the parent
-// node wouldn't know which node was there
-// associated to the interpolation.
-// To prevent hyperHTML to forget about wired nodes,
-// these are either returned as Array or, if there's ony one entry,
-// as single referenced node that won't disappear from the fragment.
-// The initial fragment, at this point, would be used as unique reference.
-const wireContent = node => {
-  const childNodes = node.childNodes;
-  const length = childNodes.length;
-  const wireNodes = [];
-  for (let i = 0; i < length; i++) {
-    let child = childNodes[i];
-    if (
-      child.nodeType === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["e" /* ELEMENT_NODE */] ||
-      __WEBPACK_IMPORTED_MODULE_1__shared_poorlyfills_js__["f" /* trim */].call(child.textContent).length !== 0
-    ) {
-      wireNodes.push(child);
-    }
-  }
-  return wireNodes.length === 1 ? wireNodes[0] : new __WEBPACK_IMPORTED_MODULE_4__classes_Wire_js__["a" /* default */](wireNodes);
-};
-
-
-/* harmony default export */ __webpack_exports__["b"] = (wire);
-
-
-/***/ }),
-/* 88 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__easy_dom_js__ = __webpack_require__(21);
-
-
-const testFragment = Object(__WEBPACK_IMPORTED_MODULE_0__easy_dom_js__["c" /* fragment */])(document);
-
-// DOM4 node.append(...many)
-const hasAppend = 'append' in testFragment;
-/* harmony export (immutable) */ __webpack_exports__["a"] = hasAppend;
-
-
-// detect old browsers without HTMLTemplateElement content support
-const hasContent = 'content' in Object(__WEBPACK_IMPORTED_MODULE_0__easy_dom_js__["a" /* create */])(document, 'template');
-/* harmony export (immutable) */ __webpack_exports__["b"] = hasContent;
-
-
-// IE 11 has problems with cloning templates: it "forgets" empty childNodes
-testFragment.appendChild(Object(__WEBPACK_IMPORTED_MODULE_0__easy_dom_js__["d" /* text */])(testFragment, 'g'));
-testFragment.appendChild(Object(__WEBPACK_IMPORTED_MODULE_0__easy_dom_js__["d" /* text */])(testFragment, ''));
-const hasDoomedCloneNode = testFragment.cloneNode(true).childNodes.length === 1;
-/* harmony export (immutable) */ __webpack_exports__["c"] = hasDoomedCloneNode;
-
-
-// old browsers need to fallback to cloneNode
-// Custom Elements V0 and V1 will work polyfilled
-// but native implementations need importNode instead
-// (specially Chromium and its old V0 implementation)
-const hasImportNode = 'importNode' in document;
-/* harmony export (immutable) */ __webpack_exports__["d"] = hasImportNode;
-
-
-
-/***/ }),
-/* 89 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__classes_Component_js__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__classes_Wire_js__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Path_js__ = __webpack_require__(90);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Style_js__ = __webpack_require__(91);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__Intent_js__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shared_easy_dom_js__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shared_utils_js__ = __webpack_require__(22);
-
-
-
-
-
-
-
-
-
-
-
-
-// hyper.Component have a connected/disconnected
-// mechanism provided by MutationObserver
-// This weak set is used to recognize components
-// as DOM node that needs to trigger connected/disconnected events
-const components = new __WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__["d" /* WeakSet */];
-
-// a basic dictionary used to filter already cached attributes
-// while looking for special hyperHTML values.
-function Cache() {}
-Cache.prototype = Object.create(null);
-
-// returns an intent to explicitly inject content as html
-const asHTML = html => ({html});
-
-// returns nodes from wires and components
-const asNode = (item, i) => {
-  return 'ELEMENT_NODE' in item ?
-    item :
-    (item.constructor === __WEBPACK_IMPORTED_MODULE_2__classes_Wire_js__["a" /* default */] ?
-      // in the Wire case, the content can be
-      // removed, post-pended, inserted, or pre-pended and
-      // all these cases are handled by domdiff already
-      /* istanbul ignore next */
-      ((1 / i) < 0 ?
-        (i ? item.remove() : item.last) :
-        (i ? item.insert() : item.first)) :
-      asNode(item.render(), i));
-}
-
-// returns true if domdiff can handle the value
-const canDiff = value =>  'ELEMENT_NODE' in value ||
-value instanceof __WEBPACK_IMPORTED_MODULE_2__classes_Wire_js__["a" /* default */] ||
-value instanceof __WEBPACK_IMPORTED_MODULE_1__classes_Component_js__["a" /* default */];
-
-// updates are created once per context upgrade
-// within the main render function (../hyper/render.js)
-// These are an Array of callbacks to invoke passing
-// each interpolation value.
-// Updates can be related to any kind of content,
-// attributes, or special text-only cases such <style>
-// elements or <textarea>
-const create = (root, paths) => {
-  const updates = [];
-  const length = paths.length;
-  for (let i = 0; i < length; i++) {
-    const info = paths[i];
-    const node = __WEBPACK_IMPORTED_MODULE_3__Path_js__["a" /* default */].find(root, info.path);
-    switch (info.type) {
-      case 'any':
-        updates.push(setAnyContent(node, []));
-        break;
-      case 'attr':
-        updates.push(setAttribute(node, info.name, info.node));
-        break;
-      case 'text':
-        updates.push(setTextContent(node));
-        break;
-    }
-  }
-  return updates;
-};
-
-// finding all paths is a one-off operation performed
-// when a new template literal is used.
-// The goal is to map all target nodes that will be
-// used to update content/attributes every time
-// the same template literal is used to create content.
-// The result is a list of paths related to the template
-// with all the necessary info to create updates as
-// list of callbacks that target directly affected nodes.
-const find = (node, paths, parts) => {
-  const childNodes = node.childNodes;
-  const length = childNodes.length;
-  for (let i = 0; i < length; i++) {
-    let child = childNodes[i];
-    switch (child.nodeType) {
-      case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["e" /* ELEMENT_NODE */]:
-        findAttributes(child, paths, parts);
-        find(child, paths, parts);
-        break;
-      case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["a" /* COMMENT_NODE */]:
-        if (child.textContent === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["k" /* UID */]) {
-          parts.shift();
-          paths.push(
-            // basicHTML or other non standard engines
-            // might end up having comments in nodes
-            // where they shouldn't, hence this check.
-            __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["h" /* SHOULD_USE_TEXT_CONTENT */].test(node.nodeName) ?
-              __WEBPACK_IMPORTED_MODULE_3__Path_js__["a" /* default */].create('text', node) :
-              __WEBPACK_IMPORTED_MODULE_3__Path_js__["a" /* default */].create('any', child)
-          );
-        }
-        break;
-      case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["j" /* TEXT_NODE */]:
-        // the following ignore is actually covered by browsers
-        // only basicHTML ends up on previous COMMENT_NODE case
-        // instead of TEXT_NODE because it knows nothing about
-        // special style or textarea behavior
-        /* istanbul ignore if */
-        if (
-          __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["h" /* SHOULD_USE_TEXT_CONTENT */].test(node.nodeName) &&
-          __WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__["f" /* trim */].call(child.textContent) === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["l" /* UIDC */]
-        ) {
-          parts.shift();
-          paths.push(__WEBPACK_IMPORTED_MODULE_3__Path_js__["a" /* default */].create('text', node));
-        }
-        break;
-    }
-  }
-};
-
-// attributes are searched via unique hyperHTML id value.
-// Despite HTML being case insensitive, hyperHTML is able
-// to recognize attributes by name in a caseSensitive way.
-// This plays well with Custom Elements definitions
-// and also with XML-like environments, without trusting
-// the resulting DOM but the template literal as the source of truth.
-// IE/Edge has a funny bug with attributes and these might be duplicated.
-// This is why there is a cache in charge of being sure no duplicated
-// attributes are ever considered in future updates.
-const findAttributes = (node, paths, parts) => {
-  const cache = new Cache;
-  const attributes = node.attributes;
-  const array = __WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["d" /* slice */].call(attributes);
-  const remove = [];
-  const length = array.length;
-  for (let i = 0; i < length; i++) {
-    const attribute = array[i];
-    if (attribute.value === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["k" /* UID */]) {
-      const name = attribute.name;
-      // the following ignore is covered by IE
-      // and the IE9 double viewBox test
-      /* istanbul ignore else */
-      if (!(name in cache)) {
-        const realName = parts.shift().replace(/^(?:|[\S\s]*?\s)(\S+?)=['"]?$/, '$1');
-        cache[name] = attributes[realName] ||
-                      // the following ignore is covered by browsers
-                      // while basicHTML is already case-sensitive
-                      /* istanbul ignore next */
-                      attributes[realName.toLowerCase()];
-        paths.push(__WEBPACK_IMPORTED_MODULE_3__Path_js__["a" /* default */].create('attr', cache[name], realName));
-      }
-      remove.push(attribute);
-    }
-  }
-  const len = remove.length;
-  for (let i = 0; i < len; i++) {
-    node.removeAttributeNode(remove[i]);
-  }
-
-  // This is a very specific Firefox/Safari issue
-  // but since it should be a not so common pattern,
-  // it's probably worth patching regardless.
-  // Basically, scripts created through strings are death.
-  // You need to create fresh new scripts instead.
-  // TODO: is there any other node that needs such nonsense ?
-  const nodeName = node.nodeName;
-  if (/^script$/i.test(nodeName)) {
-    const script = Object(__WEBPACK_IMPORTED_MODULE_7__shared_easy_dom_js__["a" /* create */])(node, nodeName);
-    for (let i = 0; i < attributes.length; i++) {
-      script.setAttributeNode(attributes[i].cloneNode(true));
-    }
-    script.textContent = node.textContent;
-    node.parentNode.replaceChild(script, node);
-  }
-};
-
-// when a Promise is used as interpolation value
-// its result must be parsed once resolved.
-// This callback is in charge of understanding what to do
-// with a returned value once the promise is resolved.
-const invokeAtDistance = (value, callback) => {
-  callback(value.placeholder);
-  if ('text' in value) {
-    Promise.resolve(value.text).then(String).then(callback);
-  } else if ('any' in value) {
-    Promise.resolve(value.any).then(callback);
-  } else if ('html' in value) {
-    Promise.resolve(value.html).then(asHTML).then(callback);
-  } else {
-    Promise.resolve(__WEBPACK_IMPORTED_MODULE_5__Intent_js__["a" /* default */].invoke(value, callback)).then(callback);
-  }
-};
-
-// quick and dirty way to check for Promise/ish values
-const isPromise_ish = value => value != null && 'then' in value;
-
-// in a hyper(node)`<div>${content}</div>` case
-// everything could happen:
-//  * it's a JS primitive, stored as text
-//  * it's null or undefined, the node should be cleaned
-//  * it's a component, update the content by rendering it
-//  * it's a promise, update the content once resolved
-//  * it's an explicit intent, perform the desired operation
-//  * it's an Array, resolve all values if Promises and/or
-//    update the node with the resulting list of content
-const setAnyContent = (node, childNodes) => {
-  let fastPath = false;
-  let oldValue;
-  const anyContent = value => {
-    switch (typeof value) {
-      case 'string':
-      case 'number':
-      case 'boolean':
-        if (fastPath) {
-          if (oldValue !== value) {
-            oldValue = value;
-            childNodes[0].textContent = value;
-          }
-        } else {
-          fastPath = true;
-          oldValue = value;
-          childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-            node.parentNode,
-            childNodes,
-            [Object(__WEBPACK_IMPORTED_MODULE_7__shared_easy_dom_js__["d" /* text */])(node, value)],
-            asNode,
-            node
-          );
-        }
-        break;
-      case 'object':
-      case 'undefined':
-        if (value == null) {
-          fastPath = false;
-          childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-            node.parentNode,
-            childNodes,
-            [],
-            asNode,
-            node
-          );
-          break;
-        }
-      default:
-        fastPath = false;
-        oldValue = value;
-        if (Object(__WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__["e" /* isArray */])(value)) {
-          if (value.length === 0) {
-            if (childNodes.length) {
-              childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-                node.parentNode,
-                childNodes,
-                [],
-                asNode,
-                node
-              );
-            }
-          } else {
-            switch (typeof value[0]) {
-              case 'string':
-              case 'number':
-              case 'boolean':
-                anyContent({html: value});
-                break;
-              case 'object':
-                if (Object(__WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__["e" /* isArray */])(value[0])) {
-                  value = value.concat.apply([], value);
-                }
-                if (isPromise_ish(value[0])) {
-                  Promise.all(value).then(anyContent);
-                  break;
-                }
-              default:
-                childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-                  node.parentNode,
-                  childNodes,
-                  value,
-                  asNode,
-                  node
-                );
-                break;
-            }
-          }
-        } else if (canDiff(value)) {
-          childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-            node.parentNode,
-            childNodes,
-            value.nodeType === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["d" /* DOCUMENT_FRAGMENT_NODE */] ?
-              __WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["d" /* slice */].call(value.childNodes) :
-              [value],
-            asNode,
-            node
-          );
-        } else if (isPromise_ish(value)) {
-          value.then(anyContent);
-        } else if ('placeholder' in value) {
-          invokeAtDistance(value, anyContent);
-        } else if ('text' in value) {
-          anyContent(String(value.text));
-        } else if ('any' in value) {
-          anyContent(value.any);
-        } else if ('html' in value) {
-          childNodes = Object(__WEBPACK_IMPORTED_MODULE_6__shared_domdiff_js__["a" /* default */])(
-            node.parentNode,
-            childNodes,
-            __WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["d" /* slice */].call(
-              Object(__WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["b" /* createFragment */])(
-                node,
-                [].concat(value.html).join('')
-              ).childNodes
-            ),
-            asNode,
-            node
-          );
-        } else if ('length' in value) {
-          anyContent(__WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["d" /* slice */].call(value));
-        } else {
-          anyContent(__WEBPACK_IMPORTED_MODULE_5__Intent_js__["a" /* default */].invoke(value, anyContent));
-        }
-        break;
-    }
-  };
-  return anyContent;
-};
-
-// there are four kind of attributes, and related behavior:
-//  * events, with a name starting with `on`, to add/remove event listeners
-//  * special, with a name present in their inherited prototype, accessed directly
-//  * regular, accessed through get/setAttribute standard DOM methods
-//  * style, the only regular attribute that also accepts an object as value
-//    so that you can style=${{width: 120}}. In this case, the behavior has been
-//    fully inspired by Preact library and its simplicity.
-const setAttribute = (node, name, original) => {
-  const isSVG = __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["g" /* OWNER_SVG_ELEMENT */] in node;
-  let oldValue;
-  // if the attribute is the style one
-  // handle it differently from others
-  if (name === 'style') {
-    return Object(__WEBPACK_IMPORTED_MODULE_4__Style_js__["a" /* default */])(node, original, isSVG);
-  }
-  // the name is an event one,
-  // add/remove event listeners accordingly
-  else if (/^on/.test(name)) {
-    let type = name.slice(2);
-    if (type === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["b" /* CONNECTED */] || type === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["c" /* DISCONNECTED */]) {
-      if (notObserving) {
-        notObserving = false;
-        observe();
-      }
-      components.add(node);
-    }
-    else if (name.toLowerCase() in node) {
-      type = type.toLowerCase();
-    }
-    return newValue => {
-      if (oldValue !== newValue) {
-        if (oldValue) node.removeEventListener(type, oldValue, false);
-        oldValue = newValue;
-        if (newValue) node.addEventListener(type, newValue, false);
-      }
-    };
-  }
-  // the attribute is special ('value' in input)
-  // and it's not SVG *or* the name is exactly data,
-  // in this case assign the value directly
-  else if (name === 'data' || (!isSVG && name in node)) {
-    return newValue => {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-        if (node[name] !== newValue) {
-          node[name] = newValue;
-          if (newValue == null) {
-            node.removeAttribute(name);
-          }
-        }
-      }
-    };
-  }
-  // in every other case, use the attribute node as it is
-  // update only the value, set it as node only when/if needed
-  else {
-    let owner = false;
-    const attribute = original.cloneNode(true);
-    return newValue => {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-        if (attribute.value !== newValue) {
-          if (newValue == null) {
-            if (owner) {
-              owner = false;
-              node.removeAttributeNode(attribute);
-            }
-            attribute.value = newValue;
-          } else {
-            attribute.value = newValue;
-            if (!owner) {
-              owner = true;
-              node.setAttributeNode(attribute);
-            }
-          }
-        }
-      }
-    };
-  }
-};
-
-// style or textareas don't accept HTML as content
-// it's pointless to transform or analyze anything
-// different from text there but it's worth checking
-// for possible defined intents.
-const setTextContent = node => {
-  let oldValue;
-  const textContent = value => {
-    if (oldValue !== value) {
-      oldValue = value;
-      if (typeof value === 'object' && value) {
-        if (isPromise_ish(value)) {
-          value.then(textContent);
-        } else if ('placeholder' in value) {
-          invokeAtDistance(value, textContent);
-        } else if ('text' in value) {
-          textContent(String(value.text));
-        } else if ('any' in value) {
-          textContent(value.any);
-        } else if ('html' in value) {
-          textContent([].concat(value.html).join(''));
-        } else if ('length' in value) {
-          textContent(__WEBPACK_IMPORTED_MODULE_9__shared_utils_js__["d" /* slice */].call(value).join(''));
-        } else {
-          textContent(__WEBPACK_IMPORTED_MODULE_5__Intent_js__["a" /* default */].invoke(value, textContent));
-        }
-      } else {
-        node.textContent = value == null ? '' : value;
-      }
-    }
-  };
-  return textContent;
-};
-
-/* harmony default export */ __webpack_exports__["a"] = ({create, find});
-
-// hyper.Components might need connected/disconnected notifications
-// used by components and their onconnect/ondisconnect callbacks.
-// When one of these callbacks is encountered,
-// the document starts being observed.
-let notObserving = true;
-function observe() {
-
-  // when hyper.Component related DOM nodes
-  // are appended or removed from the live tree
-  // these might listen to connected/disconnected events
-  // This utility is in charge of finding all components
-  // involved in the DOM update/change and dispatch
-  // related information to them
-  const dispatchAll = (nodes, type) => {
-    const event = new __WEBPACK_IMPORTED_MODULE_8__shared_poorlyfills_js__["a" /* Event */](type);
-    const length = nodes.length;
-    for (let i = 0; i < length; i++) {
-      let node = nodes[i];
-      if (node.nodeType === __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["e" /* ELEMENT_NODE */]) {
-        dispatchTarget(node, event);
-      }
-    }
-  };
-
-  // the way it's done is via the components weak set
-  // and recursively looking for nested components too
-  const dispatchTarget = (node, event) => {
-    if (components.has(node)) {
-      node.dispatchEvent(event);
-    } else {
-      const children = node.children;
-      const length = children.length;
-      for (let i = 0; i < length; i++) {
-        dispatchTarget(children[i], event);
-      }
-    }
-  }
-
-  // The MutationObserver is the best way to implement that
-  // but there is a fallback to deprecated DOMNodeInserted/Removed
-  // so that even older browsers/engines can help components life-cycle
-  try {
-    (new MutationObserver(records => {
-      const length = records.length;
-      for (let i = 0; i < length; i++) {
-        let record = records[i];
-        dispatchAll(record.removedNodes, __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["c" /* DISCONNECTED */]);
-        dispatchAll(record.addedNodes, __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["b" /* CONNECTED */]);
-      }
-    })).observe(document, {subtree: true, childList: true});
-  } catch(o_O) {
-    document.addEventListener('DOMNodeRemoved', event => {
-      dispatchAll([event.target], __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["c" /* DISCONNECTED */]);
-    }, false);
-    document.addEventListener('DOMNodeInserted', event => {
-      dispatchAll([event.target], __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["b" /* CONNECTED */]);
-    }, false);
-  }
-}
-
-
-/***/ }),
-/* 90 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__ = __webpack_require__(19);
-
-
-// every template literal interpolation indicates
-// a precise target in the DOM the template is representing.
-// `<p id=${'attribute'}>some ${'content'}</p>`
-// hyperHTML finds only once per template literal,
-// hence once per entire application life-cycle,
-// all nodes that are related to interpolations.
-// These nodes are stored as indexes used to retrieve,
-// once per upgrade, nodes that will change on each future update.
-// A path example is [2, 0, 1] representing the operation:
-// node.childNodes[2].childNodes[0].childNodes[1]
-// Attributes are addressed via their owner node and their name.
-const createPath = node => {
-  const path = [];
-  let parentNode;
-  switch (node.nodeType) {
-    case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["e" /* ELEMENT_NODE */]:
-    case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["d" /* DOCUMENT_FRAGMENT_NODE */]:
-      parentNode = node;
-      break;
-    case __WEBPACK_IMPORTED_MODULE_0__shared_constants_js__["a" /* COMMENT_NODE */]:
-      parentNode = node.parentNode;
-      prepend(path, parentNode, node);
-      break;
-    default:
-      parentNode = node.ownerElement;
-      break;
-  }
-  for (
-    node = parentNode;
-    (parentNode = parentNode.parentNode);
-    node = parentNode
-  ) {
-    prepend(path, parentNode, node);
-  }
-  return path;
-};
-
-const prepend = (path, parent, node) => {
-  path.unshift(path.indexOf.call(parent.childNodes, node));
-};
-
-/* harmony default export */ __webpack_exports__["a"] = ({
-  create: (type, node, name) => ({type, name, node, path: createPath(node)}),
-  find: (node, path) => {
-    const length = path.length;
-    for (let i = 0; i < length; i++) {
-      node = node.childNodes[path[i]];
-    }
-    return node;
-  }
-});
-
-
-/***/ }),
-/* 91 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-// from https://github.com/developit/preact/blob/33fc697ac11762a1cb6e71e9847670d047af7ce5/src/constants.js
-const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
-
-// style is handled as both string and object
-// even if the target is an SVG element (consistency)
-/* harmony default export */ __webpack_exports__["a"] = ((node, original, isSVG) => {
-  if (isSVG) {
-    const style = original.cloneNode(true);
-    style.value = '';
-    node.setAttributeNode(style);
-    return update(style, isSVG);
-  }
-  return update(node.style, isSVG);
-});
-
-// the update takes care or changing/replacing
-// only properties that are different or
-// in case of string, the whole node
-const update = (style, isSVG) => {
-  let oldType, oldValue;
-  return newValue => {
-    switch (typeof newValue) {
-      case 'object':
-        if (newValue) {
-          if (oldType === 'object') {
-            if (!isSVG) {
-              if (oldValue !== newValue) {
-                for (const key in oldValue) {
-                  if (!(key in newValue)) {
-                    style[key] = '';
-                  }
-                }
-              }
-            }
-          } else {
-            if (isSVG) style.value = '';
-            else style.cssText = '';
-          }
-          const info = isSVG ? {} : style;
-          for (const key in newValue) {
-            const value = newValue[key];
-            info[key] = typeof value === 'number' &&
-                        !IS_NON_DIMENSIONAL.test(key) ?
-                          (value + 'px') : value;
-          }
-          oldType = 'object';
-          if (isSVG) style.value = toStyle((oldValue = info));
-          else oldValue = newValue;
-          break;
-        }
-      default:
-        if (oldValue != newValue) {
-          oldType = 'string';
-          oldValue = newValue;
-          if (isSVG) style.value = newValue || '';
-          else style.cssText = newValue || '';
-        }
-        break;
-    }
-  };
-};
-
-const hyphen = /([^A-Z])([A-Z]+)/g;
-const ized = ($0, $1, $2) => $1 + '-' + $2.toLowerCase();
-const toStyle = object => {
-  const css = [];
-  for (const key in object) {
-    css.push(key.replace(hyphen, ized), ':', object[key], ';');
-  }
-  return css.join('');
-};
-
-/***/ }),
-/* 92 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createTemperature = undefined;
-
-var _actions = __webpack_require__(8);
-
-var _view = __webpack_require__(93);
-
-var createTemperature = exports.createTemperature = function createTemperature(update) {
-  return {
-    model: function model() {
-      return {
-        precipitations: false,
-        precipitation: null,
-        date: "",
-        value: 20,
-        units: "C"
-      };
-    },
-
-    view: (0, _view.createView)((0, _actions.createActions)(update))
-  };
-};
-
-/***/ }),
-/* 93 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createView = undefined;
-
-var _templateObject = _taggedTemplateLiteral(["\n  <span>\n    <input type=\"radio\" id=\"", "\" name=\"precipitation\" value=\"", "\"\n      checked=\"", "\"\n      onclick=", "/>\n    <label for=\"", "\">", "</label>\n  </span>\n"], ["\n  <span>\n    <input type=\"radio\" id=\"", "\" name=\"precipitation\" value=\"", "\"\n      checked=\"", "\"\n      onclick=", "/>\n    <label for=\"", "\">", "</label>\n  </span>\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n      <div>\n        <div>\n          <input type=\"checkbox\" checked=\"", "\"\n            onclick=", " id=\"precipitations\"/>\n          <label for=\"precipitations\">Precipitations</label>\n        </div>\n        <div>\n          ", "\n          ", "\n          ", "\n        </div>\n        <div>\n          Date:\n          <input type=\"text\" size=\"10\" oninput=", "/>\n        </div>\n        <span>Temperature: </span>\n        <span class=\"tempValue\">", "</span>&deg;<span class=\"tempUnits\">", "</span>\n        <div>\n          <button class=\"btn btn-default increase\" onclick=", ">Increase</button>\n          <button class=\"btn btn-default decrease\" onclick=", ">Decrease</button>\n        </div>\n        <div>\n          <button class=\"btn btn-primary changeUnits\" onclick=", ">Change Units</button>\n        </div>\n      </div>\n    "], ["\n      <div>\n        <div>\n          <input type=\"checkbox\" checked=\"", "\"\n            onclick=", " id=\"precipitations\"/>\n          <label for=\"precipitations\">Precipitations</label>\n        </div>\n        <div>\n          ", "\n          ", "\n          ", "\n        </div>\n        <div>\n          Date:\n          <input type=\"text\" size=\"10\" oninput=", "/>\n        </div>\n        <span>Temperature: </span>\n        <span class=\"tempValue\">", "</span>&deg;<span class=\"tempUnits\">", "</span>\n        <div>\n          <button class=\"btn btn-default increase\" onclick=", ">Increase</button>\n          <button class=\"btn btn-default decrease\" onclick=", ">Decrease</button>\n        </div>\n        <div>\n          <button class=\"btn btn-primary changeUnits\" onclick=", ">Change Units</button>\n        </div>\n      </div>\n    "]);
-
-var _esm = __webpack_require__(35);
-
-var _handler = __webpack_require__(9);
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-var precipitationOption = function precipitationOption(_ref) {
-  var model = _ref.model,
-      actions = _ref.actions,
-      id = _ref.id,
-      value = _ref.value,
-      label = _ref.label;
-  return (0, _esm.wire)()(_templateObject, id, value, model.precipitation === value, (0, _handler.safe)(actions.changePrecipitation), id, label);
-};
-
-var createView = exports.createView = function createView(actions) {
-  return function (model) {
-    var w = (0, _esm.wire)(model);
-    var el = w(_templateObject2, model.precipitations, (0, _handler.safe)(actions.togglePrecipitations), precipitationOption({ model: model, actions: actions, id: "rain", value: "RAIN", label: "Rain" }), precipitationOption({ model: model, actions: actions, id: "snow", value: "SNOW", label: "Snow" }), precipitationOption({ model: model, actions: actions, id: "sleet", value: "SLEET", label: "Sleet" }), (0, _handler.safe)(actions.editDate), model.value, model.units, (0, _handler.wrap)(actions.increase, 1), (0, _handler.wrap)(actions.increase, -1), (0, _handler.safe)(actions.changeUnits));
-
-    if (!w.default) {
-      w.default = model.date;
-      el.querySelector("input[type=text]").value = model.date;
-    }
-    return el;
-  };
-};
-
-/***/ })
-/******/ ]);
+/******/ });
