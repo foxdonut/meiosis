@@ -256,159 +256,15 @@ eval("function _isPlaceholder(a) {\n       return a != null && typeof a === 'obj
 
 /***/ }),
 
-/***/ "./node_modules/ultradom/src/clone.js":
-/*!********************************************!*\
-  !*** ./node_modules/ultradom/src/clone.js ***!
-  \********************************************/
-/*! exports provided: clone */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"clone\", function() { return clone; });\nfunction clone(target, source) {\n  var obj = {}\n\n  for (var i in target) obj[i] = target[i]\n  for (var i in source) obj[i] = source[i]\n\n  return obj\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/clone.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/createElement.js":
-/*!****************************************************!*\
-  !*** ./node_modules/ultradom/src/createElement.js ***!
-  \****************************************************/
-/*! exports provided: createElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"createElement\", function() { return createElement; });\n/* harmony import */ var _updateAttribute__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./updateAttribute */ \"./node_modules/ultradom/src/updateAttribute.js\");\n\n\nfunction createElement(node, lifecycle, isSVG) {\n  var element =\n    typeof node === \"string\" || typeof node === \"number\"\n      ? document.createTextNode(node)\n      : (isSVG = isSVG || node.nodeName === \"svg\")\n        ? document.createElementNS(\"http://www.w3.org/2000/svg\", node.nodeName)\n        : document.createElement(node.nodeName)\n\n  var attributes = node.attributes\n  if (attributes) {\n    if (attributes.oncreate) {\n      lifecycle.push(function() {\n        attributes.oncreate(element)\n      })\n    }\n\n    for (var i = 0; i < node.children.length; i++) {\n      element.appendChild(createElement(node.children[i], lifecycle, isSVG))\n    }\n\n    for (var name in attributes) {\n      Object(_updateAttribute__WEBPACK_IMPORTED_MODULE_0__[\"updateAttribute\"])(element, name, attributes[name], null, isSVG)\n    }\n  }\n\n  return element\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/createElement.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/eventListener.js":
-/*!****************************************************!*\
-  !*** ./node_modules/ultradom/src/eventListener.js ***!
-  \****************************************************/
-/*! exports provided: eventListener */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eventListener\", function() { return eventListener; });\nfunction eventListener(event) {\n  return event.currentTarget.events[event.type](event)\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/eventListener.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/getKey.js":
+/***/ "./node_modules/ultradom/ultradom.m.js":
 /*!*********************************************!*\
-  !*** ./node_modules/ultradom/src/getKey.js ***!
+  !*** ./node_modules/ultradom/ultradom.m.js ***!
   \*********************************************/
-/*! exports provided: getKey */
+/*! exports provided: h, render */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getKey\", function() { return getKey; });\nfunction getKey(node) {\n  return node ? node.key : null\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/getKey.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/h.js":
-/*!****************************************!*\
-  !*** ./node_modules/ultradom/src/h.js ***!
-  \****************************************/
-/*! exports provided: h */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"h\", function() { return h; });\nfunction h(name, attributes) {\n  var rest = []\n  var children = []\n  var length = arguments.length\n\n  while (length-- > 2) rest.push(arguments[length])\n\n  while (rest.length) {\n    var node = rest.pop()\n    if (node && node.pop) {\n      for (length = node.length; length--; ) {\n        rest.push(node[length])\n      }\n    } else if (node != null && node !== true && node !== false) {\n      children.push(node)\n    }\n  }\n\n  return typeof name === \"function\"\n    ? name(attributes || {}, children) // h(Component)\n    : {\n        nodeName: name,\n        attributes: attributes || {},\n        children: children,\n        key: attributes && attributes.key\n      }\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/h.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/index.js":
-/*!********************************************!*\
-  !*** ./node_modules/ultradom/src/index.js ***!
-  \********************************************/
-/*! exports provided: h, patch */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _h__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./h */ \"./node_modules/ultradom/src/h.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"h\", function() { return _h__WEBPACK_IMPORTED_MODULE_0__[\"h\"]; });\n\n/* harmony import */ var _patch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./patch */ \"./node_modules/ultradom/src/patch.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"patch\", function() { return _patch__WEBPACK_IMPORTED_MODULE_1__[\"patch\"]; });\n\n\n\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/index.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/patch.js":
-/*!********************************************!*\
-  !*** ./node_modules/ultradom/src/patch.js ***!
-  \********************************************/
-/*! exports provided: patch */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"patch\", function() { return patch; });\n/* harmony import */ var _recycleElement__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./recycleElement */ \"./node_modules/ultradom/src/recycleElement.js\");\n/* harmony import */ var _patchElement__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./patchElement */ \"./node_modules/ultradom/src/patchElement.js\");\n\n\n\nfunction patch(node, element) {\n  var lifecycle = []\n\n  element = element\n    ? Object(_patchElement__WEBPACK_IMPORTED_MODULE_1__[\"patchElement\"])(\n        element.parentNode,\n        element,\n        element.node == null ? Object(_recycleElement__WEBPACK_IMPORTED_MODULE_0__[\"recycleElement\"])(element, [].map) : element.node,\n        node,\n        lifecycle,\n        element.node == null // isRecycling\n      )\n    : Object(_patchElement__WEBPACK_IMPORTED_MODULE_1__[\"patchElement\"])(null, null, null, node, lifecycle)\n\n  element.node = node\n\n  while (lifecycle.length) lifecycle.pop()()\n\n  return element\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/patch.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/patchElement.js":
-/*!***************************************************!*\
-  !*** ./node_modules/ultradom/src/patchElement.js ***!
-  \***************************************************/
-/*! exports provided: patchElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"patchElement\", function() { return patchElement; });\n/* harmony import */ var _createElement__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./createElement */ \"./node_modules/ultradom/src/createElement.js\");\n/* harmony import */ var _removeElement__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./removeElement */ \"./node_modules/ultradom/src/removeElement.js\");\n/* harmony import */ var _updateElement__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./updateElement */ \"./node_modules/ultradom/src/updateElement.js\");\n/* harmony import */ var _getKey__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./getKey */ \"./node_modules/ultradom/src/getKey.js\");\n\n\n\n\n\nfunction patchElement(\n  parent,\n  element,\n  oldNode,\n  node,\n  lifecycle,\n  isRecycling,\n  isSVG\n) {\n  if (node === oldNode) {\n  } else if (oldNode == null || oldNode.nodeName !== node.nodeName) {\n    var newElement = Object(_createElement__WEBPACK_IMPORTED_MODULE_0__[\"createElement\"])(node, lifecycle, isSVG)\n    if (parent) {\n      parent.insertBefore(newElement, element)\n      if (oldNode != null) {\n        Object(_removeElement__WEBPACK_IMPORTED_MODULE_1__[\"removeElement\"])(parent, element, oldNode)\n      }\n    }\n    element = newElement\n  } else if (oldNode.nodeName == null) {\n    element.nodeValue = node\n  } else {\n    Object(_updateElement__WEBPACK_IMPORTED_MODULE_2__[\"updateElement\"])(\n      element,\n      oldNode.attributes,\n      node.attributes,\n      lifecycle,\n      isRecycling,\n      (isSVG = isSVG || node.nodeName === \"svg\")\n    )\n\n    var oldKeyed = {}\n    var newKeyed = {}\n    var oldElements = []\n    var oldChildren = oldNode.children\n    var children = node.children\n\n    for (var i = 0; i < oldChildren.length; i++) {\n      oldElements[i] = element.childNodes[i]\n\n      var oldKey = Object(_getKey__WEBPACK_IMPORTED_MODULE_3__[\"getKey\"])(oldChildren[i])\n      if (oldKey != null) {\n        oldKeyed[oldKey] = [oldElements[i], oldChildren[i]]\n      }\n    }\n\n    var i = 0\n    var k = 0\n\n    while (k < children.length) {\n      var oldKey = Object(_getKey__WEBPACK_IMPORTED_MODULE_3__[\"getKey\"])(oldChildren[i])\n      var newKey = Object(_getKey__WEBPACK_IMPORTED_MODULE_3__[\"getKey\"])(children[k])\n\n      if (newKeyed[oldKey]) {\n        i++\n        continue\n      }\n\n      if (newKey == null || isRecycling) {\n        if (oldKey == null) {\n          patchElement(\n            element,\n            oldElements[i],\n            oldChildren[i],\n            children[k],\n            lifecycle,\n            isRecycling,\n            isSVG\n          )\n          k++\n        }\n        i++\n      } else {\n        var keyedNode = oldKeyed[newKey] || []\n\n        if (oldKey === newKey) {\n          patchElement(\n            element,\n            keyedNode[0],\n            keyedNode[1],\n            children[k],\n            lifecycle,\n            isRecycling,\n            isSVG\n          )\n          i++\n        } else if (keyedNode[0]) {\n          patchElement(\n            element,\n            element.insertBefore(keyedNode[0], oldElements[i]),\n            keyedNode[1],\n            children[k],\n            lifecycle,\n            isRecycling,\n            isSVG\n          )\n        } else {\n          patchElement(\n            element,\n            oldElements[i],\n            null,\n            children[k],\n            lifecycle,\n            isRecycling,\n            isSVG\n          )\n        }\n\n        newKeyed[newKey] = children[k]\n        k++\n      }\n    }\n\n    while (i < oldChildren.length) {\n      if (Object(_getKey__WEBPACK_IMPORTED_MODULE_3__[\"getKey\"])(oldChildren[i]) == null) {\n        Object(_removeElement__WEBPACK_IMPORTED_MODULE_1__[\"removeElement\"])(element, oldElements[i], oldChildren[i])\n      }\n      i++\n    }\n\n    for (var i in oldKeyed) {\n      if (!newKeyed[i]) {\n        Object(_removeElement__WEBPACK_IMPORTED_MODULE_1__[\"removeElement\"])(element, oldKeyed[i][0], oldKeyed[i][1])\n      }\n    }\n  }\n  return element\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/patchElement.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/recycleElement.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/ultradom/src/recycleElement.js ***!
-  \*****************************************************/
-/*! exports provided: recycleElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"recycleElement\", function() { return recycleElement; });\nfunction recycleElement(element, map) {\n  return {\n    nodeName: element.nodeName.toLowerCase(),\n    attributes: {},\n    children: map.call(element.childNodes, function(element) {\n      return element.nodeType === 3 // Node.TEXT_NODE\n        ? element.nodeValue\n        : recycleElement(element, map)\n    })\n  }\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/recycleElement.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/removeChildren.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/ultradom/src/removeChildren.js ***!
-  \*****************************************************/
-/*! exports provided: removeChildren */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"removeChildren\", function() { return removeChildren; });\nfunction removeChildren(element, node) {\n  var attributes = node.attributes\n  if (attributes) {\n    for (var i = 0; i < node.children.length; i++) {\n      removeChildren(element.childNodes[i], node.children[i])\n    }\n\n    if (attributes.ondestroy) {\n      attributes.ondestroy(element)\n    }\n  }\n  return element\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/removeChildren.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/removeElement.js":
-/*!****************************************************!*\
-  !*** ./node_modules/ultradom/src/removeElement.js ***!
-  \****************************************************/
-/*! exports provided: removeElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"removeElement\", function() { return removeElement; });\n/* harmony import */ var _removeChildren__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./removeChildren */ \"./node_modules/ultradom/src/removeChildren.js\");\n\n\nfunction removeElement(parent, element, node) {\n  function done() {\n    parent.removeChild(Object(_removeChildren__WEBPACK_IMPORTED_MODULE_0__[\"removeChildren\"])(element, node))\n  }\n\n  var cb = node.attributes && node.attributes.onremove\n  if (cb) {\n    cb(element, done)\n  } else {\n    done()\n  }\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/removeElement.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/updateAttribute.js":
-/*!******************************************************!*\
-  !*** ./node_modules/ultradom/src/updateAttribute.js ***!
-  \******************************************************/
-/*! exports provided: updateAttribute */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"updateAttribute\", function() { return updateAttribute; });\n/* harmony import */ var _clone__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clone */ \"./node_modules/ultradom/src/clone.js\");\n/* harmony import */ var _eventListener__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eventListener */ \"./node_modules/ultradom/src/eventListener.js\");\n\n\n\nfunction updateAttribute(element, name, value, oldValue, isSVG) {\n  if (name === \"key\") {\n  } else if (name === \"style\") {\n    for (var i in Object(_clone__WEBPACK_IMPORTED_MODULE_0__[\"clone\"])(oldValue, value)) {\n      var style = value == null || value[i] == null ? \"\" : value[i]\n      if (i[0] === \"-\") {\n        element[name].setProperty(i, style)\n      } else {\n        element[name][i] = style\n      }\n    }\n  } else {\n    if (name[0] === \"o\" && name[1] === \"n\") {\n      name = name.slice(2)\n\n      if (element.events) {\n        if (!oldValue) oldValue = element.events[name]\n      } else {\n        element.events = {}\n      }\n\n      element.events[name] = value\n\n      if (value) {\n        if (!oldValue) {\n          element.addEventListener(name, _eventListener__WEBPACK_IMPORTED_MODULE_1__[\"eventListener\"])\n        }\n      } else {\n        element.removeEventListener(name, _eventListener__WEBPACK_IMPORTED_MODULE_1__[\"eventListener\"])\n      }\n    } else if (name in element && name !== \"list\" && !isSVG) {\n      element[name] = value == null ? \"\" : value\n    } else if (value != null && value !== false) {\n      element.setAttribute(name, value)\n    }\n\n    if (value == null || value === false) {\n      element.removeAttribute(name)\n    }\n  }\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/updateAttribute.js?");
-
-/***/ }),
-
-/***/ "./node_modules/ultradom/src/updateElement.js":
-/*!****************************************************!*\
-  !*** ./node_modules/ultradom/src/updateElement.js ***!
-  \****************************************************/
-/*! exports provided: updateElement */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"updateElement\", function() { return updateElement; });\n/* harmony import */ var _clone__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clone */ \"./node_modules/ultradom/src/clone.js\");\n/* harmony import */ var _updateAttribute__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./updateAttribute */ \"./node_modules/ultradom/src/updateAttribute.js\");\n\n\n\nfunction updateElement(\n  element,\n  oldAttributes,\n  attributes,\n  lifecycle,\n  isRecycling,\n  isSVG\n) {\n  for (var name in Object(_clone__WEBPACK_IMPORTED_MODULE_0__[\"clone\"])(oldAttributes, attributes)) {\n    if (\n      attributes[name] !==\n      (name === \"value\" || name === \"checked\"\n        ? element[name]\n        : oldAttributes[name])\n    ) {\n      Object(_updateAttribute__WEBPACK_IMPORTED_MODULE_1__[\"updateAttribute\"])(\n        element,\n        name,\n        attributes[name],\n        oldAttributes[name],\n        isSVG\n      )\n    }\n  }\n\n  var cb = isRecycling ? attributes.oncreate : attributes.onupdate\n  if (cb) {\n    lifecycle.push(function() {\n      cb(element, oldAttributes)\n    })\n  }\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/src/updateElement.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"h\", function() { return h; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\nfunction clone(target, source) {\n  var obj = {}\n\n  for (var i in target) obj[i] = target[i]\n  for (var i in source) obj[i] = source[i]\n\n  return obj\n}\n\nfunction eventListener(event) {\n  return event.currentTarget.events[event.type](event)\n}\n\nfunction updateAttribute(element, name, value, oldValue, isSVG) {\n  if (name === \"key\") {\n  } else {\n    if (name[0] === \"o\" && name[1] === \"n\") {\n      if (!element.events) {\n        element.events = {}\n      }\n      element.events[(name = name.slice(2))] = value\n\n      if (value) {\n        if (!oldValue) {\n          element.addEventListener(name, eventListener)\n        }\n      } else {\n        element.removeEventListener(name, eventListener)\n      }\n    } else if (name in element && name !== \"list\" && !isSVG) {\n      element[name] = value == null ? \"\" : value\n    } else if (value != null && value !== false) {\n      element.setAttribute(name, value)\n    }\n\n    if (value == null || value === false) {\n      element.removeAttribute(name)\n    }\n  }\n}\n\nfunction createElement(node, lifecycle, isSVG) {\n  var element =\n    typeof node === \"string\" || typeof node === \"number\"\n      ? document.createTextNode(node)\n      : (isSVG = isSVG || node.name === \"svg\")\n        ? document.createElementNS(\"http://www.w3.org/2000/svg\", node.name)\n        : document.createElement(node.name)\n\n  var attributes = node.attributes\n  if (attributes) {\n    if (attributes.oncreate) {\n      lifecycle.push(function() {\n        attributes.oncreate(element)\n      })\n    }\n\n    for (var i = 0; i < node.children.length; i++) {\n      element.appendChild(createElement(node.children[i], lifecycle, isSVG))\n    }\n\n    for (var name in attributes) {\n      updateAttribute(element, name, attributes[name], null, isSVG)\n    }\n  }\n\n  return element\n}\n\nfunction updateElement(element, oldAttributes, attributes, lifecycle, isSVG) {\n  for (var name in clone(oldAttributes, attributes)) {\n    if (\n      attributes[name] !==\n      (name === \"value\" || name === \"checked\"\n        ? element[name]\n        : oldAttributes[name])\n    ) {\n      updateAttribute(\n        element,\n        name,\n        attributes[name],\n        oldAttributes[name],\n        isSVG\n      )\n    }\n  }\n\n  if (attributes.onupdate) {\n    lifecycle.push(function() {\n      attributes.onupdate(element, oldAttributes)\n    })\n  }\n}\n\nfunction removeChildren(element, node) {\n  var attributes = node.attributes\n  if (attributes) {\n    for (var i = 0; i < node.children.length; i++) {\n      removeChildren(element.childNodes[i], node.children[i])\n    }\n\n    if (attributes.ondestroy) {\n      attributes.ondestroy(element)\n    }\n  }\n  return element\n}\n\nfunction removeElement(parent, element, node) {\n  function done() {\n    parent.removeChild(removeChildren(element, node))\n  }\n\n  var cb = node.attributes && node.attributes.onremove\n  if (cb) {\n    cb(element, done)\n  } else {\n    done()\n  }\n}\n\nfunction getKey(node) {\n  return node ? node.key : null\n}\n\nfunction patch(parent, element, oldNode, node, lifecycle, isSVG) {\n  if (node === oldNode) {\n  } else if (oldNode == null || oldNode.name !== node.name) {\n    var newElement = parent.insertBefore(\n      createElement(node, lifecycle, isSVG),\n      element\n    )\n\n    if (oldNode != null) {\n      removeElement(parent, element, oldNode)\n    }\n\n    element = newElement\n  } else if (oldNode.name == null) {\n    element.nodeValue = node\n  } else {\n    updateElement(\n      element,\n      oldNode.attributes,\n      node.attributes,\n      lifecycle,\n      (isSVG = isSVG || node.name === \"svg\")\n    )\n\n    var oldKeyed = {}\n    var newKeyed = {}\n    var oldElements = []\n    var oldChildren = oldNode.children\n    var children = node.children\n\n    for (var i = 0; i < oldChildren.length; i++) {\n      oldElements[i] = element.childNodes[i]\n\n      var oldKey = getKey(oldChildren[i])\n      if (oldKey != null) {\n        oldKeyed[oldKey] = [oldElements[i], oldChildren[i]]\n      }\n    }\n\n    var i = 0\n    var k = 0\n\n    while (k < children.length) {\n      var oldKey = getKey(oldChildren[i])\n      var newKey = getKey(children[k])\n\n      if (newKeyed[oldKey]) {\n        i++\n        continue\n      }\n\n      if (newKey != null && newKey === getKey(oldChildren[i + 1])) {\n        if (oldKey == null) {\n          removeElement(element, oldElements[i], oldChildren[i])\n        }\n        i++\n        continue\n      }\n\n      if (newKey == null) {\n        if (oldKey == null) {\n          patch(\n            element,\n            oldElements[i],\n            oldChildren[i],\n            children[k],\n            lifecycle,\n            isSVG\n          )\n          k++\n        }\n        i++\n      } else {\n        var keyed = oldKeyed[newKey] || []\n\n        if (oldKey === newKey) {\n          patch(element, keyed[0], keyed[1], children[k], lifecycle, isSVG)\n          i++\n        } else if (keyed[0]) {\n          patch(\n            element,\n            element.insertBefore(keyed[0], oldElements[i]),\n            keyed[1],\n            children[k],\n            lifecycle,\n            isSVG\n          )\n        } else {\n          patch(element, oldElements[i], null, children[k], lifecycle, isSVG)\n        }\n\n        newKeyed[newKey] = children[k]\n        k++\n      }\n    }\n\n    while (i < oldChildren.length) {\n      if (getKey(oldChildren[i]) == null) {\n        removeElement(element, oldElements[i], oldChildren[i])\n      }\n      i++\n    }\n\n    for (var i in oldKeyed) {\n      if (!newKeyed[i]) {\n        removeElement(element, oldKeyed[i][0], oldKeyed[i][1])\n      }\n    }\n  }\n  return element\n}\n\nfunction h(name, attributes) {\n  var rest = []\n  var children = []\n  var length = arguments.length\n\n  while (length-- > 2) rest.push(arguments[length])\n\n  while (rest.length) {\n    var node = rest.pop()\n    if (node && node.pop) {\n      for (length = node.length; length--; ) {\n        rest.push(node[length])\n      }\n    } else if (node != null && node !== true && node !== false) {\n      children.push(node)\n    }\n  }\n\n  return {\n    name: name,\n    attributes: attributes || {},\n    children: children,\n    key: attributes && attributes.key\n  }\n}\n\nfunction render(node, container) {\n  var lifecycle = []\n  var element = container.children[0]\n\n  patch(\n    container,\n    element,\n    element && element.node,\n    node,\n    lifecycle\n  ).node = node\n\n  while (lifecycle.length) lifecycle.pop()()\n}\n\n\n//# sourceURL=webpack:///./node_modules/ultradom/ultradom.m.js?");
 
 /***/ }),
 
@@ -443,7 +299,7 @@ eval("\n\nvar _setup = __webpack_require__(/*! ./setup */ \"./ultradom/setup.js\
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/* WEBPACK VAR INJECTION */(function(global) {\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.setupApp = exports.setupRender = undefined;\n\nvar _ultradom = __webpack_require__(/*! ultradom */ \"./node_modules/ultradom/src/index.js\");\n\nvar _common = __webpack_require__(/*! ../common */ \"./common/index.js\");\n\nvar _jsx = __webpack_require__(/*! ../common/jsx */ \"./common/jsx.js\");\n\nvar jsxUltradom = (0, _jsx.jsx)({\n  \"onChange\": \"onchange\",\n  \"onClick\": \"onclick\",\n  \"onInput\": \"oninput\"\n});\n\nvar setupRender = exports.setupRender = function setupRender() {\n  global.jsx = jsxUltradom(_ultradom.h);\n  return _ultradom.patch;\n};\n\nvar setupApp = exports.setupApp = function setupApp() {\n  return (0, _common.setup)(setupRender());\n};\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack:///./ultradom/setup.js?");
+eval("/* WEBPACK VAR INJECTION */(function(global) {\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.setupApp = exports.setupRender = undefined;\n\nvar _ultradom = __webpack_require__(/*! ultradom */ \"./node_modules/ultradom/ultradom.m.js\");\n\nvar _common = __webpack_require__(/*! ../common */ \"./common/index.js\");\n\nvar _jsx = __webpack_require__(/*! ../common/jsx */ \"./common/jsx.js\");\n\nvar jsxUltradom = (0, _jsx.jsx)({\n  \"onChange\": \"onchange\",\n  \"onClick\": \"onclick\",\n  \"onInput\": \"oninput\"\n});\n\nvar setupRender = exports.setupRender = function setupRender() {\n  global.jsx = jsxUltradom(_ultradom.h);\n  return _ultradom.render;\n};\n\nvar setupApp = exports.setupApp = function setupApp() {\n  return (0, _common.setup)(setupRender());\n};\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack:///./ultradom/setup.js?");
 
 /***/ })
 
