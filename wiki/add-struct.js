@@ -19,6 +19,7 @@ filenames.forEach(source => {
   lines.unshift("<link rel=\"stylesheet\" href=\"skeleton.css\">");
   lines.unshift("<link rel=\"stylesheet\" href=\"normalize.css\">");
   lines.unshift("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
+  lines.unshift("<title>Meiosis Wiki</title>");
   lines.unshift("<head>");
   lines.unshift("<!DOCTYPE html><html>");
   lines.push("</body></html>");
