@@ -8,7 +8,7 @@
     "build": "harp compile build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "node add-struct.js dist && cp css/* images/*.svg images/*.png dist",
     "onchange": "onchange app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'mithril/*' 'react/*' -- npm run build",
-    "start": "static-server -p 9000"
+    "start": "static-server -p ${PORT:-9000}"
   },
   "repository": {
     "type": "git",
