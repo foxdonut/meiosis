@@ -1,4 +1,39 @@
-/* global pages */
+const Home = {
+  page: {
+    id: "Home",
+    tab: "Home"
+  },
+  view: vnode => m("div", "Home Page")
+};
+
+const Coffee = {
+  page: {
+    id: "Coffee",
+    tab: "Coffee"
+  },
+  view: vnode => {
+    const model = vnode.attrs.model;
+    return (
+      m("div",
+        m("p", "Coffee Page"),
+          model.coffees.map(coffee => m("span", { key: coffee.id},
+            m("a", { href: "#/coffee/" + coffee.id }, coffee.id),
+            " "
+          ),
+          model.coffee
+        )
+      )
+    );
+  }
+};
+
+const Beer = {
+  page: {
+    id: "Beer",
+    tab: "Beer"
+  },
+  view: vnode => m("div", "Beer Page")
+};
 
 const Layout = {
   view: vnode => {
@@ -11,13 +46,13 @@ const Layout = {
       m("div",
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
-            m("li", { class: isActive(pages.home.tab) },
+            m("li", { class: isActive(Home.page.tab) },
               m("a", { href: "#!/" }, "Home")
             ),
-            m("li", { class: isActive(pages.coffee.tab) },
+            m("li", { class: isActive(Coffee.page.tab) },
               m("a", { href: "#!/coffee" }, "Coffee")
             ),
-            m("li", { class: isActive(pages.beer.tab) },
+            m("li", { class: isActive(Beer.page.tab) },
               m("a", { href: "#!/beer" }, "Beer")
             ),
             m("li.btn",
@@ -67,25 +102,4 @@ const createBeer = (update, navigation) => {
         )
       )
   };
-};
-
-const Coffee = {
-  view: vnode => {
-    const model = vnode.attrs.model;
-    return (
-      m("div",
-        m("p", "Coffee Page"),
-          model.coffees.map(coffee => m("span", { key: coffee.id},
-            m("a", { href: "#/coffee/" + coffee.id }, coffee.id),
-            " "
-          ),
-          model.coffee
-        )
-      )
-    );
-  }
-};
-
-const Home = {
-  view: vnode => m("div", "Home Page")
 };

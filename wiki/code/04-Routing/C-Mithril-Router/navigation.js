@@ -1,5 +1,3 @@
-/* global urlMapper */
-
 const compose = (f1, f2) => x => f1(f2(x));
 
 const coffees = [
@@ -28,25 +26,6 @@ const services =  {
   loadBeer: () => new Promise(resolve =>
     setTimeout(() => resolve(beerList), 1)
   )
-};
-
-const pages = {
-  home: {
-    id: "Home",
-    tab: "Home"
-  },
-  coffee: {
-    id: "Coffee",
-    tab: "Coffee"
-  },
-  beer: {
-    id: "Beer",
-    tab: "Beer"
-  },
-  beerDetails: {
-    id: "BeerDetails",
-    tab: "Beer"
-  }
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -86,15 +65,6 @@ const createNavigation = update => {
 
 // eslint-disable-next-line no-unused-vars
 const createRouter = navigation => {
-  const mapper = urlMapper();
-
-  const routes = {
-    "/": { id: pages.home.id, action: navigation.navigateToHome },
-    "/coffee/:id?": { id: pages.coffee.id, action: navigation.navigateToCoffee },
-    "/beer": { id: pages.beer.id, action: navigation.navigateToBeer },
-    "/beer/:id": { id: pages.beerDetails.id, action: navigation.navigateToBeerDetails }
-  };
-
   const resolveRoute = () => {
     const route = document.location.hash.substring(1);
     const resolved = mapper.map(route, routes);
