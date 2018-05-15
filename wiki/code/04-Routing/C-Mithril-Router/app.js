@@ -1,44 +1,88 @@
-const Home = {
-  page: {
+/* global m, O */
+
+const mlink = { oncreate: m.route.link, onupdate: m.route.link };
+
+// eslint-disable-next-line no-unused-vars
+const createHome = update => {
+  const page = {
     id: "Home",
-    tab: "Home"
-  },
-  view: vnode => m("div", "Home Page")
+    tab: "Home",
+    label: "Home"
+  };
+  const route = "/";
+
+  return {
+    href: () => route,
+    navigateTo: _params => update({ page }),
+    page,
+    route,
+    view: _vnode => m("div", "Home Page")
+  };
 };
 
-const Coffee = {
-  page: {
+const coffees = [
+  { id: "c1", description: "Coffee 1" },
+  { id: "c2", description: "Coffee 2" }
+];
+
+const loadCoffees = () => new Promise(resolve =>
+  setTimeout(() => resolve(coffees), 1)
+);
+
+// eslint-disable-next-line no-unused-vars
+const createCoffee = update => {
+  const page = {
     id: "Coffee",
-    tab: "Coffee"
-  },
-  view: vnode => {
-    const model = vnode.attrs.model;
-    return (
-      m("div",
-        m("p", "Coffee Page"),
-          model.coffees.map(coffee => m("span", { key: coffee.id},
-            m("a", { href: "#/coffee/" + coffee.id }, coffee.id),
-            " "
-          ),
-          model.coffee
+    tab: "Coffee",
+    label: "Coffee"
+  };
+  const route = "/coffee";
+
+  return {
+    href: () => route,
+    navigateTo: _params => loadCoffees().then(coffees => update({ page, coffees })),
+    page,
+    route,
+    view: vnode => {
+      const model = vnode.attrs.model;
+      return (
+        m("div",
+          m("p", "Coffee Page"),
+          model.coffees.map(
+            coffee =>
+              m("span", { key: coffee.id },
+                m("a", { href: "#/coffee/" + coffee.id }, coffee.id),
+                " ",
+                model.coffee
+              )
+          )
         )
-      )
-    );
-  }
+      );
+    }
+  };
 };
 
+/*
 const Beer = {
   page: {
     id: "Beer",
     tab: "Beer"
   },
-  view: vnode => m("div", "Beer Page")
+  view: _vnode => m("div", "Beer Page")
+};
+*/
+
+const navigateTo = component => {
+  const result = component.navigateTo();
+  if (result && typeof result.then === "function") {
+    result.then(() => m.redraw());
+  }
 };
 
-const Layout = {
+// eslint-disable-next-line no-unused-vars
+const createLayout = components => ({
   view: vnode => {
     const model = vnode.attrs.model;
-    const currentPageId = model.page.id;
     const currentTab = model.page.tab;
     const isActive = tab => tab === currentTab ? "active" : "";
 
@@ -46,35 +90,26 @@ const Layout = {
       m("div",
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
-            m("li", { class: isActive(Home.page.tab) },
-              m("a", { href: "#!/" }, "Home")
+            components.map(component =>
+              m("li", { class: isActive(component.page.tab) },
+                m("a", O({ href: component.href() }, mlink), component.page.label)
+              )
             ),
-            m("li", { class: isActive(Coffee.page.tab) },
-              m("a", { href: "#!/coffee" }, "Coffee")
-            ),
-            m("li", { class: isActive(Beer.page.tab) },
-              m("a", { href: "#!/beer" }, "Beer")
-            ),
-            m("li.btn",
-              m("button.btn.btn-default",
-                { onclick: _evt => navigation.navigateToHome() }, "Home")
-            ),
-            m("li.btn",
-              m("button.btn.btn-default",
-                { onclick: _evt => navigation.navigateToCoffee() }, "Coffee")
-            ),
-            m("li.btn",
-              m("button.btn.btn-default",
-                { onclick: _evt => navigation.navigateToBeer() }, "Beer")
-            ),
+            components.map(component =>
+              m("li.btn",
+                m("button.btn.btn-default",
+                  { onclick: _evt => navigateTo(component) }, component.page.label)
+              )
+            )
           )
         ),
         vnode.children
       )
     );
   }
-};
+});
 
+/*
 const createBeerDetails = _update => ({
   view: model => m("p", "Details of beer ", model.params.id)
 });
@@ -103,3 +138,4 @@ const createBeer = (update, navigation) => {
       )
   };
 };
+*/
