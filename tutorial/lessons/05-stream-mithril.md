@@ -54,7 +54,7 @@ What we've set up with the Meiosis Pattern is a **reactive loop**:
 - And the loop continues.
 
 The key here is the `update` function: it receives values from the `view`, updates the model, and
-re-renders the view. So, how to we solve the circular dependency between `update` and `view`?
+re-renders the view. So, how do we solve the circular dependency between `update` and `view`?
 
 ### Introducing Streams
 
