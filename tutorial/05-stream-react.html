@@ -52,7 +52,7 @@ it&#39;s not a great situation.</p>
 <li>And the loop continues.</li>
 </ul>
 <p>The key here is the <code>update</code> function: it receives values from the <code>view</code>, updates the model, and
-re-renders the view. So, how to we solve the circular dependency between <code>update</code> and <code>view</code>?</p>
+re-renders the view. So, how do we solve the circular dependency between <code>update</code> and <code>view</code>?</p>
 <h3>Introducing Streams</h3><p>What we&#39;d like to do is have <code>update</code> as a way for the view to send values out so that we can use
 them to update the model and re-render the view. But, we want <code>update</code> to <strong>only</strong> be a way to
 communicate values. <strong>What</strong> we do with those values (update the model, re-render the view) should
