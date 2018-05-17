@@ -16,8 +16,8 @@ var linkMap = {
   "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
   "patchinko": "https://unpkg.com/patchinko@3.2.1/overloaded.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
-  "react": "https://unpkg.com/react@16.3.1/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js",
+  "react": "https://unpkg.com/react@16.3.2/umd/react.development.js",
+  "react-dom": "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js",
   "universal-router": "https://unpkg.com/universal-router@6.0.0/universal-router.min.js",
   "universal-router-generate-urls": "https://unpkg.com/universal-router@6.0.0/universal-router-generate-urls.min.js"
 };

@@ -1,24 +1,39 @@
 /* global React, ReactDOM, flyd, _, $ */
-const nestUpdate = (update, path) => func => update(_.update(path, func));
+const nestUpdate = (update, path) => func => update(model => _.update(model, path, func));
 
 const nest = (create, update, path) => {
   const component = create(nestUpdate(update, path));
   const result = Object.assign({}, component);
 
   if (component.model) {
-    result.model = () => _.set(path, component.model(), {});
+    result.model = () => _.set({}, path, component.model());
   }
   if (component.view) {
-    // This is equivalent to:
-    // result.view = model => component.view(_.get(path, model));
-    result.view = _.flow([_.get(path), component.view]);
+    result.view = model => component.view(_.get(model, path));
   }
   return result;
 };
 
+const nestComponent = (createComponent, update, path) => {
+  const Component = createComponent(nestUpdate(update, path));
+  return class extends React.Component {
+    constructor(props) {
+      super(props);
+    }
+
+    static model() {
+      return _.set({}, path, Component.model());
+    }
+
+    render() {
+      return (<Component model={_.get(this.props.model, path)} />);
+    }
+  };
+};
+
 const createEntry = update => {
   const actions = {
-    editEntryValue: evt => update(_.set("value", evt.target.value))
+    editEntryValue: evt => update(model => _.set(model, "value", evt.target.value))
   };
 
   return {
@@ -35,57 +50,55 @@ const createEntry = update => {
   };
 };
 
-class DateField extends React.Component {
-  static model() {
-    return {
-      value: ""
-    };
-  }
+const createDateField = update => {
+  const actions = {
+    editDateValue: evt => update(model => _.set(model, "value", evt.target.value))
+  };
 
-  componentWillMount() {
-    this.dateFieldRef = React.createRef();
-    const update = this.props.update;
+  return class extends React.Component {
+    static model() {
+      return {
+        value: ""
+      };
+    }
 
-    this.actions = {
-      editDateValue: evt => update(_.set("value", evt.target.value))
-    };
-  }
+    componentWillMount() {
+      this.dateFieldRef = React.createRef();
+    }
 
-  componentDidMount() {
-    const update = this.props.update;
+    componentDidMount() {
+      const $datepicker = $(this.dateFieldRef.current);
 
-    const $datepicker = $(this.dateFieldRef.current);
+      $datepicker
+        .datepicker({ autoHide: true })
+        .on("pick.datepicker", _evt =>
+          update(model => _.set(model, "value", $datepicker.datepicker("getDate", true)))
+        );
+    }
 
-    $datepicker
-      .datepicker({ autoHide: true })
-      .on("pick.datepicker", _evt =>
-        update(_.set("value", $datepicker.datepicker("getDate", true)))
+    render() {
+      const model = this.props.model;
+
+      return (
+        <div style={{marginTop: 8}}>
+          <span style={{marginRight: 8}}>Date:</span>
+          <input ref={this.dateFieldRef} type="text" size="10" value={model.value}
+            onChange={actions.editDateValue}/>
+        </div>
       );
-  }
+    }
 
-  render() {
-    const model = this.props.model;
-    const actions = this.actions;
-
-    return (
-      <div style={{marginTop: 8}}>
-        <span style={{marginRight: 8}}>Date:</span>
-        <input ref={this.dateFieldRef} type="text" size="10" value={model.value}
-          onChange={actions.editDateValue}/>
-      </div>
-    );
-  }
-
-  componentWillUnmount() {
-    $(this.dateFieldRef.current).datepicker("destroy");
-  }
-}
+    componentWillUnmount() {
+      $(this.dateFieldRef.current).datepicker("destroy");
+    }
+  };
+};
 
 const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(_.update("value", _.add(value)));
+      update(model => _.update(model, "value", previous => _.add(previous, value)));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -147,23 +160,24 @@ const createApp = update => {
     }
   };
 
-  const entry = nest(createEntry, update, "entry");
-  const air = nest(createTemperature("Air"), update, "temperature.air");
+  const entry = nest(createEntry, update, ["entry"]);
+  const DateField = nestComponent(createDateField, update, ["date"]);
+  const air = nest(createTemperature("Air"), update, ["temperature", "air"]);
   const water = nest(createTemperature("Water"), update, ["temperature", "water"]);
 
   return {
-    model: () => _.mergeAll([
+    model: () => _.merge(
       { saved: "" },
       entry.model(),
-      { date: DateField.model() },
+      DateField.model(),
       air.model(),
       water.model()
-    ]),
+    ),
 
     view: model => (
       <form>
         {entry.view(model)}
-        <DateField model={model.date} update={nestUpdate(update, "date")} />
+        <DateField model={model} />
         {air.view(model)}
         {water.view(model)}
         <div>

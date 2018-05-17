@@ -2,8 +2,8 @@
 const nestUpdate = (update, prop) => func =>
   update(model => model.update(prop, func));
 
-const nestComponent = (create, update, prop) => {
-  const Component = create(nestUpdate(update, prop));
+const nestComponent = (createComponent, update, prop) => {
+  const Component = createComponent(nestUpdate(update, prop));
   return class extends React.PureComponent {
     constructor(props) {
       super(props);
