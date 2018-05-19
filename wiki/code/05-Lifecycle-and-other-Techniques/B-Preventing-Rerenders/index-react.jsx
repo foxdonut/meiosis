@@ -1,27 +1,27 @@
-/* global React, ReactDOM, flyd, Immutable */
-const nestUpdate = (update, prop) => func =>
-  update(model => model.update(prop, func));
+/* global React, ReactDOM, flyd, _ */
+const nestUpdate = (update, path) => func =>
+  update(model => _.update(model, path, func));
 
-const nestComponent = (createComponent, update, prop) => {
-  const Component = createComponent(nestUpdate(update, prop));
-  return class extends React.PureComponent {
+const nestComponent = (createComponent, update, path) => {
+  const Component = createComponent(nestUpdate(update, path));
+  return class extends React.Component {
     constructor(props) {
       super(props);
     }
 
     static model() {
-      return { [prop]: Component.model() };
+      return _.set({}, path, Component.model());
     }
 
     render() {
-      return (<Component model={this.props.model.get(prop)} />);
+      return (<Component model={_.get(this.props.model, path)} />);
     }
   };
 };
 
 const createEntryNumber = update => {
   const actions = {
-    editEntryValue: evt => update(model => model.set("value", evt.target.value))
+    editEntryValue: evt => update(model => _.merge({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -38,8 +38,8 @@ const createEntryNumber = update => {
 
       return (
         <div>
-          <span>Entry number:</span>
-          <input type="text" size="2" value={model.get("value")} onChange={actions.editEntryValue}/>
+          <span style={{marginRight: 8}}>Entry number:</span>
+          <input type="text" size="2" value={model.value} onChange={actions.editEntryValue}/>
         </div>
       );
     }
@@ -48,7 +48,7 @@ const createEntryNumber = update => {
 
 const createEntryDate = update => {
   const actions = {
-    editDateValue: evt => update(model => model.set("value", evt.target.value))
+    editDateValue: evt => update(model => _.merge({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -64,9 +64,10 @@ const createEntryDate = update => {
       const model = this.props.model;
 
       return (
-        <div>
-          <span>Date:</span>
-          <input type="text" size="10" value={model.get("value")} onChange={actions.editDateValue}/>
+        <div style={{marginTop: 8}}>
+          <span style={{marginRight: 8}}>Date:</span>
+          <input type="text" size="10" value={model.value}
+            onChange={actions.editDateValue}/>
         </div>
       );
     }
@@ -77,20 +78,20 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(model =>
-        model.update("value", v => v + value));
+      update(model => _.merge({}, _.update(model, "value", previous => _.add(previous, value))));
     },
     changeUnits: evt => {
       evt.preventDefault();
       update(model => {
-        if (model.get("units") === "C") {
-          return model.set("units", "F").
-            set("value", Math.round( model.get("value") * 9 / 5 + 32 ));
+        if (model.units === "C") {
+          model.units = "F";
+          model.value = Math.round( model.value * 9 / 5 + 32 );
         }
         else {
-          return model.set("units", "C").
-            set("value", Math.round( (model.get("value") - 32) / 9 * 5 ));
+          model.units = "C";
+          model.value = Math.round( (model.value - 32) / 9 * 5 );
         }
+        return _.merge({}, model);
       });
     }
   };
@@ -105,17 +106,14 @@ const createTemperature = label => update => {
     }
 
     render() {
-      // eslint-disable-next-line no-console
-      console.log("render Temperature", this.props.model.get("label"));
       const model = this.props.model;
+      // eslint-disable-next-line no-console
+      console.log("render Temperature", model.label);
 
       return (
-        <div className="row">
+        <div className="row" style={{marginTop: 8}}>
           <div className="col-md-3">
-            <span>
-              {model.get("label")} Temperature:
-              {model.get("value")}&deg;{model.get("units")}
-            </span>
+            <span>{model.label} Temperature: {model.value}&deg;{model.units} </span>
           </div>
           <div className="col-md-6">
             <button className="btn btn-sm btn-default" onClick={actions.increase(1)}>Increase</button>{" "}
@@ -129,34 +127,35 @@ const createTemperature = label => update => {
 };
 
 const createApp = update => {
-  const EntryNumber = nestComponent(createEntryNumber, update, "entry");
-  const EntryDate = nestComponent(createEntryDate, update, "date");
-  const Air = nestComponent(createTemperature("Air"), update, "airTemperature");
-  const Water = nestComponent(createTemperature("Water"), update, "waterTemperature");
-
-  const displayTemperature = temperature =>
-    temperature.get("label") + ": " +
-    temperature.get("value") + "\xB0" + temperature.get("units");
+  const displayTemperature = temperature => temperature.label + ": " +
+    temperature.value + "\xB0" + temperature.units;
 
   const actions = {
     save: evt => {
       evt.preventDefault();
       update(model => {
-        return model.
-          set("saved", "Entry #" + model.getIn(["entry", "value"]) +
-            " on " + model.getIn(["date", "value"]) + ":" +
-            " Temperatures: " +
-            displayTemperature(model.get("airTemperature")) + " " +
-            displayTemperature(model.get("waterTemperature"))).
-          setIn(["entry", "value"], "").
-          setIn(["date", "value"], "");
+        model.saved = " Entry #" + model.entry.value +
+          " on " + model.date.value + ":" +
+          " Temperatures: " +
+          displayTemperature(model.temperature.air) + " " +
+          displayTemperature(model.temperature.water);
+
+        model.entry.value = "";
+        model.date.value = "";
+
+        return _.merge({}, model);
       });
     }
   };
 
-  return class extends React.PureComponent {
+  const EntryNumber = nestComponent(createEntryNumber, update, ["entry"]);
+  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
+  const Air = nestComponent(createTemperature("Air"), update, ["temperature", "air"]);
+  const Water = nestComponent(createTemperature("Water"), update, ["temperature", "water"]);
+
+  return class extends React.Component {
     static model() {
-      return Object.assign(
+      return _.merge(
         { saved: "" },
         EntryNumber.model(),
         EntryDate.model(),
@@ -175,8 +174,8 @@ const createApp = update => {
           <Air model={model} />
           <Water model={model} />
           <div>
-            <button className="btn btn-primary" onClick={actions.save}>Save</button>{" "}
-            <span>{model.get("saved")}</span>
+            <button className="btn btn-primary" onClick={actions.save}>Save</button>
+            <span>{model.saved}</span>
           </div>
         </form>
       );
@@ -187,7 +186,7 @@ const createApp = update => {
 const update = flyd.stream();
 const App = createApp(update);
 const models = flyd.scan((model, func) => func(model),
-  Immutable.fromJS(App.model()), update);
+  App.model(), update);
 
 const element = document.getElementById("app");
 models.map(model => ReactDOM.render(<App model={model} />, element));

@@ -1,5 +1,6 @@
 /* global React, ReactDOM, flyd, _, $ */
-const nestUpdate = (update, path) => func => update(model => _.update(model, path, func));
+const nestUpdate = (update, path) => func =>
+  update(model => _.update(model, path, func));
 
 const nest = (create, update, path) => {
   const component = create(nestUpdate(update, path));
@@ -31,7 +32,7 @@ const nestComponent = (createComponent, update, path) => {
   };
 };
 
-const createEntry = update => {
+const createEntryNumber = update => {
   const actions = {
     editEntryValue: evt => update(model => _.set(model, "value", evt.target.value))
   };
@@ -50,7 +51,7 @@ const createEntry = update => {
   };
 };
 
-const createDateField = update => {
+const createEntryDate = update => {
   const actions = {
     editDateValue: evt => update(model => _.set(model, "value", evt.target.value))
   };
@@ -160,24 +161,24 @@ const createApp = update => {
     }
   };
 
-  const entry = nest(createEntry, update, ["entry"]);
-  const DateField = nestComponent(createDateField, update, ["date"]);
+  const entryNumber = nest(createEntryNumber, update, ["entry"]);
+  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
   const air = nest(createTemperature("Air"), update, ["temperature", "air"]);
   const water = nest(createTemperature("Water"), update, ["temperature", "water"]);
 
   return {
     model: () => _.merge(
       { saved: "" },
-      entry.model(),
-      DateField.model(),
+      entryNumber.model(),
+      EntryDate.model(),
       air.model(),
       water.model()
     ),
 
     view: model => (
       <form>
-        {entry.view(model)}
-        <DateField model={model} />
+        {entryNumber.view(model)}
+        <EntryDate model={model} />
         {air.view(model)}
         {water.view(model)}
         <div>

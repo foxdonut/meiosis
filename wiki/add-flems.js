@@ -6,7 +6,6 @@ var toDir = process.argv[3];
 var linkMap = {
   "datepicker": "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
   "flyd": "https://unpkg.com/flyd@0.2.6/flyd.js",
-  "immutable": "https://unpkg.com/immutable@3.8.2/dist/immutable.js",
   "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
   "lodash": "https://unpkg.com/lodash@4.17.5",
   "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
