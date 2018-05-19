@@ -6,7 +6,7 @@
 
 React version:
 
-@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,immutable 800 60
+@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,lodash 800 60
 
 Mithril version:
 

@@ -21,7 +21,7 @@ const nestComponent = (createComponent, update, path) => {
 
 const createEntryNumber = update => {
   const actions = {
-    editEntryValue: evt => update(model => _.merge({}, _.set(model, "value", evt.target.value)))
+    editEntryValue: evt => update(model => Object.assign({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -48,7 +48,7 @@ const createEntryNumber = update => {
 
 const createEntryDate = update => {
   const actions = {
-    editDateValue: evt => update(model => _.merge({}, _.set(model, "value", evt.target.value)))
+    editDateValue: evt => update(model => Object.assign({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -78,7 +78,7 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(model => _.merge({}, _.update(model, "value", previous => _.add(previous, value))));
+      update(model => Object.assign({}, _.update(model, "value", previous => _.add(previous, value))));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -91,7 +91,7 @@ const createTemperature = label => update => {
           model.units = "C";
           model.value = Math.round( (model.value - 32) / 9 * 5 );
         }
-        return _.merge({}, model);
+        return Object.assign({}, model);
       });
     }
   };
@@ -143,7 +143,7 @@ const createApp = update => {
         model.entry.value = "";
         model.date.value = "";
 
-        return _.merge({}, model);
+        return Object.assign({}, model);
       });
     }
   };
