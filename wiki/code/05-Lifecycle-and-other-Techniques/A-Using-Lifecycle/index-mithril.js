@@ -32,11 +32,11 @@ const nestComponent = (create, update, path) => {
   const result = O({}, component);
 
   if (component.model) {
-    result.model = () => _.set(path, component.model(), {});
+    result.model = () => nestPatch(component.model(), path);
   }
   if (component.view) {
     result.view = vnode => component.view(
-      _.merge(vnode, { attrs: { model: get(path, vnode.attrs.model) } })
+      O(vnode, { attrs: { model: get(vnode.attrs.model, path) } })
     );
   }
   return result;
@@ -44,7 +44,7 @@ const nestComponent = (create, update, path) => {
 
 const createEntry = update => {
   const actions = {
-    editEntryValue: evt => update(_.set("value", evt.target.value))
+    editEntryValue: evt => update({ value: evt.target.value })
   };
 
   return {
@@ -67,7 +67,7 @@ const createDateField = update => ({
 
   oninit: vnode => {
     vnode.state.actions = {
-      editDateValue: evt => update(_.set("value", evt.target.value))
+      editDateValue: evt => update({ value: evt.target.value })
     };
   },
 
@@ -77,7 +77,7 @@ const createDateField = update => ({
     $datepicker
       .datepicker({ autoHide: true })
       .on("pick.datepicker", _evt =>
-        update(_.set("value", $datepicker.datepicker("getDate", true)))
+        update({ value: $datepicker.datepicker("getDate", true) })
       );
   },
 
@@ -103,7 +103,7 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(_.update("value", _.add(value)));
+      update({ value: O(previous => previous + value) });
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -164,24 +164,24 @@ const createApp = update => {
     }
   };
 
-  const entry = nest(createEntry, update, "entry");
-  const DateField = nest(createDateField, update, "date", true);
-  const air = nest(createTemperature("Air"), update, "temperature.air");
+  const entryNumber = nest(createEntry, update, ["entry"]);
+  const EntryDate = nestComponent(createDateField, update, ["date"]);
+  const air = nest(createTemperature("Air"), update, ["temperature", "air"]);
   const water = nest(createTemperature("Water"), update, ["temperature", "water"]);
 
   return {
-    model: () => _.mergeAll([
+    model: () => O(
       { saved: "" },
-      entry.model(),
-      DateField.model(),
+      entryNumber.model(),
+      EntryDate.model(),
       air.model(),
       water.model()
-    ]),
+    ),
 
     view: model =>
       m("form",
-        entry.view(model),
-        m(DateField, { model }),
+        entryNumber.view(model),
+        m(EntryDate, { model }),
         air.view(model),
         water.view(model),
         m("div",
@@ -194,8 +194,7 @@ const createApp = update => {
 
 const update = m.stream();
 const app = createApp(update);
-const models = m.stream.scan((model, func) => func(model),
-  app.model(), update);
+const models = m.stream.scan(O, app.model(), update);
 
 const element = document.getElementById("app");
 models.map(model => m.render(element, app.view(model)));
