@@ -1,23 +1,37 @@
-/* global m, R */
+/* global m, O */
 
-const nestUpdate = (update, prop) => func =>
-  update(R.over(R.lensProp(prop), func));
+const get = (object, path, defaultValue) =>
+  object == null
+    ? defaultValue
+    : path.length === 1
+      ? object[path[0]]
+      : get(object[path[0]], path.slice(1));
 
-const nestComponent = (create, update, prop) => {
-  const Component = create(nestUpdate(update, prop));
-  const Result = R.merge({}, Component);
+const nestPatch = (object, path) => ({
+  [path[0]]: path.length === 1
+    ? O(object)
+    : O(nestPatch(object, path.slice(1)))
+});
+
+const nestUpdate = (update, path) => patch =>
+  update(nestPatch(patch, path));
+
+const nestComponent = (create, update, path) => {
+  const Component = create(nestUpdate(update, path));
+  const result = O({}, Component);
+
   if (Component.model) {
-    Result.model = () => R.assoc(prop, Component.model(), {});
+    result.model = () => nestPatch(Component.model(), path);
   }
   if (Component.view) {
-    Result.view = vnode => m(Component, { model: R.prop(prop, vnode.attrs.model) });
+    result.view = vnode => m(Component, { model: get(vnode.attrs.model, path) });
   }
-  return Result;
+  return result;
 };
 
 const createEntryNumber = update => {
   const actions = {
-    editEntryValue: evt => update(R.assoc("value", evt.target.value))
+    editEntryValue: evt => update({ value: evt.target.value })
   };
 
   return {
@@ -31,9 +45,8 @@ const createEntryNumber = update => {
 
       return (
         m("div",
-          m("span", "Entry number:"),
-          m("input[type=text][size=2]",
-            { value: model.value, oninput: actions.editEntryValue })
+          m("span", { style: { "margin-right": "8px" } }, "Entry number:"),
+          m("input[type=text][size=2]", { value: model.value, oninput: actions.editEntryValue })
         )
       );
     },
@@ -43,7 +56,7 @@ const createEntryNumber = update => {
 
 const createEntryDate = update => {
   const actions = {
-    editDateValue: evt => update(R.assoc("value", evt.target.value))
+    editDateValue: evt => update({ value: evt.target.value })
   };
 
   return {
@@ -56,8 +69,8 @@ const createEntryDate = update => {
       const model = vnode.attrs.model;
 
       return (
-        m("div",
-          m("span", "Date:"),
+        m("div", { style: { "margin-top": "8px" } },
+          m("span", { style: { "margin-right": "8px" } }, "Date:"),
           m("input[type=text][size=10]",
             { value: model.value, oninput: actions.editDateValue })
         )
@@ -71,23 +84,20 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(R.over(R.lensProp("value"), R.add(value)));
+      update({ value: O(previous => previous + value) });
     },
     changeUnits: evt => {
       evt.preventDefault();
       update(model => {
         if (model.units === "C") {
-          return R.merge(model, {
-            units: "F",
-            value: Math.round( model.value * 9 / 5 + 32 )
-          });
+          model.units = "F";
+          model.value = Math.round( model.value * 9 / 5 + 32 );
         }
         else {
-          return R.merge(model, {
-            units: "C",
-            value: Math.round( (model.value - 32) / 9 * 5 )
-          });
+          model.units = "C";
+          model.value = Math.round( (model.value - 32) / 9 * 5 );
         }
+        return model;
       });
     }
   };
@@ -104,11 +114,11 @@ const createTemperature = label => update => {
       console.log("render Temperature", model.label);
 
       return (
-        m(".row",
-          m(".col-md-3",
-            m("span", model.label + " Temperature: " + model.value + "\xB0" + model.units)
+        m("div.row", { style: { "margin-top": "8px" } },
+          m("div.col-md-3",
+            m("span", model.label, " Temperature: ", model.value, m.trust("&deg;"), model.units)
           ),
-          m(".col-md-6",
+          m("div.col-md-6",
             m("button.btn.btn-sm.btn-default", {onclick: actions.increase(1)}, "Increase"),
             m("button.btn.btn-sm.btn-default", {onclick: actions.increase(-1)}, "Decrease"),
             m("button.btn.btn-sm.btn-info", {onclick: actions.changeUnits}, "Change Units")
@@ -122,40 +132,40 @@ const createTemperature = label => update => {
 
 
 const createApp = update => {
-  const displayTemperature = temperature =>
-    temperature.label + ": " +
+  const displayTemperature = temperature => temperature.label + ": " +
     temperature.value + "\xB0" + temperature.units;
 
   const actions = {
     save: evt => {
       evt.preventDefault();
-      update(model => Object.assign(model, {
-        saved: "Entry #" + model.entry.value +
-            " on " + model.date.value + ":" +
-            " Temperatures: " +
-            displayTemperature(model.airTemperature) + " " +
-            displayTemperature(model.waterTemperature),
-        entry: Object.assign(model.entry, { value: "" }),
-        date: Object.assign(model.date, { value: "" })
-      }));
+      update(model => {
+        model.saved = " Entry #" + model.entry.value +
+          " on " + model.date.value + ":" +
+          " Temperatures: " +
+          displayTemperature(model.temperature.air) + " " +
+          displayTemperature(model.temperature.water);
+
+        model.entry.value = "";
+        model.date.value = "";
+
+        return model;
+      });
     }
   };
 
-  const EntryNumber = nestComponent(createEntryNumber, update, "entry");
-  const EntryDate = nestComponent(createEntryDate, update, "date");
-  const Air = nestComponent(createTemperature("Air"), update, "airTemperature");
-  const Water = nestComponent(createTemperature("Water"), update, "waterTemperature");
+  const EntryNumber = nestComponent(createEntryNumber, update, ["entry"]);
+  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
+  const Air = nestComponent(createTemperature("Air"), update, ["temperature", "air"]);
+  const Water = nestComponent(createTemperature("Water"), update, ["temperature", "water"]);
 
   return {
-    model: () => R.mergeAll([
+    model: () => O(
       { saved: "" },
       EntryNumber.model(),
       EntryDate.model(),
-      R.merge(
-        Air.model(),
-        Water.model()
-      )
-    ]),
+      Air.model(),
+      Water.model()
+    ),
     view: model =>
       m("form",
         m(EntryNumber, { model }),
@@ -164,7 +174,6 @@ const createApp = update => {
         m(Water, { model }),
         m("div",
           m("button.btn.btn-primary", {onclick: actions.save}, "Save"),
-          m("span", " "),
           m("span", model.saved)
         )
       )
@@ -173,8 +182,7 @@ const createApp = update => {
 
 const update = m.stream();
 const app = createApp(update);
-const models = m.stream.scan((model, func) => func(model),
-  app.model(), update);
+const models = m.stream.scan(O, app.model(), update);
 
 const element = document.getElementById("app");
 models.map(model => m.render(element, app.view(model)));

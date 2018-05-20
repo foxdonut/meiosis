@@ -28,21 +28,19 @@ const nest = (create, update, path) => {
 };
 
 const nestComponent = (create, update, path) => {
-  const component = create(nestUpdate(update, path));
-  const result = O({}, component);
+  const Component = create(nestUpdate(update, path));
+  const result = O({}, Component);
 
-  if (component.model) {
-    result.model = () => nestPatch(component.model(), path);
+  if (Component.model) {
+    result.model = () => nestPatch(Component.model(), path);
   }
-  if (component.view) {
-    result.view = vnode => component.view(
-      O(vnode, { attrs: { model: get(vnode.attrs.model, path) } })
-    );
+  if (Component.view) {
+    result.view = vnode => m(Component, { model: get(vnode.attrs.model, path) });
   }
   return result;
 };
 
-const createEntry = update => {
+const createEntryNumber = update => {
   const actions = {
     editEntryValue: evt => update({ value: evt.target.value })
   };
@@ -60,44 +58,43 @@ const createEntry = update => {
   };
 };
 
-const createDateField = update => ({
-  model: () => ({
-    value: ""
-  }),
+const createEntryDate = update => {
+  const actions = {
+    editDateValue: evt => update({ value: evt.target.value })
+  };
 
-  oninit: vnode => {
-    vnode.state.actions = {
-      editDateValue: evt => update({ value: evt.target.value })
-    };
-  },
+  return {
+    model: () => ({
+      value: ""
+    }),
 
-  oncreate: vnode => {
-    const $datepicker = $(vnode.dom).find(".dateField");
+    oncreate: vnode => {
+      const $datepicker = $(vnode.dom).find(".dateField");
 
-    $datepicker
-      .datepicker({ autoHide: true })
-      .on("pick.datepicker", _evt =>
-        update({ value: $datepicker.datepicker("getDate", true) })
+      $datepicker
+        .datepicker({ autoHide: true })
+        .on("pick.datepicker", _evt =>
+          update({ value: $datepicker.datepicker("getDate", true) })
+        );
+    },
+
+    view: vnode => {
+      const model = vnode.attrs.model;
+
+      return (
+        m("div", { style: { "margin-top": "8px" } },
+          m("span", { style: { "margin-right": "8px" } }, "Date:"),
+          m("input[type=text][size=10].dateField",
+            { value: model.value, oninput: actions.editDateValue })
+        )
       );
-  },
+    },
 
-  view: vnode => {
-    const model = vnode.attrs.model;
-    const actions = vnode.state.actions;
-
-    return (
-      m("div", { style: { "margin-top": "8px" } },
-        m("span", { style: { "margin-right": "8px" } }, "Date:"),
-        m("input[type=text][size=10].dateField", { value: model.value,
-          oninput: actions.editDateValue })
-      )
-    );
-  },
-
-  onremove: vnode => {
-    $(vnode.dom).find(".dateField").datepicker("destroy");
-  }
-});
+    onremove: vnode => {
+      $(vnode.dom).find(".dateField").datepicker("destroy");
+    }
+  };
+};
 
 const createTemperature = label => update => {
   const actions = {
@@ -134,8 +131,8 @@ const createTemperature = label => update => {
           m("span", model.label, " Temperature: ", model.value, m.trust("&deg;"), model.units)
         ),
         m("div.col-md-6",
-          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(1) }, "Increase"), " ",
-          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(-1) }, "Decrease"), " ",
+          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(1) }, "Increase"),
+          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(-1) }, "Decrease"),
           m("button.btn.btn-sm.btn-info", { onclick: actions.changeUnits }, "Change Units")
         )
       )
@@ -164,8 +161,8 @@ const createApp = update => {
     }
   };
 
-  const entryNumber = nest(createEntry, update, ["entry"]);
-  const EntryDate = nestComponent(createDateField, update, ["date"]);
+  const entryNumber = nest(createEntryNumber, update, ["entry"]);
+  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
   const air = nest(createTemperature("Air"), update, ["temperature", "air"]);
   const water = nest(createTemperature("Water"), update, ["temperature", "water"]);
 
