@@ -12,7 +12,7 @@ React version:
 
 Mithril version:
 
-@flems code/05-Lifecycle-and-other-Techniques/A-Using-Lifecycle/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css,public/css/datepicker.min.css mithril,mithril-stream,lodash-fp,jquery,datepicker 800 60
+@flems code/05-Lifecycle-and-other-Techniques/A-Using-Lifecycle/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css,public/css/datepicker.min.css mithril,mithril-stream,patchinko,jquery,datepicker 800 60
 
 [Table of Contents](toc.html)
 

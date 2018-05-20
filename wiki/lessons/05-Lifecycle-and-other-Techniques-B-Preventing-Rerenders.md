@@ -10,7 +10,7 @@ React version:
 
 Mithril version:
 
-@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,ramda 800 60
+@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-immutable 800 60
 
 _Coming Soon!_
 

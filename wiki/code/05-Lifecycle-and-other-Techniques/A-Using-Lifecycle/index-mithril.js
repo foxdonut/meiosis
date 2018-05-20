@@ -1,25 +1,43 @@
-/* global m, _, $ */
-const nestUpdate = (update, path) => func => update(_.update(path, func));
+/* global m, O, $ */
+const get = (object, path, defaultValue) =>
+  object == null
+    ? defaultValue
+    : path.length === 1
+      ? object[path[0]]
+      : get(object[path[0]], path.slice(1));
 
-const nest = (create, update, path, isMithril) => {
+const nestPatch = (object, path) => ({
+  [path[0]]: path.length === 1
+    ? O(object)
+    : O(nestPatch(object, path.slice(1)))
+});
+
+const nestUpdate = (update, path) => patch =>
+  update(nestPatch(patch, path));
+
+const nest = (create, update, path) => {
   const component = create(nestUpdate(update, path));
-  const result = Object.assign({}, component);
+  const result = O({}, component);
+  if (component.model) {
+    result.model = () => nestPatch(component.model(), path);
+  }
+  if (component.view) {
+    result.view = model => component.view(get(model, path));
+  }
+  return result;
+};
+
+const nestComponent = (create, update, path) => {
+  const component = create(nestUpdate(update, path));
+  const result = O({}, component);
 
   if (component.model) {
     result.model = () => _.set(path, component.model(), {});
   }
   if (component.view) {
-    if (isMithril) {
-      // for Mithril, view is a function of vnode instead of model
-      result.view = vnode => component.view(
-        _.merge(vnode, { attrs: { model: _.get(path, vnode.attrs.model) } })
-      );
-    }
-    else {
-      // This is equivalent to:
-      // result.view = model => component.view(_.get(path, model));
-      result.view = _.flow([_.get(path), component.view]);
-    }
+    result.view = vnode => component.view(
+      _.merge(vnode, { attrs: { model: get(path, vnode.attrs.model) } })
+    );
   }
   return result;
 };

@@ -14,6 +14,7 @@ var linkMap = {
   "mithril": "https://unpkg.com/mithril@1.1.6",
   "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
   "patchinko": "https://unpkg.com/patchinko@3.2.1/overloaded.js",
+  "patchinko-immutable": "https://unpkg.com/patchinko@3.2.1/immutable.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   "react": "https://unpkg.com/react@16.3.2/umd/react.development.js",
   "react-dom": "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js",
