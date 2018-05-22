@@ -29,6 +29,8 @@ const nestComponent = (create, update, path) => {
   return result;
 };
 
+const checkIfModelChanged = (next, prev) => next.attrs.model !== prev.attrs.model;
+
 const createEntryNumber = update => {
   const actions = {
     editEntryValue: evt => update({ value: evt.target.value })
@@ -50,7 +52,7 @@ const createEntryNumber = update => {
         )
       );
     },
-    onbeforeupdate: (next, prev) => next.attrs.model !== prev.attrs.model
+    onbeforeupdate: checkIfModelChanged
   };
 };
 
@@ -76,7 +78,7 @@ const createEntryDate = update => {
         )
       );
     },
-    onbeforeupdate: (next, prev) => next.attrs.model !== prev.attrs.model
+    onbeforeupdate: checkIfModelChanged
   };
 };
 
@@ -126,7 +128,7 @@ const createTemperature = label => update => {
         )
       );
     },
-    onbeforeupdate: (next, prev) => next.attrs.model !== prev.attrs.model
+    onbeforeupdate: checkIfModelChanged
   };
 };
 
