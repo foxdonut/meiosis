@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
     "build": "harp compile build dist && (cd images && ./generate_all_diagrams.sh)",
-    "postbuild": "node add-struct.js dist && cp css/* images/*.svg images/*.png dist",
+    "postbuild": "cp css/* images/*.svg images/*.png dist",
     "onchange": "onchange app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'mithril/*' 'react/*' -- npm run build",
     "start": "static-server -p ${PORT:-9000}"
   },
