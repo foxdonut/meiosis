@@ -25,7 +25,7 @@ img {
   max-width: 100%;
 }
 .CodeMirror pre {
-  font-size: 1.6rem !important;
+  font-size: 1.3rem !important;
 }
 pre[class*="language-"] {
   padding: 0;
