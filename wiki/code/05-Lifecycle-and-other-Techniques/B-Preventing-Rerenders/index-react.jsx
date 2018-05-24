@@ -21,7 +21,8 @@ const nestComponent = (createComponent, update, path) => {
 
 const createEntryNumber = update => {
   const actions = {
-    editEntryValue: evt => update(model => Object.assign({}, _.set(model, "value", evt.target.value)))
+    editEntryValue: evt => update(model =>
+      Object.assign({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -39,7 +40,8 @@ const createEntryNumber = update => {
       return (
         <div>
           <span style={{marginRight: 8}}>Entry number:</span>
-          <input type="text" size="2" value={model.value} onChange={actions.editEntryValue}/>
+          <input type="text" size="2" value={model.value}
+            onChange={actions.editEntryValue}/>
         </div>
       );
     }
@@ -48,7 +50,8 @@ const createEntryNumber = update => {
 
 const createEntryDate = update => {
   const actions = {
-    editDateValue: evt => update(model => Object.assign({}, _.set(model, "value", evt.target.value)))
+    editDateValue: evt => update(model =>
+      Object.assign({}, _.set(model, "value", evt.target.value)))
   };
 
   return class extends React.PureComponent {
@@ -78,7 +81,8 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(model => Object.assign({}, _.update(model, "value", previous => _.add(previous, value))));
+      update(model => Object.assign({},
+        _.update(model, "value", previous => _.add(previous, value))));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -116,9 +120,14 @@ const createTemperature = label => update => {
             <span>{model.label} Temperature: {model.value}&deg;{model.units} </span>
           </div>
           <div className="col-md-6">
-            <button className="btn btn-sm btn-default" onClick={actions.increase(1)}>Increase</button>{" "}
-            <button className="btn btn-sm btn-default" onClick={actions.increase(-1)}>Decrease</button>{" "}
-            <button className="btn btn-sm btn-info" onClick={actions.changeUnits}>Change Units</button>
+            <button className="btn btn-sm btn-default"
+              onClick={actions.increase(1)}>Increase</button>{" "}
+
+            <button className="btn btn-sm btn-default"
+              onClick={actions.increase(-1)}>Decrease</button>{" "}
+
+            <button className="btn btn-sm btn-info"
+              onClick={actions.changeUnits}>Change Units</button>
           </div>
         </div>
       );
@@ -150,8 +159,12 @@ const createApp = update => {
 
   const EntryNumber = nestComponent(createEntryNumber, update, ["entry"]);
   const EntryDate = nestComponent(createEntryDate, update, ["date"]);
-  const Air = nestComponent(createTemperature("Air"), update, ["temperature", "air"]);
-  const Water = nestComponent(createTemperature("Water"), update, ["temperature", "water"]);
+
+  const Air = nestComponent(createTemperature("Air"), update,
+    ["temperature", "air"]);
+
+  const Water = nestComponent(createTemperature("Water"), update,
+    ["temperature", "water"]);
 
   return class extends React.Component {
     static model() {
@@ -174,7 +187,8 @@ const createApp = update => {
           <Air model={model} />
           <Water model={model} />
           <div>
-            <button className="btn btn-primary" onClick={actions.save}>Save</button>
+            <button className="btn btn-primary"
+              onClick={actions.save}>Save</button>
             <span>{model.saved}</span>
           </div>
         </form>

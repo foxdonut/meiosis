@@ -34,7 +34,8 @@ const nestComponent = (createComponent, update, path) => {
 
 const createEntryNumber = update => {
   const actions = {
-    editEntryValue: evt => update(model => _.set(model, "value", evt.target.value))
+    editEntryValue: evt => update(model =>
+      _.set(model, "value", evt.target.value))
   };
 
   return {
@@ -45,7 +46,8 @@ const createEntryNumber = update => {
     view: model => (
       <div>
         <span style={{marginRight: 8}}>Entry number:</span>
-        <input type="text" size="2" value={model.value} onChange={actions.editEntryValue}/>
+        <input type="text" size="2" value={model.value}
+          onChange={actions.editEntryValue}/>
       </div>
     )
   };
@@ -53,7 +55,8 @@ const createEntryNumber = update => {
 
 const createEntryDate = update => {
   const actions = {
-    editDateValue: evt => update(model => _.set(model, "value", evt.target.value))
+    editDateValue: evt => update(model =>
+      _.set(model, "value", evt.target.value))
   };
 
   return class extends React.Component {
@@ -73,7 +76,8 @@ const createEntryDate = update => {
       $datepicker
         .datepicker({ autoHide: true })
         .on("pick.datepicker", _evt =>
-          update(model => _.set(model, "value", $datepicker.datepicker("getDate", true)))
+          update(model => _.set(model, "value",
+            $datepicker.datepicker("getDate", true)))
         );
     }
 
@@ -83,8 +87,8 @@ const createEntryDate = update => {
       return (
         <div style={{marginTop: 8}}>
           <span style={{marginRight: 8}}>Date:</span>
-          <input ref={this.dateFieldRef} type="text" size="10" value={model.value}
-            onChange={actions.editDateValue}/>
+          <input ref={this.dateFieldRef} type="text" size="10"
+            value={model.value} onChange={actions.editDateValue}/>
         </div>
       );
     }
@@ -99,7 +103,8 @@ const createTemperature = label => update => {
   const actions = {
     increase: value => evt => {
       evt.preventDefault();
-      update(model => _.update(model, "value", previous => _.add(previous, value)));
+      update(model => _.update(model, "value",
+        previous => _.add(previous, value)));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -130,9 +135,14 @@ const createTemperature = label => update => {
           <span>{model.label} Temperature: {model.value}&deg;{model.units} </span>
         </div>
         <div className="col-md-6">
-          <button className="btn btn-sm btn-default" onClick={actions.increase(1)}>Increase</button>{" "}
-          <button className="btn btn-sm btn-default" onClick={actions.increase(-1)}>Decrease</button>{" "}
-          <button className="btn btn-sm btn-info" onClick={actions.changeUnits}>Change Units</button>
+          <button className="btn btn-sm btn-default"
+            onClick={actions.increase(1)}>Increase</button>{" "}
+
+          <button className="btn btn-sm btn-default"
+            onClick={actions.increase(-1)}>Decrease</button>{" "}
+
+          <button className="btn btn-sm btn-info"
+            onClick={actions.changeUnits}>Change Units</button>
         </div>
       </div>
     )
@@ -163,8 +173,12 @@ const createApp = update => {
 
   const entryNumber = nest(createEntryNumber, update, ["entry"]);
   const EntryDate = nestComponent(createEntryDate, update, ["date"]);
-  const air = nest(createTemperature("Air"), update, ["temperature", "air"]);
-  const water = nest(createTemperature("Water"), update, ["temperature", "water"]);
+
+  const air = nest(createTemperature("Air"), update,
+    ["temperature", "air"]);
+
+  const water = nest(createTemperature("Water"), update,
+    ["temperature", "water"]);
 
   return {
     model: () => _.merge(
@@ -182,7 +196,8 @@ const createApp = update => {
         {air.view(model)}
         {water.view(model)}
         <div>
-          <button className="btn btn-primary" onClick={actions.save}>Save</button>
+          <button className="btn btn-primary"
+            onClick={actions.save}>Save</button>
           <span>{model.saved}</span>
         </div>
       </form>
