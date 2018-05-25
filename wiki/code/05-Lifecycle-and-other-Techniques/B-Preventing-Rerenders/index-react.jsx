@@ -22,7 +22,7 @@ const nestComponent = (createComponent, update, path) => {
 const createEntryNumber = update => {
   const actions = {
     editEntryValue: evt => update(model =>
-      Object.assign({}, _.set(model, "value", evt.target.value)))
+      Object.assign({}, model, { value: evt.target.value }))
   };
 
   return class extends React.PureComponent {
@@ -51,7 +51,7 @@ const createEntryNumber = update => {
 const createEntryDate = update => {
   const actions = {
     editDateValue: evt => update(model =>
-      Object.assign({}, _.set(model, "value", evt.target.value)))
+      Object.assign({}, model, { value: evt.target.value }))
   };
 
   return class extends React.PureComponent {
@@ -79,23 +79,25 @@ const createEntryDate = update => {
 
 const createTemperature = label => update => {
   const actions = {
-    increase: value => evt => {
+    increase: amount => evt => {
       evt.preventDefault();
-      update(model => Object.assign({},
-        _.update(model, "value", previous => _.add(previous, value))));
+      update(model => Object.assign({}, model, { value: model.value + amount }));
     },
     changeUnits: evt => {
       evt.preventDefault();
       update(model => {
         if (model.units === "C") {
-          model.units = "F";
-          model.value = Math.round( model.value * 9 / 5 + 32 );
+          return Object.assign({}, model, {
+            units: "F",
+            value: Math.round( model.value * 9 / 5 + 32 )
+          });
         }
         else {
-          model.units = "C";
-          model.value = Math.round( (model.value - 32) / 9 * 5 );
+          return Object.assign({}, model, {
+            units: "C",
+            value: Math.round( (model.value - 32) / 9 * 5 )
+          });
         }
-        return Object.assign({}, model);
       });
     }
   };
