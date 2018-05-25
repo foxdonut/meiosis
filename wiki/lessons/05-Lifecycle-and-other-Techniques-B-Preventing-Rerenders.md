@@ -70,9 +70,43 @@ re-rendered.
 <a name="mithril_prevent_re_render">
 ### Mithril version
 
-@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-immutable 800 70
+We can use Mithril's
+[onbeforeupdate lifecycle method](https://mithril.js.org/lifecycle-methods.html#onbeforeupdate)
+to prevent a component from re-rendering when the model has not changed. For this to work, we
+need to make sure to produce **new object instances** from `update()` instead of mutating the
+existing object.
 
-_Coming Soon!_
+Because we are using [Patchinko](https://github.com/barneycarroll/patchinko) to issue and
+handle model updates, this is simply a matter of switching from
+[overloaded](https://github.com/barneycarroll/patchinko#overloaded) to
+[immutable](https://github.com/barneycarroll/patchinko#immutable).
+This creates a new object instance instead of mutating the model.
+
+Next, we can write a simple helper function that checks whether the component's model
+has changed:
+
+```js
+const checkIfModelChanged = (next, prev) =>
+  next.attrs.model !== prev.attrs.model;
+```
+
+Finally, we add the `onbeforeupdate` lifecycle method to the component:
+
+```js
+onbeforeupdate: checkIfModelChanged
+```
+
+This will prevent the component's `view()` method from being called when the model has not
+changed. We can prove this to ourselves by adding `console.log` statements in the `view()`
+methods of the components, and check the console output to confirm that components are only
+re-rendered when their model has changed.
+
+Verify this in the example below. Notice that `render Entry`, `render Date`,
+`render Temperature Air`, and `render Temperature Water` appear in the console output **only**
+when you interact with that component in the user interface. Other components do not get
+re-rendered.
+
+@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-immutable 800 70
 
 [Table of Contents](toc.html)
 

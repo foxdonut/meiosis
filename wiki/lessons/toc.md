@@ -29,7 +29,7 @@
 ### 05 - Lifecycle Methods and other Techniques
 
 - [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html) (coming soon)
-- [B - Preventing Rerenders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html) (coming soon)
+- [B - Preventing Re-renders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html)
 - [C - React Context](05-Lifecycle-and-other-Techniques-C-React-Context.html) (coming soon)
 - [D - Render Props](05-Lifecycle-and-other-Techniques-D-Render-Props.html) (coming soon)
 

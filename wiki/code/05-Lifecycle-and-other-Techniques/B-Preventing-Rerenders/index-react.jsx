@@ -81,7 +81,8 @@ const createTemperature = label => update => {
   const actions = {
     increase: amount => evt => {
       evt.preventDefault();
-      update(model => Object.assign({}, model, { value: model.value + amount }));
+      update(model => Object.assign({}, model,
+        { value: model.value + amount }));
     },
     changeUnits: evt => {
       evt.preventDefault();
@@ -119,7 +120,8 @@ const createTemperature = label => update => {
       return (
         <div className="row" style={{marginTop: 8}}>
           <div className="col-md-3">
-            <span>{model.label} Temperature: {model.value}&deg;{model.units} </span>
+            <span>{model.label} Temperature:
+              {model.value}&deg;{model.units} </span>
           </div>
           <div className="col-md-6">
             <button className="btn btn-sm btn-default"

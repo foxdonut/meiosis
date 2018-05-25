@@ -37,7 +37,8 @@ const nestComponent = (create, update, path) => {
     result.model = () => nestPatch(Component.model(), path);
   }
   if (Component.view) {
-    result.view = vnode => m(Component, { model: get(vnode.attrs.model, path) });
+    result.view = vnode => m(Component,
+      { model: get(vnode.attrs.model, path) });
   }
   return result;
 };
@@ -138,14 +139,14 @@ const createTemperature = label => update => {
             m.trust("&deg;"), model.units)
         ),
         m("div.col-md-6",
-          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(1) },
-            "Increase"),
+          m("button.btn.btn-sm.btn-default",
+            { onclick: actions.increase(1) }, "Increase"),
 
-          m("button.btn.btn-sm.btn-default", { onclick: actions.increase(-1) },
-            "Decrease"),
+          m("button.btn.btn-sm.btn-default",
+            { onclick: actions.increase(-1) }, "Decrease"),
 
-          m("button.btn.btn-sm.btn-info", { onclick: actions.changeUnits },
-            "Change Units")
+          m("button.btn.btn-sm.btn-info",
+            { onclick: actions.changeUnits }, "Change Units")
         )
       )
   };
@@ -196,7 +197,8 @@ const createApp = update => {
         air.view(model),
         water.view(model),
         m("div",
-          m("button.btn.btn-primary", { onclick: actions.save(model) }, "Save"),
+          m("button.btn.btn-primary", { onclick: actions.save(model) },
+            "Save"),
           m("span", model.saved)
         )
       )
