@@ -1,74 +1,96 @@
-/* global m, O, pathToRegexp */
+/* global m, O */
 
 const mlink = { oncreate: m.route.link, onupdate: m.route.link };
 
-const addHref = pageObject => {
-  pageObject.href = pathToRegexp.compile(pageObject.route);
-  return pageObject;
+// eslint-disable-next-line no-unused-vars
+const createHome = update => {
+  const incr = () => update({ counter: O(value => value + 1)});
+
+  return {
+    tab: "Home",
+    label: "Home",
+    routes: ["/"],
+    view: vnode => [
+      m("div", "Home Page"),
+      m("div", "Counter: ", vnode.attrs.model.counter),
+      m("div", m("button", { onclick: incr }, "Increment"))
+    ]
+  };
 };
 
-const HomePage = addHref({
-  tab: "Home",
-  label: "Home",
-  route: "/"
-});
-
-// eslint-disable-next-line no-unused-vars
-const createHome = update => O({
-  view: _vnode => m("div", "Home Page")
-}, HomePage);
-
-const coffees = [
+const coffeeData = [
   { id: "c1", description: "Coffee 1" },
   { id: "c2", description: "Coffee 2" }
 ];
 
 const loadCoffees = () => new Promise(resolve =>
-  setTimeout(() => resolve(coffees), 1)
+  setTimeout(() => resolve(coffeeData), 1)
 );
 
-const CoffeePage = addHref({
+// eslint-disable-next-line no-unused-vars
+const createCoffee = update => ({
   tab: "Coffee",
   label: "Coffee",
-  route: "/coffee/:id"
-});
-
-const coffeeView = model =>
-  m("div",
-    m("p", "Coffee Page"),
-    model.coffees.map(
-      coffee =>
-        m("span", { key: coffee.id },
-          m("a", O({ href: CoffeePage.href({ id: coffee.id }) }, mlink), coffee.id)
-        )
-    ),
-    model.coffee
-  );
-
-// eslint-disable-next-line no-unused-vars
-const createCoffee = update => O({
+  routes: ["/coffee", "/coffee/:id"],
   navigateTo: params => loadCoffees().then(
-    coffees => update({ coffees, coffee: "Coffee " + params.id })
+    coffees => update({ coffees, coffee: params.id ? "Coffee " + params.id : O })
   ),
-  view: vnode => coffeeView(vnode.attrs.model)
-}, CoffeePage);
+  view: vnode => {
+    const model = vnode.attrs.model;
+    return (
+      m("div",
+        m("p", "Coffee Page"),
+        model.coffees.map(
+          coffee =>
+            m("span", { key: coffee.id },
+              m("a", O({ href: "/coffee/" + coffee.id }, mlink), coffee.id)
+            )
+        ),
+        model.coffee
+      )
+    );
+  }
+});
 
-const CoffeesPage = addHref({
-  tab: "Coffee",
-  label: "Coffee",
-  route: "/coffee"
+const beerData = [
+  { id: "b1", title: "Beer 1" },
+  { id: "b2", title: "Beer 2" }
+];
+
+const loadBeer = () => new Promise(resolve =>
+  setTimeout(() => resolve(beerData), 1)
+);
+
+// eslint-disable-next-line no-unused-vars
+const createBeer = update => ({
+  tab: "Beer",
+  label: "Beer",
+  routes: ["/beer"],
+  navigateTo: () => loadBeer().then(beerList => update({ beerList })),
+  view: vnode =>
+    m("div",
+      m("p", "Beer Page"),
+      m("ul",
+        vnode.attrs.model.beerList.map(beer =>
+          m("li", { key: beer.id },
+            m("a", O({ href: "/beer/" + beer.id }, mlink), beer.title)
+          )
+        )
+      )
+    )
 });
 
 // eslint-disable-next-line no-unused-vars
-const createCoffees = update => {
-  return O({
-    navigateTo: _params => loadCoffees().then(coffees => update({ coffees, coffee: O })),
-    view: vnode => coffeeView(vnode.attrs.model)
-  }, CoffeesPage);
-};
+const createBeerDetails = update => ({
+  tab: "Beer",
+  label: "Beer",
+  routes: ["/beer/:id"],
+  navigateTo: params => update({ beerId: params.id }),
+  view: vnode => m("p", "Details of beer ", vnode.attrs.model.beerId)
+});
 
 // eslint-disable-next-line no-unused-vars
-const Layout = {
+const createLayout = pages => ({
   view: vnode => {
     const isActive = tab => tab === vnode.attrs.currentTab ? "active" : "";
 
@@ -76,9 +98,9 @@ const Layout = {
       m("div",
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
-            [HomePage, CoffeesPage].map(Component =>
+            pages.map(Component =>
               m("li", { class: isActive(Component.tab) },
-                m("a", O({ href: Component.href() }, mlink), Component.label)
+                m("a", O({ href: Component.routes[0] }, mlink), Component.label)
               )
             )
           )
@@ -87,4 +109,4 @@ const Layout = {
       )
     );
   }
-};
+});
