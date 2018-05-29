@@ -34,7 +34,7 @@ const createNavigation = update => {
     { key: 'home', route: '' },
     { key: 'coffee' },
     { key: 'beer' },
-    { key: 'beerDetails' },
+    { key: 'beerDetails', tab: 'beer' },
   ]);
 
   const { home, coffee, beer, beerDetails } = stateNavigator.states;

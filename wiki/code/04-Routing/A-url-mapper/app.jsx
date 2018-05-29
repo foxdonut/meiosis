@@ -57,7 +57,7 @@ const createApp = (update, stateNavigator) => {
     view: model => {
       var state = stateNavigator.stateContext.state;
       if (!state) return null;
-      const isActive = tab => tab === state.key ? "active" : "";
+      const isActive = tab => tab === (state.tab || state.key) ? "active" : "";
       return (
         <div>
           <nav className="navbar navbar-default">
