@@ -52,6 +52,7 @@ const createApp = (update, stateNavigator) => {
   return {
     view: model => {
       var state = stateNavigator.stateContext.state;
+      if (!state) return null;
       const isActive = tab => tab === state.key ? "active" : "";
       return (
         <div>
