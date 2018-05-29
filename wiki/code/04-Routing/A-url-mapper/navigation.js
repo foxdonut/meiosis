@@ -51,6 +51,22 @@ const pages = {
 
 // eslint-disable-next-line no-unused-vars
 const createNavigation = update => {
+  var stateNavigator = new Navigation.StateNavigator([
+    { key: 'home', route: '' },
+    { key: 'coffee' },
+    { key: 'beer' },
+    { key: 'beerDetails' },
+  ]);
+
+  stateNavigator.onNavigate((oldState, state, data, asyncData) => {
+    update(model => Object.assign(model, data, asyncData, { stateNavigator }))
+  });
+
+  stateNavigator.start();
+
+
+
+
   const navigate = (page, params = {}) =>
     model => Object.assign(model, { page, params });
 
