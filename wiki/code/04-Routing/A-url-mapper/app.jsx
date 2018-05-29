@@ -37,7 +37,7 @@ const createCoffee = (update, stateNavigator) => ({
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={`#${stateNavigator.getNavigationLink("coffee", { id: coffee.id })}`}>
+        <a href={`#${stateNavigator.getRefreshLink({ id: coffee.id })}`}>
           {coffee.id}
         </a>
         {" "}
