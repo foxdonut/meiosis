@@ -64,6 +64,12 @@ const createNavigation = update => {
   beer.component = createBeer(update, stateNavigator);
   beerDetails.component = createBeerDetails(update, stateNavigator);
 
+  beer.navigating = (data, url, navigate) => {
+    services.loadBeer().then(beerList => {
+      navigate({ beerList });
+    });
+  }
+
   stateNavigator.onNavigate((oldState, state, data, asyncData) => {
     update(model => Object.assign(model, data, asyncData))
   });
