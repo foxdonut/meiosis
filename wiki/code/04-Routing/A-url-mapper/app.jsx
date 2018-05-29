@@ -6,7 +6,7 @@ const createBeerDetails = (update, stateNavigator) => ({
 
 const createBeer = (update, stateNavigator) => {
   const actions = {
-    beerDetails: id => _evt => stateNavigator.navigate('beerDetails', { id }),
+    beerDetails: id => _evt => stateNavigator.navigate("beerDetails", { id }),
   };
 
   return {
@@ -16,7 +16,7 @@ const createBeer = (update, stateNavigator) => {
         <ul>
           {model.beerList.map(beer =>
             <li key={beer.id}>
-              <a href={`#${stateNavigator.getNavigationLink('beerDetails', { id: beer.id })}`}>
+              <a href={`#${stateNavigator.getNavigationLink("beerDetails", { id: beer.id })}`}>
                 {beer.title}
               </a>
               {" "}
@@ -37,7 +37,7 @@ const createCoffee = (update, stateNavigator) => ({
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={`#${stateNavigator.getNavigationLink('coffee', { id: coffee.id })}`}>
+        <a href={`#${stateNavigator.getNavigationLink("coffee", { id: coffee.id })}`}>
           {coffee.id}
         </a>
         {" "}
@@ -62,26 +62,26 @@ const createApp = (update, stateNavigator) => {
         <div>
           <nav className="navbar navbar-default">
             <ul className="nav navbar-nav">
-              <li className={isActive('home')}>
+              <li className={isActive("home")}>
                 <a href="#/">Home</a>
               </li>
-              <li className={isActive('coffee')}>
+              <li className={isActive("coffee")}>
                 <a href="#/coffee">Coffee</a>
               </li>
-              <li className={isActive('beer')}>
+              <li className={isActive("beer")}>
                 <a href="#/beer">Beer</a>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => stateNavigator.navigate('home')}>Home</button>
+                  onClick={_evt => stateNavigator.navigate("home")}>Home</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => stateNavigator.navigate('coffee')}>Coffee</button>
+                  onClick={_evt => stateNavigator.navigate("coffee")}>Coffee</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => stateNavigator.navigate('beer')}>Beer</button>
+                  onClick={_evt => stateNavigator.navigate("beer")}>Beer</button>
               </li>
             </ul>
           </nav>
