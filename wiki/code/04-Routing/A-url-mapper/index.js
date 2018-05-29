@@ -2,13 +2,13 @@
 
 // Meiosis Setup
 const update = flyd.stream();
-const stateNavigator = createNavigation(update);
-const app = createApp(update, stateNavigator);
 const models = flyd.scan((model, func) => func(model),
-  {}, update);
+{}, update);
 
 // Rendering
 const element = document.getElementById("app");
+const stateNavigator = createNavigation(update);
+const app = createApp(update, stateNavigator);
 models.map(model => ReactDOM.render(app.view(model), element));
 
 // Only for using Meiosis Tracer in development.
