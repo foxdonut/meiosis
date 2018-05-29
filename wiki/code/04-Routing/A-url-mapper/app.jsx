@@ -69,15 +69,15 @@ const createApp = (update, stateNavigator) => {
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToHome()}>Home</button>
+                  onClick={_evt => stateNavigator.navigate('home')}>Home</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToCoffee()}>Coffee</button>
+                  onClick={_evt => stateNavigator.navigate('coffee')}>Coffee</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigation.navigateToBeer()}>Beer</button>
+                  onClick={_evt => stateNavigator.navigate('beer')}>Beer</button>
               </li>
             </ul>
           </nav>
