@@ -1,10 +1,10 @@
 /* global pages */
 
-const createBeerDetails = _update => ({
+const createBeerDetails = (update, stateNavigator) => ({
   view: model => (<p>Details of beer {model.params.id}</p>)
 });
 
-const createBeer = (update, navigation) => {
+const createBeer = (update, stateNavigator) => {
   const actions = {
     beerDetails: id => _evt => navigation.navigateToBeerDetails({ id }),
   };
@@ -30,7 +30,7 @@ const createBeer = (update, navigation) => {
   };
 };
 
-const createCoffee = _update => ({
+const createCoffee = (update, stateNavigator) => ({
   view: model => (
     <div>
       <p>Coffee Page</p>
@@ -48,41 +48,22 @@ const createHome = _update => ({
 });
 
 // eslint-disable-next-line no-unused-vars
-const createApp = (update, navigation) => {
-  const homeComponent = createHome(update);
-  const coffeeComponent = createCoffee(update);
-  const beerComponent = createBeer(update, navigation);
-  const beerDetailsComponent = createBeerDetails(update);
-
-  const pageMap = {
-    [pages.home.id]: homeComponent,
-    [pages.coffee.id]: coffeeComponent,
-    [pages.beer.id]: beerComponent,
-    [pages.beerDetails.id]: beerDetailsComponent
-  };
-
+const createApp = (update, stateNavigator) => {
   return {
-    model: () => ({
-      page: pages.home,
-      params: {}
-    }),
     view: model => {
-      const currentPageId = pageMap[model.page.id] ? model.page.id : pages.home.id;
-      const component = pageMap[currentPageId];
-      const currentTab = model.page.tab;
-      const isActive = tab => tab === currentTab ? "active" : "";
-
+      var state = stateNavigator.stateContext.state;
+      const isActive = tab => tab === state.key ? "active" : "";
       return (
         <div>
           <nav className="navbar navbar-default">
             <ul className="nav navbar-nav">
-              <li className={isActive(pages.home.tab)}>
+              <li className={isActive('home')}>
                 <a href="#/">Home</a>
               </li>
-              <li className={isActive(pages.coffee.tab)}>
+              <li className={isActive('coffee')}>
                 <a href="#/coffee">Coffee</a>
               </li>
-              <li className={isActive(pages.beer.tab)}>
+              <li className={isActive('beer')}>
                 <a href="#/beer">Beer</a>
               </li>
               <li className="btn">
@@ -99,7 +80,7 @@ const createApp = (update, navigation) => {
               </li>
             </ul>
           </nav>
-          {component.view(model)}
+          {state.component.view(model)}
         </div>
       );
     }
