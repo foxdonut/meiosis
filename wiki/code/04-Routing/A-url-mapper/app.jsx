@@ -1,12 +1,12 @@
 /* global pages */
 
 const createBeerDetails = (update, stateNavigator) => ({
-  view: model => (<p>Details of beer {model.params.id}</p>)
+  view: model => (<p>Details of beer {model.id}</p>)
 });
 
 const createBeer = (update, stateNavigator) => {
   const actions = {
-    beerDetails: id => _evt => navigation.navigateToBeerDetails({ id }),
+    beerDetails: id => _evt => stateNavigator.navigate('beerDetails', { id }),
   };
 
   return {
@@ -16,7 +16,7 @@ const createBeer = (update, stateNavigator) => {
         <ul>
           {model.beerList.map(beer =>
             <li key={beer.id}>
-              <a href={"#/beer/" + beer.id}>{beer.title}</a>
+              <a href={`#${stateNavigator.getNavigationLink('beerDetails', { id: beer.id })}`}>{beer.title}</a>
               {" "}
               <button className="btn btn-default btn-xs"
                 onClick={actions.beerDetails(beer.id)}>
