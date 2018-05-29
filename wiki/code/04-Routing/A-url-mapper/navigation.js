@@ -70,6 +70,19 @@ const createNavigation = update => {
     });
   }
 
+  coffee.navigating = (data, url, navigate) => {
+    services.loadCoffees().then(coffees => {
+      if (data.id) {
+        services.loadCoffee(data).then(coffee => {
+          navigate(Object.assign({ coffee: coffee.description }, { coffees }));
+        });
+      }
+      else {
+        navigate({ coffees });
+      }
+    });
+  }
+
   stateNavigator.onNavigate((oldState, state, data, asyncData) => {
     update(model => Object.assign(model, data, asyncData))
   });
