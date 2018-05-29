@@ -16,7 +16,9 @@ const createBeer = (update, stateNavigator) => {
         <ul>
           {model.beerList.map(beer =>
             <li key={beer.id}>
-              <a href={`#${stateNavigator.getNavigationLink('beerDetails', { id: beer.id })}`}>{beer.title}</a>
+              <a href={`#${stateNavigator.getNavigationLink('beerDetails', { id: beer.id })}`}>
+                {beer.title}
+              </a>
               {" "}
               <button className="btn btn-default btn-xs"
                 onClick={actions.beerDetails(beer.id)}>
@@ -35,7 +37,9 @@ const createCoffee = (update, stateNavigator) => ({
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={`#${stateNavigator.getNavigationLink('coffee', { id: coffee.id })}`}>{coffee.id}</a>
+        <a href={`#${stateNavigator.getNavigationLink('coffee', { id: coffee.id })}`}>
+          {coffee.id}
+        </a>
         {" "}
       </span>)}
       {model.coffee}
