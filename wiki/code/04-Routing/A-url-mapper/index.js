@@ -19,5 +19,5 @@ router.resolveRoute();
 models.map(router.routeSync);
 
 // Only for using Meiosis Tracer in development.
-meiosis.trace({ update, dataStreams: [ models ] });
-meiosisTracer({ selector: "#tracer" });
+// meiosis.trace({ update, dataStreams: [ models ] });
+// meiosisTracer({ selector: "#tracer" });
