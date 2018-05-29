@@ -62,8 +62,8 @@ const createNavigation = update => {
     });
   }
 
-  stateNavigator.onNavigate((oldState, state, data, asyncData) => {
-    var { data, asyncData, url } = stateNavigator.stateContext;
+  stateNavigator.onNavigate(() => {
+    const { data, asyncData, url } = stateNavigator.stateContext;
     update(model => Object.assign(model, data, asyncData, { url }))
   });
 
@@ -71,7 +71,7 @@ const createNavigation = update => {
 
   const contextSync = ({ url }) => {
     if (url !== undefined && stateNavigator.stateContext.url !== url) {
-      var { state, data } = stateNavigator.parseLink(url);
+      const { state, data } = stateNavigator.parseLink(url);
       stateNavigator.stateContext.url = url;
       stateNavigator.stateContext.state = state;
       stateNavigator.stateContext.data = data;
