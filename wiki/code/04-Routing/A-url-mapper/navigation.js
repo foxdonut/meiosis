@@ -63,7 +63,8 @@ const createNavigation = update => {
   }
 
   stateNavigator.onNavigate((oldState, state, data, asyncData) => {
-    update(model => Object.assign(model, data, asyncData))
+    var { data, asyncData, url } = stateNavigator.stateContext;
+    update(model => Object.assign(model, data, asyncData, { url }))
   });
 
   stateNavigator.start();
