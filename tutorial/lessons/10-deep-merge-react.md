@@ -41,7 +41,7 @@ So we need to send updates such as:
 We then hope to merge that in with the top-level model to obtain:
 
 ```js
-{ air:   { value: 22, units: "C" },
+{ air:   { value: 23, units: "C" },
   water: { value: 84, units: "F" }
 }
 ```
