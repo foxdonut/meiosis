@@ -98,7 +98,7 @@ var createTemperaturePair = function(update) {
   var view = function(model) {
     return (<div>
       {air.view(model)}
-      {water.view(Object.assign(model, { context: { theme: "light" } }))}
+      {water.view(Object.assign({}, model, { context: { theme: "light" } }))}
     </div>);
   };
   return { model: model, view: view };
