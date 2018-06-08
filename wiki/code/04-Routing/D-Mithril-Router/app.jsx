@@ -1,4 +1,4 @@
-/* global preventDefault */
+/* @jsx m */
 /* global createBeer, createBeerDetails, createCoffee, createHome */
 /* global createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage */
 
@@ -22,7 +22,8 @@ const createApp = update => {
 
   return {
     navigator,
-    view: model => {
+    view: vnode => {
+      const model = vnode.attrs.model;
       const component = navigator.getComponent(model.pageId);
       const currentTab = model.tab;
       const isActive = tab => tab === currentTab ? "active" : "";
@@ -32,31 +33,25 @@ const createApp = update => {
           <nav className="navbar navbar-default">
             <ul className="nav navbar-nav">
               <li className={isActive(HomePage)}>
-                <a href={navigator.getUrl(HomePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(HomePage))}
-                >Home</a>
+                <a href={navigator.getUrl(HomePage)}>Home</a>
               </li>
               <li className={isActive(CoffeePage)}>
-                <a href={navigator.getUrl(CoffeePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(CoffeePage))}
-                >Coffee</a>
+                <a href={navigator.getUrl(CoffeePage)}>Coffee</a>
               </li>
               <li className={isActive(BeerPage)}>
-                <a href={navigator.getUrl(BeerPage)}
-                  onClick={preventDefault(() => navigator.navigateTo(BeerPage))}
-                >Beer</a>
+                <a href={navigator.getUrl(BeerPage)}>Beer</a>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigator.navigateTo(HomePage)}>Home</button>
+                  onclick={_evt => navigator.navigateTo(HomePage)}>Home</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigator.navigateTo(CoffeePage)}>Coffee</button>
+                  onclick={_evt => navigator.navigateTo(CoffeePage)}>Coffee</button>
               </li>
               <li className="btn">
                 <button className="btn btn-default"
-                  onClick={_evt => navigator.navigateTo(BeerPage)}>Beer</button>
+                  onclick={_evt => navigator.navigateTo(BeerPage)}>Beer</button>
               </li>
             </ul>
           </nav>

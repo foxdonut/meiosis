@@ -1,16 +1,15 @@
-/* global compose, urlMapper */
-
 // eslint-disable-next-line no-unused-vars
 const createNavigator = update => {
   const componentMap = {};
   const navigateToMap = {};
   const routeMap = {};
   const routeHandlerMap = {};
-  const mapper = urlMapper({ query: true });
+  const routes = {};
 
-  const getUrl = (id, params = {}) => {
+  const getUrl = (id, _params = {}) => {
     const route = routeMap[id];
-    return route && "#" + mapper.stringify(route, params);
+    //return route && "#!" + mapper.stringify(route, params);
+    return route && "#!" + route;
   };
 
   return {
@@ -27,7 +26,7 @@ const createNavigator = update => {
             });
 
           if (component.navigating) {
-            component.navigating(params, func => update(compose(func, updateFn)));
+            return component.navigating(params);
           }
           else {
             update(updateFn);
@@ -37,6 +36,7 @@ const createNavigator = update => {
         if (config.route) {
           routeMap[config.key] = config.route;
           routeHandlerMap[config.route] = handler;
+          routes[config.route] = config.key;
         }
       });
     },
@@ -44,15 +44,10 @@ const createNavigator = update => {
     navigateTo: (id, params) => {
       const target = navigateToMap[id];
       if (target) {
-        target(params);
+        return target(params);
       }
     },
-    handleUrl: url => {
-      const matchedRoute = mapper.map(url, routeHandlerMap);
-      if (matchedRoute) {
-        matchedRoute.match(matchedRoute.values);
-      }
-    },
+    routes,
     getUrl
   };
 };

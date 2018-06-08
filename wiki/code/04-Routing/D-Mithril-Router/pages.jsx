@@ -1,4 +1,5 @@
-/* global compose, preventDefault, BeerDetailsPage, CoffeePage */
+/* @jsx m */
+/* global compose, CoffeePage, BeerPage, BeerDetailsPage */
 
 /* Home Page */
 
@@ -27,30 +28,28 @@ const loadCoffee = params => new Promise(resolve =>
 
 // eslint-disable-next-line no-unused-vars
 const createCoffee = navigator => update => ({
-  navigating: (params, navigate) => {
+  navigating: params =>
     loadCoffees().then(coffees => {
-      const assignCoffees = model => Object.assign(model, { coffees });
+      const assignCoffees = model => Object.assign(model, {
+        coffees,
+        pageId: CoffeePage
+      });
 
       if (params && params.id) {
         loadCoffee(params).then(coffee => {
-          navigate(compose(assignCoffees,
+          update(compose(assignCoffees,
             model => Object.assign(model, { coffee: coffee.description })));
         });
       }
       else {
-        navigate(assignCoffees);
+        update(assignCoffees);
       }
-    });
-  },
+    }),
   view: model => (
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}
-          onClick={preventDefault(() =>
-            navigator.navigateTo(CoffeePage, { id: coffee.id })
-          )}
-        >{coffee.id}</a>
+        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}>{coffee.id}</a>
         {" "}
       </span>)}
       {model.coffee}
@@ -70,11 +69,10 @@ const beerList = [
 
 // eslint-disable-next-line no-unused-vars
 const createBeer = navigator => update => ({
-  navigating: (params, navigate) => {
+  navigating: _params =>
     loadBeer().then(beerList => {
-      navigate(model => Object.assign(model, { beerList }));
-    });
-  },
+      update(model => Object.assign(model, { pageId: BeerPage, beerList }));
+    }),
   view: model => (
     <div>
       <p>Beer Page</p>
@@ -82,13 +80,10 @@ const createBeer = navigator => update => ({
         {model.beerList.map(beer =>
           <li key={beer.id}>
             <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
-              onClick={preventDefault(() =>
-                navigator.navigateTo(BeerDetailsPage, { id: beer.id })
-              )}
             >{beer.title}</a>
             {" "}
             <button className="btn btn-default btn-xs"
-              onClick={() =>
+              onclick={() =>
                 navigator.navigateTo(BeerDetailsPage, { id: beer.id })}>
               {beer.title}
             </button>
@@ -100,8 +95,11 @@ const createBeer = navigator => update => ({
 });
 
 // eslint-disable-next-line no-unused-vars
-const createBeerDetails = _navigator =>  _update => ({
-  navigating: (params, navigate) =>
-    navigate(model => Object.assign(model, { beerId: params.id })),
+const createBeerDetails = _navigator =>  update => ({
+  navigating: params =>
+    update(model => Object.assign(model, {
+      pageId: BeerPage,
+      beerId: params.id
+    })),
   view: model => (<p>Details of beer {model.beerId}</p>)
 });
