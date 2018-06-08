@@ -1,11 +1,10 @@
-/* @jsx m */
-/* global compose, CoffeePage, BeerPage, BeerDetailsPage */
+/* global m, href, compose, CoffeePage, BeerPage, BeerDetailsPage */
 
 /* Home Page */
 
 // eslint-disable-next-line no-unused-vars
 const createHome = _navigator => _update => ({
-  view: _model => (<div>Home Page</div>)
+  view: _model => m("div", "Home Page")
 });
 
 /* Coffee Page */
@@ -31,12 +30,13 @@ const createCoffee = navigator => update => ({
   navigating: params =>
     loadCoffees().then(coffees => {
       const assignCoffees = model => Object.assign(model, {
-        coffees,
-        pageId: CoffeePage
+        pageId: CoffeePage,
+        params,
+        coffees
       });
 
       if (params && params.id) {
-        loadCoffee(params).then(coffee => {
+        return loadCoffee(params).then(coffee => {
           update(compose(assignCoffees,
             model => Object.assign(model, { coffee: coffee.description })));
         });
@@ -45,16 +45,17 @@ const createCoffee = navigator => update => ({
         update(assignCoffees);
       }
     }),
-  view: model => (
-    <div>
-      <p>Coffee Page</p>
-      {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}>{coffee.id}</a>
-        {" "}
-      </span>)}
-      {model.coffee}
-    </div>
-  )
+  view: model =>
+    m("div",
+      m("p", "Coffee Page"),
+      model.coffees.map(coffee => m("span", { key: coffee.id },
+        m("a", href(
+          navigator.getUrl(CoffeePage) + "?" + m.buildQueryString({ id: coffee.id })
+        ), coffee.id),
+        " "
+      )),
+      model.coffee
+    )
 });
 
 /* Beer Page */
@@ -73,33 +74,30 @@ const createBeer = navigator => update => ({
     loadBeer().then(beerList => {
       update(model => Object.assign(model, { pageId: BeerPage, beerList }));
     }),
-  view: model => (
-    <div>
-      <p>Beer Page</p>
-      <ul>
-        {model.beerList.map(beer =>
-          <li key={beer.id}>
-            <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
-            >{beer.title}</a>
-            {" "}
-            <button className="btn btn-default btn-xs"
-              onclick={() =>
-                navigator.navigateTo(BeerDetailsPage, { id: beer.id })}>
-              {beer.title}
-            </button>
-          </li>
-        )}
-      </ul>
-    </div>
-  )
+  view: model =>
+    m("div",
+      m("p", "Beer Page"),
+      m("ul",
+        model.beerList.map(beer =>
+          m("li", { key: beer.id },
+            m("a", href(navigator.getUrl(BeerDetailsPage, { id: beer.id })),
+              beer.title),
+            " ",
+            m("button.btn.btn-default.btn-xs",
+              { onclick: _evt =>
+                m.route.set(navigator.getUrl(BeerDetailsPage, { id: beer.id }))
+              },
+              beer.title
+            )
+          )
+        )
+      )
+    )
 });
 
 // eslint-disable-next-line no-unused-vars
 const createBeerDetails = _navigator =>  update => ({
   navigating: params =>
-    update(model => Object.assign(model, {
-      pageId: BeerPage,
-      beerId: params.id
-    })),
-  view: model => (<p>Details of beer {model.beerId}</p>)
+    update(model => Object.assign(model, { pageId: BeerDetailsPage, params })),
+  view: model => m("p", "Details of beer ", model.params.id)
 });

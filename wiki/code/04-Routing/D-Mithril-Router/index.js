@@ -1,13 +1,14 @@
-/* global m, createApp, HomePage */
+/* global m, createApp, prefix, HomePage */
 
 // Meiosis Setup
 const update = m.stream();
 const App = createApp(update);
 const models = m.stream.scan((model, func) => func(model),
-  { pageId: HomePage, tab: HomePage }, update);
+  { pageId: HomePage }, update);
 
 // Rendering
 const element = document.getElementById("app");
+m.route.prefix(prefix);
 m.route(element, "/", Object.keys(App.navigator.routes).reduce(
   (result, route) => {
     result[route] = {
@@ -19,13 +20,3 @@ m.route(element, "/", Object.keys(App.navigator.routes).reduce(
   },
   {}
 ));
-
-// The url is part of the view. Display it in the browser's location bar.
-/*
-models.map(model => {
-  const url = model.url;
-  if (url && document.location.hash !== url) {
-    window.history.pushState({}, "", url);
-  }
-});
-*/
