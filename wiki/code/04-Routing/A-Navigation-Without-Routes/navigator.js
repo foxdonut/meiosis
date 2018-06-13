@@ -5,22 +5,13 @@ const createNavigator = update => {
   const componentMap = {};
   const navigateToMap = {};
 
-  const getUrl = (_id, _params) => {
-    return "#";
-  };
-
   return {
     register: configs => {
       configs.forEach(config => {
         const component = config.component;
         componentMap[config.key] = component;
-        const handler = params => {
-          const updateFn = model =>
-            Object.assign(model, {
-              pageId: config.key,
-              tab: config.tab || config.key
-            });
-
+        navigateToMap[config.key] = params => {
+          const updateFn = model => Object.assign(model, { pageId: config.key });
           if (component.navigating) {
             component.navigating(params, func => update(compose(func, updateFn)));
           }
@@ -28,7 +19,6 @@ const createNavigator = update => {
             update(updateFn);
           }
         };
-        navigateToMap[config.key] = handler;
       });
     },
     getComponent: pageId => componentMap[pageId],
@@ -38,6 +28,6 @@ const createNavigator = update => {
         target(params);
       }
     },
-    getUrl
+    blankHref: "javascript://"
   };
 };

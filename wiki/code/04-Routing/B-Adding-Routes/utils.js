@@ -4,10 +4,10 @@ const CoffeePage = "CoffeePage";
 const BeerPage = "BeerPage";
 const BeerDetailsPage = "BeerDetailsPage";
 
+// Tab defaults to page id. Indicate exceptions here.
+const tabMap = {
+  [BeerDetailsPage]: BeerPage
+};
+
 const compose = (...funcs) => x =>
   funcs.reduceRight((value, func) => func(value), x);
-
-const preventDefault = func => evt => {
-  evt.preventDefault();
-  func(evt);
-};

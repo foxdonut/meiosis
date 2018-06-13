@@ -1,6 +1,6 @@
-/* global preventDefault */
-/* global createBeer, createBeerDetails, createCoffee, createHome */
-/* global createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage */
+/* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
+   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
+*/
 
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {
@@ -17,14 +17,14 @@ const createApp = update => {
       route: "/beer" },
 
     { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
-      route: "/beer/:id", tab: BeerPage }
+      route: "/beer/:id" }
   ]);
 
   return {
     navigator,
     view: model => {
       const component = navigator.getComponent(model.pageId);
-      const currentTab = model.tab;
+      const currentTab = tabMap[model.pageId] || model.pageId;
       const isActive = tab => tab === currentTab ? "active" : "";
 
       return (
@@ -32,19 +32,13 @@ const createApp = update => {
           <nav className="navbar navbar-default">
             <ul className="nav navbar-nav">
               <li className={isActive(HomePage)}>
-                <a href={navigator.getUrl(HomePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(HomePage))}
-                >Home</a>
+                <a href={navigator.getUrl(HomePage)}>Home</a>
               </li>
               <li className={isActive(CoffeePage)}>
-                <a href={navigator.getUrl(CoffeePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(CoffeePage))}
-                >Coffee</a>
+                <a href={navigator.getUrl(CoffeePage)}>Coffee</a>
               </li>
               <li className={isActive(BeerPage)}>
-                <a href={navigator.getUrl(BeerPage)}
-                  onClick={preventDefault(() => navigator.navigateTo(BeerPage))}
-                >Beer</a>
+                <a href={navigator.getUrl(BeerPage)}>Beer</a>
               </li>
               <li className="btn">
                 <button className="btn btn-default"

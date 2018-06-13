@@ -4,7 +4,9 @@ const CoffeePage = "CoffeePage";
 const BeerPage = "BeerPage";
 const BeerDetailsPage = "BeerDetailsPage";
 
-const preventDefault = func => evt => {
-  evt.preventDefault();
-  func(evt);
+// Tab defaults to page id. Indicate exceptions here.
+const tabMap = {
+  [BeerDetailsPage]: BeerPage
 };
+
+const prefix = "#";

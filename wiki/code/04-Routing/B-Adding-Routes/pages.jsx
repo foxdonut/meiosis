@@ -1,4 +1,4 @@
-/* global compose, preventDefault, BeerDetailsPage, CoffeePage */
+/* global compose, BeerDetailsPage, CoffeePage */
 
 /* Home Page */
 
@@ -46,11 +46,7 @@ const createCoffee = navigator => update => ({
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}
-          onClick={preventDefault(() =>
-            navigator.navigateTo(CoffeePage, { id: coffee.id })
-          )}
-        >{coffee.id}</a>
+        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}>{coffee.id}</a>
         {" "}
       </span>)}
       {model.coffee}
@@ -82,9 +78,6 @@ const createBeer = navigator => update => ({
         {model.beerList.map(beer =>
           <li key={beer.id}>
             <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
-              onClick={preventDefault(() =>
-                navigator.navigateTo(BeerDetailsPage, { id: beer.id })
-              )}
             >{beer.title}</a>
             {" "}
             <button className="btn btn-default btn-xs"

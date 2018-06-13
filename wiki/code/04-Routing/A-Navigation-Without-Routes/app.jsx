@@ -1,6 +1,6 @@
-/* global preventDefault */
-/* global createBeer, createBeerDetails, createCoffee, createHome */
-/* global createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage */
+/* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
+   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
+*/
 
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {
@@ -10,15 +10,14 @@ const createApp = update => {
     { key: HomePage, component: createHome(navigator)(update) },
     { key: CoffeePage, component: createCoffee(navigator)(update) },
     { key: BeerPage, component: createBeer(navigator)(update) },
-    { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
-      tab: BeerPage }
+    { key: BeerDetailsPage, component: createBeerDetails(navigator)(update) }
   ]);
 
   return {
     navigator,
     view: model => {
       const component = navigator.getComponent(model.pageId);
-      const currentTab = model.tab;
+      const currentTab = tabMap[model.pageId] || model.pageId;
       const isActive = tab => tab === currentTab ? "active" : "";
 
       return (
@@ -26,18 +25,18 @@ const createApp = update => {
           <nav className="navbar navbar-default">
             <ul className="nav navbar-nav">
               <li className={isActive(HomePage)}>
-                <a href={navigator.getUrl(HomePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(HomePage))}
+                <a href={navigator.blankHref}
+                  onClick={() => navigator.navigateTo(HomePage)}
                 >Home</a>
               </li>
               <li className={isActive(CoffeePage)}>
-                <a href={navigator.getUrl(CoffeePage)}
-                  onClick={preventDefault(() => navigator.navigateTo(CoffeePage))}
+                <a href={navigator.blankHref}
+                  onClick={() => navigator.navigateTo(CoffeePage)}
                 >Coffee</a>
               </li>
               <li className={isActive(BeerPage)}>
-                <a href={navigator.getUrl(BeerPage)}
-                  onClick={preventDefault(() => navigator.navigateTo(BeerPage))}
+                <a href={navigator.blankHref}
+                  onClick={() => navigator.navigateTo(BeerPage)}
                 >Beer</a>
               </li>
               <li className="btn">
