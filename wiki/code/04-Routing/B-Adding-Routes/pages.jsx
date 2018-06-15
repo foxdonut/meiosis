@@ -1,4 +1,17 @@
-/* global compose, BeerDetailsPage, CoffeePage */
+/* global compose, BeerDetailsPage, CoffeePage, HomePage */
+
+/* 404 Not Found Page */
+
+// eslint-disable-next-line no-unused-vars
+const createNotFound = navigator => _update => ({
+  view: _model => (<div>
+    <div>Not Found Page</div>
+    <div>Sorry, we could not find what you were looking 4...04</div>
+    <div>
+      <a href={navigator.getUrl(HomePage)}>Home Page</a>
+    </div>
+  </div>)
+});
 
 /* Home Page */
 

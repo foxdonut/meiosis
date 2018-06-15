@@ -4,7 +4,7 @@
 const update = flyd.stream();
 const App = createApp(update);
 const models = flyd.scan((model, func) => func(model),
-  { pageId: HomePage, tab: HomePage }, update);
+  { pageId: HomePage }, update);
 
 // Rendering
 const element = document.getElementById("app");
