@@ -1,5 +1,6 @@
-/* global m, href, createBeer, createBeerDetails, createCoffee, createHome,
-   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage, tabMap
+/* global m, href, createNotFound, createBeer, createBeerDetails, createCoffee,
+   createHome, createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage,
+   tabMap
 */
 
 // eslint-disable-next-line no-unused-vars
@@ -18,13 +19,13 @@ const createApp = update => {
 
     { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
       route: "/beer/:id" }
-  ]);
+  ], createNotFound(navigator)(update));
 
   return {
     navigator,
     view: vnode => {
       const model = vnode.attrs.model;
-      const component = navigator.getComponent(model.pageId);
+      const Component = navigator.getComponent(model.pageId);
       const currentTab = tabMap[model.pageId] || model.pageId;
       const isActive = tab => tab === currentTab ? ".active" : "";
 
@@ -43,25 +44,25 @@ const createApp = update => {
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => m.route.set(navigator.getUrl(HomePage)) },
+                  { onclick: _evt => navigator.navigateTo(HomePage) },
                   "Home"
                 )
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => m.route.set(navigator.getUrl(CoffeePage)) },
+                  { onclick: _evt => navigator.navigateTo(CoffeePage) },
                   "Coffee"
                 )
               ),
               m("li.btn",
                 m("button.btn.btn-default",
-                  { onclick: _evt => m.route.set(navigator.getUrl(BeerPage)) },
+                  { onclick: _evt => navigator.navigateTo(BeerPage) },
                   "Beer"
                 )
               )
             )
           ),
-          component && component.view(model)
+          m(Component, { model })
         )
       );
     }

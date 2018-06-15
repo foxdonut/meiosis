@@ -1,10 +1,23 @@
-/* global m, href, compose, CoffeePage, BeerPage, BeerDetailsPage */
+/* global m, O, href, HomePage, CoffeePage, BeerDetailsPage */
+
+/* 404 Not Found Page */
+
+// eslint-disable-next-line no-unused-vars
+const createNotFound = navigator => _update => ({
+  view: _vnode => m("div",
+    m("div", "Not Found Page"),
+    m("div", "Sorry, we could not find what you were looking 4...04"),
+    m("div",
+      m("a", href(navigator.getUrl(HomePage)), "Home Page")
+    )
+  )
+});
 
 /* Home Page */
 
 // eslint-disable-next-line no-unused-vars
 const createHome = _navigator => _update => ({
-  view: _model => m("div", "Home Page")
+  view: _vnode => m("div", "Home Page")
 });
 
 /* Coffee Page */
@@ -26,27 +39,23 @@ const loadCoffee = params => new Promise(resolve =>
   setTimeout(() => resolve(coffeeMap[params.id]||"")), 1);
 
 // eslint-disable-next-line no-unused-vars
-const createCoffee = navigator => update => ({
-  navigating: params =>
+const createCoffee = navigator => _update => ({
+  navigating: (params, navigate) =>
     loadCoffees().then(coffees => {
-      const assignCoffees = model => Object.assign(model, {
-        pageId: CoffeePage,
-        params,
-        coffees
-      });
+      const assignCoffees = { coffees };
 
       if (params && params.id) {
-        return loadCoffee(params).then(coffee => {
-          update(compose(assignCoffees,
-            model => Object.assign(model, { coffee: coffee.description })));
+        loadCoffee(params).then(coffee => {
+          navigate(O(assignCoffees, { coffee: coffee.description }));
         });
       }
       else {
-        update(assignCoffees);
+        navigate(assignCoffees);
       }
     }),
-  view: model =>
-    m("div",
+  view: vnode => {
+    const model = vnode.attrs.model;
+    return m("div",
       m("p", "Coffee Page"),
       model.coffees.map(coffee => m("span", { key: coffee.id },
         m("a", href(
@@ -55,30 +64,29 @@ const createCoffee = navigator => update => ({
         " "
       )),
       model.coffee
-    )
+    );
+  }
 });
 
 /* Beer Page */
-
-const loadBeer = () => new Promise(resolve =>
-  setTimeout(() => resolve(beerList), 1));
 
 const beerList = [
   { id: "b1", title: "Beer 1" },
   { id: "b2", title: "Beer 2" }
 ];
 
+const loadBeer = () => new Promise(resolve =>
+  setTimeout(() => resolve(beerList), 1));
+
 // eslint-disable-next-line no-unused-vars
-const createBeer = navigator => update => ({
-  navigating: _params =>
-    loadBeer().then(beerList => {
-      update(model => Object.assign(model, { pageId: BeerPage, beerList }));
-    }),
-  view: model =>
+const createBeer = navigator => _update => ({
+  navigating: (_params, navigate) =>
+    loadBeer().then(beerList => navigate({ beerList })),
+  view: vnode =>
     m("div",
       m("p", "Beer Page"),
       m("ul",
-        model.beerList.map(beer =>
+        vnode.attrs.model.beerList.map(beer =>
           m("li", { key: beer.id },
             m("a", href(navigator.getUrl(BeerDetailsPage, { id: beer.id })),
               beer.title),
@@ -97,7 +105,6 @@ const createBeer = navigator => update => ({
 
 // eslint-disable-next-line no-unused-vars
 const createBeerDetails = _navigator =>  update => ({
-  navigating: params =>
-    update(model => Object.assign(model, { pageId: BeerDetailsPage, params })),
-  view: model => m("p", "Details of beer ", model.params.id)
+  navigating: (params, navigate) => navigate({ pageId: BeerDetailsPage, params }),
+  view: vnode => m("p", "Details of beer ", vnode.attrs.model.params.id)
 });
