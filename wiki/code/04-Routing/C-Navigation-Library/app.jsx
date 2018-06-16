@@ -1,5 +1,5 @@
-/* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
-   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
+/* global createNotFound, createBeer, createBeerDetails, createCoffee, createHome,
+   tabMap, createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
 */
 
 // eslint-disable-next-line no-unused-vars
@@ -18,7 +18,7 @@ const createApp = update => {
 
     { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
       route: "/beer/{id}" }
-  ]);
+  ], createNotFound(navigator)(update));
 
   return {
     navigator,
@@ -54,7 +54,7 @@ const createApp = update => {
               </li>
             </ul>
           </nav>
-          {component && component.view(model)}
+          {component.view(model)}
         </div>
       );
     }
