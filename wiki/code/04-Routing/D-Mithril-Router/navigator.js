@@ -14,6 +14,9 @@ const createNavigator = update => {
 
   return {
     register: (configs, notFound) => {
+      if (notFound) {
+        configs.push({ key: "NotFoundPage", component: notFound, route: "/:404..." });
+      }
       configs.forEach(config => {
         const component = config.component;
         componentMap[config.key] = component;
