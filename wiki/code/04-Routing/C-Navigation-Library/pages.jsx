@@ -42,7 +42,7 @@ const loadCoffee = params => new Promise(resolve =>
 const createCoffee = navigator => update => ({
   navigating: (params, url, navigate) => {
     loadCoffees().then(coffees => {
-      const assignCoffees = { coffees };
+      const assignCoffees = { coffees, coffee: null };
 
       if (params && params.id) {
         loadCoffee(params).then(coffee => {

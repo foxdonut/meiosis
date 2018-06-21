@@ -1,17 +1,23 @@
 /* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
-   createNotFound, createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
+   createNotFound, createNavigator, BeerPage, BeerDetailsPage, CoffeePage,
+   CoffeeDetailsPage, HomePage
 */
 
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {
   const navigator = createNavigator(update);
 
+  const coffeeComponent = createCoffee(navigator)(update);
+
   navigator.register([
     { key: HomePage, component: createHome(navigator)(update),
       route: "/" },
 
-    { key: CoffeePage, component: createCoffee(navigator)(update),
-      route: "/coffee/:id?" },
+    { key: CoffeePage, component: coffeeComponent,
+      route: "/coffee" },
+
+    { key: CoffeeDetailsPage, component: coffeeComponent,
+      route: "/coffee/:id" },
 
     { key: BeerPage, component: createBeer(navigator)(update),
       route: "/beer" },
@@ -19,6 +25,8 @@ const createApp = update => {
     { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
       route: "/beer/:id" }
   ], createNotFound(navigator)(update));
+
+  navigator.start();
 
   return {
     navigator,

@@ -1,4 +1,4 @@
-/* global m, O, href, HomePage, CoffeePage, BeerDetailsPage */
+/* global m, href, HomePage, CoffeePage, BeerDetailsPage */
 
 /* 404 Not Found Page */
 
@@ -42,15 +42,13 @@ const loadCoffee = params => new Promise(resolve =>
 const createCoffee = navigator => _update => ({
   navigating: (params, navigate) =>
     loadCoffees().then(coffees => {
-      const assignCoffees = { coffees };
-
       if (params && params.id) {
         loadCoffee(params).then(coffee => {
-          navigate(O(assignCoffees, { coffee: coffee.description }));
+          navigate({ coffees, coffee: coffee.description });
         });
       }
       else {
-        navigate(assignCoffees);
+        navigate({ coffees, coffee: null });
       }
     }),
   view: vnode => {

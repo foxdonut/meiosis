@@ -1,54 +1,41 @@
-/* global compose, prefix, urlMapper */
+/* global compose, Navigo */
 
 // eslint-disable-next-line no-unused-vars
 const createNavigator = update => {
+  const router = new Navigo(null, true);
   const componentMap = {};
-  const routeMap = {};
-  const routeHandlerMap = {};
-  const mapper = urlMapper({ query: true });
-  let notFoundComponent = undefined;
-
-  const getUrl = (id, params = {}) => {
-    const route = routeMap[id];
-    return route && prefix + mapper.stringify(route, params);
-  };
+  const routes = {};
+  let notFoundComponent = null;
 
   return {
     register: (configs, notFound) => {
       configs.forEach(config => {
         const component = config.component;
         componentMap[config.key] = component;
-        if (config.route) {
-          routeMap[config.key] = config.route;
-          routeHandlerMap[config.route] = (params, url) => {
-            const updateFn = model =>
-              Object.assign(model, { pageId: config.key, url: prefix + url });
-
+        const updateFn = model =>
+          Object.assign(model, { pageId: config.key, url: document.location.hash });
+        routes[config.route] = {
+          as: config.key,
+          uses: params => {
             if (component.navigating) {
               component.navigating(params, func => update(compose(func, updateFn)));
             }
             else {
               update(updateFn);
             }
-          };
-        }
+          }
+        };
       });
-      notFoundComponent = notFound;
+      if (notFound) {
+        notFoundComponent = notFound;
+        router.notFound(() =>
+          update(model => Object.assign(model,
+            { pageId: null, url: document.location.hash })));
+      }
     },
     getComponent: pageId => componentMap[pageId] || notFoundComponent,
-    navigateTo: (id, params) => {
-      document.location.href = getUrl(id, params);
-    },
-    handleUrl: url => {
-      url = url || "/";
-      const matchedRoute = mapper.map(url, routeHandlerMap);
-      if (matchedRoute) {
-        matchedRoute.match(matchedRoute.values, url);
-      }
-      else {
-        update(model => Object.assign(model, { pageId: undefined, url: prefix + url }));
-      }
-    },
-    getUrl
+    getUrl:  (id, params) => router.generate(id, params),
+    navigateTo: (id, params) => router.navigate(router.generate(id, params)),
+    start: () => router.on(routes).resolve()
   };
 };

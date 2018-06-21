@@ -1,4 +1,4 @@
-/* global compose, BeerDetailsPage, CoffeePage, HomePage */
+/* global compose, BeerDetailsPage, CoffeeDetailsPage, HomePage */
 
 /* 404 Not Found Page */
 
@@ -42,12 +42,14 @@ const loadCoffee = params => new Promise(resolve =>
 const createCoffee = navigator => update => ({
   navigating: (params, navigate) => {
     loadCoffees().then(coffees => {
-      const assignCoffees = model => Object.assign(model, { coffees });
+      const assignCoffees = model => Object.assign(model, { coffees, coffee: null });
 
       if (params && params.id) {
         loadCoffee(params).then(coffee => {
-          navigate(compose(assignCoffees,
-            model => Object.assign(model, { coffee: coffee.description })));
+          navigate(compose(
+            model => Object.assign(model, { coffee: coffee.description }),
+            assignCoffees
+          ));
         });
       }
       else {
@@ -59,7 +61,7 @@ const createCoffee = navigator => update => ({
     <div>
       <p>Coffee Page</p>
       {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}>{coffee.id}</a>
+        <a href={navigator.getUrl(CoffeeDetailsPage, { id: coffee.id })}>{coffee.id}</a>
         {" "}
       </span>)}
       {model.coffee}
