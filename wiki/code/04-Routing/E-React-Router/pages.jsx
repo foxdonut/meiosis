@@ -1,24 +1,27 @@
-/* global compose, BeerDetailsPage, CoffeeDetailsPage, HomePage */
+/* global compose, BeerDetailsPage, CoffeeDetailsPage, HomePage,
+   React, ReactRouterDOM */
+
+const { Link } = ReactRouterDOM;
 
 /* 404 Not Found Page */
 
 // eslint-disable-next-line no-unused-vars
-const createNotFound = navigator => _update => ({
-  view: _model => (<div>
+const createNotFound = navigator => _update => () => (
+  <div>
     <div>Not Found Page</div>
     <div>Sorry, we could not find what you were looking 4...04</div>
     <div>
-      <a href={navigator.getUrl(HomePage)}>Home Page</a>
+      <Link to={navigator.getUrl(HomePage)}>Home Page</Link>
     </div>
-  </div>)
-});
+  </div>
+);
 
 /* Home Page */
 
 // eslint-disable-next-line no-unused-vars
-const createHome = _navigator => _update => ({
-  view: _model => (<div>Home Page</div>)
-});
+const createHome = _navigator => _update => () => (
+  <div>Home Page</div>
+);
 
 /* Coffee Page */
 
@@ -80,36 +83,55 @@ const beerList = [
 ];
 
 // eslint-disable-next-line no-unused-vars
-const createBeer = navigator => update => ({
-  navigating: (params, navigate) => {
+const createBeer = navigator => update => class extends React.Component {
+  loadData() {
     loadBeer().then(beerList => {
-      navigate(model => Object.assign(model, { beerList }));
+      update(model => Object.assign(model, { beerList }));
     });
-  },
-  view: model => (
-    <div>
-      <p>Beer Page</p>
-      <ul>
-        {model.beerList.map(beer =>
-          <li key={beer.id}>
-            <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
-            >{beer.title}</a>
-            {" "}
-            <button className="btn btn-default btn-xs"
-              onClick={() =>
-                navigator.navigateTo(BeerDetailsPage, { id: beer.id })}>
-              {beer.title}
-            </button>
-          </li>
-        )}
-      </ul>
-    </div>
-  )
-});
+  }
+  componentWillMount() {
+    this.loadData();
+  }
+  render() {
+    const model = this.props.model;
+    return (
+      <div>
+        <p>Beer Page</p>
+        <ul>
+          {model.beerList && model.beerList.map(beer =>
+            <li key={beer.id}>
+              <Link to={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
+              >{beer.title}</Link>
+              {" "}
+              <button className="btn btn-default btn-xs"
+                onClick={() =>
+                  navigator.navigateTo(BeerDetailsPage, { id: beer.id })}>
+                {beer.title}
+              </button>
+            </li>
+          )}
+        </ul>
+      </div>
+    );
+  }
+};
 
 // eslint-disable-next-line no-unused-vars
-const createBeerDetails = _navigator =>  _update => ({
-  navigating: (params, navigate) =>
-    navigate(model => Object.assign(model, { beerId: params.id })),
-  view: model => (<p>Details of beer {model.beerId}</p>)
-});
+const createBeerDetails = _navigator =>  update => class extends React.Component {
+  loadData(id) {
+    update(model => Object.assign(model, { beerId: id }));
+  }
+  componentWillMount() {
+    this.loadData(this.props.match.params.id);
+  }
+  componentDidUpdate(previous) {
+    const id = this.props.match.params.id;
+    if (id !== previous.match.params.id) {
+      this.loadData(id);
+    }
+  }
+  render() {
+    const model = this.props.model;
+    return (<p>Details of beer {model.beerId}</p>);
+  }
+};

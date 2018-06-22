@@ -1,5 +1,5 @@
 /* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
-   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage
+   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage, React
 */
 
 // eslint-disable-next-line no-unused-vars

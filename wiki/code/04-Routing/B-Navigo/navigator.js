@@ -30,7 +30,8 @@ const createNavigator = update => {
         notFoundComponent = notFound;
         router.notFound(() =>
           update(model => Object.assign(model,
-            { pageId: null, url: document.location.hash })));
+            { pageId: null, url: document.location.hash }))
+        );
       }
     },
     getComponent: pageId => componentMap[pageId] || notFoundComponent,

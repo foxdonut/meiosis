@@ -1,4 +1,4 @@
-/* global BeerDetailsPage, CoffeePage, HomePage */
+/* global BeerDetailsPage, CoffeePage, HomePage, React */
 
 /* 404 Not Found Page */
 

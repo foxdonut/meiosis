@@ -1,4 +1,4 @@
-/* global m, O, pathToRegexp, prefix */
+/* global m, pathToRegexp, prefix */
 
 // eslint-disable-next-line no-unused-vars
 const createNavigator = update => {
@@ -34,7 +34,7 @@ const createNavigator = update => {
       if (Component && Component.navigating) {
         return new Promise(resolve => {
           Component.navigating(params, obj => {
-            update(O(updateObj, obj));
+            update(Object.assign(updateObj, obj));
             resolve();
           });
         });

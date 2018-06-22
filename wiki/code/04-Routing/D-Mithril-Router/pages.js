@@ -1,4 +1,4 @@
-/* global m, href, HomePage, CoffeePage, BeerDetailsPage */
+/* global m, O, href, HomePage, CoffeePage, BeerDetailsPage */
 
 /* 404 Not Found Page */
 
@@ -48,7 +48,7 @@ const createCoffee = navigator => _update => ({
         });
       }
       else {
-        navigate({ coffees, coffee: null });
+        navigate({ coffees, coffee: O });
       }
     }),
   view: vnode => {
