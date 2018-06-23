@@ -53,7 +53,14 @@ const createApp = update => {
               </li>
             </ul>
           </nav>
-          {component && component.view(model)}
+          {component.view(model)}
+          <div style={{visibility: model.pleaseWait ? "visible" : "hidden"}}>
+            <div className="modal">
+              <div className="box">
+                <p>Loading, please wait...</p>
+              </div>
+            </div>
+          </div>
         </div>
       );
     }
