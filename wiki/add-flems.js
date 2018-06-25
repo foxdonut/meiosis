@@ -84,7 +84,8 @@ filenames.forEach(source => {
     window.Flems(flems${flemNumber}, {
       files: ${fileString},
       links: ${linkString},
-      middle: ${middle}
+      middle: ${middle},
+      autoFocus: false
     })
   </script>
       `;
