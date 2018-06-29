@@ -1,4 +1,4 @@
-/* global compose, BeerDetailsPage, CoffeePage, HomePage, React */
+/* global BeerDetailsPage, CoffeePage, HomePage, React */
 
 /* 404 Not Found Page */
 
@@ -8,12 +8,11 @@ const createNotFound = navigator => _update => ({
     <div>Not Found Page</div>
     <div>Sorry, we could not find what you were looking 4...04</div>
     <div>
-      <a href={navigator.getUrl(HomePage)}>Home Page</a>
+      <a href={navigator.blankHref}
+        onClick={() => navigator.navigateTo(HomePage)}>Home Page</a>
     </div>
   </div>)
 });
-
-/* Please Wait modal */
 
 /* Home Page */
 
@@ -37,17 +36,12 @@ const coffeeMap = coffees.reduce((result, next) => {
 // eslint-disable-next-line no-unused-vars
 const createCoffee = navigator => _update => ({
   navigating: (params, navigate) => {
-    const assignCoffees = model => Object.assign(model, { coffees, coffee: null });
-
     if (params && params.id) {
       const coffee = coffeeMap[params.id];
-      navigate(compose(
-        model => Object.assign(model, { coffee: coffee.description }),
-        assignCoffees
-      ));
+      navigate(model => Object.assign(model, { coffees, coffee: coffee.description }));
     }
     else {
-      navigate(assignCoffees);
+      navigate(model => Object.assign(model, { coffees, coffee: null }));
     }
   },
   view: model => (
@@ -92,6 +86,7 @@ const beerMap = beers.reduce((result, next) => {
 const createBeer = navigator => update => ({
   navigating: (_params, navigate) => {
     update(model => Object.assign(model, { pleaseWait: true }));
+
     loadBeers().then(beers => {
       navigate(model => Object.assign(model, { pleaseWait: false, beers }));
     });
@@ -118,9 +113,12 @@ const createBeer = navigator => update => ({
   )
 });
 
+/* Beer Details Page */
+
 // eslint-disable-next-line no-unused-vars
 const createBeerDetails = _navigator =>  _update => ({
   navigating: (params, navigate) =>
     navigate(model => Object.assign(model, { beer: beerMap[params.id].description })),
+
   view: model => (<p>{model.beer}</p>)
 });

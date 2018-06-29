@@ -1,21 +1,25 @@
-/* global createBeer, createBeerDetails, createCoffee, createHome, tabMap,
-   createNavigator, BeerPage, BeerDetailsPage, CoffeePage, HomePage, React
+/* global
+BeerDetailsPage, BeerPage, CoffeePage, HomePage, React, createBeer, createBeerDetails,
+createCoffee, createHome, createNavigator, createNotFound, tabMap
 */
 
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {
   const navigator = createNavigator(update);
 
+  // Register the pages, with the key (page id) and the corresponding component.
   navigator.register([
     { key: HomePage, component: createHome(navigator)(update) },
     { key: CoffeePage, component: createCoffee(navigator)(update) },
     { key: BeerPage, component: createBeer(navigator)(update) },
     { key: BeerDetailsPage, component: createBeerDetails(navigator)(update) }
-  ]);
+  ], createNotFound(navigator)(update));
+  // ^^ Indicate the component to use for when the page is not found.
 
   return {
     navigator,
     view: model => {
+      // Get the component and tab for the current page.
       const component = navigator.getComponent(model.pageId);
       const currentTab = tabMap[model.pageId] || model.pageId;
       const isActive = tab => tab === currentTab ? "active" : "";
@@ -54,6 +58,7 @@ const createApp = update => {
             </ul>
           </nav>
           {component.view(model)}
+          {/* Show or hide the Please Wait modal. See public/css/style.css */}
           <div style={{visibility: model.pleaseWait ? "visible" : "hidden"}}>
             <div className="modal">
               <div className="box">

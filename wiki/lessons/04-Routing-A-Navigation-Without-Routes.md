@@ -2,17 +2,34 @@
 
 [Table of Contents](toc.html)
 
-## Routing
+## Routing - Navigation Without Routes
 
 In this part of the Meiosis tutorial, we will look at routing. We'll use the simple page
 navigation example shown below.
 
 ![Routing](routing-example.gif)
 
-### Starting Without Routing
+### Running the Example
+
+To run this example (and every example in the Wiki):
+
+```
+git clone https://github.com/foxdonut/meiosis
+cd meiosis/wiki
+npm i
+npm start
+```
+
+Then open [http://localhost:9000](http://localhost:9000) to view the example index, and click on
+the specific example.
+
+The code for the examples is located in `meiosis/wiki/code`. You can edit code there and reload
+the page in your browser to see your changes.
+
+### Starting Without Routes
 
 Routing does not have to be so notoriously difficult and complicated. We'll start implementing
-the application without routing, using the model as our single source of truth (as always) and
+the application without routes, using the model as our single source of truth (as always) and
 actions to navigate to different pages. Then, we can add routes as simple mappings to actions.
 
 ### Defining Navigation
@@ -69,111 +86,123 @@ const createNavigator = update => {
 };
 ```
 
-
-
-
-### Creating the App
-
-When creating the app, we'll pass the navigation object over so that we can call its
-functions and navigate. Since the model identifies the current page, we'll create a
-lookup map to conveniently find the corresponding component. Then we can just call
-its `view` function to render the current page.
+The navigator has a `componentMap` object to keep track of components associated to page ids.
+We pass a list of component configurations to the `register` function, where each configuration
+has a `key` for the page id and a `component` property for the associated component:
 
 ```javascript
-export const createApp = (update, navigation) => {
-  const homeComponent = createHome(update); //more...
-  const pageMap = {
-    [pages.home.id]: homeComponent, //more...
-  };
-  return {
-    view: model => {
-      const component = pageMap[model.page.id];
-      return (
-        // render tabs, model.page.tab determines active tab
-        {component.view(model)}
-      );
-    }
-  };
+const createApp = update => {
+  const navigator = createNavigator(update);
+
+  navigator.register([
+    { key: HomePage, component: createHome(navigator)(update) },
+    { key: CoffeePage, component: createCoffee(navigator)(update) },
+    { key: BeerPage, component: createBeer(navigator)(update) },
+    { key: BeerDetailsPage, component: createBeerDetails(navigator)(update) }
+  ]);
+
+  // ...
 };
 ```
 
-### Adding Routes
-
-Adding routes is a simple mapping between route and a plain object with the page id and the
-navigation action:
+Next, we want a want to navigate to a different page. We'll add a `navigateTo` function to our
+navigator:
 
 ```javascript
-export const createRouter = navigation => {
-  const routes = {
-    "/": { id: pages.home.id,
-      action: navigation.navigateToHome },
-    "/coffee/:id?": { id: pages.coffee.id,
-      action: navigation.navigateToCoffee },
-    "/beer": { id: pages.beer.id,
-      action: navigation.navigateToBeer },
-    "/beer/:id": { id: pages.beerDetails.id,
-      action: navigation.navigateToBeerDetails }
-  };
-```
-
-We can use a simple routing library such as [url-mapper](https://github.com/cerebral/url-mapper)
-to resolve routes:
-
-```javascript
-import Mapper from "url-mapper";
-
-const resolveRoute = () => {
-  const route = document.location.hash.substring(1);
-  const resolved = urlMapper.map(route, routes);
-  if (resolved) {
-    resolved.match.action(resolved.values);
+const navigateToMap = {};
+// ...
+navigateToMap[config.key] = params => {
+  const updateFunc = model => Object.assign(model, { pageId: config.key });
+  update(updateFunc);
+};
+// ...
+navigateTo: (id, params) => {
+  const target = navigateToMap[id];
+  if (target) {
+    target(params);
   }
-};
-
-window.onpopstate = resolveRoute;
+}
 ```
 
-Once a route is resolved, we can call its `action` function to navigate to the page.
-
-### Route Sync
-
-Everything works now, except for one detail: although navigating with actions or routes
-works the same way, navigating with an action does not reflect the corresponding route in
-the browser's location bar.
-
-We can fix this with a simple route sync function:
+Now, we can navigate to a page using a link:
 
 ```javascript
-const routeMap = Object.keys(routes).reduce((result, route) => {
-  result[routes[route].id] = route;
+<a onClick={() => navigator.navigateTo(CoffeePage)}>Coffee</a>
+```
+
+Or a button:
+
+```javascript
+<button onClick={_evt => navigator.navigateTo(CoffeePage)}>Coffee</button>
+```
+
+### Loading Data Before Navigating
+
+Sometimes we want to do something before navigating to a page, such as loading data. To implement
+this, we'll add support for a `navigating` property on a component. If that property is defined,
+the navigator will call that function before navigating to a page.
+
+The `navigating` function receives the navigation parameters and a callback function, `navigate`,
+for sending the navigator a model-updating function that we'd normally pass to `update()`. The
+navigator combines this function with the update that sets the current page id on the model.
+
+For example, let's say we want to load the coffees on the Coffee page. Further, if there is a
+parameter id, we also want to load the details for that coffee. We can write a `navigating`
+function on the coffee component:
+
+```javascript
+const coffees = [
+  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
+  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
+];
+
+const coffeeMap = coffees.reduce((result, next) => {
+  result[next.id] = next;
   return result;
 }, {});
 
-const routeSync = model => {
-  const segment = routeMap[model.page.id] || "/";
-  const route = urlMapper.stringify(segment, model.params||{});
-  if (document.location.hash.substring(1) !== route) {
-    window.history.pushState({}, "", "#" + route);
+const createCoffee = navigator => _update => ({
+  navigating: (params, navigate) => {
+    if (params && params.id) {
+      const coffee = coffeeMap[params.id];
+      navigate(model => Object.assign(model, { coffees, coffee: coffee.description }));
+    }
+    else {
+      navigate(model => Object.assign(model, { coffees, coffee: null }));
+    }
+  },
+  // ...
+});
+```
+
+To support this in the navigator, we check whether the component has a `navigating` property.
+In that case, we pass it the navigation parameters and a callback function so that we can
+compose the component's model update with the update to assign the page id:
+
+```javascript
+navigateToMap[config.key] = params => {
+  // Function to update the model and set the page id
+  const updateFunc = model => Object.assign(model, { pageId: config.key });
+
+  // If the component has a 'navigating' property, call it first, then compose
+  // its update function with the one we defined above.
+  if (component.navigating) {
+    component.navigating(params, func => update(compose(func, updateFunc)));
+  }
+  // No 'navigating' property, so we only need to update the page id.
+  else {
+    update(updateFunc);
   }
 };
 ```
 
-After building a page id to route lookup map, we can use it along with url-mapper's
-`stringify` function to generate the route from the model's current page id.
-Then, if the browser's location bar does not match the route, we can set it with
-`window.history.pushState`.
+### Asynchronous Loading
 
-Now, we can use actions and routes to navigate, and the browser's location bar
-reflects the correct route. The model is our source of truth: in fact, we can even change
-the model by typing in the textarea of the Meiosis Tracer, and see the correct route in
-the browser's location bar along with the correct page in the view.
-
-@flems app.html,lib/url-mapper.js,code/04-Routing/A-url-mapper/navigation.js,code/04-Routing/A-url-mapper/app.jsx,code/04-Routing/A-url-mapper/index.js,public/css/bootstrap.min.css react,react-dom,flyd,meiosis,meiosis-tracer 800 70
+### Showing a "Loading, Please Wait" Modal
 
 ### Up Next
 
-In the next section, we'll try a different routing library,
-[Universal Router](04-Routing-B-Universal-Router.html).
+In the [next section](04-Routing-B-Navigo.html), we'll add routes to the example.
 
 [Table of Contents](toc.html)
 
