@@ -198,7 +198,83 @@ navigateToMap[config.key] = params => {
 
 ### Asynchronous Loading
 
+What if we are loading the data asynchronously? No problem, we just need to call the `navigate`
+function when the data loading has completed:
+
+```javascript
+const beers = [
+  { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
+  { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
+];
+
+const loadBeers = () => new Promise(resolve =>
+  setTimeout(() => resolve(beers), 1000));
+
+const createBeer = navigator => update => ({
+  navigating: (_params, navigate) => {
+    loadBeers().then(beers => {
+      navigate(model => Object.assign(model, { beers }));
+    });
+  },
+  // ...
+});
+```
+
 ### Showing a "Loading, Please Wait" Modal
+
+If loading data takes some time, we may want to show a "Loading, Please Wait" modal while the
+data is loading. We can use a `pleaseWait` indicator on the model, setting it to `true` as soon
+as we are navigating to the page, and then to `false` once the data loading has completed.
+
+```javascript
+const createBeer = navigator => update => ({
+  navigating: (_params, navigate) => {
+    update(model => Object.assign(model, { pleaseWait: true }));
+
+    loadBeers().then(beers => {
+      navigate(model => Object.assign(model, { pleaseWait: false, beers }));
+    });
+  },
+  // ...
+});
+```
+
+Then, on the main view of our application, we can show or hide the modal according to the
+`pleaseWait` indicator:
+
+```html
+<div style={{visibility: model.pleaseWait ? "visible" : "hidden"}}>
+  <div className="modal">
+    <div className="box">
+      <p>Loading, please wait...</p>
+    </div>
+  </div>
+</div>
+```
+
+We can use some simple CSS to style the modal:
+
+```css
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.box {
+  padding: 30px;
+  background: white;
+  text-align: center;
+}
+```
+
+This will shade the background and prevent clicking while showing the "Loading, please wait..."
+message in a white centered box.
 
 ### Up Next
 
