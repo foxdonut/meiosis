@@ -4,7 +4,7 @@
 
 ## Routing - Navigation Without Routes
 
-In this part of the Meiosis tutorial, we will look at routing. We'll use the simple page
+In this part of the Meiosis Wiki, we will look at routing. We'll use the simple page
 navigation example shown below.
 
 ![Routing](routing-example.gif)

@@ -4,13 +4,13 @@
 
 ## Routing - Adding Routes
 
-In this part of the Meiosis tutorial, we will look at routing. We'll use the simple page
-navigation example shown below.
+In the [previous section](04-Routing-A-Navigation-Without-Routes.html), we started implementing the
+navigation example shown below. Now, let's add some routes.
 
 ![Routing](routing-example.gif)
 
-
 ### Up Next
+
 
 
 [Table of Contents](toc.html)
