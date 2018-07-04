@@ -1,4 +1,4 @@
-/* global m, O, href, HomePage, CoffeePage, BeerDetailsPage */
+/* global m, O, href, BeerDetailsPage, CoffeeDetailsPage, HomePage */
 
 /* 404 Not Found Page */
 
@@ -23,8 +23,8 @@ const createHome = _navigator => _update => ({
 /* Coffee Page */
 
 const coffees = [
-  { id: "c1", description: "Coffee 1" },
-  { id: "c2", description: "Coffee 2" }
+  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
+  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
 ];
 
 const coffeeMap = coffees.reduce((result, next) => {
@@ -32,35 +32,34 @@ const coffeeMap = coffees.reduce((result, next) => {
   return result;
 }, {});
 
-const loadCoffees = () => new Promise(resolve =>
-  setTimeout(() => resolve(coffees), 1));
-
-const loadCoffee = params => new Promise(resolve =>
-  setTimeout(() => resolve(coffeeMap[params.id]||"")), 1);
-
 // eslint-disable-next-line no-unused-vars
 const createCoffee = navigator => _update => ({
-  navigating: (params, navigate) =>
-    loadCoffees().then(coffees => {
-      if (params && params.id) {
-        loadCoffee(params).then(coffee => {
-          navigate({ coffees, coffee: coffee.description });
-        });
-      }
-      else {
-        navigate({ coffees, coffee: O });
-      }
-    }),
+  navigating: (params, navigate) => {
+    if (params && params.id) {
+      const coffee = coffeeMap[params.id];
+      navigate({ coffees, coffee: coffee.description });
+    }
+    else {
+      navigate({ coffees, coffee: O });
+    }
+  },
   view: vnode => {
     const model = vnode.attrs.model;
     return m("div",
       m("p", "Coffee Page"),
-      model.coffees.map(coffee => m("span", { key: coffee.id },
-        m("a", href(
-          navigator.getUrl(CoffeePage) + "?" + m.buildQueryString({ id: coffee.id })
-        ), coffee.id),
-        " "
-      )),
+      m("ul",
+        model.coffees.map(coffee =>
+          m("li", { key: coffee.id },
+            m("a", href(navigator.getUrl(CoffeeDetailsPage, { id: coffee.id })),
+              coffee.title),
+            " ",
+            m("button.btn.btn-default.btn-xs", {
+              onclick: () =>
+                navigator.navigateTo(CoffeeDetailsPage, { id: coffee.id })
+            }, coffee.title)
+          )
+        )
+      ),
       model.coffee
     );
   }
@@ -68,23 +67,33 @@ const createCoffee = navigator => _update => ({
 
 /* Beer Page */
 
-const beerList = [
-  { id: "b1", title: "Beer 1" },
-  { id: "b2", title: "Beer 2" }
+const beers = [
+  { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
+  { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
 ];
 
-const loadBeer = () => new Promise(resolve =>
-  setTimeout(() => resolve(beerList), 1));
+const loadBeers = () => new Promise(resolve =>
+  setTimeout(() => resolve(beers), 1000));
+
+const beerMap = beers.reduce((result, next) => {
+  result[next.id] = next;
+  return result;
+}, {});
 
 // eslint-disable-next-line no-unused-vars
-const createBeer = navigator => _update => ({
-  navigating: (_params, navigate) =>
-    loadBeer().then(beerList => navigate({ beerList })),
+const createBeer = navigator => update => ({
+  navigating: (_params, navigate) => {
+    update({ pleaseWait: true });
+
+    loadBeers().then(beers => {
+      navigate({ pleaseWait: false, beers });
+    });
+  },
   view: vnode =>
     m("div",
       m("p", "Beer Page"),
       m("ul",
-        vnode.attrs.model.beerList.map(beer =>
+        vnode.attrs.model.beers.map(beer =>
           m("li", { key: beer.id },
             m("a", href(navigator.getUrl(BeerDetailsPage, { id: beer.id })),
               beer.title),
@@ -101,8 +110,12 @@ const createBeer = navigator => _update => ({
     )
 });
 
+/* Beer Details Page */
+
 // eslint-disable-next-line no-unused-vars
 const createBeerDetails = _navigator =>  update => ({
-  navigating: (params, navigate) => navigate({ pageId: BeerDetailsPage, params }),
-  view: vnode => m("p", "Details of beer ", vnode.attrs.model.params.id)
+  navigating: (params, navigate) =>
+    navigate({ beer: beerMap[params.id].description }),
+
+  view: vnode => m("p", vnode.attrs.model.beer)
 });

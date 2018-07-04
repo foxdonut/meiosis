@@ -23,8 +23,8 @@ const createHome = _navigator => _update => ({
 /* Coffee Page */
 
 const coffees = [
-  { id: "c1", description: "Coffee 1" },
-  { id: "c2", description: "Coffee 2" }
+  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
+  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
 ];
 
 const coffeeMap = coffees.reduce((result, next) => {
@@ -32,62 +32,67 @@ const coffeeMap = coffees.reduce((result, next) => {
   return result;
 }, {});
 
-const loadCoffees = () => new Promise(resolve =>
-  setTimeout(() => resolve(coffees), 1));
-
-const loadCoffee = params => new Promise(resolve =>
-  setTimeout(() => resolve(coffeeMap[params.id]||"")), 1);
-
 // eslint-disable-next-line no-unused-vars
 const createCoffee = navigator => update => ({
-  navigating: (params, url, navigate) => {
-    loadCoffees().then(coffees => {
-      const assignCoffees = { coffees, coffee: null };
-
-      if (params && params.id) {
-        loadCoffee(params).then(coffee => {
-          navigate(Object.assign(assignCoffees, { coffee: coffee.description }));
-        });
-      }
-      else {
-        navigate(assignCoffees);
-      }
-    });
+  navigating: (params, _url, navigate) => {
+    if (params && params.id) {
+      const coffee = coffeeMap[params.id];
+      navigate({ coffees, coffee: coffee.description });
+    }
+    else {
+      navigate({ coffees, coffee: null });
+    }
   },
   view: model => (
     <div>
       <p>Coffee Page</p>
-      {model.coffees.map(coffee => <span key={coffee.id}>
-        <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}>{coffee.id}</a>
-        {" "}
-      </span>)}
-      {model.coffee}
+      <ul>
+        {model.coffees.map(coffee =>
+          <li key={coffee.id}>
+            <a href={navigator.getUrl(CoffeePage, { id: coffee.id })}
+            >{coffee.title}</a>
+            {" "}
+            <button className="btn btn-default btn-xs"
+              onClick={() =>
+                navigator.navigateTo(CoffeePage, { id: coffee.id })}>
+              {coffee.title}
+            </button>
+          </li>
+        )}
+      </ul>
     </div>
   )
 });
 
 /* Beer Page */
 
-const loadBeer = () => new Promise(resolve =>
-  setTimeout(() => resolve(beerList), 1));
-
-const beerList = [
-  { id: "b1", title: "Beer 1" },
-  { id: "b2", title: "Beer 2" }
+const beers = [
+  { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
+  { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
 ];
+
+const loadBeers = () => new Promise(resolve =>
+  setTimeout(() => resolve(beers), 1000));
+
+const beerMap = beers.reduce((result, next) => {
+  result[next.id] = next;
+  return result;
+}, {});
 
 // eslint-disable-next-line no-unused-vars
 const createBeer = navigator => update => ({
-  navigating: (params, url, navigate) => {
-    loadBeer().then(beerList => {
-      navigate({ beerList });
+  navigating: (_params, _url, navigate) => {
+    update(model => Object.assign(model, { pleaseWait: true }));
+
+    loadBeers().then(beers => {
+      navigate({ pleaseWait: false, beers });
     });
   },
   view: model => (
     <div>
       <p>Beer Page</p>
       <ul>
-        {model.beerList.map(beer =>
+        {model.beers.map(beer =>
           <li key={beer.id}>
             <a href={navigator.getUrl(BeerDetailsPage, { id: beer.id })}
             >{beer.title}</a>
@@ -104,9 +109,12 @@ const createBeer = navigator => update => ({
   )
 });
 
+/* Beer Details Page */
+
 // eslint-disable-next-line no-unused-vars
 const createBeerDetails = _navigator =>  _update => ({
-  navigating: (params, url, navigate) =>
-    navigate({ beerId: params.id }),
+  navigating: (params, _url, navigate) =>
+    navigate({ beer: beerMap[params.id].description }),
+
   view: model => (<p>Details of beer {model.beerId}</p>)
 });

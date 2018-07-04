@@ -2,6 +2,7 @@
 /* eslint no-unused-vars: 0 */
 const HomePage = "HomePage";
 const CoffeePage = "CoffeePage";
+const CoffeeDetailsPage = "CoffeeDetailsPage";
 const BeerPage = "BeerPage";
 const BeerDetailsPage = "BeerDetailsPage";
 

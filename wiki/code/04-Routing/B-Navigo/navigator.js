@@ -48,7 +48,7 @@ const createNavigator = update => {
       }
     },
     getComponent: pageId => componentMap[pageId] || notFoundComponent,
-    getUrl:  (id, params) => router.generate(id, params),
+    getUrl: (id, params) => router.generate(id, params),
     navigateTo: (id, params) => router.navigate(router.generate(id, params)),
     start: () => router.on(routes).resolve()
   };

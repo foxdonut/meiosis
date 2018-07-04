@@ -2,11 +2,17 @@
 
 // eslint-disable-next-line no-unused-vars
 const createNavigator = update => {
+  // Map of page id -> component
   const componentMap = {};
+
+  // Navigation
   let stateNavigator = undefined;
+
+  // Component to use for invalid page ids
   let notFoundComponent = undefined;
 
   return {
+    // configs have a key, a component, and a route.
     register: (configs, notFound) => {
       if (notFound) {
         configs.push({ key: "NotFoundPage", component: notFound, route: "{*x}",

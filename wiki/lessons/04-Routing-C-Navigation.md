@@ -35,17 +35,14 @@ navigator.register([
   { key: HomePage, component: createHome(navigator)(update),
     route: "/" },
 
-  { key: CoffeePage, component: coffeeComponent,
-    route: "/coffee" },
-
-  { key: CoffeeDetailsPage, component: coffeeComponent,
-    route: "/coffee/:id" },
+  { key: CoffeePage, component: createCoffee(navigator)(update),
+    route: "/coffee/{id?}" },
 
   { key: BeerPage, component: createBeer(navigator)(update),
     route: "/beer" },
 
   { key: BeerDetailsPage, component: createBeerDetails(navigator)(update),
-    route: "/beer/:id" }
+    route: "/beer/{id}" }
 ], createNotFound(navigator)(update));
 ```
 
@@ -55,49 +52,14 @@ Now, when the URL matches a route, we will do the equivalent of navigating to th
 
 In the navigator, we'll need to handle routes.
 
-In this example, we'll use [Navigo](https://github.com/krasimir/navigo). However, note that you can
+In this example, we'll use [Navigation](https://grahammendick.github.io/navigation/). However, note that you can
 use a different router with minimal effort. You only need to change the navigator to use your
 preferred library. The rest of the application does not need to change. In fact, to demonstrate this,
-we'll use a different library, [Navigation](https://grahammendick.github.io/navigation/), in the
-[next section](04-Routing-C-Navigation.html).
+we use a different library, [Navigation](https://github.com/krasimir/navigo), in the
+[previous section](04-Routing-B-Navigo.html).
 
-Now, in the navigator, instead of constructing a map of navigation functions, we'll build Navigo
-routes:
-
-```javascript
-const routes = {};
-```
-
-We can build a Navigo route with an `as` property to identify the route, and a `uses` property for
-the navigation function:
-
-```javascript
-register: (configs, notFound) => {
-  configs.forEach(config => {
-    const component = config.component;
-    componentMap[config.key] = component;
-
-    // Function to update the model and set the page id and url
-    const updateFunc = model =>
-      Object.assign(model, { pageId: config.key, url: document.location.hash });
-
-    routes[config.route] = {
-      as: config.key,
-      uses: params => {
-        // If the component has a 'navigating' property, call it first, then compose
-        // its update function with the one we defined above.
-        if (component.navigating) {
-          component.navigating(params, func => update(compose(func, updateFunc)));
-        }
-        // No 'navigating' property, so we only need to update the page id and url.
-        else {
-          update(updateFunc);
-        }
-      }
-    };
-  });
-};
-```
+Now, in the navigator, instead of constructing a map of navigation functions, we'll build a Navigation
+state navigator:
 
 We use the `key` as the identifier, and the same navigation that we previously had for the
 `uses` property. Navigo will automatically call the navigation function when a route matches.
@@ -116,9 +78,9 @@ const createNavigator = update => {
     register: (configs, notFound) => {
       // ...
     },
-    getUrl: (id, params) => router.generate(id, params),
-    navigateTo: (id, params) => router.navigate(router.generate(id, params)),
-    start: () => router.on(routes).resolve()
+    getUrl: (id, params) => prefix + stateNavigator.getNavigationLink(id, params),
+    navigateTo: (id, params) => stateNavigator.navigate(id, params),
+    start: () => stateNavigator.start()
   };
 };
 ```

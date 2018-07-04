@@ -1,11 +1,10 @@
 /* global m, O, createApp, prefix, HomePage */
 
-// Meiosis Setup
+// Meiosis Pattern Setup
 const update = m.stream();
 const App = createApp(update);
 const models = m.stream.scan(O, { pageId: HomePage }, update);
 
-// Rendering
 const element = document.getElementById("app");
 m.route.prefix(prefix);
 m.route(element, "/", Object.keys(App.navigator.routes).reduce((result, route) => {

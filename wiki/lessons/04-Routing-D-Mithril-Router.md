@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## Routing - Adding Routes
+## Routing - Using the Mithril Router
 
 In the [previous section](04-Routing-A-Navigation-Without-Routes.html), we started implementing the
 navigation example shown below. Now, let's add some routes.
