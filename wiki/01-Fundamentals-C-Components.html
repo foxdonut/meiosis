@@ -33,8 +33,7 @@ export const createTemperature = update =&gt; ({
   }),
 
   view: createView(createActions(update))
-});
-</code></pre>
+});</code></pre>
 <p>We have a function to create the component, which receives <code>update</code>. We return an object with a
 <code>model</code> function that returns the component&#39;s initial model, and a <code>view</code> function to render the
 view. The view gets created from actions; actions are created by passing in <code>update</code>.</p>
@@ -63,8 +62,7 @@ view. The view gets created from actions; actions are created by passing in <cod
     }
     return model;
   })
-});
-</code></pre>
+});</code></pre>
 <p>We have actions for:</p>
 <ul>
 <li>Editing the date.</li>
@@ -86,8 +84,7 @@ view. The view gets created from actions; actions are created by passing in <cod
       &lt;button onClick={actions.changeUnits}&gt;Change Units&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-);
-</code></pre>
+);</code></pre>
 <p>The view simply renders the values from the model and calls actions when the user interacts
 with the UI.</p>
 <h3>The Meiosis Pattern</h3><p>We can now set up and use our component with the Meiosis Pattern:</p>
@@ -100,8 +97,7 @@ const models = flyd.scan((model, func) =&gt; func(model),
   temperature.model(), update);
 
 const element = document.getElementById(&quot;app&quot;);
-models.map(model =&gt; ReactDOM.render(temperature.view(model), element));
-</code></pre>
+models.map(model =&gt; ReactDOM.render(temperature.view(model), element));</code></pre>
 <p>Notice that the pattern works the same as before. After creating the <code>temperature</code> component,
 we can get the initial model from its <code>model()</code> function, and render the view by calling
 <code>temperature.view(model)</code>.</p>
@@ -112,7 +108,8 @@ we can get the initial model from its <code>model()</code> function, and render 
     window.Flems(flems1, {
       files: [{name: "temperature.js", content: "const createActions = update => ({\n  editDate: evt =>\n    update(model => {\n      model.date = evt.target.value;\n      return model;\n    }),\n\n  increase: amount => _evt =>\n    update(model => {\n      model.value = model.value + amount;\n      return model;\n    }),\n\n  changeUnits: _evt => update(model => {\n    if (model.units === \"C\") {\n      model.units = \"F\";\n      model.value = Math.round( model.value * 9 / 5 + 32 );\n    }\n    else {\n      model.units = \"C\";\n      model.value = Math.round( (model.value - 32) / 9 * 5 );\n    }\n    return model;\n  })\n});\n\nconst createView = actions => model => (\n  <div>\n    <div>Date: <input type=\"text\" size=\"10\" value={model.date} onChange={actions.editDate}/></div>\n    <span>Temperature: {model.value}&deg;{model.units} </span>\n    <div>\n      <button onClick={actions.increase(1)}>Increase</button>\n      <button onClick={actions.increase(-1)}>Decrease</button>\n    </div>\n    <div>\n      <button onClick={actions.changeUnits}>Change Units</button>\n    </div>\n  </div>\n);\n\n// eslint-disable-next-line no-unused-vars\nconst createTemperature = update => ({\n  model: () => ({\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  }),\n\n  view: createView(createActions(update))\n});\n\n", compiler: "babel"},{name: "index.js", content: "/* global ReactDOM, flyd, createTemperature */\n\nconst update = flyd.stream();\nconst temperature = createTemperature(update);\nconst models = flyd.scan((model, func) => func(model),\n  temperature.model(), update);\n\nconst element = document.getElementById(\"app\");\nmodels.map(model => ReactDOM.render(temperature.view(model), element));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.2/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
-      middle: 75
+      middle: 75,
+      autoFocus: false
     })
   </script>
 

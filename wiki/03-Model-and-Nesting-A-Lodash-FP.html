@@ -21,11 +21,9 @@ updates and nesting quite elegant.</p>
   update(model =&gt; {
     model.date = evt.target.value;
     return model;
-  })
-</code></pre>
+  })</code></pre>
 <p>With <a href="https://lodash.com">Lodash</a>, we can write this as:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))</code></pre>
 <p>We can make this even nicer using <a href="https://github.com/lodash/lodash/wiki/FP-Guide">Lodash-FP</a>.</p>
 <blockquote>
 <p>The lodash/fp module promotes a more functional programming (FP) friendly style by exporting an
@@ -41,46 +39,36 @@ in any of these ways:</p>
 <pre><code class="language-javascript">f(10, 20, 30)
 f(10)(20, 30)
 f(10, 20)(30)
-f(10)(20)(30)
-</code></pre>
+f(10)(20)(30)</code></pre>
 <p>Curried functions make it easy to create functions by passing less than the total number of
 parameters. A simple example is a curried function <code>const add = (x, y) =&gt; x + y</code>. You could
 write <code>const increment = add(1)</code> and then re-use <code>increment</code> to add 1 to any number, by
 calling <code>const incremented = increment(number)</code>.</p>
 <h3>Data-Last Functions</h3><p><em>Data-last</em> functions change the order of their parameters to put the &quot;configuration&quot; parameters
 first and the &quot;data&quot; parameters last. If you look at Lodash&#39;s <code>_.set</code> function:</p>
-<pre><code class="language-javascript">_.set(model, &quot;value&quot;, value)
-</code></pre>
+<pre><code class="language-javascript">_.set(model, &quot;value&quot;, value)</code></pre>
 <p>It sets the <code>&quot;value&quot;</code> property to <code>value</code> on the <code>model</code>. That&#39;s the important part: it operates
 <em>on the model</em>. The <code>model</code> is the data. In Lodash-FP, the order of the parameters is changed to:</p>
-<pre><code class="language-javascript">_.set(&quot;value&quot;, value, model)
-</code></pre>
+<pre><code class="language-javascript">_.set(&quot;value&quot;, value, model)</code></pre>
 <p>Notice how <code>model</code> is now the last parameter. How does this help? Combined with currying, we can
 improve our <code>_.set</code> call. Previously we had:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))</code></pre>
 <p>Using Lodash-FP, we now have:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value, model))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value, model))</code></pre>
 <h3>Point-Free Style</h3><p>A pattern that often occurs when passing functions is:</p>
-<pre><code class="language-javascript">update(x =&gt; f(x))
-</code></pre>
+<pre><code class="language-javascript">update(x =&gt; f(x))</code></pre>
 <p>You are passing a function that gets <code>x</code> and calls <code>f(x)</code>. But, you don&#39;t need to create a new
 function here. You can just pass <code>f</code> directly:</p>
-<pre><code class="language-javascript">update(f)
-</code></pre>
+<pre><code class="language-javascript">update(f)</code></pre>
 <p>Since <code>f</code> is already a function that accepts a parameter and returns a result.</p>
 <p>We can apply this to our code:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value, model))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value, model))</code></pre>
 <p>Since <code>_.set</code> is curried, we can call it with just the first two parameters, to get a function of
 one parameter:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value)(model))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(&quot;date&quot;, evt.target.value)(model))</code></pre>
 <p>We have the same pattern here, <code>update(x =&gt; f(x))</code>, where <code>f</code> is <code>_.set(&quot;date&quot;, evt.target.value)</code>,
 so we can simplify it to <code>update(f)</code>:</p>
-<pre><code class="language-javascript">editDate: evt =&gt; update(_.set(&quot;date&quot;, evt.target.value))
-</code></pre>
+<pre><code class="language-javascript">editDate: evt =&gt; update(_.set(&quot;date&quot;, evt.target.value))</code></pre>
 <p>Since it is curried, <code>_.set(&quot;date&quot;, evt.target.value)</code> returns a function of <code>model</code>, which we can
 pass to <code>update</code>. Notice that we don&#39;t need to specify the <code>model</code> parameter at all! This is called
 <em>point-free</em> style.</p>
@@ -90,7 +78,8 @@ pass to <code>update</code>. Notice that we don&#39;t need to specify the <code>
     window.Flems(flems1, {
       files: [{name: "nest.js", content: "/* global _ */\n\nconst nestUpdate = (update, path) => func =>\n  update(_.update(path, func));\n\n// eslint-disable-next-line no-unused-vars\nconst nest = (create, update, path) => {\n  const component = create(nestUpdate(update, path));\n  const result = _.merge({}, component);\n  if (component.model) {\n    result.model = () => _.set(path, component.model(), {});\n  }\n  if (component.view) {\n    result.view = _.flowRight([component.view, _.get(path)]);\n  }\n  return result;\n};\n", compiler: "babel"},{name: "temperature.js", content: "/* global _ */\n\nconst createActions = update => ({\n  editDate: evt =>\n    update(_.set(\"date\", evt.target.value)),\n\n  increase: amount => _evt =>\n    update(_.update(\"value\", _.add(amount))),\n\n  changeUnits: _evt => update(model => {\n    if (model.units === \"C\") {\n      return _.merge(model, {\n        units: \"F\",\n        value: Math.round( model.value * 9 / 5 + 32 )\n      });\n    }\n    else {\n      return _.merge(model, {\n        units: \"C\",\n        value: Math.round( (model.value - 32) / 9 * 5 )\n      });\n    }\n  })\n});\n\nconst createView = actions => model => (\n  <div>\n    <div>Date: <input type=\"text\" size=\"10\" value={model.date} onChange={actions.editDate}/></div>\n    <span>Temperature: {model.value}&deg;{model.units} </span>\n    <div>\n      <button onClick={actions.increase(1)}>Increase</button>\n      <button onClick={actions.increase(-1)}>Decrease</button>\n    </div>\n    <div>\n      <button onClick={actions.changeUnits}>Change Units</button>\n    </div>\n  </div>\n);\n\n// eslint-disable-next-line no-unused-vars\nconst createTemperature = update => ({\n  model: () => ({\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  }),\n\n  view: createView(createActions(update))\n});\n", compiler: "babel"},{name: "app.js", content: "/* global _, nest, createTemperature */\n\n// eslint-disable-next-line no-unused-vars\nconst createApp = update => {\n  const air = nest(createTemperature, update, [\"air\"]);\n  const water = nest(createTemperature, update, [\"water\"]);\n\n  return {\n    model: () => _.merge(air.model(), water.model()),\n    view: model => (\n      <div>\n        {air.view(model)}\n        {water.view(model)}\n      </div>\n    )\n  };\n};\n", compiler: "babel"},{name: "index.js", content: "/* global ReactDOM, flyd, createApp, meiosis, meiosisTracer */\n\nconst update = flyd.stream();\nconst app = createApp(update);\nconst models = flyd.scan((model, func) => func(model),\n  app.model(), update);\n\nconst element = document.getElementById(\"app\");\nmodels.map(model => ReactDOM.render(app.view(model), element));\n\n// Only for using Meiosis Tracer in development.\nmeiosis.trace({ update, dataStreams: [ models ] });\nmeiosisTracer({ selector: \"#tracer\" });\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.2/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"},{name: "lodash-fp", type: "js", url: "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)"},{name: "meiosis", type: "js", url: "https://unpkg.com/meiosis@1.4.1/dist/meiosis.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@1.4.1/dist/meiosis-tracer.js"}],
-      middle: 75
+      middle: 75,
+      autoFocus: false
     })
   </script>
 

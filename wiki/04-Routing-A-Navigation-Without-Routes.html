@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meiosis Wiki</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="skeleton.css">
+    <link rel="stylesheet" href="prism.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="container">
+    <script src="prism.js" type="text/javascript"></script>
+    <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+    <h1><a href="http://meiosis.js.org">Meiosis</a> Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>Routing - Navigation Without Routes</h2><p>In this part of the Meiosis Wiki, we will look at routing. We&#39;ll use the simple page
+navigation example shown below.</p>
+<p><img src="routing-example.gif" alt="Routing"></p>
+<h3>Running the Example</h3><p>To run this example (and every example in the Wiki):</p>
+<pre><code>git clone https://github.com/foxdonut/meiosis
+cd meiosis/wiki
+npm i
+npm start</code></pre><p>Then open <a href="http://localhost:9000">http://localhost:9000</a> to view the example index, and click on
+the specific example.</p>
+<p>The code for the examples is located in <code>meiosis/wiki/code</code>. You can edit code there and reload
+the page in your browser to see your changes.</p>
+<h3>Starting Without Routes</h3><p>Routing does not have to be so notoriously difficult and complicated. We&#39;ll start implementing
+the application without routes, using the model as our single source of truth (as always) and
+actions to navigate to different pages. Then, we can add routes as simple mappings to actions.</p>
+<h3>Defining Navigation</h3><p>To identify the different pages of the application, we&#39;ll use simple constants:</p>
+<pre><code class="language-javascript">const HomePage = &quot;HomePage&quot;;
+const CoffeePage = &quot;CoffeePage&quot;;
+const BeerPage = &quot;BeerPage&quot;;
+const BeerDetailsPage = &quot;BeerDetailsPage&quot;;</code></pre>
+<p>Then, to indicate which page we&#39;re on, we&#39;ll assign the current page id to the model.</p>
+<pre><code class="language-javascript">{
+  pageId: &quot;HomePage&quot;
+};</code></pre>
+<p>To display the current page, we&#39;ll simply look up the component that corresponds to the page id.</p>
+<pre><code class="language-javascript">view: model =&gt; {
+  const component = navigator.getComponent(model.pageId);
+  // ...
+  return (
+    &lt;div&gt;
+      {component.view(model)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Creating the Navigator</h3><p>In the code above, we called <code>navigator.getComponent</code> to retrieve the component for a page id.
+Let&#39;s see how we create this navigator.</p>
+<pre><code class="language-javascript">const createNavigator = update =&gt; {
+  const componentMap = {};
+
+  return {
+    register: configs =&gt; {
+      configs.forEach(config =&gt; {
+        const component = config.component;
+        componentMap[config.key] = component;
+      });
+    },
+    getComponent: pageId =&gt; componentMap[pageId]
+  };
+};</code></pre>
+<p>The navigator has a <code>componentMap</code> object to keep track of components associated to page ids.
+We pass a list of component configurations to the <code>register</code> function, where each configuration
+has a <code>key</code> for the page id and a <code>component</code> property for the associated component:</p>
+<pre><code class="language-javascript">const createApp = update =&gt; {
+  const navigator = createNavigator(update);
+
+  navigator.register([
+    { key: HomePage, component: createHome(navigator)(update) },
+    { key: CoffeePage, component: createCoffee(navigator)(update) },
+    { key: BeerPage, component: createBeer(navigator)(update) },
+    { key: BeerDetailsPage, component: createBeerDetails(navigator)(update) }
+  ]);
+
+  // ...
+};</code></pre>
+<p>Next, we want a want to navigate to a different page. We&#39;ll add a <code>navigateTo</code> function to our
+navigator:</p>
+<pre><code class="language-javascript">const navigateToMap = {};
+// ...
+navigateToMap[config.key] = params =&gt; {
+  const updateFunc = model =&gt; Object.assign(model, { pageId: config.key });
+  update(updateFunc);
+};
+// ...
+navigateTo: (id, params) =&gt; {
+  const target = navigateToMap[id];
+  if (target) {
+    target(params);
+  }
+}</code></pre>
+<p>Now, we can navigate to a page using a link:</p>
+<pre><code class="language-javascript">&lt;a onClick={() =&gt; navigator.navigateTo(CoffeePage)}&gt;Coffee&lt;/a&gt;</code></pre>
+<p>Or a button:</p>
+<pre><code class="language-javascript">&lt;button onClick={_evt =&gt; navigator.navigateTo(CoffeePage)}&gt;Coffee&lt;/button&gt;</code></pre>
+<h3>Loading Data Before Navigating</h3><p>Sometimes we want to do something before navigating to a page, such as loading data. To implement
+this, we&#39;ll add support for a <code>navigating</code> property on a component. If that property is defined,
+the navigator will call that function before navigating to a page.</p>
+<p>The <code>navigating</code> function receives the navigation parameters and a callback function, <code>navigate</code>,
+for sending the navigator a model-updating function that we&#39;d normally pass to <code>update()</code>. The
+navigator combines this function with the update that sets the current page id on the model.</p>
+<p>For example, let&#39;s say we want to load the coffees on the Coffee page. Further, if there is a
+parameter id, we also want to load the details for that coffee. We can write a <code>navigating</code>
+function on the coffee component:</p>
+<pre><code class="language-javascript">const coffees = [
+  { id: &quot;c1&quot;, title: &quot;Coffee 1&quot;, description: &quot;Description of Coffee 1&quot; },
+  { id: &quot;c2&quot;, title: &quot;Coffee 2&quot;, description: &quot;Description of Coffee 2&quot; }
+];
+
+const coffeeMap = coffees.reduce((result, next) =&gt; {
+  result[next.id] = next;
+  return result;
+}, {});
+
+const createCoffee = navigator =&gt; _update =&gt; ({
+  navigating: (params, navigate) =&gt; {
+    if (params &amp;&amp; params.id) {
+      const coffee = coffeeMap[params.id];
+      navigate(model =&gt; Object.assign(model, { coffees, coffee: coffee.description }));
+    }
+    else {
+      navigate(model =&gt; Object.assign(model, { coffees, coffee: null }));
+    }
+  },
+  // ...
+});</code></pre>
+<p>To support this in the navigator, we check whether the component has a <code>navigating</code> property.
+In that case, we pass it the navigation parameters and a callback function so that we can
+compose the component&#39;s model update with the update to assign the page id:</p>
+<pre><code class="language-javascript">navigateToMap[config.key] = params =&gt; {
+  // Function to update the model and set the page id
+  const updateFunc = model =&gt; Object.assign(model, { pageId: config.key });
+
+  // If the component has a &#39;navigating&#39; property, call it first, then compose
+  // its update function with the one we defined above.
+  if (component.navigating) {
+    component.navigating(params, func =&gt; update(compose(func, updateFunc)));
+  }
+  // No &#39;navigating&#39; property, so we only need to update the page id.
+  else {
+    update(updateFunc);
+  }
+};</code></pre>
+<h3>Asynchronous Loading</h3><p>What if we are loading the data asynchronously? No problem, we just need to call the <code>navigate</code>
+function when the data loading has completed:</p>
+<pre><code class="language-javascript">const beers = [
+  { id: &quot;b1&quot;, title: &quot;Beer 1&quot;, description: &quot;Description of Beer 1&quot; },
+  { id: &quot;b2&quot;, title: &quot;Beer 2&quot;, description: &quot;Description of Beer 2&quot; }
+];
+
+const loadBeers = () =&gt; new Promise(resolve =&gt;
+  setTimeout(() =&gt; resolve(beers), 1000));
+
+const createBeer = navigator =&gt; update =&gt; ({
+  navigating: (_params, navigate) =&gt; {
+    loadBeers().then(beers =&gt; {
+      navigate(model =&gt; Object.assign(model, { beers }));
+    });
+  },
+  // ...
+});</code></pre>
+<h3>Showing a &quot;Loading, Please Wait&quot; Modal</h3><p>If loading data takes some time, we may want to show a &quot;Loading, Please Wait&quot; modal while the
+data is loading. We can use a <code>pleaseWait</code> indicator on the model, setting it to <code>true</code> as soon
+as we are navigating to the page, and then to <code>false</code> once the data loading has completed.</p>
+<pre><code class="language-javascript">const createBeer = navigator =&gt; update =&gt; ({
+  navigating: (_params, navigate) =&gt; {
+    update(model =&gt; Object.assign(model, { pleaseWait: true }));
+
+    loadBeers().then(beers =&gt; {
+      navigate(model =&gt; Object.assign(model, { pleaseWait: false, beers }));
+    });
+  },
+  // ...
+});</code></pre>
+<p>Then, on the main view of our application, we can show or hide the modal according to the
+<code>pleaseWait</code> indicator:</p>
+<pre><code class="language-html">&lt;div style={{visibility: model.pleaseWait ? &quot;visible&quot; : &quot;hidden&quot;}}&gt;
+  &lt;div className=&quot;modal&quot;&gt;
+    &lt;div className=&quot;box&quot;&gt;
+      &lt;p&gt;Loading, please wait...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p>We can use some simple CSS to style the modal:</p>
+<pre><code class="language-css">.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.box {
+  padding: 30px;
+  background: white;
+  text-align: center;
+}</code></pre>
+<p>This will shade the background and prevent clicking while showing the &quot;Loading, please wait...&quot;
+message in a white centered box.</p>
+<h3>Up Next</h3><p>In the <a href="04-Routing-B-Navigo.html">next section</a>, we&#39;ll add routes to the example.</p>
+<p><a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="http://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+  </body>
+</html>

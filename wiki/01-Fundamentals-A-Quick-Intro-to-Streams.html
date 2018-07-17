@@ -23,8 +23,7 @@ of the code does <em>not</em> depend on streams.</p>
 using it should not be a problem either. Finally, you can also write your own stream implementation with just a handful
 of lines of code, as demonstrated <a href="http://meiosis.js.org/tutorial/05-stream-mithril.html">in the Meiosis tutorial</a>.</p>
 <h3>Page Setup</h3><p>As with all of the examples in this Wiki, we start with a <code>&lt;div&gt;</code> in an HTML page where our app will be rendered:</p>
-<pre><code class="language-html">&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
-</code></pre>
+<pre><code class="language-html">&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;</code></pre>
 <p>Next, we&#39;ll render a number of <code>&lt;div&gt;</code>s within <code>app</code> to show output:</p>
 <pre><code class="language-javascript">const element = document.getElementById(&quot;app&quot;);
 
@@ -38,33 +37,27 @@ for (let n = 1; n &lt;= total; n++) {
 const log = number =&gt; value =&gt; {
   const streamElement = document.getElementById(&quot;stream&quot; + number);
   streamElement.innerHTML = streamElement.innerHTML + &quot; &quot; + value;
-};
-</code></pre>
+};</code></pre>
 <p>This renders <code>&lt;div id=&#39;stream1&#39;&gt;Stream 1 values:&lt;/div&gt;</code>, and the same for 2 and 3. The <code>log</code> function takes the stream
 number and returns another function that, given a value, will append it to the <code>innerHTML</code> of the div. We&#39;ll be able to
 see values by calling this <code>log</code> function.</p>
 <h3>Our First Stream</h3><p>With that setup out of the way, let&#39;s create our first stream:</p>
 <pre><code class="language-javascript">const stream1 = flyd.stream();
-const log1 = log(1);
-</code></pre>
+const log1 = log(1);</code></pre>
 <p>Now, <code>stream1</code> is a stream of values. We&#39;ve also created <code>log1</code> for convenience so that <code>log1(value)</code> will show <code>value</code>
 on our page.</p>
 <p>To push a value onto the stream, we simply call <code>stream1</code> as a function and pass it the value:</p>
-<pre><code class="language-javascript">stream1(5);
-</code></pre>
+<pre><code class="language-javascript">stream1(5);</code></pre>
 <p>To read the last value from the stream, we call <code>stream1</code> as a function but with no arguments:</p>
-<pre><code class="language-javascript">stream1()
-</code></pre>
+<pre><code class="language-javascript">stream1()</code></pre>
 <p>If we call <code>log1</code> with that value, we will see <code>5</code>. This is the code so far:</p>
 <pre><code class="language-javascript">const stream1 = flyd.stream();
 const log1 = log(1);
 stream1(5);
-log1(stream1()); // 5
-</code></pre>
+log1(stream1()); // 5</code></pre>
 <p>If we call <code>stream1</code> again with new value, it will be the value returned by calling <code>stream1</code> with no arguments:</p>
 <pre><code class="language-javascript">stream1(8);
-log1(stream1()); // 8
-</code></pre>
+log1(stream1()); // 8</code></pre>
 <p>So far, so good. Now, let&#39;s look at the first of only two stream operators that we&#39;ll use, <code>map</code>.</p>
 <h3>Using <code>map</code></h3><p>We can call <code>map(fn)</code> on a stream to get another stream of values. What this does is call <code>fn</code> every time a value is
 pushed onto the stream. The result returned by <code>fn</code> is then pushed onto the resulting stream. For example:</p>
@@ -72,8 +65,7 @@ pushed onto the stream. The result returned by <code>fn</code> is then pushed on
 const stream2 = stream1.map(x =&gt; x * 10);
 const log2 = log(2);
 stream1(5);
-log2(stream2()); // 50
-</code></pre>
+log2(stream2()); // 50</code></pre>
 <p>Since <code>stream2</code> is the result of multiplying the values of <code>stream1</code> by 10, and <code>stream2()</code> returns the last value of
 the stream, the result will be 50.</p>
 <p>Because the function that we pass to <code>map()</code> is called every time a new value is pushed onto the stream, we can pass a
@@ -83,8 +75,7 @@ const stream2 = stream1.map(x =&gt; x * 10);
 const log2 = log(2);
 stream2.map(log2);
 stream1(4);
-stream1(2);
-</code></pre>
+stream1(2);</code></pre>
 <p>Now that we are calling <code>log2</code> for every new value of <code>stream2</code>, we will see <code>40 20</code> in the output.</p>
 <h3>Using <code>scan</code></h3><p>Besides <code>map</code>, the only other stream operator that we need to set up Meiosis is <code>scan</code>. If you are familiar with
 <code>reduce</code>, you will recognize that <code>scan</code> is like <code>reduce</code> except that it produces each value instead of just the
@@ -106,8 +97,7 @@ stream3.map(log3);
 
 amounts(2);
 amounts(3);
-amounts(4);
-</code></pre>
+amounts(4);</code></pre>
 <p>We will see <code>0 2 5 9</code> in the output.</p>
 <p>The initial value is <code>0</code>, which we see in the output. When <code>2</code> is pushed onto the <code>amounts</code> stream, the <code>add</code> function
 gets called with <code>(0, 2)</code>. Since the function returns the sum, we see <code>2</code> in the output. The next value on the stream
@@ -138,8 +128,7 @@ stream4.map(log4);
 operations({ operation: &quot;add&quot;, value: 4 });
 operations({ operation: &quot;sub&quot;, value: 6 });
 operations({ operation: &quot;add&quot;, value: 10 });
-operations({ operation: &quot;add&quot;, value: 5 });
-</code></pre>
+operations({ operation: &quot;add&quot;, value: 5 });</code></pre>
 <p>This time, our initial and accumulated values are numbers, but the <em>next</em> value is an object indicating an <code>operation</code>
 and a <code>value</code>. Our function looks at the <code>operation</code> to determine whether it should add or subtract the value, then it
 returns the total.</p>
@@ -151,7 +140,8 @@ returns the total.</p>
     window.Flems(flems1, {
       files: [{name: "index.js", content: "/*global flyd*/\n\nconst element = document.getElementById(\"app\");\n\nconst total = 3;\n\nfor (let n = 1; n <= total; n++) {\n  element.innerHTML = element.innerHTML +\n  \"<div id='stream\" + n + \"'>Stream \" + n + \" values:</div>\";\n}\n\nconst log = number => value => {\n  const streamElement = document.getElementById(\"stream\" + number);\n  streamElement.innerHTML = streamElement.innerHTML + \" \" + value;\n};\n\nconst stream1 = flyd.stream();\nstream1.map(log(1));\nstream1(5);\nstream1(\"2 pancakes\");\nlog(1)(stream1());\n\n\nconst amounts = flyd.stream();\nconst add = (total, next) => total + next;\n\nconst stream2 = flyd.scan(add, 0, amounts);\nstream2.map(log(2));\n\namounts(2);\namounts(3);\namounts(4);\n\nconst operations = flyd.stream();\n\nconst applyOperation = (total, nextOperation) => {\n  if (nextOperation.operation === \"add\") {\n    total = total + nextOperation.value;\n  }\n  else if (nextOperation.operation === \"sub\") {\n    total = total - nextOperation.value;\n  }\n  return total;\n};\n\nconst stream3 = flyd.scan(applyOperation, 0, operations);\nstream3.map(log(3));\n\noperations({ operation: \"add\", value: 4 });\noperations({ operation: \"sub\", value: 6 });\noperations({ operation: \"add\", value: 10 });\noperations({ operation: \"add\", value: 5 });\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
-      middle: 75
+      middle: 75,
+      autoFocus: false
     })
   </script>
 
