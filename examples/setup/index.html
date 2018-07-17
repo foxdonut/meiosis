@@ -22,73 +22,107 @@
     <div><a href="https://github.com/foxdonut/meiosis-examples/tree/master/examples/setup" target="_blank">Source code</a></div>
     <hr>
 
-    <div>The examples below use JSX to abstract the virtual DOM library being used, making it easy to switch from one to another!</div>
+    <div>
+      The examples below use JSX, or plain JS and <a href="https://github.com/foxdonut/seview" target="_blank">seview</a>,
+      to abstract the virtual DOM library being used, making it easy to switch from one to another!
+    </div>
 
-    <table class="table">
+    <table class="table table-striped">
       <tbody>
         <tr>
-          <th>Alphabetical<br></th>
+          <th>Virtual-DOM Library<br></th>
+          <th>Examples</th>
           <th>Speed<sup>1</sup><br>1 is fastest</th>
           <th>Size<sup>2</sup><br>1 is smallest</th>
           <th>Combined<br>(Speed+Size)</th>
         </tr>
         <tr>
           <td>
-            <ol>
-              <li><a href="https://github.com/anthonyshort/deku" target="_blank">[site]</a> <a href="deku/index.html">Deku</a></li>
-              <li><a href="https://dio.js.org/" target="_blank">[site]</a> <a href="diojs/index.html">DIO</a></li>
-              <li class="hl"><a href="https://github.com/leeoniya/domvm" target="_blank">[site]</a> <a href="domvm/index.html">Domvm</a></li>
-              <li><a href="https://infernojs.org/" target="_blank">[site]</a> <a href="inferno/index.html">Inferno</a></li>
-              <li><a href="http://mithril.js.org/" target="_blank">[site]</a> <a href="mithril/index.html">Mithril</a></li>
-              <li class="hl"><a href="https://github.com/yelouafi/petit-dom" target="_blank">[site]</a> <a href="petit-dom/index.html">Petit-dom</a></li>
-              <li><a href="https://preactjs.com/" target="_blank">[site]</a> <a href="preact/index.html">Preact</a></li>
-              <li><a href="https://reactjs.org/" target="_blank">[site]</a> <a href="react/index.html">React</a></li>
-              <li><a href="https://github.com/snabbdom/snabbdom/" target="_blank">[site]</a> <a href="snabbdom/index.html">Snabbdom</a></li>
-              <li><a href="https://github.com/jorgebucaran/ultradom" target="_blank">[site]</a> <a href="ultradom/index.html">Ultradom</a></li>
-            </ol>
+            <a href="https://github.com/yelouafi/petit-dom" target="_blank">Petit-dom</a>
           </td>
           <td>
-            <ol>
-              <li class="hl"><a href="petit-dom/index.html">Petit-dom</a></li>
-              <li><a href="inferno/index.html">Inferno</a></li>
-              <li class="hl"><a href="domvm/index.html">Domvm</a></li>
-              <li><a href="diojs/index.html">DIO</a></li>
-              <li><a href="snabbdom/index.html">Snabbdom</a></li>
-              <li><a href="preact/index.html">Preact</a></li>
-              <li><a href="mithril/index.html">Mithril</a></li>
-              <li><a href="react/index.html">React</a></li>
-              <li><a href="deku/index.html">Deku</a></li>
-              <li><a href="ultradom/index.html">Ultradom</a></li>
-            </ol>
+            <a href="petit-dom/index-jsx.html">JSX</a> | <a href="petit-dom/index-js.html">seview</a>
+          </td>
+          <td>1</td>
+          <td>1</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://github.com/leeoniya/domvm" target="_blank">Domvm</a>
           </td>
           <td>
-            <ol>
-              <li><a href="ultradom/index.html">Ultradom</a></li>
-              <li class="hl"><a href="domvm/index.html">Domvm</a></li>
-              <li class="hl"><a href="petit-dom/index.html">Petit-dom</a></li>
-              <li><a href="preact/index.html">Preact</a></li>
-              <li><a href="snabbdom/index.html">Snabbdom</a></li>
-              <li><a href="deku/index.html">Deku</a></li>
-              <li><a href="mithril/index.html">Mithril</a><sup>3</sup></li>
-              <li><a href="inferno/index.html">Inferno</a></li>
-              <li><a href="diojs/index.html">DIO</a></li>
-              <li><a href="react/index.html">React</a></li>
-            </ol>
+            <a href="domvm/index-jsx.html">JSX</a> | <a href="domvm/index-js.html">seview</a>
+          </td>
+          <td>3</td>
+          <td>4</td>
+          <td>2</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://infernojs.org/" target="_blank">Inferno</a>
           </td>
           <td>
-            <ul>
-              <li class="hl">4. <a href="petit-dom/index.html">Petit-dom</a></li>
-              <li class="hl">5. <a href="domvm/index.html">Domvm</a></li>
-              <li>10. <a href="inferno/index.html">Inferno</a></li>
-              <li>10. <a href="preact/index.html">Preact</a></li>
-              <li>10. <a href="snabbdom/index.html">Snabbdom</a></li>
-              <li>11. <a href="ultradom/index.html">Ultradom</a></li>
-              <li>13. <a href="diojs/index.html">DIO</a></li>
-              <li>14. <a href="mithril/index.html">Mithril</a></li>
-              <li>15. <a href="deku/index.html">Deku</a></li>
-              <li>18. <a href="react/index.html">React</a></li>
-            </ul>
+            <a href="inferno/index-jsx.html">JSX</a> | <a href="inferno/index-js.html">seview</a>
           </td>
+          <td>2</td>
+          <td>6</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://preactjs.com/" target="_blank">Preact</a>
+          </td>
+          <td>
+            <a href="preact/index-jsx.html">JSX</a> | <a href="preact/index-js.html">seview</a>
+          </td>
+          <td>6</td>
+          <td>2</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://github.com/snabbdom/snabbdom/" target="_blank">Snabbdom</a>
+          </td>
+          <td>
+            <a href="snabbdom/index-jsx.html">JSX</a> | <a href="snabbdom/index-js.html">seview</a>
+          </td>
+          <td>5</td>
+          <td>3</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://dio.js.org/" target="_blank">DIO</a>
+          </td>
+          <td>
+            <a href="diojs/index-jsx.html">JSX</a> | <a href="diojs/index-js.html">seview</a>
+          </td>
+          <td>4</td>
+          <td>7</td>
+          <td>6</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="http://mithril.js.org/" target="_blank">Mithril</a>
+          </td>
+          <td>
+            <a href="mithril/index-jsx.html">JSX</a> | <a href="mithril/index-js.html">seview</a>
+          </td>
+          <td>7</td>
+          <td>5</td>
+          <td>7</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://reactjs.org/" target="_blank">React</a>
+          </td>
+          <td>
+            <a href="react/index-jsx.html">JSX</a> | <a href="react/index-js.html">seview</a>
+          </td>
+          <td>8</td>
+          <td>8</td>
+          <td>8</td>
         </tr>
       </tbody>
     </table>
@@ -97,7 +131,6 @@
 
     <table class="table">
       <tbody>
-        <tr>
           <th>Alphabetical<br></th>
         </tr>
         <tr>
