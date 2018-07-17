@@ -23,8 +23,8 @@
 
 ### 04 - Routing
 
-- [A - Routing with url-mapper](04-Routing-A-url-mapper.html)
-- [B - Universal Router](04-Routing-B-Universal-Router.html)
+- [A - Navigation Without Routes](04-Routing-A-Navigation-Without-Routes.html)
+- [B - Adding Routes](04-Routing-B-Adding-Routes.html)
 
 ### 05 - Lifecycle Methods and other Techniques
 

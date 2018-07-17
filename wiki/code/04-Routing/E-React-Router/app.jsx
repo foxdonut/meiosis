@@ -61,9 +61,9 @@ const createApp = update => {
               {routes.map(route => {
                 route.render = props => {
                   props.model = model;
-                  return React.createElement(route.page, props, []);
+                  return React.createElement(route.page, props);
                 };
-                return React.createElement(Route, route, []);
+                return React.createElement(Route, route);
               })}
             </Switch>
           </div>
