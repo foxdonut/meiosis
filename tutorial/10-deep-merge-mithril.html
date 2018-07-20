@@ -21,22 +21,18 @@ to indicate the path at which to update the model. In this lesson, we&#39;ll use
 <h3>Let&#39;s try going back to <code>Object.assign</code></h3><p>Instead of sending updates as <code>{ path: ..., data: ... }</code>, let&#39;s try going back to using
 <code>Object.assign</code>. Remember, in that case we just sent data objects as updates, and merged them in
 with <code>Object.assign</code>. At the time, we weren&#39;t nesting, so our top-level model was:</p>
-<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }
-</code></pre>
+<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }</code></pre>
 <p>We were sending updates such a <code>{ value: 23 }</code>.</p>
 <p>Now, our top-level model is:</p>
 <pre><code class="language-js">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <p>So we need to send updates such as:</p>
-<pre><code class="language-js">{ air: { value: 23 } }
-</code></pre>
+<pre><code class="language-js">{ air: { value: 23 } }</code></pre>
 <p>We then hope to merge that in with the top-level model to obtain:</p>
 <pre><code class="language-js">{ air:   { value: 23, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <h3>Nesting with plain data objects</h3><p>Whereas before we were &quot;tagging&quot; our updates with a <code>path</code> property, nesting with plain data
 objects is just a matter of placing the incoming data within the object using the path:</p>
 <pre><code class="language-js">var nest = function(update, prop) {
@@ -45,8 +41,7 @@ objects is just a matter of placing the incoming data within the object using th
     result[prop] = obj;
     update(result);
   };
-};
-</code></pre>
+};</code></pre>
 <p>Again we are wrapping <code>update</code> with <code>nest</code>. Now, when the temperature code calls
 <code>update({ value: 23 })</code>, if we nest the temperature element with <code>nest(update, &quot;air&quot;)</code>, the
 update will be transformed into <code>{ air: { value: 23 } }</code>.</p>
@@ -56,8 +51,7 @@ update will be transformed into <code>{ air: { value: 23 } }</code>.</p>
   { air:   { value: 22, units: &quot;C&quot; },
     water: { value: 84, units: &quot;F&quot; }
   },
-  update);
-</code></pre>
+  update);</code></pre>
 <p>But this doesn&#39;t work. Try it out below. Can you see what is not quite working? Do you have an
 idea why?</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
@@ -85,8 +79,7 @@ first level. Nested properties from the source <strong>overwrite</strong> the ne
 // Result is:
   { air:   { value: 23 },
     water: { value: 84, units: &quot;F&quot; }
-  },
-</code></pre>
+  },</code></pre>
 <p>As you can see above, at the first level we have <code>air</code> and <code>water</code>, so <code>Object.assign</code> merges
 <code>air</code> and keeps <code>water</code>. But after that, whatever is under <code>air</code> overwrites whatever was there
 previously. So <code>{ value: 23 }</code> entirely replaces <code>{ value: 22, units: &quot;C&quot; }</code> and we lose <code>units</code>.</p>
@@ -106,8 +99,7 @@ can in turn nest <code>temperaturePair</code> at <code>temperatures</code>.</p>
   { air:   { value: 22, units: &quot;C&quot; },
     water: { value: 84, units: &quot;F&quot; }
   }
-}
-</code></pre>
+}</code></pre>
 <p>The following illustrates multiple levels of nesting. <code>createTemperaturePair</code> nests
 <code>createTemperature</code> at <code>air</code> and <code>water</code>. <code>createView</code> in turn nests <code>createTemperaturePair</code>  at
 <code>temperatures</code>.</p>

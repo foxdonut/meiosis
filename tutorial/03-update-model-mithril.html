@@ -18,16 +18,14 @@ function that produces the vnode according to the <code>model</code> that is pas
 model and refresh the view?</p>
 <p>Our model is a counter that has a value of <code>0</code>. Let&#39;s add a button to increase the counter.</p>
 <h3>DOM Event Handler Functions</h3><p>We can add a <code>+1</code> button with this code:</p>
-<pre><code class="language-js">m(&quot;button&quot;, { onclick: increase }, &quot;+1&quot;)
-</code></pre>
+<pre><code class="language-js">m(&quot;button&quot;, { onclick: increase }, &quot;+1&quot;)</code></pre>
 <p>It is important to remember that what we associate to <code>onclick</code> must be a <strong>function</strong>. This
 function will automatically be called when the user clicks on the button, and the function gets
 passed a DOM event as a parameter. Here, the function is <code>increase</code>:</p>
 <pre><code class="language-js">var increase = function(_event) {
   model = model + 1;
   m.render(element, view(model));
-};
-</code></pre>
+};</code></pre>
 <blockquote>
 <p><strong>Note:</strong> the <code>increase</code> function does not need to do anything with the DOM event. So, <code>increase</code>
 could have been a function with no parameters. For clarity, I included the event parameter in

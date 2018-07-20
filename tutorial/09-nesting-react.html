@@ -25,8 +25,7 @@ its own <code>{ value: ..., units: ... }</code> model, but we want a top-level m
 from the other:</p>
 <pre><code class="language-js">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <p>Having a single top-level model gives us a <strong>single source of truth</strong> and combined with a root
 <code>view = function(model)</code>, we continue having a simple reactive loop with the Meiosis pattern:</p>
 <p><img src="09-nesting-05.svg" alt="The Reactive Loop"></p>
@@ -35,13 +34,11 @@ from the other:</p>
 <code>view(model)</code>, we were able to render (and re-render) the temperature.</p>
 <p>Our goal is to have <em>two</em> temperatures in the view, but we want to <strong>reuse the same code,</strong>
 <strong>without changing it</strong>. So each temperature still deals with a model that looks like:</p>
-<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }
-</code></pre>
+<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }</code></pre>
 <p>But we want to have a top-level model that looks like:</p>
 <pre><code class="language-js">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <p>We&#39;ll rename the <code>createView</code> function to <code>createTemperature</code>, but it will work the same as
 before. Our top-level <code>createView</code> function will create two instances of temperature:</p>
 <pre><code class="language-js">var createView = function(update) {
@@ -54,8 +51,7 @@ before. Our top-level <code>createView</code> function will create two instances
       {water(model.water)}
     &lt;/div&gt;);
   };
-};
-</code></pre>
+};</code></pre>
 <p>The idea is that <code>air</code> and <code>water</code> are the <code>view(model)</code> functions for temperature, and our
 top-level <code>view</code> function calling <code>air(model.air)</code> and <code>water(model.water)</code> to render the two
 temperature instances one after the other. Notice that we pass <code>model.air</code> and <code>model.water</code>
@@ -77,8 +73,7 @@ function and render the label in the view:</p>
 
 // ...
   var air = createTemperature(update, &quot;Air&quot;);
-  var water = createTemperature(update, &quot;Water&quot;);
-</code></pre>
+  var water = createTemperature(update, &quot;Water&quot;);</code></pre>
 <p>That way, we can clearly see the <code>Air</code> and <code>Water</code> temperature in the view. Below is the code that
 we have so far. Note that updates don&#39;t work yet, so clicking on <code>Increase</code>, <code>Decrease</code>, and
 <code>Change Units</code> won&#39;t have any effect.</p>
@@ -86,7 +81,7 @@ we have so far. Note that updates don&#39;t work yet, so clicking on <code>Incre
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "09-nesting-a.js", content: "/*global ReactDOM, flyd*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(update, \"Air\");\n  var water = createTemperature(update, \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "09-nesting-a.js", content: "/*global React, ReactDOM, flyd*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(update, \"Air\");\n  var water = createTemperature(update, \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })
@@ -98,23 +93,19 @@ needing to know about the <code>air</code> and <code>water</code> - instead, it 
 <code>model.units</code> as before.</p>
 <p>The problem now is, how do we get updates to work? Let&#39;s address that next.</p>
 <h3>Nesting Updates</h3><p>The reason that updates don&#39;t work is that our temperatures are sending updates as:</p>
-<pre><code class="language-js">update({ value: 85 });
-</code></pre>
+<pre><code class="language-js">update({ value: 85 });</code></pre>
 <p>But our top-level <code>scan</code> uses <code>Object.assign</code> to merge the update with the top-level model, so
 we end up with:</p>
 <pre><code class="language-js">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; },
   value: 85
-}
-</code></pre>
+}</code></pre>
 <p><strong>What we want instead</strong> is to <strong>nest</strong> the <code>air</code> and <code>water</code> updates at their respective properties:</p>
 <p><img src="09-nesting-03.svg" alt="Nesting Updates"></p>
 <p>We can achieve this by <strong>wrapping the update</strong> function so that when a temperature calls:</p>
-<pre><code class="language-js">update({ value: 85 });
-</code></pre>
+<pre><code class="language-js">update({ value: 85 });</code></pre>
 <p>We <strong>intercept</strong> the incoming <code>{ value: 85 }</code> and change it so that instead, we have:</p>
-<pre><code class="language-js">update({ path: &quot;water&quot;, data: { value: 85 } });
-</code></pre>
+<pre><code class="language-js">update({ path: &quot;water&quot;, data: { value: 85 } });</code></pre>
 <p>Then, our accumulator function can use <code>path</code> and <code>data</code> to update the top-level model accordingly:</p>
 <pre><code class="language-js">var models = flyd.scan(
   function(model, obj) {
@@ -124,8 +115,7 @@ we end up with:</p>
   { air:   { value: 22, units: &quot;C&quot; },
     water: { value: 84, units: &quot;F&quot; }
   },
-  update);
-</code></pre>
+  update);</code></pre>
 <p>Notice how we&#39;ve moved up the call to <code>Object.assign</code> so that it operates on the <code>obj.path</code>. Then
 we set the result back to <code>model[obj.path]</code>, effectively &quot;nesting&quot; the update within the top-level
 model.</p>
@@ -138,8 +128,7 @@ into the form of <code>{ path: ..., data: ... }</code> before calling the &quot;
   return function(data) {
     update({ path: path, data: data });
   };
-};
-</code></pre>
+};</code></pre>
 <p>What we&#39;re doing here is creating a new function that will be a &quot;stand-in&quot; for the <code>update</code>
 function that we pass to the temperature code. When the temperature code calls <code>update(...)</code>,
 it will effectively be calling the inner <code>function(data)</code>, which turns around and calls
@@ -147,12 +136,10 @@ it will effectively be calling the inner <code>function(data)</code>, which turn
 <p><img src="09-nesting-04.svg" alt="Wrapping Update"></p>
 <p>Now, to use the <code>nest</code> function, all we have to do is change this code:</p>
 <pre><code class="language-js">var air = createTemperature(update, &quot;Air&quot;);
-var water = createTemperature(update, &quot;Water&quot;);
-</code></pre>
+var water = createTemperature(update, &quot;Water&quot;);</code></pre>
 <p>To this code:</p>
 <pre><code class="language-js">var air = createTemperature(nest(update, &quot;air&quot;), &quot;Air&quot;);
-var water = createTemperature(nest(update, &quot;water&quot;), &quot;Water&quot;);
-</code></pre>
+var water = createTemperature(nest(update, &quot;water&quot;), &quot;Water&quot;);</code></pre>
 <p>There you have it, instead of passing <code>update</code> directly, we use <code>nest</code> to wrap <code>update</code> with the
 path that we specify, <code>air</code> and <code>water</code>. The temperature code does not need to change, and the
 updates now work correctly, as you can see in the complete example below.</p>
@@ -160,7 +147,7 @@ updates now work correctly, as you can see in the complete example below.</p>
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "09-nesting.js", content: "/*global ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nest = function(update, path) {\n  return function(data) {\n    update({ path: path, data: data });\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(\n  function(model, obj) {\n    model[obj.path] = Object.assign(model[obj.path], obj.data);\n    return model;\n  },\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "09-nesting.js", content: "/*global React, ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nest = function(update, path) {\n  return function(data) {\n    update({ path: path, data: data });\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(\n  function(model, obj) {\n    model[obj.path] = Object.assign(model[obj.path], obj.data);\n    return model;\n  },\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })

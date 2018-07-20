@@ -28,8 +28,7 @@ update.map(function(value) {
   ReactDOM.render(view(model), element)
 });
 
-ReactDOM.render(view(model), element);
-</code></pre>
+ReactDOM.render(view(model), element);</code></pre>
 <ul>
 <li>We have an <strong>initial model</strong> of 0.</li>
 <li>We render the view with that initial model (on the last line).</li>
@@ -58,13 +57,11 @@ becomes the <strong>latest</strong> result.</p>
 <p>Finally, since at first there is no latest result, we pass to <code>scan</code> an <strong>initial value</strong>, which
 becomes starting point for the latest result, and the first value on the new stream.</p>
 <p>Let&#39;s look at an example. Say we start with an <code>update</code> stream:</p>
-<pre><code class="language-js">var update = stream();
-</code></pre>
+<pre><code class="language-js">var update = stream();</code></pre>
 <p>Next, we create an <code>otherStream</code> with <code>scan</code>:</p>
 <pre><code class="language-js">var otherStream = scan(function(latest, next) {
   return latest + next;
-}, 0, update);
-</code></pre>
+}, 0, update);</code></pre>
 <p>As you can see, we need to pass three parameters to <code>scan</code>:</p>
 <ul>
 <li>The accumulator function. Here, the function adds the next value coming in from <code>update</code> to the
@@ -101,8 +98,7 @@ in an initial value for the stream:</p>
     return newStream;
   };
   return createdStream;
-};
-</code></pre>
+};</code></pre>
 <p>We&#39;ve added the <code>initial</code> parameter. Then, when <code>map</code> is called, we check whether there was an
 initial value for the source stream. If there was, then the initial value for the new stream
 is the result of calling the passed in <code>mapFunction</code>.</p>
@@ -117,8 +113,7 @@ is the result of calling the passed in <code>mapFunction</code>.</p>
   });
 
   return newStream;
-};
-</code></pre>
+};</code></pre>
 <p>As we discussed, <code>scan</code> takes an accumulator function, an initial value, and a source stream.
 The new stream starts with the initial value. This is also the starting point for the
 <code>accumulated</code> value, which is the latest result. Then, we <code>map</code> on the source stream, passing in
@@ -136,8 +131,7 @@ update.map(function(value) {
   ReactDOM.render(view(model), element)
 });
 
-ReactDOM.render(view(model), element)
-</code></pre>
+ReactDOM.render(view(model), element)</code></pre>
 <p>We can make these improvements:</p>
 <ul>
 <li>No longer have a <code>model</code> variable that we keep reassigning. Instead, our accumulator function
@@ -163,14 +157,13 @@ var element = document.getElementById(&quot;app&quot;);
 
 models.map(function(model) {
   ReactDOM.render(view(model), element)
-});
-</code></pre>
+});</code></pre>
 <p>You can try out the complete example below.</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "06-scan.js", content: "/*global ReactDOM*/\n\n// -- Utility code\n\nvar stream = function(initial) {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newInitial = undefined;\n    if (initial !== undefined) {\n      newInitial = mapFunction(initial);\n    }\n    var newStream = stream(newInitial);\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\nvar scan = function(accumulator, initial, sourceStream) {\n  var newStream = stream(initial);\n  var accumulated = initial;\n\n  sourceStream.map(function(value) {\n    accumulated = accumulator(accumulated, value);\n    newStream(accumulated);\n  });\n\n  return newStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = stream();\nvar view = createView(update);\n\nvar models = scan(function(model, value) {\n  return model + value;\n}, 0, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "06-scan.js", content: "/*global React, ReactDOM*/\n\n// -- Utility code\n\nvar stream = function(initial) {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newInitial = undefined;\n    if (initial !== undefined) {\n      newInitial = mapFunction(initial);\n    }\n    var newStream = stream(newInitial);\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\nvar scan = function(accumulator, initial, sourceStream) {\n  var newStream = stream(initial);\n  var accumulated = initial;\n\n  sourceStream.map(function(value) {\n    accumulated = accumulator(accumulated, value);\n    newStream(accumulated);\n  });\n\n  return newStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = stream();\nvar view = createView(update);\n\nvar models = scan(function(model, value) {\n  return model + value;\n}, 0, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })

@@ -18,16 +18,14 @@ function that produces the vnode according to the <code>model</code> that is pas
 model and refresh the view?</p>
 <p>Our model is a counter that has a value of <code>0</code>. Let&#39;s add a button to increase the counter.</p>
 <h3>DOM Event Handler Functions</h3><p>We can add a <code>+1</code> button with this code:</p>
-<pre><code class="language-html">&lt;button onClick={increase}&gt;+1&lt;/button&gt;
-</code></pre>
+<pre><code class="language-html">&lt;button onClick={increase}&gt;+1&lt;/button&gt;</code></pre>
 <p>It is important to remember that what we associate to <code>onClick</code> must be a <strong>function</strong>. This
 function will automatically be called when the user clicks on the button, and the function gets
 passed a DOM event as a parameter. Here, the function is <code>increase</code>:</p>
 <pre><code class="language-js">var increase = function(_event) {
   model = model + 1;
   ReactDOM.render(view(model), element);
-};
-</code></pre>
+};</code></pre>
 <blockquote>
 <p><strong>Note:</strong> the <code>increase</code> function does not need to do anything with the DOM event. So, <code>increase</code>
 could have been a function with no parameters. For clarity, I included the event parameter in
@@ -48,7 +46,7 @@ make the real DOM reflect the view.</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "03-update-model.js", content: "/*global ReactDOM*/\nvar model = 0;\n\nvar increase = function(_event) {\n  model = model + 1;\n  ReactDOM.render(view(model), element);\n};\n\nvar view = function(model) {\n  return (<div>\n    <div>Counter: {model}</div>\n    <button onClick={increase}>+1</button>\n  </div>);\n};\n\nvar element = document.getElementById(\"app\");\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "03-update-model.js", content: "/*global React, ReactDOM*/\nvar model = 0;\n\nvar increase = function(_event) {\n  model = model + 1;\n  ReactDOM.render(view(model), element);\n};\n\nvar view = function(model) {\n  return (<div>\n    <div>Counter: {model}</div>\n    <button onClick={increase}>+1</button>\n  </div>);\n};\n\nvar element = document.getElementById(\"app\");\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })

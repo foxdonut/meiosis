@@ -26,8 +26,7 @@ var update = function(value) {
 };
 
 view = createView(update);
-m.render(element, view(model));
-</code></pre>
+m.render(element, view(model));</code></pre>
 <p>Our initial model is <code>0</code>. When the view issues an update, such as <code>update(1)</code>, we add the value
 <code>1</code> to the model and re-render the view.</p>
 <p>That works, but what&#39;s not so great about this setup is that we have a circular dependency:</p>
@@ -85,8 +84,7 @@ var element = document.getElementById(&quot;app&quot;);
 update.map(function(value) {
   model = model + value;
   m.render(element, view(model));
-});
-</code></pre>
+});</code></pre>
 <p>Although <code>map</code> produces a new stream, we don&#39;t need it here. The function that we pass does not
 return anything that we need to use. As you can see, <code>map</code> allows us not only to produce a new
 stream of values, but also to <strong>do</strong> something with the values (also known as <strong>side effects</strong>).</p>
@@ -164,8 +162,7 @@ change the <code>update.map</code> block to:</li>
 <pre><code class="language-js">update
   .map(updateModel)
   .map(view)
-  .map(render);
-</code></pre>
+  .map(render);</code></pre>
 <p>Verify that the example still works properly. Hint: make sure to return the model from the
 <code>updateModel</code> function.</p>
 <p>Whether to use a single function, or to separate out the steps into individual functions, is up

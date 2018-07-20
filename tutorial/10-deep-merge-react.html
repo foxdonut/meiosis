@@ -21,22 +21,18 @@ to indicate the path at which to update the model. In this lesson, we&#39;ll use
 <h3>Let&#39;s try going back to <code>Object.assign</code></h3><p>Instead of sending updates as <code>{ path: ..., data: ... }</code>, let&#39;s try going back to using
 <code>Object.assign</code>. Remember, in that case we just sent data objects as updates, and merged them in
 with <code>Object.assign</code>. At the time, we weren&#39;t nesting, so our top-level model was:</p>
-<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }
-</code></pre>
+<pre><code class="language-js">{ value: 22, units: &quot;C&quot; }</code></pre>
 <p>We were sending updates such a <code>{ value: 23 }</code>.</p>
 <p>Now, our top-level model is:</p>
 <pre><code class="language-js">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <p>So we need to send updates such as:</p>
-<pre><code class="language-js">{ air: { value: 23 } }
-</code></pre>
+<pre><code class="language-js">{ air: { value: 23 } }</code></pre>
 <p>We then hope to merge that in with the top-level model to obtain:</p>
 <pre><code class="language-js">{ air:   { value: 23, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
-}
-</code></pre>
+}</code></pre>
 <h3>Nesting with plain data objects</h3><p>Whereas before we were &quot;tagging&quot; our updates with a <code>path</code> property, nesting with plain data
 objects is just a matter of placing the incoming data within the object using the path:</p>
 <pre><code class="language-js">var nest = function(update, prop) {
@@ -45,8 +41,7 @@ objects is just a matter of placing the incoming data within the object using th
     result[prop] = obj;
     update(result);
   };
-};
-</code></pre>
+};</code></pre>
 <p>Again we are wrapping <code>update</code> with <code>nest</code>. Now, when the temperature code calls
 <code>update({ value: 23 })</code>, if we nest the temperature element with <code>nest(update, &quot;air&quot;)</code>, the
 update will be transformed into <code>{ air: { value: 23 } }</code>.</p>
@@ -56,15 +51,14 @@ update will be transformed into <code>{ air: { value: 23 } }</code>.</p>
   { air:   { value: 22, units: &quot;C&quot; },
     water: { value: 84, units: &quot;F&quot; }
   },
-  update);
-</code></pre>
+  update);</code></pre>
 <p>But this doesn&#39;t work. Try it out below. Can you see what is not quite working? Do you have an
 idea why?</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "10-deep-merge-a.js", content: "/*global ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nest = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\n// This doesn't work!\nvar models = flyd.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "10-deep-merge-a.js", content: "/*global React, ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nest = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createView = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\n// This doesn't work!\nvar models = flyd.scan(Object.assign,\n  { air:   { value: 22, units: \"C\" },\n    water: { value: 84, units: \"F\" }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })
@@ -85,8 +79,7 @@ first level. Nested properties from the source <strong>overwrite</strong> the ne
 // Result is:
   { air:   { value: 23 },
     water: { value: 84, units: &quot;F&quot; }
-  },
-</code></pre>
+  },</code></pre>
 <p>As you can see above, at the first level we have <code>air</code> and <code>water</code>, so <code>Object.assign</code> merges
 <code>air</code> and keeps <code>water</code>. But after that, whatever is under <code>air</code> overwrites whatever was there
 previously. So <code>{ value: 23 }</code> entirely replaces <code>{ value: 22, units: &quot;C&quot; }</code> and we lose <code>units</code>.</p>
@@ -106,8 +99,7 @@ can in turn nest <code>temperaturePair</code> at <code>temperatures</code>.</p>
   { air:   { value: 22, units: &quot;C&quot; },
     water: { value: 84, units: &quot;F&quot; }
   }
-}
-</code></pre>
+}</code></pre>
 <p>The following illustrates multiple levels of nesting. <code>createTemperaturePair</code> nests
 <code>createTemperature</code> at <code>air</code> and <code>water</code>. <code>createView</code> in turn nests <code>createTemperaturePair</code>  at
 <code>temperatures</code>.</p>
@@ -126,7 +118,7 @@ discussed, we&#39;re using Lodash&#39;s <code>_.merge</code> to achieve deep mer
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "10-deep-merge.js", content: "/*global ReactDOM, flyd, _*/\n\n// -- Utility code\n\nvar nest = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createTemperaturePair = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\nvar createView = function(update) {\n  var pair = createTemperaturePair(nest(update, \"temperatures\"));\n\n  return function(model) {\n    return pair(model.temperatures);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(_.merge,\n  { temperatures:\n    { air:   { value: 22, units: \"C\" },\n      water: { value: 84, units: \"F\" }\n    }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "10-deep-merge.js", content: "/*global React, ReactDOM, flyd, _*/\n\n// -- Utility code\n\nvar nest = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(update, label) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div className=\"temperature\">\n      <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\nvar createTemperaturePair = function(update) {\n  var air = createTemperature(nest(update, \"air\"), \"Air\");\n  var water = createTemperature(nest(update, \"water\"), \"Water\");\n\n  return function(model) {\n    return (<div>\n      {air(model.air)}\n      {water(model.water)}\n    </div>);\n  };\n};\n\nvar createView = function(update) {\n  var pair = createTemperaturePair(nest(update, \"temperatures\"));\n\n  return function(model) {\n    return pair(model.temperatures);\n  };\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(_.merge,\n  { temperatures:\n    { air:   { value: 22, units: \"C\" },\n      water: { value: 84, units: \"F\" }\n    }\n  },\n  update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"},{name: "lodash", type: "js", url: "https://unpkg.com/lodash@4.17.5"}],
       middle: 75
     })

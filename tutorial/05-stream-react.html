@@ -26,8 +26,7 @@ var update = function(value) {
 };
 
 view = createView(update);
-ReactDOM.render(view(model), element);
-</code></pre>
+ReactDOM.render(view(model), element);</code></pre>
 <p>Our initial model is <code>0</code>. When the view issues an update, such as <code>update(1)</code>, we add the value
 <code>1</code> to the model and re-render the view.</p>
 <p>That works, but what&#39;s not so great about this setup is that we have a circular dependency:</p>
@@ -85,8 +84,7 @@ var element = document.getElementById(&quot;app&quot;);
 update.map(function(value) {
   model = model + value;
   ReactDOM.render(view(model), element);
-});
-</code></pre>
+});</code></pre>
 <p>Although <code>map</code> produces a new stream, we don&#39;t need it here. The function that we pass does not
 return anything that we need to use. As you can see, <code>map</code> allows us not only to produce a new
 stream of values, but also to <strong>do</strong> something with the values (also known as <strong>side effects</strong>).</p>
@@ -138,7 +136,7 @@ the passed-in function and push the result onto the new stream.</p>
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "05-stream.js", content: "/*global ReactDOM*/\n\n// -- Utility code\n\nvar stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar element = document.getElementById(\"app\");\n\nupdate.map(function(value) {\n  model = model + value;\n  ReactDOM.render(view(model), element);\n});\n\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "05-stream.js", content: "/*global React, ReactDOM*/\n\n// -- Utility code\n\nvar stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar element = document.getElementById(\"app\");\n\nupdate.map(function(value) {\n  model = model + value;\n  ReactDOM.render(view(model), element);\n});\n\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"}],
       middle: 75
     })
@@ -164,8 +162,7 @@ change the <code>update.map</code> block to:</li>
 <pre><code class="language-js">update
   .map(updateModel)
   .map(view)
-  .map(render);
-</code></pre>
+  .map(render);</code></pre>
 <p>Verify that the example still works properly. Hint: make sure to return the model from the
 <code>updateModel</code> function.</p>
 <p>Whether to use a single function, or to separate out the steps into individual functions, is up

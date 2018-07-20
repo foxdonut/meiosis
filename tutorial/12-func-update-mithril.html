@@ -29,8 +29,7 @@ updates. The accumulator function receives the latest model, and what was passed
 Previously, those updates were plain objects, and we merged them into the model:</p>
 <pre><code class="language-js">function(model, object) {
   return _.merge(model, object);
-}
-</code></pre>
+}</code></pre>
 <p>Or simply <code>_.merge</code>.</p>
 <p>Now, we&#39;ll change our strategy. We&#39;ll pass <strong>functions</strong> to <code>update()</code>. This is what&#39;s used in
 the majority of the Meiosis examples, because it gives you a lot of flexibility.</p>
@@ -38,27 +37,23 @@ the majority of the Meiosis examples, because it gives you a lot of flexibility.
 functions. The functions that we&#39;ll pass to <code>update()</code> are functions that receive the latest
 model and return the updated model.</p>
 <p>For example, previously to set the temperature value to 23, we&#39;d write:</p>
-<pre><code class="language-js">update({ value: 23 });
-</code></pre>
+<pre><code class="language-js">update({ value: 23 });</code></pre>
 <p>Now, we&#39;ll write:</p>
 <pre><code class="language-js">update(function(model) {
   model.value = 23;
   return model;
-});
-</code></pre>
+});</code></pre>
 <p>This makes our updates a stream of functions that update the model. Our accumulator function
 becomes:</p>
 <pre><code class="language-js">function(model, func) {
   return func(model);
-}
-</code></pre>
+}</code></pre>
 <p>That is, given the latest model and the incoming function <code>func</code> from the <code>update</code> stream,
 producing the updated model is simply done by calling <code>func(model)</code>.</p>
 <p>The <code>scan</code> in our Meiosis setup code becomes:</p>
 <pre><code class="language-js">var models = m.stream.scan(function(model, func) {
   return func(model);
-}, app.model(), update);
-</code></pre>
+}, app.model(), update);</code></pre>
 <p>Take a minute to let that sink in.</p>
 <h3>Nesting Updates</h3><p>For nesting, the handling of our <code>model</code> and <code>view</code> functions remains the same. But what about
 nesting updates? Previously, we had:</p>
@@ -68,8 +63,7 @@ nesting updates? Previously, we had:</p>
     result[prop] = obj;
     update(result);
   };
-};
-</code></pre>
+};</code></pre>
 <p>So when we called <code>update({ data... })</code>, <code>nestUpdate</code> would turn that into
 <code>update({ prop: { data... }})</code>.</p>
 <p><img src="12-func-update-01.svg" alt="Nesting Objects"></p>
@@ -85,8 +79,7 @@ calling <code>func</code> to the nested property of the model:</p>
       return model;
     });
   };
-};
-</code></pre>
+};</code></pre>
 <p>Now that we have <code>nestUpdate</code> ready, let&#39;s see how we issue updates.</p>
 <h3>Issuing Updates</h3><p>To issue updates, we call <code>update()</code> and pass it a function. That function receives the latest
 model and returns the updated model. Here are our <code>increase</code> and <code>changeUnits</code> event handlers:</p>
@@ -105,8 +98,7 @@ var changeUnits = function(_event) {
     model.units = newUnits;
     return model;
   });
-};
-</code></pre>
+};</code></pre>
 <p>Notice how we make changes to the model and then return it. It&#39;s fine to mutate the model object
 and return it, but you could also use code that returns a new object as the updated model.</p>
 <p>Previously, we had to pass the model to the event handler functions so that it could be used to
@@ -115,14 +107,12 @@ function. We can thus simplify the calls that we make to event handlers.</p>
 <h3>Simplifying Calls to Event Handlers</h3><p>With the plain object updates, we needed to pass the model to the event handler functions:</p>
 <pre><code class="language-js">m(&quot;button&quot;, { onclick: increase(model, 1) }, &quot;Increase&quot;)
 m(&quot;button&quot;, { onclick: increase(model,-1) }, &quot;Decrease&quot;)
-m(&quot;button&quot;, { onclick: changeUnits(model) }, &quot;Change Units&quot;)
-</code></pre>
+m(&quot;button&quot;, { onclick: changeUnits(model) }, &quot;Change Units&quot;)</code></pre>
 <p>Now that we receive the model in the function that we pass to <code>update()</code>, we can simplify the
 calls to the event handlers. We no longer need to pass the model:</p>
 <pre><code class="language-js">m(&quot;button&quot;, { onclick: increase( 1) }, &quot;Increase&quot;)
 m(&quot;button&quot;, { onclick: increase(-1) }, &quot;Decrease&quot;)
-m(&quot;button&quot;, { onclick: changeUnits }, &quot;Change Units&quot;)
-</code></pre>
+m(&quot;button&quot;, { onclick: changeUnits }, &quot;Change Units&quot;)</code></pre>
 <p>Passing functions to <code>update()</code> gives us a lot of flexibility. It&#39;s easy to modify the model in
 any way that we want, using any logic that we want, and so on, within the function. The function
 always gets passed the latest model, can make the necessary changes, and return the updated model.</p>

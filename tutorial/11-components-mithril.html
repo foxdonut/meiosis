@@ -30,8 +30,7 @@ instances of the former. Let&#39;s turn these into components with a <strong>mod
       // ...
   }
   return view;
-}
-</code></pre>
+}</code></pre>
 <p>That created the view function. Now, instead, we&#39;ll create a plain JavaScript object that returns
 <code>{ model: ..., view: ... }</code> where <code>model</code> is a function that creates the initial model for the
 component, and <code>view</code> is the view function:</p>
@@ -46,8 +45,7 @@ component, and <code>view</code> is the view function:</p>
     };
     return { model: model, view: view };
   };
-};
-</code></pre>
+};</code></pre>
 <p>Notice that we&#39;re accepting the <code>label</code> as before to show the temperature label. Now, we also
 accept an optional <code>init</code> parameter for the initial model, but if it&#39;s not provided, we default
 the initial model to <code>{ value: 22, units: &quot;C&quot; }</code>. The <code>model()</code> function is useful to create
@@ -61,8 +59,7 @@ is so that we can pass that to <code>nest</code>, in case we want to nest the co
   var model = // ...
   var view = // ...
   return { model: model, view: view };
-};
-</code></pre>
+};</code></pre>
 <h3>Nesting Components</h3><p>Now that we have components with a <code>model</code> and a <code>view</code>, we can decide how we nest components.
 Previously, we only nested the <code>update</code> function:</p>
 <pre><code class="language-js">var nest = function(update, prop) {
@@ -81,8 +78,7 @@ return function(model) {
     air(model.air),
     water(model.water)
   ];
-};
-</code></pre>
+};</code></pre>
 <p>In the code above, notice how we have to match <code>nest(update, &quot;air&quot;)</code> with <code>air(model.air)</code>. That
 is, we have to make sure that the property we use when calling <code>nest()</code> matches the property of
 the model that we pass to the view function.</p>
@@ -120,8 +116,7 @@ var nest = function(create, update, prop) {
     };
   }
   return result;
-};
-</code></pre>
+};</code></pre>
 <p>The <code>nest</code> function takes the component&#39;s <code>create</code> function, the property at which to nest, and
 the <code>update</code> function. We create the component, passing in the nested <code>update</code>, just like we did
 before.</p>
@@ -149,8 +144,7 @@ value inside an object with the property, such as <code>{ air: ... }</code>.</p>
     ];
   };
   return { model: model, view: view };
-};
-</code></pre>
+};</code></pre>
 <p>Remember that <code>createTemperature(...)</code> returns <code>function(update)</code>. That is the <code>create</code> function
 that we pass to <code>nest</code>, along with the <code>update</code> function and the property at which to nest.</p>
 <p>Notice how we use the default initial model for <code>air</code>, but we can also specify a different
@@ -176,8 +170,7 @@ var element = document.getElementById(&quot;app&quot;);
 
 models.map(function(model) {
   m.render(element, app.view(model));
-});
-</code></pre>
+});</code></pre>
 <p>Now, our top-level <code>app</code> is a component composed of our other components. We can get the
 initial top-level model simply by calling <code>app.model()</code>, and we can render the top-level
 view with <code>app.view(model)</code>.</p>

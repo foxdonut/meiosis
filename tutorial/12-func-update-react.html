@@ -29,8 +29,7 @@ updates. The accumulator function receives the latest model, and what was passed
 Previously, those updates were plain objects, and we merged them into the model:</p>
 <pre><code class="language-js">function(model, object) {
   return _.merge(model, object);
-}
-</code></pre>
+}</code></pre>
 <p>Or simply <code>_.merge</code>.</p>
 <p>Now, we&#39;ll change our strategy. We&#39;ll pass <strong>functions</strong> to <code>update()</code>. This is what&#39;s used in
 the majority of the Meiosis examples, because it gives you a lot of flexibility.</p>
@@ -38,27 +37,23 @@ the majority of the Meiosis examples, because it gives you a lot of flexibility.
 functions. The functions that we&#39;ll pass to <code>update()</code> are functions that receive the latest
 model and return the updated model.</p>
 <p>For example, previously to set the temperature value to 23, we&#39;d write:</p>
-<pre><code class="language-js">update({ value: 23 });
-</code></pre>
+<pre><code class="language-js">update({ value: 23 });</code></pre>
 <p>Now, we&#39;ll write:</p>
 <pre><code class="language-js">update(function(model) {
   model.value = 23;
   return model;
-});
-</code></pre>
+});</code></pre>
 <p>This makes our updates a stream of functions that update the model. Our accumulator function
 becomes:</p>
 <pre><code class="language-js">function(model, func) {
   return func(model);
-}
-</code></pre>
+}</code></pre>
 <p>That is, given the latest model and the incoming function <code>func</code> from the <code>update</code> stream,
 producing the updated model is simply done by calling <code>func(model)</code>.</p>
 <p>The <code>scan</code> in our Meiosis setup code becomes:</p>
 <pre><code class="language-js">var models = flyd.scan(function(model, func) {
   return func(model);
-}, app.model(), update);
-</code></pre>
+}, app.model(), update);</code></pre>
 <p>Take a minute to let that sink in.</p>
 <h3>Nesting Updates</h3><p>For nesting, the handling of our <code>model</code> and <code>view</code> functions remains the same. But what about
 nesting updates? Previously, we had:</p>
@@ -68,8 +63,7 @@ nesting updates? Previously, we had:</p>
     result[prop] = obj;
     update(result);
   };
-};
-</code></pre>
+};</code></pre>
 <p>So when we called <code>update({ data... })</code>, <code>nestUpdate</code> would turn that into
 <code>update({ prop: { data... }})</code>.</p>
 <p><img src="12-func-update-01.svg" alt="Nesting Objects"></p>
@@ -85,8 +79,7 @@ calling <code>func</code> to the nested property of the model:</p>
       return model;
     });
   };
-};
-</code></pre>
+};</code></pre>
 <p>Now that we have <code>nestUpdate</code> ready, let&#39;s see how we issue updates.</p>
 <h3>Issuing Updates</h3><p>To issue updates, we call <code>update()</code> and pass it a function. That function receives the latest
 model and returns the updated model. Here are our <code>increase</code> and <code>changeUnits</code> event handlers:</p>
@@ -105,8 +98,7 @@ var changeUnits = function(_event) {
     model.units = newUnits;
     return model;
   });
-};
-</code></pre>
+};</code></pre>
 <p>Notice how we make changes to the model and then return it. It&#39;s fine to mutate the model object
 and return it, but you could also use code that returns a new object as the updated model.</p>
 <p>Previously, we had to pass the model to the event handler functions so that it could be used to
@@ -115,14 +107,12 @@ function. We can thus simplify the calls that we make to event handlers.</p>
 <h3>Simplifying Calls to Event Handlers</h3><p>With the plain object updates, we needed to pass the model to the event handler functions:</p>
 <pre><code class="language-html">&lt;button onClick={increase(model, 1)}&gt;Increase&lt;/button&gt;
 &lt;button onClick={increase(model,-1)}&gt;Decrease&lt;/button&gt;
-&lt;button onClick={changeUnits(model)}&gt;Change Units&lt;/button&gt;
-</code></pre>
+&lt;button onClick={changeUnits(model)}&gt;Change Units&lt;/button&gt;</code></pre>
 <p>Now that we receive the model in the function that we pass to <code>update()</code>, we can simplify the
 calls to the event handlers. We no longer need to pass the model:</p>
 <pre><code class="language-html">&lt;button onClick={increase( 1)}&gt;Increase&lt;/button&gt;
 &lt;button onClick={increase(-1)}&gt;Decrease&lt;/button&gt;
-&lt;button onClick={changeUnits}&gt;Change Units&lt;/button&gt;
-</code></pre>
+&lt;button onClick={changeUnits}&gt;Change Units&lt;/button&gt;</code></pre>
 <p>Passing functions to <code>update()</code> gives us a lot of flexibility. It&#39;s easy to modify the model in
 any way that we want, using any logic that we want, and so on, within the function. The function
 always gets passed the latest model, can make the necessary changes, and return the updated model.</p>
@@ -131,7 +121,7 @@ always gets passed the latest model, can make the necessary changes, and return 
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "12-func-update.js", content: "/*global ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(func) {\n    update(function(model) {\n      model[prop] = func(model[prop]);\n      return model;\n    });\n  };\n};\n\nvar nest = function(create, update, prop) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(amount) {\n      return function(_event) {\n        update(function(model) {\n          model.value += amount;\n          return model;\n        });\n      };\n    };\n    var changeUnits = function(_event) {\n      update(function(model) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        model.value = convert(model.value, newUnits);\n        model.units = newUnits;\n        return model;\n      });\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return (<div className=\"temperature\">\n        <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n        <div>\n          <button onClick={increase( 1)}>Increase</button>\n          <button onClick={increase(-1)}>Decrease</button>\n        </div>\n        <div>\n          <button onClick={changeUnits}>Change Units</button>\n        </div>\n      </div>);\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = nest(createTemperature(\"Air\"), update, \"air\");\n  var water = nest(createTemperature(\"Water\", { value: 84, units: \"F\" }),\n    update, \"water\");\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return (<div>\n      {air.view(model)}\n      {water.view(model)}\n    </div>);\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperaturePair, update, \"temperatures\");\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar app = createApp(update);\n\nvar models = flyd.scan(function(model, func) {\n  return func(model);\n}, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(app.view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "12-func-update.js", content: "/*global React, ReactDOM, flyd*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(func) {\n    update(function(model) {\n      model[prop] = func(model[prop]);\n      return model;\n    });\n  };\n};\n\nvar nest = function(create, update, prop) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(amount) {\n      return function(_event) {\n        update(function(model) {\n          model.value += amount;\n          return model;\n        });\n      };\n    };\n    var changeUnits = function(_event) {\n      update(function(model) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        model.value = convert(model.value, newUnits);\n        model.units = newUnits;\n        return model;\n      });\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return (<div className=\"temperature\">\n        <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n        <div>\n          <button onClick={increase( 1)}>Increase</button>\n          <button onClick={increase(-1)}>Decrease</button>\n        </div>\n        <div>\n          <button onClick={changeUnits}>Change Units</button>\n        </div>\n      </div>);\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = nest(createTemperature(\"Air\"), update, \"air\");\n  var water = nest(createTemperature(\"Water\", { value: 84, units: \"F\" }),\n    update, \"water\");\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return (<div>\n      {air.view(model)}\n      {water.view(model)}\n    </div>);\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperaturePair, update, \"temperatures\");\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar app = createApp(update);\n\nvar models = flyd.scan(function(model, func) {\n  return func(model);\n}, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(app.view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })

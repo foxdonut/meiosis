@@ -30,8 +30,7 @@ instances of the former. Let&#39;s turn these into components with a <strong>mod
       // ...
   }
   return view;
-}
-</code></pre>
+}</code></pre>
 <p>That created the view function. Now, instead, we&#39;ll create a plain JavaScript object that returns
 <code>{ model: ..., view: ... }</code> where <code>model</code> is a function that creates the initial model for the
 component, and <code>view</code> is the view function:</p>
@@ -46,8 +45,7 @@ component, and <code>view</code> is the view function:</p>
     };
     return { model: model, view: view };
   };
-};
-</code></pre>
+};</code></pre>
 <p>Notice that we&#39;re accepting the <code>label</code> as before to show the temperature label. Now, we also
 accept an optional <code>init</code> parameter for the initial model, but if it&#39;s not provided, we default
 the initial model to <code>{ value: 22, units: &quot;C&quot; }</code>. The <code>model()</code> function is useful to create
@@ -61,8 +59,7 @@ is so that we can pass that to <code>nest</code>, in case we want to nest the co
   var model = // ...
   var view = // ...
   return { model: model, view: view };
-};
-</code></pre>
+};</code></pre>
 <h3>Nesting Components</h3><p>Now that we have components with a <code>model</code> and a <code>view</code>, we can decide how we nest components.
 Previously, we only nested the <code>update</code> function:</p>
 <pre><code class="language-js">var nest = function(update, prop) {
@@ -81,8 +78,7 @@ return function(model) {
     {air(model.air)}
     {water(model.water)}
   &lt;/div&gt;);
-};
-</code></pre>
+};</code></pre>
 <p>In the code above, notice how we have to match <code>nest(update, &quot;air&quot;)</code> with <code>air(model.air)</code>. That
 is, we have to make sure that the property we use when calling <code>nest()</code> matches the property of
 the model that we pass to the view function.</p>
@@ -120,8 +116,7 @@ var nest = function(create, update, prop) {
     };
   }
   return result;
-};
-</code></pre>
+};</code></pre>
 <p>The <code>nest</code> function takes the component&#39;s <code>create</code> function, the property at which to nest, and
 the <code>update</code> function. We create the component, passing in the nested <code>update</code>, just like we did
 before.</p>
@@ -149,8 +144,7 @@ value inside an object with the property, such as <code>{ air: ... }</code>.</p>
     &lt;/div&gt;);
   };
   return { model: model, view: view };
-};
-</code></pre>
+};</code></pre>
 <p>Remember that <code>createTemperature(...)</code> returns <code>function(update)</code>. That is the <code>create</code> function
 that we pass to <code>nest</code>, along with the <code>update</code> function and the property at which to nest.</p>
 <p>Notice how we use the default initial model for <code>air</code>, but we can also specify a different
@@ -176,8 +170,7 @@ var element = document.getElementById(&quot;app&quot;);
 
 models.map(function(model) {
   ReactDOM.render(view(model), element);
-});
-</code></pre>
+});</code></pre>
 <p>Now, our top-level <code>app</code> is a component composed of our other components. We can get the
 initial top-level model simply by calling <code>app.model()</code>, and we can render the top-level
 view with <code>app.view(model)</code>.</p>
@@ -186,7 +179,7 @@ view with <code>app.view(model)</code>.</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "11-components.js", content: "/*global ReactDOM, flyd, _*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\nvar nest = function(create, update, prop) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(model, amount) {\n      return function(_event) {\n        update({ value: model.value + amount });\n      };\n    };\n    var changeUnits = function(model) {\n      return function(_event) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        var newValue = convert(model.value, newUnits);\n        update({ value: newValue, units: newUnits });\n      };\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return (<div className=\"temperature\">\n        <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n        <div>\n          <button onClick={increase(model, 1)}>Increase</button>\n          <button onClick={increase(model,-1)}>Decrease</button>\n        </div>\n        <div>\n          <button onClick={changeUnits(model)}>Change Units</button>\n        </div>\n      </div>);\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = nest(createTemperature(\"Air\"), update, \"air\");\n  var water = nest(createTemperature(\"Water\", { value: 84, units: \"F\" }),\n    update, \"water\");\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return (<div>\n      {air.view(model)}\n      {water.view(model)}\n    </div>);\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperaturePair, update, \"temperatures\");\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar app = createApp(update);\n\nvar models = flyd.scan(_.merge, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(app.view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "11-components.js", content: "/*global React, ReactDOM, flyd, _*/\n\n// -- Utility code\n\nvar nestUpdate = function(update, prop) {\n  return function(obj) {\n    var result = {};\n    result[prop] = obj;\n    update(result);\n  };\n};\n\nvar nest = function(create, update, prop) {\n  var component = create(nestUpdate(update, prop));\n  var result = Object.assign({}, component);\n  if (component.model) {\n    result.model = function() {\n      var initialModel = {};\n      initialModel[prop] = component.model();\n      return initialModel;\n    };\n  }\n  if (component.view) {\n    result.view = function(model) {\n      return component.view(model[prop]);\n    };\n  }\n  return result;\n};\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createTemperature = function(label, init) {\n  return function(update) {\n    var increase = function(model, amount) {\n      return function(_event) {\n        update({ value: model.value + amount });\n      };\n    };\n    var changeUnits = function(model) {\n      return function(_event) {\n        var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n        var newValue = convert(model.value, newUnits);\n        update({ value: newValue, units: newUnits });\n      };\n    };\n\n    var model = function() {\n      return Object.assign({ value: 22, units: \"C\" }, init);\n    };\n\n    var view = function(model) {\n      return (<div className=\"temperature\">\n        <span>{label} Temperature: {model.value}&deg;{model.units}</span>\n        <div>\n          <button onClick={increase(model, 1)}>Increase</button>\n          <button onClick={increase(model,-1)}>Decrease</button>\n        </div>\n        <div>\n          <button onClick={changeUnits(model)}>Change Units</button>\n        </div>\n      </div>);\n    };\n    return { model: model, view: view };\n  };\n};\n\nvar createTemperaturePair = function(update) {\n  var air = nest(createTemperature(\"Air\"), update, \"air\");\n  var water = nest(createTemperature(\"Water\", { value: 84, units: \"F\" }),\n    update, \"water\");\n\n  var model = function() {\n    return Object.assign(air.model(), water.model());\n  };\n\n  var view = function(model) {\n    return (<div>\n      {air.view(model)}\n      {water.view(model)}\n    </div>);\n  };\n  return { model: model, view: view };\n};\n\nvar createApp = function(update) {\n  return nest(createTemperaturePair, update, \"temperatures\");\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar app = createApp(update);\n\nvar models = flyd.scan(_.merge, app.model(), update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(app.view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"},{name: "lodash", type: "js", url: "https://unpkg.com/lodash@4.17.5"}],
       middle: 75
     })

@@ -26,8 +26,7 @@ units, Celsius or Farenheit. We could represent the model as:</p>
 <pre><code class="language-js">{
   value: 22,
   units: &quot;C&quot;
-}
-</code></pre>
+}</code></pre>
 <p>Not only can we increase or decrease the value, we can also change the units between <code>C</code> and
 <code>F</code>. Changing the units should automatically change the value to the equivalent in the units
 to which we are switching.</p>
@@ -37,8 +36,7 @@ to issue updates and handle them in the accumulator function.</p>
 This method copies properties from one or more source objects to a target object. For example:</p>
 <pre><code class="language-js">                           // target object           source object
 var result = Object.assign({ value: 22, units: &quot;C&quot; }, { value: 24 });
-// result is { value: 24, units: &quot;C&quot; }
-</code></pre>
+// result is { value: 24, units: &quot;C&quot; }</code></pre>
 <p>As you can see, <code>Object.assign</code> copies over properties from the source object to the target
 object, and leaves untouched any properties that are in the target but not the source.</p>
 <p>If we issue source objects onto our <code>update</code> stream, we can use <code>Object.assign</code> to update the
@@ -46,33 +44,28 @@ model in the accumulator function:</p>
 <pre><code class="language-js">var models = flyd.scan(
   function(model, value) {
     return Object.assign(model, value);
-  }, { value: 22, units: &quot;C&quot; }, update);
-</code></pre>
+  }, { value: 22, units: &quot;C&quot; }, update);</code></pre>
 <p>Our initial model is <code>{ value: 22, units: &quot;C&quot; }</code> and the accumulator function calls
 <code>Object.assign</code> to update the model. Thus, we could call <code>update({ value: 21 })</code> to set the
 temperature <code>value</code> to <code>21</code> and keep the same units.</p>
 <h3>Passing functions as parameters</h3><p>But wait! Notice the accumulator function that we are passing as a parameter to <code>scan</code>:</p>
 <pre><code class="language-js">function(model, value) {
   return Object.assign(model, value);
-}
-</code></pre>
+}</code></pre>
 <p>We have a function that takes <code>(model, value)</code> and calls <code>Object.assign</code> with <code>(model, value)</code>.
 But <code>Object.assign</code> already does what we want, so we can pass it directly to <code>scan</code>:</p>
 <pre><code class="language-js">var models = flyd.scan(Object.assign,
-  { value: 22, units: &quot;C&quot; }, update);
-</code></pre>
+  { value: 22, units: &quot;C&quot; }, update);</code></pre>
 <p>Whenever you are passing a function that looks like:</p>
 <pre><code class="language-js">callSomething(
   function(params) {
     return someFunction(params);
   }
-);
-</code></pre>
+);</code></pre>
 <p>You are creating a function that takes some parameters and calls a function with the same
 parameters. There is no need to create that outer function - you can instead just pass
 <code>someFunction</code> directly:</p>
-<pre><code class="language-js">callSomething(someFunction);
-</code></pre>
+<pre><code class="language-js">callSomething(someFunction);</code></pre>
 <p>Passing functions as parameters is very useful!</p>
 <h3>Building out the example</h3><p>Our temperature example will display the current temperature&#39;s value and units.
 The value can be changed with <code>Increase</code> and <code>Decrease</code> buttons. The units can be switched
@@ -83,7 +76,7 @@ value is converted to the new units.</p>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "08-accumulator.js", content: "/*global ReactDOM, flyd*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createView = function(update) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div>\n      <span>Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(Object.assign,\n  { value: 22, units: \"C\" }, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "08-accumulator.js", content: "/*global React, ReactDOM, flyd*/\n\n// -- Application code\n\nvar convert = function(value, to) {\n  if (to === \"C\") {\n    return Math.round( (value - 32) / 9 * 5 );\n  }\n  else {\n    return Math.round( value * 9 / 5 + 32 );\n  }\n};\n\nvar createView = function(update) {\n  var increase = function(model, amount) {\n    return function(_event) {\n      update({ value: model.value + amount });\n    };\n  };\n  var changeUnits = function(model) {\n    return function(_event) {\n      var newUnits = model.units === \"C\" ? \"F\" : \"C\";\n      var newValue = convert(model.value, newUnits);\n      update({ value: newValue, units: newUnits });\n    };\n  };\n\n  var view = function(model) {\n    return (<div>\n      <span>Temperature: {model.value}&deg;{model.units}</span>\n      <div>\n        <button onClick={increase(model, 1)}>Increase</button>\n        <button onClick={increase(model,-1)}>Decrease</button>\n      </div>\n      <div>\n        <button onClick={changeUnits(model)}>Change Units</button>\n      </div>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar update = flyd.stream();\nvar view = createView(update);\n\nvar models = flyd.scan(Object.assign,\n  { value: 22, units: \"C\" }, update);\n\nvar element = document.getElementById(\"app\");\n\nmodels.map(function(model) {\n  ReactDOM.render(view(model), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.1/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"}],
       middle: 75
     })

@@ -18,8 +18,7 @@ and re-rendered the view with the updated model.</p>
 <pre><code class="language-js">var increase = function(_event) {
   model = model + 1;
   m.render(element, view(model));
-};
-</code></pre>
+};</code></pre>
 <h3>Extracting out the details</h3><p>Notice that the function above needs to &quot;know&quot; about the details of how to re-render the view:</p>
 <ul>
 <li>It calls <code>m.render</code></li>
@@ -34,20 +33,17 @@ handler functions, and we don&#39;t want all these references tied in everywhere
 <pre><code class="language-js">var update = function(value) {
   model = model + value;
   m.render(element, view(model));
-};
-</code></pre>
+};</code></pre>
 <p>Now the <code>increase</code> function just needs to call <code>update(1)</code> to increase the value by 1 and re-render
 the view. As you will see, this <code>update</code> function will only be in one place.</p>
 <h3>Event handler function</h3><p>Our <code>increase</code> function can now be:</p>
 <pre><code class="language-js">var increase = function(_event) {
   update(1);
-};
-</code></pre>
+};</code></pre>
 <p>And a <code>decrease</code> function could be:</p>
 <pre><code class="language-js">var decrease = function(_event) {
   update(-1);
-};
-</code></pre>
+};</code></pre>
 <p>But instead of having separate functions for what are just different values that we pass to
 <code>update</code>, we can write a single function that gets the <strong>amount</strong> by which to increase, and
 <strong>returns a function</strong> that calls <code>update</code> with that amount:</p>
@@ -55,15 +51,13 @@ the view. As you will see, this <code>update</code> function will only be in one
   return function(_event) {
     update(amount);
   };
-};
-</code></pre>
+};</code></pre>
 <p>As you can see, <strong>functions are values</strong> and, like other values, they can be <strong>returned</strong> as a
 result of calling a function. They can also be passed as values to other functions.</p>
 <p>So what does this buy us? We can call <code>increase(1)</code> and <code>increase(-1)</code> to associate event handlers
 to the <code>increase</code> and <code>decrease</code> buttons:</p>
 <pre><code class="language-js">m(&quot;button&quot;, { onclick: increase( 1) }, &quot;+1&quot;),
-m(&quot;button&quot;, { onclick: increase(-1) }, &quot;-1&quot;)
-</code></pre>
+m(&quot;button&quot;, { onclick: increase(-1) }, &quot;-1&quot;)</code></pre>
 <p>Remember that <code>onclick</code> needs a <code>function(event)</code>, and that is what we are getting by calling
 <code>increase(1)</code> and <code>increase(-1)</code>.</p>
 <p><img src="04-update-function-01.svg" alt="Event Handler Function"></p>
@@ -83,8 +77,7 @@ needs <code>update</code>, we&#39;ll write a <code>createView</code> function th
     ];
   };
   return view;
-};
-</code></pre>
+};</code></pre>
 <p>By receiving <code>update</code> as a parameter, our <code>createView</code> function is not tied to anything outside of
 the function itself. It does not reference <code>update</code> as a global variable.</p>
 <p>Also notice that <code>createView</code> is another function-that-returns-a-function. After setting up the
