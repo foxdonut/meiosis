@@ -1,12 +1,12 @@
 /* global m, O, $ */
 
 // Using recursion
-const get = (object, path, defaultValue) =>
-  object == null
-    ? defaultValue
+const get = (object, path) =>
+  object == undefined
+    ? undefined
     : path.length === 1
       ? object[path[0]]
-      : get(object[path[0]], path.slice(1), defaultValue);
+      : get(object[path[0]], path.slice(1));
 
 const nestPatch = (object, path) => ({
   [path[0]]: path.length === 1

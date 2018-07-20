@@ -4,14 +4,12 @@ const convert = (value, to) => Math.round(
   (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
 );
 
-const add = x => y => x + y;
-
 const createActions = update => ({
   editDate: evt =>
     update({ date: evt.target.value }),
 
   increase: amount => _evt =>
-    update({ value: O(add(amount)) }),
+    update({ value: O(value => value + amount) }),
 
   changeUnits: _evt => update(model => {
     const newUnits = model.units === "C" ? "F" : "C";

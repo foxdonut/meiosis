@@ -82,6 +82,9 @@ handle model updates, this is simply a matter of switching from
 [immutable](https://github.com/barneycarroll/patchinko#immutable).
 This creates a new object instance instead of mutating the model.
 
+> In case you missed it, refer to the
+[Wiki section on using Patchinko](03-Model-and-Nesting-C-Patchinko.html).
+
 Next, we can write a simple helper function that checks whether the component's model
 has changed:
 

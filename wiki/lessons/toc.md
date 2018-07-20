@@ -19,14 +19,14 @@
 
 - [A - Lodash FP](03-Model-and-Nesting-A-Lodash-FP.html)
 - [B - Ramda](03-Model-and-Nesting-B-Ramda.html)
-- [C - Patchinko](03-Model-and-Nesting-C-Patchinko.html) (coming soon)
+- [C - Patchinko](03-Model-and-Nesting-C-Patchinko.html)
 
 ### 04 - Routing
 
 - [A - Navigation Without Routes](04-Routing-A-Navigation-Without-Routes.html)
 - [B - Adding Routes](04-Routing-B-Adding-Routes.html)
 
-### 05 - Lifecycle Methods and other Techniques
+### 05 - Techniques and Strategies
 
 - [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html) (coming soon)
 - [B - Preventing Re-renders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html)
