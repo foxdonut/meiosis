@@ -12,12 +12,133 @@
     <script src="prism.js" type="text/javascript"></script>
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
     <h1><a href="http://meiosis.js.org">Meiosis</a> Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>Patchinko</h2><p><em>Coming Soon!</em></p>
+<h2>Patchinko</h2><p>Using functions to update the model is powerful and flexible. Another approach which is really
+nice is to use <a href="https://github.com/barneycarroll/patchinko">Patchinko</a> by
+<a href="http://barneycarroll.com/">Barney Carroll</a>.</p>
+<p>Patchinko is a brilliant utility that Barney wrote in just 30-some lines of code.</p>
+<p>With Patchinko, we can achieve two things in a simple and elegant way:</p>
+<ol>
+<li>Deep merge</li>
+<li>Update using the previous value</li>
+</ol>
+<h3>Deep Merge</h3><p>Imagine that we issue updates as objects instead of functions. The objects indicate the properties
+and values that we want to update. We explored this in the
+<a href="../tutorial/10-deep-merge-mithril.html">Deep Merge section of the Meiosis Tutorial</a>. Essentially,
+we wanted to use <code>Object.assign</code> as our <code>scan</code> function:</p>
+<pre><code class="language-javascript">const models = scan(Object.assign, initialModel, update);</code></pre>
+<p>That didn&#39;t work because <code>Object.assign</code> does a <em>shallow</em> merge. If our current model is:</p>
+<pre><code class="language-javascript">{ air:   { value: 22, units: &quot;C&quot; },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>And we want to update the <code>air</code> <code>value</code> to <code>23</code> by calling <code>update({ air:  { value: 23 } })</code>, we
+end up with:</p>
+<pre><code class="language-javascript">{ air:   { value: 23 },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>Since <code>Object.assign</code> does a shallow merge. The solution we explored in the tutorial was to use
+a library that supports <em>deep</em> merge, such as
+<a href="https://lodash.com/docs/4.17.5#merge">Lodash&#39;s _.merge</a> or
+<a href="https://github.com/KyleAMathews/deepmerge">deepmerge</a>.</p>
+<p>Using Patchinko, we can achieve the equivalent of a deep merge as follows.</p>
+<p>Patchinko gives us a single function, <code>O</code>, that we can use to manage our updates.</p>
+<blockquote>
+<p>The <code>O</code> function is the <a href="https://github.com/barneycarroll/patchinko#overloaded">overloaded</a>
+version of Patchinko. Patchinko also has an
+<a href="https://github.com/barneycarroll/patchinko#explicit">explicit</a> version which provides the
+functions <code>P</code>, <code>S</code>, <code>PS</code>, and <code>D</code>.</p>
+</blockquote>
+<p>Calling <code>O</code> with multiple, plain object arguments works the same as <code>Object.assign</code>:</p>
+<pre><code class="language-javascript">O(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:  { value: 23 } }
+)
+// result:
+{ air:   { value: 23 },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>So again we lost the <code>units</code> on the <code>air</code> property.</p>
+<p><strong>However</strong>, within the objects that we pass to <code>O</code>, we call <code>O</code> again with a single object.
+This is the equivalent of <code>Object.assign</code> <em>for that property</em>. In practice, this is how you can
+update deeply nested properties without losing the rest:</p>
+<pre><code class="language-javascript">O(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:  O({ value: 23 }) } // notice O() here
+)
+// result:
+{ air:   { value: 23, units: &quot;C&quot; }, // now we didn&#39;t lose the units!
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>By having <code>{ air: O({ value: 23 }) }</code>, Patchinko does <code>O(target.air, { value: 23 })</code> and assigns
+the result back to the <code>air</code> property. The equivalent with <code>Object.assign</code> would be:</p>
+<pre><code class="language-javascript">const target =
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  };
+
+Object.assign(target, { air: Object.assign(target.air, { value: 23 }) })</code></pre>
+<p>But of course in a more concise manner. Moreover, we can use <code>O()</code> in this fashion for any
+number of levels deep within our objects.</p>
+<h3>Update Using the Previous Value</h3><p>Patchinko&#39;s <code>O</code> has one more trick up its sleeve. If we pass a <strong>function</strong> to <code>O()</code>, Patchinko
+passes the value of that property to the function, and assigns the function&#39;s return value back
+to that property.</p>
+<p>This makes it easy for us to update a value using the previous value. For example, say that
+instead of setting the value, we want to <em>increase</em> the value by an amount. We need the previous
+value to compute the updated value. We can pass a function to <code>O()</code>:</p>
+<pre><code class="language-javascript">O(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:  O({ value: O(x =&gt; x + 8) }) } // First O to update air, second O to update value
+)
+// result:
+{ air:   { value: 30, units: &quot;C&quot; }, // we increased the value by 8, and didn&#39;t lose the units
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>By passing a function to <code>O()</code>, Patchinko passes us the previous value of that property,
+<code>air.value</code>. Our function receives <code>22</code>, adds <code>8</code> and returns <code>30</code>, which Patchinko assigns
+back to <code>air.value</code>.</p>
+<h3>Issuing Updates</h3><p>Using Patchinko, we can issue updates as plain objects and <code>O</code> instead of as functions.
+Therefore <code>update</code> is now a stream of objects instead of a stream of functions.</p>
+<p>To handle the updates, we can just use <code>O</code>:</p>
+<pre><code class="language-javascript">const models = flyd.scan(O, app.model(), update);</code></pre>
+<p>Remember that <code>scan</code> calls the function with the latest value and the next one coming in from the
+<code>update</code> stream. Thus what we wrote above results in <code>O(latestModel, nextUpdate)</code>. Objects that
+we issue via the <code>update</code> stream will be merged in to the latest model by <code>O</code>.</p>
+<p>Now, for setting values, instead of writing this with Lodash:</p>
+<pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))</code></pre>
+<p>We can write this with Patchinko:</p>
+<pre><code class="language-javascript">editDate: evt =&gt; update({ date: evt.target.value })</code></pre>
+<p>And instead of this for updating a value using the previous value:</p>
+<pre><code class="language-javascript">increase: amount =&gt; _evt =&gt; update(_.update(&quot;value&quot;, _.add(amount)))</code></pre>
+<p>We can write this:</p>
+<pre><code class="language-javascript">increase: amount =&gt; _evt =&gt; update({ value: O(value =&gt; value + amount) })</code></pre>
+<h3>Nesting</h3><p>To nest components within the top-level model at a certain path, we just have to wrap the updates
+that we issue, recursively with <code>O()</code>:</p>
+<pre><code class="language-javascript">const nestPatch = (object, path) =&gt; ({
+  [path[0]]: path.length === 1
+    ? O(object)
+    : O(nestPatch(object, path.slice(1)))
+});
+
+const nestUpdate = (update, path) =&gt; patch =&gt;
+  update(nestPatch(patch, path));</code></pre>
+<p>So if our component is nested at <code>[&quot;temperature&quot;, &quot;air&quot;]</code>, we can issue an update within the
+component simply as:</p>
+<pre><code class="language-javascript">update({ date: evt.target.value })</code></pre>
+<p>And the nesting will wrap the update to:</p>
+<pre><code class="language-javascript">update(O({ temperature: O({ air: O({ date: evt.target.value }) }) }))</code></pre>
+<p>This will ensure that the nested property gets updated without losing any other properties in the
+top-level model.</p>
+<p>You can see and experiment with the full example below.</p>
   <div id="flems1" class="flemscode" style="height:800px"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "nest.js", content: "/* global O */\n\n// Using recursion\n/*\nconst get = (object, path, defaultValue) =>\n  object == null\n    ? defaultValue\n    : path.length === 1\n      ? object[path[0]]\n      : get(object[path[0]], path.slice(1), defaultValue);\n\nconst nestPatch = (object, path) => ({\n  [path[0]]: path.length === 1\n    ? O(object)\n    : O(nestPatch(object, path.slice(1)))\n});\n*/\n\n// Using reduce, courtesy Barney Carroll (https://github.com/barneycarroll)\nconst get = (object, path, defaultValue) =>\n  path.reduce((obj, key) => obj == null\n    ? defaultValue : obj[key], object);\n\nconst nestPatch = (object, path) => [...path].reverse().reduce(\n  (patch, key) => ({ [key]: O(patch) }), object);\n\nconst nestUpdate = (update, path) => patch =>\n  update(nestPatch(patch, path));\n\n// eslint-disable-next-line no-unused-vars\nconst nest = (create, update, path) => {\n  path = Array.isArray(path) ? path : [ path ];\n  const component = create(nestUpdate(update, path));\n  const result = O({}, component);\n  if (component.model) {\n    result.model = () => nestPatch(component.model(), path);\n  }\n  if (component.view) {\n    result.view = model => component.view(get(model, path));\n  }\n  return result;\n};\n", compiler: "babel"},{name: "temperature.js", content: "/* global O, React */\n\nconst convert = (value, to) => Math.round(\n  (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n);\n\nconst add = x => y => x + y;\n\nconst createActions = update => ({\n  editDate: evt =>\n    update({ date: evt.target.value }),\n\n  increase: amount => _evt =>\n    update({ value: O(add(amount)) }),\n\n  changeUnits: _evt => update(model => {\n    const newUnits = model.units === \"C\" ? \"F\" : \"C\";\n    const newValue = convert(model.value, newUnits);\n    return O(model, { units: newUnits, value: newValue });\n  })\n});\n\nconst createView = actions => model => (\n  <div>\n    <div>Date: <input type=\"text\" size=\"10\" value={model.date} onChange={actions.editDate}/></div>\n    <span>Temperature: {model.value}&deg;{model.units} </span>\n    <div>\n      <button onClick={actions.increase(1)}>Increase</button>\n      <button onClick={actions.increase(-1)}>Decrease</button>\n    </div>\n    <div>\n      <button onClick={actions.changeUnits}>Change Units</button>\n    </div>\n  </div>\n);\n\n// eslint-disable-next-line no-unused-vars\nconst createTemperature = update => ({\n  model: () => ({\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  }),\n\n  view: createView(createActions(update))\n});\n", compiler: "babel"},{name: "app.js", content: "/* global O, React, nest, createTemperature */\n// eslint-disable-next-line no-unused-vars\nconst createApp = update => {\n  const air = nest(createTemperature, update, \"air\");\n  const water = nest(createTemperature, update, \"water\");\n\n  return {\n    model: () => O({}, air.model(), water.model()),\n    view: model => (\n      <div>\n        {air.view(model)}\n        {water.view(model)}\n      </div>\n    )\n  };\n};\n", compiler: "babel"},{name: "index.js", content: "/* global ReactDOM, flyd, O, meiosis, meiosisTracer, createApp */\n\nconst update = flyd.stream();\nconst app = createApp(update);\nconst models = flyd.scan(O, app.model(), update);\n\nconst element = document.getElementById(\"app\");\nmodels.map(model => { ReactDOM.render(app.view(model), element); });\n\n// Only for using Meiosis Tracer in development.\nmeiosis.trace({ update, dataStreams: [ models ], toUpdate: x => x });\nmeiosisTracer({ selector: \"#tracer\" });\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "nest.js", content: "/* global O */\n\n// Using reduce, courtesy Barney Carroll (https://github.com/barneycarroll)\nconst get = (object, path) =>\n  path.reduce((obj, key) => obj == undefined ? undefined : obj[key], object);\n\nconst nestPatch = (object, path) => ({\n  [path[0]]: path.length === 1\n    ? O(object)\n    : O(nestPatch(object, path.slice(1)))\n});\n\nconst nestUpdate = (update, path) => patch =>\n  update(nestPatch(patch, path));\n\n// eslint-disable-next-line no-unused-vars\nconst nest = (create, update, path) => {\n  const component = create(nestUpdate(update, path));\n  const result = O({}, component);\n  if (component.model) {\n    result.model = () => nestPatch(component.model(), path);\n  }\n  if (component.view) {\n    result.view = model => component.view(get(model, path));\n  }\n  return result;\n};\n", compiler: "babel"},{name: "temperature.js", content: "/* global O, React */\n\nconst convert = (value, to) => Math.round(\n  (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n);\n\nconst createActions = update => ({\n  editDate: evt =>\n    update({ date: evt.target.value }),\n\n  increase: amount => _evt =>\n    update({ value: O(value => value + amount) }),\n\n  changeUnits: _evt => update(model => {\n    const newUnits = model.units === \"C\" ? \"F\" : \"C\";\n    const newValue = convert(model.value, newUnits);\n    return O(model, { units: newUnits, value: newValue });\n  })\n});\n\nconst createView = actions => model => (\n  <div>\n    <div>Date: <input type=\"text\" size=\"10\" value={model.date} onChange={actions.editDate}/></div>\n    <span>Temperature: {model.value}&deg;{model.units} </span>\n    <div>\n      <button onClick={actions.increase(1)}>Increase</button>\n      <button onClick={actions.increase(-1)}>Decrease</button>\n    </div>\n    <div>\n      <button onClick={actions.changeUnits}>Change Units</button>\n    </div>\n  </div>\n);\n\n// eslint-disable-next-line no-unused-vars\nconst createTemperature = update => ({\n  model: () => ({\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  }),\n\n  view: createView(createActions(update))\n});\n", compiler: "babel"},{name: "app.js", content: "/* global O, React, nest, createTemperature */\n// eslint-disable-next-line no-unused-vars\nconst createApp = update => {\n  const air = nest(createTemperature, update, [\"air\"]);\n  const water = nest(createTemperature, update, [\"water\"]);\n\n  return {\n    model: () => O({}, air.model(), water.model()),\n    view: model => (\n      <div>\n        {air.view(model)}\n        {water.view(model)}\n      </div>\n    )\n  };\n};\n", compiler: "babel"},{name: "index.js", content: "/* global ReactDOM, flyd, O, meiosis, meiosisTracer, createApp */\n\nconst update = flyd.stream();\nconst app = createApp(update);\nconst models = flyd.scan(O, app.model(), update);\n\nconst element = document.getElementById(\"app\");\nmodels.map(model => { ReactDOM.render(app.view(model), element); });\n\n// Only for using Meiosis Tracer in development.\nmeiosis.trace({ update, dataStreams: [ models ], toUpdate: x => x });\nmeiosisTracer({ selector: \"#tracer\" });\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.3.2/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js"},{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.6/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@3.2.1/overloaded.js"},{name: "meiosis", type: "js", url: "https://unpkg.com/meiosis@1.4.1/dist/meiosis.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@1.4.1/dist/meiosis-tracer.js"}],
       middle: 75,
       autoFocus: false
@@ -25,6 +146,9 @@
   </script>
 
 
+<p>While using functions to update the model is generic, flexible and powerful, Patchinko gives us
+a way to issue updates that is arguably simpler, more concise and intuitive, without losing any
+power or flexibility.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>
 <p><a href="http://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
