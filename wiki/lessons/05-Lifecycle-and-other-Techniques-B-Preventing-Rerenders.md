@@ -67,7 +67,7 @@ re-rendered.
 
 @flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,lodash 800 70
 
-<a name="mithril_prevent_re_render">
+<a name="mithril_prevent_re_render"></a>
 ### Mithril version
 
 We can use Mithril's

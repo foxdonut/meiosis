@@ -1,4 +1,4 @@
-/*global ReactDOM*/
+/*global React, ReactDOM*/
 
 // -- Utility code
 

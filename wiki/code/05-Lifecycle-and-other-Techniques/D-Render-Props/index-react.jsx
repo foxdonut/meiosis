@@ -1,4 +1,4 @@
-/* global ReactDOM, flyd */
+/* global React, ReactDOM, flyd */
 
 // https://reactjs.org/docs/render-props.html
 const duck = {
@@ -55,4 +55,4 @@ const models = flyd.scan((model, func) => func(model),
   app.model(), update);
 
 const element = document.getElementById("app");
-models.map(model => ReactDOM.render(app.view(model), element));
+models.map(model => { ReactDOM.render(app.view(model), element); });

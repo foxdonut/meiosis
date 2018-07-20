@@ -1,4 +1,8 @@
-/* global O */
+/* global O, React */
+
+const convert = (value, to) => Math.round(
+  (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+);
 
 const add = x => y => x + y;
 
@@ -10,18 +14,9 @@ const createActions = update => ({
     update({ value: O(add(amount)) }),
 
   changeUnits: _evt => update(model => {
-    if (model.units === "C") {
-      return O(model, {
-        units: "F",
-        value: Math.round( model.value * 9 / 5 + 32 )
-      });
-    }
-    else {
-      return O(model, {
-        units: "C",
-        value: Math.round( (model.value - 32) / 9 * 5 )
-      });
-    }
+    const newUnits = model.units === "C" ? "F" : "C";
+    const newValue = convert(model.value, newUnits);
+    return O(model, { units: newUnits, value: newValue });
   })
 });
 

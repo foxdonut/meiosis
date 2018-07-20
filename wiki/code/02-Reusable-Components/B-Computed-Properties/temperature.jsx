@@ -1,3 +1,9 @@
+/* global React */
+
+const convert = (value, to) => Math.round(
+  (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+);
+
 const createActions = update => ({
   editDate: evt =>
     update(model => {
@@ -12,15 +18,9 @@ const createActions = update => ({
     }),
 
   changeUnits: _evt => update(model => {
-    if (model.units === "C") {
-      model.units = "F";
-      model.value = Math.round( model.value * 9 / 5 + 32 );
-    }
-    else {
-      model.units = "C";
-      model.value = Math.round( (model.value - 32) / 9 * 5 );
-    }
-    return model;
+    const newUnits = model.units === "C" ? "F" : "C";
+    const newValue = convert(model.value, newUnits);
+    return Object.assign(model, { units: newUnits, value: newValue });
   })
 });
 

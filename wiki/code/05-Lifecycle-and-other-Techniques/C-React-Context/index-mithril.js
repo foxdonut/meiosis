@@ -1,156 +1,116 @@
-/* global m */
+/* global m, O */
 
 // -- Utility code
 
-var nestUpdate = function(update, prop) {
-  return function(func) {
-    update(function(model) {
-      model[prop] = func(model[prop]);
-      return model;
-    });
-  };
-};
+const nestPatch = (patch, prop) => ({ [prop]: O(patch) });
 
-var nest = function(create, update, prop) {
-  var component = create(nestUpdate(update, prop));
-  var result = Object.assign({}, component);
+const nestUpdate = (update, prop) => patch => update(nestPatch(patch, prop));
+
+const nest = (create, update, prop) => {
+  const component = create(nestUpdate(update, prop));
+  const result = O({}, component);
   if (component.model) {
-    result.model = function() {
-      var initialModel = {};
-      initialModel[prop] = component.model();
-      return initialModel;
-    };
+    result.model = () => nestPatch(component.model(), prop);
   }
   if (component.view) {
-    result.view = function(model) {
-      return component.view(Object.assign(
-        { context: model.context },
-        model[prop])
-      );
-    };
+    result.view = model => component.view(O(
+      { context: model.context },
+      model[prop]
+    ));
   }
   return result;
 };
 
 // -- Application code
 
-var convert = function(value, to) {
-  if (to === "C") {
-    return Math.round( (value - 32) / 9 * 5 );
-  }
-  else {
-    return Math.round( value * 9 / 5 + 32 );
-  }
-};
+const convert = (value, to) => Math.round(
+  (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+);
 
-var createTemperature = function(label, init) {
-  return function(update) {
-    var increase = function(amount) {
-      return function(_event) {
-        update(function(model) {
-          model.value += amount;
-          return model;
-        });
-      };
-    };
-    var changeUnits = function(_event) {
-      update(function(model) {
-        var newUnits = model.units === "C" ? "F" : "C";
-        model.value = convert(model.value, newUnits);
-        model.units = newUnits;
-        return model;
-      });
-    };
+const createTemperature = (label, init) => update => {
+  const increase = amount => _event => update({
+    value: O(value => value + amount)
+  });
+  const changeUnits = _event =>
+    update(model => {
+      const newUnits = model.units === "C" ? "F" : "C";
+      const newValue = convert(model.value, newUnits);
+      return O(model, { units: newUnits, value: newValue });
+    });
 
-    var model = function() {
-      return Object.assign({ value: 22, units: "C" }, init);
-    };
+  const model = () => O({ value: 22, units: "C" }, init);
 
-    var view = function(model) {
-      var btn = "button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default");
-      return m("div.temperature", [
-        label, " Temperature: ", model.value, m.trust("&deg;"), model.units,
-        m("div",
-          m(btn, { onclick: increase( 1) }, "Increase"),
-          m(btn, { onclick: increase(-1) }, "Decrease")
-        ),
-        m("div",
-          m(btn, { onclick: changeUnits }, "Change Units")
-        )
-      ]);
-    };
-    return { model: model, view: view };
+  const view = model => {
+    const btn = "button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default");
+    return m("div.temperature", [
+      label, " Temperature: ", model.value, m.trust("&deg;"), model.units,
+      m("div",
+        m(btn, { onclick: increase( 1) }, "Increase"),
+        m(btn, { onclick: increase(-1) }, "Decrease")
+      ),
+      m("div",
+        m(btn, { onclick: changeUnits }, "Change Units")
+      )
+    ]);
   };
+  return { model, view };
 };
 
-var createTemperaturePair = function(update) {
-  var air = nest(createTemperature("Air"), update, "air");
-  var water = nest(createTemperature("Water", { value: 84, units: "F" }),
+const createTemperaturePair = update => {
+  const air = nest(createTemperature("Air"), update, "air");
+  const water = nest(createTemperature("Water", { value: 84, units: "F" }),
     update, "water");
 
-  var model = function() {
-    return Object.assign(air.model(), water.model());
-  };
+  const model = () => O(air.model(), water.model());
 
-  var view = function(model) {
-    return [
-      air.view(model),
-      water.view(
-        Object.assign({}, model, { context: { theme: "light" } })
-      )
-    ];
-  };
-  return { model: model, view: view };
+  const view = model => [
+    air.view(model),
+    water.view(
+      O({}, model, { context: { theme: "light" } })
+    )
+  ];
+  return { model, view };
 };
 
-var createThemeChanger = function(update) {
-  var changeTheme = function(_event) {
-    update(function(model) {
-      model.context.theme = model.context.theme === "light" ? "dark" : "light";
-      return model;
+const createThemeChanger = update => {
+  const changeTheme = _event => {
+    update({
+      context: O({ theme: O(previous => previous === "light" ? "dark" : "light") })
     });
   };
-  var view = function(model) {
-    return m("div", [
+  const view = model =>
+    m("div", [
       m("div", "Theme: " + model.context.theme),
       m("button." + (model.context.theme === "dark" ? "btn-primary" : "btn-default"),
         { onclick: changeTheme }, "Change Theme")
     ]);
-  };
-  return { view: view };
+
+  return { view };
 };
 
-var createApp = function(update) {
-  var temperaturePair = nest(createTemperaturePair, update, "temperatures");
-  var themeChanger = createThemeChanger(update);
-  var view = function(model) {
-    return [
-      temperaturePair.view(model),
-      themeChanger.view(model)
-    ];
-  };
+const createApp = update => {
+  const temperaturePair = nest(createTemperaturePair, update, "temperatures");
+  const themeChanger = createThemeChanger(update);
+  const view = model => [
+    temperaturePair.view(model),
+    themeChanger.view(model)
+  ];
   return {
-    model: function() {
-      return Object.assign(
-        { context: { theme: "light" } },
-        temperaturePair.model()
-      );
-    },
-    view: view
+    model: () => O(
+      { context: { theme: "light" } },
+      temperaturePair.model()
+    ),
+    view
   };
 };
 
 // -- Meiosis pattern setup code
 
-var update = m.stream();
-var app = createApp(update);
+const update = m.stream();
+const app = createApp(update);
 
-var models = m.stream.scan(function(model, func) {
-  return func(model);
-}, app.model(), update);
+const models = m.stream.scan(O, app.model(), update);
 
-var element = document.getElementById("app");
+const element = document.getElementById("app");
 
-models.map(function(model) {
-  m.render(element, app.view(model));
-});
+models.map(model => { m.render(element, app.view(model)); });

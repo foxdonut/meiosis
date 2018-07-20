@@ -1,4 +1,9 @@
-/* global R */
+/* global R, React */
+
+const convert = (value, to) => Math.round(
+  (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+);
+
 const createActions = update => ({
   editDate: evt =>
     update(R.assoc("date", evt.target.value)),
@@ -7,18 +12,9 @@ const createActions = update => ({
     update(R.over(R.lensProp("value"), R.add(amount))),
 
   changeUnits: _evt => update(model => {
-    if (model.units === "C") {
-      return R.merge(model, {
-        units: "F",
-        value: Math.round( model.value * 9 / 5 + 32 )
-      });
-    }
-    else {
-      return R.merge(model, {
-        units: "C",
-        value: Math.round( (model.value - 32) / 9 * 5 )
-      });
-    }
+    const newUnits = model.units === "C" ? "F" : "C";
+    const newValue = convert(model.value, newUnits);
+    return R.merge(model, { units: newUnits, value: newValue });
   })
 });
 

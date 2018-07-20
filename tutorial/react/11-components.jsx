@@ -1,4 +1,4 @@
-/*global ReactDOM, flyd, _*/
+/*global React, ReactDOM, flyd, _*/
 
 // -- Utility code
 

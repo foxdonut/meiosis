@@ -1,4 +1,4 @@
-/*global ReactDOM*/
+/*global React, ReactDOM*/
 var model = 0;
 
 var increase = function(_event) {

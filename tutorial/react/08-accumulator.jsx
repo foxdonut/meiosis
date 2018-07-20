@@ -1,4 +1,4 @@
-/*global ReactDOM, flyd*/
+/*global React, ReactDOM, flyd*/
 
 // -- Application code
 

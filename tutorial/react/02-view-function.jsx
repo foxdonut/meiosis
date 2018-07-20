@@ -1,4 +1,4 @@
-/*global ReactDOM*/
+/*global React, ReactDOM*/
 var view = function(model) {
   return <div>Counter: {model}</div>;
 };

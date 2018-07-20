@@ -77,6 +77,10 @@ const createEntryDate = update => {
   };
 };
 
+const convert = (value, to) => Math.round(
+  (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+);
+
 const createTemperature = label => update => {
   const actions = {
     increase: amount => evt => {
@@ -87,18 +91,9 @@ const createTemperature = label => update => {
     changeUnits: evt => {
       evt.preventDefault();
       update(model => {
-        if (model.units === "C") {
-          return Object.assign({}, model, {
-            units: "F",
-            value: Math.round( model.value * 9 / 5 + 32 )
-          });
-        }
-        else {
-          return Object.assign({}, model, {
-            units: "C",
-            value: Math.round( (model.value - 32) / 9 * 5 )
-          });
-        }
+        const newUnits = model.units === "C" ? "F" : "C";
+        const newValue = convert(model.value, newUnits);
+        return Object.assign({}, model, { units: newUnits, value: newValue });
       });
     }
   };
@@ -207,4 +202,4 @@ const models = flyd.scan((model, func) => func(model),
   App.model(), update);
 
 const element = document.getElementById("app");
-models.map(model => ReactDOM.render(<App model={model} />, element));
+models.map(model => { ReactDOM.render(<App model={model} />, element); });

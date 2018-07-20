@@ -1,4 +1,4 @@
-/*global ReactDOM*/
+/*global React, ReactDOM*/
 
 // -- Application code
 

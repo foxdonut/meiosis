@@ -12,7 +12,7 @@ React version:
 
 Mithril version:
 
-@flems code/05-Lifecycle-and-other-Techniques/C-React-Context/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream 800
+@flems code/05-Lifecycle-and-other-Techniques/C-React-Context/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko 800
 
 [Table of Contents](toc.html)
 

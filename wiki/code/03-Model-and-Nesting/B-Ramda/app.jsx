@@ -1,4 +1,4 @@
-/* global R, nest, createTemperature */
+/* global R, React, nest, createTemperature */
 
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {

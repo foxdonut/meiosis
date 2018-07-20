@@ -1,4 +1,4 @@
-/*global ReactDOM, flyd*/
+/*global React, ReactDOM, flyd*/
 
 const createActions = update => ({
   increase: () => update(model => {
@@ -20,4 +20,4 @@ const models = flyd.scan((model, func) => func(model),
 
 const view = createView(createActions(update));
 const element = document.getElementById("app");
-models.map(model => ReactDOM.render(view(model), element));
+models.map(model => { ReactDOM.render(view(model), element); });

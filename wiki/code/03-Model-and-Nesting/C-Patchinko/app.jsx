@@ -1,4 +1,4 @@
-/* global O, nest, createTemperature */
+/* global O, React, nest, createTemperature */
 // eslint-disable-next-line no-unused-vars
 const createApp = update => {
   const air = nest(createTemperature, update, "air");
