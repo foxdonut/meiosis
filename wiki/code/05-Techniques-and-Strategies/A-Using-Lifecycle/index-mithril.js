@@ -43,22 +43,22 @@ const nestComponent = (create, update, path) => {
   return result;
 };
 
-const createEntryNumber = update => {
+const createEntryNumber = () => {
+  let entryNumber = "";
   const actions = {
-    editEntryValue: evt => update({ value: evt.target.value })
+    editEntryNumber: evt => {
+      entryNumber = evt.target.value;
+    }
   };
 
   return {
-    model: () => ({
-      value: ""
-    }),
+    getEntryNumber: () => entryNumber,
 
-    view: model =>
-      m("div",
-        m("span", { style: { "margin-right": "8px" } }, "Entry number:"),
-        m("input[type=text][size=2]",
-          { value: model.value, oninput: actions.editEntryValue })
-      )
+    view: () => m("div",
+      m("span", { style: { "margin-right": "8px" } }, "Entry number:"),
+      m("input[type=text][size=2]",
+        { value: entryNumber, oninput: actions.editEntryNumber })
+    )
   };
 };
 
@@ -151,11 +151,20 @@ const createApp = update => {
   const displayTemperature = temperature => temperature.label + ": " +
     temperature.value + "\xB0" + temperature.units;
 
+  const EntryNumber = createEntryNumber();
+  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
+
+  const air = nest(createTemperature("Air"), update,
+    ["temperature", "air"]);
+
+  const water = nest(createTemperature("Water"), update,
+    ["temperature", "water"]);
+
   const actions = {
     save: model => evt => {
       evt.preventDefault();
       update({
-        saved: " Entry #" + model.entry.value +
+        saved: " Entry #" + EntryNumber.getEntryNumber() +
           " on " + model.date.value + ":" +
           " Temperatures: " +
           displayTemperature(model.temperature.air) + " " +
@@ -167,28 +176,20 @@ const createApp = update => {
     }
   };
 
-  const entryNumber = nest(createEntryNumber, update, ["entry"]);
-  const EntryDate = nestComponent(createEntryDate, update, ["date"]);
-
-  const air = nest(createTemperature("Air"), update,
-    ["temperature", "air"]);
-
-  const water = nest(createTemperature("Water"), update,
-    ["temperature", "water"]);
-
   return {
     model: () => O(
       { saved: "" },
-      entryNumber.model(),
       EntryDate.model(),
       air.model(),
       water.model()
     ),
 
-    view: model =>
-      m("form",
-        entryNumber.view(model),
-        m(EntryDate, { model }),
+    view: vnode => {
+      const model = vnode.attrs.models();
+
+      return m("form",
+        m(EntryNumber, { }),
+        m(EntryDate, { model: model }),
         air.view(model),
         water.view(model),
         m("div",
@@ -196,13 +197,14 @@ const createApp = update => {
             "Save"),
           m("span", model.saved)
         )
-      )
+      );
+    }
   };
 };
 
 const update = m.stream();
-const app = createApp(update);
-const models = m.stream.scan(O, app.model(), update);
+const App = createApp(update);
+const models = m.stream.scan(O, App.model(), update);
 
 const element = document.getElementById("app");
-models.map(model => m.render(element, app.view(model)));
+m.mount(element, { view: () => m(App, { models }) });

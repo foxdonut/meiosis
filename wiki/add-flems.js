@@ -5,9 +5,9 @@ var toDir = process.argv[3];
 
 var linkMap = {
   "datepicker": "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
-  "flyd": "https://unpkg.com/flyd@0.2.6/flyd.js",
+  "flyd": "https://unpkg.com/flyd@0.2.8/flyd.js",
   "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
-  "lodash": "https://unpkg.com/lodash@4.17.5",
+  "lodash": "https://unpkg.com/lodash@4.17.10",
   "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
   "meiosis": "https://unpkg.com/meiosis@1.4.1/dist/meiosis.js",
   "meiosis-tracer": "https://unpkg.com/meiosis-tracer@1.4.1/dist/meiosis-tracer.js",
@@ -16,10 +16,8 @@ var linkMap = {
   "patchinko": "https://unpkg.com/patchinko@3.2.1/overloaded.js",
   "patchinko-immutable": "https://unpkg.com/patchinko@3.2.1/immutable.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
-  "react": "https://unpkg.com/react@16.3.2/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.3.2/umd/react-dom.development.js",
-  "universal-router": "https://unpkg.com/universal-router@6.0.0/universal-router.min.js",
-  "universal-router-generate-urls": "https://unpkg.com/universal-router@6.0.0/universal-router-generate-urls.min.js"
+  "react": "https://unpkg.com/react@16.4.1/umd/react.development.js",
+  "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"
 };
 
 var filenames = fs.readdirSync(fromDir);

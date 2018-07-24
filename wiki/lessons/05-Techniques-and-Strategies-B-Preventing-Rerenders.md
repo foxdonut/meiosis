@@ -65,7 +65,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`,
 when you interact with that component in the user interface. Other components do not get
 re-rendered.
 
-@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,lodash 800 70
+@flems code/05-Techniques-and-Strategies/B-Preventing-Rerenders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,lodash 800 70
 
 <a name="mithril_prevent_re_render"></a>
 ### Mithril version
@@ -109,7 +109,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`,
 when you interact with that component in the user interface. Other components do not get
 re-rendered.
 
-@flems code/05-Lifecycle-and-other-Techniques/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-immutable 800 70
+@flems code/05-Techniques-and-Strategies/B-Preventing-Rerenders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-immutable 800 70
 
 [Table of Contents](toc.html)
 

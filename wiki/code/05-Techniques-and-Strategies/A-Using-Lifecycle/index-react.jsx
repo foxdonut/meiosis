@@ -33,26 +33,30 @@ const nestComponent = (createComponent, update, path) => {
   };
 };
 
-const createEntryNumber = update => {
-  const actions = {
-    editEntryValue: evt => update(model =>
-      Object.assign(model, { value: evt.target.value }))
-  };
+class EntryNumber extends React.Component {
+  constructor(props) {
+    super(props);
+    const self = this;
+    self.state = {
+      entryNumber: ""
+    };
+    props.entryNumberHook(() => self.state.entryNumber);
+  }
 
-  return {
-    model: () => ({
-      value: ""
-    }),
+  editEntryNumber(evt) {
+    this.setState({ entryNumber: evt.target.value });
+  }
 
-    view: model => (
+  render() {
+    return (
       <div>
         <span style={{marginRight: 8}}>Entry number:</span>
-        <input type="text" size="2" value={model.value}
-          onChange={actions.editEntryValue}/>
+        <input type="text" size="2" value={this.state.entryNumber}
+          onChange={this.editEntryNumber.bind(this)}/>
       </div>
-    )
-  };
-};
+    );
+  }
+}
 
 const createEntryDate = update => {
   const actions = {
@@ -61,14 +65,15 @@ const createEntryDate = update => {
   };
 
   return class extends React.Component {
+    constructor(props) {
+      super(props);
+      this.dateFieldRef = React.createRef();
+    }
+
     static model() {
       return {
         value: ""
       };
-    }
-
-    componentWillMount() {
-      this.dateFieldRef = React.createRef();
     }
 
     componentDidMount() {
@@ -153,17 +158,21 @@ const createApp = update => {
   const displayTemperature = temperature => temperature.label + ": " +
     temperature.value + "\xB0" + temperature.units;
 
+  let getEntryNumber = null;
+  const entryNumberHook = getter => {
+    getEntryNumber = getter;
+  };
+
   const actions = {
     save: evt => {
       evt.preventDefault();
       update(model => {
-        model.saved = " Entry #" + model.entry.value +
+        model.saved = " Entry #" + getEntryNumber() +
           " on " + model.date.value + ":" +
           " Temperatures: " +
           displayTemperature(model.temperature.air) + " " +
           displayTemperature(model.temperature.water);
 
-        model.entry.value = "";
         model.date.value = "";
 
         return model;
@@ -171,7 +180,6 @@ const createApp = update => {
     }
   };
 
-  const entryNumber = nest(createEntryNumber, update, ["entry"]);
   const EntryDate = nestComponent(createEntryDate, update, ["date"]);
 
   const air = nest(createTemperature("Air"), update,
@@ -183,7 +191,6 @@ const createApp = update => {
   return {
     model: () => _.merge(
       { saved: "" },
-      entryNumber.model(),
       EntryDate.model(),
       air.model(),
       water.model()
@@ -191,7 +198,7 @@ const createApp = update => {
 
     view: model => (
       <form>
-        {entryNumber.view(model)}
+        <EntryNumber entryNumberHook={entryNumberHook} />
         <EntryDate model={model} />
         {air.view(model)}
         {water.view(model)}

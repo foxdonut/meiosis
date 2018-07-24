@@ -1,4 +1,4 @@
-/** @license React v16.3.2
+/** @license React v16.4.1
  * react.development.js
  *
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -108,22 +108,22 @@ var objectAssign = shouldUseNative() ? Object.assign : function (target, source)
 
 // TODO: this is special because it gets imported during build.
 
-var ReactVersion = '16.3.2';
+var ReactVersion = '16.4.1';
 
 // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
-var hasSymbol = typeof Symbol === 'function' && Symbol['for'];
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
 
-var REACT_ELEMENT_TYPE = hasSymbol ? Symbol['for']('react.element') : 0xeac7;
-var REACT_CALL_TYPE = hasSymbol ? Symbol['for']('react.call') : 0xeac8;
-var REACT_RETURN_TYPE = hasSymbol ? Symbol['for']('react.return') : 0xeac9;
-var REACT_PORTAL_TYPE = hasSymbol ? Symbol['for']('react.portal') : 0xeaca;
-var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol['for']('react.fragment') : 0xeacb;
-var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol['for']('react.strict_mode') : 0xeacc;
-var REACT_PROVIDER_TYPE = hasSymbol ? Symbol['for']('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol['for']('react.context') : 0xeace;
-var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol['for']('react.async_mode') : 0xeacf;
-var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol['for']('react.forward_ref') : 0xead0;
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
+var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_TIMEOUT_TYPE = hasSymbol ? Symbol.for('react.timeout') : 0xead1;
 
 var MAYBE_ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
 var FAUX_ITERATOR_SYMBOL = '@@iterator';
@@ -195,6 +195,38 @@ var invariant_1 = invariant;
 
 // Relying on the `invariant()` implementation lets us
 // have preserve the format and params in the www builds.
+
+// Exports ReactDOM.createRoot
+
+
+// Experimental error-boundary API that can recover from errors within a single
+// render phase
+
+// Suspense
+var enableSuspense = false;
+// Helps identify side effects in begin-phase lifecycle hooks and setState reducers:
+
+
+// In some cases, StrictMode should also double-render lifecycles.
+// This can be confusing for tests though,
+// And it can be bad for performance in production.
+// This feature flag can be used to control the behavior:
+
+
+// To preserve the "Pause on caught exceptions" behavior of the debugger, we
+// replay the begin phase of a failed component inside invokeGuardedCallback.
+
+
+// Warn about deprecated, async-unsafe lifecycles; relates to RFC #6:
+
+
+// Warn about legacy context API
+
+
+// Gather advanced timing metrics for Profiler subtrees.
+
+
+// Only used in www builds.
 
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -1106,7 +1138,7 @@ function forEachSingleChild(bookKeeping, child, name) {
 /**
  * Iterates through children that are typically specified as `props.children`.
  *
- * See https://reactjs.org/docs/react-api.html#react.children.foreach
+ * See https://reactjs.org/docs/react-api.html#reactchildrenforeach
  *
  * The provided forEachFunc(child, index) will be called for each
  * leaf child.
@@ -1158,7 +1190,7 @@ function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
 /**
  * Maps children that are typically specified as `props.children`.
  *
- * See https://reactjs.org/docs/react-api.html#react.children.map
+ * See https://reactjs.org/docs/react-api.html#reactchildrenmap
  *
  * The provided mapFunction(child, key, index) will be called for each
  * leaf child.
@@ -1181,12 +1213,12 @@ function mapChildren(children, func, context) {
  * Count the number of children that are typically specified as
  * `props.children`.
  *
- * See https://reactjs.org/docs/react-api.html#react.children.count
+ * See https://reactjs.org/docs/react-api.html#reactchildrencount
  *
  * @param {?*} children Children tree container.
  * @return {number} The number of children.
  */
-function countChildren(children, context) {
+function countChildren(children) {
   return traverseAllChildren(children, emptyFunction_1.thatReturnsNull, null);
 }
 
@@ -1194,7 +1226,7 @@ function countChildren(children, context) {
  * Flatten a children object (typically specified as `props.children`) and
  * return an array with appropriately re-keyed children.
  *
- * See https://reactjs.org/docs/react-api.html#react.children.toarray
+ * See https://reactjs.org/docs/react-api.html#reactchildrentoarray
  */
 function toArray(children) {
   var result = [];
@@ -1206,7 +1238,7 @@ function toArray(children) {
  * Returns the first child in a collection of children and verifies that there
  * is only one child in the collection.
  *
- * See https://reactjs.org/docs/react-api.html#react.children.only
+ * See https://reactjs.org/docs/react-api.html#reactchildrenonly
  *
  * The current implementation of this function assumes that a single child gets
  * passed without a wrapper, but the purpose of this helper function is to
@@ -1235,7 +1267,14 @@ function createContext(defaultValue, calculateChangedBits) {
     _calculateChangedBits: calculateChangedBits,
     _defaultValue: defaultValue,
     _currentValue: defaultValue,
+    // As a workaround to support multiple concurrent renderers, we categorize
+    // some renderers as primary and others as secondary. We only expect
+    // there to be two concurrent renderers at most: React Native (primary) and
+    // Fabric (secondary); React DOM (primary) and React ART (secondary).
+    // Secondary renderers store their context values on separate fields.
+    _currentValue2: defaultValue,
     _changedBits: 0,
+    _changedBits2: 0,
     // These are circular
     Provider: null,
     Consumer: null
@@ -1249,6 +1288,7 @@ function createContext(defaultValue, calculateChangedBits) {
 
   {
     context._currentRenderer = null;
+    context._currentRenderer2 = null;
   }
 
   return context;
@@ -1257,6 +1297,10 @@ function createContext(defaultValue, calculateChangedBits) {
 function forwardRef(render) {
   {
     !(typeof render === 'function') ? warning_1(false, 'forwardRef requires a render function but was given %s.', render === null ? 'null' : typeof render) : void 0;
+
+    if (render != null) {
+      !(render.defaultProps == null && render.propTypes == null) ? warning_1(false, 'forwardRef render functions do not support propTypes or defaultProps. ' + 'Did you accidentally pass a React component?') : void 0;
+    }
   }
 
   return {
@@ -1272,7 +1316,7 @@ var describeComponentFrame = function (name, source, ownerName) {
 function isValidElementType(type) {
   return typeof type === 'string' || typeof type === 'function' ||
   // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
-  type === REACT_FRAGMENT_TYPE || type === REACT_ASYNC_MODE_TYPE || type === REACT_STRICT_MODE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
+  type === REACT_FRAGMENT_TYPE || type === REACT_ASYNC_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_TIMEOUT_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
 }
 
 function getComponentName(fiber) {
@@ -1285,14 +1329,22 @@ function getComponentName(fiber) {
     return type;
   }
   switch (type) {
+    case REACT_ASYNC_MODE_TYPE:
+      return 'AsyncMode';
+    case REACT_CONTEXT_TYPE:
+      return 'Context.Consumer';
     case REACT_FRAGMENT_TYPE:
       return 'ReactFragment';
     case REACT_PORTAL_TYPE:
       return 'ReactPortal';
-    case REACT_CALL_TYPE:
-      return 'ReactCall';
-    case REACT_RETURN_TYPE:
-      return 'ReactReturn';
+    case REACT_PROFILER_TYPE:
+      return 'Profiler(' + fiber.pendingProps.id + ')';
+    case REACT_PROVIDER_TYPE:
+      return 'Context.Provider';
+    case REACT_STRICT_MODE_TYPE:
+      return 'StrictMode';
+    case REACT_TIMEOUT_TYPE:
+      return 'Timeout';
   }
   if (typeof type === 'object' && type !== null) {
     switch (type.$$typeof) {
@@ -1402,10 +1454,16 @@ var getStackAddendum = function () {};
       return '#text';
     } else if (typeof element.type === 'string') {
       return element.type;
-    } else if (element.type === REACT_FRAGMENT_TYPE) {
+    }
+
+    var type = element.type;
+    if (type === REACT_FRAGMENT_TYPE) {
       return 'React.Fragment';
+    } else if (typeof type === 'object' && type !== null && type.$$typeof === REACT_FORWARD_REF_TYPE) {
+      var functionName = type.render.displayName || type.render.name || '';
+      return functionName !== '' ? 'ForwardRef(' + functionName + ')' : 'ForwardRef';
     } else {
-      return element.type.displayName || element.type.name || 'Unknown';
+      return type.displayName || type.name || 'Unknown';
     }
   };
 
@@ -1549,22 +1607,31 @@ function validateChildKeys(node, parentType) {
  * @param {ReactElement} element
  */
 function validatePropTypes(element) {
-  var componentClass = element.type;
-  if (typeof componentClass !== 'function') {
+  var type = element.type;
+  var name = void 0,
+      propTypes = void 0;
+  if (typeof type === 'function') {
+    // Class or functional component
+    name = type.displayName || type.name;
+    propTypes = type.propTypes;
+  } else if (typeof type === 'object' && type !== null && type.$$typeof === REACT_FORWARD_REF_TYPE) {
+    // ForwardRef
+    var functionName = type.render.displayName || type.render.name || '';
+    name = functionName !== '' ? 'ForwardRef(' + functionName + ')' : 'ForwardRef';
+    propTypes = type.propTypes;
+  } else {
     return;
   }
-  var name = componentClass.displayName || componentClass.name;
-  var propTypes = componentClass.propTypes;
   if (propTypes) {
     currentlyValidatingElement = element;
     checkPropTypes_1(propTypes, element.props, 'prop', name, getStackAddendum);
     currentlyValidatingElement = null;
-  } else if (componentClass.PropTypes !== undefined && !propTypesMisspellWarningShown) {
+  } else if (type.PropTypes !== undefined && !propTypesMisspellWarningShown) {
     propTypesMisspellWarningShown = true;
     warning_1(false, 'Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?', name || 'Unknown');
   }
-  if (typeof componentClass.getDefaultProps === 'function') {
-    !componentClass.getDefaultProps.isReactClassApproved ? warning_1(false, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;
+  if (typeof type.getDefaultProps === 'function') {
+    !type.getDefaultProps.isReactClassApproved ? warning_1(false, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;
   }
 }
 
@@ -1699,6 +1766,7 @@ var React = {
   Fragment: REACT_FRAGMENT_TYPE,
   StrictMode: REACT_STRICT_MODE_TYPE,
   unstable_AsyncMode: REACT_ASYNC_MODE_TYPE,
+  unstable_Profiler: REACT_PROFILER_TYPE,
 
   createElement: createElementWithValidation,
   cloneElement: cloneElementWithValidation,
@@ -1713,6 +1781,10 @@ var React = {
     assign: objectAssign
   }
 };
+
+if (enableSuspense) {
+  React.Timeout = REACT_TIMEOUT_TYPE;
+}
 
 {
   objectAssign(React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED, {
@@ -1734,7 +1806,7 @@ var React$3 = ( React$2 && React ) || React$2;
 
 // TODO: decide on the top-level export form.
 // This is hacky but makes it work with both Rollup and Jest.
-var react = React$3['default'] ? React$3['default'] : React$3;
+var react = React$3.default ? React$3.default : React$3;
 
 return react;
 

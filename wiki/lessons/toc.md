@@ -28,10 +28,10 @@
 
 ### 05 - Techniques and Strategies
 
-- [A - Using Lifecycle Methods](05-Lifecycle-and-other-Techniques-A-Using-Lifecycle.html) (coming soon)
-- [B - Preventing Re-renders](05-Lifecycle-and-other-Techniques-B-Preventing-Rerenders.html)
-- [C - React Context](05-Lifecycle-and-other-Techniques-C-React-Context.html) (coming soon)
-- [D - Render Props](05-Lifecycle-and-other-Techniques-D-Render-Props.html) (coming soon)
+- [A - Using Lifecycle Methods and Stateful Components](05-Techniques-and-Strategies-A-Using-Lifecycle.html) (coming soon)
+- [B - Preventing Re-renders](05-Techniques-and-Strategies-B-Preventing-Rerenders.html)
+- [C - React Context](05-Techniques-and-Strategies-C-React-Context.html) (coming soon)
+- [D - Render Props](05-Techniques-and-Strategies-D-Render-Props.html) (coming soon)
 
 -----
 
