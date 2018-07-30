@@ -22,7 +22,7 @@ with `Object.assign`. At the time, we weren't nesting, so our top-level model wa
 { value: 22, units: "C" }
 ```
 
-We were sending updates such a `{ value: 23 }`.
+We were sending updates such as `{ value: 23 }`.
 
 Now, our top-level model is:
 
