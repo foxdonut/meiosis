@@ -278,7 +278,7 @@ message in a white centered box.
 
 ### Up Next
 
-In the [next section](04-Routing-B-Navigo.html), we'll add routes to the example.
+In the [next section](04-Routing-B-Adding-Routes.html), we'll add routes to the example.
 
 [Table of Contents](toc.html)
 
