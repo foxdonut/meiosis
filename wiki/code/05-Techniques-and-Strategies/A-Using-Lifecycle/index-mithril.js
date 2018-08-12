@@ -43,6 +43,10 @@ const nestComponent = (create, update, path) => {
   return result;
 };
 
+// This is our stateful component. It manages its internal state using the "closure component"
+// technique, and relies on Mithril's autoredraw. This works with Meiosis by using m.mount in
+// the Meiosis setup.
+// The component provides getEntryNumber to retrieve the value of the entry number.
 const createEntryNumber = () => {
   let entryNumber = "";
   const actions = {
@@ -62,6 +66,8 @@ const createEntryNumber = () => {
   };
 };
 
+// This uses a 3rd party date picker,
+// https://fengyuanchen.github.io/datepicker/
 const createEntryDate = update => {
   const actions = {
     editDateValue: evt => update({ value: evt.target.value })
@@ -207,4 +213,5 @@ const App = createApp(update);
 const models = m.stream.scan(O, App.model(), update);
 
 const element = document.getElementById("app");
+// Meiosis setup with m.mount
 m.mount(element, { view: () => m(App, { models }) });

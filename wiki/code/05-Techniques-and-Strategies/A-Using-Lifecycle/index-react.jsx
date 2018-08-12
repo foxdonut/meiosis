@@ -33,6 +33,8 @@ const nestComponent = (createComponent, update, path) => {
   };
 };
 
+// This is our stateful component
+// It provides entryNumberHook to retrieve the value of the entry number
 class EntryNumber extends React.Component {
   constructor(props) {
     super(props);
@@ -58,6 +60,8 @@ class EntryNumber extends React.Component {
   }
 }
 
+// This uses a 3rd party date picker,
+// https://fengyuanchen.github.io/datepicker/
 const createEntryDate = update => {
   const actions = {
     editDateValue: evt => update(model =>
