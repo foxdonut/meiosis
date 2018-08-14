@@ -27,11 +27,13 @@ const createThemeChanger = update => {
       return model;
     } });
 
-  const view = model =>
-    (<div>
-      <button className={model.context.theme === "dark" ? "btn-primary" : "btn-default"}
-        onClick={changeTheme}>Change Theme</button>
-    </div>);
+  const view = model => (
+    <div>
+      <button className={model.context.theme === "dark" ?
+        "btn-primary" : "btn-default"}
+      onClick={changeTheme}>Change Theme</button>
+    </div>
+  );
 
   return { view };
 };
@@ -60,21 +62,24 @@ const createTemperature = label => update => {
   const themeChanger = createThemeChanger(update);
 
   const view = function(model) {
-    const btnClass = (model.context.theme === "dark" ? "btn-primary" : "btn-default");
-    return (<div className="temperature">
-      <span>{label} Temperature: {model.value}&deg;{model.units}</span>
-      <div>
-        <button className={btnClass}
-          onClick={increase( 1)}>Increase</button>
-        <button className={btnClass}
-          onClick={increase(-1)}>Decrease</button>
+    const btnClass = (model.context.theme === "dark" ?
+      "btn-primary" : "btn-default");
+    return (
+      <div className="temperature">
+        <span>{label} Temperature: {model.value}&deg;{model.units}</span>
+        <div>
+          <button className={btnClass}
+            onClick={increase( 1)}>Increase</button>
+          <button className={btnClass}
+            onClick={increase(-1)}>Decrease</button>
+        </div>
+        <div>
+          <button className={btnClass}
+            onClick={changeUnits}>Change Units</button>
+        </div>
+        {themeChanger.view(model)}
       </div>
-      <div>
-        <button className={btnClass}
-          onClick={changeUnits}>Change Units</button>
-      </div>
-      {themeChanger.view(model)}
-    </div>);
+    );
   };
 
   return { model, view };
@@ -86,11 +91,12 @@ const createTemperaturePair = update => {
 
   const model = () => Object.assign(air.model(), water.model());
 
-  const view = model =>
-    (<div>
+  const view = model => (
+    <div>
       {air.view(model)}
       {water.view(model)}
-    </div>);
+    </div>
+  );
 
   return { model, view };
 };
@@ -98,12 +104,13 @@ const createTemperaturePair = update => {
 const createApp = update => {
   const temperaturePair = nest(createTemperaturePair, update, ["temperatures"]);
   const themeChanger = createThemeChanger(update);
-  const view = model =>
-    (<div>
+  const view = model => (
+    <div>
       <div>Theme: {model.context.theme}</div>
       {themeChanger.view(model)}
       {temperaturePair.view(model)}
-    </div>);
+    </div>
+  );
 
   return {
     model: () => Object.assign(

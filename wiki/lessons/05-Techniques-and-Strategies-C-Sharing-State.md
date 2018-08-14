@@ -8,11 +8,32 @@ Sometimes we'd like to share state between nested components. Each of these comp
 access to its subsection of the state, so how do we give them access to some state that is
 "higher up" in the state tree?
 
-React version:
+### React + function update version:
+
+```javascript
+{
+  context: { ... },
+  ... // rest of model, possibly nested
+}
+```
+
+```javascript
+update(model => {
+  // make changes to the model...
+  return model;
+});
+```
+
+```javascript
+update({ context: model => {
+  // make changes to the model...
+  return model;
+} });
+```
 
 @flems code/05-Techniques-and-Strategies/C-Sharing-State/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,lodash 800
 
-Mithril version:
+### Mithril + Patchinko version:
 
 @flems code/05-Techniques-and-Strategies/C-Sharing-State/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko 800
 
