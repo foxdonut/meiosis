@@ -1,19 +1,43 @@
-/* global React, ReactDOM, flyd, _ */
+/* global React, ReactDOM, flyd */
 
 // -- Utility code
 
+// Using recursion
+const get = (object, path) =>
+  object == undefined
+    ? undefined
+    : path.length === 1
+      ? object[path[0]]
+      : get(object[path[0]], path.slice(1));
+
+const set = (object, path, value) => {
+  if (path.length === 1) {
+    object[path[0]] = value;
+  }
+  else {
+    if (object[path[0]] === undefined) {
+      object[path[0]] = {};
+    }
+    set(object[path[0]], path.slice(1), value);
+  }
+  return object;
+};
+
+const updateWith = (object, path, func) =>
+  set(object, path, func(get(object, path)));
+
 const nestUpdate = (update, path) => func =>
-  update(func.context ? func : (model => _.update(model, path, func)));
+  update(func.context ? func : (model => updateWith(model, path, func)));
 
 const nest = function(create, update, path) {
   const component = create(nestUpdate(update, path));
   const result = Object.assign({}, component);
   if (component.model) {
-    result.model = () => _.set({}, path, component.model());
+    result.model = () => set({}, path, component.model());
   }
   if (component.view) {
     result.view = model => component.view(
-      Object.assign({ context: model.context }, _.get(model, path)));
+      Object.assign({ context: model.context }, get(model, path)));
   }
   return result;
 };
