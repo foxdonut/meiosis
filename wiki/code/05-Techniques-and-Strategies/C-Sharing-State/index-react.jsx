@@ -11,14 +11,15 @@ const get = (object, path) =>
       : get(object[path[0]], path.slice(1));
 
 const set = (object, path, value) => {
+  const head = path[0];
   if (path.length === 1) {
-    object[path[0]] = value;
+    object[head] = value;
   }
   else {
-    if (object[path[0]] === undefined) {
-      object[path[0]] = {};
+    if (object[head] === undefined) {
+      object[head] = {};
     }
-    set(object[path[0]], path.slice(1), value);
+    set(object[head], path.slice(1), value);
   }
   return object;
 };
