@@ -186,7 +186,7 @@ This concludes the Meiosis tutorial. Thanks for reading, I hope you enjoy Meiosi
 
 ### What's Next?
 
-- [Wiki](https://github.com/foxdonut/meiosis/wiki)
+- [Documentation](http://meiosis.js.org/docs/toc.html)
 - [Examples](http://meiosis.js.org/examples.html)
 - [Meiosis Tracer](https://github.com/foxdonut/meiosis-tracer)
 - [Gitter channel](https://gitter.im/foxdonut/meiosis)

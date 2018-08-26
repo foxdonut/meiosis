@@ -20,7 +20,7 @@ Inferno, Preact, domvm) or even lit-html, hyperHTML, etc.
 
 → Read the [Meiosis Tutorial](http://meiosis.js.org/tutorial/toc.html) to get started.
 
-→ Read the [Wiki](http://meiosis.js.org/wiki/toc.html) to learn more techniques.
+→ Read the [Documentation](http://meiosis.js.org/docs/toc.html) to learn more techniques.
 
 ## Ready for More?
 

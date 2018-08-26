@@ -1,6 +1,6 @@
 # Meiosis Tutorial Examples
 
-You can run the examples directly on the pages of the Wiki, edit the code and see the results.
+You can run the examples directly on the pages of the Tutorial, edit the code and see the results.
 
 You can also run the examples locally:
 
