@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Meiosis Wiki</title>
+    <title>Meiosis Documentation</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="normalize.css">
     <link rel="stylesheet" href="skeleton.css">
@@ -11,7 +11,7 @@
   <body class="container">
     <script src="prism.js" type="text/javascript"></script>
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
-    <h1><a href="http://meiosis.js.org">Meiosis</a> Wiki</h1><p><a href="toc.html">Table of Contents</a></p>
+    <h1><a href="http://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>Lodash FP</h2><p>In this part of Meiosis, we will look at different strategies for model updates and nesting
 components. Keep in mind that Meiosis is very flexible; you can use plain mutation for model
 updates if that suits you. That being said, let&#39;s explore some libraries that can make model
@@ -24,7 +24,7 @@ updates and nesting quite elegant.</p>
   })</code></pre>
 <p>With <a href="https://lodash.com">Lodash</a>, we can write this as:</p>
 <pre><code class="language-javascript">editDate: evt =&gt; update(model =&gt; _.set(model, &quot;date&quot;, evt.target.value))</code></pre>
-<p>We can make this even nicer using <a href="https://github.com/lodash/lodash/wiki/FP-Guide">Lodash-FP</a>.</p>
+<p>We can make this even nicer using <a href="https://github.com/lodash/lodash/docs/FP-Guide">Lodash-FP</a>.</p>
 <blockquote>
 <p>The lodash/fp module promotes a more functional programming (FP) friendly style by exporting an
 instance of lodash with its methods wrapped to produce immutable auto-curried iteratee-first
