@@ -11,7 +11,7 @@
   <body class="container">
     <script src="prism.js" type="text/javascript"></script>
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
-    <h1><a href="http://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
+    <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>Routing - Adding Routes</h2><p>In the <a href="04-Routing-A-Navigation-Without-Routes.html">previous section</a>, we started implementing the
 navigation example shown below. Now, let&#39;s add some routes.</p>
 <p><img src="routing-example.gif" alt="Routing"></p>
@@ -135,8 +135,7 @@ tracerElement.id = &quot;tracer&quot;;
 tracerElement.style = &quot;position: absolute; top: 0; right: 0&quot;;
 element.parentNode.insertBefore(tracerElement, element.nextSibling);
 
-meiosis.trace({ update, dataStreams: [ models ]});
-meiosisTracer({ selector: &quot;#tracer&quot; });
+meiosisTracer({ selector: &quot;#tracer&quot;, streams: [ models ] });
 
 // Display the url in the browser&#39;s location bar.
 models.map(model =&gt; {
@@ -277,6 +276,6 @@ the path for a route and parameters.</p>
 to see all the details.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>
-<p><a href="http://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
   </body>
 </html>
