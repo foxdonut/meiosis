@@ -60,6 +60,7 @@ const createCoffee = navigator => update => ({
           </li>
         )}
       </ul>
+      {model.coffee}
     </div>
   )
 });

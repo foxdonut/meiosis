@@ -1,10 +1,10 @@
-# [Meiosis](http://meiosis.js.org) Tutorial
+# [Meiosis](https://meiosis.js.org) Tutorial
 
 [Table of Contents](toc.html)
 
 ## 00 - Introduction
 
-Welcome to the [Meiosis](http://meiosis.js.org) Tutorial!
+Welcome to the [Meiosis](https://meiosis.js.org) Tutorial!
 
 The purpose of this tutorial is to explain the Meiosis pattern from the ground up, hopefully
 without assuming too much prior knowledge beyond the basics of JavaScript.
@@ -19,8 +19,8 @@ like to use. This tutorial is offered in two versions: one with
 
 If neither of those is your preferred view library, fear not! It is trivial to use just about
 any view library with the Meiosis pattern, whether it's a virtual DOM library or even
-libraries such as [lit-html](http://meiosis.js.org/examples/setup/lit-html/index.html)
-and [hyperHTML](http://meiosis.js.org/examples/setup/hyperHTML/index.html).
+libraries such as [lit-html](https://meiosis.js.org/examples/setup/lit-html/index.html)
+and [hyperHTML](https://meiosis.js.org/examples/setup/hyperHTML/index.html).
 
 ### JSX or hyperscript
 
@@ -64,4 +64,4 @@ Let's get started! Please continue by choosing a version:
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

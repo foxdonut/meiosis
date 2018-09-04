@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -206,7 +206,7 @@ top-level model.
 
 You can see and experiment with the full example below.
 
-@flems code/03-Model-and-Nesting/C-Patchinko/nest.js,code/03-Model-and-Nesting/C-Patchinko/temperature.jsx,code/03-Model-and-Nesting/C-Patchinko/app.jsx,code/03-Model-and-Nesting/C-Patchinko/index.js,app.html,app.css react,react-dom,flyd,patchinko,meiosis,meiosis-tracer 800
+@flems code/03-Model-and-Nesting/C-Patchinko/nest.js,code/03-Model-and-Nesting/C-Patchinko/temperature.jsx,code/03-Model-and-Nesting/C-Patchinko/app.jsx,code/03-Model-and-Nesting/C-Patchinko/index.js,app.html,app.css react,react-dom,flyd,patchinko,meiosis-tracer 800
 
 While using functions to update the model is generic, flexible and powerful, Patchinko gives us
 a way to issue updates that is arguably simpler, more concise and intuitive, without losing any
@@ -216,4 +216,4 @@ power or flexibility.
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

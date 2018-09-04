@@ -9,8 +9,7 @@ var linkMap = {
   "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
   "lodash": "https://unpkg.com/lodash@4.17.10",
   "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
-  "meiosis": "https://unpkg.com/meiosis@1.4.1/dist/meiosis.js",
-  "meiosis-tracer": "https://unpkg.com/meiosis-tracer@1.4.1/dist/meiosis-tracer.js",
+  "meiosis-tracer": "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
   "mithril": "https://unpkg.com/mithril@1.1.6",
   "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
   "patchinko": "https://unpkg.com/patchinko@3.2.1/overloaded.js",
@@ -74,6 +73,10 @@ filenames.forEach(source => {
       if (parts.length > 4) {
         middle = parts[4];
       }
+      var selected = "";
+      if (parts.length > 5) {
+        selected = "selected: '" + parts[5] + "',";
+      }
 
       line = `
   <div id="flems${flemNumber}" class="flemscode"${style}></div>
@@ -83,6 +86,7 @@ filenames.forEach(source => {
       files: ${fileString},
       links: ${linkString},
       middle: ${middle},
+      ${selected}
       autoFocus: false
     })
   </script>

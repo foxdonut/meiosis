@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -124,7 +124,7 @@ Since it is curried, `_.set("date", evt.target.value)` returns a function of `mo
 pass to `update`. Notice that we don't need to specify the `model` parameter at all! This is called
 _point-free_ style.
 
-@flems code/03-Model-and-Nesting/A-Lodash-FP/nest.js,code/03-Model-and-Nesting/A-Lodash-FP/temperature.jsx,code/03-Model-and-Nesting/A-Lodash-FP/app.jsx,code/03-Model-and-Nesting/A-Lodash-FP/index.js,app.html,app.css react,react-dom,flyd,lodash-fp,meiosis,meiosis-tracer 800
+@flems code/03-Model-and-Nesting/A-Lodash-FP/nest.js,code/03-Model-and-Nesting/A-Lodash-FP/temperature.jsx,code/03-Model-and-Nesting/A-Lodash-FP/app.jsx,code/03-Model-and-Nesting/A-Lodash-FP/index.js,app.html,app.css react,react-dom,flyd,lodash-fp,meiosis-tracer 800
 
 ### Principles / Takeaways
 
@@ -146,4 +146,4 @@ Having learned these functional programming concepts, next we'll look at
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/foxdonut/meiosis](https://badges.gitter.im/foxdonut/meiosis.svg)](https://gitter.im/foxdonut/meiosis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-http://meiosis.js.org
+https://meiosis.js.org
 
 > It's not a library. It's a simple pattern to manage state in your web applications.
 
@@ -18,13 +18,13 @@ Inferno, Preact, domvm) or even lit-html, hyperHTML, etc.
 
 ## Ready to have a closer look?
 
-→ Read the [Meiosis Tutorial](http://meiosis.js.org/tutorial/toc.html) to get started.
+→ Read the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html) to get started.
 
-→ Read the [Documentation](http://meiosis.js.org/docs/toc.html) to learn more techniques.
+→ Read the [Documentation](https://meiosis.js.org/docs/toc.html) to learn more techniques.
 
 ## Ready for More?
 
-- Try out more [examples](http://meiosis.js.org/examples.html).
+- Try out more [examples](https://meiosis.js.org/examples.html).
 - Check out the [Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer).
 - Chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
 

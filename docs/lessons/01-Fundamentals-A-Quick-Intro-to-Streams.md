@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -16,7 +16,7 @@ In Meiosis, I use [Flyd](https://github.com/paldepind/flyd) because it is just l
 _minimal_ and _simple_. If you use [Mithril](https://mithril.js.org), then
 [Mithril Streams](https://mithril.js.org/stream.html) work just as well. If you already know another stream library,
 using it should not be a problem either. Finally, you can also write your own stream implementation with just a handful
-of lines of code, as demonstrated [in the Meiosis tutorial](http://meiosis.js.org/tutorial/05-stream-mithril.html).
+of lines of code, as demonstrated [in the Meiosis tutorial](https://meiosis.js.org/tutorial/05-stream-mithril.html).
 
 ### Page Setup
 
@@ -217,4 +217,4 @@ Whew! I promise there will be a lot less theory from here on out. I just needed 
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

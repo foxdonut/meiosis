@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -145,4 +145,4 @@ provides, the [Meiosis Tracer](01-Fundamentals-D-Using-the-Tracer.html).
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

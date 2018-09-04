@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Tutorial
+# [Meiosis](https://meiosis.js.org) Tutorial
 
 [Table of Contents](toc.html)
 
@@ -186,14 +186,14 @@ This concludes the Meiosis tutorial. Thanks for reading, I hope you enjoy Meiosi
 
 ### What's Next?
 
-- [Documentation](http://meiosis.js.org/docs/toc.html)
-- [Examples](http://meiosis.js.org/examples.html)
-- [Meiosis Tracer](https://github.com/foxdonut/meiosis-tracer)
+- [Documentation](https://meiosis.js.org/docs/toc.html)
+- [Examples](https://meiosis.js.org/examples.html)
+- [Meiosis Tracer](https://meiosis.js.org/tracer)
 - [Gitter channel](https://gitter.im/foxdonut/meiosis)
-- [Meiosis home page](http://meiosis.js.org)
+- [Meiosis home page](https://meiosis.js.org)
 
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

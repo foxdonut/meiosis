@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -122,7 +122,7 @@ views just call actions, and actions call `update` as a regular function.
 of streams is _simple_ and _minimal_. We do not need to use stream operators anywhere else in the code.
 - Views are just functions of `(model)`.
 - The only dependencies are a virtual DOM library of your choice, and a stream library of your choice - or, write
-your own, as demonstrated [in the Meiosis tutorial](http://meiosis.js.org/tutorial/05-stream-mithril.html).
+your own, as demonstrated [in the Meiosis tutorial](https://meiosis.js.org/tutorial/05-stream-mithril.html).
 - Meiosis is just a pattern setup. There is no dependency on a Meiosis library.
 
 ### Up Next
@@ -133,4 +133,4 @@ Next, we'll look at structuring code into [components](01-Fundamentals-C-Compone
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

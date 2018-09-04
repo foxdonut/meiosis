@@ -1,8 +1,0 @@
-.vscode
-*.tgz
-images
-src
-test
-tutorial
-webpack.config.js
-wiki

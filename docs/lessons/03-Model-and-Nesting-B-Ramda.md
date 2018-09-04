@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -106,7 +106,7 @@ These functional programming constructs can be very nice, but perhaps harder to 
 we're not used to them. It's up to you to decide how "far" to go. The more concise form is
 arguably more elegant, but less explicit as to what is going on.
 
-@flems code/03-Model-and-Nesting/B-Ramda/nest.js,code/03-Model-and-Nesting/B-Ramda/temperature.jsx,code/03-Model-and-Nesting/B-Ramda/app.jsx,code/03-Model-and-Nesting/B-Ramda/index.js,app.html,app.css react,react-dom,flyd,ramda,meiosis,meiosis-tracer 800
+@flems code/03-Model-and-Nesting/B-Ramda/nest.js,code/03-Model-and-Nesting/B-Ramda/temperature.jsx,code/03-Model-and-Nesting/B-Ramda/app.jsx,code/03-Model-and-Nesting/B-Ramda/index.js,app.html,app.css react,react-dom,flyd,ramda,meiosis-tracer 800
 
 ### Principles / Takeaways
 
@@ -123,4 +123,4 @@ In the next section, we'll look at using [Patchinko](03-Model-and-Nesting-C-Patc
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

@@ -1,4 +1,4 @@
-# [Meiosis](http://meiosis.js.org) Documentation
+# [Meiosis](https://meiosis.js.org) Documentation
 
 [Table of Contents](toc.html)
 
@@ -178,8 +178,7 @@ tracerElement.id = "tracer";
 tracerElement.style = "position: absolute; top: 0; right: 0";
 element.parentNode.insertBefore(tracerElement, element.nextSibling);
 
-meiosis.trace({ update, dataStreams: [ models ]});
-meiosisTracer({ selector: "#tracer" });
+meiosisTracer({ selector: "#tracer", streams: [ models ] });
 
 // Display the url in the browser's location bar.
 models.map(model => {
@@ -366,4 +365,4 @@ to see all the details.
 
 -----
 
-[Meiosis](http://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
