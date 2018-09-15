@@ -3,6 +3,7 @@
 // -- Utility code
 
 const pipe = (...fns) => input => fns.reduce((value, fn) => fn(value), input);
+const I = x => x;
 
 const preventDefault = evt => {
   evt.preventDefault();
@@ -60,9 +61,11 @@ const LoginPage = "LoginPage";
 
 const createActions = update => ({
   navigateTo: pageId => update(merge({ pageId })),
-  navigateToDataPage: () => {
+  navigateToDataPage: model => {
     update(merge({ pageId: DataPage }));
-    setTimeout(() => update(merge({ data: "The data has been loaded." })), 1500);
+    if (!model.data) {
+      setTimeout(() => update(merge({ data: "The data has been loaded." })), 1500);
+    }
   },
   login: user => update(merge({ user, pageId: HomePage })),
   username: value => update(set(["login", "username"], value)),
@@ -74,36 +77,44 @@ const createActions = update => ({
 
 const checkAuthentication = model => {
   if (model.pageId === SettingsPage && model.user == null) {
-    return merge({ pageId: LoginPage, returnTo: SettingsPage })(model);
+    return merge({ pageId: LoginPage, returnTo: SettingsPage });
   }
-  return model;
+  return I;
 };
 
 const prepareLogin = model => {
   if (model.pageId === LoginPage && !model.login) {
-    return merge({ login: { username: "", password: "" } })(model);
+    return merge({ login: { username: "", password: "" } });
   }
   else if (model.pageId !== LoginPage && model.login) {
-    return merge({ login: null })(model);
+    return merge({ login: null });
   }
-  return model;
+  return I;
 };
 
 const checkReturnTo = model => {
   if (model.user && model.returnTo) {
-    return merge({ pageId: model.returnTo, returnTo: null })(model);
+    return merge({ pageId: model.returnTo, returnTo: null });
   }
   else if (model.pageId !== LoginPage && model.returnTo) {
-    return merge({ returnTo: null })(model);
+    return merge({ returnTo: null });
   }
-  return model;
+  return I;
 };
 
-const createState = () => pipe(
+// f(model) = patch
+// f1(model) = patch, f2(model) = patch
+// fns.reduce((x, f) => O(x, f(x)), model)
+
+// f(model) = f
+// f1(model) = f, f2(model) = f
+// fns.reduce((x, f) => f(x)(x), model)
+
+const createState = () => model => [
   checkAuthentication,
   prepareLogin,
   checkReturnTo
-);
+].reduce((x, f) => f(x)(x), model);
 
 // -- Pages
 
@@ -180,7 +191,10 @@ const createView = actions => {
             "Logout"]],
 
         ["li.tab-item" + active(DataPage),
-          ["a", { href: "#", onClick: pipe(preventDefault, () => actions.navigateToDataPage()) }, "Data"]]
+          ["a",
+            { href: "#",
+              onClick: pipe(preventDefault, () => actions.navigateToDataPage(model))
+            }, "Data"]]
       ],
       pages[model.pageId].view(model)
     ];
@@ -204,7 +218,7 @@ const actions = createActions(update);
 const app = createApp(actions);
 
 const models = flyd.scan((x, f) => f(x), app.initialModel(), update);
-const states = models.map(app.state);
+const states = models.map(model => app.state(model));
 
 const element = document.getElementById("app");
 const render = view => { ReactDOM.render(h(view), element); };
