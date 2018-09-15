@@ -195,7 +195,7 @@ Now, tracing through history reflects the correct URL.
 ## Using Navigation
 
 We used Navigo, but we can use other routing libraries with minimal changes. For example, let's try
-using[Navigation](https://grahammendick.github.io/navigation/), which is a "data first, routes last"
+using [Navigation](https://grahammendick.github.io/navigation/), which is a "data first, routes last"
 approach to routing - a great fit for us.
 
 ### Specifying Routes
