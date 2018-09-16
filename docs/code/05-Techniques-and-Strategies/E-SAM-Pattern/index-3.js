@@ -102,15 +102,7 @@ const checkReturnTo = model => {
   return I;
 };
 
-// f(model) = patch
-// f1(model) = patch, f2(model) = patch
-// fns.reduce((x, f) => O(x, f(x)), model)
-
-// f(model) = f
-// f1(model) = f, f2(model) = f
-// fns.reduce((x, f) => f(x)(x), model)
-
-const createState = () => model => [
+const state = model => [
   checkAuthentication,
   prepareLogin,
   checkReturnTo
@@ -206,7 +198,7 @@ const createView = actions => {
 const createApp = actions => {
   return {
     initialModel: () => ({ pageId: HomePage }),
-    state: createState(),
+    state,
     view: createView(actions)
   };
 };

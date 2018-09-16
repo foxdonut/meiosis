@@ -46,8 +46,8 @@ const createActions = present => ({
 
 // -- Acceptor
 
-const createAcceptor = () => (model, proposal) => {
-  if (proposal.pageId === SettingsPage && !model.user) {
+const acceptor = (model, proposal) => {
+  if (proposal.pageId === SettingsPage && model.user == null) {
     return O(model, { pageId: LoginPage, returnTo: SettingsPage });
   }
   return O(model, proposal);
@@ -57,28 +57,26 @@ const createAcceptor = () => (model, proposal) => {
 
 const prepareLogin = model => {
   if (model.pageId === LoginPage && !model.login) {
-    return O(model, { login: { username: "", password: "" } });
+    return { login: { username: "", password: "" } };
   }
   else if (model.pageId !== LoginPage && model.login) {
-    return O(model, { login: null });
+    return { login: null };
   }
-  return model;
 };
 
 const checkReturnTo = model => {
   if (model.user && model.returnTo) {
-    return O(model, { pageId: model.returnTo, returnTo: O });
+    return { pageId: model.returnTo, returnTo: O };
   }
   else if (model.pageId !== LoginPage && model.returnTo) {
-    return O(model, { returnTo: O });
+    return { returnTo: O };
   }
-  return model;
 };
 
-const createState = () => pipe(
+const state = model => [
   prepareLogin,
   checkReturnTo
-);
+].reduce((x, f) => O(x, f(x)), model);
 
 // -- Next-Action-Predicate (nap)
 
@@ -175,8 +173,8 @@ const createView = actions => {
 const createApp = actions => {
   return {
     initialModel: () => ({ pageId: HomePage }),
-    acceptor: createAcceptor(),
-    state: createState(),
+    acceptor,
+    state,
     view: createView(actions)
   };
 };

@@ -3,6 +3,7 @@
 // -- Utility code
 
 const pipe = (...fns) => input => fns.reduce((value, fn) => fn(value), input);
+const I = x => x;
 
 const preventDefault = evt => {
   evt.preventDefault();
@@ -71,36 +72,36 @@ const createActions = update => ({
 
 const checkAuthentication = model => {
   if (model.pageId === SettingsPage && model.user == null) {
-    return merge({ pageId: LoginPage, returnTo: SettingsPage })(model);
+    return merge({ pageId: LoginPage, returnTo: SettingsPage });
   }
-  return model;
+  return I;
 };
 
 const prepareLogin = model => {
   if (model.pageId === LoginPage && !model.login) {
-    return merge({ login: { username: "", password: "" } })(model);
+    return merge({ login: { username: "", password: "" } });
   }
   else if (model.pageId !== LoginPage && model.login) {
-    return merge({ login: null })(model);
+    return merge({ login: null });
   }
-  return model;
+  return I;
 };
 
 const checkReturnTo = model => {
   if (model.user && model.returnTo) {
-    return merge({ pageId: model.returnTo, returnTo: null })(model);
+    return merge({ pageId: model.returnTo, returnTo: null });
   }
   else if (model.pageId !== LoginPage && model.returnTo) {
-    return merge({ returnTo: null })(model);
+    return merge({ returnTo: null });
   }
-  return model;
+  return I;
 };
 
-const createState = () => pipe(
+const state = model => [
   checkAuthentication,
   prepareLogin,
   checkReturnTo
-);
+].reduce((x, f) => f(x)(x), model);
 
 // -- Next-Action-Predicate (nap)
 
@@ -197,7 +198,7 @@ const createView = actions => {
 const createApp = actions => {
   return {
     initialModel: () => ({ pageId: HomePage }),
-    state: createState(),
+    state,
     view: createView(actions)
   };
 };

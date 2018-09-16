@@ -16,7 +16,8 @@ var linkMap = {
   "patchinko-immutable": "https://unpkg.com/patchinko@3.2.1/immutable.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   "react": "https://unpkg.com/react@16.4.1/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"
+  "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js",
+  "seview": "https://unpkg.com/seview"
 };
 
 var filenames = fs.readdirSync(fromDir);
