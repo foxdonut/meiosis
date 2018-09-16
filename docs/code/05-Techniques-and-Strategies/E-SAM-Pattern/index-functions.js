@@ -61,6 +61,14 @@ const LoginPage = "LoginPage";
 
 const createActions = update => ({
   navigateTo: pageId => update(merge({ pageId })),
+  /* alternate to nap()
+  navigateToDataPage: model => {
+    update(merge({ pageId: DataPage }));
+    if (!model.data) {
+      setTimeout(() => update(merge({ data: "The data has been loaded." })), 1500);
+    }
+  },
+  */
   login: user => update(merge({ user, pageId: HomePage })),
   username: value => update(set(["login", "username"], value)),
   password: value => update(set(["login", "password"], value)),
