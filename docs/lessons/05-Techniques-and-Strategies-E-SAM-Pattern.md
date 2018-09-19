@@ -52,6 +52,8 @@ const element = document.getElementById("app");
 models.map(model => { ReactDOM.render(app.view(model), element); });
 ```
 
+@flems code/05-Techniques-and-Strategies/E-SAM-Pattern/example-01.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+
 ## Using `update` as `present`
 
 In SAM, actions _present_ values to the model, and the model's acceptor function decides if
@@ -114,6 +116,8 @@ const element = document.getElementById("app");
 models.map(model => { ReactDOM.render(app.view(model), element); });
 ```
 
+@flems code/05-Techniques-and-Strategies/E-SAM-Pattern/example-02.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+
 ## State
 
 The State function looks at the model and makes any changes necessary to produce application
@@ -163,6 +167,8 @@ const element = document.getElementById("app");
 states.map(state => { ReactDOM.render(app.view(state), element); });
 ```
 
+@flems code/05-Techniques-and-Strategies/E-SAM-Pattern/example-03.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+
 ## Next-Action-Predicate
 
 ```javascript
@@ -187,6 +193,8 @@ states.map(state => { ReactDOM.render(app.view(state), element); });
 const nap = createNap(actions);
 states.map(nap);
 ```
+
+@flems code/05-Techniques-and-Strategies/E-SAM-Pattern/example-04.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
 
 [Table of Contents](toc.html)
 
