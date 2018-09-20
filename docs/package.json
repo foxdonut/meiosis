@@ -8,7 +8,8 @@
     "build": "harp compile build dist",
     "postbuild": "cp css/* images/*.png images/*.gif dist",
     "onchange": "onchange app.css app.html 'common/*' 'css/*' 'lessons/*' 'code/**' -- npm run build",
-    "start": "static-server -p ${PORT:-9000}"
+    "start": "static-server -p ${PORT:-9000}",
+    "reload": "reload -w code -e html,css,js,jsx -p ${PORT:-9000}"
   },
   "repository": {
     "type": "git",
@@ -28,10 +29,11 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "eslint": "^5.1.0",
-    "eslint-plugin-react": "^7.10.0",
+    "eslint": "^5.6.0",
+    "eslint-plugin-react": "^7.11.1",
     "harp": "^0.27.0",
     "onchange": "^4.1.0",
+    "reload": "^2.3.1",
     "static-server": "^2.2.1"
   }
 }

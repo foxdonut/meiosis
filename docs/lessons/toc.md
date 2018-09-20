@@ -32,7 +32,7 @@
 - [B - Preventing Re-renders](05-Techniques-and-Strategies-B-Preventing-Rerenders.html)
 - [C - Sharing State Between Nested Components](05-Techniques-and-Strategies-C-Sharing-State.html)
 - [D - Services](05-Techniques-and-Strategies-D-Services.html) (coming soon)
-- [E - SAM Pattern](05-Techniques-and-Strategies-E-SAM-Pattern.html) (coming soon)
+- [E - SAM Pattern](05-Techniques-and-Strategies-E-SAM-Pattern.html)
 
 -----
 
