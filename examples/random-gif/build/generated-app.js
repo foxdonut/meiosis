@@ -1,595 +1,7 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global.b = factory());
-}(this, (function () { 'use strict';
-
-  var pseudos = [
-    ':active',
-    ':any',
-    ':checked',
-    ':default',
-    ':disabled',
-    ':empty',
-    ':enabled',
-    ':first',
-    ':first-child',
-    ':first-of-type',
-    ':fullscreen',
-    ':focus',
-    ':hover',
-    ':indeterminate',
-    ':in-range',
-    ':invalid',
-    ':last-child',
-    ':last-of-type',
-    ':left',
-    ':link',
-    ':only-child',
-    ':only-of-type',
-    ':optional',
-    ':out-of-range',
-    ':read-only',
-    ':read-write',
-    ':required',
-    ':right',
-    ':root',
-    ':scope',
-    ':target',
-    ':valid',
-    ':visited',
-
-    // With value
-    ':dir',
-    ':lang',
-    ':not',
-    ':nth-child',
-    ':nth-last-child',
-    ':nth-last-of-type',
-    ':nth-of-type',
-
-    // Elements
-    '::after',
-    '::before',
-    '::first-letter',
-    '::first-line',
-    '::selection',
-    '::backdrop',
-    '::placeholder',
-    '::marker',
-    '::spelling-error',
-    '::grammar-error'
-  ];
-
-  var popular = {
-    ai : 'alignItems',
-    b  : 'bottom',
-    bc : 'backgroundColor',
-    br : 'borderRadius',
-    bs : 'boxShadow',
-    c  : 'color',
-    d  : 'display',
-    f  : 'float',
-    fd : 'flexDirection',
-    ff : 'fontFamily',
-    fs : 'fontSize',
-    h  : 'height',
-    jc : 'justifyContent',
-    l  : 'left',
-    lh : 'lineHeight',
-    ls : 'letterSpacing',
-    m  : 'margin',
-    mb : 'marginBottom',
-    ml : 'marginLeft',
-    mr : 'marginRight',
-    mt : 'marginTop',
-    o  : 'opacity',
-    p  : 'padding',
-    pb : 'paddingBottom',
-    pl : 'paddingLeft',
-    pr : 'paddingRight',
-    pt : 'paddingTop',
-    r  : 'right',
-    t  : 'top',
-    ta : 'textAlign',
-    td : 'textDecoration',
-    tt : 'textTransform',
-    w  : 'width'
-  };
-
-  var cssProperties = ['float'].concat(Object.keys(
-    findWidth(document.documentElement.style)
-  ).filter(function (p) { return p.indexOf('-') === -1 && p !== 'length'; }));
-
-  function findWidth(obj) {
-    return obj.hasOwnProperty('width')
-      ? obj
-      : findWidth(Object.getPrototypeOf(obj))
-  }
-
-  var memoize = function (fn, cache) {
-    if ( cache === void 0 ) cache = {};
-
-    return function (item) { return item in cache
-      ? cache[item]
-      : cache[item] = fn(item); };
-  };
-
-  function add(style, prop, value) {
-    if (prop in style)
-      { add(style, '!' + prop, value); }
-    else
-      { style[prop] = value; }
-  }
-
-  var vendorMap = Object.create(null, {});
-  var vendorValuePrefix = Object.create(null, {});
-
-  var vendorRegex = /^(o|O|ms|MS|Ms|moz|Moz|webkit|Webkit|WebKit)([A-Z])/;
-
-  var appendPx = memoize(function (prop) {
-    var el = document.createElement('div');
-
-    try {
-      el.style[prop] = '1px';
-      el.style.setProperty(prop, '1px');
-      return el.style[prop].slice(-3) === '1px' ? 'px' : ''
-    } catch (err) {
-      return ''
-    }
-  }, {
-    flex: '',
-    boxShadow: 'px',
-    border: 'px'
-  });
-
-  function lowercaseFirst(string) {
-    return string.charAt(0).toLowerCase() + string.slice(1)
-  }
-
-  function sanitize(styles) {
-    return Object.keys(styles).reduce(function (acc, key) {
-      var value = styles[key];
-
-      if (!value && value !== 0 && value !== '')
-        { return acc }
-
-      if (key === 'content' && value.charAt(0) !== '"')
-        { acc[key] = '"' + value + '"'; }
-      else
-        { acc[key in vendorMap ? vendorMap[key] : key] = formatValue(key, value); }
-
-      return acc
-    }, {})
-  }
-
-  function assign(obj, obj2) {
-    for (var key in obj2) {
-      if (obj2.hasOwnProperty(key))
-        { obj[key] = obj2[key]; }
-    }
-  }
-
-  function hyphenToCamelCase(hyphen) {
-    return hyphen.slice(hyphen.charAt(0) === '-' ? 1 : 0).replace(/-([a-z])/g, function(match) {
-      return match[1].toUpperCase()
-    })
-  }
-
-  function camelCaseToHyphen(camelCase) {
-    return camelCase.replace(/([A-Z])/g, '-$1').toLowerCase()
-  }
-
-  function initials(camelCase) {
-    return camelCase.charAt(0) + (camelCase.match(/([A-Z])/g) || []).join('').toLowerCase()
-  }
-
-  function objectToRules(style, selector, suffix, single) {
-    if ( suffix === void 0 ) suffix = '';
-
-    var base = {};
-
-    var rules = [];
-
-    Object.keys(style).forEach(function (prop) {
-      if (prop.charAt(0) === '@')
-        { rules.push(prop + '{' + objectToRules(style[prop], selector, suffix, single) + '}'); }
-      else if (typeof style[prop] === 'object')
-        { rules = rules.concat(objectToRules(style[prop], selector, suffix + prop, single)); }
-      else
-        { base[prop] = style[prop]; }
-    });
-
-    if (Object.keys(base).length) {
-      rules.unshift(
-        ((single || (suffix.charAt(0) === ' ') ? '' : '&') + '&' + suffix).replace(/&/g, selector) +
-        '{' + stylesToCss(base) + '}'
-      );
-    }
-
-    return rules
-  }
-
-  var selectorSplit = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-
-  function stylesToCss(style) {
-    return Object.keys(style).reduce(function (acc, prop) { return acc + propToString(prop.replace(/!/g, ''), style[prop]); }
-    , '')
-  }
-
-  function propToString(prop, value) {
-    return (vendorRegex.test(prop) ? '-' : '')
-      + (prop.charAt(0) === '-' && prop.charAt(1) === '-'
-        ? prop
-        : camelCaseToHyphen(prop)
-      )
-      + ':'
-      + value
-      + ';'
-  }
-
-  function formatValue(key, value) {
-    return value in vendorValuePrefix
-      ? vendorValuePrefix[value]
-      : addPx(key, value)
-  }
-
-  function addPx(key, value) {
-    return value + (isNaN(value) ? '' : appendPx(key))
-  }
-
-  var document$1 = window.document;
-  var styleSheet = document$1 && document$1.createElement('style');
-  styleSheet && document$1.head.appendChild(styleSheet);
-  var sheet = styleSheet && styleSheet.sheet;
-
-  var debug = false;
-  var classes = Object.create(null, {});
-  var rules = [];
-  var count = 0;
-
-  var classPrefix = 'b' + ('000' + ((Math.random() * 46656) | 0).toString(36)).slice(-3) +
-                      ('000' + ((Math.random() * 46656) | 0).toString(36)).slice(-3);
-
-  function setDebug(d) {
-    debug = d;
-  }
-
-  function getSheet() {
-    var content = rules.join('');
-    rules = [];
-    classes = Object.create(null, {});
-    count = 0;
-    return content
-  }
-
-  function insert(rule, index) {
-    rules.push(rule);
-
-    if (debug)
-      { return styleSheet.textContent = rules.join('\n') }
-
-    sheet && sheet.insertRule(rule, arguments.length > 1
-      ? index
-      : sheet.cssRules.length
-    );
-  }
-
-  function createClass(style) {
-    var json = JSON.stringify(style);
-
-    if (json in classes)
-      { return classes[json] }
-
-    var className = classPrefix + (++count)
-        , rules = objectToRules(style, '.' + className);
-
-    for (var i = 0; i < rules.length; i++)
-      { insert(rules[i]); }
-
-    classes[json] = className;
-
-    return className
-  }
-
-  /* eslint no-invalid-this: 0 */
-
-  var shorts = Object.create(null);
-
-  function bss(input, value) {
-    var b = chain(bss);
-    assign(b.__style, parse.apply(null, arguments));
-    return b
-  }
-
-  function setProp(prop, value) {
-    Object.defineProperty(bss, prop, {
-      configurable: true,
-      value: value
-    });
-  }
-
-  Object.defineProperties(bss, {
-    __style: {
-      configurable: true,
-      writable: true,
-      value: {}
-    },
-    valueOf: {
-      configurable: true,
-      writable: true,
-      value: function ValueOf() {
-        return '.' + this.class
-      }
-    }
-  });
-
-  setProp('setDebug', setDebug);
-
-  setProp('$keyframes', keyframes);
-  setProp('$media', $media);
-  setProp('$import', $import);
-  setProp('$nest', $nest);
-  setProp('getSheet', getSheet);
-  setProp('helper', helper);
-  setProp('css', css);
-  setProp('classPrefix', classPrefix);
-
-  function chain(instance) {
-    var newInstance = Object.create(bss, {
-      __style: {
-        value: instance.__style
-      },
-      style: {
-        enumerable: true,
-        get: function() {
-          var this$1 = this;
-
-          return Object.keys(this.__style).reduce(function (acc, key) {
-            if (typeof this$1.__style[key] === 'number' || typeof this$1.__style[key] === 'string')
-              { acc[key.replace(/^!/, '')] = this$1.__style[key]; }
-            return acc
-          }, {})
-        }
-      }
-    });
-
-    if (instance === bss)
-      { bss.__style = {}; }
-
-    return newInstance
-  }
-
-  cssProperties.forEach(function (prop) {
-    var vendor = prop.match(vendorRegex);
-    if (vendor) {
-      var unprefixed = lowercaseFirst(prop.replace(vendorRegex, '$2'));
-      if (cssProperties.indexOf(unprefixed) === -1) {
-        if (unprefixed === 'flexDirection')
-          { vendorValuePrefix.flex = '-' + vendor[1].toLowerCase() + '-flex'; }
-
-        vendorMap[unprefixed] = prop;
-        setProp(unprefixed, setter(prop));
-        setProp(short(unprefixed), bss[unprefixed]);
-        return
-      }
-    }
-
-    setProp(prop, setter(prop));
-    setProp(short(prop), bss[prop]);
-  });
-
-  setProp('content', function Content(arg) {
-    this.__style.content = '"' + arg + '"';
-    return chain(this)
-  });
-
-  Object.defineProperty(bss, 'class', {
-    set: function(value) {
-      this.__class = value;
-    },
-    get: function() {
-      return this.__class || createClass(this.__style)
-    }
-  });
-
-  function $media(value, style) {
-    if (value)
-      { add(this.__style, '@media ' + value, parse(style)); }
-
-    return chain(this)
-  }
-
-  function $import(value) {
-    if (value)
-      { insert('@import ' + value + ';', 0); }
-
-    return chain(this)
-  }
-
-  function $nest(selector, properties) {
-    var this$1 = this;
-
-    if (arguments.length === 1)
-      { Object.keys(selector).forEach(function (x) { return addNest(this$1.__style, x, selector[x]); }); }
-    else if (selector)
-      { addNest(this.__style, selector, properties); }
-
-    return chain(this)
-  }
-
-  function addNest(style, selector, properties) {
-    add(
-      style,
-      selector.split(selectorSplit).map(function (x) {
-        x = x.trim();
-        return (x.charAt(0) === ':' || x.charAt(0) === '[' ? '' : ' ') + x
-      }).join(',&'),
-      parse(properties)
-    );
-  }
-
-  pseudos.forEach(function (name) { return setProp('$' + hyphenToCamelCase(name.replace(/:/g, '')), function Pseudo(value, b) {
-      if (value || b)
-        { add(this.__style, name + (b ? '(' + value + ')' : ''), parse(b || value)); }
-      return chain(this)
-    }); }
-  );
-
-  function setter(prop) {
-    return function CssProperty(value) {
-      if (!value && value !== 0) {
-        delete this.__style[prop];
-      } else if (arguments.length > 0) {
-        add(this.__style, prop, arguments.length === 1
-          ? formatValue(prop, value)
-          : Array.prototype.slice.call(arguments).map(function (v) { return addPx(prop, v); }).join(' ')
-        );
-      }
-
-      return chain(this)
-    }
-  }
-
-  function css(selector, style) {
-    if (arguments.length === 1)
-      { Object.keys(selector).forEach(function (key) { return addCss(key, selector[key]); }); }
-    else
-      { addCss(selector, style); }
-
-    return chain(this)
-  }
-
-  function addCss(selector, style) {
-    objectToRules(parse(style), selector, '', true).forEach(insert);
-  }
-
-  function helper(name, styling) {
-    if (arguments.length === 1)
-      { return Object.keys(name).forEach(function (key) { return helper(key, name[key]); }) }
-
-    delete bss[name]; // Needed to avoid weird get calls in chrome
-
-    if (typeof styling === 'function') {
-      helper[name] = styling;
-      Object.defineProperty(bss, name, {
-        configurable: true,
-        value: function Helper() {
-          var result = styling.apply(null, arguments);
-          assign(this.__style, result.__style);
-          return chain(this)
-        }
-      });
-    } else {
-      helper[name] = parse(styling);
-      Object.defineProperty(bss, name, {
-        configurable: true,
-        get: function() {
-          assign(this.__style, parse(styling));
-          return chain(this)
-        }
-      });
-    }
-  }
-
-  bss.helper('$animate', function (value, props) { return bss.animation(bss.$keyframes(props) + ' ' + value); }
-  );
-
-  function short(prop) {
-    var acronym = initials(prop)
-        , short = popular[acronym] && popular[acronym] !== prop ? prop : acronym;
-
-    shorts[short] = prop;
-    return short
-  }
-
-  var stringToObject = memoize(function (string) {
-    var last = ''
-      , prev;
-
-    return string.trim().split(/;|\n/).reduce(function (acc, line) {
-      line = last + line.trim();
-      last = line.charAt(line.length - 1) === ',' ? line : '';
-      if (last)
-        { return acc }
-
-      if (line.charAt(0) === ',') {
-        acc[prev] += line;
-        return acc
-      }
-
-      var ref = line.replace(/[ :]+/, ' ').split(' ');
-      var key = ref[0];
-      var tokens = ref.slice(1);
-
-      if (!key)
-        { return acc }
-
-      var cssVar = key.charAt(0) === '-' && key.charAt(1) === '-'
-          , prop = cssVar
-            ? key
-            : hyphenToCamelCase(key);
-
-      prev = shorts[prop] || prop;
-
-      if (prop in helper) {
-        typeof helper[prop] === 'function'
-          ? assign(acc, helper[prop].apply(helper, tokens).__style)
-          : assign(acc, helper[prop]);
-      } else if (tokens.length > 0) {
-        add(acc, prev, tokens.map(function (t) { return cssVar ? t : addPx(prev, t); }).join(' '));
-      }
-
-      return acc
-    }, {})
-  });
-
-  var count$1 = 0;
-  var keyframeCache = {};
-
-  function keyframes(props) {
-    var content = Object.keys(props).reduce(function (acc, key) { return acc + key + '{' + stylesToCss(parse(props[key])) + '}'; }
-    , '');
-
-    if (content in keyframeCache)
-      { return keyframeCache[content] }
-
-    var name = classPrefix + count$1++;
-    keyframeCache[content] = name;
-    insert('@keyframes ' + name + '{' + content + '}');
-
-    return name
-  }
-
-  function parse(input, value) {
-    var arguments$1 = arguments;
-    var obj;
-
-    if (typeof input === 'string') {
-      if (typeof value === 'string' || typeof value === 'number')
-        { return (( obj = {}, obj[input] = value, obj )) }
-
-      return stringToObject(input)
-    } else if (Array.isArray(input) && typeof input[0] === 'string') {
-      var str = '';
-      for (var i = 0; i < input.length; i++)
-        { str += input[i] + (arguments$1[i + 1] || ''); }
-      return stringToObject(str)
-    }
-
-    return input.__style || sanitize(input)
-  }
-
-  return bss;
-
-})));
-
-
-},{}],2:[function(require,module,exports){
 module.exports=function(e){var t={};function n(r){if(t[r])return t[r].exports;var i=t[r]={i:r,l:!1,exports:{}};return e[r].call(i.exports,i,i.exports,n),i.l=!0,i.exports}return n.m=e,n.c=t,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var i in e)n.d(r,i,function(t){return e[t]}.bind(null,i));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=1)}([function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.rowsId="tracerRows",t.colsId="tracerCols",t.streamContainerId="tracerStreamContainer",t.settingsContainerId="tracerSettingsContainer",t.hideTracerId="tracerHide",t.showTracerId="tracerShow",t.autoId="traceAutoSend",t.streamId=function(e){return"tracerStreamBox_ "+e},t.hiddenStreamId=function(e){return"tracerStreamBoxHidden_"+e},t.hideStreamId=function(e){return"tracerStreamHide_"+e},t.showStreamId=function(e){return"tracerStreamShow_"+e},t.modelId=function(e){return"tracerModel_"+e},t.sliderId=function(e){return"tracerSlider_"+e},t.stepBackId=function(e){return"tracerStepBack_"+e},t.stepForwardId=function(e){return"tracerStepForward_"+e},t.sliderValueId=function(e){return"tracerSliderValue_"+e},t.sendId=function(e){return"tracerSend_"+e},t.resetId=function(e){return"tracerReset_"+e},t.histId=function(e){return"tracerAccumulateHistory_"+e}},function(e,t,n){"use strict";var r=n(2);e.exports=r.meiosisTracer},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.meiosisTracer=void 0;var r=n(3),i=n(4);t.meiosisTracer=function(e){if(null!=e.streams&&(0,r.trace)(e),null!=e.selector)return(0,i.tracer)(e)}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});t.trace=function(e){var t=e.streams,n=void 0===t?[]:t,r=e.stringify,i=void 0===r?function(e){return JSON.stringify(e,null,4)}:r,o=e.parse,d=void 0===o?function(e){return JSON.parse(e)}:o,a=e.listen,u=void 0===a?function(e,t){return e.map(t)}:a,l=e.emit,c=void 0===l?function(e,t){return e(t)}:l;if(window&&window.__MEIOSIS_TRACER_GLOBAL_HOOK__){for(var s=[],m=!1,v=[],f=0,I=n.length;f<I;f++){var p="Stream "+f;n[f].stream?(n[f].label=n[f].label||p,v.push(n[f])):v.push({stream:n[f],label:p})}v.forEach(function(e,t){var n=e.stream;u(n,function(e){var n={type:"MEIOSIS_STREAM_VALUE",index:t,value:i(e)};m?window.postMessage(n,"*"):s.push(n)})}),window.addEventListener("message",function(e){if("MEIOSIS_TRACER_INIT"===e.data.type){var t=[];v.forEach(function(e){var n={};Object.keys(e).forEach(function(t){"stream"!==t&&(n[t]=e[t])}),t.push(n)}),window.postMessage({type:"MEIOSIS_STREAM_OPTIONS",value:t},"*"),m=!0,s.forEach(function(e){return window.postMessage(e,"*")}),s.length=0}else if("MEIOSIS_TRIGGER_STREAM_VALUE"===e.data.type){var n=e.data,r=n.index,i=n.value;c(v[r].stream,d(i))}}),window.postMessage({type:"MEIOSIS_PING"},"*")}}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.tracer=void 0;var r=n(5),i=n(6),o=n(7),d=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t.default=e,t}(n(0));window.__MEIOSIS_TRACER_GLOBAL_HOOK__=!0;t.tracer=function(e){var t=e.selector,n=e.sendTracerInit,a=e.triggerStreamValue,u=e.direction,l=void 0===u?"column":u,c=e.rows,s=void 0===c?15:c,m=e.cols,v=void 0===m?50:m,f=e.autoSend,I=void 0===f||f,p=document.querySelector(t);if(p){var y=[],g=[],h=null;null==n&&(n=function(){window.postMessage({type:"MEIOSIS_TRACER_INIT"},"*")}),null==a&&(a=function(e,t){window.postMessage({type:"MEIOSIS_TRIGGER_STREAM_VALUE",index:e,value:t},"*")});var w=function(e){var t={onHideTracer:function(){var e=document.getElementById(d.streamContainerId);h=e.style,e.style="display:none",document.getElementById(d.settingsContainerId).style="display:none",document.getElementById(d.showTracerId).style=""},onShowTracer:function(){document.getElementById(d.streamContainerId).style=h,document.getElementById(d.settingsContainerId).style="",document.getElementById(d.showTracerId).style="display:none"},onRowsColsChange:function(t,n){for(var r=0;r<e.length;r++){var i=document.getElementById(d.modelId(r));i.rows=t,i.cols=n}},onDirectionChange:function(e){document.getElementById(d.streamContainerId).style="display:flex;flex-direction:"+e},onAutoChange:function(e){I=e}},n=document.createElement("div");p.append(n),(0,o.settingsView)({element:n,listeners:t,direction:l,rows:s,cols:v,autoSend:I});var u=document.createElement("div");u.id=d.streamContainerId,u.style="display:flex;flex-direction:column",p.append(u);for(var c=function(e,t){I&&(g[e]=!1,document.getElementById(d.histId(e)).checked=!1,a(e,t))},m=function(t){var n=e[t],o=n.label,d=n.hist,l=n.hide;y.push({history:[],value:-1}),g.push(!1!==d);var m={onSliderChange:function(e){var n=y[t],r=n.history[e];n.value=e,(0,i.updateView)({index:t,model:r,value:e}),c(t,r)},onStepBack:function(){var e=y[t];e.value=e.value-1;var n=e.history[e.value];(0,i.updateView)({index:t,model:n,value:e.value}),c(t,n)},onStepForward:function(){var e=y[t];e.value=e.value+1;var n=e.history[e.value];(0,i.updateView)({index:t,model:n,value:e.value}),c(t,n)},onSend:function(e){a(t,e)},onReset:function(){var e=y[t];e.history.length=0,e.value=-1,(0,i.updateView)({index:t,model:"",value:e.value,max:e.value})},onHistChange:function(e,t){g[e]=t}},f=document.createElement("div");f.style="flex-grow:1",u.append(f),(0,r.streamView)({element:f,index:t,listeners:m,label:o,rows:s,cols:v,hist:d,hide:l})},f=0;f<e.length;f++)m(f);(0,o.initializeResizeChangeDirection)(t,l)},E=function(e,t){if(g[e]){var n=y[e];n.history.length>0&&(n.history.length=n.value+1),n.history.push(t),n.value=n.history.length-1,(0,i.updateView)({index:e,model:t,value:n.value,max:n.history.length-1})}};return window.addEventListener("message",function(e){"MEIOSIS_STREAM_OPTIONS"===e.data.type?w(e.data.value):"MEIOSIS_STREAM_VALUE"===e.data.type&&E(e.data.index,e.data.value)}),n(),{receiveStreamOptions:w,receiveStreamValue:E,reset:function(){return null}}}}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.streamView=void 0;var r=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t.default=e,t}(n(0));t.streamView=function(e){var t=e.element,n=e.index,i=e.listeners,o=e.label,d=void 0===o?"":o,a=e.rows,u=e.cols,l=e.hist,c=void 0===l||l,s=e.hide,m=void 0!==s&&s,v="padding:8px;border:1px solid gray";t.innerHTML="<div id='"+r.streamId(n)+"' style='"+v+"'><div><span>"+d+" </span><label title='Toggle accumulate history'><input id='"+r.histId(n)+"' type='checkbox' "+(c?"checked":"")+" /> Hist </label><button id='"+r.hideStreamId(n)+"'>Hide</button></div><textarea id='"+r.modelId(n)+"' rows='"+a+"' cols='"+u+"'></textarea><div><input id='"+r.sliderId(n)+"' type='range' min='0' max='0' value='0' style='width: 100%' /><button id='"+r.stepBackId(n)+"'>&lt</button> <button id='"+r.stepForwardId(n)+"'>&gt</button> <span id='"+r.sliderValueId(n)+"'>-1</span> <button id='"+r.sendId(n)+"'>Send</button> <button id='"+r.resetId(n)+"'>Reset</button> </div></div><div id='"+r.hiddenStreamId(n)+"' style='display:none'><span>"+d+" </span><button id='"+r.showStreamId(n)+"'>Show</button></div>",document.getElementById(r.sliderId(n)).addEventListener("input",function(e){i.onSliderChange(parseInt(e.target.value,10))});var f=document.getElementById(r.stepBackId(n));f.addEventListener("click",function(e){i.onStepBack()}),f.disabled=!0;var I=document.getElementById(r.stepForwardId(n));I.addEventListener("click",function(e){i.onStepForward()}),I.disabled=!0,document.getElementById(r.sendId(n)).addEventListener("click",function(e){i.onSend(document.getElementById(r.modelId(n)).value)}),document.getElementById(r.resetId(n)).addEventListener("click",function(e){i.onReset()});var p=function(e){document.getElementById(r.streamId(e)).style="display:none",document.getElementById(r.hiddenStreamId(e)).style=v};document.getElementById(r.hideStreamId(n)).addEventListener("click",function(e){return p(n)}),document.getElementById(r.showStreamId(n)).addEventListener("click",function(e){document.getElementById(r.hiddenStreamId(n)).style="display:none",document.getElementById(r.streamId(n)).style=v}),document.getElementById(r.histId(n)).addEventListener("change",function(e){i.onHistChange(n,e.target.checked)}),m&&p(n)}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.updateView=void 0;var r=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t.default=e,t}(n(0));t.updateView=function(e){var t=e.index,n=e.model,i=e.value,o=e.max;document.getElementById(r.modelId(t)).value=n,null!=o&&(document.getElementById(r.sliderId(t)).max=o),document.getElementById(r.sliderId(t)).value=i,document.getElementById(r.sliderValueId(t)).innerHTML=i,document.getElementById(r.stepBackId(t)).disabled=i<=0,document.getElementById(r.stepForwardId(t)).disabled=i==document.getElementById(r.sliderId(t)).max}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.initializeResizeChangeDirection=t.settingsView=void 0;var r=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t.default=e,t}(n(0));t.settingsView=function(e){var t=e.element,n=e.listeners,i=e.direction,o=e.rows,d=e.cols,a=e.autoSend;t.innerHTML="<div id='"+r.settingsContainerId+"'><label title='Align in a row'><input type='radio' name='direction' value='row' "+("row"===i?"checked":"")+" />Row </label><label title='Align in a column'><input type='radio' name='direction' value='column' "+("column"===i?"checked":"")+" />Col </label><label title='Toggle auto-send'><input id='"+r.autoId+"' type='checkbox' "+(a?"checked":"")+" />Auto </label> <input title='Number of rows' id='"+r.rowsId+"' type='text' size='2' value='"+o+"'/><span> &times; </span> <input title='Number of columns' id='"+r.colsId+"' type='text' size='2' value='"+d+"'/><button id='"+r.hideTracerId+"'>Hide</button></div><button id='"+r.showTracerId+"' style='display:none'>Show</button>",document.getElementById(r.hideTracerId).addEventListener("click",function(e){n.onHideTracer()}),document.getElementById(r.showTracerId).addEventListener("click",function(e){n.onShowTracer()}),document.getElementById(r.rowsId).addEventListener("input",function(e){n.onRowsColsChange(parseInt(e.target.value,10),parseInt(document.getElementById(r.colsId).value,10))}),document.getElementById(r.colsId).addEventListener("input",function(e){n.onRowsColsChange(parseInt(document.getElementById(r.rowsId).value,10),parseInt(e.target.value,10))});for(var u=document.querySelectorAll("input[name='direction']"),l=0,c=u.length;l<c;l++)u[l].addEventListener("change",function(e){e.target.checked&&n.onDirectionChange(e.target.value)});document.getElementById(r.autoId).addEventListener("change",function(e){n.onAutoChange(e.target.checked)})},t.initializeResizeChangeDirection=function(e,t){var n=function(){for(var t=window.innerWidth>window.innerHeight?"row":"column",n=document.querySelectorAll("input[name='direction']"),r=0,i=n.length;r<i;r++)n[r].checked=n[r].value===t;e.onDirectionChange(t)};"auto"===t&&window.addEventListener("resize",n),"row"===t||"column"===t?e.onDirectionChange(t):n()}}]);
 
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 (function (global,setImmediate){
 ;(function() {
 "use strict"
@@ -1849,12 +1261,12 @@ if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"timers":329}],4:[function(require,module,exports){
+},{"timers":329}],3:[function(require,module,exports){
 "use strict"
 
 module.exports = require("./stream/stream")
 
-},{"./stream/stream":5}],5:[function(require,module,exports){
+},{"./stream/stream":4}],4:[function(require,module,exports){
 /* eslint-disable */
 ;(function() {
 "use strict"
@@ -2016,6 +1428,40 @@ else if (typeof window.m === "function" && !("stream" in window.m)) window.m.str
 else window.m = {stream : createStream}
 
 }());
+
+},{}],5:[function(require,module,exports){
+function O(a, b){
+  if(arguments.length == 1)
+    if(this instanceof O)
+      this.apply =
+        typeof a == 'function' ? a : function(b){
+          return O(b != null ? b : {}, a)
+        }
+
+    else
+      return new O(a)
+
+  else if(a == null)
+    return arguments.length > 2 ? O.call.apply(O, arguments) : b
+
+  else {
+    for(var i = 1; i < arguments.length; i++, b = arguments[i])
+      for(var key in b)
+        if(b.hasOwnProperty(key))
+          b[key] == O
+          ? delete a[key]
+          : a[key] =
+            b[key] instanceof O
+            ? b[key].apply(a[key])
+            : b[key]
+
+    return a
+  }
+}
+
+try {
+  module.exports = O
+} catch(e) {}
 
 },{}],6:[function(require,module,exports){
 // shim for using process in browser
@@ -14773,234 +14219,243 @@ function v4(options, buf, offset) {
 module.exports = v4;
 
 },{"./lib/bytesToUuid":331,"./lib/rng":332}],335:[function(require,module,exports){
-var b = require("bss");
-var R = require("ramda");
-var _a = require("../util/nest"), nestCreateComponent = _a.nestCreateComponent, nestComponent = _a.nestComponent;
-var createButton = require("../button").createButton;
-var createCounter = require("../counter").createCounter;
+var O = require("patchinko/constant");
+var Button = require("../button");
+var Counter = require("../counter");
 var RandomGif = require("../random-gif");
-var createRandomGifPair = require("../random-gif-pair").createRandomGifPair;
-var createRandomGifPairPair = require("../random-gif-pair-pair").createRandomGifPairPair;
-var createRandomGifList = require("../random-gif-list").createRandomGifList;
+var RandomGifPair = require("../random-gif-pair");
+var RandomGifPairPair = require("../random-gif-pair-pair");
+var RandomGifList = require("../random-gif-list");
 exports.createApp = function (update) {
-    RandomGif.signals.newGif.map(function () {
-        update(function (model) {
-            var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
-            return R.over(R.lensPath(["counter", "value"]), R.add(increment), model);
-        });
-    });
-    var button = nestCreateComponent(createButton, update, ["button"]);
-    var counter = nestCreateComponent(createCounter("Counter"), update, ["counter"]);
-    var randomGif1 = nestComponent(RandomGif, update, ["randomGif1"]);
-    var randomGif2 = nestComponent(RandomGif, update, ["randomGif2"]);
-    var randomGifPair = nestCreateComponent(createRandomGifPair, update, ["randomGifPair"]);
-    var randomGifPairPair = nestCreateComponent(createRandomGifPairPair, update, ["randomGifPairPair"]);
-    var randomGifList = nestCreateComponent(createRandomGifList, update, ["randomGifList"]);
+    var buttonView = Button.createView({ actions: Button.createActions(update) });
+    var counterView = Counter.createView();
+    var randomGifView = RandomGif.createView({ actions: RandomGif.createActions(update) });
+    var randomGifPairView = RandomGifPair.createView({ randomGifView: randomGifView });
+    var randomGifPairPairView = RandomGifPairPair.createView({ randomGifPairView: randomGifPairView });
+    var randomGifListView = RandomGifList.createView({ randomGifView: randomGifView, actions: RandomGifList.createActions(update) });
     return {
-        model: function () { return Object.assign({}, button.model(), counter.model(), randomGif1.model(), randomGif2.model(), randomGifPair.model(), randomGifPairPair.model(), randomGifList.model()); },
-        state: randomGifList.state,
+        model: function () { return O(Button.model("button"), Counter.model("counter", "Counter"), RandomGif.model("randomGif:1"), RandomGif.model("randomGif:2"), RandomGifPair.model("randomGifPair"), RandomGifPairPair.model("randomGifPairPair"), RandomGifList.model("randomGifList")); },
+        onUpdate: function (model, obj) { return O(model, [
+            Counter.onUpdate
+        ].reduce(function (x, f) { return f(model, x); }, obj)); },
+        state: function (model) { return [
+            RandomGifList.state
+        ].reduce(function (x, f) { return O(x, f(x)); }, model); },
         view: function (model) { return ["div",
-            counter.view(model),
-            ["div" + b.mt(8), "Button:"],
-            button.view(model),
-            ["div" + b.mt(8), "Random Gif:"],
-            randomGif1.view(model),
-            ["div" + b.mt(8), "Another Random Gif:"],
-            randomGif2.view(model),
-            ["div" + b.mt(8), "Random Gif Pair:"],
-            randomGifPair.view(model),
-            ["div" + b.mt(8), "Random Gif Pair Pair:"],
-            randomGifPairPair.view(model),
-            ["div" + b.mt(8), "Random Gif List:"],
-            randomGifList.view(model)
+            counterView(model, "counter"),
+            ["div.mt2", "Button:"],
+            buttonView(model, "button"),
+            ["div.mt2", "Random Gif:"],
+            randomGifView(model, "randomGif:1"),
+            ["div.mt2", "Another Random Gif:"],
+            randomGifView(model, "randomGif:2"),
+            ["div.mt2", "Random Gif Pair:"],
+            randomGifPairView(model, "randomGifPair"),
+            ["div.mt2", "Random Gif Pair Pair:"],
+            randomGifPairPairView(model, "randomGifPairPair"),
+            ["div.mt2", "Random Gif List:"],
+            randomGifListView(model, "randomGifList")
         ]; }
     };
 };
 
-},{"../button":336,"../counter":337,"../random-gif":345,"../random-gif-list":340,"../random-gif-pair":343,"../random-gif-pair-pair":342,"../util/nest":349,"bss":1,"ramda":91}],336:[function(require,module,exports){
-var b = require("bss");
-var _a = require("ramda"), lensPath = _a.lensPath, not = _a.not, over = _a.over;
+},{"../button":336,"../counter":337,"../random-gif":345,"../random-gif-list":340,"../random-gif-pair":343,"../random-gif-pair-pair":342,"patchinko/constant":5}],336:[function(require,module,exports){
+var O = require("patchinko/constant");
+var R = require("ramda");
 var button = require("../util/ui").button;
 var createActions = function (update) { return ({
-    toggle: function (_event) { return update(over(lensPath(["active"]), not)); }
+    toggle: function (id) { return function (_event) { return update(R.objOf(id, O({ active: O(function (x) { return !x; }) }))); }; }
 }); };
-exports.createButton = function (update) {
-    var actions = createActions(update);
-    return {
-        model: function () { return ({
-            active: false
-        }); },
-        view: function (model) {
-            var bc = model.active ? "green" : "red";
-            var label = model.active ? "Active" : "Inactive";
-            return ["button" + button, { style: b.bc(bc).style, onclick: actions.toggle }, label];
-        }
-    };
+module.exports = {
+    model: function (id) { return R.objOf(id, {
+        active: false
+    }); },
+    createActions: createActions,
+    createView: function (_a) {
+        var actions = _a.actions;
+        return function (model, id) {
+            var bc = model[id].active ? "green" : "red";
+            var label = model[id].active ? "Active" : "Inactive";
+            return ["button.bg-" + bc + button, { onclick: actions.toggle(id) }, label];
+        };
+    }
 };
 
-},{"../util/ui":350,"bss":1,"ramda":91}],337:[function(require,module,exports){
-var b = require("bss");
-exports.createCounter = function (label) { return function (_update) { return ({
-    model: function () { return ({
+},{"../util/ui":348,"patchinko/constant":5,"ramda":91}],337:[function(require,module,exports){
+var O = require("patchinko/constant");
+var R = require("ramda");
+module.exports = {
+    model: function (id, label) { return R.objOf(id, {
         label: label,
         value: 0
     }); },
-    view: function (model) { return ["div" + b.mt(8), model.label + ": " + model.value]; }
-}); }; };
+    createView: function () { return function (model, id) { return ["div", model[id].label + ": " + model[id].value]; }; },
+    onUpdate: function (model, obj) {
+        if (obj.event === "newGifGenerated") {
+            var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
+            return Object.assign(obj, {
+                counter: O({ value: O(R.add(increment)) })
+            });
+        }
+        return obj;
+    }
+};
 
-},{"bss":1}],338:[function(require,module,exports){
+},{"patchinko/constant":5,"ramda":91}],338:[function(require,module,exports){
 var m = require("mithril");
 var stream = require("mithril/stream");
 var createApp = require("./app").createApp;
 var h = require("./util/ui").h;
 var update = stream();
 var app = createApp(update);
-var models = stream.scan(function (model, func) { return func(model); }, app.model(), update);
+var models = stream.scan(app.onUpdate, app.model(), update);
 var states = models.map(app.state);
 var element = document.getElementById("app");
 states.map(function (state) { return m.render(element, h(app.view(state))); });
 var meiosisTracer = require("meiosis-tracer");
-var signals = require("./random-gif/signals").signals;
-meiosisTracer({ selector: "#tracer", streams: [
+meiosisTracer({ selector: "#tracer", rows: 8, streams: [
+        { label: "update", stream: update },
         { label: "models", stream: models },
-        { label: "states", stream: states },
-        { label: "newGif", stream: signals.newGif }
+        { label: "states", stream: states }
     ] });
 
-},{"./app":335,"./random-gif/signals":346,"./util/ui":350,"meiosis-tracer":2,"mithril":3,"mithril/stream":4}],339:[function(require,module,exports){
+},{"./app":335,"./util/ui":348,"meiosis-tracer":1,"mithril":2,"mithril/stream":3}],339:[function(require,module,exports){
+var O = require("patchinko/constant");
+var R = require("ramda");
+var uuid = require("uuid");
 var RandomGif = require("../random-gif");
-var nestUpdate = require("../util/nest").nestUpdate;
-exports.createActions = function (update) { return ({
-    add: function () { return update(function (model) {
-        var randomGifModel = RandomGif.model();
-        model.randomGifIds.push(randomGifModel.id);
-        model.randomGifsById[randomGifModel.id] = randomGifModel;
-        return model;
-    }); },
-    remove: function (id) { return update(function (model) {
-        model.randomGifIds.splice(model.randomGifIds.indexOf(id), 1);
-        delete model.randomGifsById[id];
-        return model;
-    }); },
-    resetAll: function (ids) { return ids.forEach(function (id) { return RandomGif.actions.reset(nestUpdate(update, ["randomGifsById", id])); }); }
-}); };
+exports.createActions = function (update) {
+    var randomGifActions = RandomGif.createActions(update);
+    return {
+        add: function (id) {
+            var _a;
+            var newId = "randomGifList:" + uuid.v1();
+            var randomGifModel = RandomGif.model(newId);
+            var key = Object.keys(randomGifModel)[0];
+            update((_a = {},
+                _a[key] = randomGifModel[key],
+                _a[id] = O({ randomGifIds: O(R.concat([newId])) }),
+                _a));
+        },
+        remove: function (id, subId) {
+            var _a;
+            return update((_a = {},
+                _a[id] = O({
+                    randomGifIds: O(function (list) { return R.remove(list.indexOf(subId), 1, list); })
+                }),
+                _a[subId] = O,
+                _a));
+        },
+        resetAll: function (ids) { return ids.forEach(randomGifActions.reset); }
+    };
+};
 
-},{"../random-gif":345,"../util/nest":349}],340:[function(require,module,exports){
+},{"../random-gif":345,"patchinko/constant":5,"ramda":91,"uuid":330}],340:[function(require,module,exports){
+var O = require("patchinko/constant");
 var R = require("ramda");
 var createActions = require("./actions").createActions;
 var createView = require("./view").createView;
-var state = function (model) { return R.assoc("hasGifs", R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), R.values(model.randomGifsById))), model); };
-exports.createRandomGifList = function (update) {
-    var actions = createActions(update);
-    return {
-        model: function () { return ({
-            randomGifsById: {},
-            randomGifIds: []
-        }); },
-        state: state,
-        view: createView(actions, update)
-    };
+module.exports = {
+    model: function (id) { return R.objOf(id, {
+        randomGifIds: []
+    }); },
+    createActions: createActions,
+    createView: createView,
+    state: function (model) { return ({
+        randomGifList: O({
+            hasGifs: R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), R.map(function (id) { return R.prop(id, model); }, model.randomGifList.randomGifIds)))
+        })
+    }); }
 };
 
-},{"./actions":339,"./view":341,"ramda":91}],341:[function(require,module,exports){
-var b = require("bss");
+},{"./actions":339,"./view":341,"patchinko/constant":5,"ramda":91}],341:[function(require,module,exports){
 var button = require("../util/ui").button;
-var RandomGif = require("../random-gif");
-var nestUpdate = require("../util/nest").nestUpdate;
-exports.createView = function (actions, update) {
-    var renderRandomGif = function (model) {
-        return ["div" + b.d("inline-block").mr(8), { key: model.id },
-            RandomGif.view(model, nestUpdate(update, ["randomGifsById", model.id])),
-            ["button" + button.bc("red"), { onclick: function () { return actions.remove(model.id); } }, "Remove"]
+exports.createView = function (_a) {
+    var actions = _a.actions, randomGifView = _a.randomGifView;
+    var renderRandomGif = function (model, id, subId) {
+        return ["div.dib.mr2", { key: id },
+            randomGifView(model, subId),
+            ["button.bg-red" + button, { onclick: function () { return actions.remove(id, subId); } }, "Remove"]
         ];
     };
-    return function (model) {
-        return ["div" + b.border("1px solid blue").p(8).mt(4),
-            ["div", "Has gifs: ", model.hasGifs ? "Yes" : "No"],
-            ["button" + button.bc("green"), { onclick: function () { return actions.add(); } }, "Add"],
-            ["button" + button.bc("red"), { onclick: function () { return actions.resetAll(model.randomGifIds); } }, "Reset All"],
-            ["div", model.randomGifIds.map(function (id) { return renderRandomGif(model.randomGifsById[id]); })]
+    return function (model, id) {
+        return ["div.ba.b--blue.pa2.mt2",
+            ["div", "Has gifs: ", model[id].hasGifs ? "Yes" : "No"],
+            ["button.bg-green" + button, { onclick: function () { return actions.add(id); } }, "Add"],
+            ["button.bg-red" + button, { onclick: function () { return actions.resetAll(model[id].randomGifIds); } },
+                "Reset All"],
+            ["div", model[id].randomGifIds.map(function (subId) { return renderRandomGif(model, id, subId); })]
         ];
     };
 };
 
-},{"../random-gif":345,"../util/nest":349,"../util/ui":350,"bss":1}],342:[function(require,module,exports){
-var b = require("bss");
-var nestCreateComponent = require("../util/nest").nestCreateComponent;
-var createRandomGifPair = require("../random-gif-pair").createRandomGifPair;
-exports.createRandomGifPairPair = function (update) {
-    var randomGifPairOne = nestCreateComponent(createRandomGifPair, update, ["randomGifPairOne"]);
-    var randomGifPairTwo = nestCreateComponent(createRandomGifPair, update, ["randomGifPairTwo"]);
-    return {
-        model: function () { return Object.assign({}, randomGifPairOne.model(), randomGifPairTwo.model()); },
-        view: function (model) { return ["div" + b.border("1px solid orange").p(8).mt(4),
-            randomGifPairOne.view(model),
-            randomGifPairTwo.view(model)
-        ]; }
-    };
+},{"../util/ui":348}],342:[function(require,module,exports){
+var RandomGifPair = require("../random-gif-pair");
+module.exports = {
+    model: function (id) { return Object.assign(RandomGifPair.model(id + ":one"), RandomGifPair.model(id + ":two")); },
+    createView: function (_a) {
+        var randomGifPairView = _a.randomGifPairView;
+        return function (model, id) { return ["div.ba.b--orange.pa2.mt2",
+            randomGifPairView(model, id + ":one"),
+            randomGifPairView(model, id + ":two")
+        ]; };
+    }
 };
 
-},{"../random-gif-pair":343,"../util/nest":349,"bss":1}],343:[function(require,module,exports){
-var b = require("bss");
-var nestComponent = require("../util/nest").nestComponent;
+},{"../random-gif-pair":343}],343:[function(require,module,exports){
 var RandomGif = require("../random-gif");
-exports.createRandomGifPair = function (update) {
-    var randomGifFirst = nestComponent(RandomGif, update, ["randomGifFirst"]);
-    var randomGifSecond = nestComponent(RandomGif, update, ["randomGifSecond"]);
-    return {
-        model: function () { return Object.assign({}, randomGifFirst.model(), randomGifSecond.model()); },
-        view: function (model) { return ["div" + b.border("1px solid purple").p(8).mt(4),
-            ["div" + b.d("inline-block"), randomGifFirst.view(model)],
-            ["div" + b.d("inline-block").ml(8), randomGifSecond.view(model)]
-        ]; }
-    };
+module.exports = {
+    model: function (id) { return Object.assign(RandomGif.model(id + ":first"), RandomGif.model(id + ":second")); },
+    createView: function (_a) {
+        var randomGifView = _a.randomGifView;
+        return function (model, id) { return ["div.ba.b--purple.pa2.mt2",
+            ["div.dib", randomGifView(model, id + ":first")],
+            ["div.dib.ml2", randomGifView(model, id + ":second")]
+        ]; };
+    }
 };
 
-},{"../random-gif":345,"../util/nest":349,"bss":1}],344:[function(require,module,exports){
+},{"../random-gif":345}],344:[function(require,module,exports){
 var m = require("mithril");
-var assoc = require("ramda").assoc;
+var O = require("patchinko/constant");
+var R = require("ramda");
 var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
-var signals = require("./signals").signals;
 var gif_new_url = "https://api.giphy.com/v1/gifs/random";
 var api_key = "dc6zaTOxFJmzC";
-exports.actions = ({
-    editTag: function (update, tag) { return update(assoc("tag", tag)); },
-    newGif: function (update, tag) {
-        signals.newGif(true);
-        update(assoc("image", Loaded.N()));
+exports.createActions = function (update) { return ({
+    editTag: function (id, tag) { return update(R.objOf(id, O({ tag: tag }))); },
+    newGif: function (id, tag) {
+        update(R.objOf(id, O({ image: Loaded.N() })));
         m.request({ url: gif_new_url, data: { api_key: api_key, tag: tag } }).
             then(function (response) {
-            return update(assoc("image", Loaded.Y(Success.Y(Image.Y(response.data.image_url)))));
+            var _a;
+            return update((_a = {},
+                _a[id] = O({
+                    image: Loaded.Y(Success.Y(Image.Y(response.data.image_url)))
+                }),
+                _a.event = "newGifGenerated",
+                _a));
         }).
-            catch(function () { return update(assoc("image", Loaded.Y(Success.N()))); });
+            catch(function () { return update(R.objOf(id, O({ image: Loaded.Y(Success.N()) }))); });
     },
-    reset: function (update) { return update(assoc("image", Loaded.Y(Success.Y(Image.N())))); }
-});
+    reset: function (id) { return update(R.objOf(id, O({ image: Loaded.Y(Success.Y(Image.N())) }))); }
+}); };
 
-},{"./signals":346,"./types":347,"mithril":3,"ramda":91}],345:[function(require,module,exports){
-var uuid = require("uuid");
+},{"./types":346,"mithril":2,"patchinko/constant":5,"ramda":91}],345:[function(require,module,exports){
+var R = require("ramda");
 var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
-var actions = require("./actions").actions;
-var view = require("./view").view;
-var signals = require("./signals").signals;
+var createActions = require("./actions").createActions;
+var createView = require("./view").createView;
 module.exports = {
-    model: function () { return ({
-        id: uuid.v1(),
+    model: function (id) { return R.objOf(id, {
         image: Loaded.Y(Success.Y(Image.N())),
         tag: ""
     }); },
-    view: view,
-    actions: actions,
-    signals: signals
+    createActions: createActions,
+    createView: createView
 };
 
-},{"./actions":344,"./signals":346,"./types":347,"./view":348,"uuid":330}],346:[function(require,module,exports){
-var stream = require("mithril/stream");
-exports.signals = {
-    newGif: stream()
-};
-
-},{"mithril/stream":4}],347:[function(require,module,exports){
+},{"./actions":344,"./types":346,"./view":347,"ramda":91}],346:[function(require,module,exports){
 var yslashn = require("static-sum-type/modules/yslashn");
 module.exports = {
     Loaded: yslashn.maybe("Loaded"),
@@ -15008,13 +14463,11 @@ module.exports = {
     Image: yslashn.maybe("Image")
 };
 
-},{"static-sum-type/modules/yslashn":328}],348:[function(require,module,exports){
-var b = require("bss");
+},{"static-sum-type/modules/yslashn":328}],347:[function(require,module,exports){
 var identity = require("ramda").identity;
 var fold = require("static-sum-type").fold;
 var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
 var button = require("../util/ui").button;
-var actions = require("./actions").actions;
 var IMG_PREFIX = "/examples/random-gif/images/";
 var imgsrc = function (image) {
     return fold(Loaded)({
@@ -15028,54 +14481,24 @@ var imgsrc = function (image) {
         })
     })(image);
 };
-exports.view = function (model, update) {
-    return ["div" + b.border("1px solid green").p(8).mt(4),
-        ["span" + b.mr(4), "Tag:"],
-        ["input[type=text]", { value: model.tag, onkeyup: function (evt) { return actions.editTag(update, evt.target.value); } }],
-        ["button" + button.bc("#357edd"), { onclick: function () { return actions.newGif(update, model.tag); } },
-            "Random Gif"],
-        ["button" + button.bc("red"), { onclick: function () { return actions.reset(update); } }, "Reset"],
-        ["div" + b.mt(4), ["img", { width: 200, height: 200, src: imgsrc(model.image) }]]
-    ];
+exports.createView = function (_a) {
+    var actions = _a.actions;
+    return function (model, id) {
+        return ["div.ba.b--green.pa2.mt2",
+            ["span.mr2", "Tag:"],
+            ["input[type=text]", { value: model[id].tag, onkeyup: function (evt) { return actions.editTag(id, evt.target.value); } }],
+            ["button.bg-blue" + button, { onclick: function () { return actions.newGif(id, model[id].tag); } },
+                "Random Gif"],
+            ["button.bg-red" + button, { onclick: function () { return actions.reset(id); } }, "Reset"],
+            ["div.mt2", ["img", { width: 200, height: 200, src: imgsrc(model[id].image) }]]
+        ];
+    };
 };
 
-},{"../util/ui":350,"./actions":344,"./types":347,"bss":1,"ramda":91,"static-sum-type":327}],349:[function(require,module,exports){
-var R = require("ramda");
-var nestUpdate = function (update, path) { return function (func) {
-    return update(R.over(R.lensPath(path), func));
-}; };
-var nestCreateComponent = function (create, update, path) {
-    var component = create(nestUpdate(update, path));
-    var result = Object.assign({}, component);
-    if (component.model) {
-        result.model = function () { return R.assocPath(path, component.model(), {}); };
-    }
-    if (component.state) {
-        result.state = R.over(R.lensPath(path), component.state);
-    }
-    if (component.view) {
-        result.view = R.compose(component.view, R.path(path));
-    }
-    return result;
-};
-var nestComponent = function (component, update, path) {
-    var result = Object.assign({}, component);
-    if (component.model) {
-        result.model = function () { return R.assocPath(path, component.model(), {}); };
-    }
-    if (component.view) {
-        var nestedUpdate_1 = nestUpdate(update, path);
-        result.view = function (model) { return component.view(R.path(path, model), nestedUpdate_1); };
-    }
-    return result;
-};
-module.exports = { nestUpdate: nestUpdate, nestCreateComponent: nestCreateComponent, nestComponent: nestComponent };
-
-},{"ramda":91}],350:[function(require,module,exports){
+},{"../util/ui":348,"./types":346,"ramda":91,"static-sum-type":327}],348:[function(require,module,exports){
 var m = require("mithril");
-var b = require("bss");
 var sv = require("seview").sv;
-exports.button = b.d("block").mt(4).p(8).w("8rem").br(".25rem").c("white");
+exports.button = ".db.w4.mt2.pa2.white.br2";
 exports.h = sv(function (node) {
     return (typeof node === "string")
         ? { tag: "#", children: node }
@@ -15084,4 +14507,4 @@ exports.h = sv(function (node) {
             : m(node.tag, node.attrs || {}, node.children || []);
 });
 
-},{"bss":1,"mithril":3,"seview":326}]},{},[338]);
+},{"mithril":2,"seview":326}]},{},[338]);
