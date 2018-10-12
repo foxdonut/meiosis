@@ -12,9 +12,207 @@
     <script src="prism.js" type="text/javascript"></script>
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
     <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>Services</h2><p><em>Coming soon.</em></p>
+<h2>Services</h2><p><a href="https://james-forbes.com">James Forbes</a> shared his idea of <em>Services</em>. In this section, we&#39;ll
+look at James&#39; version using streams, another version using functions, and finally a version that
+uses <a href="https://barneycarroll.com">Barney Carroll</a>&#39;s
+<a href="https://github.com/barneycarroll/patchinko">Patchinko</a>.</p>
+<p>James explains that while one-off actions occur after click events, user input, and so on,
+services are for ongoing state synchronization. They can produce computed properties, store and
+retrieve state from local storage, and trigger other actions.</p>
+<h3>Using Streams</h3><p>James&#39; version uses streams to implement services. The structure is as follows:</p>
+<pre><code class="language-javascript">{
+  initial: model =&gt; model,
+  start: model$ =&gt; action$
+}</code></pre>
+<p>A service has an <code>initial</code> function which produces the service&#39;s initial model. The <code>start</code>
+function takes the Meiosis stream of models and returns a stream of actions. The service emits
+model updates (actions) on this stream.</p>
+<p>The application&#39;s initial model is combined with each service&#39;s initial model to produce the
+final initial model for the Meiosis stream of models:</p>
+<pre><code class="language-javascript">const initialModel = () =&gt; {
+  const model =
+    {  boxes: []
+      , colors:
+      [ &quot;red&quot;
+        , &quot;purple&quot;
+        , &quot;blue&quot;
+      ],
+    };
+  return {
+    ...model,
+    ...services
+      .map(s =&gt; s.initial(model))
+      .reduce(R.merge, {})
+  };
+};
+
+const models = m.stream.scan( T, initialModel(), update );
+const element = document.getElementById(&quot;app&quot;);
+models.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
+<p>Then, every service is started by passing in the stream of models, and mapping the result onto the
+<code>update</code> stream:</p>
+<pre><code class="language-javascript">services.map(s =&gt; s.start(models).map(update));</code></pre>
+<p>When a service emits a model update onto its stream, it is passed on to the <code>update</code> stream.</p>
+<h4>Colored Boxes Example</h4><p>James shared an example where you have colored boxes that you can click on to add them to a list.
+The boxes are displayed one next to the other, with a description of how many boxes of each color
+are in the list. You can remove a box from the list by clicking on it.</p>
+<p>In the example, there are three services:</p>
+<ul>
+<li><code>StatsService</code>: produces an object that indicates how many boxes of each color.</li>
+<li><code>LocalStorageService</code>: stores and retrieves the box data to and from local storage. You will
+notice that the box list remains even after reloading the page.</li>
+<li><code>DescriptionService</code>: produces the text description of how many boxes of each color are in
+the list.</li>
+</ul>
+<p>Each service has an <code>initial</code> and <code>start</code> function. For example, the <code>StatsService</code> initializes
+its model with <code>0</code> for every box color, and computes the number of instances of each color:</p>
+<pre><code class="language-javascript">const StatsService = {
+  initial(model) {
+    return model.colors
+      .map(R.objOf)
+      .map(K(0))
+      .reduce(R.merge, {});
+  },
+  start(model) {
+    return dropRepeats( model.map( x =&gt; x.boxes ) )
+      .map( R.countBy(I) )
+      .map( R.assoc(&quot;stats&quot;) );
+  }
+};</code></pre>
+<p>Notice the call to <code>dropRepeats</code>. This is necessary because the stream of model updates produced
+by the service is fed back into the Meiosis <code>update</code> stream. This in turn produces an updated
+model, which triggers the service again. To avoid an infinite loop, <code>dropRepeats</code> does not
+emit a value when it is the same as the previous one:</p>
+<pre><code class="language-javascript">function dropRepeats(s) {
+  var ready = false;
+  var d = m.stream();
+  s.map(function (v) {
+    if (!ready || v !== d()) {
+      ready = true;
+      d(v);
+    }
+  });
+  return d;
+}</code></pre>
+<p>The complete example is below.</p>
+  <div id="flems1" class="flemscode" style="height:700px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "index-streams.js", content: "/* global b, m, R */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nfunction dropRepeats(s) {\n  var ready = false;\n  var d = m.stream();\n  s.map(function (v) {\n    if (!ready || v !== d()) {\n      ready = true;\n      d(v);\n    }\n  });\n  return d;\n}\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => xs => xs.concat(x)\n        , $boxes\n      ]\n    ),\n  removeBox: i =>\n    $boxes( xs => xs.filter( (x,j) => i != j ) )\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst update = m.stream();\nconst T = (x,f) => f(x);\n\nconst StatsService = {\n  initial(model) {\n    return model.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  start(model) {\n    return dropRepeats( model.map( x => x.boxes ) )\n      .map( R.countBy(I) )\n      .map( R.assoc(\"stats\") );\n  }\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  start(model) {\n    const update = m.stream();\n\n    dropRepeats( model.map( R.pick([\"boxes\"]) ) )\n      .map(x => localStorage.setItem(\"v1\", JSON.stringify(x)));\n\n    return update;\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  start(model) {\n    return dropRepeats( model.map( x => x.stats ) )\n      .map(\n        R.pipe(\n          R.toPairs,\n          R.groupBy( R.last ),\n          R.map( R.map(R.head) ),\n          R.map( humanList(\"and\") ),\n          R.toPairs,\n          R.map( R.join(\" \") ),\n          humanList(\"and\"),\n          x => x + \".\",\n          R.objOf(\"description\"),\n          R.mergeDeepLeft\n        )\n      );\n  }\n};\n\nconst services = [\n  LocalStorageService,\n  StatsService,\n  DescriptionService\n];\n\nconst initialModel = () => {\n  const model =\n    {  boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ],\n    };\n  return {\n    ...model,\n    ...services\n      .map(s => s.initial(model))\n      .reduce(R.merge, {})\n  };\n};\n\nconst models = m.stream.scan( T, initialModel(), update );\nconst element = document.getElementById(\"app\");\nmodels.map(view(update)).map(v => m.render(element, v));\n\nservices.map(s => s.start(models).map(update));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"}],
+      middle: 60,
+
+      autoFocus: false
+    })
+  </script>
+
+
+<p>Using streams gives you the flexibility of being able to hook into them and wiring them as you
+wish. Now, let&#39;s look at a slightly different approach, using functions.</p>
+<h3>Using Functions</h3><p>Instead of a <code>start</code> function, we&#39;ll use a <code>state</code> function to which we&#39;ll pass the latest model
+from the Meiosis <code>models</code> stream. The <code>state</code> function returns a model update (action):</p>
+<pre><code class="language-javascript">{
+  initial: model =&gt; model,
+  state: model =&gt; action
+}</code></pre>
+<p>Before, we took a <em>stream of models</em> and we returned a <em>stream of actions</em>; now, we have a function
+that just takes a model and returns an action, which is a model update.</p>
+<p>To wire up our services, we&#39;ll create a <code>states</code> stream from the <code>models</code> stream.</p>
+<p>First, we&#39;ll taking our array of services and call the <code>state</code> function on each one:</p>
+<pre><code class="language-javascript">services
+  .map(s =&gt; s.state)</code></pre>
+<p>This gives us an array of functions:</p>
+<pre><code>[ f1, f2, f3 ]</code></pre><p>Each of these functions takes a model and returns a model update, which itself is a function of
+the model. So, we need to pass the model to each function, and call the result again with the
+model:</p>
+<pre><code class="language-javascript">f1(model)(model)</code></pre>
+<p>This is actually called the <code>W</code> combinator, or <em>duplication</em>
+combinator<sup><a href="https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45">1</a></sup></p>
+<pre><code class="language-javascript">// W combinator, &quot;duplication&quot;
+const W = f =&gt; x =&gt; f(x)(x);</code></pre>
+<p>Now we have:</p>
+<pre><code class="language-javascript">services
+  .map(s =&gt; s.state)
+  .map(W)</code></pre>
+<p>This gives us an array of functions ready to be called with the model. To combine them all into
+a single function, we need to apply <code>pipe</code>:</p>
+<pre><code class="language-javascript">const states = models.map(
+  R.apply(
+    R.pipe,
+    services
+      .map(s =&gt; s.state)
+      .map(W)
+  )
+);</code></pre>
+<p>Finally, we use our <code>states</code> stream to render the view:</p>
+<pre><code class="language-javascript">states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
+<p>Have a look at the example below.</p>
+  <div id="flems2" class="flemscode" style="height:700px"></div>
+
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "index-functions.js", content: "/* global b, m, R */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\n// Reference: https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45\nconst W = f => x => f(x)(x); // W combinator, \"duplication\"\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => xs => xs.concat(x)\n        , $boxes\n      ]\n    ),\n  removeBox: i =>\n    $boxes( xs => xs.filter( (x,j) => i != j ) )\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst update = m.stream();\nconst T = (x,f) => f(x);\n\nconst StatsService = {\n  initial(model) {\n    return model.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  state: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  state(model) {\n    T(\n      model,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n    return I;\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  state: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst services = [\n  LocalStorageService,\n  StatsService,\n  DescriptionService\n];\n\nconst initialModel = () => {\n  const model =\n    {  boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ],\n    };\n  return {\n    ...model,\n    ...services\n      .map(s => s.initial(model))\n      .reduce(R.merge, {})\n  };\n};\n\nconst models = m.stream.scan( T, initialModel(), update );\nconst states = models.map(\n  R.apply(\n    R.pipe,\n    services\n      .map(s => s.state)\n      .map(W)\n  )\n);\n\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"}],
+      middle: 60,
+
+      autoFocus: false
+    })
+  </script>
+
+
+<p>Note that we no longer need <code>dropRepeats</code>, because we are not feeding actions back into the
+<code>update</code> stream. Instead, we have a separate <code>states</code> stream derived from <code>models</code>, so we
+don&#39;t need to worry about creating an infinite loop.</p>
+<h3>Using Patchinko</h3><p>An alternative to using functions for model updates is using
+<a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, which we looked at in
+<a href="03-Model-and-Nesting-C-Patchinko.html">this section</a>.</p>
+<p>To use Patchinko, we emit model updates (actions) as objects instead of functions, and we use <code>O</code>
+as our accumulator:</p>
+<pre><code class="language-javascript">const models = m.stream.scan( O, initialModel(), update );</code></pre>
+<p>Our services also return objects instead of functions to indicate model updates. Now, when we
+call <code>state</code> on our services:</p>
+<pre><code class="language-javascript">services
+  .map(s =&gt; s.state)</code></pre>
+<p>We still have an array of functions:</p>
+<pre><code class="language-javascript">[ f1, f2, f3 ]</code></pre>
+<p>But each function returns an object to update the model. To apply the update, we need to call
+<code>O(model, f(model))</code>:</p>
+<pre><code class="language-javascript">services
+  .map(s =&gt; s.state)
+  .map(f =&gt; model =&gt; O(model, f(model)))</code></pre>
+<p>Again, this gives us an array of functions ready to be called with the model, and we can combine
+them as before into a single function, by applying <code>pipe</code>:</p>
+<pre><code class="language-javascript">const states = models.map(
+  R.apply(
+    R.pipe,
+    services
+      .map(s =&gt; s.state)
+      .map(f =&gt; model =&gt; O(model, f(model)))
+  )
+);</code></pre>
+<p>Finally, as before we use our <code>states</code> stream to render the view:</p>
+<pre><code class="language-javascript">states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
+<p>You will find the complete example below.</p>
+  <div id="flems3" class="flemscode" style="height:700px"></div>
+
+  <script>
+    window.Flems(flems3, {
+      files: [{name: "index-patchinko.js", content: "/* global b, m, R, O */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => ({ boxes: O(xs => xs.concat(x)) })\n      ]\n    ),\n  removeBox: i =>\n    ({ boxes: O( xs => xs.filter( (x,j) => i != j ) ) })\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst update = m.stream();\nconst T = (x,f) => f(x);\n\nconst StatsService = {\n  initial(model) {\n    return model.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  state: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\")\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  state(model) {\n    T(\n      model,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n    return I;\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  state: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\")\n  )\n};\n\nconst services = [\n  LocalStorageService,\n  StatsService,\n  DescriptionService\n];\n\nconst initialModel = () => {\n  const model =\n    {  boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ],\n    };\n  return {\n    ...model,\n    ...services\n      .map(s => s.initial(model))\n      .reduce(R.merge, {})\n  };\n};\n\nconst models = m.stream.scan( O, initialModel(), update );\nconst states = models.map(\n  R.apply(\n    R.pipe,\n    services\n      .map(s => s.state)\n      .map(f => model => O(model, f(model)))\n  )\n);\n\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@3.2.1/overloaded.js"}],
+      middle: 60,
+
+      autoFocus: false
+    })
+  </script>
+
+
+<h3>Conclusion</h3><p>We can wire up services in different ways, and use them for computed properties, state
+synchronization, and other purposes. Please note, however, that not everything belongs in a service,
+so it&#39;s important to be careful not to get carried away.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>
-<p><a href="https://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> /
+<a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
   </body>
 </html>
