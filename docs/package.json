@@ -9,7 +9,7 @@
     "postbuild": "cp css/* images/*.png images/*.gif dist",
     "onchange": "onchange app.css app.html 'common/*' 'css/*' 'lessons/*' 'code/**' -- npm run build",
     "start": "static-server -p ${PORT:-9000}",
-    "reload": "reload -w code -e html,css,js,jsx -p ${PORT:-9000}"
+    "reload": "reload -w code,dist -e html,css,js,jsx -p ${PORT:-9000}"
   },
   "repository": {
     "type": "git",

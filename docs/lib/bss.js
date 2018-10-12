@@ -119,11 +119,11 @@
       : cache[item] = fn(item); };
   };
 
-  function add(style, prop, value) {
-    if (prop in style)
-      { add(style, '!' + prop, value); }
+  function add(style, prop, values) {
+    if (prop in style) // Recursively increase specificity
+      { add(style, '!' + prop, values); }
     else
-      { style[prop] = value; }
+      { style[prop] = formatValues(prop, values); }
   }
 
   var vendorMap = Object.create(null, {});
@@ -144,7 +144,11 @@
   }, {
     flex: '',
     boxShadow: 'px',
-    border: 'px'
+    border: 'px',
+    borderTop: 'px',
+    borderRight: 'px',
+    borderBottom: 'px',
+    borderLeft: 'px'
   });
 
   function lowercaseFirst(string) {
@@ -161,7 +165,7 @@
       if (key === 'content' && value.charAt(0) !== '"')
         { acc[key] = '"' + value + '"'; }
       else
-        { acc[key] = formatValue(key, value); }
+        { add(acc, key, value); }
 
       return acc
     }, {})
@@ -172,6 +176,7 @@
       if (obj2.hasOwnProperty(key))
         { obj[key] = obj2[key]; }
     }
+    return obj
   }
 
   function hyphenToCamelCase(hyphen) {
@@ -224,7 +229,7 @@
   function propToString(prop, value) {
     prop = prop in vendorMap ? vendorMap[prop] : prop;
     return (vendorRegex.test(prop) ? '-' : '')
-      + (prop.charAt(0) === '-' && prop.charAt(1) === '-'
+      + (cssVar(prop)
         ? prop
         : camelCaseToHyphen(prop)
       )
@@ -233,14 +238,22 @@
       + ';'
   }
 
-  function formatValue(key, value) {
-    return value in vendorValuePrefix
-      ? vendorValuePrefix[value]
-      : addPx(key, value)
+  function formatValues(prop, value) {
+    return Array.isArray(value)
+      ? value.map(function (v) { return formatValue(prop, v); }).join(' ')
+      : typeof value === 'string'
+        ? formatValues(prop, value.split(' '))
+        : formatValue(prop, value)
   }
 
-  function addPx(key, value) {
-    return value + (isNaN(value) ? '' : appendPx(key))
+  function formatValue(prop, value) {
+    return value in vendorValuePrefix
+      ? vendorValuePrefix[value]
+      : value + (isNaN(value) || value === null || typeof value === 'boolean' || cssVar(prop) ? '' : appendPx(prop))
+  }
+
+  function cssVar(prop) {
+    return prop.charAt(0) === '-' && prop.charAt(1) === '-'
   }
 
   var styleSheet = typeof document === 'object' && document.createElement('style');
@@ -348,7 +361,7 @@
   function chain(instance) {
     var newInstance = Object.create(bss, {
       __style: {
-        value: instance.__style
+        value: assign({}, instance.__style)
       },
       style: {
         enumerable: true,
@@ -390,8 +403,9 @@
   });
 
   setProp('content', function Content(arg) {
-    this.__style.content = '"' + arg + '"';
-    return chain(this)
+    var b = chain(this);
+    b.__style.content = '"' + arg + '"';
+    return b
   });
 
   Object.defineProperty(bss, 'class', {
@@ -404,10 +418,11 @@
   });
 
   function $media(value, style) {
+    var b = chain(this);
     if (value)
-      { add(this.__style, '@media ' + value, parse(style)); }
+      { b.__style['@media ' + value] = parse(style); }
 
-    return chain(this)
+    return b
   }
 
   function $import(value) {
@@ -418,46 +433,41 @@
   }
 
   function $nest(selector, properties) {
-    var this$1 = this;
-
+    var b = chain(this);
     if (arguments.length === 1)
-      { Object.keys(selector).forEach(function (x) { return addNest(this$1.__style, x, selector[x]); }); }
+      { Object.keys(selector).forEach(function (x) { return addNest(b.__style, x, selector[x]); }); }
     else if (selector)
-      { addNest(this.__style, selector, properties); }
+      { addNest(b.__style, selector, properties); }
 
-    return chain(this)
+    return b
   }
 
   function addNest(style, selector, properties) {
-    add(
-      style,
+    style[
       selector.split(selectorSplit).map(function (x) {
         x = x.trim();
         return (x.charAt(0) === ':' || x.charAt(0) === '[' ? '' : ' ') + x
-      }).join(',&'),
-      parse(properties)
-    );
+      }).join(',&')
+    ] = parse(properties);
   }
 
-  pseudos.forEach(function (name) { return setProp('$' + hyphenToCamelCase(name.replace(/:/g, '')), function Pseudo(value, b) {
-      if (value || b)
-        { add(this.__style, name + (b ? '(' + value + ')' : ''), parse(b || value)); }
-      return chain(this)
+  pseudos.forEach(function (name) { return setProp('$' + hyphenToCamelCase(name.replace(/:/g, '')), function Pseudo(value, style) {
+      var b = chain(this);
+      if (value || style)
+        { b.__style[name + (style ? '(' + value + ')' : '')] = parse(style || value); }
+      return b
     }); }
   );
 
   function setter(prop) {
     return function CssProperty(value) {
-      if (!value && value !== 0) {
-        delete this.__style[prop];
-      } else if (arguments.length > 0) {
-        add(this.__style, prop, arguments.length === 1
-          ? formatValue(prop, value)
-          : Array.prototype.slice.call(arguments).map(function (v) { return addPx(prop, v); }).join(' ')
-        );
-      }
+      var b = chain(this);
+      if (!value && value !== 0)
+        { delete b.__style[prop]; }
+      else if (arguments.length > 0)
+        { add(b.__style, prop, Array.prototype.slice.call(arguments)); }
 
-      return chain(this)
+      return b
     }
   }
 
@@ -485,9 +495,10 @@
       Object.defineProperty(bss, name, {
         configurable: true,
         value: function Helper() {
+          var b = chain(this);
           var result = styling.apply(null, arguments);
-          assign(this.__style, result.__style);
-          return chain(this)
+          assign(b.__style, result.__style);
+          return b
         }
       });
     } else {
@@ -495,8 +506,9 @@
       Object.defineProperty(bss, name, {
         configurable: true,
         get: function() {
-          assign(this.__style, parse(styling));
-          return chain(this)
+          var b = chain(this);
+          assign(b.__style, parse(styling));
+          return b
         }
       });
     }
@@ -535,10 +547,9 @@
       if (!key)
         { return acc }
 
-      var cssVar = key.charAt(0) === '-' && key.charAt(1) === '-'
-          , prop = cssVar
-            ? key
-            : hyphenToCamelCase(key);
+      var prop = key.charAt(0) === '-' && key.charAt(1) === '-'
+        ? key
+        : hyphenToCamelCase(key);
 
       prev = shorts[prop] || prop;
 
@@ -547,7 +558,7 @@
           ? assign(acc, helper[prop].apply(helper, tokens).__style)
           : assign(acc, helper[prop]);
       } else if (tokens.length > 0) {
-        add(acc, prev, tokens.map(function (t) { return cssVar ? t : addPx(prev, t); }).join(' '));
+        add(acc, prev, tokens);
       }
 
       return acc

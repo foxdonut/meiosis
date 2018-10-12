@@ -16,7 +16,7 @@ const pipe = xs => xs.reduceRight(o, I);
 const $ =
   { prop: k => f => o =>
     ({ ...o, [k]: f(o[k]) })
-    , get: lens => o => {
+  , get: lens => o => {
     var y;
     lens (  x => y = x ) (o);
     return y;
@@ -31,7 +31,7 @@ const Action = {
   addBox: x =>
     pipe(
       [ K(x)
-        , ys => xs => xs.concat(ys)
+        , x => xs => xs.concat(x)
         , $boxes
       ]
     ),
@@ -39,19 +39,19 @@ const Action = {
     $boxes( xs => xs.filter( (x,j) => i != j ) )
 };
 
-const View = update => state =>
+const view = update => state =>
   m( ".app" + b.d("grid").ff("Helvetica")
     , m("nav.header"
         + b
           .d("flex")
           .jc("space-between")
           .ai("center")
-          .bc("purple")
+          .bc("steelblue")
           .c("white")
           .p("1em")
 
-      , m("h1"+b.m(0), "Boxes")
-      , $.get( $colors ) (state)
+    , m("h1"+b.m(0), "Boxes")
+    , $.get( $colors ) (state)
       .map(
         x => m("button"
             + b
@@ -62,7 +62,7 @@ const View = update => state =>
               .fs("2em")
               .m(0)
               .border("none")
-          ,
+        ,
         { onclick: pipe([Action.addBox(x), update]) }, "+"
         )
       )
@@ -76,7 +76,7 @@ const View = update => state =>
       .maxHeight("14em")
       .overflowY("auto")
 
-      ,$.get( $boxes ) (state) .map(
+    ,$.get( $boxes ) (state) .map(
       (x, i) =>
         m("" + b.bc(x).c("white").w("4em").h("4em"),
           { onclick:
@@ -91,21 +91,28 @@ const update = m.stream();
 const T = (x,f) => f(x);
 
 const StatsService = {
+  initial(model) {
+    return model.colors
+      .map(R.objOf)
+      .map(K(0))
+      .reduce(R.merge, {});
+  },
   state: R.pipe(
     x => x.boxes,
     R.countBy(I),
     R.objOf("stats"),
     R.mergeDeepLeft
-  ),
-  initial(state) {
-    return state.colors
-      .map(R.objOf)
-      .map(K(0))
-      .reduce(R.merge, {});
-  }
+  )
 };
 
 const LocalStorageService = {
+  initial() {
+    return [localStorage.getItem("v1")]
+      .filter(Boolean)
+      .map(JSON.parse)
+      .concat({ boxes: [] })
+      .shift();
+  },
   state(model) {
     T(
       model,
@@ -115,17 +122,15 @@ const LocalStorageService = {
       )
     );
     return I;
-  },
-  initial() {
-    return [localStorage.getItem("v1")]
-      .filter(Boolean)
-      .map(JSON.parse)
-      .concat({ boxes: [] })
-      .shift();
   }
 };
 
 const DescriptionService = {
+  initial() {
+    return {
+      description: ""
+    };
+  },
   state: R.pipe(
     x => x.stats,
     R.toPairs,
@@ -138,52 +143,41 @@ const DescriptionService = {
     x => x + ".",
     R.objOf("description"),
     R.mergeDeepLeft
-  ),
-  initial() {
-    return {
-      description: ""
-    };
-  }
+  )
 };
 
-const services = {
-  localStorage: LocalStorageService,
-  statsService: StatsService,
-  descriptionService: DescriptionService
-};
+const services = [
+  LocalStorageService,
+  StatsService,
+  DescriptionService
+];
 
 const initialModel = () => {
-  const state =
+  const model =
     {  boxes: []
       , colors:
-      [ "black"
-        , "red"
-        , "green"
-        , "orange"
-        , "pink"
+      [ "red"
+        , "purple"
+        , "blue"
       ],
     };
   return {
-    ...state,
-    ...Object
-      .entries(services)
-      .map(
-        ([_k,v]) => v.initial(state)
-      )
+    ...model,
+    ...services
+      .map(s => s.initial(model))
       .reduce(R.merge, {})
   };
 };
 
-const model = m.stream.scan( T, initialModel(), update );
-const state = model.map(
+const models = m.stream.scan( T, initialModel(), update );
+const states = models.map(
   R.apply(
     R.pipe,
-    Object.values(services)
+    services
       .map(s => s.state)
       .map(W)
   )
 );
 
-const view = state.map(View(update));
 const element = document.getElementById("app");
-view.map( x => m.render(element, x) );
+states.map(view(update)).map(v => m.render(element, v));

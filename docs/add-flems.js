@@ -4,6 +4,7 @@ var fromDir = process.argv[2];
 var toDir = process.argv[3];
 
 var linkMap = {
+  "bss": "https://unpkg.com/bss@1.3.0/bss.js",
   "datepicker": "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
   "flyd": "https://unpkg.com/flyd@0.2.8/flyd.js",
   "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
