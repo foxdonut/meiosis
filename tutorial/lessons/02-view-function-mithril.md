@@ -41,6 +41,10 @@ It is just a simple function of the model.
 `{ label: "The Counter", value: 0 }` as the model. Change the `view` function so that it uses the
 model to produce the view.
 
+### Solution
+
+@flems mithril/02-view-function-solution.js,app.html,app.css mithril 500 hidden
+
 In the next lesson, we will learn how to let the user increment the counter by clicking on a
 button. The button will trigger code that adds 1 to the model and re-renders the view.
 
