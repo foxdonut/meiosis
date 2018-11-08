@@ -135,7 +135,7 @@ the value.
 For `.map`, we create a new stream. We add a function to the current stream which will call
 the passed-in function and push the result onto the new stream.
 
-## Exercises
+### Exercises
 
 Using the code above, take our stream implementation out for a test drive.
 
@@ -147,6 +147,10 @@ Using the code above, take our stream implementation out for a test drive.
 1. Map a function to the `plusTwo` stream that outputs each value using `console.log`.
 1. Verify that everything is working by calling `update(1)` and `update(2)` and seeing
 `12` and `22` on the console log.
+
+### Solution
+
+@flems common/05-stream-impl-solution.js [] 800 hidden
 
 ### Putting it all together
 
@@ -185,6 +189,10 @@ Verify that the example still works properly. Hint: make sure to return the mode
 
 Whether to use a single function, or to separate out the steps into individual functions, is up
 to your personal preference.
+
+### Solution
+
+@flems mithril/05-stream-solution.js,app.html,app.css mithril 800 hidden
 
 When you are ready, continue on to [06 - Scan](06-scan-mithril.html).
 

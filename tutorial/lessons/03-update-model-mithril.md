@@ -59,6 +59,10 @@ You can see the working code below:
 model to produce the view, and change the `increase` function so that it increases the model value.
 1. Add a `-1` button that decreases the value by 1.
 
+### Solution
+
+@flems mithril/03-update-model-solution.js,app.html,app.css mithril 750 hidden
+
 When you are ready, continue on to [04 - Update Function](04-update-function-mithril.html).
 
 [Table of Contents](toc.html)

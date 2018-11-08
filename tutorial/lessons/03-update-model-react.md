@@ -59,6 +59,10 @@ You can see the working code below:
 model to produce the view, and change the `increase` function so that it increases the model value.
 1. Add a `-1` button that decreases the value by 1.
 
+### Solution
+
+@flems react/03-update-model-solution.jsx,app.html,app.css react,react-dom 750 hidden
+
 When you are ready, continue on to [04 - Update Function](04-update-function-react.html).
 
 [Table of Contents](toc.html)

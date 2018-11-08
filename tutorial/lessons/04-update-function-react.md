@@ -140,6 +140,10 @@ two lines of code to do this.
 **multiplying** instead of adding the incoming value. Verify that `+1` has no effect, `-1`
 only changes the sign, and `+5` and`-5` multiply by `5` and `-5` respectively.
 
+### Solution
+
+@flems react/04-update-function-solution.jsx,app.html,app.css react,react-dom 800 hidden
+
 When you are ready, continue on to [05 - Stream](05-stream-react.html).
 
 [Table of Contents](toc.html)

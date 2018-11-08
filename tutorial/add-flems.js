@@ -46,14 +46,22 @@ filenames.forEach(source => {
       });
       var linkString = "[" + linkContents.join(",") + "]";
 
-      var style = "";
+      var style = " style=\"";
       if (parts.length > 3) {
-        style = " style=\"height:" + parts[3] + "px\"";
+        style += " height:" + parts[3] + "px;";
       }
 
-      line = `
-  <div id="flems${flemNumber}" class="flemscode"${style}></div>
+      var hidden = (parts.length > 4 && parts[4] === "hidden");
+      if (hidden) {
+        style += " display: none;";
+      }
+      style += "\"";
 
+      line = (hidden
+        ? `<div style="margin-bottom: 24px;"><a href="javascript:"
+             onclick="this.style.display='none';document.getElementById('flems${flemNumber}').style.display='block'"
+             >Show solution</a></div>`
+        : "") + `<div id="flems${flemNumber}" class="flemscode"${style}></div>
   <script>
     window.Flems(flems${flemNumber}, {
       files: ${fileString},
