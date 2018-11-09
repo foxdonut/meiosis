@@ -232,6 +232,10 @@ Here is the completed example:
 parameters and creates its initial model. Then, modify the component so that it accepts an optional
 initial model. What did you have to change?
 
+### Solution
+
+@flems react/11-components-solution.jsx,app.html,app.css react,react-dom,flyd,lodash 800 hidden
+
 When you are ready, continue on to [12 - Function Update](12-func-update-react.html).
 
 [Table of Contents](toc.html)

@@ -212,6 +212,10 @@ updates now work correctly, as you can see in the complete example below.
 that it works by trying it out in the application. Which code did you need to add or change? Which
 code did not need any changes?
 
+### Solution
+
+@flems mithril/09-nesting-solution.js,app.html,app.css mithril,mithril-stream 800 hidden
+
 When you are ready, continue on to [10 - Deep Merge](10-deep-merge-mithril.html).
 
 [Table of Contents](toc.html)

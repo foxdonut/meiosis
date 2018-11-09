@@ -20,6 +20,6 @@ button.dark {
 button.dark:hover {
   background-color: #7775f9;
 }
-.temperature {
+.temperature, .humidity {
   margin-bottom: 20px;
 }

@@ -164,6 +164,10 @@ discussed, we're using Lodash's `_.merge` to achieve deep merging of updates int
 The element that you add should not "know" where it is nested within the top-level model. For bonus
 points, add another element that is nested within the element that you added.
 
+### Solution
+
+@flems react/10-deep-merge-solution.jsx,app.html,app.css react,react-dom,flyd,lodash 800 hidden
+
 When you are ready, continue on to [11 - Components](11-components-react.html).
 
 [Table of Contents](toc.html)

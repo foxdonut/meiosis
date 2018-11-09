@@ -127,6 +127,10 @@ in with the current model to produce the updated model.
 the temperature should be reset to `22`. For Farenheit, the reset button should set the
 temperature to `72`.
 
+### Solution
+
+@flems react/08-accumulator-solution.jsx,app.html,app.css react,react-dom,flyd 800 hidden
+
 When you are ready, continue on to [09 - Nesting](09-nesting-react.html).
 
 [Table of Contents](toc.html)

@@ -128,6 +128,10 @@ in with the current model to produce the updated model.
 the temperature should be reset to `22`. For Farenheit, the reset button should set the
 temperature to `72`.
 
+### Solution
+
+@flems mithril/08-accumulator-solution.js,app.html,app.css mithril,mithril-stream 800 hidden
+
 When you are ready, continue on to [09 - Nesting](09-nesting-mithril.html).
 
 [Table of Contents](toc.html)

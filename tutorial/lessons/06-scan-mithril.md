@@ -213,6 +213,10 @@ Finally, change the accumulator function that is passed to `scan` so that it loo
 
 ![Scan with different types](06-scan-02.svg)
 
+### Solution
+
+@flems mithril/06-scan-solution.js,app.html,app.css mithril 800 hidden
+
 When you are ready, continue on to [07 - Stream Library](07-stream-lib-mithril.html).
 
 [Table of Contents](toc.html)

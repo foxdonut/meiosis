@@ -182,6 +182,10 @@ Here is the full example:
 - Add another component next to `temperatures`. Issue updates by calling `update()` and passing
 functions that update the model. Verify that the nesting works.
 
+### Solution
+
+@flems mithril/12-func-update-solution.js,app.html,app.css mithril,mithril-stream 800 hidden
+
 This concludes the Meiosis tutorial. Thanks for reading, I hope you enjoy Meiosis!
 
 ### What's Next?

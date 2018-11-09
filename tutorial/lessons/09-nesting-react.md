@@ -212,6 +212,10 @@ updates now work correctly, as you can see in the complete example below.
 that it works by trying it out in the application. Which code did you need to add or change? Which
 code did not need any changes?
 
+### Solution
+
+@flems react/09-nesting-solution.jsx,app.html,app.css react,react-dom,flyd 800 hidden
+
 When you are ready, continue on to [10 - Deep Merge](10-deep-merge-react.html).
 
 [Table of Contents](toc.html)
