@@ -28,11 +28,10 @@ to render other things on the page, and have your app (or multiple apps) occupy 
 the page.</p>
 <p>To produce the vnode for our message, we can simply use <code>&lt;h1&gt;Hello, world&lt;/h1&gt;</code>.</p>
 <p>Here is the code to render the message onto the page:</p>
-  <div id="flems1" class="flemscode"></div>
-
+<div id="flems1" class="flemscode" style=""></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "01-hello-world.js", content: "/*global React, ReactDOM*/\nvar element = document.getElementById(\"app\");\nReactDOM.render(<h1>Hello, world</h1>, element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "01-hello-world.js", content: "/*global React, ReactDOM*/\nvar element = document.getElementById(\"app\");\nReactDOM.render(<h1>Hello, world</h1>, element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.4.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"}],
       middle: 75
     })

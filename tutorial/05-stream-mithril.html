@@ -104,8 +104,7 @@ Meiosis pattern.</p>
 onto the <code>update</code> stream, call <code>someFunction(value)</code> and push the result onto the new stream.</li>
 </ol>
 <p>Here is our stream implementation:</p>
-  <div id="flems1" class="flemscode" style="height:550px"></div>
-
+<div id="flems1" class="flemscode" style="height:550px"></div>
   <script>
     window.Flems(flems1, {
       files: [{name: "05-stream-impl.js", content: "var stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};"}],
@@ -120,7 +119,7 @@ When the stream is called as a function, we go through every <code>mapFunction</
 the value.</p>
 <p>For <code>.map</code>, we create a new stream. We add a function to the current stream which will call
 the passed-in function and push the result onto the new stream.</p>
-<h2>Exercises</h2><p>Using the code above, take our stream implementation out for a test drive.</p>
+<h3>Exercises</h3><p>Using the code above, take our stream implementation out for a test drive.</p>
 <ol>
 <li>Create an <code>update</code> stream.</li>
 <li>Create a <code>timesTen</code> stream that is the result of multiplying by ten each value from the
@@ -131,12 +130,21 @@ the passed-in function and push the result onto the new stream.</p>
 <li>Verify that everything is working by calling <code>update(1)</code> and <code>update(2)</code> and seeing
 <code>12</code> and <code>22</code> on the console log.</li>
 </ol>
-<h3>Putting it all together</h3><p>Now that we have our stream implementation, we can use it in our counter example:</p>
-  <div id="flems2" class="flemscode" style="height:800px"></div>
-
+<h3>Solution</h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
   <script>
     window.Flems(flems2, {
-      files: [{name: "05-stream.js", content: "/*global m*/\n\n// -- Utility code\n\nvar stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar element = document.getElementById(\"app\");\n\nupdate.map(function(value) {\n  model = model + value;\n  m.render(element, view(model));\n});\n\nm.render(element, view(model));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "05-stream-impl-solution.js", content: "var stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// 1. Create an update stream.\nvar update = stream();\n\n// 2. Create a timesTen stream that is the result of multiplying by ten each\n// value from the update stream.\nvar timesTen = update.map(function(value) {\n  return value * 10;\n});\n\n// 3. Create a plusTwo stream that is the result of adding two to each value\n// from the timesTen stream.\nvar plusTwo = timesTen.map(function(value) {\n  return value + 2;\n});\n\n// 4. Map a function to the plusTwo stream that outputs each value using\n// console.log.\nplusTwo.map(function(value) {\n  console.log(value);\n});\n\n// 5. Verify that everything is working by calling update(1) and update(2) and\n// seeing 12 and 22 on the console log.\nupdate(1);\nupdate(2);\n"}],
+      links: [],
+      middle: 75
+    })
+  </script>
+
+
+<h3>Putting it all together</h3><p>Now that we have our stream implementation, we can use it in our counter example:</p>
+<div id="flems3" class="flemscode" style="height:800px"></div>
+  <script>
+    window.Flems(flems3, {
+      files: [{name: "05-stream.js", content: "/*global m*/\n\n// -- Utility code\n\nvar stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar element = document.getElementById(\"app\");\n\nupdate.map(function(value) {\n  model = model + value;\n  m.render(element, view(model));\n});\n\nm.render(element, view(model));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
       middle: 75
     })
@@ -167,6 +175,16 @@ change the <code>update.map</code> block to:</li>
 <code>updateModel</code> function.</p>
 <p>Whether to use a single function, or to separate out the steps into individual functions, is up
 to your personal preference.</p>
+<h3>Solution</h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems4').style.display='block'">Show solution</a></div><div id="flems4" class="flemscode" style="height:800px; display: none"></div>
+  <script>
+    window.Flems(flems4, {
+      files: [{name: "05-stream-solution.js", content: "/*global m*/\n\n// -- Utility code\n\nvar stream = function() {\n  var mapFunctions = [];\n  var createdStream = function(value) {\n    for (var i in mapFunctions) {\n      mapFunctions[i](value);\n    }\n  };\n  createdStream.map = function(mapFunction) {\n    var newStream = stream();\n\n    mapFunctions.push(function(value) {\n      newStream(mapFunction(value));\n    });\n\n    return newStream;\n  };\n  return createdStream;\n};\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return [\n      m(\"div\", \"Counter: \" + model),\n      m(\"button\", { onclick: increase( 1) }, \"+1\"),\n      m(\"button\", { onclick: increase(-1) }, \"-1\")\n    ];\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar update = stream();\nvar view = createView(update);\n\nvar element = document.getElementById(\"app\");\n\n// Separate out the updateModel function\nvar updateModel = function(value) {\n  model = model + value;\n  return model;\n};\n\n// Separate out the render function\nvar render = function(view) {\n  m.render(element, view);\n};\n\n// Chain calls to .map\nupdate\n  .map(updateModel)\n  .map(view)\n  .map(render);\n\nupdate.map(function(value) {\n  model = model + value;\n  m.render(element, view(model));\n});\n\nm.render(element, view(model));\n"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"}],
+      middle: 75
+    })
+  </script>
+
+
 <p>When you are ready, continue on to <a href="06-scan-mithril.html">06 - Scan</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>

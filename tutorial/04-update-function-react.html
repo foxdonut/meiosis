@@ -84,11 +84,10 @@ the function itself. It does not reference <code>update</code> as a global varia
 <code>increase</code> event handler, it creates and returns the <code>view</code> function, which continues to be a
 function that takes a <code>model</code> and returns a view.</p>
 <h3>Putting it all together</h3><p>Here is the complete example:</p>
-  <div id="flems1" class="flemscode" style="height:800px"></div>
-
+<div id="flems1" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "04-update-function.js", content: "/*global React, ReactDOM*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar element = document.getElementById(\"app\");\nvar view = null;\n\nvar update = function(value) {\n  model = model + value;\n  ReactDOM.render(view(model), element);\n};\n\nview = createView(update);\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "04-update-function.js", content: "/*global React, ReactDOM*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>+1</button>\n      <button onClick={increase(-1)}>-1</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\nvar model = 0;\nvar element = document.getElementById(\"app\");\nvar view = null;\n\nvar update = function(value) {\n  model = model + value;\n  ReactDOM.render(view(model), element);\n};\n\nview = createView(update);\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.4.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"}],
       middle: 75
     })
@@ -111,6 +110,16 @@ two lines of code to do this.</li>
 <strong>multiplying</strong> instead of adding the incoming value. Verify that <code>+1</code> has no effect, <code>-1</code>
 only changes the sign, and <code>+5</code> and<code>-5</code> multiply by <code>5</code> and <code>-5</code> respectively.</li>
 </ol>
+<h3>Solution</h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "04-update-function-solution.js", content: "/*global React, ReactDOM*/\n\n// -- Application code\n\nvar createView = function(update) {\n  var increase = function(amount) {\n    return function(_event) {\n      update(amount);\n    };\n  };\n  var view = function(model) {\n    return (<div>\n      <div>Counter: {model}</div>\n      <button onClick={increase( 1)}>&times; 1</button>\n      <button onClick={increase(-1)}>&times; -1</button>\n      {/* Add two buttons which multiply by 5 / -5 */}\n      <button onClick={increase( 5)}>&times; 5</button>\n      <button onClick={increase(-5)}>&times; -5</button>\n    </div>);\n  };\n  return view;\n};\n\n// -- Meiosis pattern setup code\n\n// Change the initial value of the model to 1\nvar model = 1;\nvar element = document.getElementById(\"app\");\nvar view = null;\n\n// Change how the model gets updated, by multiplying instead of adding\nvar update = function(value) {\n  model = model * value;\n  ReactDOM.render(view(model), element);\n};\n\nview = createView(update);\nReactDOM.render(view(model), element);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "react", type: "js", url: "https://unpkg.com/react@16.4.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"}],
+      middle: 75
+    })
+  </script>
+
+
 <p>When you are ready, continue on to <a href="05-stream-react.html">05 - Stream</a>.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>
