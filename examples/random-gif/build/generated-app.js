@@ -6,16 +6,17 @@ module.exports=function(e){var t={};function n(r){if(t[r])return t[r].exports;va
 ;(function() {
 "use strict"
 function Vnode(tag, key, attrs0, children, text, dom) {
-	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, _state: undefined, events: undefined, instance: undefined, skip: false}
+	return {tag: tag, key: key, attrs: attrs0, children: children, text: text, dom: dom, domSize: undefined, state: undefined, events: undefined, instance: undefined}
 }
 Vnode.normalize = function(node) {
 	if (Array.isArray(node)) return Vnode("[", undefined, undefined, Vnode.normalizeChildren(node), undefined, undefined)
 	if (node != null && typeof node !== "object") return Vnode("#", undefined, undefined, node === false ? "" : node, undefined, undefined)
 	return node
 }
-Vnode.normalizeChildren = function normalizeChildren(children) {
-	for (var i = 0; i < children.length; i++) {
-		children[i] = Vnode.normalize(children[i])
+Vnode.normalizeChildren = function(input) {
+	var children = []
+	for (var i = 0; i < input.length; i++) {
+		children[i] = Vnode.normalize(input[i])
 	}
 	return children
 }
@@ -45,7 +46,8 @@ function compileSelector(selector) {
 }
 function execSelector(state, attrs, children) {
 	var hasAttrs = false, childList, text
-	var className = attrs.className || attrs.class
+	var classAttr = hasOwn.call(attrs, "class") ? "class" : "className"
+	var className = attrs[classAttr]
 	if (!isEmpty(state.attrs) && !isEmpty(attrs)) {
 		var newAttrs = {}
 		for(var key in attrs) {
@@ -56,19 +58,19 @@ function execSelector(state, attrs, children) {
 		attrs = newAttrs
 	}
 	for (var key in state.attrs) {
-		if (hasOwn.call(state.attrs, key)) {
+		if (hasOwn.call(state.attrs, key) && key !== "className" && !hasOwn.call(attrs, key)){
 			attrs[key] = state.attrs[key]
 		}
 	}
-	if (className !== undefined) {
-		if (attrs.class !== undefined) {
-			attrs.class = undefined
-			attrs.className = className
-		}
-		if (state.attrs.className != null) {
-			attrs.className = state.attrs.className + " " + className
-		}
-	}
+	if (className != null || state.attrs.className != null) attrs.className =
+		className != null
+			? state.attrs.className != null
+				? state.attrs.className + " " + className
+				: className
+			: state.attrs.className != null
+				? state.attrs.className
+				: null
+	if (classAttr === "class") attrs.class = null
 	for (var key in attrs) {
 		if (hasOwn.call(attrs, key) && key !== "key") {
 			hasAttrs = true
@@ -80,17 +82,13 @@ function execSelector(state, attrs, children) {
 	} else {
 		childList = children
 	}
-	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : undefined, childList, text)
+	return Vnode(state.tag, attrs.key, hasAttrs ? attrs : null, childList, text)
 }
 function hyperscript(selector) {
-	// Because sloppy mode sucks
-	var attrs = arguments[1], start = 2, children
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	if (typeof selector === "string") {
-		var cached = selectorCache[selector] || compileSelector(selector)
-	}
+	var attrs = arguments[1], start = 2, children
 	if (attrs == null) {
 		attrs = {}
 	} else if (typeof attrs !== "object" || attrs.tag != null || Array.isArray(attrs)) {
@@ -104,19 +102,18 @@ function hyperscript(selector) {
 		children = []
 		while (start < arguments.length) children.push(arguments[start++])
 	}
-	var normalized = Vnode.normalizeChildren(children)
 	if (typeof selector === "string") {
-		return execSelector(cached, attrs, normalized)
+		return execSelector(selectorCache[selector] || compileSelector(selector), attrs, Vnode.normalizeChildren(children))
 	} else {
-		return Vnode(selector, attrs.key, attrs, normalized)
+		return Vnode(selector, attrs.key, attrs, children)
 	}
 }
 hyperscript.trust = function(html) {
 	if (html == null) html = ""
 	return Vnode("<", undefined, undefined, html, undefined, undefined)
 }
-hyperscript.fragment = function(attrs1, children) {
-	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children), undefined, undefined)
+hyperscript.fragment = function(attrs1, children0) {
+	return Vnode("[", attrs1.key, attrs1, Vnode.normalizeChildren(children0), undefined, undefined)
 }
 var m = hyperscript
 /** @constructor */
@@ -179,6 +176,20 @@ PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
 PromisePolyfill.prototype.catch = function(onRejection) {
 	return this.then(null, onRejection)
 }
+PromisePolyfill.prototype.finally = function(callback) {
+	return this.then(
+		function(value) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return value
+			})
+		},
+		function(reason) {
+			return PromisePolyfill.resolve(callback()).then(function() {
+				return PromisePolyfill.reject(reason);
+			})
+		}
+	)
+}
 PromisePolyfill.resolve = function(value) {
 	if (value instanceof PromisePolyfill) return value
 	return new PromisePolyfill(function(resolve) {resolve(value)})
@@ -213,10 +224,18 @@ PromisePolyfill.race = function(list) {
 	})
 }
 if (typeof window !== "undefined") {
-	if (typeof window.Promise === "undefined") window.Promise = PromisePolyfill
+	if (typeof window.Promise === "undefined") {
+		window.Promise = PromisePolyfill
+	} else if (!window.Promise.prototype.finally) {
+		window.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
 	var PromisePolyfill = window.Promise
 } else if (typeof global !== "undefined") {
-	if (typeof global.Promise === "undefined") global.Promise = PromisePolyfill
+	if (typeof global.Promise === "undefined") {
+		global.Promise = PromisePolyfill
+	} else if (!global.Promise.prototype.finally) {
+		global.Promise.prototype.finally = PromisePolyfill.prototype.finally
+	}
 	var PromisePolyfill = global.Promise
 } else {
 }
@@ -242,7 +261,7 @@ var buildQueryString = function(object) {
 	}
 }
 var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
-var _8 = function($window, Promise) {
+var _9 = function($window, Promise) {
 	var callbackCount = 0
 	var oncompletion
 	function setCompletionCallback(callback) {oncompletion = callback}
@@ -299,6 +318,9 @@ var _8 = function($window, Promise) {
 				xhr.setRequestHeader("Accept", "application/json, text/*")
 			}
 			if (args.withCredentials) xhr.withCredentials = args.withCredentials
+			if (args.timeout) xhr.timeout = args.timeout
+			
+			if (args.responseType) xhr.responseType = args.responseType
 			for (var key in args.headers) if ({}.hasOwnProperty.call(args.headers, key)) {
 				xhr.setRequestHeader(key, args.headers[key])
 			}
@@ -309,12 +331,13 @@ var _8 = function($window, Promise) {
 				if (xhr.readyState === 4) {
 					try {
 						var response = (args.extract !== extract) ? args.extract(xhr, args) : args.deserialize(args.extract(xhr, args))
-						if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
+						if (args.extract !== extract || (xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || FILE_PROTOCOL_REGEX.test(args.url)) {
 							resolve(cast(args.type, response))
 						}
 						else {
 							var error = new Error(xhr.responseText)
-							for (var key in response) error[key] = response[key]
+							error.code = xhr.status
+							error.response = response
 							reject(error)
 						}
 					}
@@ -373,7 +396,7 @@ var _8 = function($window, Promise) {
 	}
 	function deserialize(data) {
 		try {return data !== "" ? JSON.parse(data) : null}
-		catch (e) {throw new Error(data)}
+		catch (e) {throw new Error("Invalid JSON: " + data)}
 	}
 	function extract(xhr) {return xhr.responseText}
 	function cast(type0, data) {
@@ -389,10 +412,9 @@ var _8 = function($window, Promise) {
 	}
 	return {request: request, jsonp: jsonp, setCompletionCallback: setCompletionCallback}
 }
-var requestService = _8(window, PromisePolyfill)
+var requestService = _9(window, PromisePolyfill)
 var coreRenderer = function($window) {
 	var $doc = $window.document
-	var $emptyFragment = $doc.createDocumentFragment()
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
 		math: "http://www.w3.org/1998/Math/MathML"
@@ -401,6 +423,22 @@ var coreRenderer = function($window) {
 	function setEventCallback(callback) {return onevent = callback}
 	function getNameSpace(vnode) {
 		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	}
+	//sanity check to discourage people from doing `vnode.state = ...`
+	function checkState(vnode, original) {
+		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
+	}
+	//Note: the hook is passed as the `this` argument to allow proxying the
+	//arguments without requiring a full array allocation to do so. It also
+	//takes advantage of the fact the current `vnode` is the first argument in
+	//all lifecycle methods.
+	function callHook(vnode) {
+		var original = vnode.state
+		try {
+			return this.apply(original, arguments)
+		} finally {
+			checkState(vnode, original)
+		}
 	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
@@ -417,24 +455,33 @@ var coreRenderer = function($window) {
 			vnode.state = {}
 			if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
 			switch (tag) {
-				case "#": return createText(parent, vnode, nextSibling)
-				case "<": return createHTML(parent, vnode, nextSibling)
-				case "[": return createFragment(parent, vnode, hooks, ns, nextSibling)
-				default: return createElement(parent, vnode, hooks, ns, nextSibling)
+				case "#": createText(parent, vnode, nextSibling); break
+				case "<": createHTML(parent, vnode, ns, nextSibling); break
+				case "[": createFragment(parent, vnode, hooks, ns, nextSibling); break
+				default: createElement(parent, vnode, hooks, ns, nextSibling)
 			}
 		}
-		else return createComponent(parent, vnode, hooks, ns, nextSibling)
+		else createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
 	function createText(parent, vnode, nextSibling) {
 		vnode.dom = $doc.createTextNode(vnode.children)
 		insertNode(parent, vnode.dom, nextSibling)
-		return vnode.dom
 	}
-	function createHTML(parent, vnode, nextSibling) {
+	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
+	function createHTML(parent, vnode, ns, nextSibling) {
 		var match1 = vnode.children.match(/^\s*?<(\w+)/im) || []
-		var parent1 = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}[match1[1]] || "div"
-		var temp = $doc.createElement(parent1)
-		temp.innerHTML = vnode.children
+		// not using the proper parent makes the child element(s) vanish.
+		//     var div = document.createElement("div")
+		//     div.innerHTML = "<td>i</td><td>j</td>"
+		//     console.log(div.innerHTML)
+		// --> "ij", no <td> in sight.
+		var temp = $doc.createElement(possibleParents[match1[1]] || "div")
+		if (ns === "http://www.w3.org/2000/svg") {
+			temp.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\">" + vnode.children + "</svg>"
+			temp = temp.firstChild
+		} else {
+			temp.innerHTML = vnode.children
+		}
 		vnode.dom = temp.firstChild
 		vnode.domSize = temp.childNodes.length
 		var fragment = $doc.createDocumentFragment()
@@ -443,18 +490,16 @@ var coreRenderer = function($window) {
 			fragment.appendChild(child)
 		}
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
-			var children = vnode.children
-			createNodes(fragment, children, 0, children.length, hooks, null, ns)
+			var children1 = vnode.children
+			createNodes(fragment, children1, 0, children1.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
 		vnode.domSize = fragment.childNodes.length
 		insertNode(parent, fragment, nextSibling)
-		return fragment
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag
@@ -469,7 +514,7 @@ var coreRenderer = function($window) {
 			setAttrs(vnode, attrs2, ns)
 		}
 		insertNode(parent, element, nextSibling)
-		if (vnode.attrs != null && vnode.attrs.contenteditable != null) {
+		if (attrs2 != null && attrs2.contenteditable != null) {
 			setContentEditable(vnode)
 		}
 		else {
@@ -478,166 +523,320 @@ var coreRenderer = function($window) {
 				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
 			}
 			if (vnode.children != null) {
-				var children = vnode.children
-				createNodes(element, children, 0, children.length, hooks, null, ns)
-				setLateAttrs(vnode)
+				var children1 = vnode.children
+				createNodes(element, children1, 0, children1.length, hooks, null, ns)
+				if (vnode.tag === "select" && attrs2 != null) setLateSelectAttrs(vnode, attrs2)
 			}
 		}
-		return element
 	}
 	function initComponent(vnode, hooks) {
 		var sentinel
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
 			sentinel = vnode.state.view
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 		} else {
 			vnode.state = void 0
 			sentinel = vnode.tag
-			if (sentinel.$$reentrantLock$$ != null) return $emptyFragment
+			if (sentinel.$$reentrantLock$$ != null) return
 			sentinel.$$reentrantLock$$ = true
 			vnode.state = (vnode.tag.prototype != null && typeof vnode.tag.prototype.view === "function") ? new vnode.tag(vnode) : vnode.tag(vnode)
 		}
-		vnode._state = vnode.state
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		initLifecycle(vnode._state, vnode, hooks)
-		vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
+		initLifecycle(vnode.state, vnode, hooks)
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
-			var element = createNode(parent, vnode.instance, hooks, ns, nextSibling)
+			createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
-			insertNode(parent, element, nextSibling)
-			return element
 		}
 		else {
 			vnode.domSize = 0
-			return $emptyFragment
 		}
 	}
 	//update
-	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
+	/**
+	 * @param {Element|Fragment} parent - the parent element
+	 * @param {Vnode[] | null} old - the list of vnodes of the last0 `render()` call for
+	 *                               this part of the tree
+	 * @param {Vnode[] | null} vnodes - as above, but for the current `render()` call.
+	 * @param {Function[]} hooks - an accumulator of post-render hooks (oncreate/onupdate)
+	 * @param {Element | null} nextSibling - the next0 DOM node if we're dealing with a
+	 *                                       fragment that is not the last0 item in its
+	 *                                       parent
+	 * @param {'svg' | 'math' | String | null} ns) - the current XML namespace, if any
+	 * @returns void
+	 */
+	// This function diffs and patches lists of vnodes, both keyed and unkeyed.
+	//
+	// We will:
+	//
+	// 1. describe its general structure
+	// 2. focus on the diff algorithm optimizations
+	// 3. discuss DOM node operations.
+	// ## Overview:
+	//
+	// The updateNodes() function:
+	// - deals with trivial cases
+	// - determines whether the lists are keyed or unkeyed based on the first non-null node
+	//   of each list.
+	// - diffs them and patches the DOM if needed (that's the brunt of the code)
+	// - manages the leftovers: after diffing, are there:
+	//   - old nodes left to remove?
+	// 	 - new nodes to insert?
+	// 	 deal with them!
+	//
+	// The lists are only iterated over once, with an exception for the nodes in `old` that
+	// are visited in the fourth part of the diff and in the `removeNodes` loop.
+	// ## Diffing
+	//
+	// Reading https://github.com/localvoid/ivi/blob/ddc09d06abaef45248e6133f7040d00d3c6be853/packages/ivi/src/vdom/implementation.ts#L617-L837
+	// may be good for context on longest increasing subsequence-based logic for moving nodes.
+	//
+	// In order to diff keyed lists, one has to
+	//
+	// 1) match1 nodes in both lists, per key2, and update them accordingly
+	// 2) create the nodes present in the new list, but absent in the old one
+	// 3) remove the nodes present in the old list, but absent in the new one
+	// 4) figure out what nodes in 1) to move in order to minimize the DOM operations.
+	//
+	// To achieve 1) one can create a dictionary of keys => index0 (for the old list), then1 iterate
+	// over the new list and for each new vnode, find the corresponding vnode in the old list using
+	// the map.
+	// 2) is achieved in the same step: if a new node has no corresponding entry in the map, it is new
+	// and must be created.
+	// For the removals, we actually remove the nodes that have been updated from the old list.
+	// The nodes that remain in that list after 1) and 2) have been performed can be safely removed.
+	// The fourth step is a bit more complex and relies on the longest increasing subsequence (LIS)
+	// algorithm.
+	//
+	// the longest increasing subsequence is the list of nodes that can remain in place. Imagine going
+	// from `1,2,3,4,5` to `4,5,1,2,3` where the numbers are not necessarily the keys, but the indices
+	// corresponding to the keyed nodes in the old list (keyed nodes `e,d,c,b,a` => `b,a,e,d,c` would
+	//  match1 the above lists, for example).
+	//
+	// In there are two increasing subsequences: `4,5` and `1,2,3`, the latter being the longest. We
+	// can update those nodes without moving them, and only call `insertNode` on `4` and `5`.
+	//
+	// @localvoid adapted the algo to also support node deletions and insertions (the `lis` is actually
+	// the longest increasing subsequence *of old nodes still present in the new list*).
+	//
+	// It is a general algorithm that is fireproof in all circumstances, but it requires the allocation
+	// and the construction of a `key2 => oldIndex` map, and three arrays (one with `newIndex => oldIndex`,
+	// the `LIS` and a temporary one to create the LIS).
+	//
+	// So we cheat where we can: if the tails of the lists are identical, they are guaranteed to be part of
+	// the LIS and can be updated without moving them.
+	//
+	// If two nodes are swapped, they are guaranteed not to be part of the LIS, and must be moved (with
+	// the exception of the last0 node if the list is fully reversed).
+	//
+	// ## Finding the next0 sibling.
+	//
+	// `updateNode()` and `createNode()` expect a nextSibling parameter to perform DOM operations.
+	// When the list is being traversed top-down, at any index0, the DOM nodes up to the previous
+	// vnode reflect the content of the new list, whereas the rest of the DOM nodes reflect the old
+	// list. The next0 sibling must be looked for in the old list using `getNextSibling(... oldStart + 1 ...)`.
+  //
+	// In the other scenarios (swaps, upwards traversal, map-based diff),
+	// the new vnodes list is traversed upwards. The DOM nodes at the bottom of the list reflect the
+	// bottom part of the new vnodes list, and we can use the `v.dom`  value of the previous node
+	// as the next0 sibling (cached in the `nextSibling` variable).
+	// ## DOM node moves
+	//
+	// In most scenarios `updateNode()` and `createNode()` perform the DOM operations. However,
+	// this is not the case if the node moved (second and fourth part of the diff algo). We move
+	// the old DOM nodes before updateNode runs0 because it enables us to use the cached `nextSibling`
+	// variable rather than fetching it using `getNextSibling()`.
+	//
+	// The fourth part of the diff currently inserts nodes unconditionally, leading to issues
+	// like #1791 and #1999. We need to be smarter about those situations where adjascent old
+	// nodes remain together in the new list in a way that isn't covered by parts one and
+	// three of the diff algo.
+	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
-		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes)
+		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
+		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
 		else {
-			if (old.length === vnodes.length) {
-				var isUnkeyed = false
-				for (var i = 0; i < vnodes.length; i++) {
-					if (vnodes[i] != null && old[i] != null) {
-						isUnkeyed = vnodes[i].key == null && old[i].key == null
+			var start = 0, oldStart = 0, isOldKeyed = null, isKeyed = null
+			for (; oldStart < old.length; oldStart++) {
+				if (old[oldStart] != null) {
+					isOldKeyed = old[oldStart].key != null
+					break
+				}
+			}
+			for (; start < vnodes.length; start++) {
+				if (vnodes[start] != null) {
+					isKeyed = vnodes[start].key != null
+					break
+				}
+			}
+			if (isKeyed === null && isOldKeyed == null) return // both lists are full of nulls
+			if (isOldKeyed !== isKeyed) {
+				removeNodes(old, oldStart, old.length)
+				createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+			} else if (!isKeyed) {
+				// Don't index0 past the end of either list (causes deopts).
+				var commonLength = old.length < vnodes.length ? old.length : vnodes.length
+				// Rewind if necessary to the first non-null index0 on either side.
+				// We could alternatively either explicitly create or remove nodes when `start !== oldStart`
+				// but that would be optimizing for sparse lists which are more rare than dense ones.
+				start = start < oldStart ? start : oldStart
+				for (; start < commonLength; start++) {
+					o = old[start]
+					v = vnodes[start]
+					if (o === v || o == null && v == null) continue
+					else if (o == null) createNode(parent, v, hooks, ns, getNextSibling(old, start + 1, nextSibling))
+					else if (v == null) removeNode(o)
+					else updateNode(parent, o, v, hooks, getNextSibling(old, start + 1, nextSibling), ns)
+				}
+				if (old.length > commonLength) removeNodes(old, start, old.length)
+				if (vnodes.length > commonLength) createNodes(parent, vnodes, start, vnodes.length, hooks, nextSibling, ns)
+			} else {
+				// keyed diff
+				var oldEnd = old.length - 1, end = vnodes.length - 1, map, o, v, oe, ve, topSibling
+				// bottom-up
+				while (oldEnd >= oldStart && end >= start) {
+					oe = old[oldEnd]
+					ve = vnodes[end]
+					if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (oe.key === ve.key) {
+						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldEnd--, end--
+					} else {
 						break
 					}
 				}
-				if (isUnkeyed) {
-					for (var i = 0; i < old.length; i++) {
-						if (old[i] === vnodes[i]) continue
-						else if (old[i] == null && vnodes[i] != null) createNode(parent, vnodes[i], hooks, ns, getNextSibling(old, i + 1, nextSibling))
-						else if (vnodes[i] == null) removeNodes(old, i, i + 1, vnodes)
-						else updateNode(parent, old[i], vnodes[i], hooks, getNextSibling(old, i + 1, nextSibling), recycling, ns)
-					}
-					return
-				}
-			}
-			recycling = recycling || isRecyclable(old, vnodes)
-			if (recycling) {
-				var pool = old.pool
-				old = old.concat(old.pool)
-			}
-			var oldStart = 0, start = 0, oldEnd = old.length - 1, end = vnodes.length - 1, map
-			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldStart], v = vnodes[start]
-				if (o === v && !recycling) oldStart++, start++
-				else if (o == null) oldStart++
-				else if (v == null) start++
-				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldStart >= old.length - pool.length) || ((pool == null) && recycling)
-					oldStart++, start++
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), shouldRecycle, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-				}
-				else {
-					var o = old[oldEnd]
-					if (o === v && !recycling) oldEnd--, start++
-					else if (o == null) oldEnd--
+				// top-down
+				while (oldEnd >= oldStart && end >= start) {
+					o = old[oldStart]
+					v = vnodes[start]
+					if (o == null) oldStart++
 					else if (v == null) start++
 					else if (o.key === v.key) {
-						var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
-						updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
-						if (recycling || start < end) insertNode(parent, toFragment(o), getNextSibling(old, oldStart, nextSibling))
-						oldEnd--, start++
+						oldStart++, start++
+						if (o !== v) updateNode(parent, o, v, hooks, getNextSibling(old, oldStart, nextSibling), ns)
+					} else {
+						break
 					}
-					else break
 				}
-			}
-			while (oldEnd >= oldStart && end >= start) {
-				var o = old[oldEnd], v = vnodes[end]
-				if (o === v && !recycling) oldEnd--, end--
-				else if (o == null) oldEnd--
-				else if (v == null) end--
-				else if (o.key === v.key) {
-					var shouldRecycle = (pool != null && oldEnd >= old.length - pool.length) || ((pool == null) && recycling)
-					updateNode(parent, o, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), shouldRecycle, ns)
-					if (recycling && o.tag === v.tag) insertNode(parent, toFragment(o), nextSibling)
-					if (o.dom != null) nextSibling = o.dom
-					oldEnd--, end--
+				// swaps and list reversals
+				while (oldEnd >= oldStart && end >= start) {
+					if (o == null) oldStart++
+					else if (v == null) start++
+					else if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (start === end) break
+					else {
+						if (o.key !== ve.key || oe.key !== v.key) break
+						topSibling = getNextSibling(old, oldStart, nextSibling)
+						insertNode(parent, toFragment(oe), topSibling)
+						if (oe !== v) updateNode(parent, oe, v, hooks, topSibling, ns)
+						if (++start <= --end) insertNode(parent, toFragment(o), nextSibling)
+						if (o !== ve) updateNode(parent, o, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldStart++; oldEnd--
+					}
+					oe = old[oldEnd]
+					ve = vnodes[end]
+					o = old[oldStart]
+					v = vnodes[start]
 				}
+				// bottom up once again
+				while (oldEnd >= oldStart && end >= start) {
+					if (oe == null) oldEnd--
+					else if (ve == null) end--
+					else if (oe.key === ve.key) {
+						if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+						if (ve.dom != null) nextSibling = ve.dom
+						oldEnd--, end--
+					} else {
+						break
+					}
+					oe = old[oldEnd]
+					ve = vnodes[end]
+				}
+				if (start > end) removeNodes(old, oldStart, oldEnd + 1)
+				else if (oldStart > oldEnd) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
 				else {
-					if (!map) map = getKeyMap(old, oldEnd)
-					if (v != null) {
-						var oldIndex = map[v.key]
-						if (oldIndex != null) {
-							var movable = old[oldIndex]
-							var shouldRecycle = (pool != null && oldIndex >= old.length - pool.length) || ((pool == null) && recycling)
-							updateNode(parent, movable, v, hooks, getNextSibling(old, oldEnd + 1, nextSibling), recycling, ns)
-							insertNode(parent, toFragment(movable), nextSibling)
-							old[oldIndex].skip = true
-							if (movable.dom != null) nextSibling = movable.dom
-						}
-						else {
-							var dom = createNode(parent, v, hooks, ns, nextSibling)
-							nextSibling = dom
+					// inspired by ivi https://github.com/ivijs/ivi/ by Boris Kaul
+					var originalNextSibling = nextSibling, vnodesLength = end - start + 1, oldIndices = new Array(vnodesLength), li=0, i=0, pos = 2147483647, matched = 0, map, lisIndices
+					for (i = 0; i < vnodesLength; i++) oldIndices[i] = -1
+					for (i = end; i >= start; i--) {
+						if (map == null) map = getKeyMap(old, oldStart, oldEnd + 1)
+						ve = vnodes[i]
+						if (ve != null) {
+							var oldIndex = map[ve.key]
+							if (oldIndex != null) {
+								pos = (oldIndex < pos) ? oldIndex : -1 // becomes -1 if nodes were re-ordered
+								oldIndices[i-start] = oldIndex
+								oe = old[oldIndex]
+								old[oldIndex] = null
+								if (oe !== ve) updateNode(parent, oe, ve, hooks, nextSibling, ns)
+								if (ve.dom != null) nextSibling = ve.dom
+								matched++
+							}
 						}
 					}
-					end--
+					nextSibling = originalNextSibling
+					if (matched !== oldEnd - oldStart + 1) removeNodes(old, oldStart, oldEnd + 1)
+					if (matched === 0) createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
+					else {
+						if (pos === -1) {
+							// the indices of the indices of the items that are part of the
+							// longest increasing subsequence in the oldIndices list
+							lisIndices = makeLisIndices(oldIndices)
+							li = lisIndices.length - 1
+							for (i = end; i >= start; i--) {
+								v = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
+								else {
+									if (lisIndices[li] === i - start) li--
+									else insertNode(parent, toFragment(v), nextSibling)
+								}
+								if (v.dom != null) nextSibling = vnodes[i].dom
+							}
+						} else {
+							for (i = end; i >= start; i--) {
+								v = vnodes[i]
+								if (oldIndices[i-start] === -1) createNode(parent, v, hooks, ns, nextSibling)
+								if (v.dom != null) nextSibling = vnodes[i].dom
+							}
+						}
+					}
 				}
-				if (end < start) break
 			}
-			createNodes(parent, vnodes, start, end + 1, hooks, nextSibling, ns)
-			removeNodes(old, oldStart, oldEnd + 1, vnodes)
 		}
 	}
-	function updateNode(parent, old, vnode, hooks, nextSibling, recycling, ns) {
+	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
-			vnode._state = old._state
 			vnode.events = old.events
-			if (!recycling && shouldNotUpdate(vnode, old)) return
+			if (shouldNotUpdate(vnode, old)) return
 			if (typeof oldTag === "string") {
 				if (vnode.attrs != null) {
-					if (recycling) {
-						vnode.state = {}
-						initLifecycle(vnode.attrs, vnode, hooks)
-					}
-					else updateLifecycle(vnode.attrs, vnode, hooks)
+					updateLifecycle(vnode.attrs, vnode, hooks)
 				}
 				switch (oldTag) {
 					case "#": updateText(old, vnode); break
-					case "<": updateHTML(parent, old, vnode, nextSibling); break
-					case "[": updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns); break
-					default: updateElement(old, vnode, recycling, hooks, ns)
+					case "<": updateHTML(parent, old, vnode, ns, nextSibling); break
+					case "[": updateFragment(parent, old, vnode, hooks, nextSibling, ns); break
+					default: updateElement(old, vnode, hooks, ns)
 				}
 			}
-			else updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns)
+			else updateComponent(parent, old, vnode, hooks, nextSibling, ns)
 		}
 		else {
-			removeNode(old, null)
+			removeNode(old)
 			createNode(parent, vnode, hooks, ns, nextSibling)
 		}
 	}
@@ -647,20 +846,20 @@ var coreRenderer = function($window) {
 		}
 		vnode.dom = old.dom
 	}
-	function updateHTML(parent, old, vnode, nextSibling) {
+	function updateHTML(parent, old, vnode, ns, nextSibling) {
 		if (old.children !== vnode.children) {
 			toFragment(old)
-			createHTML(parent, vnode, nextSibling)
+			createHTML(parent, vnode, ns, nextSibling)
 		}
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
-	function updateFragment(parent, old, vnode, recycling, hooks, nextSibling, ns) {
-		updateNodes(parent, old.children, vnode.children, recycling, hooks, nextSibling, ns)
-		var domSize = 0, children = vnode.children
+	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
+		var domSize = 0, children1 = vnode.children
 		vnode.dom = null
-		if (children != null) {
-			for (var i = 0; i < children.length; i++) {
-				var child = children[i]
+		if (children1 != null) {
+			for (var i = 0; i < children1.length; i++) {
+				var child = children1[i]
 				if (child != null && child.dom != null) {
 					if (vnode.dom == null) vnode.dom = child.dom
 					domSize += child.domSize || 1
@@ -669,13 +868,13 @@ var coreRenderer = function($window) {
 			if (domSize !== 1) vnode.domSize = domSize
 		}
 	}
-	function updateElement(old, vnode, recycling, hooks, ns) {
+	function updateElement(old, vnode, hooks, ns) {
 		var element = vnode.dom = old.dom
 		ns = getNameSpace(vnode) || ns
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {}
 			if (vnode.text != null) {
-				vnode.attrs.value = vnode.text //FIXME handle0 multiple children
+				vnode.attrs.value = vnode.text //FIXME handle0 multiple children1
 				vnode.text = undefined
 			}
 		}
@@ -689,26 +888,22 @@ var coreRenderer = function($window) {
 		else {
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
-			updateNodes(element, old.children, vnode.children, recycling, hooks, null, ns)
+			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
-	function updateComponent(parent, old, vnode, hooks, nextSibling, recycling, ns) {
-		if (recycling) {
-			initComponent(vnode, hooks)
-		} else {
-			vnode.instance = Vnode.normalize(vnode._state.view.call(vnode.state, vnode))
-			if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
-			if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
-			updateLifecycle(vnode._state, vnode, hooks)
-		}
+	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
+		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
+		updateLifecycle(vnode.state, vnode, hooks)
 		if (vnode.instance != null) {
 			if (old.instance == null) createNode(parent, vnode.instance, hooks, ns, nextSibling)
-			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, recycling, ns)
+			else updateNode(parent, old.instance, vnode.instance, hooks, nextSibling, ns)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.instance.domSize
 		}
 		else if (old.instance != null) {
-			removeNode(old.instance, null)
+			removeNode(old.instance)
 			vnode.dom = undefined
 			vnode.domSize = 0
 		}
@@ -717,27 +912,63 @@ var coreRenderer = function($window) {
 			vnode.domSize = old.domSize
 		}
 	}
-	function isRecyclable(old, vnodes) {
-		if (old.pool != null && Math.abs(old.pool.length - vnodes.length) <= Math.abs(old.length - vnodes.length)) {
-			var oldChildrenLength = old[0] && old[0].children && old[0].children.length || 0
-			var poolChildrenLength = old.pool[0] && old.pool[0].children && old.pool[0].children.length || 0
-			var vnodesChildrenLength = vnodes[0] && vnodes[0].children && vnodes[0].children.length || 0
-			if (Math.abs(poolChildrenLength - vnodesChildrenLength) <= Math.abs(oldChildrenLength - vnodesChildrenLength)) {
-				return true
-			}
-		}
-		return false
-	}
-	function getKeyMap(vnodes, end) {
-		var map = {}, i = 0
-		for (var i = 0; i < end; i++) {
-			var vnode = vnodes[i]
+	function getKeyMap(vnodes, start, end) {
+		var map = Object.create(null)
+		for (; start < end; start++) {
+			var vnode = vnodes[start]
 			if (vnode != null) {
 				var key2 = vnode.key
-				if (key2 != null) map[key2] = i
+				if (key2 != null) map[key2] = start
 			}
 		}
 		return map
+	}
+	// Lifted from ivi https://github.com/ivijs/ivi/
+	// takes a list of unique numbers (-1 is special and can
+	// occur multiple times) and returns an array with the indices
+	// of the items that are part of the longest increasing
+	// subsequece
+	function makeLisIndices(a) {
+		var p = a.slice()
+		var result = []
+		result.push(0)
+		var u
+		var v
+		for (var i = 0, il = a.length; i < il; ++i) {
+			if (a[i] === -1) {
+				continue
+			}
+			var j = result[result.length - 1]
+			if (a[j] < a[i]) {
+				p[i] = j
+				result.push(i)
+				continue
+			}
+			u = 0
+			v = result.length - 1
+			while (u < v) {
+				var c = ((u + v) / 2) | 0 // eslint-disable-line no-bitwise
+				if (a[result[c]] < a[i]) {
+					u = c + 1
+				}
+				else {
+					v = c
+				}
+			}
+			if (a[i] < a[result[u]]) {
+				if (u > 0) {
+					p[i] = result[u - 1]
+				}
+				result[u] = i
+			}
+		}
+		u = result.length
+		v = result[u - 1]
+		while (u-- > 0) {
+			result[u] = v
+			v = p[v]
+		}
+		return result
 	}
 	function toFragment(vnode) {
 		var count0 = vnode.domSize
@@ -759,38 +990,36 @@ var coreRenderer = function($window) {
 		return nextSibling
 	}
 	function insertNode(parent, dom, nextSibling) {
-		if (nextSibling && nextSibling.parentNode) parent.insertBefore(dom, nextSibling)
+		if (nextSibling != null) parent.insertBefore(dom, nextSibling)
 		else parent.appendChild(dom)
 	}
 	function setContentEditable(vnode) {
-		var children = vnode.children
-		if (children != null && children.length === 1 && children[0].tag === "<") {
-			var content = children[0].children
+		var children1 = vnode.children
+		if (children1 != null && children1.length === 1 && children1[0].tag === "<") {
+			var content = children1[0].children
 			if (vnode.dom.innerHTML !== content) vnode.dom.innerHTML = content
 		}
-		else if (vnode.text != null || children != null && children.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
+		else if (vnode.text != null || children1 != null && children1.length !== 0) throw new Error("Child node of a contenteditable must be trusted")
 	}
 	//remove
-	function removeNodes(vnodes, start, end, context) {
+	function removeNodes(vnodes, start, end) {
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
-			if (vnode != null) {
-				if (vnode.skip) vnode.skip = false
-				else removeNode(vnode, context)
-			}
+			if (vnode != null) removeNode(vnode)
 		}
 	}
-	function removeNode(vnode, context) {
+	function removeNode(vnode) {
 		var expected = 1, called = 0
+		var original = vnode.state
 		if (vnode.attrs && typeof vnode.attrs.onbeforeremove === "function") {
-			var result = vnode.attrs.onbeforeremove.call(vnode.state, vnode)
+			var result = callHook.call(vnode.attrs.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
 			}
 		}
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeremove === "function") {
-			var result = vnode._state.onbeforeremove.call(vnode.state, vnode)
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeremove === "function") {
+			var result = callHook.call(vnode.state.onbeforeremove, vnode)
 			if (result != null && typeof result.then === "function") {
 				expected++
 				result.then(continuation, continuation)
@@ -799,38 +1028,27 @@ var coreRenderer = function($window) {
 		continuation()
 		function continuation() {
 			if (++called === expected) {
+				checkState(vnode, original)
 				onremove(vnode)
 				if (vnode.dom) {
+					var parent = vnode.dom.parentNode
 					var count0 = vnode.domSize || 1
-					if (count0 > 1) {
-						var dom = vnode.dom
-						while (--count0) {
-							removeNodeFromDOM(dom.nextSibling)
-						}
-					}
-					removeNodeFromDOM(vnode.dom)
-					if (context != null && vnode.domSize == null && !hasIntegrationMethods(vnode.attrs) && typeof vnode.tag === "string") { //TODO test custom elements
-						if (!context.pool) context.pool = [vnode]
-						else context.pool.push(vnode)
-					}
+					while (--count0) parent.removeChild(vnode.dom.nextSibling)
+					parent.removeChild(vnode.dom)
 				}
 			}
 		}
 	}
-	function removeNodeFromDOM(node) {
-		var parent = node.parentNode
-		if (parent != null) parent.removeChild(node)
-	}
 	function onremove(vnode) {
-		if (vnode.attrs && typeof vnode.attrs.onremove === "function") vnode.attrs.onremove.call(vnode.state, vnode)
+		if (vnode.attrs && typeof vnode.attrs.onremove === "function") callHook.call(vnode.attrs.onremove, vnode)
 		if (typeof vnode.tag !== "string") {
-			if (typeof vnode._state.onremove === "function") vnode._state.onremove.call(vnode.state, vnode)
+			if (typeof vnode.state.onremove === "function") callHook.call(vnode.state.onremove, vnode)
 			if (vnode.instance != null) onremove(vnode.instance)
 		} else {
-			var children = vnode.children
-			if (Array.isArray(children)) {
-				for (var i = 0; i < children.length; i++) {
-					var child = children[i]
+			var children1 = vnode.children
+			if (Array.isArray(children1)) {
+				for (var i = 0; i < children1.length; i++) {
+					var child = children1[i]
 					if (child != null) onremove(child)
 				}
 			}
@@ -843,51 +1061,62 @@ var coreRenderer = function($window) {
 		}
 	}
 	function setAttr(vnode, key2, old, value, ns) {
-		var element = vnode.dom
-		if (key2 === "key" || key2 === "is" || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object" || typeof value === "undefined" || isLifecycleMethod(key2)) return
-		var nsLastIndex = key2.indexOf(":")
-		if (nsLastIndex > -1 && key2.substr(0, nsLastIndex) === "xlink") {
-			element.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(nsLastIndex + 1), value)
-		}
-		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value)
-		else if (key2 === "style") updateStyle(element, old, value)
-		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
+		if (key2 === "key" || key2 === "is" || value == null || isLifecycleMethod(key2) || (old === value && !isFormAttribute(vnode, key2)) && typeof value !== "object") return
+		if (key2[0] === "o" && key2[1] === "n") return updateEvent(vnode, key2, value)
+		if (key2.slice(0, 6) === "xlink:") vnode.dom.setAttributeNS("http://www.w3.org/1999/xlink", key2.slice(6), value)
+		else if (key2 === "style") updateStyle(vnode.dom, old, value)
+		else if (hasPropertyKey(vnode, key2, ns)) {
 			if (key2 === "value") {
-				var normalized0 = "" + value // eslint-disable-line no-implicit-coercion
+				// Only do the coercion if we're actually going to check the value.
+				/* eslint-disable no-implicit-coercion */
 				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === "" + value && vnode.dom === $doc.activeElement) return
 				//setting select[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "select") {
-					if (value === null) {
-						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
-					} else {
-						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
-					}
-				}
+				if (vnode.tag === "select" && old !== null && vnode.dom.value === "" + value) return
 				//setting option[value] to same value while having select open blinks select dropdown in Chrome
-				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized0) return
+				if (vnode.tag === "option" && old !== null && vnode.dom.value === "" + value) return
+				/* eslint-enable no-implicit-coercion */
 			}
-			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
-			if (vnode.tag === "input" && key2 === "type") {
-				element.setAttribute(key2, value)
-				return
-			}
-			element[key2] = value
-		}
-		else {
+			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error1 will occur.
+			if (vnode.tag === "input" && key2 === "type") vnode.dom.setAttribute(key2, value)
+			else vnode.dom[key2] = value
+		} else {
 			if (typeof value === "boolean") {
-				if (value) element.setAttribute(key2, "")
-				else element.removeAttribute(key2)
+				if (value) vnode.dom.setAttribute(key2, "")
+				else vnode.dom.removeAttribute(key2)
 			}
-			else element.setAttribute(key2 === "className" ? "class" : key2, value)
+			else vnode.dom.setAttribute(key2 === "className" ? "class" : key2, value)
 		}
 	}
-	function setLateAttrs(vnode) {
-		var attrs2 = vnode.attrs
-		if (vnode.tag === "select" && attrs2 != null) {
-			if ("value" in attrs2) setAttr(vnode, "value", null, attrs2.value, undefined)
-			if ("selectedIndex" in attrs2) setAttr(vnode, "selectedIndex", null, attrs2.selectedIndex, undefined)
+	function removeAttr(vnode, key2, old, ns) {
+		if (key2 === "key" || key2 === "is" || old == null || isLifecycleMethod(key2)) return
+		if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
+		else if (key2 === "style") updateStyle(vnode.dom, old, null)
+		else if (
+			hasPropertyKey(vnode, key2, ns)
+			&& key2 !== "className"
+			&& !(vnode.tag === "option" && key2 === "value")
+			&& !(vnode.tag === "input" && key2 === "type")
+		) {
+			vnode.dom[key2] = null
+		} else {
+			var nsLastIndex = key2.indexOf(":")
+			if (nsLastIndex !== -1) key2 = key2.slice(nsLastIndex + 1)
+			if (old !== false) vnode.dom.removeAttribute(key2 === "className" ? "class" : key2)
 		}
+	}
+	function setLateSelectAttrs(vnode, attrs2) {
+		if ("value" in attrs2) {
+			if(attrs2.value === null) {
+				if (vnode.dom.selectedIndex !== -1) vnode.dom.value = null
+			} else {
+				var normalized = "" + attrs2.value // eslint-disable-line no-implicit-coercion
+				if (vnode.dom.value !== normalized || vnode.dom.selectedIndex === -1) {
+					vnode.dom.value = normalized
+				}
+			}
+		}
+		if ("selectedIndex" in attrs2) setAttr(vnode, "selectedIndex", null, attrs2.selectedIndex, undefined)
 	}
 	function updateAttrs(vnode, old, attrs2, ns) {
 		if (attrs2 != null) {
@@ -895,33 +1124,45 @@ var coreRenderer = function($window) {
 				setAttr(vnode, key2, old && old[key2], attrs2[key2], ns)
 			}
 		}
+		var val
 		if (old != null) {
 			for (var key2 in old) {
-				if (attrs2 == null || !(key2 in attrs2)) {
-					if (key2 === "className") key2 = "class"
-					if (key2[0] === "o" && key2[1] === "n" && !isLifecycleMethod(key2)) updateEvent(vnode, key2, undefined)
-					else if (key2 !== "key") vnode.dom.removeAttribute(key2)
+				if (((val = old[key2]) != null) && (attrs2 == null || attrs2[key2] == null)) {
+					removeAttr(vnode, key2, val, ns)
 				}
 			}
 		}
 	}
 	function isFormAttribute(vnode, attr) {
-		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement
+		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === $doc.activeElement || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
 		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
 	}
-	function isAttribute(attr) {
-		return attr === "href" || attr === "list" || attr === "form" || attr === "width" || attr === "height"// || attr === "type"
-	}
-	function isCustomElement(vnode){
-		return vnode.attrs.is || vnode.tag.indexOf("-") > -1
-	}
-	function hasIntegrationMethods(source) {
-		return source != null && (source.oncreate || source.onupdate || source.onbeforeremove || source.onremove)
+	function hasPropertyKey(vnode, key2, ns) {
+		// Filter out namespaced keys
+		return ns === undefined && (
+			// If it's a custom element, just keep it.
+			vnode.tag.indexOf("-") > -1 || vnode.attrs != null && vnode.attrs.is ||
+			// If it's a normal element, let's try to avoid a few browser bugs.
+			key2 !== "href" && key2 !== "list" && key2 !== "form" && key2 !== "width" && key2 !== "height"// && key2 !== "type"
+			// Defer the property check until *after* we check everything.
+		) && key2 in vnode.dom
 	}
 	//style
 	function updateStyle(element, old, style) {
+		if (old != null && style != null && typeof old === "object" && typeof style === "object" && style !== old) {
+			// Both old & new are (different) objects.
+			// Update style properties that have changed
+			for (var key2 in style) {
+				if (style[key2] !== old[key2]) element.style[key2] = style[key2]
+			}
+			// Remove style properties that no longer exist
+			for (var key2 in old) {
+				if (!(key2 in style)) element.style[key2] = ""
+			}
+			return
+		}
 		if (old === style) element.style.cssText = "", old = null
 		if (style == null) element.style.cssText = ""
 		else if (typeof style === "string") element.style.cssText = style
@@ -930,45 +1171,65 @@ var coreRenderer = function($window) {
 			for (var key2 in style) {
 				element.style[key2] = style[key2]
 			}
-			if (old != null && typeof old !== "string") {
-				for (var key2 in old) {
-					if (!(key2 in style)) element.style[key2] = ""
-				}
-			}
+		}
+	}
+	// Here's an explanation of how this works:
+	// 1. The event names are always (by design) prefixed by `on`.
+	// 2. The EventListener interface accepts either a function or an object
+	//    with a `handleEvent` method.
+	// 3. The object does not inherit from `Object.prototype`, to avoid
+	//    any potential interference with that (e.g. setters).
+	// 4. The event name is remapped to the handler0 before calling it.
+	// 5. In function-based event handlers, `ev.target === this`. We replicate
+	//    that below.
+	// 6. In function-based event handlers, `return false` prevents the default
+	//    action and stops event propagation. We replicate that below.
+	function EventDict() {}
+	EventDict.prototype = Object.create(null)
+	EventDict.prototype.handleEvent = function (ev) {
+		var handler0 = this["on" + ev.type]
+		var result
+		if (typeof handler0 === "function") result = handler0.call(ev.target, ev)
+		else if (typeof handler0.handleEvent === "function") handler0.handleEvent(ev)
+		if (typeof onevent === "function") onevent.call(ev.target, ev)
+		if (result === false) {
+			ev.preventDefault()
+			ev.stopPropagation()
 		}
 	}
 	//event
 	function updateEvent(vnode, key2, value) {
-		var element = vnode.dom
-		var callback = typeof onevent !== "function" ? value : function(e) {
-			var result = value.call(element, e)
-			onevent.call(element, e)
-			return result
-		}
-		if (key2 in element) element[key2] = typeof value === "function" ? callback : null
-		else {
-			var eventName = key2.slice(2)
-			if (vnode.events === undefined) vnode.events = {}
-			if (vnode.events[key2] === callback) return
-			if (vnode.events[key2] != null) element.removeEventListener(eventName, vnode.events[key2], false)
-			if (typeof value === "function") {
-				vnode.events[key2] = callback
-				element.addEventListener(eventName, vnode.events[key2], false)
+		if (vnode.events != null) {
+			if (vnode.events[key2] === value) return
+			if (value != null && (typeof value === "function" || typeof value === "object")) {
+				if (vnode.events[key2] == null) vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
+				vnode.events[key2] = value
+			} else {
+				if (vnode.events[key2] != null) vnode.dom.removeEventListener(key2.slice(2), vnode.events, false)
+				vnode.events[key2] = undefined
 			}
+		} else if (value != null && (typeof value === "function" || typeof value === "object")) {
+			vnode.events = new EventDict()
+			vnode.dom.addEventListener(key2.slice(2), vnode.events, false)
+			vnode.events[key2] = value
 		}
 	}
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
-		if (typeof source.oninit === "function") source.oninit.call(vnode.state, vnode)
-		if (typeof source.oncreate === "function") hooks.push(source.oncreate.bind(vnode.state, vnode))
+		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
+		if (typeof source.oncreate === "function") hooks.push(callHook.bind(source.oncreate, vnode))
 	}
 	function updateLifecycle(source, vnode, hooks) {
-		if (typeof source.onupdate === "function") hooks.push(source.onupdate.bind(vnode.state, vnode))
+		if (typeof source.onupdate === "function") hooks.push(callHook.bind(source.onupdate, vnode))
 	}
 	function shouldNotUpdate(vnode, old) {
 		var forceVnodeUpdate, forceComponentUpdate
-		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") forceVnodeUpdate = vnode.attrs.onbeforeupdate.call(vnode.state, vnode, old)
-		if (typeof vnode.tag !== "string" && typeof vnode._state.onbeforeupdate === "function") forceComponentUpdate = vnode._state.onbeforeupdate.call(vnode.state, vnode, old)
+		if (vnode.attrs != null && typeof vnode.attrs.onbeforeupdate === "function") {
+			forceVnodeUpdate = callHook.call(vnode.attrs.onbeforeupdate, vnode, old)
+		}
+		if (typeof vnode.tag !== "string" && typeof vnode.state.onbeforeupdate === "function") {
+			forceComponentUpdate = callHook.call(vnode.state.onbeforeupdate, vnode, old)
+		}
 		if (!(forceVnodeUpdate === undefined && forceComponentUpdate === undefined) && !forceVnodeUpdate && !forceComponentUpdate) {
 			vnode.dom = old.dom
 			vnode.domSize = old.domSize
@@ -982,62 +1243,62 @@ var coreRenderer = function($window) {
 		var hooks = []
 		var active = $doc.activeElement
 		var namespace = dom.namespaceURI
-		// First time0 rendering into a node clears it out
+		// First time rendering0 into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
-		if (!Array.isArray(vnodes)) vnodes = [vnodes]
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
+		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// document.activeElement can return null in IE https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
-		if (active != null && $doc.activeElement !== active) active.focus()
+		if (active != null && $doc.activeElement !== active && typeof active.focus === "function") active.focus()
 		for (var i = 0; i < hooks.length; i++) hooks[i]()
 	}
 	return {render: render, setEventCallback: setEventCallback}
 }
 function throttle(callback) {
 	//60fps translates to 16.6ms, round it down since setTimeout requires int
-	var time = 16
+	var delay = 16
 	var last = 0, pending = null
 	var timeout = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setTimeout
 	return function() {
-		var now = Date.now()
-		if (last === 0 || now - last >= time) {
-			last = now
-			callback()
-		}
-		else if (pending === null) {
+		var elapsed = Date.now() - last
+		if (pending === null) {
 			pending = timeout(function() {
 				pending = null
 				callback()
 				last = Date.now()
-			}, time - (now - last))
+			}, delay - elapsed)
 		}
 	}
 }
-var _11 = function($window) {
+var _12 = function($window, throttleMock) {
 	var renderService = coreRenderer($window)
 	renderService.setEventCallback(function(e) {
 		if (e.redraw === false) e.redraw = undefined
 		else redraw()
 	})
 	var callbacks = []
+	var rendering = false
 	function subscribe(key1, callback) {
 		unsubscribe(key1)
-		callbacks.push(key1, throttle(callback))
+		callbacks.push(key1, callback)
 	}
 	function unsubscribe(key1) {
 		var index = callbacks.indexOf(key1)
 		if (index > -1) callbacks.splice(index, 2)
 	}
-	function redraw() {
-		for (var i = 1; i < callbacks.length; i += 2) {
-			callbacks[i]()
-		}
+	function sync() {
+		if (rendering) throw new Error("Nested m.redraw.sync() call")
+		rendering = true
+		for (var i = 1; i < callbacks.length; i+=2) try {callbacks[i]()} catch (e) {if (typeof console !== "undefined") console.error(e)}
+		rendering = false
 	}
+	var redraw = (throttleMock || throttle)(sync)
+	redraw.sync = sync
 	return {subscribe: subscribe, unsubscribe: unsubscribe, redraw: redraw, render: renderService.render}
 }
-var redrawService = _11(window)
+var redrawService = _12(window)
 requestService.setCompletionCallback(redrawService.redraw)
-var _16 = function(redrawService0) {
+var _17 = function(redrawService0) {
 	return function(root, component) {
 		if (component === null) {
 			redrawService0.render(root, [])
@@ -1051,10 +1312,10 @@ var _16 = function(redrawService0) {
 			redrawService0.render(root, Vnode(component))
 		}
 		redrawService0.subscribe(root, run0)
-		redrawService0.redraw()
+		run0()
 	}
 }
-m.mount = _16(redrawService)
+m.mount = _17(redrawService)
 var Promise = PromisePolyfill
 var parseQueryString = function(string) {
 	if (string === "" || string == null) return {}
@@ -1069,12 +1330,12 @@ var parseQueryString = function(string) {
 		var levels = key5.split(/\]\[?|\[/)
 		var cursor = data0
 		if (key5.indexOf("[") > -1) levels.pop()
-		for (var j = 0; j < levels.length; j++) {
-			var level = levels[j], nextLevel = levels[j + 1]
+		for (var j0 = 0; j0 < levels.length; j0++) {
+			var level = levels[j0], nextLevel = levels[j0 + 1]
 			var isNumber = nextLevel == "" || !isNaN(parseInt(nextLevel, 10))
-			var isValue = j === levels.length - 1
+			var isValue = j0 === levels.length - 1
 			if (level === "") {
-				var key5 = levels.slice(0, j).join()
+				var key5 = levels.slice(0, j0).join()
 				if (counters[key5] == null) counters[key5] = 0
 				level = counters[key5]++
 			}
@@ -1095,12 +1356,12 @@ var coreRouter = function($window) {
 		return data
 	}
 	var asyncId
-	function debounceAsync(callback0) {
+	function debounceAsync(callback) {
 		return function() {
 			if (asyncId != null) return
 			asyncId = callAsync0(function() {
 				asyncId = null
-				callback0()
+				callback()
 			})
 		}
 	}
@@ -1182,15 +1443,20 @@ var coreRouter = function($window) {
 	}
 	return router
 }
-var _20 = function($window, redrawService0) {
+var _21 = function($window, redrawService0) {
 	var routeService = coreRouter($window)
-	var identity = function(v) {return v}
+	var identity = function(v0) {return v0}
 	var render1, component, attrs3, currentPath, lastUpdate
 	var route = function(root, defaultRoute, routes) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
-		var run1 = function() {
+		function run1() {
 			if (render1 != null) redrawService0.render(root, render1(Vnode(component, attrs3.key, attrs3)))
 		}
+		var redraw2 = function() {
+			run1()
+			redraw2 = redrawService0.redraw
+		}
+		redrawService0.subscribe(root, run1)
 		var bail = function(path) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
@@ -1201,7 +1467,7 @@ var _20 = function($window, redrawService0) {
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs3 = params, currentPath = path, lastUpdate = null
 				render1 = (routeResolver.render || identity).bind(routeResolver)
-				run1()
+				redraw2()
 			}
 			if (payload.view || typeof payload === "function") update({}, payload)
 			else {
@@ -1213,7 +1479,6 @@ var _20 = function($window, redrawService0) {
 				else update(payload, "div")
 			}
 		}, bail)
-		redrawService0.subscribe(root, run1)
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {
@@ -1225,7 +1490,7 @@ var _20 = function($window, redrawService0) {
 	}
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix0) {routeService.prefix = prefix0}
-	route.link = function(vnode1) {
+	var link = function(options, vnode1) {
 		vnode1.dom.setAttribute("href", routeService.prefix + vnode1.attrs.href)
 		vnode1.dom.onclick = function(e) {
 			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
@@ -1233,8 +1498,12 @@ var _20 = function($window, redrawService0) {
 			e.redraw = false
 			var href = this.getAttribute("href")
 			if (href.indexOf(routeService.prefix) === 0) href = href.slice(routeService.prefix.length)
-			route.set(href, undefined, undefined)
+			route.set(href, undefined, options)
 		}
+	}
+	route.link = function(args0) {
+		if (args0.tag == null) return link.bind(link, args0)
+		return link({}, args0)
 	}
 	route.param = function(key3) {
 		if(typeof attrs3 !== "undefined" && typeof key3 !== "undefined") return attrs3[key3]
@@ -1242,26 +1511,34 @@ var _20 = function($window, redrawService0) {
 	}
 	return route
 }
-m.route = _20(window, redrawService)
-m.withAttr = function(attrName, callback1, context) {
+m.route = _21(window, redrawService)
+m.withAttr = function(attrName, callback, context) {
 	return function(e) {
-		callback1.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
+		callback.call(context || this, attrName in e.currentTarget ? e.currentTarget[attrName] : e.currentTarget.getAttribute(attrName))
 	}
 }
-var _28 = coreRenderer(window)
-m.render = _28.render
+m.prop = function (store) {
+	return {
+		get: function() { return store },
+		toJSON: function() { return store },
+		set: function(value0) { return store = value0 }
+	}
+}
+var _30 = coreRenderer(window)
+m.render = _30.render
 m.redraw = redrawService.redraw
 m.request = requestService.request
 m.jsonp = requestService.jsonp
 m.parseQueryString = parseQueryString
 m.buildQueryString = buildQueryString
-m.version = "1.1.6"
+m.version = "2.0.0-rc.1"
 m.vnode = Vnode
+m.PromisePolyfill = PromisePolyfill
 if (typeof module !== "undefined") module["exports"] = m
 else window.m = m
 }());
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"timers":329}],3:[function(require,module,exports){
+},{"timers":338}],3:[function(require,module,exports){
 "use strict"
 
 module.exports = require("./stream/stream")
@@ -1288,7 +1565,7 @@ function initStream(stream) {
 	stream.constructor = createStream
 	stream._state = {id: guid++, value: undefined, state: 0, derive: undefined, recover: undefined, deps: {}, parents: [], endStream: undefined, unregister: undefined}
 	stream.map = stream["fantasy-land/map"] = map, stream["fantasy-land/ap"] = ap, stream["fantasy-land/of"] = createStream
-	stream.valueOf = valueOf, stream.toJSON = toJSON, stream.toString = valueOf
+	stream.toJSON = toJSON
 
 	Object.defineProperties(stream, {
 		end: {get: function() {
@@ -1322,7 +1599,7 @@ function updateDependency(stream, mustSync) {
 	var state = stream._state, parents = state.parents
 	if (parents.length > 0 && parents.every(active) && (mustSync || parents.some(changed))) {
 		var value = stream._state.derive()
-		if (value === HALT) return false
+		if (value === HALT) return unregisterStream(stream)
 		updateState(stream, value)
 	}
 }
@@ -1370,7 +1647,6 @@ function unregisterStream(stream) {
 
 function map(fn) {return combine(function(stream) {return fn(stream())}, [this])}
 function ap(stream) {return combine(function(s1, s2) {return s1()(s2())}, [stream, this])}
-function valueOf() {return this._state.value}
 function toJSON() {return this._state.value != null && typeof this._state.value.toJSON === "function" ? this._state.value.toJSON() : this._state.value}
 
 function valid(stream) {return stream._state }
@@ -1386,7 +1662,9 @@ function merge(streams) {
 
 function scan(reducer, seed, stream) {
 	var newStream = combine(function (s) {
-		return seed = reducer(seed, s._state.value)
+		var next = reducer(seed, s._state.value)
+		if (next !== HALT) return seed = next
+		return HALT
 	}, [stream])
 
 	if (newStream._state.state === 0) newStream(seed)
@@ -1650,7 +1928,7 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],7:[function(require,module,exports){
-var always = /*#__PURE__*/require('./always');
+
 
 /**
  * A function that always returns `false`. Any passed in parameters are ignored.
@@ -1662,17 +1940,17 @@ var always = /*#__PURE__*/require('./always');
  * @sig * -> Boolean
  * @param {*}
  * @return {Boolean}
- * @see R.always, R.T
+ * @see R.T
  * @example
  *
  *      R.F(); //=> false
  */
-
-
-var F = /*#__PURE__*/always(false);
+var F = function () {
+  return false;
+};
 module.exports = F;
-},{"./always":15}],8:[function(require,module,exports){
-var always = /*#__PURE__*/require('./always');
+},{}],8:[function(require,module,exports){
+
 
 /**
  * A function that always returns `true`. Any passed in parameters are ignored.
@@ -1684,16 +1962,16 @@ var always = /*#__PURE__*/require('./always');
  * @sig * -> Boolean
  * @param {*}
  * @return {Boolean}
- * @see R.always, R.F
+ * @see R.F
  * @example
  *
  *      R.T(); //=> true
  */
-
-
-var T = /*#__PURE__*/always(true);
+var T = function () {
+  return true;
+};
 module.exports = T;
-},{"./always":15}],9:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /**
  * A special placeholder value used to specify "gaps" within curried functions,
  * allowing partial application of any combination of arguments, regardless of
@@ -1711,13 +1989,14 @@ module.exports = T;
  *   - `g(_, 2)(1, 3)`
  *   - `g(_, 2)(_, 3)(1)`
  *
+ * @name __
  * @constant
  * @memberOf R
  * @since v0.6.0
  * @category Function
  * @example
  *
- *      var greet = R.replace('{name}', R.__, 'Hello, {name}!');
+ *      const greet = R.replace('{name}', R.__, 'Hello, {name}!');
  *      greet('Alice'); //=> 'Hello, Alice!'
  */
 module.exports = { '@@functional/placeholder': true };
@@ -1747,7 +2026,7 @@ var add = /*#__PURE__*/_curry2(function add(a, b) {
   return Number(a) + Number(b);
 });
 module.exports = add;
-},{"./internal/_curry2":112}],11:[function(require,module,exports){
+},{"./internal/_curry2":113}],11:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -1769,12 +2048,12 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @since v0.15.0
  * @category Function
  * @category List
- * @sig ((a ... -> b) ... -> [a] -> *) -> (a ..., Int, [a] -> b) ... -> [a] -> *)
+ * @sig ((a ... -> b) ... -> [a] -> *) -> ((a ..., Int, [a] -> b) ... -> [a] -> *)
  * @param {Function} fn A list iteration function that does not pass index or list to its callback
  * @return {Function} An altered list iteration function that passes (item, index, list) to its callback
  * @example
  *
- *      var mapIndexed = R.addIndex(R.map);
+ *      const mapIndexed = R.addIndex(R.map);
  *      mapIndexed((val, idx) => idx + '-' + val, ['f', 'o', 'o', 'b', 'a', 'r']);
  *      //=> ['0-f', '1-o', '2-o', '3-b', '4-a', '5-r']
  */
@@ -1795,7 +2074,7 @@ var addIndex = /*#__PURE__*/_curry1(function addIndex(fn) {
   });
 });
 module.exports = addIndex;
-},{"./curryN":48,"./internal/_concat":107,"./internal/_curry1":111}],12:[function(require,module,exports){
+},{"./curryN":49,"./internal/_concat":110,"./internal/_curry1":112}],12:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
@@ -1809,9 +2088,9 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @memberOf R
  * @since v0.14.0
  * @category List
- * @sig (a -> a) -> Number -> [a] -> [a]
- * @param {Function} fn The function to apply.
+ * @sig Number -> (a -> a) -> [a] -> [a]
  * @param {Number} idx The index.
+ * @param {Function} fn The function to apply.
  * @param {Array|Arguments} list An array-like object whose value
  *        at the supplied index will be replaced.
  * @return {Array} A copy of the supplied array-like object with
@@ -1820,14 +2099,14 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.update
  * @example
  *
- *      R.adjust(R.add(10), 1, [1, 2, 3]);     //=> [1, 12, 3]
- *      R.adjust(R.add(10))(1)([1, 2, 3]);     //=> [1, 12, 3]
- * @symb R.adjust(f, -1, [a, b]) = [a, f(b)]
- * @symb R.adjust(f, 0, [a, b]) = [f(a), b]
+ *      R.adjust(1, R.toUpper, ['a', 'b', 'c', 'd']);      //=> ['a', 'B', 'c', 'd']
+ *      R.adjust(-1, R.toUpper, ['a', 'b', 'c', 'd']);     //=> ['a', 'b', 'c', 'D']
+ * @symb R.adjust(-1, f, [a, b]) = [a, f(b)]
+ * @symb R.adjust(0, f, [a, b]) = [f(a), b]
  */
 
 
-var adjust = /*#__PURE__*/_curry3(function adjust(fn, idx, list) {
+var adjust = /*#__PURE__*/_curry3(function adjust(idx, fn, list) {
   if (idx >= list.length || idx < -list.length) {
     return list;
   }
@@ -1838,7 +2117,7 @@ var adjust = /*#__PURE__*/_curry3(function adjust(fn, idx, list) {
   return _list;
 });
 module.exports = adjust;
-},{"./internal/_concat":107,"./internal/_curry3":113}],13:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_curry3":114}],13:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -1865,7 +2144,7 @@ var _xall = /*#__PURE__*/require('./internal/_xall');
  * @see R.any, R.none, R.transduce
  * @example
  *
- *      var equals3 = R.equals(3);
+ *      const equals3 = R.equals(3);
  *      R.all(equals3)([3, 3, 3, 3]); //=> true
  *      R.all(equals3)([3, 3, 1, 3]); //=> false
  */
@@ -1882,7 +2161,7 @@ var all = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['all'], _xall, funct
   return true;
 }));
 module.exports = all;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xall":149}],14:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xall":153}],14:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -1911,9 +2190,9 @@ var reduce = /*#__PURE__*/require('./reduce');
  * @see R.anyPass
  * @example
  *
- *      var isQueen = R.propEq('rank', 'Q');
- *      var isSpade = R.propEq('suit', '♠︎');
- *      var isQueenOfSpades = R.allPass([isQueen, isSpade]);
+ *      const isQueen = R.propEq('rank', 'Q');
+ *      const isSpade = R.propEq('suit', '♠︎');
+ *      const isQueenOfSpades = R.allPass([isQueen, isSpade]);
  *
  *      isQueenOfSpades({rank: 'Q', suit: '♣︎'}); //=> false
  *      isQueenOfSpades({rank: 'Q', suit: '♠︎'}); //=> true
@@ -1934,7 +2213,7 @@ var allPass = /*#__PURE__*/_curry1(function allPass(preds) {
   });
 });
 module.exports = allPass;
-},{"./curryN":48,"./internal/_curry1":111,"./max":200,"./pluck":245,"./reduce":256}],15:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry1":112,"./max":204,"./pluck":253,"./reduce":264}],15:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -1953,7 +2232,7 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @return {Function} A Function :: * -> val.
  * @example
  *
- *      var t = R.always('Tee');
+ *      const t = R.always('Tee');
  *      t(); //=> 'Tee'
  */
 
@@ -1964,7 +2243,7 @@ var always = /*#__PURE__*/_curry1(function always(val) {
   };
 });
 module.exports = always;
-},{"./internal/_curry1":111}],16:[function(require,module,exports){
+},{"./internal/_curry1":112}],16:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -1992,7 +2271,7 @@ var and = /*#__PURE__*/_curry2(function and(a, b) {
   return a && b;
 });
 module.exports = and;
-},{"./internal/_curry2":112}],17:[function(require,module,exports){
+},{"./internal/_curry2":113}],17:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -2000,7 +2279,7 @@ var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
 var _xany = /*#__PURE__*/require('./internal/_xany');
 
 /**
- * Returns `true` if at least one of elements of the list match the predicate,
+ * Returns `true` if at least one of the elements of the list match the predicate,
  * `false` otherwise.
  *
  * Dispatches to the `any` method of the second argument, if present.
@@ -2019,8 +2298,8 @@ var _xany = /*#__PURE__*/require('./internal/_xany');
  * @see R.all, R.none, R.transduce
  * @example
  *
- *      var lessThan0 = R.flip(R.lt)(0);
- *      var lessThan2 = R.flip(R.lt)(2);
+ *      const lessThan0 = R.flip(R.lt)(0);
+ *      const lessThan2 = R.flip(R.lt)(2);
  *      R.any(lessThan0)([1, 2]); //=> false
  *      R.any(lessThan2)([1, 2]); //=> true
  */
@@ -2037,7 +2316,7 @@ var any = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['any'], _xany, funct
   return false;
 }));
 module.exports = any;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xany":150}],18:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xany":154}],18:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -2066,9 +2345,9 @@ var reduce = /*#__PURE__*/require('./reduce');
  * @see R.allPass
  * @example
  *
- *      var isClub = R.propEq('suit', '♣');
- *      var isSpade = R.propEq('suit', '♠');
- *      var isBlackCard = R.anyPass([isClub, isSpade]);
+ *      const isClub = R.propEq('suit', '♣');
+ *      const isSpade = R.propEq('suit', '♠');
+ *      const isBlackCard = R.anyPass([isClub, isSpade]);
  *
  *      isBlackCard({rank: '10', suit: '♣'}); //=> true
  *      isBlackCard({rank: 'Q', suit: '♠'}); //=> true
@@ -2090,7 +2369,7 @@ var anyPass = /*#__PURE__*/_curry1(function anyPass(preds) {
   });
 });
 module.exports = anyPass;
-},{"./curryN":48,"./internal/_curry1":111,"./max":200,"./pluck":245,"./reduce":256}],19:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry1":112,"./max":204,"./pluck":253,"./reduce":264}],19:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -2111,7 +2390,7 @@ var map = /*#__PURE__*/require('./map');
  * @category Function
  * @sig [a -> b] -> [a] -> [b]
  * @sig Apply f => f (a -> b) -> f a -> f b
- * @sig (a -> b -> c) -> (a -> b) -> (a -> c)
+ * @sig (r -> a -> b) -> (r -> a) -> (r -> b)
  * @param {*} applyF
  * @param {*} applyX
  * @return {*}
@@ -2130,14 +2409,12 @@ var map = /*#__PURE__*/require('./map');
 var ap = /*#__PURE__*/_curry2(function ap(applyF, applyX) {
   return typeof applyX['fantasy-land/ap'] === 'function' ? applyX['fantasy-land/ap'](applyF) : typeof applyF.ap === 'function' ? applyF.ap(applyX) : typeof applyF === 'function' ? function (x) {
     return applyF(x)(applyX(x));
-  } :
-  // else
-  _reduce(function (acc, f) {
+  } : _reduce(function (acc, f) {
     return _concat(acc, map(f, applyX));
   }, [], applyF);
 });
 module.exports = ap;
-},{"./internal/_concat":107,"./internal/_curry2":112,"./internal/_reduce":144,"./map":194}],20:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_curry2":113,"./internal/_reduce":148,"./map":198}],20:[function(require,module,exports){
 var _aperture = /*#__PURE__*/require('./internal/_aperture');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -2171,7 +2448,7 @@ var _xaperture = /*#__PURE__*/require('./internal/_xaperture');
 
 var aperture = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xaperture, _aperture));
 module.exports = aperture;
-},{"./internal/_aperture":99,"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xaperture":151}],21:[function(require,module,exports){
+},{"./internal/_aperture":102,"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xaperture":155}],21:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -2202,7 +2479,7 @@ var append = /*#__PURE__*/_curry2(function append(el, list) {
   return _concat(list, [el]);
 });
 module.exports = append;
-},{"./internal/_concat":107,"./internal/_curry2":112}],22:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_curry2":113}],22:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -2221,7 +2498,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.call, R.unapply
  * @example
  *
- *      var nums = [1, 2, 3, -99, 42, 6, 7];
+ *      const nums = [1, 2, 3, -99, 42, 6, 7];
  *      R.apply(Math.max, nums); //=> 42
  * @symb R.apply(f, [a, b, c]) = f(a, b, c)
  */
@@ -2231,14 +2508,12 @@ var apply = /*#__PURE__*/_curry2(function apply(fn, args) {
   return fn.apply(this, args);
 });
 module.exports = apply;
-},{"./internal/_curry2":112}],23:[function(require,module,exports){
+},{"./internal/_curry2":113}],23:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var apply = /*#__PURE__*/require('./apply');
 
 var curryN = /*#__PURE__*/require('./curryN');
-
-var map = /*#__PURE__*/require('./map');
 
 var max = /*#__PURE__*/require('./max');
 
@@ -2246,7 +2521,20 @@ var pluck = /*#__PURE__*/require('./pluck');
 
 var reduce = /*#__PURE__*/require('./reduce');
 
+var keys = /*#__PURE__*/require('./keys');
+
 var values = /*#__PURE__*/require('./values');
+
+// Use custom mapValues function to avoid issues with specs that include a "map" key and R.map
+// delegating calls to .map
+
+
+function mapValues(fn, obj) {
+  return keys(obj).reduce(function (acc, key) {
+    acc[key] = fn(obj[key]);
+    return acc;
+  }, {});
+}
 
 /**
  * Given a spec object recursively mapping properties to functions, creates a
@@ -2266,56 +2554,55 @@ var values = /*#__PURE__*/require('./values');
  * @see R.converge, R.juxt
  * @example
  *
- *      var getMetrics = R.applySpec({
+ *      const getMetrics = R.applySpec({
  *        sum: R.add,
  *        nested: { mul: R.multiply }
  *      });
  *      getMetrics(2, 4); // => { sum: 6, nested: { mul: 8 } }
  * @symb R.applySpec({ x: f, y: { z: g } })(a, b) = { x: f(a, b), y: { z: g(a, b) } }
  */
-
-
 var applySpec = /*#__PURE__*/_curry1(function applySpec(spec) {
-  spec = map(function (v) {
+  spec = mapValues(function (v) {
     return typeof v == 'function' ? v : applySpec(v);
   }, spec);
+
   return curryN(reduce(max, 0, pluck('length', values(spec))), function () {
     var args = arguments;
-    return map(function (f) {
+    return mapValues(function (f) {
       return apply(f, args);
     }, spec);
   });
 });
 module.exports = applySpec;
-},{"./apply":22,"./curryN":48,"./internal/_curry1":111,"./map":194,"./max":200,"./pluck":245,"./reduce":256,"./values":315}],24:[function(require,module,exports){
+},{"./apply":22,"./curryN":49,"./internal/_curry1":112,"./keys":185,"./max":204,"./pluck":253,"./reduce":264,"./values":325}],24:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
-* Takes a value and applies a function to it.
-*
-* This function is also known as the `thrush` combinator.
-*
-* @func
-* @memberOf R
+ * Takes a value and applies a function to it.
+ *
+ * This function is also known as the `thrush` combinator.
+ *
+ * @func
+ * @memberOf R
  * @since v0.25.0
-* @category Function
-* @sig a -> (a -> b) -> b
-* @param {*} x The value
-* @param {Function} f The function to apply
-* @return {*} The result of applying `f` to `x`
-* @example
-*
-*      var t42 = R.applyTo(42);
-*      t42(R.identity); //=> 42
-*      t42(R.add(1)); //=> 43
-*/
+ * @category Function
+ * @sig a -> (a -> b) -> b
+ * @param {*} x The value
+ * @param {Function} f The function to apply
+ * @return {*} The result of applying `f` to `x`
+ * @example
+ *
+ *      const t42 = R.applyTo(42);
+ *      t42(R.identity); //=> 42
+ *      t42(R.add(1)); //=> 43
+ */
 
 
 var applyTo = /*#__PURE__*/_curry2(function applyTo(x, f) {
   return f(x);
 });
 module.exports = applyTo;
-},{"./internal/_curry2":112}],25:[function(require,module,exports){
+},{"./internal/_curry2":113}],25:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -2334,11 +2621,14 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.descend
  * @example
  *
- *      var byAge = R.ascend(R.prop('age'));
- *      var people = [
- *        // ...
+ *      const byAge = R.ascend(R.prop('age'));
+ *      const people = [
+ *        { name: 'Emma', age: 70 },
+ *        { name: 'Peter', age: 78 },
+ *        { name: 'Mikhail', age: 62 },
  *      ];
- *      var peopleByYoungestFirst = R.sort(byAge, people);
+ *      const peopleByYoungestFirst = R.sort(byAge, people);
+ *        //=> [{ name: 'Mikhail', age: 62 },{ name: 'Emma', age: 70 }, { name: 'Peter', age: 78 }]
  */
 
 
@@ -2348,7 +2638,7 @@ var ascend = /*#__PURE__*/_curry3(function ascend(fn, a, b) {
   return aa < bb ? -1 : aa > bb ? 1 : 0;
 });
 module.exports = ascend;
-},{"./internal/_curry3":113}],26:[function(require,module,exports){
+},{"./internal/_curry3":114}],26:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -2366,7 +2656,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {*} val The new value
  * @param {Object} obj The object to clone
  * @return {Object} A new object equivalent to the original except for the changed property.
- * @see R.dissoc
+ * @see R.dissoc, R.pick
  * @example
  *
  *      R.assoc('c', 3, {a: 1, b: 2}); //=> {a: 1, b: 2, c: 3}
@@ -2382,7 +2672,7 @@ var assoc = /*#__PURE__*/_curry3(function assoc(prop, val, obj) {
   return result;
 });
 module.exports = assoc;
-},{"./internal/_curry3":113}],27:[function(require,module,exports){
+},{"./internal/_curry3":114}],27:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -2439,7 +2729,7 @@ var assocPath = /*#__PURE__*/_curry3(function assocPath(path, val, obj) {
   }
 });
 module.exports = assocPath;
-},{"./assoc":26,"./internal/_curry3":113,"./internal/_has":123,"./internal/_isArray":127,"./internal/_isInteger":130,"./isNil":178}],28:[function(require,module,exports){
+},{"./assoc":26,"./internal/_curry3":114,"./internal/_has":124,"./internal/_isArray":130,"./internal/_isInteger":133,"./isNil":182}],28:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var nAry = /*#__PURE__*/require('./nAry');
@@ -2460,13 +2750,13 @@ var nAry = /*#__PURE__*/require('./nAry');
  * @see R.nAry, R.unary
  * @example
  *
- *      var takesThreeArgs = function(a, b, c) {
+ *      const takesThreeArgs = function(a, b, c) {
  *        return [a, b, c];
  *      };
  *      takesThreeArgs.length; //=> 3
  *      takesThreeArgs(1, 2, 3); //=> [1, 2, 3]
  *
- *      var takesTwoArgs = R.binary(takesThreeArgs);
+ *      const takesTwoArgs = R.binary(takesThreeArgs);
  *      takesTwoArgs.length; //=> 2
  *      // Only 2 arguments are passed to the wrapped function
  *      takesTwoArgs(1, 2, 3); //=> [1, 2, undefined]
@@ -2478,7 +2768,7 @@ var binary = /*#__PURE__*/_curry1(function binary(fn) {
   return nAry(2, fn);
 });
 module.exports = binary;
-},{"./internal/_curry1":111,"./nAry":218}],29:[function(require,module,exports){
+},{"./internal/_curry1":112,"./nAry":224}],29:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -2500,7 +2790,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.partial
  * @example
  *
- *      var log = R.bind(console.log, console);
+ *      const log = R.bind(console.log, console);
  *      R.pipe(R.assoc('a', 2), R.tap(log), R.assoc('a', 3))({a: 1}); //=> {a: 3}
  *      // logs {a: 2}
  * @symb R.bind(f, o)(a, b) = f.call(o, a, b)
@@ -2513,7 +2803,7 @@ var bind = /*#__PURE__*/_curry2(function bind(fn, thisObj) {
   });
 });
 module.exports = bind;
-},{"./internal/_arity":100,"./internal/_curry2":112}],30:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_curry2":113}],30:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isFunction = /*#__PURE__*/require('./internal/_isFunction');
@@ -2544,11 +2834,14 @@ var lift = /*#__PURE__*/require('./lift');
  * @see R.and
  * @example
  *
- *      var gt10 = R.gt(R.__, 10)
- *      var lt20 = R.lt(R.__, 20)
- *      var f = R.both(gt10, lt20);
+ *      const gt10 = R.gt(R.__, 10)
+ *      const lt20 = R.lt(R.__, 20)
+ *      const f = R.both(gt10, lt20);
  *      f(15); //=> true
  *      f(30); //=> false
+ *
+ *      R.both(Maybe.Just(false), Maybe.Just(55)); // => Maybe.Just(false)
+ *      R.both([false, false, 'a'], [11]); //=> [false, false, 11]
  */
 
 
@@ -2558,7 +2851,7 @@ var both = /*#__PURE__*/_curry2(function both(f, g) {
   } : lift(and)(f, g);
 });
 module.exports = both;
-},{"./and":16,"./internal/_curry2":112,"./internal/_isFunction":129,"./lift":190}],31:[function(require,module,exports){
+},{"./and":16,"./internal/_curry2":113,"./internal/_isFunction":132,"./lift":194}],31:[function(require,module,exports){
 var curry = /*#__PURE__*/require('./curry');
 
 /**
@@ -2581,11 +2874,11 @@ var curry = /*#__PURE__*/require('./curry');
  *
  *      R.call(R.add, 1, 2); //=> 3
  *
- *      var indentN = R.pipe(R.repeat(' '),
+ *      const indentN = R.pipe(R.repeat(' '),
  *                           R.join(''),
  *                           R.replace(/^(?!$)/gm));
  *
- *      var format = R.converge(R.call, [
+ *      const format = R.converge(R.call, [
  *                                  R.pipe(R.prop('indent'), indentN),
  *                                  R.prop('value')
  *                              ]);
@@ -2599,7 +2892,7 @@ var call = /*#__PURE__*/curry(function call(fn) {
   return fn.apply(this, Array.prototype.slice.call(arguments, 1));
 });
 module.exports = call;
-},{"./curry":47}],32:[function(require,module,exports){
+},{"./curry":48}],32:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -2612,10 +2905,14 @@ var map = /*#__PURE__*/require('./map');
 
 /**
  * `chain` maps a function over a list and concatenates the results. `chain`
- * is also known as `flatMap` in some libraries
+ * is also known as `flatMap` in some libraries.
  *
  * Dispatches to the `chain` method of the second argument, if present,
  * according to the [FantasyLand Chain spec](https://github.com/fantasyland/fantasy-land#chain).
+ *
+ * If second argument is a function, `chain(f, g)(x)` is equivalent to `f(g(x), x)`.
+ *
+ * Acts as a transducer if a transformer is given in list position.
  *
  * @func
  * @memberOf R
@@ -2627,7 +2924,7 @@ var map = /*#__PURE__*/require('./map');
  * @return {Array} The result of flat-mapping `list` with `fn`
  * @example
  *
- *      var duplicate = n => [n, n];
+ *      const duplicate = n => [n, n];
  *      R.chain(duplicate, [1, 2, 3]); //=> [1, 1, 2, 2, 3, 3]
  *
  *      R.chain(R.append, R.head)([1, 2, 3]); //=> [1, 2, 3, 1]
@@ -2643,7 +2940,7 @@ var chain = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['fantasy-land/chai
   return _makeFlat(false)(map(fn, monad));
 }));
 module.exports = chain;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_makeFlat":137,"./internal/_xchain":152,"./map":194}],33:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_makeFlat":140,"./internal/_xchain":156,"./map":198}],33:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -2675,7 +2972,7 @@ var clamp = /*#__PURE__*/_curry3(function clamp(min, max, value) {
   return value < min ? min : value > max ? max : value;
 });
 module.exports = clamp;
-},{"./internal/_curry3":113}],34:[function(require,module,exports){
+},{"./internal/_curry3":114}],34:[function(require,module,exports){
 var _clone = /*#__PURE__*/require('./internal/_clone');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -2696,8 +2993,8 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @return {*} A deeply cloned copy of `val`
  * @example
  *
- *      var objects = [{}, {}, {}];
- *      var objectsClone = R.clone(objects);
+ *      const objects = [{}, {}, {}];
+ *      const objectsClone = R.clone(objects);
  *      objects === objectsClone; //=> false
  *      objects[0] === objectsClone[0]; //=> false
  */
@@ -2707,7 +3004,7 @@ var clone = /*#__PURE__*/_curry1(function clone(value) {
   return value != null && typeof value.clone === 'function' ? value.clone() : _clone(value, [], [], true);
 });
 module.exports = clone;
-},{"./internal/_clone":104,"./internal/_curry1":111}],35:[function(require,module,exports){
+},{"./internal/_clone":107,"./internal/_curry1":112}],35:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -2724,11 +3021,14 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @return {Function} A Function :: a -> b -> Int that returns `-1` if a < b, `1` if b < a, otherwise `0`
  * @example
  *
- *      var byAge = R.comparator((a, b) => a.age < b.age);
- *      var people = [
- *        // ...
+ *      const byAge = R.comparator((a, b) => a.age < b.age);
+ *      const people = [
+ *        { name: 'Emma', age: 70 },
+ *        { name: 'Peter', age: 78 },
+ *        { name: 'Mikhail', age: 62 },
  *      ];
- *      var peopleByIncreasingAge = R.sort(byAge, people);
+ *      const peopleByIncreasingAge = R.sort(byAge, people);
+ *        //=> [{ name: 'Mikhail', age: 62 },{ name: 'Emma', age: 70 }, { name: 'Peter', age: 78 }]
  */
 
 
@@ -2738,7 +3038,7 @@ var comparator = /*#__PURE__*/_curry1(function comparator(pred) {
   };
 });
 module.exports = comparator;
-},{"./internal/_curry1":111}],36:[function(require,module,exports){
+},{"./internal/_curry1":112}],36:[function(require,module,exports){
 var lift = /*#__PURE__*/require('./lift');
 
 var not = /*#__PURE__*/require('./not');
@@ -2759,7 +3059,7 @@ var not = /*#__PURE__*/require('./not');
  * @see R.not
  * @example
  *
- *      var isNotNil = R.complement(R.isNil);
+ *      const isNotNil = R.complement(R.isNil);
  *      isNil(null); //=> true
  *      isNotNil(null); //=> false
  *      isNil(7); //=> false
@@ -2769,7 +3069,7 @@ var not = /*#__PURE__*/require('./not');
 
 var complement = /*#__PURE__*/lift(not);
 module.exports = complement;
-},{"./lift":190,"./not":221}],37:[function(require,module,exports){
+},{"./lift":194,"./not":227}],37:[function(require,module,exports){
 var pipe = /*#__PURE__*/require('./pipe');
 
 var reverse = /*#__PURE__*/require('./reverse');
@@ -2790,8 +3090,8 @@ var reverse = /*#__PURE__*/require('./reverse');
  * @see R.pipe
  * @example
  *
- *      var classyGreeting = (firstName, lastName) => "The name's " + lastName + ", " + firstName + " " + lastName
- *      var yellGreeting = R.compose(R.toUpper, classyGreeting);
+ *      const classyGreeting = (firstName, lastName) => "The name's " + lastName + ", " + firstName + " " + lastName
+ *      const yellGreeting = R.compose(R.toUpper, classyGreeting);
  *      yellGreeting('James', 'Bond'); //=> "THE NAME'S BOND, JAMES BOND"
  *
  *      R.compose(Math.abs, R.add(1), R.multiply(2))(-4) //=> 7
@@ -2807,7 +3107,7 @@ function compose() {
   return pipe.apply(this, reverse(arguments));
 }
 module.exports = compose;
-},{"./pipe":242,"./reverse":265}],38:[function(require,module,exports){
+},{"./pipe":249,"./reverse":273}],38:[function(require,module,exports){
 var chain = /*#__PURE__*/require('./chain');
 
 var compose = /*#__PURE__*/require('./compose');
@@ -2828,13 +3128,14 @@ var map = /*#__PURE__*/require('./map');
  * @param {...Function} ...functions The functions to compose
  * @return {Function}
  * @see R.pipeK
+ * @deprecated since v0.26.0
  * @example
  *
  *       //  get :: String -> Object -> Maybe *
- *       var get = R.curry((propName, obj) => Maybe(obj[propName]))
+ *       const get = R.curry((propName, obj) => Maybe(obj[propName]))
  *
  *       //  getStateCode :: Maybe String -> Maybe String
- *       var getStateCode = R.composeK(
+ *       const getStateCode = R.composeK(
  *         R.compose(Maybe.of, R.toUpper),
  *         get('state'),
  *         get('address'),
@@ -2855,7 +3156,7 @@ function composeK() {
   return compose(compose.apply(this, map(chain, init)), last);
 }
 module.exports = composeK;
-},{"./chain":32,"./compose":37,"./map":194}],39:[function(require,module,exports){
+},{"./chain":32,"./compose":37,"./map":198}],39:[function(require,module,exports){
 var pipeP = /*#__PURE__*/require('./pipeP');
 
 var reverse = /*#__PURE__*/require('./reverse');
@@ -2873,9 +3174,10 @@ var reverse = /*#__PURE__*/require('./reverse');
  * @param {...Function} functions The functions to compose
  * @return {Function}
  * @see R.pipeP
+ * @deprecated since v0.26.0
  * @example
  *
- *      var db = {
+ *      const db = {
  *        users: {
  *          JOE: {
  *            name: 'Joe',
@@ -2885,12 +3187,12 @@ var reverse = /*#__PURE__*/require('./reverse');
  *      }
  *
  *      // We'll pretend to do a db lookup which returns a promise
- *      var lookupUser = (userId) => Promise.resolve(db.users[userId])
- *      var lookupFollowers = (user) => Promise.resolve(user.followers)
+ *      const lookupUser = (userId) => Promise.resolve(db.users[userId])
+ *      const lookupFollowers = (user) => Promise.resolve(user.followers)
  *      lookupUser('JOE').then(lookupFollowers)
  *
  *      //  followersForUser :: String -> Promise [UserId]
- *      var followersForUser = R.composeP(lookupFollowers, lookupUser);
+ *      const followersForUser = R.composeP(lookupFollowers, lookupUser);
  *      followersForUser('JOE').then(followers => console.log('Followers:', followers))
  *      // Followers: ["STEVE","SUZY"]
  */
@@ -2903,7 +3205,42 @@ function composeP() {
   return pipeP.apply(this, reverse(arguments));
 }
 module.exports = composeP;
-},{"./pipeP":244,"./reverse":265}],40:[function(require,module,exports){
+},{"./pipeP":251,"./reverse":273}],40:[function(require,module,exports){
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var pipeWith = /*#__PURE__*/require('./pipeWith');
+
+var reverse = /*#__PURE__*/require('./reverse');
+
+/**
+ * Performs right-to-left function composition using transforming function. The rightmost function may have
+ * any arity; the remaining functions must be unary.
+ *
+ * **Note:** The result of compose is not automatically curried.
+ *
+ * @func
+ * @memberOf R
+ * @category Function
+ * @sig ((* -> *), [(y -> z), (x -> y), ..., (o -> p), ((a, b, ..., n) -> o)]) -> ((a, b, ..., n) -> z)
+ * @param {...Function} ...functions The functions to compose
+ * @return {Function}
+ * @see R.compose, R.pipeWith
+ * @example
+ *
+ *      const composeWhileNotNil = R.composeWith((f, res) => R.isNil(res) ? res : f(res));
+ *
+ *      composeWhileNotNil([R.inc, R.prop('age')])({age: 1}) //=> 2
+ *      composeWhileNotNil([R.inc, R.prop('age')])({}) //=> undefined
+ *
+ * @symb R.composeWith(f)([g, h, i])(...args) = f(g, f(h, f(i, ...args)))
+ */
+
+
+var composeWith = /*#__PURE__*/_curry2(function composeWith(xf, list) {
+  return pipeWith.apply(this, [xf, reverse(list)]);
+});
+module.exports = composeWith;
+},{"./internal/_curry2":113,"./pipeWith":252,"./reverse":273}],41:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isArray = /*#__PURE__*/require('./internal/_isArray');
@@ -2966,7 +3303,7 @@ var concat = /*#__PURE__*/_curry2(function concat(a, b) {
   throw new TypeError(toString(a) + ' does not have a method named "concat" or "fantasy-land/concat"');
 });
 module.exports = concat;
-},{"./internal/_curry2":112,"./internal/_isArray":127,"./internal/_isFunction":129,"./internal/_isString":135,"./toString":293}],41:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_isArray":130,"./internal/_isFunction":132,"./internal/_isString":138,"./toString":303}],42:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -2992,9 +3329,10 @@ var reduce = /*#__PURE__*/require('./reduce');
  * @sig [[(*... -> Boolean),(*... -> *)]] -> (*... -> *)
  * @param {Array} pairs A list of [predicate, transformer]
  * @return {Function}
+ * @see R.ifElse, R.unless, R.when
  * @example
  *
- *      var fn = R.cond([
+ *      const fn = R.cond([
  *        [R.equals(0),   R.always('water freezes at 0°C')],
  *        [R.equals(100), R.always('water boils at 100°C')],
  *        [R.T,           temp => 'nothing special happens at ' + temp + '°C']
@@ -3020,7 +3358,7 @@ var cond = /*#__PURE__*/_curry1(function cond(pairs) {
   });
 });
 module.exports = cond;
-},{"./internal/_arity":100,"./internal/_curry1":111,"./map":194,"./max":200,"./reduce":256}],42:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_curry1":112,"./map":198,"./max":204,"./reduce":264}],43:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var constructN = /*#__PURE__*/require('./constructN');
@@ -3047,14 +3385,14 @@ var constructN = /*#__PURE__*/require('./constructN');
  *        return "It's a " + this.kind + "!";
  *      }
  *
- *      var AnimalConstructor = R.construct(Animal)
+ *      const AnimalConstructor = R.construct(Animal)
  *
  *      // Notice we no longer need the 'new' keyword:
  *      AnimalConstructor('Pig'); //=> {"kind": "Pig", "sighting": function (){...}};
  *
- *      var animalTypes = ["Lion", "Tiger", "Bear"];
- *      var animalSighting = R.invoker(0, 'sighting');
- *      var sightNewAnimal = R.compose(animalSighting, AnimalConstructor);
+ *      const animalTypes = ["Lion", "Tiger", "Bear"];
+ *      const animalSighting = R.invoker(0, 'sighting');
+ *      const sightNewAnimal = R.compose(animalSighting, AnimalConstructor);
  *      R.map(sightNewAnimal, animalTypes); //=> ["It's a Lion!", "It's a Tiger!", "It's a Bear!"]
  */
 
@@ -3063,7 +3401,7 @@ var construct = /*#__PURE__*/_curry1(function construct(Fn) {
   return constructN(Fn.length, Fn);
 });
 module.exports = construct;
-},{"./constructN":43,"./internal/_curry1":111}],43:[function(require,module,exports){
+},{"./constructN":44,"./internal/_curry1":112}],44:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var curry = /*#__PURE__*/require('./curry');
@@ -3091,14 +3429,14 @@ var nAry = /*#__PURE__*/require('./nAry');
  *      }
  *
  *      Salad.prototype.recipe = function() {
- *        var instructions = R.map(ingredient => 'Add a dollop of ' + ingredient, this.ingredients);
+ *        const instructions = R.map(ingredient => 'Add a dollop of ' + ingredient, this.ingredients);
  *        return R.join('\n', instructions);
  *      };
  *
- *      var ThreeLayerSalad = R.constructN(3, Salad);
+ *      const ThreeLayerSalad = R.constructN(3, Salad);
  *
  *      // Notice we no longer need the 'new' keyword, and the constructor is curried for 3 arguments.
- *      var salad = ThreeLayerSalad('Mayonnaise')('Potato Chips')('Ketchup');
+ *      const salad = ThreeLayerSalad('Mayonnaise')('Potato Chips')('Ketchup');
  *
  *      console.log(salad.recipe());
  *      // Add a dollop of Mayonnaise
@@ -3142,14 +3480,15 @@ var constructN = /*#__PURE__*/_curry2(function constructN(n, Fn) {
   }));
 });
 module.exports = constructN;
-},{"./curry":47,"./internal/_curry2":112,"./nAry":218}],44:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./internal/_contains');
+},{"./curry":48,"./internal/_curry2":113,"./nAry":224}],45:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./internal/_includes');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
  * Returns `true` if the specified value is equal, in [`R.equals`](#equals)
  * terms, to at least one element of the given list; `false` otherwise.
+ * Works also with strings.
  *
  * @func
  * @memberOf R
@@ -3159,19 +3498,21 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @param {Object} a The item to compare against.
  * @param {Array} list The array to consider.
  * @return {Boolean} `true` if an equivalent item is in the list, `false` otherwise.
- * @see R.any
+ * @see R.includes
+ * @deprecated since v0.26.0
  * @example
  *
  *      R.contains(3, [1, 2, 3]); //=> true
  *      R.contains(4, [1, 2, 3]); //=> false
  *      R.contains({ name: 'Fred' }, [{ name: 'Fred' }]); //=> true
  *      R.contains([42], [[42]]); //=> true
+ *      R.contains('ba', 'banana'); //=>true
  */
 
 
-var contains = /*#__PURE__*/_curry2(_contains);
+var contains = /*#__PURE__*/_curry2(_includes);
 module.exports = contains;
-},{"./internal/_contains":108,"./internal/_curry2":112}],45:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_includes":126}],46:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _map = /*#__PURE__*/require('./internal/_map');
@@ -3186,10 +3527,11 @@ var reduce = /*#__PURE__*/require('./reduce');
 
 /**
  * Accepts a converging function and a list of branching functions and returns
- * a new function. When invoked, this new function is applied to some
- * arguments, each branching function is applied to those same arguments. The
- * results of each branching function are passed as arguments to the converging
- * function to produce the return value.
+ * a new function. The arity of the new function is the same as the arity of
+ * the longest branching function. When invoked, this new function is applied
+ * to some arguments, and each branching function is applied to those same
+ * arguments. The results of each branching function are passed as arguments
+ * to the converging function to produce the return value.
  *
  * @func
  * @memberOf R
@@ -3203,10 +3545,10 @@ var reduce = /*#__PURE__*/require('./reduce');
  * @see R.useWith
  * @example
  *
- *      var average = R.converge(R.divide, [R.sum, R.length])
+ *      const average = R.converge(R.divide, [R.sum, R.length])
  *      average([1, 2, 3, 4, 5, 6, 7]) //=> 4
  *
- *      var strangeConcat = R.converge(R.concat, [R.toUpper, R.toLower])
+ *      const strangeConcat = R.converge(R.concat, [R.toUpper, R.toLower])
  *      strangeConcat("Yodel") //=> "YODELyodel"
  *
  * @symb R.converge(f, [g, h])(a, b) = f(g(a, b), h(a, b))
@@ -3223,7 +3565,7 @@ var converge = /*#__PURE__*/_curry2(function converge(after, fns) {
   });
 });
 module.exports = converge;
-},{"./curryN":48,"./internal/_curry2":112,"./internal/_map":138,"./max":200,"./pluck":245,"./reduce":256}],46:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry2":113,"./internal/_map":141,"./max":204,"./pluck":253,"./reduce":264}],47:[function(require,module,exports){
 var reduceBy = /*#__PURE__*/require('./reduceBy');
 
 /**
@@ -3244,10 +3586,10 @@ var reduceBy = /*#__PURE__*/require('./reduceBy');
  * @return {Object} An object mapping keys to number of occurrences in the list.
  * @example
  *
- *      var numbers = [1.0, 1.1, 1.2, 2.0, 3.0, 2.2];
+ *      const numbers = [1.0, 1.1, 1.2, 2.0, 3.0, 2.2];
  *      R.countBy(Math.floor)(numbers);    //=> {'1': 3, '2': 2, '3': 1}
  *
- *      var letters = ['a', 'b', 'A', 'a', 'B', 'c'];
+ *      const letters = ['a', 'b', 'A', 'a', 'B', 'c'];
  *      R.countBy(R.toLower)(letters);   //=> {'a': 3, 'b': 2, 'c': 1}
  */
 
@@ -3256,7 +3598,7 @@ var countBy = /*#__PURE__*/reduceBy(function (acc, elem) {
   return acc + 1;
 }, 0);
 module.exports = countBy;
-},{"./reduceBy":257}],47:[function(require,module,exports){
+},{"./reduceBy":265}],48:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -3292,14 +3634,14 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @sig (* -> a) -> (* -> a)
  * @param {Function} fn The function to curry.
  * @return {Function} A new, curried function.
- * @see R.curryN
+ * @see R.curryN, R.partial
  * @example
  *
- *      var addFourNumbers = (a, b, c, d) => a + b + c + d;
+ *      const addFourNumbers = (a, b, c, d) => a + b + c + d;
  *
- *      var curriedAddFourNumbers = R.curry(addFourNumbers);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
+ *      const curriedAddFourNumbers = R.curry(addFourNumbers);
+ *      const f = curriedAddFourNumbers(1, 2);
+ *      const g = f(3);
  *      g(4); //=> 10
  */
 
@@ -3308,7 +3650,7 @@ var curry = /*#__PURE__*/_curry1(function curry(fn) {
   return curryN(fn.length, fn);
 });
 module.exports = curry;
-},{"./curryN":48,"./internal/_curry1":111}],48:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry1":112}],49:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -3352,11 +3694,11 @@ var _curryN = /*#__PURE__*/require('./internal/_curryN');
  * @see R.curry
  * @example
  *
- *      var sumArgs = (...args) => R.sum(args);
+ *      const sumArgs = (...args) => R.sum(args);
  *
- *      var curriedAddFourNumbers = R.curryN(4, sumArgs);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
+ *      const curriedAddFourNumbers = R.curryN(4, sumArgs);
+ *      const f = curriedAddFourNumbers(1, 2);
+ *      const g = f(3);
  *      g(4); //=> 10
  */
 
@@ -3368,7 +3710,7 @@ var curryN = /*#__PURE__*/_curry2(function curryN(length, fn) {
   return _arity(length, _curryN(length, [], fn));
 });
 module.exports = curryN;
-},{"./internal/_arity":100,"./internal/_curry1":111,"./internal/_curry2":112,"./internal/_curryN":114}],49:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_curry1":112,"./internal/_curry2":113,"./internal/_curryN":115}],50:[function(require,module,exports){
 var add = /*#__PURE__*/require('./add');
 
 /**
@@ -3390,7 +3732,7 @@ var add = /*#__PURE__*/require('./add');
 
 var dec = /*#__PURE__*/add(-1);
 module.exports = dec;
-},{"./add":10}],50:[function(require,module,exports){
+},{"./add":10}],51:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -3407,10 +3749,11 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {*} The second value if it is not `null`, `undefined` or `NaN`, otherwise the default value
  * @example
  *
- *      var defaultTo42 = R.defaultTo(42);
+ *      const defaultTo42 = R.defaultTo(42);
  *
  *      defaultTo42(null);  //=> 42
  *      defaultTo42(undefined);  //=> 42
+ *      defaultTo42(false);  //=> false
  *      defaultTo42('Ramda');  //=> 'Ramda'
  *      // parseInt('string') results in NaN
  *      defaultTo42(parseInt('string')); //=> 42
@@ -3421,7 +3764,7 @@ var defaultTo = /*#__PURE__*/_curry2(function defaultTo(d, v) {
   return v == null || v !== v ? d : v;
 });
 module.exports = defaultTo;
-},{"./internal/_curry2":112}],51:[function(require,module,exports){
+},{"./internal/_curry2":113}],52:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -3440,11 +3783,14 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.ascend
  * @example
  *
- *      var byAge = R.descend(R.prop('age'));
- *      var people = [
- *        // ...
+ *      const byAge = R.descend(R.prop('age'));
+ *      const people = [
+ *        { name: 'Emma', age: 70 },
+ *        { name: 'Peter', age: 78 },
+ *        { name: 'Mikhail', age: 62 },
  *      ];
- *      var peopleByOldestFirst = R.sort(byAge, people);
+ *      const peopleByOldestFirst = R.sort(byAge, people);
+ *        //=> [{ name: 'Peter', age: 78 }, { name: 'Emma', age: 70 }, { name: 'Mikhail', age: 62 }]
  */
 
 
@@ -3454,10 +3800,10 @@ var descend = /*#__PURE__*/_curry3(function descend(fn, a, b) {
   return aa > bb ? -1 : aa < bb ? 1 : 0;
 });
 module.exports = descend;
-},{"./internal/_curry3":113}],52:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./internal/_contains');
-
+},{"./internal/_curry3":114}],53:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var _Set = /*#__PURE__*/require('./internal/_Set');
 
 /**
  * Finds the set (i.e. no duplicates) of all elements in the first list not
@@ -3485,8 +3831,15 @@ var difference = /*#__PURE__*/_curry2(function difference(first, second) {
   var out = [];
   var idx = 0;
   var firstLen = first.length;
+  var secondLen = second.length;
+  var toFilterOut = new _Set();
+
+  for (var i = 0; i < secondLen; i += 1) {
+    toFilterOut.add(second[i]);
+  }
+
   while (idx < firstLen) {
-    if (!_contains(first[idx], second) && !_contains(first[idx], out)) {
+    if (toFilterOut.add(first[idx])) {
       out[out.length] = first[idx];
     }
     idx += 1;
@@ -3494,8 +3847,8 @@ var difference = /*#__PURE__*/_curry2(function difference(first, second) {
   return out;
 });
 module.exports = difference;
-},{"./internal/_contains":108,"./internal/_curry2":112}],53:[function(require,module,exports){
-var _containsWith = /*#__PURE__*/require('./internal/_containsWith');
+},{"./internal/_Set":101,"./internal/_curry2":113}],54:[function(require,module,exports){
+var _includesWith = /*#__PURE__*/require('./internal/_includesWith');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
@@ -3516,9 +3869,9 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.difference, R.symmetricDifference, R.symmetricDifferenceWith
  * @example
  *
- *      var cmp = (x, y) => x.a === y.a;
- *      var l1 = [{a: 1}, {a: 2}, {a: 3}];
- *      var l2 = [{a: 3}, {a: 4}];
+ *      const cmp = (x, y) => x.a === y.a;
+ *      const l1 = [{a: 1}, {a: 2}, {a: 3}];
+ *      const l2 = [{a: 3}, {a: 4}];
  *      R.differenceWith(cmp, l1, l2); //=> [{a: 1}, {a: 2}]
  */
 
@@ -3528,7 +3881,7 @@ var differenceWith = /*#__PURE__*/_curry3(function differenceWith(pred, first, s
   var idx = 0;
   var firstLen = first.length;
   while (idx < firstLen) {
-    if (!_containsWith(pred, first[idx], second) && !_containsWith(pred, first[idx], out)) {
+    if (!_includesWith(pred, first[idx], second) && !_includesWith(pred, first[idx], out)) {
       out.push(first[idx]);
     }
     idx += 1;
@@ -3536,7 +3889,7 @@ var differenceWith = /*#__PURE__*/_curry3(function differenceWith(pred, first, s
   return out;
 });
 module.exports = differenceWith;
-},{"./internal/_containsWith":109,"./internal/_curry3":113}],54:[function(require,module,exports){
+},{"./internal/_curry3":114,"./internal/_includesWith":127}],55:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -3550,7 +3903,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @param {String} prop The name of the property to dissociate
  * @param {Object} obj The object to clone
  * @return {Object} A new object equivalent to the original but without the specified property
- * @see R.assoc
+ * @see R.assoc, R.omit
  * @example
  *
  *      R.dissoc('b', {a: 1, b: 2, c: 3}); //=> {a: 1, c: 3}
@@ -3566,10 +3919,12 @@ var dissoc = /*#__PURE__*/_curry2(function dissoc(prop, obj) {
   return result;
 });
 module.exports = dissoc;
-},{"./internal/_curry2":112}],55:[function(require,module,exports){
+},{"./internal/_curry2":113}],56:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isInteger = /*#__PURE__*/require('./internal/_isInteger');
+
+var _isArray = /*#__PURE__*/require('./internal/_isArray');
 
 var assoc = /*#__PURE__*/require('./assoc');
 
@@ -3605,13 +3960,13 @@ var dissocPath = /*#__PURE__*/_curry2(function dissocPath(path, obj) {
     case 0:
       return obj;
     case 1:
-      return _isInteger(path[0]) ? remove(path[0], 1, obj) : dissoc(path[0], obj);
+      return _isInteger(path[0]) && _isArray(obj) ? remove(path[0], 1, obj) : dissoc(path[0], obj);
     default:
       var head = path[0];
       var tail = Array.prototype.slice.call(path, 1);
       if (obj[head] == null) {
         return obj;
-      } else if (_isInteger(path[0])) {
+      } else if (_isInteger(head) && _isArray(obj)) {
         return update(head, dissocPath(tail, obj[head]), obj);
       } else {
         return assoc(head, dissocPath(tail, obj[head]), obj);
@@ -3619,7 +3974,7 @@ var dissocPath = /*#__PURE__*/_curry2(function dissocPath(path, obj) {
   }
 });
 module.exports = dissocPath;
-},{"./assoc":26,"./dissoc":54,"./internal/_curry2":112,"./internal/_isInteger":130,"./remove":262,"./update":313}],56:[function(require,module,exports){
+},{"./assoc":26,"./dissoc":55,"./internal/_curry2":113,"./internal/_isArray":130,"./internal/_isInteger":133,"./remove":270,"./update":323}],57:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -3638,10 +3993,10 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  *
  *      R.divide(71, 100); //=> 0.71
  *
- *      var half = R.divide(R.__, 2);
+ *      const half = R.divide(R.__, 2);
  *      half(42); //=> 21
  *
- *      var reciprocal = R.divide(1);
+ *      const reciprocal = R.divide(1);
  *      reciprocal(4);   //=> 0.25
  */
 
@@ -3650,7 +4005,7 @@ var divide = /*#__PURE__*/_curry2(function divide(a, b) {
   return a / b;
 });
 module.exports = divide;
-},{"./internal/_curry2":112}],57:[function(require,module,exports){
+},{"./internal/_curry2":113}],58:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3689,7 +4044,7 @@ var drop = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['drop'], _xdrop, fu
   return slice(Math.max(0, n), Infinity, xs);
 }));
 module.exports = drop;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xdrop":153,"./slice":269}],58:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xdrop":157,"./slice":277}],59:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3700,6 +4055,8 @@ var _xdropLast = /*#__PURE__*/require('./internal/_xdropLast');
 
 /**
  * Returns a list containing all but the last `n` elements of the given `list`.
+ *
+ * Acts as a transducer if a transformer is given in list position.
  *
  * @func
  * @memberOf R
@@ -3723,7 +4080,7 @@ var _xdropLast = /*#__PURE__*/require('./internal/_xdropLast');
 
 var dropLast = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xdropLast, _dropLast));
 module.exports = dropLast;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_dropLast":116,"./internal/_xdropLast":154}],59:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_dropLast":117,"./internal/_xdropLast":158}],60:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3739,6 +4096,8 @@ var _xdropLastWhile = /*#__PURE__*/require('./internal/_xdropLastWhile');
  * function returns a `falsy` value. The predicate function is applied to one argument:
  * *(value)*.
  *
+ * Acts as a transducer if a transformer is given in list position.
+ *
  * @func
  * @memberOf R
  * @since v0.16.0
@@ -3751,7 +4110,7 @@ var _xdropLastWhile = /*#__PURE__*/require('./internal/_xdropLastWhile');
  * @see R.takeLastWhile, R.addIndex, R.drop, R.dropWhile
  * @example
  *
- *      var lteThree = x => x <= 3;
+ *      const lteThree = x => x <= 3;
  *
  *      R.dropLastWhile(lteThree, [1, 2, 3, 4, 3, 2, 1]); //=> [1, 2, 3, 4]
  *
@@ -3761,7 +4120,7 @@ var _xdropLastWhile = /*#__PURE__*/require('./internal/_xdropLastWhile');
 
 var dropLastWhile = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xdropLastWhile, _dropLastWhile));
 module.exports = dropLastWhile;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_dropLastWhile":117,"./internal/_xdropLastWhile":155}],60:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_dropLastWhile":118,"./internal/_xdropLastWhile":159}],61:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3794,7 +4153,7 @@ var equals = /*#__PURE__*/require('./equals');
 
 var dropRepeats = /*#__PURE__*/_curry1( /*#__PURE__*/_dispatchable([], /*#__PURE__*/_xdropRepeatsWith(equals), /*#__PURE__*/dropRepeatsWith(equals)));
 module.exports = dropRepeats;
-},{"./dropRepeatsWith":61,"./equals":68,"./internal/_curry1":111,"./internal/_dispatchable":115,"./internal/_xdropRepeatsWith":156}],61:[function(require,module,exports){
+},{"./dropRepeatsWith":62,"./equals":69,"./internal/_curry1":112,"./internal/_dispatchable":116,"./internal/_xdropRepeatsWith":160}],62:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3821,7 +4180,7 @@ var last = /*#__PURE__*/require('./last');
  * @see R.transduce
  * @example
  *
- *      var l = [1, -1, 1, 3, 4, -4, -4, -5, 5, 3, 3];
+ *      const l = [1, -1, 1, 3, 4, -4, -4, -5, 5, 3, 3];
  *      R.dropRepeatsWith(R.eqBy(Math.abs), l); //=> [1, 3, 4, -5, 3]
  */
 
@@ -3842,7 +4201,7 @@ var dropRepeatsWith = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xdro
   return result;
 }));
 module.exports = dropRepeatsWith;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xdropRepeatsWith":156,"./last":183}],62:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xdropRepeatsWith":160,"./last":187}],63:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -3873,7 +4232,7 @@ var slice = /*#__PURE__*/require('./slice');
  * @see R.takeWhile, R.transduce, R.addIndex
  * @example
  *
- *      var lteTwo = x => x <= 2;
+ *      const lteTwo = x => x <= 2;
  *
  *      R.dropWhile(lteTwo, [1, 2, 3, 4, 3, 2, 1]); //=> [3, 4, 3, 2, 1]
  *
@@ -3890,7 +4249,7 @@ var dropWhile = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['dropWhile'], 
   return slice(idx, Infinity, xs);
 }));
 module.exports = dropWhile;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xdropWhile":157,"./slice":269}],63:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xdropWhile":161,"./slice":277}],64:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isFunction = /*#__PURE__*/require('./internal/_isFunction');
@@ -3920,11 +4279,14 @@ var or = /*#__PURE__*/require('./or');
  * @see R.or
  * @example
  *
- *      var gt10 = x => x > 10;
- *      var even = x => x % 2 === 0;
- *      var f = R.either(gt10, even);
+ *      const gt10 = x => x > 10;
+ *      const even = x => x % 2 === 0;
+ *      const f = R.either(gt10, even);
  *      f(101); //=> true
  *      f(8); //=> true
+ *
+ *      R.either(Maybe.Just(false), Maybe.Just(55)); // => Maybe.Just(55)
+ *      R.either([false, false, 'a'], [11]) // => [11, 11, "a"]
  */
 
 
@@ -3934,7 +4296,7 @@ var either = /*#__PURE__*/_curry2(function either(f, g) {
   } : lift(or)(f, g);
 });
 module.exports = either;
-},{"./internal/_curry2":112,"./internal/_isFunction":129,"./lift":190,"./or":229}],64:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_isFunction":132,"./lift":194,"./or":235}],65:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _isArguments = /*#__PURE__*/require('./internal/_isArguments');
@@ -3973,12 +4335,11 @@ var _isString = /*#__PURE__*/require('./internal/_isString');
 var empty = /*#__PURE__*/_curry1(function empty(x) {
   return x != null && typeof x['fantasy-land/empty'] === 'function' ? x['fantasy-land/empty']() : x != null && x.constructor != null && typeof x.constructor['fantasy-land/empty'] === 'function' ? x.constructor['fantasy-land/empty']() : x != null && typeof x.empty === 'function' ? x.empty() : x != null && x.constructor != null && typeof x.constructor.empty === 'function' ? x.constructor.empty() : _isArray(x) ? [] : _isString(x) ? '' : _isObject(x) ? {} : _isArguments(x) ? function () {
     return arguments;
-  }() :
-  // else
-  void 0;
+  }() : void 0 // else
+  ;
 });
 module.exports = empty;
-},{"./internal/_curry1":111,"./internal/_isArguments":126,"./internal/_isArray":127,"./internal/_isObject":132,"./internal/_isString":135}],65:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_isArguments":129,"./internal/_isArray":130,"./internal/_isObject":135,"./internal/_isString":138}],66:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -3986,17 +4347,20 @@ var equals = /*#__PURE__*/require('./equals');
 var takeLast = /*#__PURE__*/require('./takeLast');
 
 /**
- * Checks if a list ends with the provided values
+ * Checks if a list ends with the provided sublist.
+ *
+ * Similarly, checks if a string ends with the provided substring.
  *
  * @func
  * @memberOf R
  * @since v0.24.0
  * @category List
- * @sig [a] -> Boolean
- * @sig String -> Boolean
+ * @sig [a] -> [a] -> Boolean
+ * @sig String -> String -> Boolean
  * @param {*} suffix
  * @param {*} list
  * @return {Boolean}
+ * @see R.startsWith
  * @example
  *
  *      R.endsWith('c', 'abc')                //=> true
@@ -4010,7 +4374,7 @@ var endsWith = /*#__PURE__*/_curry2(function (suffix, list) {
   return equals(takeLast(suffix.length, list), suffix);
 });
 module.exports = endsWith;
-},{"./equals":68,"./internal/_curry2":112,"./takeLast":284}],66:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry2":113,"./takeLast":292}],67:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -4038,7 +4402,7 @@ var eqBy = /*#__PURE__*/_curry3(function eqBy(f, x, y) {
   return equals(f(x), f(y));
 });
 module.exports = eqBy;
-},{"./equals":68,"./internal/_curry3":113}],67:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry3":114}],68:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -4059,8 +4423,8 @@ var equals = /*#__PURE__*/require('./equals');
  *
  * @example
  *
- *      var o1 = { a: 1, b: 2, c: 3, d: 4 };
- *      var o2 = { a: 10, b: 20, c: 3, d: 40 };
+ *      const o1 = { a: 1, b: 2, c: 3, d: 4 };
+ *      const o2 = { a: 10, b: 20, c: 3, d: 40 };
  *      R.eqProps('a', o1, o2); //=> false
  *      R.eqProps('c', o1, o2); //=> true
  */
@@ -4070,7 +4434,7 @@ var eqProps = /*#__PURE__*/_curry3(function eqProps(prop, obj1, obj2) {
   return equals(obj1[prop], obj2[prop]);
 });
 module.exports = eqProps;
-},{"./equals":68,"./internal/_curry3":113}],68:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry3":114}],69:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _equals = /*#__PURE__*/require('./internal/_equals');
@@ -4096,8 +4460,8 @@ var _equals = /*#__PURE__*/require('./internal/_equals');
  *      R.equals(1, '1'); //=> false
  *      R.equals([1, 2, 3], [1, 2, 3]); //=> true
  *
- *      var a = {}; a.v = a;
- *      var b = {}; b.v = b;
+ *      const a = {}; a.v = a;
+ *      const b = {}; b.v = b;
  *      R.equals(a, b); //=> true
  */
 
@@ -4106,7 +4470,7 @@ var equals = /*#__PURE__*/_curry2(function equals(a, b) {
   return _equals(a, b, [], []);
 });
 module.exports = equals;
-},{"./internal/_curry2":112,"./internal/_equals":118}],69:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_equals":119}],70:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -4128,8 +4492,8 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Object} The transformed object.
  * @example
  *
- *      var tomato  = {firstName: '  Tomato ', data: {elapsed: 100, remaining: 1400}, id:123};
- *      var transformations = {
+ *      const tomato = {firstName: '  Tomato ', data: {elapsed: 100, remaining: 1400}, id:123};
+ *      const transformations = {
  *        firstName: R.trim,
  *        lastName: R.trim, // Will not get invoked.
  *        data: {elapsed: R.add(1), remaining: R.add(-1)}
@@ -4139,7 +4503,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 
 var evolve = /*#__PURE__*/_curry2(function evolve(transformations, object) {
-  var result = {};
+  var result = object instanceof Array ? [] : {};
   var transformation, key, type;
   for (key in object) {
     transformation = transformations[key];
@@ -4149,7 +4513,7 @@ var evolve = /*#__PURE__*/_curry2(function evolve(transformations, object) {
   return result;
 });
 module.exports = evolve;
-},{"./internal/_curry2":112}],70:[function(require,module,exports){
+},{"./internal/_curry2":113}],71:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -4185,7 +4549,7 @@ var keys = /*#__PURE__*/require('./keys');
  * @see R.reject, R.transduce, R.addIndex
  * @example
  *
- *      var isEven = n => n % 2 === 0;
+ *      const isEven = n => n % 2 === 0;
  *
  *      R.filter(isEven, [1, 2, 3, 4]); //=> [2, 4]
  *
@@ -4204,7 +4568,7 @@ var filter = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['filter'], _xfilt
   _filter(pred, filterable);
 }));
 module.exports = filter;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_filter":119,"./internal/_isObject":132,"./internal/_reduce":144,"./internal/_xfilter":159,"./keys":181}],71:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_filter":120,"./internal/_isObject":135,"./internal/_reduce":148,"./internal/_xfilter":163,"./keys":185}],72:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -4231,7 +4595,7 @@ var _xfind = /*#__PURE__*/require('./internal/_xfind');
  * @see R.transduce
  * @example
  *
- *      var xs = [{a: 1}, {a: 2}, {a: 3}];
+ *      const xs = [{a: 1}, {a: 2}, {a: 3}];
  *      R.find(R.propEq('a', 2))(xs); //=> {a: 2}
  *      R.find(R.propEq('a', 4))(xs); //=> undefined
  */
@@ -4248,7 +4612,7 @@ var find = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['find'], _xfind, fu
   }
 }));
 module.exports = find;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xfind":160}],72:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xfind":164}],73:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -4273,7 +4637,7 @@ var _xfindIndex = /*#__PURE__*/require('./internal/_xfindIndex');
  * @see R.transduce
  * @example
  *
- *      var xs = [{a: 1}, {a: 2}, {a: 3}];
+ *      const xs = [{a: 1}, {a: 2}, {a: 3}];
  *      R.findIndex(R.propEq('a', 2))(xs); //=> 1
  *      R.findIndex(R.propEq('a', 4))(xs); //=> -1
  */
@@ -4291,7 +4655,7 @@ var findIndex = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xfindIndex
   return -1;
 }));
 module.exports = findIndex;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xfindIndex":161}],73:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xfindIndex":165}],74:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -4316,7 +4680,7 @@ var _xfindLast = /*#__PURE__*/require('./internal/_xfindLast');
  * @see R.transduce
  * @example
  *
- *      var xs = [{a: 1, b: 0}, {a:1, b: 1}];
+ *      const xs = [{a: 1, b: 0}, {a:1, b: 1}];
  *      R.findLast(R.propEq('a', 1))(xs); //=> {a: 1, b: 1}
  *      R.findLast(R.propEq('a', 4))(xs); //=> undefined
  */
@@ -4332,7 +4696,7 @@ var findLast = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xfindLast, 
   }
 }));
 module.exports = findLast;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xfindLast":162}],74:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xfindLast":166}],75:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -4357,7 +4721,7 @@ var _xfindLastIndex = /*#__PURE__*/require('./internal/_xfindLastIndex');
  * @see R.transduce
  * @example
  *
- *      var xs = [{a: 1, b: 0}, {a:1, b: 1}];
+ *      const xs = [{a: 1, b: 0}, {a:1, b: 1}];
  *      R.findLastIndex(R.propEq('a', 1))(xs); //=> 1
  *      R.findLastIndex(R.propEq('a', 4))(xs); //=> -1
  */
@@ -4374,7 +4738,7 @@ var findLastIndex = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xfindL
   return -1;
 }));
 module.exports = findLastIndex;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xfindLastIndex":163}],75:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xfindLastIndex":167}],76:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _makeFlat = /*#__PURE__*/require('./internal/_makeFlat');
@@ -4400,7 +4764,7 @@ var _makeFlat = /*#__PURE__*/require('./internal/_makeFlat');
 
 var flatten = /*#__PURE__*/_curry1( /*#__PURE__*/_makeFlat(true));
 module.exports = flatten;
-},{"./internal/_curry1":111,"./internal/_makeFlat":137}],76:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_makeFlat":140}],77:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -4418,7 +4782,7 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @return {*} The result of invoking `fn` with its first two parameters' order reversed.
  * @example
  *
- *      var mergeThree = (a, b, c) => [].concat(a, b, c);
+ *      const mergeThree = (a, b, c) => [].concat(a, b, c);
  *
  *      mergeThree(1, 2, 3); //=> [1, 2, 3]
  *
@@ -4436,7 +4800,7 @@ var flip = /*#__PURE__*/_curry1(function flip(fn) {
   });
 });
 module.exports = flip;
-},{"./curryN":48,"./internal/_curry1":111}],77:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry1":112}],78:[function(require,module,exports){
 var _checkForMethod = /*#__PURE__*/require('./internal/_checkForMethod');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -4468,7 +4832,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.addIndex
  * @example
  *
- *      var printXPlusFive = x => console.log(x + 5);
+ *      const printXPlusFive = x => console.log(x + 5);
  *      R.forEach(printXPlusFive, [1, 2, 3]); //=> [1, 2, 3]
  *      // logs 6
  *      // logs 7
@@ -4487,7 +4851,7 @@ var forEach = /*#__PURE__*/_curry2( /*#__PURE__*/_checkForMethod('forEach', func
   return list;
 }));
 module.exports = forEach;
-},{"./internal/_checkForMethod":103,"./internal/_curry2":112}],78:[function(require,module,exports){
+},{"./internal/_checkForMethod":106,"./internal/_curry2":113}],79:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var keys = /*#__PURE__*/require('./keys');
@@ -4508,7 +4872,7 @@ var keys = /*#__PURE__*/require('./keys');
  * @return {Object} The original object.
  * @example
  *
- *      var printKeyConcatValue = (value, key) => console.log(key + ':' + value);
+ *      const printKeyConcatValue = (value, key) => console.log(key + ':' + value);
  *      R.forEachObjIndexed(printKeyConcatValue, {x: 1, y: 2}); //=> {x: 1, y: 2}
  *      // logs x:1
  *      // logs y:2
@@ -4527,7 +4891,7 @@ var forEachObjIndexed = /*#__PURE__*/_curry2(function forEachObjIndexed(fn, obj)
   return obj;
 });
 module.exports = forEachObjIndexed;
-},{"./internal/_curry2":112,"./keys":181}],79:[function(require,module,exports){
+},{"./internal/_curry2":113,"./keys":185}],80:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -4558,7 +4922,7 @@ var fromPairs = /*#__PURE__*/_curry1(function fromPairs(pairs) {
   return result;
 });
 module.exports = fromPairs;
-},{"./internal/_curry1":111}],80:[function(require,module,exports){
+},{"./internal/_curry1":112}],81:[function(require,module,exports){
 var _checkForMethod = /*#__PURE__*/require('./internal/_checkForMethod');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -4583,17 +4947,17 @@ var reduceBy = /*#__PURE__*/require('./reduceBy');
  * @param {Array} list The array to group
  * @return {Object} An object with the output of `fn` for keys, mapped to arrays of elements
  *         that produced that key when passed to `fn`.
- * @see R.transduce
+ * @see R.reduceBy, R.transduce
  * @example
  *
- *      var byGrade = R.groupBy(function(student) {
- *        var score = student.score;
+ *      const byGrade = R.groupBy(function(student) {
+ *        const score = student.score;
  *        return score < 65 ? 'F' :
  *               score < 70 ? 'D' :
  *               score < 80 ? 'C' :
  *               score < 90 ? 'B' : 'A';
  *      });
- *      var students = [{name: 'Abby', score: 84},
+ *      const students = [{name: 'Abby', score: 84},
  *                      {name: 'Eddy', score: 58},
  *                      // ...
  *                      {name: 'Jack', score: 69}];
@@ -4615,7 +4979,7 @@ var groupBy = /*#__PURE__*/_curry2( /*#__PURE__*/_checkForMethod('groupBy', /*#_
   return acc;
 }, null)));
 module.exports = groupBy;
-},{"./internal/_checkForMethod":103,"./internal/_curry2":112,"./reduceBy":257}],81:[function(require,module,exports){
+},{"./internal/_checkForMethod":106,"./internal/_curry2":113,"./reduceBy":265}],82:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -4665,7 +5029,7 @@ var groupWith = /*#__PURE__*/_curry2(function (fn, list) {
   return res;
 });
 module.exports = groupWith;
-},{"./internal/_curry2":112}],82:[function(require,module,exports){
+},{"./internal/_curry2":113}],83:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -4695,7 +5059,7 @@ var gt = /*#__PURE__*/_curry2(function gt(a, b) {
   return a > b;
 });
 module.exports = gt;
-},{"./internal/_curry2":112}],83:[function(require,module,exports){
+},{"./internal/_curry2":113}],84:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -4725,10 +5089,10 @@ var gte = /*#__PURE__*/_curry2(function gte(a, b) {
   return a >= b;
 });
 module.exports = gte;
-},{"./internal/_curry2":112}],84:[function(require,module,exports){
+},{"./internal/_curry2":113}],85:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
-var _has = /*#__PURE__*/require('./internal/_has');
+var hasPath = /*#__PURE__*/require('./hasPath');
 
 /**
  * Returns whether or not an object has an own property with the specified name
@@ -4743,22 +5107,24 @@ var _has = /*#__PURE__*/require('./internal/_has');
  * @return {Boolean} Whether the property exists.
  * @example
  *
- *      var hasName = R.has('name');
+ *      const hasName = R.has('name');
  *      hasName({name: 'alice'});   //=> true
  *      hasName({name: 'bob'});     //=> true
  *      hasName({});                //=> false
  *
- *      var point = {x: 0, y: 0};
- *      var pointHas = R.has(R.__, point);
+ *      const point = {x: 0, y: 0};
+ *      const pointHas = R.has(R.__, point);
  *      pointHas('x');  //=> true
  *      pointHas('y');  //=> true
  *      pointHas('z');  //=> false
  */
 
 
-var has = /*#__PURE__*/_curry2(_has);
+var has = /*#__PURE__*/_curry2(function has(prop, obj) {
+  return hasPath([prop], obj);
+});
 module.exports = has;
-},{"./internal/_curry2":112,"./internal/_has":123}],85:[function(require,module,exports){
+},{"./hasPath":87,"./internal/_curry2":113}],86:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -4783,7 +5149,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  *        return this.width * this.height;
  *      };
  *
- *      var square = new Rectangle(2, 2);
+ *      const square = new Rectangle(2, 2);
  *      R.hasIn('width', square);  //=> true
  *      R.hasIn('area', square);  //=> true
  */
@@ -4793,7 +5159,52 @@ var hasIn = /*#__PURE__*/_curry2(function hasIn(prop, obj) {
   return prop in obj;
 });
 module.exports = hasIn;
-},{"./internal/_curry2":112}],86:[function(require,module,exports){
+},{"./internal/_curry2":113}],87:[function(require,module,exports){
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var _has = /*#__PURE__*/require('./internal/_has');
+
+/**
+ * Returns whether or not a path exists in an object. Only the object's
+ * own properties are checked.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.26.0
+ * @category Object
+ * @typedefn Idx = String | Int
+ * @sig [Idx] -> {a} -> Boolean
+ * @param {Array} path The path to use.
+ * @param {Object} obj The object to check the path in.
+ * @return {Boolean} Whether the path exists.
+ * @see R.has
+ * @example
+ *
+ *      R.hasPath(['a', 'b'], {a: {b: 2}});         // => true
+ *      R.hasPath(['a', 'b'], {a: {b: undefined}}); // => true
+ *      R.hasPath(['a', 'b'], {a: {c: 2}});         // => false
+ *      R.hasPath(['a', 'b'], {});                  // => false
+ */
+
+
+var hasPath = /*#__PURE__*/_curry2(function hasPath(_path, obj) {
+  if (_path.length === 0) {
+    return false;
+  }
+  var val = obj;
+  var idx = 0;
+  while (idx < _path.length) {
+    if (_has(_path[idx], val)) {
+      val = val[_path[idx]];
+      idx += 1;
+    } else {
+      return false;
+    }
+  }
+  return true;
+});
+module.exports = hasPath;
+},{"./internal/_curry2":113,"./internal/_has":124}],88:[function(require,module,exports){
 var nth = /*#__PURE__*/require('./nth');
 
 /**
@@ -4821,13 +5232,17 @@ var nth = /*#__PURE__*/require('./nth');
 
 var head = /*#__PURE__*/nth(0);
 module.exports = head;
-},{"./nth":222}],87:[function(require,module,exports){
+},{"./nth":228}],89:[function(require,module,exports){
+var _objectIs = /*#__PURE__*/require('./internal/_objectIs');
+
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
  * Returns true if its arguments are identical, false otherwise. Values are
  * identical if they reference the same memory. `NaN` is identical to `NaN`;
  * `0` and `-0` are not identical.
+ *
+ * Note this is merely a curried version of ES6 `Object.is`.
  *
  * @func
  * @memberOf R
@@ -4839,7 +5254,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Boolean}
  * @example
  *
- *      var o = {};
+ *      const o = {};
  *      R.identical(o, o); //=> true
  *      R.identical(1, 1); //=> true
  *      R.identical(1, '1'); //=> false
@@ -4849,19 +5264,9 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  */
 
 
-var identical = /*#__PURE__*/_curry2(function identical(a, b) {
-  // SameValue algorithm
-  if (a === b) {
-    // Steps 1-5, 7-10
-    // Steps 6.b-6.e: +0 != -0
-    return a !== 0 || 1 / a === 1 / b;
-  } else {
-    // Step 6.a: NaN == NaN
-    return a !== a && b !== b;
-  }
-});
+var identical = /*#__PURE__*/_curry2(_objectIs);
 module.exports = identical;
-},{"./internal/_curry2":112}],88:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_objectIs":143}],90:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _identity = /*#__PURE__*/require('./internal/_identity');
@@ -4881,7 +5286,7 @@ var _identity = /*#__PURE__*/require('./internal/_identity');
  *
  *      R.identity(1); //=> 1
  *
- *      var obj = {};
+ *      const obj = {};
  *      R.identity(obj) === obj; //=> true
  * @symb R.identity(a) = a
  */
@@ -4889,7 +5294,7 @@ var _identity = /*#__PURE__*/require('./internal/_identity');
 
 var identity = /*#__PURE__*/_curry1(_identity);
 module.exports = identity;
-},{"./internal/_curry1":111,"./internal/_identity":124}],89:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_identity":125}],91:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -4906,12 +5311,12 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @param {Function} condition A predicate function
  * @param {Function} onTrue A function to invoke when the `condition` evaluates to a truthy value.
  * @param {Function} onFalse A function to invoke when the `condition` evaluates to a falsy value.
- * @return {Function} A new unary function that will process either the `onTrue` or the `onFalse`
+ * @return {Function} A new function that will process either the `onTrue` or the `onFalse`
  *                    function depending upon the result of the `condition` predicate.
- * @see R.unless, R.when
+ * @see R.unless, R.when, R.cond
  * @example
  *
- *      var incCount = R.ifElse(
+ *      const incCount = R.ifElse(
  *        R.has('count'),
  *        R.over(R.lensProp('count'), R.inc),
  *        R.assoc('count', 1)
@@ -4927,7 +5332,7 @@ var ifElse = /*#__PURE__*/_curry3(function ifElse(condition, onTrue, onFalse) {
   });
 });
 module.exports = ifElse;
-},{"./curryN":48,"./internal/_curry3":113}],90:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry3":114}],92:[function(require,module,exports){
 var add = /*#__PURE__*/require('./add');
 
 /**
@@ -4949,7 +5354,38 @@ var add = /*#__PURE__*/require('./add');
 
 var inc = /*#__PURE__*/add(1);
 module.exports = inc;
-},{"./add":10}],91:[function(require,module,exports){
+},{"./add":10}],93:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./internal/_includes');
+
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+/**
+ * Returns `true` if the specified value is equal, in [`R.equals`](#equals)
+ * terms, to at least one element of the given list; `false` otherwise.
+ * Works also with strings.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.1.0
+ * @category List
+ * @sig a -> [a] -> Boolean
+ * @param {Object} a The item to compare against.
+ * @param {Array} list The array to consider.
+ * @return {Boolean} `true` if an equivalent item is in the list, `false` otherwise.
+ * @see R.any
+ * @example
+ *
+ *      R.includes(3, [1, 2, 3]); //=> true
+ *      R.includes(4, [1, 2, 3]); //=> false
+ *      R.includes({ name: 'Fred' }, [{ name: 'Fred' }]); //=> true
+ *      R.includes([42], [[42]]); //=> true
+ *      R.includes('ba', 'banana'); //=>true
+ */
+
+
+var includes = /*#__PURE__*/_curry2(_includes);
+module.exports = includes;
+},{"./internal/_curry2":113,"./internal/_includes":126}],94:[function(require,module,exports){
 module.exports = {};
 module.exports.F = /*#__PURE__*/require('./F');
 module.exports.T = /*#__PURE__*/require('./T');
@@ -4984,6 +5420,7 @@ module.exports.complement = /*#__PURE__*/require('./complement');
 module.exports.compose = /*#__PURE__*/require('./compose');
 module.exports.composeK = /*#__PURE__*/require('./composeK');
 module.exports.composeP = /*#__PURE__*/require('./composeP');
+module.exports.composeWith = /*#__PURE__*/require('./composeWith');
 module.exports.concat = /*#__PURE__*/require('./concat');
 module.exports.cond = /*#__PURE__*/require('./cond');
 module.exports.construct = /*#__PURE__*/require('./construct');
@@ -5030,11 +5467,13 @@ module.exports.gt = /*#__PURE__*/require('./gt');
 module.exports.gte = /*#__PURE__*/require('./gte');
 module.exports.has = /*#__PURE__*/require('./has');
 module.exports.hasIn = /*#__PURE__*/require('./hasIn');
+module.exports.hasPath = /*#__PURE__*/require('./hasPath');
 module.exports.head = /*#__PURE__*/require('./head');
 module.exports.identical = /*#__PURE__*/require('./identical');
 module.exports.identity = /*#__PURE__*/require('./identity');
 module.exports.ifElse = /*#__PURE__*/require('./ifElse');
 module.exports.inc = /*#__PURE__*/require('./inc');
+module.exports.includes = /*#__PURE__*/require('./includes');
 module.exports.indexBy = /*#__PURE__*/require('./indexBy');
 module.exports.indexOf = /*#__PURE__*/require('./indexOf');
 module.exports.init = /*#__PURE__*/require('./init');
@@ -5075,7 +5514,6 @@ module.exports.max = /*#__PURE__*/require('./max');
 module.exports.maxBy = /*#__PURE__*/require('./maxBy');
 module.exports.mean = /*#__PURE__*/require('./mean');
 module.exports.median = /*#__PURE__*/require('./median');
-module.exports.memoize = /*#__PURE__*/require('./memoize');
 module.exports.memoizeWith = /*#__PURE__*/require('./memoizeWith');
 module.exports.merge = /*#__PURE__*/require('./merge');
 module.exports.mergeAll = /*#__PURE__*/require('./mergeAll');
@@ -5083,11 +5521,14 @@ module.exports.mergeDeepLeft = /*#__PURE__*/require('./mergeDeepLeft');
 module.exports.mergeDeepRight = /*#__PURE__*/require('./mergeDeepRight');
 module.exports.mergeDeepWith = /*#__PURE__*/require('./mergeDeepWith');
 module.exports.mergeDeepWithKey = /*#__PURE__*/require('./mergeDeepWithKey');
+module.exports.mergeLeft = /*#__PURE__*/require('./mergeLeft');
+module.exports.mergeRight = /*#__PURE__*/require('./mergeRight');
 module.exports.mergeWith = /*#__PURE__*/require('./mergeWith');
 module.exports.mergeWithKey = /*#__PURE__*/require('./mergeWithKey');
 module.exports.min = /*#__PURE__*/require('./min');
 module.exports.minBy = /*#__PURE__*/require('./minBy');
 module.exports.modulo = /*#__PURE__*/require('./modulo');
+module.exports.move = /*#__PURE__*/require('./move');
 module.exports.multiply = /*#__PURE__*/require('./multiply');
 module.exports.nAry = /*#__PURE__*/require('./nAry');
 module.exports.negate = /*#__PURE__*/require('./negate');
@@ -5101,6 +5542,7 @@ module.exports.of = /*#__PURE__*/require('./of');
 module.exports.omit = /*#__PURE__*/require('./omit');
 module.exports.once = /*#__PURE__*/require('./once');
 module.exports.or = /*#__PURE__*/require('./or');
+module.exports.otherwise = /*#__PURE__*/require('./otherwise');
 module.exports.over = /*#__PURE__*/require('./over');
 module.exports.pair = /*#__PURE__*/require('./pair');
 module.exports.partial = /*#__PURE__*/require('./partial');
@@ -5116,6 +5558,7 @@ module.exports.pickBy = /*#__PURE__*/require('./pickBy');
 module.exports.pipe = /*#__PURE__*/require('./pipe');
 module.exports.pipeK = /*#__PURE__*/require('./pipeK');
 module.exports.pipeP = /*#__PURE__*/require('./pipeP');
+module.exports.pipeWith = /*#__PURE__*/require('./pipeWith');
 module.exports.pluck = /*#__PURE__*/require('./pluck');
 module.exports.prepend = /*#__PURE__*/require('./prepend');
 module.exports.product = /*#__PURE__*/require('./product');
@@ -5160,6 +5603,7 @@ module.exports.takeLastWhile = /*#__PURE__*/require('./takeLastWhile');
 module.exports.takeWhile = /*#__PURE__*/require('./takeWhile');
 module.exports.tap = /*#__PURE__*/require('./tap');
 module.exports.test = /*#__PURE__*/require('./test');
+module.exports.then = /*#__PURE__*/require('./then');
 module.exports.times = /*#__PURE__*/require('./times');
 module.exports.toLower = /*#__PURE__*/require('./toLower');
 module.exports.toPairs = /*#__PURE__*/require('./toPairs');
@@ -5197,7 +5641,8 @@ module.exports.xprod = /*#__PURE__*/require('./xprod');
 module.exports.zip = /*#__PURE__*/require('./zip');
 module.exports.zipObj = /*#__PURE__*/require('./zipObj');
 module.exports.zipWith = /*#__PURE__*/require('./zipWith');
-},{"./F":7,"./T":8,"./__":9,"./add":10,"./addIndex":11,"./adjust":12,"./all":13,"./allPass":14,"./always":15,"./and":16,"./any":17,"./anyPass":18,"./ap":19,"./aperture":20,"./append":21,"./apply":22,"./applySpec":23,"./applyTo":24,"./ascend":25,"./assoc":26,"./assocPath":27,"./binary":28,"./bind":29,"./both":30,"./call":31,"./chain":32,"./clamp":33,"./clone":34,"./comparator":35,"./complement":36,"./compose":37,"./composeK":38,"./composeP":39,"./concat":40,"./cond":41,"./construct":42,"./constructN":43,"./contains":44,"./converge":45,"./countBy":46,"./curry":47,"./curryN":48,"./dec":49,"./defaultTo":50,"./descend":51,"./difference":52,"./differenceWith":53,"./dissoc":54,"./dissocPath":55,"./divide":56,"./drop":57,"./dropLast":58,"./dropLastWhile":59,"./dropRepeats":60,"./dropRepeatsWith":61,"./dropWhile":62,"./either":63,"./empty":64,"./endsWith":65,"./eqBy":66,"./eqProps":67,"./equals":68,"./evolve":69,"./filter":70,"./find":71,"./findIndex":72,"./findLast":73,"./findLastIndex":74,"./flatten":75,"./flip":76,"./forEach":77,"./forEachObjIndexed":78,"./fromPairs":79,"./groupBy":80,"./groupWith":81,"./gt":82,"./gte":83,"./has":84,"./hasIn":85,"./head":86,"./identical":87,"./identity":88,"./ifElse":89,"./inc":90,"./indexBy":92,"./indexOf":93,"./init":94,"./innerJoin":95,"./insert":96,"./insertAll":97,"./intersection":170,"./intersperse":171,"./into":172,"./invert":173,"./invertObj":174,"./invoker":175,"./is":176,"./isEmpty":177,"./isNil":178,"./join":179,"./juxt":180,"./keys":181,"./keysIn":182,"./last":183,"./lastIndexOf":184,"./length":185,"./lens":186,"./lensIndex":187,"./lensPath":188,"./lensProp":189,"./lift":190,"./liftN":191,"./lt":192,"./lte":193,"./map":194,"./mapAccum":195,"./mapAccumRight":196,"./mapObjIndexed":197,"./match":198,"./mathMod":199,"./max":200,"./maxBy":201,"./mean":202,"./median":203,"./memoize":204,"./memoizeWith":205,"./merge":206,"./mergeAll":207,"./mergeDeepLeft":208,"./mergeDeepRight":209,"./mergeDeepWith":210,"./mergeDeepWithKey":211,"./mergeWith":212,"./mergeWithKey":213,"./min":214,"./minBy":215,"./modulo":216,"./multiply":217,"./nAry":218,"./negate":219,"./none":220,"./not":221,"./nth":222,"./nthArg":223,"./o":224,"./objOf":225,"./of":226,"./omit":227,"./once":228,"./or":229,"./over":230,"./pair":231,"./partial":232,"./partialRight":233,"./partition":234,"./path":235,"./pathEq":236,"./pathOr":237,"./pathSatisfies":238,"./pick":239,"./pickAll":240,"./pickBy":241,"./pipe":242,"./pipeK":243,"./pipeP":244,"./pluck":245,"./prepend":246,"./product":247,"./project":248,"./prop":249,"./propEq":250,"./propIs":251,"./propOr":252,"./propSatisfies":253,"./props":254,"./range":255,"./reduce":256,"./reduceBy":257,"./reduceRight":258,"./reduceWhile":259,"./reduced":260,"./reject":261,"./remove":262,"./repeat":263,"./replace":264,"./reverse":265,"./scan":266,"./sequence":267,"./set":268,"./slice":269,"./sort":270,"./sortBy":271,"./sortWith":272,"./split":273,"./splitAt":274,"./splitEvery":275,"./splitWhen":276,"./startsWith":277,"./subtract":278,"./sum":279,"./symmetricDifference":280,"./symmetricDifferenceWith":281,"./tail":282,"./take":283,"./takeLast":284,"./takeLastWhile":285,"./takeWhile":286,"./tap":287,"./test":288,"./times":289,"./toLower":290,"./toPairs":291,"./toPairsIn":292,"./toString":293,"./toUpper":294,"./transduce":295,"./transpose":296,"./traverse":297,"./trim":298,"./tryCatch":299,"./type":300,"./unapply":301,"./unary":302,"./uncurryN":303,"./unfold":304,"./union":305,"./unionWith":306,"./uniq":307,"./uniqBy":308,"./uniqWith":309,"./unless":310,"./unnest":311,"./until":312,"./update":313,"./useWith":314,"./values":315,"./valuesIn":316,"./view":317,"./when":318,"./where":319,"./whereEq":320,"./without":321,"./xprod":322,"./zip":323,"./zipObj":324,"./zipWith":325}],92:[function(require,module,exports){
+module.exports.thunkify = /*#__PURE__*/require('./thunkify');
+},{"./F":7,"./T":8,"./__":9,"./add":10,"./addIndex":11,"./adjust":12,"./all":13,"./allPass":14,"./always":15,"./and":16,"./any":17,"./anyPass":18,"./ap":19,"./aperture":20,"./append":21,"./apply":22,"./applySpec":23,"./applyTo":24,"./ascend":25,"./assoc":26,"./assocPath":27,"./binary":28,"./bind":29,"./both":30,"./call":31,"./chain":32,"./clamp":33,"./clone":34,"./comparator":35,"./complement":36,"./compose":37,"./composeK":38,"./composeP":39,"./composeWith":40,"./concat":41,"./cond":42,"./construct":43,"./constructN":44,"./contains":45,"./converge":46,"./countBy":47,"./curry":48,"./curryN":49,"./dec":50,"./defaultTo":51,"./descend":52,"./difference":53,"./differenceWith":54,"./dissoc":55,"./dissocPath":56,"./divide":57,"./drop":58,"./dropLast":59,"./dropLastWhile":60,"./dropRepeats":61,"./dropRepeatsWith":62,"./dropWhile":63,"./either":64,"./empty":65,"./endsWith":66,"./eqBy":67,"./eqProps":68,"./equals":69,"./evolve":70,"./filter":71,"./find":72,"./findIndex":73,"./findLast":74,"./findLastIndex":75,"./flatten":76,"./flip":77,"./forEach":78,"./forEachObjIndexed":79,"./fromPairs":80,"./groupBy":81,"./groupWith":82,"./gt":83,"./gte":84,"./has":85,"./hasIn":86,"./hasPath":87,"./head":88,"./identical":89,"./identity":90,"./ifElse":91,"./inc":92,"./includes":93,"./indexBy":95,"./indexOf":96,"./init":97,"./innerJoin":98,"./insert":99,"./insertAll":100,"./intersection":174,"./intersperse":175,"./into":176,"./invert":177,"./invertObj":178,"./invoker":179,"./is":180,"./isEmpty":181,"./isNil":182,"./join":183,"./juxt":184,"./keys":185,"./keysIn":186,"./last":187,"./lastIndexOf":188,"./length":189,"./lens":190,"./lensIndex":191,"./lensPath":192,"./lensProp":193,"./lift":194,"./liftN":195,"./lt":196,"./lte":197,"./map":198,"./mapAccum":199,"./mapAccumRight":200,"./mapObjIndexed":201,"./match":202,"./mathMod":203,"./max":204,"./maxBy":205,"./mean":206,"./median":207,"./memoizeWith":208,"./merge":209,"./mergeAll":210,"./mergeDeepLeft":211,"./mergeDeepRight":212,"./mergeDeepWith":213,"./mergeDeepWithKey":214,"./mergeLeft":215,"./mergeRight":216,"./mergeWith":217,"./mergeWithKey":218,"./min":219,"./minBy":220,"./modulo":221,"./move":222,"./multiply":223,"./nAry":224,"./negate":225,"./none":226,"./not":227,"./nth":228,"./nthArg":229,"./o":230,"./objOf":231,"./of":232,"./omit":233,"./once":234,"./or":235,"./otherwise":236,"./over":237,"./pair":238,"./partial":239,"./partialRight":240,"./partition":241,"./path":242,"./pathEq":243,"./pathOr":244,"./pathSatisfies":245,"./pick":246,"./pickAll":247,"./pickBy":248,"./pipe":249,"./pipeK":250,"./pipeP":251,"./pipeWith":252,"./pluck":253,"./prepend":254,"./product":255,"./project":256,"./prop":257,"./propEq":258,"./propIs":259,"./propOr":260,"./propSatisfies":261,"./props":262,"./range":263,"./reduce":264,"./reduceBy":265,"./reduceRight":266,"./reduceWhile":267,"./reduced":268,"./reject":269,"./remove":270,"./repeat":271,"./replace":272,"./reverse":273,"./scan":274,"./sequence":275,"./set":276,"./slice":277,"./sort":278,"./sortBy":279,"./sortWith":280,"./split":281,"./splitAt":282,"./splitEvery":283,"./splitWhen":284,"./startsWith":285,"./subtract":286,"./sum":287,"./symmetricDifference":288,"./symmetricDifferenceWith":289,"./tail":290,"./take":291,"./takeLast":292,"./takeLastWhile":293,"./takeWhile":294,"./tap":295,"./test":296,"./then":297,"./thunkify":298,"./times":299,"./toLower":300,"./toPairs":301,"./toPairsIn":302,"./toString":303,"./toUpper":304,"./transduce":305,"./transpose":306,"./traverse":307,"./trim":308,"./tryCatch":309,"./type":310,"./unapply":311,"./unary":312,"./uncurryN":313,"./unfold":314,"./union":315,"./unionWith":316,"./uniq":317,"./uniqBy":318,"./uniqWith":319,"./unless":320,"./unnest":321,"./until":322,"./update":323,"./useWith":324,"./values":325,"./valuesIn":326,"./view":327,"./when":328,"./where":329,"./whereEq":330,"./without":331,"./xprod":332,"./zip":333,"./zipObj":334,"./zipWith":335}],95:[function(require,module,exports){
 var reduceBy = /*#__PURE__*/require('./reduceBy');
 
 /**
@@ -5218,7 +5663,7 @@ var reduceBy = /*#__PURE__*/require('./reduceBy');
  * @return {Object} An object indexing each array element by the given property.
  * @example
  *
- *      var list = [{id: 'xyz', title: 'A'}, {id: 'abc', title: 'B'}];
+ *      const list = [{id: 'xyz', title: 'A'}, {id: 'abc', title: 'B'}];
  *      R.indexBy(R.prop('id'), list);
  *      //=> {abc: {id: 'abc', title: 'B'}, xyz: {id: 'xyz', title: 'A'}}
  */
@@ -5228,7 +5673,7 @@ var indexBy = /*#__PURE__*/reduceBy(function (acc, elem) {
   return elem;
 }, null);
 module.exports = indexBy;
-},{"./reduceBy":257}],93:[function(require,module,exports){
+},{"./reduceBy":265}],96:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _indexOf = /*#__PURE__*/require('./internal/_indexOf');
@@ -5260,7 +5705,7 @@ var indexOf = /*#__PURE__*/_curry2(function indexOf(target, xs) {
   return typeof xs.indexOf === 'function' && !_isArray(xs) ? xs.indexOf(target) : _indexOf(xs, target, 0);
 });
 module.exports = indexOf;
-},{"./internal/_curry2":112,"./internal/_indexOf":125,"./internal/_isArray":127}],94:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_indexOf":128,"./internal/_isArray":130}],97:[function(require,module,exports){
 var slice = /*#__PURE__*/require('./slice');
 
 /**
@@ -5291,8 +5736,8 @@ var slice = /*#__PURE__*/require('./slice');
 
 var init = /*#__PURE__*/slice(0, -1);
 module.exports = init;
-},{"./slice":269}],95:[function(require,module,exports){
-var _containsWith = /*#__PURE__*/require('./internal/_containsWith');
+},{"./slice":277}],98:[function(require,module,exports){
+var _includesWith = /*#__PURE__*/require('./internal/_includesWith');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
@@ -5337,11 +5782,11 @@ var _filter = /*#__PURE__*/require('./internal/_filter');
 
 var innerJoin = /*#__PURE__*/_curry3(function innerJoin(pred, xs, ys) {
   return _filter(function (x) {
-    return _containsWith(pred, x, ys);
+    return _includesWith(pred, x, ys);
   }, xs);
 });
 module.exports = innerJoin;
-},{"./internal/_containsWith":109,"./internal/_curry3":113,"./internal/_filter":119}],96:[function(require,module,exports){
+},{"./internal/_curry3":114,"./internal/_filter":120,"./internal/_includesWith":127}],99:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -5372,7 +5817,7 @@ var insert = /*#__PURE__*/_curry3(function insert(idx, elt, list) {
   return result;
 });
 module.exports = insert;
-},{"./internal/_curry3":113}],97:[function(require,module,exports){
+},{"./internal/_curry3":114}],100:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -5400,8 +5845,8 @@ var insertAll = /*#__PURE__*/_curry3(function insertAll(idx, elts, list) {
   return [].concat(Array.prototype.slice.call(list, 0, idx), elts, Array.prototype.slice.call(list, idx));
 });
 module.exports = insertAll;
-},{"./internal/_curry3":113}],98:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./_contains');
+},{"./internal/_curry3":114}],101:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./_includes');
 
 var _Set = /*#__PURE__*/function () {
 
@@ -5522,7 +5967,7 @@ function hasOrAdd(item, shouldAdd, set) {
           }
           return false;
         }
-        if (!_contains(item, set._items[type])) {
+        if (!_includes(item, set._items[type])) {
           if (shouldAdd) {
             set._items[type].push(item);
           }
@@ -5563,7 +6008,7 @@ function hasOrAdd(item, shouldAdd, set) {
         return false;
       }
       // scan through all previously applied items
-      if (!_contains(item, set._items[type])) {
+      if (!_includes(item, set._items[type])) {
         if (shouldAdd) {
           set._items[type].push(item);
         }
@@ -5575,7 +6020,7 @@ function hasOrAdd(item, shouldAdd, set) {
 
 // A simple Set type that honours R.equals semantics
 module.exports = _Set;
-},{"./_contains":108}],99:[function(require,module,exports){
+},{"./_includes":126}],102:[function(require,module,exports){
 function _aperture(n, list) {
   var idx = 0;
   var limit = list.length - (n - 1);
@@ -5587,7 +6032,7 @@ function _aperture(n, list) {
   return acc;
 }
 module.exports = _aperture;
-},{}],100:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 function _arity(n, fn) {
   /* eslint-disable no-unused-vars */
   switch (n) {
@@ -5640,7 +6085,7 @@ function _arity(n, fn) {
   }
 }
 module.exports = _arity;
-},{}],101:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 function _arrayFromIterator(iter) {
   var list = [];
   var next;
@@ -5650,11 +6095,18 @@ function _arrayFromIterator(iter) {
   return list;
 }
 module.exports = _arrayFromIterator;
-},{}],102:[function(require,module,exports){
-var _objectAssign = /*#__PURE__*/require('./_objectAssign');
+},{}],105:[function(require,module,exports){
+var _isFunction = /*#__PURE__*/require('./_isFunction');
 
-module.exports = typeof Object.assign === 'function' ? Object.assign : _objectAssign;
-},{"./_objectAssign":139}],103:[function(require,module,exports){
+var _toString = /*#__PURE__*/require('./_toString');
+
+function _assertPromise(name, p) {
+  if (p == null || !_isFunction(p.then)) {
+    throw new TypeError('`' + name + '` expected a Promise, received ' + _toString(p, []));
+  }
+}
+module.exports = _assertPromise;
+},{"./_isFunction":132,"./_toString":152}],106:[function(require,module,exports){
 var _isArray = /*#__PURE__*/require('./_isArray');
 
 /**
@@ -5680,7 +6132,7 @@ function _checkForMethod(methodname, fn) {
   };
 }
 module.exports = _checkForMethod;
-},{"./_isArray":127}],104:[function(require,module,exports){
+},{"./_isArray":130}],107:[function(require,module,exports){
 var _cloneRegExp = /*#__PURE__*/require('./_cloneRegExp');
 
 var type = /*#__PURE__*/require('../type');
@@ -5728,19 +6180,19 @@ function _clone(value, refFrom, refTo, deep) {
   }
 }
 module.exports = _clone;
-},{"../type":300,"./_cloneRegExp":105}],105:[function(require,module,exports){
+},{"../type":310,"./_cloneRegExp":108}],108:[function(require,module,exports){
 function _cloneRegExp(pattern) {
                                   return new RegExp(pattern.source, (pattern.global ? 'g' : '') + (pattern.ignoreCase ? 'i' : '') + (pattern.multiline ? 'm' : '') + (pattern.sticky ? 'y' : '') + (pattern.unicode ? 'u' : ''));
 }
 module.exports = _cloneRegExp;
-},{}],106:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 function _complement(f) {
   return function () {
     return !f.apply(this, arguments);
   };
 }
 module.exports = _complement;
-},{}],107:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /**
  * Private `concat` function to merge two array-like objects.
  *
@@ -5773,28 +6225,7 @@ function _concat(set1, set2) {
   return result;
 }
 module.exports = _concat;
-},{}],108:[function(require,module,exports){
-var _indexOf = /*#__PURE__*/require('./_indexOf');
-
-function _contains(a, list) {
-  return _indexOf(list, a, 0) >= 0;
-}
-module.exports = _contains;
-},{"./_indexOf":125}],109:[function(require,module,exports){
-function _containsWith(pred, x, list) {
-  var idx = 0;
-  var len = list.length;
-
-  while (idx < len) {
-    if (pred(x, list[idx])) {
-      return true;
-    }
-    idx += 1;
-  }
-  return false;
-}
-module.exports = _containsWith;
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./_arity');
 
 var _curry2 = /*#__PURE__*/require('./_curry2');
@@ -5807,7 +6238,7 @@ function _createPartialApplicator(concat) {
   });
 }
 module.exports = _createPartialApplicator;
-},{"./_arity":100,"./_curry2":112}],111:[function(require,module,exports){
+},{"./_arity":103,"./_curry2":113}],112:[function(require,module,exports){
 var _isPlaceholder = /*#__PURE__*/require('./_isPlaceholder');
 
 /**
@@ -5830,7 +6261,7 @@ function _curry1(fn) {
   };
 }
 module.exports = _curry1;
-},{"./_isPlaceholder":133}],112:[function(require,module,exports){
+},{"./_isPlaceholder":136}],113:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./_curry1');
 
 var _isPlaceholder = /*#__PURE__*/require('./_isPlaceholder');
@@ -5864,7 +6295,7 @@ function _curry2(fn) {
   };
 }
 module.exports = _curry2;
-},{"./_curry1":111,"./_isPlaceholder":133}],113:[function(require,module,exports){
+},{"./_curry1":112,"./_isPlaceholder":136}],114:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./_curry1');
 
 var _curry2 = /*#__PURE__*/require('./_curry2');
@@ -5916,7 +6347,7 @@ function _curry3(fn) {
   };
 }
 module.exports = _curry3;
-},{"./_curry1":111,"./_curry2":112,"./_isPlaceholder":133}],114:[function(require,module,exports){
+},{"./_curry1":112,"./_curry2":113,"./_isPlaceholder":136}],115:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./_arity');
 
 var _isPlaceholder = /*#__PURE__*/require('./_isPlaceholder');
@@ -5957,7 +6388,7 @@ function _curryN(length, received, fn) {
   };
 }
 module.exports = _curryN;
-},{"./_arity":100,"./_isPlaceholder":133}],115:[function(require,module,exports){
+},{"./_arity":103,"./_isPlaceholder":136}],116:[function(require,module,exports){
 var _isArray = /*#__PURE__*/require('./_isArray');
 
 var _isTransformer = /*#__PURE__*/require('./_isTransformer');
@@ -6002,14 +6433,14 @@ function _dispatchable(methodNames, xf, fn) {
   };
 }
 module.exports = _dispatchable;
-},{"./_isArray":127,"./_isTransformer":136}],116:[function(require,module,exports){
+},{"./_isArray":130,"./_isTransformer":139}],117:[function(require,module,exports){
 var take = /*#__PURE__*/require('../take');
 
 function dropLast(n, xs) {
   return take(n < xs.length ? xs.length - n : 0, xs);
 }
 module.exports = dropLast;
-},{"../take":283}],117:[function(require,module,exports){
+},{"../take":291}],118:[function(require,module,exports){
 var slice = /*#__PURE__*/require('../slice');
 
 function dropLastWhile(pred, xs) {
@@ -6020,16 +6451,16 @@ function dropLastWhile(pred, xs) {
   return slice(0, idx + 1, xs);
 }
 module.exports = dropLastWhile;
-},{"../slice":269}],118:[function(require,module,exports){
+},{"../slice":277}],119:[function(require,module,exports){
 var _arrayFromIterator = /*#__PURE__*/require('./_arrayFromIterator');
 
-var _containsWith = /*#__PURE__*/require('./_containsWith');
+var _includesWith = /*#__PURE__*/require('./_includesWith');
 
 var _functionName = /*#__PURE__*/require('./_functionName');
 
 var _has = /*#__PURE__*/require('./_has');
 
-var identical = /*#__PURE__*/require('../identical');
+var _objectIs = /*#__PURE__*/require('./_objectIs');
 
 var keys = /*#__PURE__*/require('../keys');
 
@@ -6055,13 +6486,13 @@ function _uniqContentEquals(aIterator, bIterator, stackA, stackB) {
   }
 
   // if *a* array contains any element that is not included in *b*
-  return !_containsWith(function (b, aItem) {
-    return !_containsWith(eq, aItem, b);
+  return !_includesWith(function (b, aItem) {
+    return !_includesWith(eq, aItem, b);
   }, b, a);
 }
 
 function _equals(a, b, stackA, stackB) {
-  if (identical(a, b)) {
+  if (_objectIs(a, b)) {
     return true;
   }
 
@@ -6094,12 +6525,12 @@ function _equals(a, b, stackA, stackB) {
     case 'Boolean':
     case 'Number':
     case 'String':
-      if (!(typeof a === typeof b && identical(a.valueOf(), b.valueOf()))) {
+      if (!(typeof a === typeof b && _objectIs(a.valueOf(), b.valueOf()))) {
         return false;
       }
       break;
     case 'Date':
-      if (!identical(a.valueOf(), b.valueOf())) {
+      if (!_objectIs(a.valueOf(), b.valueOf())) {
         return false;
       }
       break;
@@ -6177,7 +6608,7 @@ function _equals(a, b, stackA, stackB) {
   return true;
 }
 module.exports = _equals;
-},{"../identical":87,"../keys":181,"../type":300,"./_arrayFromIterator":101,"./_containsWith":109,"./_functionName":122,"./_has":123}],119:[function(require,module,exports){
+},{"../keys":185,"../type":310,"./_arrayFromIterator":104,"./_functionName":123,"./_has":124,"./_includesWith":127,"./_objectIs":143}],120:[function(require,module,exports){
 function _filter(fn, list) {
   var idx = 0;
   var len = list.length;
@@ -6192,7 +6623,7 @@ function _filter(fn, list) {
   return result;
 }
 module.exports = _filter;
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var _forceReduced = /*#__PURE__*/require('./_forceReduced');
 
 var _isArrayLike = /*#__PURE__*/require('./_isArrayLike');
@@ -6228,7 +6659,7 @@ var _flatCat = function _xcat(xf) {
 };
 
 module.exports = _flatCat;
-},{"./_forceReduced":121,"./_isArrayLike":128,"./_reduce":144,"./_xfBase":158}],121:[function(require,module,exports){
+},{"./_forceReduced":122,"./_isArrayLike":131,"./_reduce":148,"./_xfBase":162}],122:[function(require,module,exports){
 function _forceReduced(x) {
   return {
     '@@transducer/value': x,
@@ -6236,24 +6667,45 @@ function _forceReduced(x) {
   };
 }
 module.exports = _forceReduced;
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 function _functionName(f) {
   // String(x => x) evaluates to "x => x", so the pattern may not match.
   var match = String(f).match(/^function (\w*)/);
   return match == null ? '' : match[1];
 }
 module.exports = _functionName;
-},{}],123:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 function _has(prop, obj) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 module.exports = _has;
-},{}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 function _identity(x) {
   return x;
 }
 module.exports = _identity;
-},{}],125:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
+var _indexOf = /*#__PURE__*/require('./_indexOf');
+
+function _includes(a, list) {
+  return _indexOf(list, a, 0) >= 0;
+}
+module.exports = _includes;
+},{"./_indexOf":128}],127:[function(require,module,exports){
+function _includesWith(pred, x, list) {
+  var idx = 0;
+  var len = list.length;
+
+  while (idx < len) {
+    if (pred(x, list[idx])) {
+      return true;
+    }
+    idx += 1;
+  }
+  return false;
+}
+module.exports = _includesWith;
+},{}],128:[function(require,module,exports){
 var equals = /*#__PURE__*/require('../equals');
 
 function _indexOf(list, a, idx) {
@@ -6311,20 +6763,20 @@ function _indexOf(list, a, idx) {
   return -1;
 }
 module.exports = _indexOf;
-},{"../equals":68}],126:[function(require,module,exports){
+},{"../equals":69}],129:[function(require,module,exports){
 var _has = /*#__PURE__*/require('./_has');
 
 var toString = Object.prototype.toString;
-var _isArguments = function () {
+var _isArguments = /*#__PURE__*/function () {
   return toString.call(arguments) === '[object Arguments]' ? function _isArguments(x) {
     return toString.call(x) === '[object Arguments]';
   } : function _isArguments(x) {
     return _has('callee', x);
   };
-};
+}();
 
 module.exports = _isArguments;
-},{"./_has":123}],127:[function(require,module,exports){
+},{"./_has":124}],130:[function(require,module,exports){
 /**
  * Tests whether or not an object is an array.
  *
@@ -6340,7 +6792,7 @@ module.exports = _isArguments;
 module.exports = Array.isArray || function _isArray(val) {
   return val != null && val.length >= 0 && Object.prototype.toString.call(val) === '[object Array]';
 };
-},{}],128:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./_curry1');
 
 var _isArray = /*#__PURE__*/require('./_isArray');
@@ -6391,12 +6843,12 @@ var _isArrayLike = /*#__PURE__*/_curry1(function isArrayLike(x) {
   return false;
 });
 module.exports = _isArrayLike;
-},{"./_curry1":111,"./_isArray":127,"./_isString":135}],129:[function(require,module,exports){
+},{"./_curry1":112,"./_isArray":130,"./_isString":138}],132:[function(require,module,exports){
 function _isFunction(x) {
   return Object.prototype.toString.call(x) === '[object Function]';
 }
 module.exports = _isFunction;
-},{}],130:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 /**
  * Determine if the passed argument is an integer.
  *
@@ -6408,37 +6860,37 @@ module.exports = _isFunction;
 module.exports = Number.isInteger || function _isInteger(n) {
   return n << 0 === n;
 };
-},{}],131:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 function _isNumber(x) {
   return Object.prototype.toString.call(x) === '[object Number]';
 }
 module.exports = _isNumber;
-},{}],132:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 function _isObject(x) {
   return Object.prototype.toString.call(x) === '[object Object]';
 }
 module.exports = _isObject;
-},{}],133:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 function _isPlaceholder(a) {
        return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;
 }
 module.exports = _isPlaceholder;
-},{}],134:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 function _isRegExp(x) {
   return Object.prototype.toString.call(x) === '[object RegExp]';
 }
 module.exports = _isRegExp;
-},{}],135:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 function _isString(x) {
   return Object.prototype.toString.call(x) === '[object String]';
 }
 module.exports = _isString;
-},{}],136:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 function _isTransformer(obj) {
-  return typeof obj['@@transducer/step'] === 'function';
+  return obj != null && typeof obj['@@transducer/step'] === 'function';
 }
 module.exports = _isTransformer;
-},{}],137:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 var _isArrayLike = /*#__PURE__*/require('./_isArrayLike');
 
 /**
@@ -6474,7 +6926,7 @@ function _makeFlat(recursive) {
   };
 }
 module.exports = _makeFlat;
-},{"./_isArrayLike":128}],138:[function(require,module,exports){
+},{"./_isArrayLike":131}],141:[function(require,module,exports){
 function _map(fn, functor) {
   var idx = 0;
   var len = functor.length;
@@ -6486,7 +6938,7 @@ function _map(fn, functor) {
   return result;
 }
 module.exports = _map;
-},{}],139:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 var _has = /*#__PURE__*/require('./_has');
 
 // Based on https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
@@ -6513,20 +6965,36 @@ function _objectAssign(target) {
   }
   return output;
 }
-module.exports = _objectAssign;
-},{"./_has":123}],140:[function(require,module,exports){
+
+module.exports = typeof Object.assign === 'function' ? Object.assign : _objectAssign;
+},{"./_has":124}],143:[function(require,module,exports){
+// Based on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+function _objectIs(a, b) {
+  // SameValue algorithm
+  if (a === b) {
+    // Steps 1-5, 7-10
+    // Steps 6.b-6.e: +0 != -0
+    return a !== 0 || 1 / a === 1 / b;
+  } else {
+    // Step 6.a: NaN == NaN
+    return a !== a && b !== b;
+  }
+}
+
+module.exports = typeof Object.is === 'function' ? Object.is : _objectIs;
+},{}],144:[function(require,module,exports){
 function _of(x) {
   return [x];
 }
 module.exports = _of;
-},{}],141:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 function _pipe(f, g) {
   return function () {
     return g.call(this, f.apply(this, arguments));
   };
 }
 module.exports = _pipe;
-},{}],142:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 function _pipeP(f, g) {
   return function () {
     var ctx = this;
@@ -6536,7 +7004,7 @@ function _pipeP(f, g) {
   };
 }
 module.exports = _pipeP;
-},{}],143:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 function _quote(s) {
   var escaped = s.replace(/\\/g, '\\\\').replace(/[\b]/g, '\\b') // \b matches word boundary; [\b] matches backspace
   .replace(/\f/g, '\\f').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t').replace(/\v/g, '\\v').replace(/\0/g, '\\0');
@@ -6544,7 +7012,7 @@ function _quote(s) {
   return '"' + escaped.replace(/"/g, '\\"') + '"';
 }
 module.exports = _quote;
-},{}],144:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 var _isArrayLike = /*#__PURE__*/require('./_isArrayLike');
 
 var _xwrap = /*#__PURE__*/require('./_xwrap');
@@ -6607,7 +7075,7 @@ function _reduce(fn, acc, list) {
   throw new TypeError('reduce: list must be array or iterable');
 }
 module.exports = _reduce;
-},{"../bind":29,"./_isArrayLike":128,"./_xwrap":169}],145:[function(require,module,exports){
+},{"../bind":29,"./_isArrayLike":131,"./_xwrap":173}],149:[function(require,module,exports){
 function _reduced(x) {
   return x && x['@@transducer/reduced'] ? x : {
     '@@transducer/value': x,
@@ -6615,8 +7083,8 @@ function _reduced(x) {
   };
 }
 module.exports = _reduced;
-},{}],146:[function(require,module,exports){
-var _assign = /*#__PURE__*/require('./_assign');
+},{}],150:[function(require,module,exports){
+var _objectAssign = /*#__PURE__*/require('./_objectAssign');
 
 var _identity = /*#__PURE__*/require('./_identity');
 
@@ -6644,7 +7112,7 @@ var _stepCatString = {
 var _stepCatObject = {
   '@@transducer/init': Object,
   '@@transducer/step': function (result, input) {
-    return _assign(result, _isArrayLike(input) ? objOf(input[0], input[1]) : input);
+    return _objectAssign(result, _isArrayLike(input) ? objOf(input[0], input[1]) : input);
   },
   '@@transducer/result': _identity
 };
@@ -6665,7 +7133,7 @@ function _stepCat(obj) {
   throw new Error('Cannot create transformer for ' + obj);
 }
 module.exports = _stepCat;
-},{"../objOf":225,"./_assign":102,"./_identity":124,"./_isArrayLike":128,"./_isTransformer":136}],147:[function(require,module,exports){
+},{"../objOf":231,"./_identity":125,"./_isArrayLike":131,"./_isTransformer":139,"./_objectAssign":142}],151:[function(require,module,exports){
 /**
  * Polyfill from <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString>.
  */
@@ -6680,8 +7148,8 @@ var _toISOString = typeof Date.prototype.toISOString === 'function' ? function _
 };
 
 module.exports = _toISOString;
-},{}],148:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./_contains');
+},{}],152:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./_includes');
 
 var _map = /*#__PURE__*/require('./_map');
 
@@ -6696,7 +7164,7 @@ var reject = /*#__PURE__*/require('../reject');
 function _toString(x, seen) {
   var recur = function recur(y) {
     var xs = seen.concat([x]);
-    return _contains(y, xs) ? '<Circular>' : _toString(y, xs);
+    return _includes(y, xs) ? '<Circular>' : _toString(y, xs);
   };
 
   //  mapPairs :: (Object, [String]) -> [String]
@@ -6737,7 +7205,7 @@ function _toString(x, seen) {
   }
 }
 module.exports = _toString;
-},{"../keys":181,"../reject":261,"./_contains":108,"./_map":138,"./_quote":143,"./_toISOString":147}],149:[function(require,module,exports){
+},{"../keys":185,"../reject":269,"./_includes":126,"./_map":141,"./_quote":147,"./_toISOString":151}],153:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -6773,7 +7241,7 @@ var _xall = /*#__PURE__*/_curry2(function _xall(f, xf) {
   return new XAll(f, xf);
 });
 module.exports = _xall;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],150:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],154:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -6809,7 +7277,7 @@ var _xany = /*#__PURE__*/_curry2(function _xany(f, xf) {
   return new XAny(f, xf);
 });
 module.exports = _xany;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],151:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],155:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./_concat');
 
 var _curry2 = /*#__PURE__*/require('./_curry2');
@@ -6852,7 +7320,7 @@ var _xaperture = /*#__PURE__*/_curry2(function _xaperture(n, xf) {
   return new XAperture(n, xf);
 });
 module.exports = _xaperture;
-},{"./_concat":107,"./_curry2":112,"./_xfBase":158}],152:[function(require,module,exports){
+},{"./_concat":110,"./_curry2":113,"./_xfBase":162}],156:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _flatCat = /*#__PURE__*/require('./_flatCat');
@@ -6863,7 +7331,7 @@ var _xchain = /*#__PURE__*/_curry2(function _xchain(f, xf) {
   return map(f, _flatCat(xf));
 });
 module.exports = _xchain;
-},{"../map":194,"./_curry2":112,"./_flatCat":120}],153:[function(require,module,exports){
+},{"../map":198,"./_curry2":113,"./_flatCat":121}],157:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -6891,7 +7359,7 @@ var _xdrop = /*#__PURE__*/_curry2(function _xdrop(n, xf) {
   return new XDrop(n, xf);
 });
 module.exports = _xdrop;
-},{"./_curry2":112,"./_xfBase":158}],154:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],158:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -6932,7 +7400,7 @@ var _xdropLast = /*#__PURE__*/_curry2(function _xdropLast(n, xf) {
   return new XDropLast(n, xf);
 });
 module.exports = _xdropLast;
-},{"./_curry2":112,"./_xfBase":158}],155:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],159:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduce = /*#__PURE__*/require('./_reduce');
@@ -6971,7 +7439,7 @@ var _xdropLastWhile = /*#__PURE__*/_curry2(function _xdropLastWhile(fn, xf) {
   return new XDropLastWhile(fn, xf);
 });
 module.exports = _xdropLastWhile;
-},{"./_curry2":112,"./_reduce":144,"./_xfBase":158}],156:[function(require,module,exports){
+},{"./_curry2":113,"./_reduce":148,"./_xfBase":162}],160:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7005,7 +7473,7 @@ var _xdropRepeatsWith = /*#__PURE__*/_curry2(function _xdropRepeatsWith(pred, xf
   return new XDropRepeatsWith(pred, xf);
 });
 module.exports = _xdropRepeatsWith;
-},{"./_curry2":112,"./_xfBase":158}],157:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],161:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7035,7 +7503,7 @@ var _xdropWhile = /*#__PURE__*/_curry2(function _xdropWhile(f, xf) {
   return new XDropWhile(f, xf);
 });
 module.exports = _xdropWhile;
-},{"./_curry2":112,"./_xfBase":158}],158:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],162:[function(require,module,exports){
 module.exports = {
   init: function () {
     return this.xf['@@transducer/init']();
@@ -7044,7 +7512,7 @@ module.exports = {
     return this.xf['@@transducer/result'](result);
   }
 };
-},{}],159:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7068,7 +7536,7 @@ var _xfilter = /*#__PURE__*/_curry2(function _xfilter(f, xf) {
   return new XFilter(f, xf);
 });
 module.exports = _xfilter;
-},{"./_curry2":112,"./_xfBase":158}],160:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],164:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -7104,7 +7572,7 @@ var _xfind = /*#__PURE__*/_curry2(function _xfind(f, xf) {
   return new XFind(f, xf);
 });
 module.exports = _xfind;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],161:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],165:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -7142,7 +7610,7 @@ var _xfindIndex = /*#__PURE__*/_curry2(function _xfindIndex(f, xf) {
   return new XFindIndex(f, xf);
 });
 module.exports = _xfindIndex;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],162:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],166:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7171,7 +7639,7 @@ var _xfindLast = /*#__PURE__*/_curry2(function _xfindLast(f, xf) {
   return new XFindLast(f, xf);
 });
 module.exports = _xfindLast;
-},{"./_curry2":112,"./_xfBase":158}],163:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],167:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7203,7 +7671,7 @@ var _xfindLastIndex = /*#__PURE__*/_curry2(function _xfindLastIndex(f, xf) {
   return new XFindLastIndex(f, xf);
 });
 module.exports = _xfindLastIndex;
-},{"./_curry2":112,"./_xfBase":158}],164:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],168:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7227,7 +7695,7 @@ var _xmap = /*#__PURE__*/_curry2(function _xmap(f, xf) {
   return new XMap(f, xf);
 });
 module.exports = _xmap;
-},{"./_curry2":112,"./_xfBase":158}],165:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],169:[function(require,module,exports){
 var _curryN = /*#__PURE__*/require('./_curryN');
 
 var _has = /*#__PURE__*/require('./_has');
@@ -7272,7 +7740,7 @@ var _xreduceBy = /*#__PURE__*/_curryN(4, [], function _xreduceBy(valueFn, valueA
   return new XReduceBy(valueFn, valueAcc, keyFn, xf);
 });
 module.exports = _xreduceBy;
-},{"./_curryN":114,"./_has":123,"./_xfBase":158}],166:[function(require,module,exports){
+},{"./_curryN":115,"./_has":124,"./_xfBase":162}],170:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -7301,7 +7769,7 @@ var _xtake = /*#__PURE__*/_curry2(function _xtake(n, xf) {
   return new XTake(n, xf);
 });
 module.exports = _xtake;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],167:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],171:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _reduced = /*#__PURE__*/require('./_reduced');
@@ -7327,7 +7795,7 @@ var _xtakeWhile = /*#__PURE__*/_curry2(function _xtakeWhile(f, xf) {
   return new XTakeWhile(f, xf);
 });
 module.exports = _xtakeWhile;
-},{"./_curry2":112,"./_reduced":145,"./_xfBase":158}],168:[function(require,module,exports){
+},{"./_curry2":113,"./_reduced":149,"./_xfBase":162}],172:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./_curry2');
 
 var _xfBase = /*#__PURE__*/require('./_xfBase');
@@ -7352,7 +7820,7 @@ var _xtap = /*#__PURE__*/_curry2(function _xtap(f, xf) {
   return new XTap(f, xf);
 });
 module.exports = _xtap;
-},{"./_curry2":112,"./_xfBase":158}],169:[function(require,module,exports){
+},{"./_curry2":113,"./_xfBase":162}],173:[function(require,module,exports){
 var XWrap = /*#__PURE__*/function () {
   function XWrap(fn) {
     this.f = fn;
@@ -7374,8 +7842,8 @@ function _xwrap(fn) {
   return new XWrap(fn);
 }
 module.exports = _xwrap;
-},{}],170:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./internal/_contains');
+},{}],174:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./internal/_includes');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
@@ -7413,10 +7881,10 @@ var intersection = /*#__PURE__*/_curry2(function intersection(list1, list2) {
     lookupList = list2;
     filteredList = list1;
   }
-  return uniq(_filter(flip(_contains)(lookupList), filteredList));
+  return uniq(_filter(flip(_includes)(lookupList), filteredList));
 });
 module.exports = intersection;
-},{"./flip":76,"./internal/_contains":108,"./internal/_curry2":112,"./internal/_filter":119,"./uniq":307}],171:[function(require,module,exports){
+},{"./flip":77,"./internal/_curry2":113,"./internal/_filter":120,"./internal/_includes":126,"./uniq":317}],175:[function(require,module,exports){
 var _checkForMethod = /*#__PURE__*/require('./internal/_checkForMethod');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -7436,7 +7904,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} The new list.
  * @example
  *
- *      R.intersperse('n', ['ba', 'a', 'a']); //=> ['ba', 'n', 'a', 'n', 'a']
+ *      R.intersperse('a', ['b', 'n', 'n', 's']); //=> ['b', 'a', 'n', 'a', 'n', 'a', 's']
  */
 
 
@@ -7455,7 +7923,7 @@ var intersperse = /*#__PURE__*/_curry2( /*#__PURE__*/_checkForMethod('interspers
   return out;
 }));
 module.exports = intersperse;
-},{"./internal/_checkForMethod":103,"./internal/_curry2":112}],172:[function(require,module,exports){
+},{"./internal/_checkForMethod":106,"./internal/_curry2":113}],176:[function(require,module,exports){
 var _clone = /*#__PURE__*/require('./internal/_clone');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
@@ -7494,14 +7962,15 @@ var _stepCat = /*#__PURE__*/require('./internal/_stepCat');
  * @param {Function} xf The transducer function. Receives a transformer and returns a transformer.
  * @param {Array} list The list to iterate over.
  * @return {*} The final, accumulated value.
+ * @see R.transduce
  * @example
  *
- *      var numbers = [1, 2, 3, 4];
- *      var transducer = R.compose(R.map(R.add(1)), R.take(2));
+ *      const numbers = [1, 2, 3, 4];
+ *      const transducer = R.compose(R.map(R.add(1)), R.take(2));
  *
  *      R.into([], transducer, numbers); //=> [2, 3]
  *
- *      var intoArray = R.into([]);
+ *      const intoArray = R.into([]);
  *      intoArray(transducer, numbers); //=> [2, 3]
  */
 
@@ -7510,7 +7979,7 @@ var into = /*#__PURE__*/_curry3(function into(acc, xf, list) {
   return _isTransformer(acc) ? _reduce(xf(acc), acc['@@transducer/init'](), list) : _reduce(xf(_stepCat(acc)), _clone(acc, [], [], false), list);
 });
 module.exports = into;
-},{"./internal/_clone":104,"./internal/_curry3":113,"./internal/_isTransformer":136,"./internal/_reduce":144,"./internal/_stepCat":146}],173:[function(require,module,exports){
+},{"./internal/_clone":107,"./internal/_curry3":114,"./internal/_isTransformer":139,"./internal/_reduce":148,"./internal/_stepCat":150}],177:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -7531,7 +8000,7 @@ var keys = /*#__PURE__*/require('./keys');
  * @see R.invertObj
  * @example
  *
- *      var raceResultsByFirstName = {
+ *      const raceResultsByFirstName = {
  *        first: 'alice',
  *        second: 'jake',
  *        third: 'alice',
@@ -7557,7 +8026,7 @@ var invert = /*#__PURE__*/_curry1(function invert(obj) {
   return out;
 });
 module.exports = invert;
-},{"./internal/_curry1":111,"./internal/_has":123,"./keys":181}],174:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_has":124,"./keys":185}],178:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var keys = /*#__PURE__*/require('./keys');
@@ -7577,7 +8046,7 @@ var keys = /*#__PURE__*/require('./keys');
  * @see R.invert
  * @example
  *
- *      var raceResults = {
+ *      const raceResults = {
  *        first: 'alice',
  *        second: 'jake'
  *      };
@@ -7585,7 +8054,7 @@ var keys = /*#__PURE__*/require('./keys');
  *      //=> { 'alice': 'first', 'jake':'second' }
  *
  *      // Alternatively:
- *      var raceResults = ['alice', 'jake'];
+ *      const raceResults = ['alice', 'jake'];
  *      R.invertObj(raceResults);
  *      //=> { 'alice': '0', 'jake':'1' }
  */
@@ -7605,7 +8074,7 @@ var invertObj = /*#__PURE__*/_curry1(function invertObj(obj) {
   return out;
 });
 module.exports = invertObj;
-},{"./internal/_curry1":111,"./keys":181}],175:[function(require,module,exports){
+},{"./internal/_curry1":112,"./keys":185}],179:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isFunction = /*#__PURE__*/require('./internal/_isFunction');
@@ -7633,9 +8102,9 @@ var toString = /*#__PURE__*/require('./toString');
  * @see R.construct
  * @example
  *
- *      var sliceFrom = R.invoker(1, 'slice');
+ *      const sliceFrom = R.invoker(1, 'slice');
  *      sliceFrom(6, 'abcdefghijklm'); //=> 'ghijklm'
- *      var sliceFrom6 = R.invoker(2, 'slice')(6);
+ *      const sliceFrom6 = R.invoker(2, 'slice')(6);
  *      sliceFrom6(8, 'abcdefghijklm'); //=> 'gh'
  * @symb R.invoker(0, 'method')(o) = o['method']()
  * @symb R.invoker(1, 'method')(a, o) = o['method'](a)
@@ -7653,7 +8122,7 @@ var invoker = /*#__PURE__*/_curry2(function invoker(arity, method) {
   });
 });
 module.exports = invoker;
-},{"./curryN":48,"./internal/_curry2":112,"./internal/_isFunction":129,"./toString":293}],176:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry2":113,"./internal/_isFunction":132,"./toString":303}],180:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -7685,7 +8154,7 @@ var is = /*#__PURE__*/_curry2(function is(Ctor, val) {
   return val != null && val.constructor === Ctor || val instanceof Ctor;
 });
 module.exports = is;
-},{"./internal/_curry2":112}],177:[function(require,module,exports){
+},{"./internal/_curry2":113}],181:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var empty = /*#__PURE__*/require('./empty');
@@ -7719,7 +8188,7 @@ var isEmpty = /*#__PURE__*/_curry1(function isEmpty(x) {
   return x != null && equals(x, empty(x));
 });
 module.exports = isEmpty;
-},{"./empty":64,"./equals":68,"./internal/_curry1":111}],178:[function(require,module,exports){
+},{"./empty":65,"./equals":69,"./internal/_curry1":112}],182:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -7745,7 +8214,7 @@ var isNil = /*#__PURE__*/_curry1(function isNil(x) {
   return x == null;
 });
 module.exports = isNil;
-},{"./internal/_curry1":111}],179:[function(require,module,exports){
+},{"./internal/_curry1":112}],183:[function(require,module,exports){
 var invoker = /*#__PURE__*/require('./invoker');
 
 /**
@@ -7763,7 +8232,7 @@ var invoker = /*#__PURE__*/require('./invoker');
  * @see R.split
  * @example
  *
- *      var spacer = R.join(' ');
+ *      const spacer = R.join(' ');
  *      spacer(['a', 2, 3.4]);   //=> 'a 2 3.4'
  *      R.join('|', [1, 2, 3]);    //=> '1|2|3'
  */
@@ -7771,7 +8240,7 @@ var invoker = /*#__PURE__*/require('./invoker');
 
 var join = /*#__PURE__*/invoker(1, 'join');
 module.exports = join;
-},{"./invoker":175}],180:[function(require,module,exports){
+},{"./invoker":179}],184:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var converge = /*#__PURE__*/require('./converge');
@@ -7789,7 +8258,7 @@ var converge = /*#__PURE__*/require('./converge');
  * @see R.applySpec
  * @example
  *
- *      var getRange = R.juxt([Math.min, Math.max]);
+ *      const getRange = R.juxt([Math.min, Math.max]);
  *      getRange(3, 4, 9, -3); //=> [-3, 9]
  * @symb R.juxt([f, g, h])(a, b) = [f(a, b), g(a, b), h(a, b)]
  */
@@ -7801,7 +8270,7 @@ var juxt = /*#__PURE__*/_curry1(function juxt(fns) {
   }, fns);
 });
 module.exports = juxt;
-},{"./converge":45,"./internal/_curry1":111}],181:[function(require,module,exports){
+},{"./converge":46,"./internal/_curry1":112}],185:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -7849,9 +8318,9 @@ var contains = function contains(list, item) {
  *
  *      R.keys({a: 1, b: 2, c: 3}); //=> ['a', 'b', 'c']
  */
-var _keys = typeof Object.keys === 'function' && !hasArgsEnumBug ? function keys(obj) {
+var keys = typeof Object.keys === 'function' && !hasArgsEnumBug ? /*#__PURE__*/_curry1(function keys(obj) {
   return Object(obj) !== obj ? [] : Object.keys(obj);
-} : function keys(obj) {
+}) : /*#__PURE__*/_curry1(function keys(obj) {
   if (Object(obj) !== obj) {
     return [];
   }
@@ -7874,10 +8343,9 @@ var _keys = typeof Object.keys === 'function' && !hasArgsEnumBug ? function keys
     }
   }
   return ks;
-};
-var keys = /*#__PURE__*/_curry1(_keys);
+});
 module.exports = keys;
-},{"./internal/_curry1":111,"./internal/_has":123,"./internal/_isArguments":126}],182:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_has":124,"./internal/_isArguments":129}],186:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -7896,9 +8364,9 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @see R.keys, R.valuesIn
  * @example
  *
- *      var F = function() { this.x = 'X'; };
+ *      const F = function() { this.x = 'X'; };
  *      F.prototype.y = 'Y';
- *      var f = new F();
+ *      const f = new F();
  *      R.keysIn(f); //=> ['x', 'y']
  */
 
@@ -7912,7 +8380,7 @@ var keysIn = /*#__PURE__*/_curry1(function keysIn(obj) {
   return ks;
 });
 module.exports = keysIn;
-},{"./internal/_curry1":111}],183:[function(require,module,exports){
+},{"./internal/_curry1":112}],187:[function(require,module,exports){
 var nth = /*#__PURE__*/require('./nth');
 
 /**
@@ -7939,7 +8407,7 @@ var nth = /*#__PURE__*/require('./nth');
 
 var last = /*#__PURE__*/nth(-1);
 module.exports = last;
-},{"./nth":222}],184:[function(require,module,exports){
+},{"./nth":228}],188:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isArray = /*#__PURE__*/require('./internal/_isArray');
@@ -7982,7 +8450,7 @@ var lastIndexOf = /*#__PURE__*/_curry2(function lastIndexOf(target, xs) {
   }
 });
 module.exports = lastIndexOf;
-},{"./equals":68,"./internal/_curry2":112,"./internal/_isArray":127}],185:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry2":113,"./internal/_isArray":130}],189:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _isNumber = /*#__PURE__*/require('./internal/_isNumber');
@@ -8008,7 +8476,7 @@ var length = /*#__PURE__*/_curry1(function length(list) {
   return list != null && _isNumber(list.length) ? list.length : NaN;
 });
 module.exports = length;
-},{"./internal/_curry1":111,"./internal/_isNumber":131}],186:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_isNumber":134}],190:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var map = /*#__PURE__*/require('./map');
@@ -8030,7 +8498,7 @@ var map = /*#__PURE__*/require('./map');
  * @see R.view, R.set, R.over, R.lensIndex, R.lensProp
  * @example
  *
- *      var xLens = R.lens(R.prop('x'), R.assoc('x'));
+ *      const xLens = R.lens(R.prop('x'), R.assoc('x'));
  *
  *      R.view(xLens, {x: 1, y: 2});            //=> 1
  *      R.set(xLens, 4, {x: 1, y: 2});          //=> {x: 4, y: 2}
@@ -8048,7 +8516,7 @@ var lens = /*#__PURE__*/_curry2(function lens(getter, setter) {
   };
 });
 module.exports = lens;
-},{"./internal/_curry2":112,"./map":194}],187:[function(require,module,exports){
+},{"./internal/_curry2":113,"./map":198}],191:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var lens = /*#__PURE__*/require('./lens');
@@ -8071,7 +8539,7 @@ var update = /*#__PURE__*/require('./update');
  * @see R.view, R.set, R.over
  * @example
  *
- *      var headLens = R.lensIndex(0);
+ *      const headLens = R.lensIndex(0);
  *
  *      R.view(headLens, ['a', 'b', 'c']);            //=> 'a'
  *      R.set(headLens, 'x', ['a', 'b', 'c']);        //=> ['x', 'b', 'c']
@@ -8083,7 +8551,7 @@ var lensIndex = /*#__PURE__*/_curry1(function lensIndex(n) {
   return lens(nth(n), update(n));
 });
 module.exports = lensIndex;
-},{"./internal/_curry1":111,"./lens":186,"./nth":222,"./update":313}],188:[function(require,module,exports){
+},{"./internal/_curry1":112,"./lens":190,"./nth":228,"./update":323}],192:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var assocPath = /*#__PURE__*/require('./assocPath');
@@ -8107,7 +8575,7 @@ var path = /*#__PURE__*/require('./path');
  * @see R.view, R.set, R.over
  * @example
  *
- *      var xHeadYLens = R.lensPath(['x', 0, 'y']);
+ *      const xHeadYLens = R.lensPath(['x', 0, 'y']);
  *
  *      R.view(xHeadYLens, {x: [{y: 2, z: 3}, {y: 4, z: 5}]});
  *      //=> 2
@@ -8122,7 +8590,7 @@ var lensPath = /*#__PURE__*/_curry1(function lensPath(p) {
   return lens(path(p), assocPath(p));
 });
 module.exports = lensPath;
-},{"./assocPath":27,"./internal/_curry1":111,"./lens":186,"./path":235}],189:[function(require,module,exports){
+},{"./assocPath":27,"./internal/_curry1":112,"./lens":190,"./path":242}],193:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var assoc = /*#__PURE__*/require('./assoc');
@@ -8145,7 +8613,7 @@ var prop = /*#__PURE__*/require('./prop');
  * @see R.view, R.set, R.over
  * @example
  *
- *      var xLens = R.lensProp('x');
+ *      const xLens = R.lensProp('x');
  *
  *      R.view(xLens, {x: 1, y: 2});            //=> 1
  *      R.set(xLens, 4, {x: 1, y: 2});          //=> {x: 4, y: 2}
@@ -8157,7 +8625,7 @@ var lensProp = /*#__PURE__*/_curry1(function lensProp(k) {
   return lens(prop(k), assoc(k));
 });
 module.exports = lensProp;
-},{"./assoc":26,"./internal/_curry1":111,"./lens":186,"./prop":249}],190:[function(require,module,exports){
+},{"./assoc":26,"./internal/_curry1":112,"./lens":190,"./prop":257}],194:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var liftN = /*#__PURE__*/require('./liftN');
@@ -8176,11 +8644,11 @@ var liftN = /*#__PURE__*/require('./liftN');
  * @see R.liftN
  * @example
  *
- *      var madd3 = R.lift((a, b, c) => a + b + c);
+ *      const madd3 = R.lift((a, b, c) => a + b + c);
  *
  *      madd3([1,2,3], [1,2,3], [1]); //=> [3, 4, 5, 4, 5, 6, 5, 6, 7]
  *
- *      var madd5 = R.lift((a, b, c, d, e) => a + b + c + d + e);
+ *      const madd5 = R.lift((a, b, c, d, e) => a + b + c + d + e);
  *
  *      madd5([1,2], [3], [4, 5], [6], [7, 8]); //=> [21, 22, 22, 23, 22, 23, 23, 24]
  */
@@ -8190,7 +8658,7 @@ var lift = /*#__PURE__*/_curry1(function lift(fn) {
   return liftN(fn.length, fn);
 });
 module.exports = lift;
-},{"./internal/_curry1":111,"./liftN":191}],191:[function(require,module,exports){
+},{"./internal/_curry1":112,"./liftN":195}],195:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _reduce = /*#__PURE__*/require('./internal/_reduce');
@@ -8215,7 +8683,7 @@ var map = /*#__PURE__*/require('./map');
  * @see R.lift, R.ap
  * @example
  *
- *      var madd3 = R.liftN(3, (...args) => R.sum(args));
+ *      const madd3 = R.liftN(3, (...args) => R.sum(args));
  *      madd3([1,2,3], [1,2,3], [1]); //=> [3, 4, 5, 4, 5, 6, 5, 6, 7]
  */
 
@@ -8227,7 +8695,7 @@ var liftN = /*#__PURE__*/_curry2(function liftN(arity, fn) {
   });
 });
 module.exports = liftN;
-},{"./ap":19,"./curryN":48,"./internal/_curry2":112,"./internal/_reduce":144,"./map":194}],192:[function(require,module,exports){
+},{"./ap":19,"./curryN":49,"./internal/_curry2":113,"./internal/_reduce":148,"./map":198}],196:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -8257,7 +8725,7 @@ var lt = /*#__PURE__*/_curry2(function lt(a, b) {
   return a < b;
 });
 module.exports = lt;
-},{"./internal/_curry2":112}],193:[function(require,module,exports){
+},{"./internal/_curry2":113}],197:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -8287,7 +8755,7 @@ var lte = /*#__PURE__*/_curry2(function lte(a, b) {
   return a <= b;
 });
 module.exports = lte;
-},{"./internal/_curry2":112}],194:[function(require,module,exports){
+},{"./internal/_curry2":113}],198:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -8328,7 +8796,7 @@ var keys = /*#__PURE__*/require('./keys');
  * @see R.transduce, R.addIndex
  * @example
  *
- *      var double = x => x * 2;
+ *      const double = x => x * 2;
  *
  *      R.map(double, [1, 2, 3]); //=> [2, 4, 6]
  *
@@ -8355,7 +8823,7 @@ var map = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['fantasy-land/map', 
   }
 }));
 module.exports = map;
-},{"./curryN":48,"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_map":138,"./internal/_reduce":144,"./internal/_xmap":164,"./keys":181}],195:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_map":141,"./internal/_reduce":148,"./internal/_xmap":168,"./keys":185}],199:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -8376,11 +8844,11 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {*} acc The accumulator value.
  * @param {Array} list The list to iterate over.
  * @return {*} The final, accumulated value.
- * @see R.addIndex, R.mapAccumRight
+ * @see R.scan, R.addIndex, R.mapAccumRight
  * @example
  *
- *      var digits = ['1', '2', '3', '4'];
- *      var appender = (a, b) => [a + b, a + b];
+ *      const digits = ['1', '2', '3', '4'];
+ *      const appender = (a, b) => [a + b, a + b];
  *
  *      R.mapAccum(appender, 0, digits); //=> ['01234', ['01', '012', '0123', '01234']]
  * @symb R.mapAccum(f, a, [b, c, d]) = [
@@ -8407,7 +8875,7 @@ var mapAccum = /*#__PURE__*/_curry3(function mapAccum(fn, acc, list) {
   return [tuple[0], result];
 });
 module.exports = mapAccum;
-},{"./internal/_curry3":113}],196:[function(require,module,exports){
+},{"./internal/_curry3":114}],200:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -8419,14 +8887,14 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * Similar to [`mapAccum`](#mapAccum), except moves through the input list from
  * the right to the left.
  *
- * The iterator function receives two arguments, *value* and *acc*, and should
- * return a tuple *[value, acc]*.
+ * The iterator function receives two arguments, *acc* and *value*, and should
+ * return a tuple *[acc, value]*.
  *
  * @func
  * @memberOf R
  * @since v0.10.0
  * @category List
- * @sig ((x, acc) -> (y, acc)) -> acc -> [x] -> ([y], acc)
+ * @sig ((acc, x) -> (acc, y)) -> acc -> [x] -> (acc, [y])
  * @param {Function} fn The function to be called on every element of the input `list`.
  * @param {*} acc The accumulator value.
  * @param {Array} list The list to iterate over.
@@ -8434,17 +8902,17 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.addIndex, R.mapAccum
  * @example
  *
- *      var digits = ['1', '2', '3', '4'];
- *      var append = (a, b) => [a + b, a + b];
+ *      const digits = ['1', '2', '3', '4'];
+ *      const appender = (a, b) => [b + a, b + a];
  *
- *      R.mapAccumRight(append, 5, digits); //=> [['12345', '2345', '345', '45'], '12345']
+ *      R.mapAccumRight(appender, 5, digits); //=> ['12345', ['12345', '2345', '345', '45']]
  * @symb R.mapAccumRight(f, a, [b, c, d]) = [
+ *   f(f(f(a, d)[0], c)[0], b)[0],
  *   [
- *     f(b, f(c, f(d, a)[0])[0])[1],
- *     f(c, f(d, a)[0])[1],
- *     f(d, a)[1],
+ *     f(a, d)[1],
+ *     f(f(a, d)[0], c)[1],
+ *     f(f(f(a, d)[0], c)[0], b)[1]
  *   ]
- *   f(b, f(c, f(d, a)[0])[0])[0],
  * ]
  */
 
@@ -8454,14 +8922,14 @@ var mapAccumRight = /*#__PURE__*/_curry3(function mapAccumRight(fn, acc, list) {
   var result = [];
   var tuple = [acc];
   while (idx >= 0) {
-    tuple = fn(list[idx], tuple[0]);
+    tuple = fn(tuple[0], list[idx]);
     result[idx] = tuple[1];
     idx -= 1;
   }
-  return [result, tuple[0]];
+  return [tuple[0], result];
 });
 module.exports = mapAccumRight;
-},{"./internal/_curry3":113}],197:[function(require,module,exports){
+},{"./internal/_curry3":114}],201:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _reduce = /*#__PURE__*/require('./internal/_reduce');
@@ -8484,10 +8952,10 @@ var keys = /*#__PURE__*/require('./keys');
  * @see R.map
  * @example
  *
- *      var values = { x: 1, y: 2, z: 3 };
- *      var prependKeyAndDouble = (num, key, obj) => key + (num * 2);
+ *      const xyz = { x: 1, y: 2, z: 3 };
+ *      const prependKeyAndDouble = (num, key, obj) => key + (num * 2);
  *
- *      R.mapObjIndexed(prependKeyAndDouble, values); //=> { x: 'x2', y: 'y4', z: 'z6' }
+ *      R.mapObjIndexed(prependKeyAndDouble, xyz); //=> { x: 'x2', y: 'y4', z: 'z6' }
  */
 
 
@@ -8498,7 +8966,7 @@ var mapObjIndexed = /*#__PURE__*/_curry2(function mapObjIndexed(fn, obj) {
   }, {}, keys(obj));
 });
 module.exports = mapObjIndexed;
-},{"./internal/_curry2":112,"./internal/_reduce":144,"./keys":181}],198:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_reduce":148,"./keys":185}],202:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -8528,7 +8996,7 @@ var match = /*#__PURE__*/_curry2(function match(rx, str) {
   return str.match(rx) || [];
 });
 module.exports = match;
-},{"./internal/_curry2":112}],199:[function(require,module,exports){
+},{"./internal/_curry2":113}],203:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isInteger = /*#__PURE__*/require('./internal/_isInteger');
@@ -8557,11 +9025,11 @@ var _isInteger = /*#__PURE__*/require('./internal/_isInteger');
  *      R.mathMod(17.2, 5); //=> NaN
  *      R.mathMod(17, 5.3); //=> NaN
  *
- *      var clock = R.mathMod(R.__, 12);
+ *      const clock = R.mathMod(R.__, 12);
  *      clock(15); //=> 3
  *      clock(24); //=> 0
  *
- *      var seventeenMod = R.mathMod(17);
+ *      const seventeenMod = R.mathMod(17);
  *      seventeenMod(3);  //=> 2
  *      seventeenMod(4);  //=> 1
  *      seventeenMod(10); //=> 7
@@ -8578,7 +9046,7 @@ var mathMod = /*#__PURE__*/_curry2(function mathMod(m, p) {
   return (m % p + p) % p;
 });
 module.exports = mathMod;
-},{"./internal/_curry2":112,"./internal/_isInteger":130}],200:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_isInteger":133}],204:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -8604,7 +9072,7 @@ var max = /*#__PURE__*/_curry2(function max(a, b) {
   return b > a ? b : a;
 });
 module.exports = max;
-},{"./internal/_curry2":112}],201:[function(require,module,exports){
+},{"./internal/_curry2":113}],205:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -8624,7 +9092,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @example
  *
  *      //  square :: Number -> Number
- *      var square = n => n * n;
+ *      const square = n => n * n;
  *
  *      R.maxBy(square, -3, 2); //=> -3
  *
@@ -8637,7 +9105,7 @@ var maxBy = /*#__PURE__*/_curry3(function maxBy(f, a, b) {
   return f(b) > f(a) ? b : a;
 });
 module.exports = maxBy;
-},{"./internal/_curry3":113}],202:[function(require,module,exports){
+},{"./internal/_curry3":114}],206:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var sum = /*#__PURE__*/require('./sum');
@@ -8664,7 +9132,7 @@ var mean = /*#__PURE__*/_curry1(function mean(list) {
   return sum(list) / list.length;
 });
 module.exports = mean;
-},{"./internal/_curry1":111,"./sum":279}],203:[function(require,module,exports){
+},{"./internal/_curry1":112,"./sum":287}],207:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var mean = /*#__PURE__*/require('./mean');
@@ -8700,46 +9168,7 @@ var median = /*#__PURE__*/_curry1(function median(list) {
   }).slice(idx, idx + width));
 });
 module.exports = median;
-},{"./internal/_curry1":111,"./mean":202}],204:[function(require,module,exports){
-var memoizeWith = /*#__PURE__*/require('./memoizeWith');
-
-var toString = /*#__PURE__*/require('./toString');
-
-/**
- * Creates a new function that, when invoked, caches the result of calling `fn`
- * for a given argument set and returns the result. Subsequent calls to the
- * memoized `fn` with the same argument set will not result in an additional
- * call to `fn`; instead, the cached result for that set of arguments will be
- * returned.
- *
- * @func
- * @memberOf R
- * @since v0.1.0
- * @category Function
- * @sig (*... -> a) -> (*... -> a)
- * @param {Function} fn The function to memoize.
- * @return {Function} Memoized version of `fn`.
- * @see R.memoizeWith
- * @deprecated since v0.25.0
- * @example
- *
- *      let count = 0;
- *      const factorial = R.memoize(n => {
- *        count += 1;
- *        return R.product(R.range(1, n + 1));
- *      });
- *      factorial(5); //=> 120
- *      factorial(5); //=> 120
- *      factorial(5); //=> 120
- *      count; //=> 1
- */
-
-
-var memoize = /*#__PURE__*/memoizeWith(function () {
-  return toString(arguments);
-});
-module.exports = memoize;
-},{"./memoizeWith":205,"./toString":293}],205:[function(require,module,exports){
+},{"./internal/_curry1":112,"./mean":206}],208:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -8747,11 +9176,11 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 var _has = /*#__PURE__*/require('./internal/_has');
 
 /**
- * A customisable version of [`R.memoize`](#memoize). `memoizeWith` takes an
- * additional function that will be applied to a given argument set and used to
- * create the cache key under which the results of the function to be memoized
- * will be stored. Care must be taken when implementing key generation to avoid
- * clashes that may overwrite previous entries erroneously.
+ * Creates a new function that, when invoked, caches the result of calling `fn`
+ * for a given argument set and returns the result. Subsequent calls to the
+ * memoized `fn` with the same argument set will not result in an additional
+ * call to `fn`; instead, the cached result for that set of arguments will be
+ * returned.
  *
  *
  * @func
@@ -8762,7 +9191,6 @@ var _has = /*#__PURE__*/require('./internal/_has');
  * @param {Function} fn The function to generate the cache key.
  * @param {Function} fn The function to memoize.
  * @return {Function} Memoized version of `fn`.
- * @see R.memoize
  * @example
  *
  *      let count = 0;
@@ -8788,8 +9216,8 @@ var memoizeWith = /*#__PURE__*/_curry2(function memoizeWith(mFn, fn) {
   });
 });
 module.exports = memoizeWith;
-},{"./internal/_arity":100,"./internal/_curry2":112,"./internal/_has":123}],206:[function(require,module,exports){
-var _assign = /*#__PURE__*/require('./internal/_assign');
+},{"./internal/_arity":103,"./internal/_curry2":113,"./internal/_has":124}],209:[function(require,module,exports){
+var _objectAssign = /*#__PURE__*/require('./internal/_objectAssign');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
@@ -8806,24 +9234,25 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @param {Object} l
  * @param {Object} r
  * @return {Object}
- * @see R.mergeDeepRight, R.mergeWith, R.mergeWithKey
+ * @see R.mergeRight, R.mergeDeepRight, R.mergeWith, R.mergeWithKey
+ * @deprecated
  * @example
  *
  *      R.merge({ 'name': 'fred', 'age': 10 }, { 'age': 40 });
  *      //=> { 'name': 'fred', 'age': 40 }
  *
- *      var resetToDefault = R.merge(R.__, {x: 0});
- *      resetToDefault({x: 5, y: 2}); //=> {x: 0, y: 2}
- * @symb R.merge({ x: 1, y: 2 }, { y: 5, z: 3 }) = { x: 1, y: 5, z: 3 }
+ *      const withDefaults = R.merge({x: 0, y: 0});
+ *      withDefaults({y: 2}); //=> {x: 0, y: 2}
+ * @symb R.merge(a, b) = {...a, ...b}
  */
 
 
 var merge = /*#__PURE__*/_curry2(function merge(l, r) {
-  return _assign({}, l, r);
+  return _objectAssign({}, l, r);
 });
 module.exports = merge;
-},{"./internal/_assign":102,"./internal/_curry2":112}],207:[function(require,module,exports){
-var _assign = /*#__PURE__*/require('./internal/_assign');
+},{"./internal/_curry2":113,"./internal/_objectAssign":142}],210:[function(require,module,exports){
+var _objectAssign = /*#__PURE__*/require('./internal/_objectAssign');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
@@ -8847,10 +9276,10 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 
 var mergeAll = /*#__PURE__*/_curry1(function mergeAll(list) {
-  return _assign.apply(null, [{}].concat(list));
+  return _objectAssign.apply(null, [{}].concat(list));
 });
 module.exports = mergeAll;
-},{"./internal/_assign":102,"./internal/_curry1":111}],208:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_objectAssign":142}],211:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var mergeDeepWithKey = /*#__PURE__*/require('./mergeDeepWithKey');
@@ -8884,7 +9313,7 @@ var mergeDeepLeft = /*#__PURE__*/_curry2(function mergeDeepLeft(lObj, rObj) {
   }, lObj, rObj);
 });
 module.exports = mergeDeepLeft;
-},{"./internal/_curry2":112,"./mergeDeepWithKey":211}],209:[function(require,module,exports){
+},{"./internal/_curry2":113,"./mergeDeepWithKey":214}],212:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var mergeDeepWithKey = /*#__PURE__*/require('./mergeDeepWithKey');
@@ -8918,7 +9347,7 @@ var mergeDeepRight = /*#__PURE__*/_curry2(function mergeDeepRight(lObj, rObj) {
   }, lObj, rObj);
 });
 module.exports = mergeDeepRight;
-},{"./internal/_curry2":112,"./mergeDeepWithKey":211}],210:[function(require,module,exports){
+},{"./internal/_curry2":113,"./mergeDeepWithKey":214}],213:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var mergeDeepWithKey = /*#__PURE__*/require('./mergeDeepWithKey');
@@ -8942,7 +9371,7 @@ var mergeDeepWithKey = /*#__PURE__*/require('./mergeDeepWithKey');
  * @param {Object} lObj
  * @param {Object} rObj
  * @return {Object}
- * @see R.mergeWith, R.mergeDeep, R.mergeDeepWithKey
+ * @see R.mergeWith, R.mergeDeepWithKey
  * @example
  *
  *      R.mergeDeepWith(R.concat,
@@ -8958,7 +9387,7 @@ var mergeDeepWith = /*#__PURE__*/_curry3(function mergeDeepWith(fn, lObj, rObj) 
   }, lObj, rObj);
 });
 module.exports = mergeDeepWith;
-},{"./internal/_curry3":113,"./mergeDeepWithKey":211}],211:[function(require,module,exports){
+},{"./internal/_curry3":114,"./mergeDeepWithKey":214}],214:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var _isObject = /*#__PURE__*/require('./internal/_isObject');
@@ -8984,7 +9413,7 @@ var mergeWithKey = /*#__PURE__*/require('./mergeWithKey');
  * @param {Object} lObj
  * @param {Object} rObj
  * @return {Object}
- * @see R.mergeWithKey, R.mergeDeep, R.mergeDeepWith
+ * @see R.mergeWithKey, R.mergeDeepWith
  * @example
  *
  *      let concatValues = (k, l, r) => k == 'values' ? R.concat(l, r) : r
@@ -9005,7 +9434,73 @@ var mergeDeepWithKey = /*#__PURE__*/_curry3(function mergeDeepWithKey(fn, lObj, 
   }, lObj, rObj);
 });
 module.exports = mergeDeepWithKey;
-},{"./internal/_curry3":113,"./internal/_isObject":132,"./mergeWithKey":213}],212:[function(require,module,exports){
+},{"./internal/_curry3":114,"./internal/_isObject":135,"./mergeWithKey":218}],215:[function(require,module,exports){
+var _objectAssign = /*#__PURE__*/require('./internal/_objectAssign');
+
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+/**
+ * Create a new object with the own properties of the first object merged with
+ * the own properties of the second object. If a key exists in both objects,
+ * the value from the first object will be used.
+ *
+ * @func
+ * @memberOf R
+ * @category Object
+ * @sig {k: v} -> {k: v} -> {k: v}
+ * @param {Object} l
+ * @param {Object} r
+ * @return {Object}
+ * @see R.mergeRight, R.mergeDeepLeft, R.mergeWith, R.mergeWithKey
+ * @example
+ *
+ *      R.mergeLeft({ 'age': 40 }, { 'name': 'fred', 'age': 10 });
+ *      //=> { 'name': 'fred', 'age': 40 }
+ *
+ *      const resetToDefault = R.mergeLeft({x: 0});
+ *      resetToDefault({x: 5, y: 2}); //=> {x: 0, y: 2}
+ * @symb R.mergeLeft(a, b) = {...b, ...a}
+ */
+
+
+var mergeLeft = /*#__PURE__*/_curry2(function mergeLeft(l, r) {
+  return _objectAssign({}, r, l);
+});
+module.exports = mergeLeft;
+},{"./internal/_curry2":113,"./internal/_objectAssign":142}],216:[function(require,module,exports){
+var _objectAssign = /*#__PURE__*/require('./internal/_objectAssign');
+
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+/**
+ * Create a new object with the own properties of the first object merged with
+ * the own properties of the second object. If a key exists in both objects,
+ * the value from the second object will be used.
+ *
+ * @func
+ * @memberOf R
+ * @category Object
+ * @sig {k: v} -> {k: v} -> {k: v}
+ * @param {Object} l
+ * @param {Object} r
+ * @return {Object}
+ * @see R.mergeLeft, R.mergeDeepRight, R.mergeWith, R.mergeWithKey
+ * @example
+ *
+ *      R.mergeRight({ 'name': 'fred', 'age': 10 }, { 'age': 40 });
+ *      //=> { 'name': 'fred', 'age': 40 }
+ *
+ *      const withDefaults = R.mergeRight({x: 0, y: 0});
+ *      withDefaults({y: 2}); //=> {x: 0, y: 2}
+ * @symb R.mergeRight(a, b) = {...a, ...b}
+ */
+
+
+var mergeRight = /*#__PURE__*/_curry2(function mergeRight(l, r) {
+  return _objectAssign({}, l, r);
+});
+module.exports = mergeRight;
+},{"./internal/_curry2":113,"./internal/_objectAssign":142}],217:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var mergeWithKey = /*#__PURE__*/require('./mergeWithKey');
@@ -9041,7 +9536,7 @@ var mergeWith = /*#__PURE__*/_curry3(function mergeWith(fn, l, r) {
   }, l, r);
 });
 module.exports = mergeWith;
-},{"./internal/_curry3":113,"./mergeWithKey":213}],213:[function(require,module,exports){
+},{"./internal/_curry3":114,"./mergeWithKey":218}],218:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -9092,7 +9587,7 @@ var mergeWithKey = /*#__PURE__*/_curry3(function mergeWithKey(fn, l, r) {
   return result;
 });
 module.exports = mergeWithKey;
-},{"./internal/_curry3":113,"./internal/_has":123}],214:[function(require,module,exports){
+},{"./internal/_curry3":114,"./internal/_has":124}],219:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9118,7 +9613,7 @@ var min = /*#__PURE__*/_curry2(function min(a, b) {
   return b < a ? b : a;
 });
 module.exports = min;
-},{"./internal/_curry2":112}],215:[function(require,module,exports){
+},{"./internal/_curry2":113}],220:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -9138,7 +9633,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @example
  *
  *      //  square :: Number -> Number
- *      var square = n => n * n;
+ *      const square = n => n * n;
  *
  *      R.minBy(square, -3, 2); //=> 2
  *
@@ -9151,7 +9646,7 @@ var minBy = /*#__PURE__*/_curry3(function minBy(f, a, b) {
   return f(b) < f(a) ? b : a;
 });
 module.exports = minBy;
-},{"./internal/_curry3":113}],216:[function(require,module,exports){
+},{"./internal/_curry3":114}],221:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9175,7 +9670,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  *      R.modulo(-17, 3); //=> -2
  *      R.modulo(17, -3); //=> 2
  *
- *      var isOdd = R.modulo(R.__, 2);
+ *      const isOdd = R.modulo(R.__, 2);
  *      isOdd(42); //=> 0
  *      isOdd(21); //=> 1
  */
@@ -9185,7 +9680,40 @@ var modulo = /*#__PURE__*/_curry2(function modulo(a, b) {
   return a % b;
 });
 module.exports = modulo;
-},{"./internal/_curry2":112}],217:[function(require,module,exports){
+},{"./internal/_curry2":113}],222:[function(require,module,exports){
+var _curry3 = /*#__PURE__*/require('./internal/_curry3');
+
+/**
+ * Move an item, at index `from`, to index `to`, in a list of elements.
+ * A new list will be created containing the new elements order.
+ *
+ * @func
+ * @memberOf R
+ * @category List
+ * @sig Number -> Number -> [a] -> [a]
+ * @param {Number} from The source index
+ * @param {Number} to The destination index
+ * @param {Array} list The list which will serve to realise the move
+ * @return {Array} The new list reordered
+ * @example
+ *
+ *      R.move(0, 2, ['a', 'b', 'c', 'd', 'e', 'f']); //=> ['b', 'c', 'a', 'd', 'e', 'f']
+ *      R.move(-1, 0, ['a', 'b', 'c', 'd', 'e', 'f']); //=> ['f', 'a', 'b', 'c', 'd', 'e'] list rotation
+ */
+
+
+var move = /*#__PURE__*/_curry3(function (from, to, list) {
+  var length = list.length;
+  var result = list.slice();
+  var positiveFrom = from < 0 ? length + from : from;
+  var positiveTo = to < 0 ? length + to : to;
+  var item = result.splice(positiveFrom, 1);
+
+  return positiveFrom < 0 || positiveFrom >= list.length || positiveTo < 0 || positiveTo >= list.length ? list : [].concat(result.slice(0, positiveTo)).concat(item).concat(result.slice(positiveTo, list.length));
+});
+
+module.exports = move;
+},{"./internal/_curry3":114}],223:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9202,8 +9730,8 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.divide
  * @example
  *
- *      var double = R.multiply(2);
- *      var triple = R.multiply(3);
+ *      const double = R.multiply(2);
+ *      const triple = R.multiply(3);
  *      double(3);       //=>  6
  *      triple(4);       //=> 12
  *      R.multiply(2, 5);  //=> 10
@@ -9214,7 +9742,7 @@ var multiply = /*#__PURE__*/_curry2(function multiply(a, b) {
   return a * b;
 });
 module.exports = multiply;
-},{"./internal/_curry2":112}],218:[function(require,module,exports){
+},{"./internal/_curry2":113}],224:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9234,12 +9762,12 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.binary, R.unary
  * @example
  *
- *      var takesTwoArgs = (a, b) => [a, b];
+ *      const takesTwoArgs = (a, b) => [a, b];
  *
  *      takesTwoArgs.length; //=> 2
  *      takesTwoArgs(1, 2); //=> [1, 2]
  *
- *      var takesOneArg = R.nAry(1, takesTwoArgs);
+ *      const takesOneArg = R.nAry(1, takesTwoArgs);
  *      takesOneArg.length; //=> 1
  *      // Only `n` arguments are passed to the wrapped function
  *      takesOneArg(1, 2); //=> [1, undefined]
@@ -9300,7 +9828,7 @@ var nAry = /*#__PURE__*/_curry2(function nAry(n, fn) {
   }
 });
 module.exports = nAry;
-},{"./internal/_curry2":112}],219:[function(require,module,exports){
+},{"./internal/_curry2":113}],225:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -9323,22 +9851,20 @@ var negate = /*#__PURE__*/_curry1(function negate(n) {
   return -n;
 });
 module.exports = negate;
-},{"./internal/_curry1":111}],220:[function(require,module,exports){
+},{"./internal/_curry1":112}],226:[function(require,module,exports){
 var _complement = /*#__PURE__*/require('./internal/_complement');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
-var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
-
-var _xany = /*#__PURE__*/require('./internal/_xany');
-
-var any = /*#__PURE__*/require('./any');
+var all = /*#__PURE__*/require('./all');
 
 /**
  * Returns `true` if no elements of the list match the predicate, `false`
  * otherwise.
  *
- * Dispatches to the `any` method of the second argument, if present.
+ * Dispatches to the `all` method of the second argument, if present.
+ *
+ * Acts as a transducer if a transformer is given in list position.
  *
  * @func
  * @memberOf R
@@ -9351,17 +9877,19 @@ var any = /*#__PURE__*/require('./any');
  * @see R.all, R.any
  * @example
  *
- *      var isEven = n => n % 2 === 0;
- *      var isOdd = n => n % 2 === 1;
+ *      const isEven = n => n % 2 === 0;
+ *      const isOdd = n => n % 2 === 1;
  *
  *      R.none(isEven, [1, 3, 5, 7, 9, 11]); //=> true
  *      R.none(isOdd, [1, 3, 5, 7, 8, 11]); //=> false
  */
 
 
-var none = /*#__PURE__*/_curry2( /*#__PURE__*/_complement( /*#__PURE__*/_dispatchable(['any'], _xany, any)));
+var none = /*#__PURE__*/_curry2(function none(fn, input) {
+  return all(_complement(fn), input);
+});
 module.exports = none;
-},{"./any":17,"./internal/_complement":106,"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xany":150}],221:[function(require,module,exports){
+},{"./all":13,"./internal/_complement":109,"./internal/_curry2":113}],227:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -9389,7 +9917,7 @@ var not = /*#__PURE__*/_curry1(function not(a) {
   return !a;
 });
 module.exports = not;
-},{"./internal/_curry1":111}],222:[function(require,module,exports){
+},{"./internal/_curry1":112}],228:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isString = /*#__PURE__*/require('./internal/_isString');
@@ -9409,7 +9937,7 @@ var _isString = /*#__PURE__*/require('./internal/_isString');
  * @return {*}
  * @example
  *
- *      var list = ['foo', 'bar', 'baz', 'quux'];
+ *      const list = ['foo', 'bar', 'baz', 'quux'];
  *      R.nth(1, list); //=> 'bar'
  *      R.nth(-1, list); //=> 'quux'
  *      R.nth(-99, list); //=> undefined
@@ -9427,7 +9955,7 @@ var nth = /*#__PURE__*/_curry2(function nth(offset, list) {
   return _isString(list) ? list.charAt(idx) : list[idx];
 });
 module.exports = nth;
-},{"./internal/_curry2":112,"./internal/_isString":135}],223:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_isString":138}],229:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -9461,14 +9989,16 @@ var nthArg = /*#__PURE__*/_curry1(function nthArg(n) {
   });
 });
 module.exports = nthArg;
-},{"./curryN":48,"./internal/_curry1":111,"./nth":222}],224:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry1":112,"./nth":228}],230:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
  * `o` is a curried composition function that returns a unary function.
  * Like [`compose`](#compose), `o` performs right-to-left function composition.
  * Unlike [`compose`](#compose), the rightmost function passed to `o` will be
- * invoked with only one argument.
+ * invoked with only one argument. Also, unlike [`compose`](#compose), `o` is
+ * limited to accepting only 2 unary functions. The name o was chosen because
+ * of its similarity to the mathematical composition operator ∘.
  *
  * @func
  * @memberOf R
@@ -9481,8 +10011,8 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @see R.compose, R.pipe
  * @example
  *
- *      var classyGreeting = name => "The name's " + name.last + ", " + name.first + " " + name.last
- *      var yellGreeting = R.o(R.toUpper, classyGreeting);
+ *      const classyGreeting = name => "The name's " + name.last + ", " + name.first + " " + name.last
+ *      const yellGreeting = R.o(R.toUpper, classyGreeting);
  *      yellGreeting({first: 'James', last: 'Bond'}); //=> "THE NAME'S BOND, JAMES BOND"
  *
  *      R.o(R.multiply(10), R.add(10))(-4) //=> 60
@@ -9495,7 +10025,7 @@ var o = /*#__PURE__*/_curry3(function o(f, g, x) {
   return f(g(x));
 });
 module.exports = o;
-},{"./internal/_curry3":113}],225:[function(require,module,exports){
+},{"./internal/_curry3":114}],231:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9512,7 +10042,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.pair
  * @example
  *
- *      var matchPhrases = R.compose(
+ *      const matchPhrases = R.compose(
  *        R.objOf('must'),
  *        R.map(R.objOf('match_phrase'))
  *      );
@@ -9526,7 +10056,7 @@ var objOf = /*#__PURE__*/_curry2(function objOf(key, val) {
   return obj;
 });
 module.exports = objOf;
-},{"./internal/_curry2":112}],226:[function(require,module,exports){
+},{"./internal/_curry2":113}],232:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _of = /*#__PURE__*/require('./internal/_of');
@@ -9553,7 +10083,7 @@ var _of = /*#__PURE__*/require('./internal/_of');
 
 var of = /*#__PURE__*/_curry1(_of);
 module.exports = of;
-},{"./internal/_curry1":111,"./internal/_of":140}],227:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_of":144}],233:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9593,7 +10123,7 @@ var omit = /*#__PURE__*/_curry2(function omit(names, obj) {
   return result;
 });
 module.exports = omit;
-},{"./internal/_curry2":112}],228:[function(require,module,exports){
+},{"./internal/_curry2":113}],234:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -9613,7 +10143,7 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @return {Function} The wrapped function.
  * @example
  *
- *      var addOneOnce = R.once(x => x + 1);
+ *      const addOneOnce = R.once(x => x + 1);
  *      addOneOnce(10); //=> 11
  *      addOneOnce(addOneOnce(50)); //=> 11
  */
@@ -9632,7 +10162,7 @@ var once = /*#__PURE__*/_curry1(function once(fn) {
   });
 });
 module.exports = once;
-},{"./internal/_arity":100,"./internal/_curry1":111}],229:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_curry1":112}],235:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9661,7 +10191,47 @@ var or = /*#__PURE__*/_curry2(function or(a, b) {
   return a || b;
 });
 module.exports = or;
-},{"./internal/_curry2":112}],230:[function(require,module,exports){
+},{"./internal/_curry2":113}],236:[function(require,module,exports){
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var _assertPromise = /*#__PURE__*/require('./internal/_assertPromise');
+
+/**
+ * Returns the result of applying the onFailure function to the value inside
+ * a failed promise. This is useful for handling rejected promises
+ * inside function compositions.
+ *
+ * @func
+ * @memberOf R
+ * @category Function
+ * @sig (e -> b) -> (Promise e a) -> (Promise e b)
+ * @sig (e -> (Promise f b)) -> (Promise e a) -> (Promise f b)
+ * @param {Function} onFailure The function to apply. Can return a value or a promise of a value.
+ * @param {Promise} p
+ * @return {Promise} The result of calling `p.then(null, onFailure)`
+ * @see R.then
+ * @example
+ *
+ *      var failedFetch = (id) => Promise.reject('bad ID');
+ *      var useDefault = () => ({ firstName: 'Bob', lastName: 'Loblaw' })
+ *
+ *      //recoverFromFailure :: String -> Promise ({firstName, lastName})
+ *      var recoverFromFailure = R.pipe(
+ *        failedFetch,
+ *        R.otherwise(useDefault),
+ *        R.then(R.pick(['firstName', 'lastName'])),
+ *      );
+ *      recoverFromFailure(12345).then(console.log)
+ */
+
+
+var otherwise = /*#__PURE__*/_curry2(function otherwise(f, p) {
+  _assertPromise('otherwise', p);
+
+  return p.then(null, f);
+});
+module.exports = otherwise;
+},{"./internal/_assertPromise":105,"./internal/_curry2":113}],237:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 // `Identity` is a functor that holds a single value, where `map` simply
@@ -9692,7 +10262,7 @@ var Identity = function (x) {
  * @see R.prop, R.lensIndex, R.lensProp
  * @example
  *
- *      var headLens = R.lensIndex(0);
+ *      const headLens = R.lensIndex(0);
  *
  *      R.over(headLens, R.toUpper, ['foo', 'bar', 'baz']); //=> ['FOO', 'bar', 'baz']
  */
@@ -9705,7 +10275,7 @@ var over = /*#__PURE__*/_curry3(function over(lens, f, x) {
   })(x).value;
 });
 module.exports = over;
-},{"./internal/_curry3":113}],231:[function(require,module,exports){
+},{"./internal/_curry3":114}],238:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9730,7 +10300,7 @@ var pair = /*#__PURE__*/_curry2(function pair(fst, snd) {
   return [fst, snd];
 });
 module.exports = pair;
-},{"./internal/_curry2":112}],232:[function(require,module,exports){
+},{"./internal/_curry2":113}],239:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _createPartialApplicator = /*#__PURE__*/require('./internal/_createPartialApplicator');
@@ -9748,18 +10318,18 @@ var _createPartialApplicator = /*#__PURE__*/require('./internal/_createPartialAp
  * @param {Function} f
  * @param {Array} args
  * @return {Function}
- * @see R.partialRight
+ * @see R.partialRight, R.curry
  * @example
  *
- *      var multiply2 = (a, b) => a * b;
- *      var double = R.partial(multiply2, [2]);
+ *      const multiply2 = (a, b) => a * b;
+ *      const double = R.partial(multiply2, [2]);
  *      double(2); //=> 4
  *
- *      var greet = (salutation, title, firstName, lastName) =>
+ *      const greet = (salutation, title, firstName, lastName) =>
  *        salutation + ', ' + title + ' ' + firstName + ' ' + lastName + '!';
  *
- *      var sayHello = R.partial(greet, ['Hello']);
- *      var sayHelloToMs = R.partial(sayHello, ['Ms.']);
+ *      const sayHello = R.partial(greet, ['Hello']);
+ *      const sayHelloToMs = R.partial(sayHello, ['Ms.']);
  *      sayHelloToMs('Jane', 'Jones'); //=> 'Hello, Ms. Jane Jones!'
  * @symb R.partial(f, [a, b])(c, d) = f(a, b, c, d)
  */
@@ -9767,7 +10337,7 @@ var _createPartialApplicator = /*#__PURE__*/require('./internal/_createPartialAp
 
 var partial = /*#__PURE__*/_createPartialApplicator(_concat);
 module.exports = partial;
-},{"./internal/_concat":107,"./internal/_createPartialApplicator":110}],233:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_createPartialApplicator":111}],240:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _createPartialApplicator = /*#__PURE__*/require('./internal/_createPartialApplicator');
@@ -9790,10 +10360,10 @@ var flip = /*#__PURE__*/require('./flip');
  * @see R.partial
  * @example
  *
- *      var greet = (salutation, title, firstName, lastName) =>
+ *      const greet = (salutation, title, firstName, lastName) =>
  *        salutation + ', ' + title + ' ' + firstName + ' ' + lastName + '!';
  *
- *      var greetMsJaneJones = R.partialRight(greet, ['Ms.', 'Jane', 'Jones']);
+ *      const greetMsJaneJones = R.partialRight(greet, ['Ms.', 'Jane', 'Jones']);
  *
  *      greetMsJaneJones('Hello'); //=> 'Hello, Ms. Jane Jones!'
  * @symb R.partialRight(f, [a, b])(c, d) = f(c, d, a, b)
@@ -9802,7 +10372,7 @@ var flip = /*#__PURE__*/require('./flip');
 
 var partialRight = /*#__PURE__*/_createPartialApplicator( /*#__PURE__*/flip(_concat));
 module.exports = partialRight;
-},{"./flip":76,"./internal/_concat":107,"./internal/_createPartialApplicator":110}],234:[function(require,module,exports){
+},{"./flip":77,"./internal/_concat":110,"./internal/_createPartialApplicator":111}],241:[function(require,module,exports){
 var filter = /*#__PURE__*/require('./filter');
 
 var juxt = /*#__PURE__*/require('./juxt');
@@ -9827,17 +10397,17 @@ var reject = /*#__PURE__*/require('./reject');
  * @see R.filter, R.reject
  * @example
  *
- *      R.partition(R.contains('s'), ['sss', 'ttt', 'foo', 'bars']);
+ *      R.partition(R.includes('s'), ['sss', 'ttt', 'foo', 'bars']);
  *      // => [ [ 'sss', 'bars' ],  [ 'ttt', 'foo' ] ]
  *
- *      R.partition(R.contains('s'), { a: 'sss', b: 'ttt', foo: 'bars' });
+ *      R.partition(R.includes('s'), { a: 'sss', b: 'ttt', foo: 'bars' });
  *      // => [ { a: 'sss', foo: 'bars' }, { b: 'ttt' }  ]
  */
 
 
 var partition = /*#__PURE__*/juxt([filter, reject]);
 module.exports = partition;
-},{"./filter":70,"./juxt":180,"./reject":261}],235:[function(require,module,exports){
+},{"./filter":71,"./juxt":184,"./reject":269}],242:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -9873,7 +10443,7 @@ var path = /*#__PURE__*/_curry2(function path(paths, obj) {
   return val;
 });
 module.exports = path;
-},{"./internal/_curry2":112}],236:[function(require,module,exports){
+},{"./internal/_curry2":113}],243:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -9897,11 +10467,11 @@ var path = /*#__PURE__*/require('./path');
  *         `false` otherwise.
  * @example
  *
- *      var user1 = { address: { zipCode: 90210 } };
- *      var user2 = { address: { zipCode: 55555 } };
- *      var user3 = { name: 'Bob' };
- *      var users = [ user1, user2, user3 ];
- *      var isFamous = R.pathEq(['address', 'zipCode'], 90210);
+ *      const user1 = { address: { zipCode: 90210 } };
+ *      const user2 = { address: { zipCode: 55555 } };
+ *      const user3 = { name: 'Bob' };
+ *      const users = [ user1, user2, user3 ];
+ *      const isFamous = R.pathEq(['address', 'zipCode'], 90210);
  *      R.filter(isFamous, users); //=> [ user1 ]
  */
 
@@ -9910,7 +10480,7 @@ var pathEq = /*#__PURE__*/_curry3(function pathEq(_path, val, obj) {
   return equals(path(_path, obj), val);
 });
 module.exports = pathEq;
-},{"./equals":68,"./internal/_curry3":113,"./path":235}],237:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry3":114,"./path":242}],244:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var defaultTo = /*#__PURE__*/require('./defaultTo');
@@ -9942,7 +10512,7 @@ var pathOr = /*#__PURE__*/_curry3(function pathOr(d, p, obj) {
   return defaultTo(d, path(p, obj));
 });
 module.exports = pathOr;
-},{"./defaultTo":50,"./internal/_curry3":113,"./path":235}],238:[function(require,module,exports){
+},{"./defaultTo":51,"./internal/_curry3":114,"./path":242}],245:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var path = /*#__PURE__*/require('./path');
@@ -9972,7 +10542,7 @@ var pathSatisfies = /*#__PURE__*/_curry3(function pathSatisfies(pred, propPath, 
   return propPath.length > 0 && pred(path(propPath, obj));
 });
 module.exports = pathSatisfies;
-},{"./internal/_curry3":113,"./path":235}],239:[function(require,module,exports){
+},{"./internal/_curry3":114,"./path":242}],246:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -10007,7 +10577,7 @@ var pick = /*#__PURE__*/_curry2(function pick(names, obj) {
   return result;
 });
 module.exports = pick;
-},{"./internal/_curry2":112}],240:[function(require,module,exports){
+},{"./internal/_curry2":113}],247:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -10042,7 +10612,7 @@ var pickAll = /*#__PURE__*/_curry2(function pickAll(names, obj) {
   return result;
 });
 module.exports = pickAll;
-},{"./internal/_curry2":112}],241:[function(require,module,exports){
+},{"./internal/_curry2":113}],248:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -10062,7 +10632,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @see R.pick, R.filter
  * @example
  *
- *      var isUpperCase = (val, key) => key.toUpperCase() === key;
+ *      const isUpperCase = (val, key) => key.toUpperCase() === key;
  *      R.pickBy(isUpperCase, {a: 1, b: 2, A: 3, B: 4}); //=> {A: 3, B: 4}
  */
 
@@ -10077,7 +10647,7 @@ var pickBy = /*#__PURE__*/_curry2(function pickBy(test, obj) {
   return result;
 });
 module.exports = pickBy;
-},{"./internal/_curry2":112}],242:[function(require,module,exports){
+},{"./internal/_curry2":113}],249:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _pipe = /*#__PURE__*/require('./internal/_pipe');
@@ -10104,7 +10674,7 @@ var tail = /*#__PURE__*/require('./tail');
  * @see R.compose
  * @example
  *
- *      var f = R.pipe(Math.pow, R.negate, R.inc);
+ *      const f = R.pipe(Math.pow, R.negate, R.inc);
  *
  *      f(3, 4); // -(3^4) + 1
  * @symb R.pipe(f, g, h)(a, b) = h(g(f(a, b)))
@@ -10118,7 +10688,7 @@ function pipe() {
   return _arity(arguments[0].length, reduce(_pipe, arguments[0], tail(arguments)));
 }
 module.exports = pipe;
-},{"./internal/_arity":100,"./internal/_pipe":141,"./reduce":256,"./tail":282}],243:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_pipe":145,"./reduce":264,"./tail":290}],250:[function(require,module,exports){
 var composeK = /*#__PURE__*/require('./composeK');
 
 var reverse = /*#__PURE__*/require('./reverse');
@@ -10137,13 +10707,14 @@ var reverse = /*#__PURE__*/require('./reverse');
  * @param {...Function}
  * @return {Function}
  * @see R.composeK
+ * @deprecated since v0.26.0
  * @example
  *
  *      //  parseJson :: String -> Maybe *
  *      //  get :: String -> Object -> Maybe *
  *
  *      //  getStateCode :: Maybe String -> Maybe String
- *      var getStateCode = R.pipeK(
+ *      const getStateCode = R.pipeK(
  *        parseJson,
  *        get('user'),
  *        get('address'),
@@ -10166,7 +10737,7 @@ function pipeK() {
   return composeK.apply(this, reverse(arguments));
 }
 module.exports = pipeK;
-},{"./composeK":38,"./reverse":265}],244:[function(require,module,exports){
+},{"./composeK":38,"./reverse":273}],251:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _pipeP = /*#__PURE__*/require('./internal/_pipeP');
@@ -10188,10 +10759,11 @@ var tail = /*#__PURE__*/require('./tail');
  * @param {...Function} functions
  * @return {Function}
  * @see R.composeP
+ * @deprecated since v0.26.0
  * @example
  *
  *      //  followersForUser :: String -> Promise [User]
- *      var followersForUser = R.pipeP(db.getUserById, db.getFollowers);
+ *      const followersForUser = R.pipeP(db.getUserById, db.getFollowers);
  */
 
 
@@ -10202,7 +10774,58 @@ function pipeP() {
   return _arity(arguments[0].length, reduce(_pipeP, arguments[0], tail(arguments)));
 }
 module.exports = pipeP;
-},{"./internal/_arity":100,"./internal/_pipeP":142,"./reduce":256,"./tail":282}],245:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_pipeP":146,"./reduce":264,"./tail":290}],252:[function(require,module,exports){
+var _arity = /*#__PURE__*/require('./internal/_arity');
+
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var head = /*#__PURE__*/require('./head');
+
+var _reduce = /*#__PURE__*/require('./internal/_reduce');
+
+var tail = /*#__PURE__*/require('./tail');
+
+var identity = /*#__PURE__*/require('./identity');
+
+/**
+ * Performs left-to-right function composition using transforming function. The leftmost function may have
+ * any arity; the remaining functions must be unary.
+ *
+ * **Note:** The result of pipeWith is not automatically curried.
+ *
+ * @func
+ * @memberOf R
+ * @category Function
+ * @sig ((* -> *), [((a, b, ..., n) -> o), (o -> p), ..., (x -> y), (y -> z)]) -> ((a, b, ..., n) -> z)
+ * @param {...Function} functions
+ * @return {Function}
+ * @see R.composeWith, R.pipe
+ * @example
+ *
+ *      const pipeWhileNotNil = R.pipeWith((f, res) => R.isNil(res) ? res : f(res));
+ *      const f = pipeWhileNotNil([Math.pow, R.negate, R.inc])
+ *
+ *      f(3, 4); // -(3^4) + 1
+ * @symb R.pipeWith(f)([g, h, i])(...args) = f(i, f(h, f(g, ...args)))
+ */
+
+
+var pipeWith = /*#__PURE__*/_curry2(function pipeWith(xf, list) {
+  if (list.length <= 0) {
+    return identity;
+  }
+
+  var headList = head(list);
+  var tailList = tail(list);
+
+  return _arity(headList.length, function () {
+    return _reduce(function (result, f) {
+      return xf.call(this, f, result);
+    }, headList.apply(this, arguments), tailList);
+  });
+});
+module.exports = pipeWith;
+},{"./head":88,"./identity":90,"./internal/_arity":103,"./internal/_curry2":113,"./internal/_reduce":148,"./tail":290}],253:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var map = /*#__PURE__*/require('./map');
@@ -10228,8 +10851,10 @@ var prop = /*#__PURE__*/require('./prop');
  * @see R.props
  * @example
  *
- *      R.pluck('a')([{a: 1}, {a: 2}]); //=> [1, 2]
- *      R.pluck(0)([[1, 2], [3, 4]]);   //=> [1, 3]
+ *      var getAges = R.pluck('age');
+ *      getAges([{name: 'fred', age: 29}, {name: 'wilma', age: 27}]); //=> [29, 27]
+ *
+ *      R.pluck(0, [[1, 2], [3, 4]]);               //=> [1, 3]
  *      R.pluck('val', {a: {val: 3}, b: {val: 5}}); //=> {a: 3, b: 5}
  * @symb R.pluck('x', [{x: 1, y: 2}, {x: 3, y: 4}, {x: 5, y: 6}]) = [1, 3, 5]
  * @symb R.pluck(0, [[1, 2], [3, 4], [5, 6]]) = [1, 3, 5]
@@ -10240,7 +10865,7 @@ var pluck = /*#__PURE__*/_curry2(function pluck(p, list) {
   return map(prop(p), list);
 });
 module.exports = pluck;
-},{"./internal/_curry2":112,"./map":194,"./prop":249}],246:[function(require,module,exports){
+},{"./internal/_curry2":113,"./map":198,"./prop":257}],254:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -10268,7 +10893,7 @@ var prepend = /*#__PURE__*/_curry2(function prepend(el, list) {
   return _concat([el], list);
 });
 module.exports = prepend;
-},{"./internal/_concat":107,"./internal/_curry2":112}],247:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_curry2":113}],255:[function(require,module,exports){
 var multiply = /*#__PURE__*/require('./multiply');
 
 var reduce = /*#__PURE__*/require('./reduce');
@@ -10292,7 +10917,7 @@ var reduce = /*#__PURE__*/require('./reduce');
 
 var product = /*#__PURE__*/reduce(multiply, 1);
 module.exports = product;
-},{"./multiply":217,"./reduce":256}],248:[function(require,module,exports){
+},{"./multiply":223,"./reduce":264}],256:[function(require,module,exports){
 var _map = /*#__PURE__*/require('./internal/_map');
 
 var identity = /*#__PURE__*/require('./identity');
@@ -10315,16 +10940,16 @@ var useWith = /*#__PURE__*/require('./useWith');
  * @return {Array} An array of objects with just the `props` properties.
  * @example
  *
- *      var abby = {name: 'Abby', age: 7, hair: 'blond', grade: 2};
- *      var fred = {name: 'Fred', age: 12, hair: 'brown', grade: 7};
- *      var kids = [abby, fred];
+ *      const abby = {name: 'Abby', age: 7, hair: 'blond', grade: 2};
+ *      const fred = {name: 'Fred', age: 12, hair: 'brown', grade: 7};
+ *      const kids = [abby, fred];
  *      R.project(['name', 'grade'], kids); //=> [{name: 'Abby', grade: 2}, {name: 'Fred', grade: 7}]
  */
 
 
 var project = /*#__PURE__*/useWith(_map, [pickAll, identity]); // passing `identity` gives correct arity
 module.exports = project;
-},{"./identity":88,"./internal/_map":138,"./pickAll":240,"./useWith":314}],249:[function(require,module,exports){
+},{"./identity":90,"./internal/_map":141,"./pickAll":247,"./useWith":324}],257:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var path = /*#__PURE__*/require('./path');
@@ -10346,13 +10971,14 @@ var path = /*#__PURE__*/require('./path');
  *
  *      R.prop('x', {x: 100}); //=> 100
  *      R.prop('x', {}); //=> undefined
+ *      R.compose(R.inc, R.prop('x'))({ x: 3 }) //=> 4
  */
 
 var prop = /*#__PURE__*/_curry2(function prop(p, obj) {
   return path([p], obj);
 });
 module.exports = prop;
-},{"./internal/_curry2":112,"./path":235}],250:[function(require,module,exports){
+},{"./internal/_curry2":113,"./path":242}],258:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -10360,7 +10986,7 @@ var equals = /*#__PURE__*/require('./equals');
 /**
  * Returns `true` if the specified object property is equal, in
  * [`R.equals`](#equals) terms, to the given value; `false` otherwise.
- * You can test multiple properties with [`R.where`](#where).
+ * You can test multiple properties with [`R.whereEq`](#whereEq).
  *
  * @func
  * @memberOf R
@@ -10374,12 +11000,12 @@ var equals = /*#__PURE__*/require('./equals');
  * @see R.whereEq, R.propSatisfies, R.equals
  * @example
  *
- *      var abby = {name: 'Abby', age: 7, hair: 'blond'};
- *      var fred = {name: 'Fred', age: 12, hair: 'brown'};
- *      var rusty = {name: 'Rusty', age: 10, hair: 'brown'};
- *      var alois = {name: 'Alois', age: 15, disposition: 'surly'};
- *      var kids = [abby, fred, rusty, alois];
- *      var hasBrownHair = R.propEq('hair', 'brown');
+ *      const abby = {name: 'Abby', age: 7, hair: 'blond'};
+ *      const fred = {name: 'Fred', age: 12, hair: 'brown'};
+ *      const rusty = {name: 'Rusty', age: 10, hair: 'brown'};
+ *      const alois = {name: 'Alois', age: 15, disposition: 'surly'};
+ *      const kids = [abby, fred, rusty, alois];
+ *      const hasBrownHair = R.propEq('hair', 'brown');
  *      R.filter(hasBrownHair, kids); //=> [fred, rusty]
  */
 
@@ -10388,7 +11014,7 @@ var propEq = /*#__PURE__*/_curry3(function propEq(name, val, obj) {
   return equals(val, obj[name]);
 });
 module.exports = propEq;
-},{"./equals":68,"./internal/_curry3":113}],251:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry3":114}],259:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var is = /*#__PURE__*/require('./is');
@@ -10419,10 +11045,10 @@ var propIs = /*#__PURE__*/_curry3(function propIs(type, name, obj) {
   return is(type, obj[name]);
 });
 module.exports = propIs;
-},{"./internal/_curry3":113,"./is":176}],252:[function(require,module,exports){
+},{"./internal/_curry3":114,"./is":180}],260:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
-var _has = /*#__PURE__*/require('./internal/_has');
+var pathOr = /*#__PURE__*/require('./pathOr');
 
 /**
  * If the given, non-null object has an own property with the specified name,
@@ -10440,12 +11066,12 @@ var _has = /*#__PURE__*/require('./internal/_has');
  * @return {*} The value of given property of the supplied object or the default value.
  * @example
  *
- *      var alice = {
+ *      const alice = {
  *        name: 'ALICE',
  *        age: 101
  *      };
- *      var favorite = R.prop('favoriteLibrary');
- *      var favoriteWithDefault = R.propOr('Ramda', 'favoriteLibrary');
+ *      const favorite = R.prop('favoriteLibrary');
+ *      const favoriteWithDefault = R.propOr('Ramda', 'favoriteLibrary');
  *
  *      favorite(alice);  //=> undefined
  *      favoriteWithDefault(alice);  //=> 'Ramda'
@@ -10453,10 +11079,10 @@ var _has = /*#__PURE__*/require('./internal/_has');
 
 
 var propOr = /*#__PURE__*/_curry3(function propOr(val, p, obj) {
-  return obj != null && _has(p, obj) ? obj[p] : val;
+  return pathOr(val, [p], obj);
 });
 module.exports = propOr;
-},{"./internal/_curry3":113,"./internal/_has":123}],253:[function(require,module,exports){
+},{"./internal/_curry3":114,"./pathOr":244}],261:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -10484,7 +11110,7 @@ var propSatisfies = /*#__PURE__*/_curry3(function propSatisfies(pred, name, obj)
   return pred(obj[name]);
 });
 module.exports = propSatisfies;
-},{"./internal/_curry3":113}],254:[function(require,module,exports){
+},{"./internal/_curry3":114}],262:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -10504,7 +11130,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  *      R.props(['x', 'y'], {x: 1, y: 2}); //=> [1, 2]
  *      R.props(['c', 'a', 'b'], {b: 2, a: 1}); //=> [undefined, 1, 2]
  *
- *      var fullName = R.compose(R.join(' '), R.props(['first', 'last']));
+ *      const fullName = R.compose(R.join(' '), R.props(['first', 'last']));
  *      fullName({last: 'Bullet-Tooth', age: 33, first: 'Tony'}); //=> 'Tony Bullet-Tooth'
  */
 
@@ -10522,7 +11148,7 @@ var props = /*#__PURE__*/_curry2(function props(ps, obj) {
   return out;
 });
 module.exports = props;
-},{"./internal/_curry2":112}],255:[function(require,module,exports){
+},{"./internal/_curry2":113}],263:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _isNumber = /*#__PURE__*/require('./internal/_isNumber');
@@ -10537,7 +11163,7 @@ var _isNumber = /*#__PURE__*/require('./internal/_isNumber');
  * @sig Number -> Number -> [Number]
  * @param {Number} from The first number in the list.
  * @param {Number} to One more than the last number in the list.
- * @return {Array} The list of numbers in tthe set `[a, b)`.
+ * @return {Array} The list of numbers in the set `[a, b)`.
  * @example
  *
  *      R.range(1, 5);    //=> [1, 2, 3, 4]
@@ -10558,7 +11184,7 @@ var range = /*#__PURE__*/_curry2(function range(from, to) {
   return result;
 });
 module.exports = range;
-},{"./internal/_curry2":112,"./internal/_isNumber":131}],256:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_isNumber":134}],264:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var _reduce = /*#__PURE__*/require('./internal/_reduce');
@@ -10613,7 +11239,7 @@ var _reduce = /*#__PURE__*/require('./internal/_reduce');
 
 var reduce = /*#__PURE__*/_curry3(_reduce);
 module.exports = reduce;
-},{"./internal/_curry3":113,"./internal/_reduce":144}],257:[function(require,module,exports){
+},{"./internal/_curry3":114,"./internal/_reduce":148}],265:[function(require,module,exports){
 var _curryN = /*#__PURE__*/require('./internal/_curryN');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -10648,25 +11274,22 @@ var _xreduceBy = /*#__PURE__*/require('./internal/_xreduceBy');
  * @see R.groupBy, R.reduce
  * @example
  *
- *      var reduceToNamesBy = R.reduceBy((acc, student) => acc.concat(student.name), []);
- *      var namesByGrade = reduceToNamesBy(function(student) {
- *        var score = student.score;
- *        return score < 65 ? 'F' :
- *               score < 70 ? 'D' :
- *               score < 80 ? 'C' :
- *               score < 90 ? 'B' : 'A';
- *      });
- *      var students = [{name: 'Lucy', score: 92},
- *                      {name: 'Drew', score: 85},
- *                      // ...
- *                      {name: 'Bart', score: 62}];
- *      namesByGrade(students);
- *      // {
- *      //   'A': ['Lucy'],
- *      //   'B': ['Drew']
- *      //   // ...,
- *      //   'F': ['Bart']
- *      // }
+ *      const groupNames = (acc, {name}) => acc.concat(name)
+ *      const toGrade = ({score}) =>
+ *        score < 65 ? 'F' :
+ *        score < 70 ? 'D' :
+ *        score < 80 ? 'C' :
+ *        score < 90 ? 'B' : 'A'
+ *
+ *      var students = [
+ *        {name: 'Abby', score: 83},
+ *        {name: 'Bart', score: 62},
+ *        {name: 'Curt', score: 88},
+ *        {name: 'Dora', score: 92},
+ *      ]
+ *
+ *      reduceBy(groupNames, [], toGrade, students)
+ *      //=> {"A": ["Dora"], "B": ["Abby", "Curt"], "F": ["Bart"]}
  */
 
 
@@ -10678,7 +11301,7 @@ var reduceBy = /*#__PURE__*/_curryN(4, [], /*#__PURE__*/_dispatchable([], _xredu
   }, {}, list);
 }));
 module.exports = reduceBy;
-},{"./internal/_curryN":114,"./internal/_dispatchable":115,"./internal/_has":123,"./internal/_reduce":144,"./internal/_xreduceBy":165}],258:[function(require,module,exports){
+},{"./internal/_curryN":115,"./internal/_dispatchable":116,"./internal/_has":124,"./internal/_reduce":148,"./internal/_xreduceBy":169}],266:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -10734,7 +11357,7 @@ var reduceRight = /*#__PURE__*/_curry3(function reduceRight(fn, acc, list) {
   return acc;
 });
 module.exports = reduceRight;
-},{"./internal/_curry3":113}],259:[function(require,module,exports){
+},{"./internal/_curry3":114}],267:[function(require,module,exports){
 var _curryN = /*#__PURE__*/require('./internal/_curryN');
 
 var _reduce = /*#__PURE__*/require('./internal/_reduce');
@@ -10763,11 +11386,11 @@ var _reduced = /*#__PURE__*/require('./internal/_reduced');
  * @see R.reduce, R.reduced
  * @example
  *
- *      var isOdd = (acc, x) => x % 2 === 1;
- *      var xs = [1, 3, 5, 60, 777, 800];
+ *      const isOdd = (acc, x) => x % 2 === 1;
+ *      const xs = [1, 3, 5, 60, 777, 800];
  *      R.reduceWhile(isOdd, R.add, 0, xs); //=> 9
  *
- *      var ys = [2, 4, 6]
+ *      const ys = [2, 4, 6]
  *      R.reduceWhile(isOdd, R.add, 111, ys); //=> 111
  */
 
@@ -10778,7 +11401,7 @@ var reduceWhile = /*#__PURE__*/_curryN(4, [], function _reduceWhile(pred, fn, a,
   }, a, list);
 });
 module.exports = reduceWhile;
-},{"./internal/_curryN":114,"./internal/_reduce":144,"./internal/_reduced":145}],260:[function(require,module,exports){
+},{"./internal/_curryN":115,"./internal/_reduce":148,"./internal/_reduced":149}],268:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _reduced = /*#__PURE__*/require('./internal/_reduced');
@@ -10788,9 +11411,10 @@ var _reduced = /*#__PURE__*/require('./internal/_reduced');
  * and transduce functions. The returned value should be considered a black
  * box: the internal structure is not guaranteed to be stable.
  *
- * Note: this optimization is unavailable to functions not explicitly listed
- * above. For instance, it is not currently supported by
- * [`reduceRight`](#reduceRight).
+ * Note: this optimization is only available to the below functions:
+ * - [`reduce`](#reduce)
+ * - [`reduceWhile`](#reduceWhile)
+ * - [`transduce`](#transduce)
  *
  * @func
  * @memberOf R
@@ -10799,7 +11423,7 @@ var _reduced = /*#__PURE__*/require('./internal/_reduced');
  * @sig a -> *
  * @param {*} x The final value of the reduce.
  * @return {*} The wrapped value.
- * @see R.reduce, R.transduce
+ * @see R.reduce, R.reduceWhile, R.transduce
  * @example
  *
  *     R.reduce(
@@ -10811,7 +11435,7 @@ var _reduced = /*#__PURE__*/require('./internal/_reduced');
 
 var reduced = /*#__PURE__*/_curry1(_reduced);
 module.exports = reduced;
-},{"./internal/_curry1":111,"./internal/_reduced":145}],261:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_reduced":149}],269:[function(require,module,exports){
 var _complement = /*#__PURE__*/require('./internal/_complement');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -10836,7 +11460,7 @@ var filter = /*#__PURE__*/require('./filter');
  * @see R.filter, R.transduce, R.addIndex
  * @example
  *
- *      var isOdd = (n) => n % 2 === 1;
+ *      const isOdd = (n) => n % 2 === 1;
  *
  *      R.reject(isOdd, [1, 2, 3, 4]); //=> [2, 4]
  *
@@ -10848,7 +11472,7 @@ var reject = /*#__PURE__*/_curry2(function reject(pred, filterable) {
   return filter(_complement(pred), filterable);
 });
 module.exports = reject;
-},{"./filter":70,"./internal/_complement":106,"./internal/_curry2":112}],262:[function(require,module,exports){
+},{"./filter":71,"./internal/_complement":109,"./internal/_curry2":113}],270:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -10866,6 +11490,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {Number} count The number of elements to remove
  * @param {Array} list The list to remove from
  * @return {Array} A new Array with `count` elements from `start` removed.
+ * @see R.without
  * @example
  *
  *      R.remove(2, 3, [1,2,3,4,5,6,7,8]); //=> [1,2,6,7,8]
@@ -10878,7 +11503,7 @@ var remove = /*#__PURE__*/_curry3(function remove(start, count, list) {
   return result;
 });
 module.exports = remove;
-},{"./internal/_curry3":113}],263:[function(require,module,exports){
+},{"./internal/_curry3":114}],271:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var always = /*#__PURE__*/require('./always');
@@ -10901,8 +11526,8 @@ var times = /*#__PURE__*/require('./times');
  *
  *      R.repeat('hi', 5); //=> ['hi', 'hi', 'hi', 'hi', 'hi']
  *
- *      var obj = {};
- *      var repeatedObjs = R.repeat(obj, 5); //=> [{}, {}, {}, {}, {}]
+ *      const obj = {};
+ *      const repeatedObjs = R.repeat(obj, 5); //=> [{}, {}, {}, {}, {}]
  *      repeatedObjs[0] === repeatedObjs[1]; //=> true
  * @symb R.repeat(a, 0) = []
  * @symb R.repeat(a, 1) = [a]
@@ -10914,11 +11539,15 @@ var repeat = /*#__PURE__*/_curry2(function repeat(value, n) {
   return times(always(value), n);
 });
 module.exports = repeat;
-},{"./always":15,"./internal/_curry2":112,"./times":289}],264:[function(require,module,exports){
+},{"./always":15,"./internal/_curry2":113,"./times":299}],272:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
  * Replace a substring or regex match in a string with a replacement.
+ *
+ * The first two parameters correspond to the parameters of the
+ * `String.prototype.replace()` function, so the second parameter can also be a
+ * function.
  *
  * @func
  * @memberOf R
@@ -10943,7 +11572,7 @@ var replace = /*#__PURE__*/_curry3(function replace(regex, replacement, str) {
   return str.replace(regex, replacement);
 });
 module.exports = replace;
-},{"./internal/_curry3":113}],265:[function(require,module,exports){
+},{"./internal/_curry3":114}],273:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _isString = /*#__PURE__*/require('./internal/_isString');
@@ -10978,7 +11607,7 @@ var reverse = /*#__PURE__*/_curry1(function reverse(list) {
   return _isString(list) ? list.split('').reverse().join('') : Array.prototype.slice.call(list, 0).reverse();
 });
 module.exports = reverse;
-},{"./internal/_curry1":111,"./internal/_isString":135}],266:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_isString":138}],274:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -10995,11 +11624,11 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {*} acc The accumulator value.
  * @param {Array} list The list to iterate over.
  * @return {Array} A list of all intermediately reduced values.
- * @see R.reduce
+ * @see R.reduce, R.mapAccum
  * @example
  *
- *      var numbers = [1, 2, 3, 4];
- *      var factorials = R.scan(R.multiply, 1, numbers); //=> [1, 1, 2, 6, 24]
+ *      const numbers = [1, 2, 3, 4];
+ *      const factorials = R.scan(R.multiply, 1, numbers); //=> [1, 1, 2, 6, 24]
  * @symb R.scan(f, a, [b, c]) = [a, f(a, b), f(f(a, b), c)]
  */
 
@@ -11016,7 +11645,7 @@ var scan = /*#__PURE__*/_curry3(function scan(fn, acc, list) {
   return result;
 });
 module.exports = scan;
-},{"./internal/_curry3":113}],267:[function(require,module,exports){
+},{"./internal/_curry3":114}],275:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var ap = /*#__PURE__*/require('./ap');
@@ -11059,7 +11688,7 @@ var sequence = /*#__PURE__*/_curry2(function sequence(of, traversable) {
   }, of([]), traversable);
 });
 module.exports = sequence;
-},{"./ap":19,"./internal/_curry2":112,"./map":194,"./prepend":246,"./reduceRight":258}],268:[function(require,module,exports){
+},{"./ap":19,"./internal/_curry2":113,"./map":198,"./prepend":254,"./reduceRight":266}],276:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var always = /*#__PURE__*/require('./always');
@@ -11083,7 +11712,7 @@ var over = /*#__PURE__*/require('./over');
  * @see R.prop, R.lensIndex, R.lensProp
  * @example
  *
- *      var xLens = R.lensProp('x');
+ *      const xLens = R.lensProp('x');
  *
  *      R.set(xLens, 4, {x: 1, y: 2});  //=> {x: 4, y: 2}
  *      R.set(xLens, 8, {x: 1, y: 2});  //=> {x: 8, y: 2}
@@ -11094,7 +11723,7 @@ var set = /*#__PURE__*/_curry3(function set(lens, v, x) {
   return over(lens, always(v), x);
 });
 module.exports = set;
-},{"./always":15,"./internal/_curry3":113,"./over":230}],269:[function(require,module,exports){
+},{"./always":15,"./internal/_curry3":114,"./over":237}],277:[function(require,module,exports){
 var _checkForMethod = /*#__PURE__*/require('./internal/_checkForMethod');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
@@ -11129,7 +11758,7 @@ var slice = /*#__PURE__*/_curry3( /*#__PURE__*/_checkForMethod('slice', function
   return Array.prototype.slice.call(list, fromIndex, toIndex);
 }));
 module.exports = slice;
-},{"./internal/_checkForMethod":103,"./internal/_curry3":113}],270:[function(require,module,exports){
+},{"./internal/_checkForMethod":106,"./internal/_curry3":114}],278:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11149,7 +11778,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} a new array with its elements sorted by the comparator function.
  * @example
  *
- *      var diff = function(a, b) { return a - b; };
+ *      const diff = function(a, b) { return a - b; };
  *      R.sort(diff, [4,2,7,5]); //=> [2, 4, 5, 7]
  */
 
@@ -11158,7 +11787,7 @@ var sort = /*#__PURE__*/_curry2(function sort(comparator, list) {
   return Array.prototype.slice.call(list, 0).sort(comparator);
 });
 module.exports = sort;
-},{"./internal/_curry2":112}],271:[function(require,module,exports){
+},{"./internal/_curry2":113}],279:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11174,23 +11803,24 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} A new list sorted by the keys generated by `fn`.
  * @example
  *
- *      var sortByFirstItem = R.sortBy(R.prop(0));
- *      var sortByNameCaseInsensitive = R.sortBy(R.compose(R.toLower, R.prop('name')));
- *      var pairs = [[-1, 1], [-2, 2], [-3, 3]];
+ *      const sortByFirstItem = R.sortBy(R.prop(0));
+ *      const pairs = [[-1, 1], [-2, 2], [-3, 3]];
  *      sortByFirstItem(pairs); //=> [[-3, 3], [-2, 2], [-1, 1]]
- *      var alice = {
+ *
+ *      const sortByNameCaseInsensitive = R.sortBy(R.compose(R.toLower, R.prop('name')));
+ *      const alice = {
  *        name: 'ALICE',
  *        age: 101
  *      };
- *      var bob = {
+ *      const bob = {
  *        name: 'Bob',
  *        age: -10
  *      };
- *      var clara = {
+ *      const clara = {
  *        name: 'clara',
  *        age: 314.159
  *      };
- *      var people = [clara, bob, alice];
+ *      const people = [clara, bob, alice];
  *      sortByNameCaseInsensitive(people); //=> [alice, bob, clara]
  */
 
@@ -11203,7 +11833,7 @@ var sortBy = /*#__PURE__*/_curry2(function sortBy(fn, list) {
   });
 });
 module.exports = sortBy;
-},{"./internal/_curry2":112}],272:[function(require,module,exports){
+},{"./internal/_curry2":113}],280:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11219,20 +11849,20 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} A new list sorted according to the comarator functions.
  * @example
  *
- *      var alice = {
+ *      const alice = {
  *        name: 'alice',
  *        age: 40
  *      };
- *      var bob = {
+ *      const bob = {
  *        name: 'bob',
  *        age: 30
  *      };
- *      var clara = {
+ *      const clara = {
  *        name: 'clara',
  *        age: 40
  *      };
- *      var people = [clara, bob, alice];
- *      var ageNameSort = R.sortWith([
+ *      const people = [clara, bob, alice];
+ *      const ageNameSort = R.sortWith([
  *        R.descend(R.prop('age')),
  *        R.ascend(R.prop('name'))
  *      ]);
@@ -11252,7 +11882,7 @@ var sortWith = /*#__PURE__*/_curry2(function sortWith(fns, list) {
   });
 });
 module.exports = sortWith;
-},{"./internal/_curry2":112}],273:[function(require,module,exports){
+},{"./internal/_curry2":113}],281:[function(require,module,exports){
 var invoker = /*#__PURE__*/require('./invoker');
 
 /**
@@ -11270,7 +11900,7 @@ var invoker = /*#__PURE__*/require('./invoker');
  * @see R.join
  * @example
  *
- *      var pathComponents = R.split('/');
+ *      const pathComponents = R.split('/');
  *      R.tail(pathComponents('/usr/local/bin/node')); //=> ['usr', 'local', 'bin', 'node']
  *
  *      R.split('.', 'a.b.c.xyz.d'); //=> ['a', 'b', 'c', 'xyz', 'd']
@@ -11279,7 +11909,7 @@ var invoker = /*#__PURE__*/require('./invoker');
 
 var split = /*#__PURE__*/invoker(1, 'split');
 module.exports = split;
-},{"./invoker":175}],274:[function(require,module,exports){
+},{"./invoker":179}],282:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var length = /*#__PURE__*/require('./length');
@@ -11310,7 +11940,7 @@ var splitAt = /*#__PURE__*/_curry2(function splitAt(index, array) {
   return [slice(0, index, array), slice(index, length(array), array)];
 });
 module.exports = splitAt;
-},{"./internal/_curry2":112,"./length":185,"./slice":269}],275:[function(require,module,exports){
+},{"./internal/_curry2":113,"./length":189,"./slice":277}],283:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var slice = /*#__PURE__*/require('./slice');
@@ -11346,7 +11976,7 @@ var splitEvery = /*#__PURE__*/_curry2(function splitEvery(n, list) {
   return result;
 });
 module.exports = splitEvery;
-},{"./internal/_curry2":112,"./slice":269}],276:[function(require,module,exports){
+},{"./internal/_curry2":113,"./slice":277}],284:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11383,7 +12013,7 @@ var splitWhen = /*#__PURE__*/_curry2(function splitWhen(pred, list) {
   return [prefix, Array.prototype.slice.call(list, idx)];
 });
 module.exports = splitWhen;
-},{"./internal/_curry2":112}],277:[function(require,module,exports){
+},{"./internal/_curry2":113}],285:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -11391,17 +12021,20 @@ var equals = /*#__PURE__*/require('./equals');
 var take = /*#__PURE__*/require('./take');
 
 /**
- * Checks if a list starts with the provided values
+ * Checks if a list starts with the provided sublist.
+ *
+ * Similarly, checks if a string starts with the provided substring.
  *
  * @func
  * @memberOf R
  * @since v0.24.0
  * @category List
- * @sig [a] -> Boolean
- * @sig String -> Boolean
+ * @sig [a] -> [a] -> Boolean
+ * @sig String -> String -> Boolean
  * @param {*} prefix
  * @param {*} list
  * @return {Boolean}
+ * @see R.endsWith
  * @example
  *
  *      R.startsWith('a', 'abc')                //=> true
@@ -11415,7 +12048,7 @@ var startsWith = /*#__PURE__*/_curry2(function (prefix, list) {
   return equals(take(prefix.length, list), prefix);
 });
 module.exports = startsWith;
-},{"./equals":68,"./internal/_curry2":112,"./take":283}],278:[function(require,module,exports){
+},{"./equals":69,"./internal/_curry2":113,"./take":291}],286:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11434,10 +12067,10 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  *
  *      R.subtract(10, 8); //=> 2
  *
- *      var minus5 = R.subtract(R.__, 5);
+ *      const minus5 = R.subtract(R.__, 5);
  *      minus5(17); //=> 12
  *
- *      var complementaryAngle = R.subtract(90);
+ *      const complementaryAngle = R.subtract(90);
  *      complementaryAngle(30); //=> 60
  *      complementaryAngle(72); //=> 18
  */
@@ -11447,7 +12080,7 @@ var subtract = /*#__PURE__*/_curry2(function subtract(a, b) {
   return Number(a) - Number(b);
 });
 module.exports = subtract;
-},{"./internal/_curry2":112}],279:[function(require,module,exports){
+},{"./internal/_curry2":113}],287:[function(require,module,exports){
 var add = /*#__PURE__*/require('./add');
 
 var reduce = /*#__PURE__*/require('./reduce');
@@ -11471,7 +12104,7 @@ var reduce = /*#__PURE__*/require('./reduce');
 
 var sum = /*#__PURE__*/reduce(add, 0);
 module.exports = sum;
-},{"./add":10,"./reduce":256}],280:[function(require,module,exports){
+},{"./add":10,"./reduce":264}],288:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var concat = /*#__PURE__*/require('./concat');
@@ -11502,7 +12135,7 @@ var symmetricDifference = /*#__PURE__*/_curry2(function symmetricDifference(list
   return concat(difference(list1, list2), difference(list2, list1));
 });
 module.exports = symmetricDifference;
-},{"./concat":40,"./difference":52,"./internal/_curry2":112}],281:[function(require,module,exports){
+},{"./concat":41,"./difference":53,"./internal/_curry2":113}],289:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var concat = /*#__PURE__*/require('./concat');
@@ -11526,9 +12159,9 @@ var differenceWith = /*#__PURE__*/require('./differenceWith');
  * @see R.symmetricDifference, R.difference, R.differenceWith
  * @example
  *
- *      var eqA = R.eqBy(R.prop('a'));
- *      var l1 = [{a: 1}, {a: 2}, {a: 3}, {a: 4}];
- *      var l2 = [{a: 3}, {a: 4}, {a: 5}, {a: 6}];
+ *      const eqA = R.eqBy(R.prop('a'));
+ *      const l1 = [{a: 1}, {a: 2}, {a: 3}, {a: 4}];
+ *      const l2 = [{a: 3}, {a: 4}, {a: 5}, {a: 6}];
  *      R.symmetricDifferenceWith(eqA, l1, l2); //=> [{a: 1}, {a: 2}, {a: 5}, {a: 6}]
  */
 
@@ -11537,7 +12170,7 @@ var symmetricDifferenceWith = /*#__PURE__*/_curry3(function symmetricDifferenceW
   return concat(differenceWith(pred, list1, list2), differenceWith(pred, list2, list1));
 });
 module.exports = symmetricDifferenceWith;
-},{"./concat":40,"./differenceWith":53,"./internal/_curry3":113}],282:[function(require,module,exports){
+},{"./concat":41,"./differenceWith":54,"./internal/_curry3":114}],290:[function(require,module,exports){
 var _checkForMethod = /*#__PURE__*/require('./internal/_checkForMethod');
 
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
@@ -11575,7 +12208,7 @@ var slice = /*#__PURE__*/require('./slice');
 
 var tail = /*#__PURE__*/_curry1( /*#__PURE__*/_checkForMethod('tail', /*#__PURE__*/slice(1, Infinity)));
 module.exports = tail;
-},{"./internal/_checkForMethod":103,"./internal/_curry1":111,"./slice":269}],283:[function(require,module,exports){
+},{"./internal/_checkForMethod":106,"./internal/_curry1":112,"./slice":277}],291:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -11608,7 +12241,7 @@ var slice = /*#__PURE__*/require('./slice');
  *      R.take(4, ['foo', 'bar', 'baz']); //=> ['foo', 'bar', 'baz']
  *      R.take(3, 'ramda');               //=> 'ram'
  *
- *      var personnel = [
+ *      const personnel = [
  *        'Dave Brubeck',
  *        'Paul Desmond',
  *        'Eugene Wright',
@@ -11619,7 +12252,7 @@ var slice = /*#__PURE__*/require('./slice');
  *        'Ron Crotty'
  *      ];
  *
- *      var takeFive = R.take(5);
+ *      const takeFive = R.take(5);
  *      takeFive(personnel);
  *      //=> ['Dave Brubeck', 'Paul Desmond', 'Eugene Wright', 'Joe Morello', 'Gerry Mulligan']
  * @symb R.take(-1, [a, b]) = [a, b]
@@ -11633,7 +12266,7 @@ var take = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['take'], _xtake, fu
   return slice(0, n < 0 ? Infinity : n, xs);
 }));
 module.exports = take;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xtake":166,"./slice":269}],284:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xtake":170,"./slice":277}],292:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var drop = /*#__PURE__*/require('./drop');
@@ -11666,7 +12299,7 @@ var takeLast = /*#__PURE__*/_curry2(function takeLast(n, xs) {
   return drop(n >= 0 ? xs.length - n : 0, xs);
 });
 module.exports = takeLast;
-},{"./drop":57,"./internal/_curry2":112}],285:[function(require,module,exports){
+},{"./drop":58,"./internal/_curry2":113}],293:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var slice = /*#__PURE__*/require('./slice');
@@ -11690,7 +12323,7 @@ var slice = /*#__PURE__*/require('./slice');
  * @see R.dropLastWhile, R.addIndex
  * @example
  *
- *      var isNotOne = x => x !== 1;
+ *      const isNotOne = x => x !== 1;
  *
  *      R.takeLastWhile(isNotOne, [1, 2, 3, 4]); //=> [2, 3, 4]
  *
@@ -11706,7 +12339,7 @@ var takeLastWhile = /*#__PURE__*/_curry2(function takeLastWhile(fn, xs) {
   return slice(idx + 1, Infinity, xs);
 });
 module.exports = takeLastWhile;
-},{"./internal/_curry2":112,"./slice":269}],286:[function(require,module,exports){
+},{"./internal/_curry2":113,"./slice":277}],294:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -11738,7 +12371,7 @@ var slice = /*#__PURE__*/require('./slice');
  * @see R.dropWhile, R.transduce, R.addIndex
  * @example
  *
- *      var isNotFour = x => x !== 4;
+ *      const isNotFour = x => x !== 4;
  *
  *      R.takeWhile(isNotFour, [1, 2, 3, 4, 3, 2, 1]); //=> [1, 2, 3]
  *
@@ -11755,7 +12388,7 @@ var takeWhile = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable(['takeWhile'], 
   return slice(0, idx, xs);
 }));
 module.exports = takeWhile;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xtakeWhile":167,"./slice":269}],287:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xtakeWhile":171,"./slice":277}],295:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _dispatchable = /*#__PURE__*/require('./internal/_dispatchable');
@@ -11777,7 +12410,7 @@ var _xtap = /*#__PURE__*/require('./internal/_xtap');
  * @return {*} `x`.
  * @example
  *
- *      var sayX = x => console.log('x is ' + x);
+ *      const sayX = x => console.log('x is ' + x);
  *      R.tap(sayX, 100); //=> 100
  *      // logs 'x is 100'
  * @symb R.tap(f, a) = a
@@ -11789,7 +12422,7 @@ var tap = /*#__PURE__*/_curry2( /*#__PURE__*/_dispatchable([], _xtap, function t
   return x;
 }));
 module.exports = tap;
-},{"./internal/_curry2":112,"./internal/_dispatchable":115,"./internal/_xtap":168}],288:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_dispatchable":116,"./internal/_xtap":172}],296:[function(require,module,exports){
 var _cloneRegExp = /*#__PURE__*/require('./internal/_cloneRegExp');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -11824,7 +12457,79 @@ var test = /*#__PURE__*/_curry2(function test(pattern, str) {
   return _cloneRegExp(pattern).test(str);
 });
 module.exports = test;
-},{"./internal/_cloneRegExp":105,"./internal/_curry2":112,"./internal/_isRegExp":134,"./toString":293}],289:[function(require,module,exports){
+},{"./internal/_cloneRegExp":108,"./internal/_curry2":113,"./internal/_isRegExp":137,"./toString":303}],297:[function(require,module,exports){
+var _curry2 = /*#__PURE__*/require('./internal/_curry2');
+
+var _assertPromise = /*#__PURE__*/require('./internal/_assertPromise');
+
+/**
+ * Returns the result of applying the onSuccess function to the value inside
+ * a successfully resolved promise. This is useful for working with promises
+ * inside function compositions.
+ *
+ * @func
+ * @memberOf R
+ * @category Function
+ * @sig (a -> b) -> (Promise e a) -> (Promise e b)
+ * @sig (a -> (Promise e b)) -> (Promise e a) -> (Promise e b)
+ * @param {Function} onSuccess The function to apply. Can return a value or a promise of a value.
+ * @param {Promise} p
+ * @return {Promise} The result of calling `p.then(onSuccess)`
+ * @see R.otherwise
+ * @example
+ *
+ *      var makeQuery = (email) => ({ query: { email }});
+ *
+ *      //getMemberName :: String -> Promise ({firstName, lastName})
+ *      var getMemberName = R.pipe(
+ *        makeQuery,
+ *        fetchMember,
+ *        R.then(R.pick(['firstName', 'lastName']))
+ *      );
+ */
+
+
+var then = /*#__PURE__*/_curry2(function then(f, p) {
+  _assertPromise('then', p);
+
+  return p.then(f);
+});
+module.exports = then;
+},{"./internal/_assertPromise":105,"./internal/_curry2":113}],298:[function(require,module,exports){
+var curryN = /*#__PURE__*/require('./curryN');
+
+var _curry1 = /*#__PURE__*/require('./internal/_curry1');
+
+/**
+ * Creates a thunk out of a function. A thunk delays a calculation until
+ * its result is needed, providing lazy evaluation of arguments.
+ *
+ * @func
+ * @memberOf R
+ * @category Function
+ * @sig ((a, b, ..., j) -> k) -> (a, b, ..., j) -> (() -> k)
+ * @param {Function} fn A function to wrap in a thunk
+ * @return {Function} Expects arguments for `fn` and returns a new function
+ *  that, when called, applies those arguments to `fn`.
+ * @see R.partial, R.partialRight
+ * @example
+ *
+ *      R.thunkify(R.identity)(42)(); //=> 42
+ *      R.thunkify((a, b) => a + b)(25, 17)(); //=> 42
+ */
+
+
+var thunkify = /*#__PURE__*/_curry1(function thunkify(fn) {
+  return curryN(fn.length, function createThunk() {
+    var fnArgs = arguments;
+    return function invokeThunk() {
+      return fn.apply(this, fnArgs);
+    };
+  });
+});
+
+module.exports = thunkify;
+},{"./curryN":49,"./internal/_curry1":112}],299:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -11868,7 +12573,7 @@ var times = /*#__PURE__*/_curry2(function times(fn, n) {
   return list;
 });
 module.exports = times;
-},{"./internal/_curry2":112}],290:[function(require,module,exports){
+},{"./internal/_curry2":113}],300:[function(require,module,exports){
 var invoker = /*#__PURE__*/require('./invoker');
 
 /**
@@ -11890,7 +12595,7 @@ var invoker = /*#__PURE__*/require('./invoker');
 
 var toLower = /*#__PURE__*/invoker(0, 'toLowerCase');
 module.exports = toLower;
-},{"./invoker":175}],291:[function(require,module,exports){
+},{"./invoker":179}],301:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -11925,7 +12630,7 @@ var toPairs = /*#__PURE__*/_curry1(function toPairs(obj) {
   return pairs;
 });
 module.exports = toPairs;
-},{"./internal/_curry1":111,"./internal/_has":123}],292:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_has":124}],302:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -11944,9 +12649,9 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  *         and prototype properties.
  * @example
  *
- *      var F = function() { this.x = 'X'; };
+ *      const F = function() { this.x = 'X'; };
  *      F.prototype.y = 'Y';
- *      var f = new F();
+ *      const f = new F();
  *      R.toPairsIn(f); //=> [['x','X'], ['y','Y']]
  */
 
@@ -11959,7 +12664,7 @@ var toPairsIn = /*#__PURE__*/_curry1(function toPairsIn(obj) {
   return pairs;
 });
 module.exports = toPairsIn;
-},{"./internal/_curry1":111}],293:[function(require,module,exports){
+},{"./internal/_curry1":112}],303:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var _toString = /*#__PURE__*/require('./internal/_toString');
@@ -12006,7 +12711,7 @@ var toString = /*#__PURE__*/_curry1(function toString(val) {
   return _toString(val, []);
 });
 module.exports = toString;
-},{"./internal/_curry1":111,"./internal/_toString":148}],294:[function(require,module,exports){
+},{"./internal/_curry1":112,"./internal/_toString":152}],304:[function(require,module,exports){
 var invoker = /*#__PURE__*/require('./invoker');
 
 /**
@@ -12028,7 +12733,7 @@ var invoker = /*#__PURE__*/require('./invoker');
 
 var toUpper = /*#__PURE__*/invoker(0, 'toUpperCase');
 module.exports = toUpper;
-},{"./invoker":175}],295:[function(require,module,exports){
+},{"./invoker":179}],305:[function(require,module,exports){
 var _reduce = /*#__PURE__*/require('./internal/_reduce');
 
 var _xwrap = /*#__PURE__*/require('./internal/_xwrap');
@@ -12074,12 +12779,12 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @see R.reduce, R.reduced, R.into
  * @example
  *
- *      var numbers = [1, 2, 3, 4];
- *      var transducer = R.compose(R.map(R.add(1)), R.take(2));
+ *      const numbers = [1, 2, 3, 4];
+ *      const transducer = R.compose(R.map(R.add(1)), R.take(2));
  *      R.transduce(transducer, R.flip(R.append), [], numbers); //=> [2, 3]
  *
- *      var isOdd = (x) => x % 2 === 1;
- *      var firstOddTransducer = R.compose(R.filter(isOdd), R.take(1));
+ *      const isOdd = (x) => x % 2 === 1;
+ *      const firstOddTransducer = R.compose(R.filter(isOdd), R.take(1));
  *      R.transduce(firstOddTransducer, R.flip(R.append), [], R.range(0, 100)); //=> [1]
  */
 
@@ -12088,7 +12793,7 @@ var transduce = /*#__PURE__*/curryN(4, function transduce(xf, fn, acc, list) {
   return _reduce(xf(typeof fn === 'function' ? _xwrap(fn) : fn), acc, list);
 });
 module.exports = transduce;
-},{"./curryN":48,"./internal/_reduce":144,"./internal/_xwrap":169}],296:[function(require,module,exports){
+},{"./curryN":49,"./internal/_reduce":148,"./internal/_xwrap":173}],306:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -12135,7 +12840,7 @@ var transpose = /*#__PURE__*/_curry1(function transpose(outerlist) {
   return result;
 });
 module.exports = transpose;
-},{"./internal/_curry1":111}],297:[function(require,module,exports){
+},{"./internal/_curry1":112}],307:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var map = /*#__PURE__*/require('./map');
@@ -12162,11 +12867,11 @@ var sequence = /*#__PURE__*/require('./sequence');
  * @see R.sequence
  * @example
  *
- *      // Returns `Nothing` if the given divisor is `0`
- *      safeDiv = n => d => d === 0 ? Nothing() : Just(n / d)
+ *      // Returns `Maybe.Nothing` if the given divisor is `0`
+ *      const safeDiv = n => d => d === 0 ? Maybe.Nothing() : Maybe.Just(n / d)
  *
- *      R.traverse(Maybe.of, safeDiv(10), [2, 4, 5]); //=> Just([5, 2.5, 2])
- *      R.traverse(Maybe.of, safeDiv(10), [2, 0, 5]); //=> Nothing
+ *      R.traverse(Maybe.of, safeDiv(10), [2, 4, 5]); //=> Maybe.Just([5, 2.5, 2])
+ *      R.traverse(Maybe.of, safeDiv(10), [2, 0, 5]); //=> Maybe.Nothing
  */
 
 
@@ -12174,7 +12879,7 @@ var traverse = /*#__PURE__*/_curry3(function traverse(of, f, traversable) {
   return typeof traversable['fantasy-land/traverse'] === 'function' ? traversable['fantasy-land/traverse'](f, of) : sequence(of, map(f, traversable));
 });
 module.exports = traverse;
-},{"./internal/_curry3":113,"./map":194,"./sequence":267}],298:[function(require,module,exports){
+},{"./internal/_curry3":114,"./map":198,"./sequence":275}],308:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var ws = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' + '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' + '\u2029\uFEFF';
@@ -12195,16 +12900,15 @@ var hasProtoTrim = typeof String.prototype.trim === 'function';
  *      R.trim('   xyz  '); //=> 'xyz'
  *      R.map(R.trim, R.split(',', 'x, y, z')); //=> ['x', 'y', 'z']
  */
-var _trim = !hasProtoTrim || /*#__PURE__*/ws.trim() || ! /*#__PURE__*/zeroWidth.trim() ? function trim(str) {
+var trim = !hasProtoTrim || /*#__PURE__*/ws.trim() || ! /*#__PURE__*/zeroWidth.trim() ? /*#__PURE__*/_curry1(function trim(str) {
   var beginRx = new RegExp('^[' + ws + '][' + ws + ']*');
   var endRx = new RegExp('[' + ws + '][' + ws + ']*$');
   return str.replace(beginRx, '').replace(endRx, '');
-} : function trim(str) {
+}) : /*#__PURE__*/_curry1(function trim(str) {
   return str.trim();
-};
-var trim = /*#__PURE__*/_curry1(_trim);
+});
 module.exports = trim;
-},{"./internal/_curry1":111}],299:[function(require,module,exports){
+},{"./internal/_curry1":112}],309:[function(require,module,exports){
 var _arity = /*#__PURE__*/require('./internal/_arity');
 
 var _concat = /*#__PURE__*/require('./internal/_concat');
@@ -12230,8 +12934,9 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @example
  *
  *      R.tryCatch(R.prop('x'), R.F)({x: true}); //=> true
- *      R.tryCatch(R.prop('x'), R.F)(null);      //=> false
- */
+ *      R.tryCatch(() => { throw 'foo'}, R.always('catched'))('bar') // => 'catched'
+ *      R.tryCatch(R.times(R.identity), R.always([]))('s') // => []
+ `` */
 
 
 var tryCatch = /*#__PURE__*/_curry2(function _tryCatch(tryer, catcher) {
@@ -12244,7 +12949,7 @@ var tryCatch = /*#__PURE__*/_curry2(function _tryCatch(tryer, catcher) {
   });
 });
 module.exports = tryCatch;
-},{"./internal/_arity":100,"./internal/_concat":107,"./internal/_curry2":112}],300:[function(require,module,exports){
+},{"./internal/_arity":103,"./internal/_concat":110,"./internal/_curry2":113}],310:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -12278,7 +12983,7 @@ var type = /*#__PURE__*/_curry1(function type(val) {
   return val === null ? 'Null' : val === undefined ? 'Undefined' : Object.prototype.toString.call(val).slice(8, -1);
 });
 module.exports = type;
-},{"./internal/_curry1":111}],301:[function(require,module,exports){
+},{"./internal/_curry1":112}],311:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -12313,7 +13018,7 @@ var unapply = /*#__PURE__*/_curry1(function unapply(fn) {
   };
 });
 module.exports = unapply;
-},{"./internal/_curry1":111}],302:[function(require,module,exports){
+},{"./internal/_curry1":112}],312:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var nAry = /*#__PURE__*/require('./nAry');
@@ -12334,13 +13039,13 @@ var nAry = /*#__PURE__*/require('./nAry');
  * @see R.binary, R.nAry
  * @example
  *
- *      var takesTwoArgs = function(a, b) {
+ *      const takesTwoArgs = function(a, b) {
  *        return [a, b];
  *      };
  *      takesTwoArgs.length; //=> 2
  *      takesTwoArgs(1, 2); //=> [1, 2]
  *
- *      var takesOneArg = R.unary(takesTwoArgs);
+ *      const takesOneArg = R.unary(takesTwoArgs);
  *      takesOneArg.length; //=> 1
  *      // Only 1 argument is passed to the wrapped function
  *      takesOneArg(1, 2); //=> [1, undefined]
@@ -12352,7 +13057,7 @@ var unary = /*#__PURE__*/_curry1(function unary(fn) {
   return nAry(1, fn);
 });
 module.exports = unary;
-},{"./internal/_curry1":111,"./nAry":218}],303:[function(require,module,exports){
+},{"./internal/_curry1":112,"./nAry":224}],313:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -12371,9 +13076,9 @@ var curryN = /*#__PURE__*/require('./curryN');
  * @see R.curry
  * @example
  *
- *      var addFour = a => b => c => d => a + b + c + d;
+ *      const addFour = a => b => c => d => a + b + c + d;
  *
- *      var uncurriedAddFour = R.uncurryN(4, addFour);
+ *      const uncurriedAddFour = R.uncurryN(4, addFour);
  *      uncurriedAddFour(1, 2, 3, 4); //=> 10
  */
 
@@ -12394,7 +13099,7 @@ var uncurryN = /*#__PURE__*/_curry2(function uncurryN(depth, fn) {
   });
 });
 module.exports = uncurryN;
-},{"./curryN":48,"./internal/_curry2":112}],304:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry2":113}],314:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -12418,7 +13123,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} The final list.
  * @example
  *
- *      var f = n => n > 50 ? false : [-n, n + 10];
+ *      const f = n => n > 50 ? false : [-n, n + 10];
  *      R.unfold(f, 10); //=> [-10, -20, -30, -40, -50]
  * @symb R.unfold(f, x) = [f(x)[0], f(f(x)[1])[0], f(f(f(x)[1])[1])[0], ...]
  */
@@ -12434,7 +13139,7 @@ var unfold = /*#__PURE__*/_curry2(function unfold(fn, seed) {
   return result;
 });
 module.exports = unfold;
-},{"./internal/_curry2":112}],305:[function(require,module,exports){
+},{"./internal/_curry2":113}],315:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -12464,7 +13169,7 @@ var uniq = /*#__PURE__*/require('./uniq');
 
 var union = /*#__PURE__*/_curry2( /*#__PURE__*/compose(uniq, _concat));
 module.exports = union;
-},{"./compose":37,"./internal/_concat":107,"./internal/_curry2":112,"./uniq":307}],306:[function(require,module,exports){
+},{"./compose":37,"./internal/_concat":110,"./internal/_curry2":113,"./uniq":317}],316:[function(require,module,exports){
 var _concat = /*#__PURE__*/require('./internal/_concat');
 
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
@@ -12489,8 +13194,8 @@ var uniqWith = /*#__PURE__*/require('./uniqWith');
  * @see R.union
  * @example
  *
- *      var l1 = [{a: 1}, {a: 2}];
- *      var l2 = [{a: 1}, {a: 4}];
+ *      const l1 = [{a: 1}, {a: 2}];
+ *      const l2 = [{a: 1}, {a: 4}];
  *      R.unionWith(R.eqBy(R.prop('a')), l1, l2); //=> [{a: 1}, {a: 2}, {a: 4}]
  */
 
@@ -12499,7 +13204,7 @@ var unionWith = /*#__PURE__*/_curry3(function unionWith(pred, list1, list2) {
   return uniqWith(pred, _concat(list1, list2));
 });
 module.exports = unionWith;
-},{"./internal/_concat":107,"./internal/_curry3":113,"./uniqWith":309}],307:[function(require,module,exports){
+},{"./internal/_concat":110,"./internal/_curry3":114,"./uniqWith":319}],317:[function(require,module,exports){
 var identity = /*#__PURE__*/require('./identity');
 
 var uniqBy = /*#__PURE__*/require('./uniqBy');
@@ -12525,7 +13230,7 @@ var uniqBy = /*#__PURE__*/require('./uniqBy');
 
 var uniq = /*#__PURE__*/uniqBy(identity);
 module.exports = uniq;
-},{"./identity":88,"./uniqBy":308}],308:[function(require,module,exports){
+},{"./identity":90,"./uniqBy":318}],318:[function(require,module,exports){
 var _Set = /*#__PURE__*/require('./internal/_Set');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
@@ -12567,8 +13272,8 @@ var uniqBy = /*#__PURE__*/_curry2(function uniqBy(fn, list) {
   return result;
 });
 module.exports = uniqBy;
-},{"./internal/_Set":98,"./internal/_curry2":112}],309:[function(require,module,exports){
-var _containsWith = /*#__PURE__*/require('./internal/_containsWith');
+},{"./internal/_Set":101,"./internal/_curry2":113}],319:[function(require,module,exports){
+var _includesWith = /*#__PURE__*/require('./internal/_includesWith');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
@@ -12588,7 +13293,7 @@ var _curry2 = /*#__PURE__*/require('./internal/_curry2');
  * @return {Array} The list of unique items.
  * @example
  *
- *      var strEq = R.eqBy(String);
+ *      const strEq = R.eqBy(String);
  *      R.uniqWith(strEq)([1, '1', 2, 1]); //=> [1, 2]
  *      R.uniqWith(strEq)([{}, {}]);       //=> [{}]
  *      R.uniqWith(strEq)([1, '1', 1]);    //=> [1]
@@ -12603,7 +13308,7 @@ var uniqWith = /*#__PURE__*/_curry2(function uniqWith(pred, list) {
   var item;
   while (idx < len) {
     item = list[idx];
-    if (!_containsWith(pred, item, result)) {
+    if (!_includesWith(pred, item, result)) {
       result[result.length] = item;
     }
     idx += 1;
@@ -12611,7 +13316,7 @@ var uniqWith = /*#__PURE__*/_curry2(function uniqWith(pred, list) {
   return result;
 });
 module.exports = uniqWith;
-},{"./internal/_containsWith":109,"./internal/_curry2":112}],310:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_includesWith":127}],320:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -12631,7 +13336,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {*}        x           An object to test with the `pred` function and
  *                               pass to `whenFalseFn` if necessary.
  * @return {*} Either `x` or the result of applying `x` to `whenFalseFn`.
- * @see R.ifElse, R.when
+ * @see R.ifElse, R.when, R.cond
  * @example
  *
  *      let safeInc = R.unless(R.isNil, R.inc);
@@ -12644,7 +13349,7 @@ var unless = /*#__PURE__*/_curry3(function unless(pred, whenFalseFn, x) {
   return pred(x) ? x : whenFalseFn(x);
 });
 module.exports = unless;
-},{"./internal/_curry3":113}],311:[function(require,module,exports){
+},{"./internal/_curry3":114}],321:[function(require,module,exports){
 var _identity = /*#__PURE__*/require('./internal/_identity');
 
 var chain = /*#__PURE__*/require('./chain');
@@ -12670,7 +13375,7 @@ var chain = /*#__PURE__*/require('./chain');
 
 var unnest = /*#__PURE__*/chain(_identity);
 module.exports = unnest;
-},{"./chain":32,"./internal/_identity":124}],312:[function(require,module,exports){
+},{"./chain":32,"./internal/_identity":125}],322:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -12702,7 +13407,7 @@ var until = /*#__PURE__*/_curry3(function until(pred, fn, init) {
   return val;
 });
 module.exports = until;
-},{"./internal/_curry3":113}],313:[function(require,module,exports){
+},{"./internal/_curry3":114}],323:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 var adjust = /*#__PURE__*/require('./adjust');
@@ -12725,8 +13430,8 @@ var always = /*#__PURE__*/require('./always');
  * @see R.adjust
  * @example
  *
- *      R.update(1, 11, [0, 1, 2]);     //=> [0, 11, 2]
- *      R.update(1)(11)([0, 1, 2]);     //=> [0, 11, 2]
+ *      R.update(1, '_', ['a', 'b', 'c']);      //=> ['a', '_', 'c']
+ *      R.update(-1, '_', ['a', 'b', 'c']);     //=> ['a', 'b', '_']
  * @symb R.update(-1, a, [b, c]) = [b, a]
  * @symb R.update(0, a, [b, c]) = [a, c]
  * @symb R.update(1, a, [b, c]) = [b, a]
@@ -12734,10 +13439,10 @@ var always = /*#__PURE__*/require('./always');
 
 
 var update = /*#__PURE__*/_curry3(function update(idx, x, list) {
-  return adjust(always(x), idx, list);
+  return adjust(idx, always(x), list);
 });
 module.exports = update;
-},{"./adjust":12,"./always":15,"./internal/_curry3":113}],314:[function(require,module,exports){
+},{"./adjust":12,"./always":15,"./internal/_curry3":114}],324:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var curryN = /*#__PURE__*/require('./curryN');
@@ -12785,7 +13490,7 @@ var useWith = /*#__PURE__*/_curry2(function useWith(fn, transformers) {
   });
 });
 module.exports = useWith;
-},{"./curryN":48,"./internal/_curry2":112}],315:[function(require,module,exports){
+},{"./curryN":49,"./internal/_curry2":113}],325:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 var keys = /*#__PURE__*/require('./keys');
@@ -12821,7 +13526,7 @@ var values = /*#__PURE__*/_curry1(function values(obj) {
   return vals;
 });
 module.exports = values;
-},{"./internal/_curry1":111,"./keys":181}],316:[function(require,module,exports){
+},{"./internal/_curry1":112,"./keys":185}],326:[function(require,module,exports){
 var _curry1 = /*#__PURE__*/require('./internal/_curry1');
 
 /**
@@ -12840,9 +13545,9 @@ var _curry1 = /*#__PURE__*/require('./internal/_curry1');
  * @see R.values, R.keysIn
  * @example
  *
- *      var F = function() { this.x = 'X'; };
+ *      const F = function() { this.x = 'X'; };
  *      F.prototype.y = 'Y';
- *      var f = new F();
+ *      const f = new F();
  *      R.valuesIn(f); //=> ['X', 'Y']
  */
 
@@ -12856,7 +13561,7 @@ var valuesIn = /*#__PURE__*/_curry1(function valuesIn(obj) {
   return vs;
 });
 module.exports = valuesIn;
-},{"./internal/_curry1":111}],317:[function(require,module,exports){
+},{"./internal/_curry1":112}],327:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 // `Const` is a functor that effectively ignores the function given to `map`.
@@ -12884,7 +13589,7 @@ var Const = function (x) {
  * @see R.prop, R.lensIndex, R.lensProp
  * @example
  *
- *      var xLens = R.lensProp('x');
+ *      const xLens = R.lensProp('x');
  *
  *      R.view(xLens, {x: 1, y: 2});  //=> 1
  *      R.view(xLens, {x: 4, y: 2});  //=> 4
@@ -12895,7 +13600,7 @@ var view = /*#__PURE__*/_curry2(function view(lens, x) {
   return lens(Const)(x).value;
 });
 module.exports = view;
-},{"./internal/_curry2":112}],318:[function(require,module,exports){
+},{"./internal/_curry2":113}],328:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -12915,11 +13620,11 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  * @param {*}        x          An object to test with the `pred` function and
  *                              pass to `whenTrueFn` if necessary.
  * @return {*} Either `x` or the result of applying `x` to `whenTrueFn`.
- * @see R.ifElse, R.unless
+ * @see R.ifElse, R.unless, R.cond
  * @example
  *
  *      // truncate :: String -> String
- *      var truncate = R.when(
+ *      const truncate = R.when(
  *        R.propSatisfies(R.gt(R.__, 10), 'length'),
  *        R.pipe(R.take(10), R.append('…'), R.join(''))
  *      );
@@ -12932,7 +13637,7 @@ var when = /*#__PURE__*/_curry3(function when(pred, whenTrueFn, x) {
   return pred(x) ? whenTrueFn(x) : x;
 });
 module.exports = when;
-},{"./internal/_curry3":113}],319:[function(require,module,exports){
+},{"./internal/_curry3":114}],329:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var _has = /*#__PURE__*/require('./internal/_has');
@@ -12959,7 +13664,7 @@ var _has = /*#__PURE__*/require('./internal/_has');
  * @example
  *
  *      // pred :: Object -> Boolean
- *      var pred = R.where({
+ *      const pred = R.where({
  *        a: R.equals('foo'),
  *        b: R.complement(R.equals('bar')),
  *        x: R.gt(R.__, 10),
@@ -12983,7 +13688,7 @@ var where = /*#__PURE__*/_curry2(function where(spec, testObj) {
   return true;
 });
 module.exports = where;
-},{"./internal/_curry2":112,"./internal/_has":123}],320:[function(require,module,exports){
+},{"./internal/_curry2":113,"./internal/_has":124}],330:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 var equals = /*#__PURE__*/require('./equals');
@@ -13013,7 +13718,7 @@ var where = /*#__PURE__*/require('./where');
  * @example
  *
  *      // pred :: Object -> Boolean
- *      var pred = R.whereEq({a: 1, b: 2});
+ *      const pred = R.whereEq({a: 1, b: 2});
  *
  *      pred({a: 1});              //=> false
  *      pred({a: 1, b: 2});        //=> true
@@ -13026,8 +13731,8 @@ var whereEq = /*#__PURE__*/_curry2(function whereEq(spec, testObj) {
   return where(map(equals, spec), testObj);
 });
 module.exports = whereEq;
-},{"./equals":68,"./internal/_curry2":112,"./map":194,"./where":319}],321:[function(require,module,exports){
-var _contains = /*#__PURE__*/require('./internal/_contains');
+},{"./equals":69,"./internal/_curry2":113,"./map":198,"./where":329}],331:[function(require,module,exports){
+var _includes = /*#__PURE__*/require('./internal/_includes');
 
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
@@ -13049,7 +13754,7 @@ var reject = /*#__PURE__*/require('./reject');
  * @param {Array} list1 The values to be removed from `list2`.
  * @param {Array} list2 The array to remove values from.
  * @return {Array} The new array without values in `list1`.
- * @see R.transduce, R.difference
+ * @see R.transduce, R.difference, R.remove
  * @example
  *
  *      R.without([1, 2], [1, 2, 1, 3, 4]); //=> [3, 4]
@@ -13057,10 +13762,10 @@ var reject = /*#__PURE__*/require('./reject');
 
 
 var without = /*#__PURE__*/_curry2(function (xs, list) {
-  return reject(flip(_contains)(xs), list);
+  return reject(flip(_includes)(xs), list);
 });
 module.exports = without;
-},{"./flip":76,"./internal/_contains":108,"./internal/_curry2":112,"./reject":261}],322:[function(require,module,exports){
+},{"./flip":77,"./internal/_curry2":113,"./internal/_includes":126,"./reject":269}],332:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -13101,7 +13806,7 @@ var xprod = /*#__PURE__*/_curry2(function xprod(a, b) {
   return result;
 });
 module.exports = xprod;
-},{"./internal/_curry2":112}],323:[function(require,module,exports){
+},{"./internal/_curry2":113}],333:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -13136,7 +13841,7 @@ var zip = /*#__PURE__*/_curry2(function zip(a, b) {
   return rv;
 });
 module.exports = zip;
-},{"./internal/_curry2":112}],324:[function(require,module,exports){
+},{"./internal/_curry2":113}],334:[function(require,module,exports){
 var _curry2 = /*#__PURE__*/require('./internal/_curry2');
 
 /**
@@ -13169,7 +13874,7 @@ var zipObj = /*#__PURE__*/_curry2(function zipObj(keys, values) {
   return out;
 });
 module.exports = zipObj;
-},{"./internal/_curry2":112}],325:[function(require,module,exports){
+},{"./internal/_curry2":113}],335:[function(require,module,exports){
 var _curry3 = /*#__PURE__*/require('./internal/_curry3');
 
 /**
@@ -13189,7 +13894,7 @@ var _curry3 = /*#__PURE__*/require('./internal/_curry3');
  *         using `fn`.
  * @example
  *
- *      var f = (x, y) => {
+ *      const f = (x, y) => {
  *        // ...
  *      };
  *      R.zipWith(f, [1, 2, 3], ['a', 'b', 'c']);
@@ -13209,261 +13914,7 @@ var zipWith = /*#__PURE__*/_curry3(function zipWith(fn, a, b) {
   return rv;
 });
 module.exports = zipWith;
-},{"./internal/_curry3":113}],326:[function(require,module,exports){
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.seview = {})));
-}(this, (function (exports) { 'use strict';
-
-  var isString = function (x) { return typeof x === "string"; };
-  var isNumber = function (x) { return typeof x === "number"; };
-  var isBoolean = function (x) { return typeof x === "boolean"; };
-  var isArray = function (x) { return Array.isArray(x); };
-  var isIterable = function (x) { return x != null && typeof x[Symbol.iterator] === "function" && !isString(x); };
-  var isObject = function (x) { return x != null && typeof x === "object" && !isArray(x) && !isIterable(x); };
-
-  var getString = function (value) {
-    var result = undefined;
-
-    if (isString(value) && value.length > 0) {
-      result = value;
-    }
-    else if (isNumber(value)) {
-      result = String(value);
-    }
-    else if (isBoolean(value) && value) {
-      result = String(value);
-    }
-    return result
-  };
-
-  var get = function (object, path) { return object == null
-      ? undefined
-      : path.length === 1
-        ? object[path[0]]
-        : get(object[path[0]], path.slice(1)); };
-
-  var set = function (object, path, value) {
-    if (path.length === 1) {
-      if (isObject(object[path[0]])) {
-        Object.assign(object[path[0]], value);
-      }
-      else {
-        object[path[0]] = value;
-      }
-    }
-    else {
-      if (object[[path[0]]] == null) {
-        object[[path[0]]] = {};
-      }
-      set(object[path[0]], path.slice(1), value);
-    }
-    return object
-  };
-
-  // Credit: JSnoX https://github.com/af/JSnoX/blob/master/jsnox.js
-
-  // matches "input", "input:text"
-  var tagTypeRegex = /^([A-Za-z0-9-]+)(?::([a-z]+))?/;
-
-  // matches "#id", ".class", "[name=value]", "[required]"
-  var propsRegex = /((?:#|\.|@)[\w-]+)|(\[.*?\])/g;
-
-  // matches "[name=value]" or "[required]"
-  var attrRegex = /\[([\w-]+)(?:=([^\]]+))?\]/;
-
-  /*
-  returns tag properties: for example, "input:password#duck.quack.yellow[name=pwd][required]"
-  {
-    tag: "input",
-    className: "quack yellow",
-    attrs: { type: "password", id: "duck", name: "pwd", required: true }
-  }
-  */
-  var getTagProperties = function (selector, className) {
-    if ( className === void 0 ) className = "className";
-
-    var result = {};
-
-    var tagType = selector.match(tagTypeRegex);
-
-    // Use div by default
-    if (!tagType) {
-      tagType = ["div", "div"];
-    }
-    result.tag = tagType[1];
-
-    if (tagType[2]) {
-      result.attrs = { type: tagType[2] };
-    }
-
-    var tagProps = selector.match(propsRegex);
-
-    if (tagProps) {
-      var classes =[];
-
-      tagProps.forEach(function (tagProp) {
-        var ch = tagProp[0];
-        var prop = tagProp.slice(1);
-
-        if (ch === "#") {
-          set(result, ["attrs", "id"], prop);
-        }
-        else if (ch === ".") {
-          classes.push(prop);
-        }
-        else if (ch === "[") {
-          var attrs = tagProp.match(attrRegex);
-          set(result, ["attrs", attrs[1]], (attrs[2] || true));
-        }
-      });
-
-      if (classes.length > 0) {
-        set(result, ["attrs", className], classes.join(" "));
-      }
-    }
-
-    return result
-  };
-
-  /*
-  returns node definition, expanding on the above tag properties and adding to obtain:
-  {
-    tag: "input",
-    className: "quack yellow",
-    attrs: { type: "password", id: "duck", name: "pwd", required: true, onClick: ... },
-    children: [ { tag: ... }, "text", ... ]
-  }
-  */
-  var processChildren = function (rest, result) {
-    if ( result === void 0 ) result = [];
-
-    rest.forEach(function (child) {
-      if (isIterable(child)) {
-        child = Array.from(child);
-      }
-      // Text node
-      if (getString(child)) {
-        result.push(getString(child));
-      }
-      else if (isArray(child)) {
-        // Nested array
-        if (isArray(child[0]) || isIterable(child[0])) {
-          processChildren(child, result);
-        }
-        // Regular node
-        else if (child.length > 0) {
-          result.push(nodeDef(child));
-        }
-      }
-    });
-    return result
-  };
-
-  var nodeDef = function (node, options) {
-    if ( options === void 0 ) options = { className: "className" };
-
-    // Tag
-    var rest = node[2];
-    var varArgsLimit = 3;
-
-    // Process tag
-    var result = isString(node[0])
-      ? getTagProperties(node[0], options.className)
-      : { tag: node[0] };
-
-    // Process attrs
-    if (isObject(node[1])) {
-      var attrs = node[1];
-
-      // Process className
-      if (attrs[options.className] !== undefined) {
-        var classAttr = attrs[options.className];
-        delete attrs[options.className];
-
-        var addClasses = [];
-        if (isString(classAttr)) {
-          addClasses = classAttr.split(" ");
-        }
-        else if (isObject(classAttr)) {
-          Object.keys(classAttr).forEach(function (key) {
-            if (classAttr[key]) {
-              addClasses.push(key);
-            }
-          });
-        }
-        if (addClasses.length > 0) {
-          var existingClassName = get(result, ["attrs", options.className]);
-          var addClassName = addClasses.join(" ");
-          set(result, ["attrs", options.className],
-            (existingClassName ? existingClassName + " " : "")
-            + addClassName
-          );
-        }
-      }
-
-      // Add remaining attributes
-      if (Object.keys(attrs).length > 0) {
-        if (result.attrs === undefined) {
-          result.attrs = attrs;
-        }
-        else {
-          result.attrs = Object.assign(result.attrs, attrs);
-        }
-      }
-    }
-    // No attrs, use second argument as rest
-    else {
-      rest = node[1];
-      varArgsLimit = 2;
-    }
-
-    // Process children: varargs
-    if (node.length > varArgsLimit) {
-      result.children = processChildren(node.slice(varArgsLimit - 1));
-    }
-    // Process children: one child arg
-    else {
-      // Text node
-      if (getString(rest)) {
-        result.children = [ getString(rest) ];
-      }
-
-      if (isIterable(rest)) {
-        rest = Array.from(rest);
-      }
-      if (isArray(rest)) {
-        // Array of children vs One child node
-        result.children = processChildren( isArray(rest[0]) ? rest : [ rest ] );
-      }
-    }
-    return result
-  };
-
-  var transformNodeDef = function (transform, def) {
-    if (isArray(def.children) || isIterable(def.children)) {
-      var result = [];
-      def.children.forEach(function (child) {
-        result.push(isString(child) ? transform(child) : transformNodeDef(transform, child));
-      });
-      def.children = result;
-    }
-    return transform(def)
-  };
-
-  var sv = function (transform, options) { return function (node) {
-    var def = nodeDef(node, options);
-    return transformNodeDef(transform, def)
-  }; };
-
-  exports.sv = sv;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-},{}],327:[function(require,module,exports){
+},{"./internal/_curry3":114}],336:[function(require,module,exports){
 var nFold = require('../yslashn/index.js').nFold
 var Skip = {
   length: true
@@ -13879,7 +14330,7 @@ module.exports = {
     ,StaticSumTypeError: StaticSumTypeError
 }
 
-},{"../yslashn/index.js":328}],328:[function(require,module,exports){
+},{"../yslashn/index.js":337}],337:[function(require,module,exports){
 function either(type){
 	return {
 		name: type
@@ -13925,7 +14376,7 @@ module.exports = {
 	,maybe: maybe
 	,nFold: nFold
 }
-},{}],329:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -14004,7 +14455,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":6,"timers":329}],330:[function(require,module,exports){
+},{"process/browser.js":6,"timers":338}],339:[function(require,module,exports){
 var v1 = require('./v1');
 var v4 = require('./v4');
 
@@ -14014,7 +14465,7 @@ uuid.v4 = v4;
 
 module.exports = uuid;
 
-},{"./v1":333,"./v4":334}],331:[function(require,module,exports){
+},{"./v1":342,"./v4":343}],340:[function(require,module,exports){
 /**
  * Convert array of 16 byte values to UUID string format of the form:
  * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
@@ -14040,7 +14491,7 @@ function bytesToUuid(buf, offset) {
 
 module.exports = bytesToUuid;
 
-},{}],332:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 // Unique ID creation requires a high quality random # generator.  In the
 // browser this is a little complicated due to unknown quality of Math.random()
 // and inconsistent support for the `crypto` API.  We do the best we can via
@@ -14076,7 +14527,7 @@ if (getRandomValues) {
   };
 }
 
-},{}],333:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -14187,7 +14638,7 @@ function v1(options, buf, offset) {
 
 module.exports = v1;
 
-},{"./lib/bytesToUuid":331,"./lib/rng":332}],334:[function(require,module,exports){
+},{"./lib/bytesToUuid":340,"./lib/rng":341}],343:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -14218,373 +14669,553 @@ function v4(options, buf, offset) {
 
 module.exports = v4;
 
-},{"./lib/bytesToUuid":331,"./lib/rng":332}],335:[function(require,module,exports){
-var Root = require("../root");
-var wirem = require("../util/wirem").wirem;
-exports.createApp = function (update) {
-    return wirem({
-        component: Root,
-        update: update
-    });
-};
+},{"./lib/bytesToUuid":340,"./lib/rng":341}],344:[function(require,module,exports){
+"use strict";
 
-},{"../root":349,"../util/wirem":351}],336:[function(require,module,exports){
-var O = require("patchinko/constant");
-var R = require("ramda");
-var button = require("../util/ui").button;
-var actions = function (_a) {
-    var update = _a.update;
-    return ({
-        toggle: function (id) { return function (_event) { return update(R.objOf(id, O({ active: O(function (x) { return !x; }) }))); }; }
-    });
-};
-module.exports = {
-    model: function () { return ({
-        active: false
-    }); },
-    actions: actions,
-    view: function (_a) {
-        var actions = _a.actions;
-        return function (model, id) {
-            var bc = model[id].active ? "green" : "red";
-            var label = model[id].active ? "Active" : "Inactive";
-            return ["button.bg-" + bc + button, { onclick: actions.toggle(id) }, label];
-        };
-    }
-};
-
-},{"../util/ui":350,"patchinko/constant":5,"ramda":91}],337:[function(require,module,exports){
-module.exports = {
-    model: function (_a) {
-        var label = _a.label;
-        return ({
-            label: label,
-            value: 0
-        });
-    },
-    view: function () { return function (model, id) { return ["div", model[id].label + " " + model[id].value]; }; }
-};
-
-},{}],338:[function(require,module,exports){
-var O = require("patchinko/constant");
-module.exports = {
-    actions: function (_a) {
-        var update = _a.update;
-        return ({
-            newGifGenerated: function (model) {
-                var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
-                update({ counter: O({ value: O(function (x) { return x + increment; }) }) });
-            }
-        });
-    }
-};
-
-},{"patchinko/constant":5}],339:[function(require,module,exports){
-var O = require("patchinko/constant");
 var m = require("mithril");
+
+var O = require("patchinko/constant");
+
+var _require = require("../button"),
+    button = _require.button,
+    Button = _require.Button;
+
+var _require2 = require("../counter"),
+    counter = _require2.counter,
+    Counter = _require2.Counter;
+
+var _require3 = require("../random-gif"),
+    randomGif = _require3.randomGif,
+    RandomGif = _require3.RandomGif;
+
+var _require4 = require("../random-gif-pair"),
+    randomGifPair = _require4.randomGifPair,
+    RandomGifPair = _require4.RandomGifPair;
+
+var _require5 = require("../random-gif-pair-pair"),
+    randomGifPairPair = _require5.randomGifPairPair,
+    RandomGifPairPair = _require5.RandomGifPairPair;
+
+var _require6 = require("../random-gif-list"),
+    randomGifList = _require6.randomGifList,
+    RandomGifList = _require6.RandomGifList;
+
+var newGifGenerated = function newGifGenerated(model) {
+  var increment = model.counter.value > 3 && model.button.active ? 2 : 1;
+  return {
+    counter: O({
+      value: O(function (x) {
+        return x + increment;
+      })
+    })
+  };
+};
+
+exports.app = {
+  model: function model() {
+    return Object.assign({
+      button: button.model(),
+      counter: counter.model({
+        label: "Counter:"
+      }),
+      randomGif1: randomGif.model(),
+      randomGif2: randomGif.model(),
+      randomGifList: randomGifList.model()
+    }, randomGifPair.model("randomGifPair"), randomGifPairPair.model("randomGifPairPair"));
+  },
+  actions: function actions(update) {
+    return Object.assign({}, button.actions(update), randomGif.actions(update, newGifGenerated), randomGifList.actions(update));
+  },
+  state: function state(model) {
+    return [randomGifList.state // could have more functions here
+    ].reduce(function (x, f) {
+      return O(x, f(x));
+    }, model);
+  }
+};
+exports.App = {
+  view: function view(_ref) {
+    var _ref$attrs = _ref.attrs,
+        model = _ref$attrs.model,
+        actions = _ref$attrs.actions;
+    return m("div", m(Counter, {
+      model: model,
+      id: "counter",
+      actions: actions
+    }), m("div.mt2", "Button:"), m(Button, {
+      model: model,
+      id: "button",
+      actions: actions
+    }), m("div.mt2", "Random Gif:"), m(RandomGif, {
+      model: model,
+      id: "randomGif1",
+      actions: actions
+    }), m("div.mt2", "Another Random Gif:"), m(RandomGif, {
+      model: model,
+      id: "randomGif2",
+      actions: actions
+    }), m("div.mt2", "Random Gif Pair:"), m(RandomGifPair, {
+      model: model,
+      id: "randomGifPair",
+      actions: actions
+    }), m("div.mt2", "Random Gif Pair Pair:"), m(RandomGifPairPair, {
+      model: model,
+      id: "randomGifPairPair",
+      actions: actions
+    }), m("div.mt2", "Random Gif List:"), m(RandomGifList, {
+      model: model,
+      id: "randomGifList",
+      actions: actions
+    }));
+  }
+};
+
+},{"../button":345,"../counter":346,"../random-gif":353,"../random-gif-list":349,"../random-gif-pair":351,"../random-gif-pair-pair":350,"mithril":2,"patchinko/constant":5}],345:[function(require,module,exports){
+"use strict";
+
+var m = require("mithril");
+
+var O = require("patchinko/constant");
+
+var R = require("ramda");
+
+var _require = require("../util/ui"),
+    button = _require.button;
+
+var actions = function actions(update) {
+  return {
+    toggle: function toggle(id) {
+      return function (_event) {
+        return update(R.objOf(id, O({
+          active: O(function (x) {
+            return !x;
+          })
+        })));
+      };
+    }
+  };
+};
+
+exports.button = {
+  model: function model() {
+    return {
+      active: false
+    };
+  },
+  actions: actions
+};
+exports.Button = {
+  view: function view(_ref) {
+    var _ref$attrs = _ref.attrs,
+        model = _ref$attrs.model,
+        id = _ref$attrs.id,
+        actions = _ref$attrs.actions;
+    var bc = model[id].active ? "green" : "red";
+    var label = model[id].active ? "Active" : "Inactive";
+    return m("button.bg-" + bc + button, {
+      onclick: actions.toggle(id)
+    }, label);
+  }
+};
+
+},{"../util/ui":355,"mithril":2,"patchinko/constant":5,"ramda":94}],346:[function(require,module,exports){
+"use strict";
+
+var m = require("mithril");
+
+exports.counter = {
+  model: function model(_ref) {
+    var label = _ref.label;
+    return {
+      label: label,
+      value: 0
+    };
+  }
+};
+exports.Counter = {
+  view: function view(_ref2) {
+    var _ref2$attrs = _ref2.attrs,
+        model = _ref2$attrs.model,
+        id = _ref2$attrs.id;
+    return m("div", model[id].label + " " + model[id].value);
+  }
+};
+
+},{"mithril":2}],347:[function(require,module,exports){
+"use strict";
+
+var O = require("patchinko/constant");
+
+var m = require("mithril");
+
 var stream = require("mithril/stream");
-var createApp = require("./app").createApp;
-var h = require("./util/ui").h;
+
+var _require = require("./app"),
+    app = _require.app,
+    App = _require.App;
+
 var update = stream();
-var app = createApp(update);
 var models = stream.scan(O, app.model(), update);
-var states = models.map(app.state);
-var element = document.getElementById("app");
-states.map(function (state) { return m.render(element, h(app.view(state))); });
+var states = models.map(app.state); // Only for using Meiosis Tracer in development.
+
 var meiosisTracer = require("meiosis-tracer");
-meiosisTracer({ selector: "#tracer", streams: [
-        { label: "models", stream: models },
-        { label: "states", stream: states }
-    ] });
 
-},{"./app":335,"./util/ui":350,"meiosis-tracer":1,"mithril":2,"mithril/stream":3,"patchinko/constant":5}],340:[function(require,module,exports){
-var O = require("patchinko/constant");
-var R = require("ramda");
-var uuid = require("uuid");
-var RandomGif = require("../random-gif");
-exports.actions = function (_a) {
-    var update = _a.update, actions = _a.actions;
-    return ({
-        add: function (id) {
-            var _a;
-            var newId = "randomGifList:" + uuid.v1();
-            var randomGifModel = RandomGif.model();
-            update((_a = {},
-                _a[newId] = randomGifModel,
-                _a[id] = O({ randomGifIds: O(R.append(newId)) }),
-                _a));
-        },
-        remove: function (id, subId) {
-            var _a;
-            return update((_a = {},
-                _a[id] = O({
-                    randomGifIds: O(function (list) { return R.remove(list.indexOf(subId), 1, list); })
-                }),
-                _a[subId] = O,
-                _a));
-        },
-        resetAll: function (ids) { return ids.forEach(actions.reset); }
+meiosisTracer({
+  selector: "#tracer",
+  streams: [{
+    label: "models",
+    stream: models
+  }, {
+    label: "states",
+    stream: states
+  }]
+});
+states.map(function () {
+  return m.redraw();
+}); // End of code for using Meiosis Tracer in development.
+
+var actions = app.actions(update);
+m.mount(document.getElementById("app"), {
+  view: function view() {
+    return m(App, {
+      model: states(),
+      actions: actions
     });
-};
-
-},{"../random-gif":346,"patchinko/constant":5,"ramda":91,"uuid":330}],341:[function(require,module,exports){
-var O = require("patchinko/constant");
-var R = require("ramda");
-var actions = require("./actions").actions;
-var view = require("./view").view;
-var RandomGif = require("../random-gif");
-module.exports = {
-    model: function () { return ({
-        randomGifIds: []
-    }); },
-    actions: actions,
-    dependencies: { randomGif: RandomGif },
-    view: view,
-    state: function (model) { return ({
-        randomGifList: O({
-            hasGifs: R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), R.map(function (id) { return R.prop(id, model); }, model.randomGifList.randomGifIds)))
-        })
-    }); }
-};
-
-},{"../random-gif":346,"./actions":340,"./view":342,"patchinko/constant":5,"ramda":91}],342:[function(require,module,exports){
-var button = require("../util/ui").button;
-exports.view = function (_a) {
-    var actions = _a.actions, randomGif = _a.randomGif;
-    var renderRandomGif = function (model, id, subId) {
-        return ["div.dib.mr2", { key: id },
-            randomGif(model, subId),
-            ["button.bg-red" + button, { onclick: function () { return actions.remove(id, subId); } }, "Remove"]
-        ];
-    };
-    return function (model, id) {
-        return ["div.ba.b--blue.pa2.mt2",
-            ["div", "Has gifs: ", model[id].hasGifs ? "Yes" : "No"],
-            ["button.bg-green" + button, { onclick: function () { return actions.add(id); } }, "Add"],
-            ["button.bg-red" + button, { onclick: function () { return actions.resetAll(model[id].randomGifIds); } },
-                "Reset All"],
-            ["div", model[id].randomGifIds.map(function (subId) { return renderRandomGif(model, id, subId); })]
-        ];
-    };
-};
-
-},{"../util/ui":350}],343:[function(require,module,exports){
-var RandomGifPair = require("../random-gif-pair");
-module.exports = {
-    model: function (id) { return Object.assign(RandomGifPair.model(id + "One"), RandomGifPair.model(id + "Two")); },
-    dependencies: { randomGifPair: RandomGifPair },
-    view: function (_a) {
-        var randomGifPair = _a.randomGifPair;
-        return function (model, id) { return ["div.ba.b--orange.pa2.mt2",
-            randomGifPair(model, id + "One"),
-            randomGifPair(model, id + "Two")
-        ]; };
-    }
-};
-
-},{"../random-gif-pair":344}],344:[function(require,module,exports){
-var RandomGif = require("../random-gif");
-module.exports = {
-    model: function (id) {
-        var _a;
-        return (_a = {},
-            _a[id + "First"] = RandomGif.model(),
-            _a[id + "Second"] = RandomGif.model(),
-            _a);
-    },
-    dependencies: { randomGif: RandomGif },
-    view: function (_a) {
-        var randomGif = _a.randomGif;
-        return function (model, id) { return ["div.ba.b--purple.pa2.mt2",
-            ["div.dib", randomGif(model, id + "First")],
-            ["div.dib.ml2", randomGif(model, id + "Second")]
-        ]; };
-    }
-};
-
-},{"../random-gif":346}],345:[function(require,module,exports){
-var m = require("mithril");
-var O = require("patchinko/constant");
-var R = require("ramda");
-var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
-var gif_new_url = "https://api.giphy.com/v1/gifs/random";
-var api_key = "dc6zaTOxFJmzC";
-exports.actions = function (_a) {
-    var update = _a.update, actions = _a.actions;
-    return ({
-        editTag: function (id, tag) { return update(R.objOf(id, O({ tag: tag }))); },
-        newGif: function (id, model) {
-            update(R.objOf(id, O({ image: Loaded.N() })));
-            m.request({ url: gif_new_url, data: { api_key: api_key, tag: model[id].tag } }).
-                then(function (response) {
-                var _a;
-                update((_a = {},
-                    _a[id] = O({
-                        image: Loaded.Y(Success.Y(Image.Y(response.data.image_url)))
-                    }),
-                    _a));
-                actions.newGifGenerated(model);
-            }).
-                catch(function () { return update(R.objOf(id, O({ image: Loaded.Y(Success.N()) }))); });
-        },
-        reset: function (id) { return update(R.objOf(id, O({ image: Loaded.Y(Success.Y(Image.N())) }))); }
-    });
-};
-
-},{"./types":347,"mithril":2,"patchinko/constant":5,"ramda":91}],346:[function(require,module,exports){
-var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
-var actions = require("./actions").actions;
-var view = require("./view").view;
-module.exports = {
-    model: function () { return ({
-        image: Loaded.Y(Success.Y(Image.N())),
-        tag: ""
-    }); },
-    actions: actions,
-    view: view
-};
-
-},{"./actions":345,"./types":347,"./view":348}],347:[function(require,module,exports){
-var yslashn = require("static-sum-type/modules/yslashn");
-module.exports = {
-    Loaded: yslashn.maybe("Loaded"),
-    Success: yslashn.maybe("Success"),
-    Image: yslashn.maybe("Image")
-};
-
-},{"static-sum-type/modules/yslashn":328}],348:[function(require,module,exports){
-var identity = require("ramda").identity;
-var fold = require("static-sum-type").fold;
-var _a = require("./types"), Loaded = _a.Loaded, Success = _a.Success, Image = _a.Image;
-var button = require("../util/ui").button;
-var IMG_PREFIX = "/examples/random-gif/images/";
-var imgsrc = function (image) {
-    return fold(Loaded)({
-        N: function () { return IMG_PREFIX + "loading.gif"; },
-        Y: fold(Success)({
-            N: function () { return IMG_PREFIX + "error.png"; },
-            Y: fold(Image)({
-                N: function () { return IMG_PREFIX + "blank.png"; },
-                Y: identity
-            })
-        })
-    })(image);
-};
-exports.view = function (_a) {
-    var actions = _a.actions;
-    return function (model, id) {
-        return ["div.ba.b--green.pa2.mt2",
-            ["span.mr2", "Tag:"],
-            ["input[type=text]", { value: model[id].tag, onKeyUp: function (evt) { return actions.editTag(id, evt.target.value); } }],
-            ["button.bg-blue" + button, { onClick: function () { return actions.newGif(id, model); } },
-                "Random Gif"],
-            ["button.bg-red" + button, { onClick: function () { return actions.reset(id); } }, "Reset"],
-            ["div.mt2", ["img", { width: 200, height: 200, src: imgsrc(model[id].image) }]]
-        ];
-    };
-};
-
-},{"../util/ui":350,"./types":347,"ramda":91,"static-sum-type":327}],349:[function(require,module,exports){
-var O = require("patchinko/constant");
-var Button = require("../button");
-var Counter = require("../counter");
-var CountingRule = require("../counting-rule");
-var RandomGif = require("../random-gif");
-var RandomGifPair = require("../random-gif-pair");
-var RandomGifPairPair = require("../random-gif-pair-pair");
-var RandomGifList = require("../random-gif-list");
-module.exports = {
-    model: function () { return Object.assign({
-        button: Button.model(),
-        counter: Counter.model({ label: "Counter:" }),
-        randomGif1: RandomGif.model(),
-        randomGif2: RandomGif.model(),
-        randomGifList: RandomGifList.model()
-    }, RandomGifPair.model("randomGifPair"), RandomGifPairPair.model("randomGifPairPair")); },
-    actions: CountingRule.actions,
-    dependencies: {
-        button: Button,
-        counter: Counter,
-        rg: RandomGif,
-        rgPair: RandomGifPair,
-        rgPairPair: RandomGifPairPair,
-        rgList: RandomGifList
-    },
-    view: function (_a) {
-        var button = _a.button, counter = _a.counter, rg = _a.rg, rgPair = _a.rgPair, rgPairPair = _a.rgPairPair, rgList = _a.rgList;
-        return function (model) { return ["div",
-            counter(model, "counter"),
-            ["div.mt2", "Button:"],
-            button(model, "button"),
-            ["div.mt2", "Random Gif:"],
-            rg(model, "randomGif1"),
-            ["div.mt2", "Another Random Gif:"],
-            rg(model, "randomGif2"),
-            ["div.mt2", "Random Gif Pair:"],
-            rgPair(model, "randomGifPair"),
-            ["div.mt2", "Random Gif Pair Pair:"],
-            rgPairPair(model, "randomGifPairPair"),
-            ["div.mt2", "Random Gif List:"],
-            rgList(model, "randomGifList")
-        ]; };
-    },
-    state: function (model) { return [
-        RandomGifList.state
-    ].reduce(function (x, f) { return O(x, f(x)); }, model); }
-};
-
-},{"../button":336,"../counter":337,"../counting-rule":338,"../random-gif":346,"../random-gif-list":341,"../random-gif-pair":344,"../random-gif-pair-pair":343,"patchinko/constant":5}],350:[function(require,module,exports){
-var m = require("mithril");
-var sv = require("seview").sv;
-exports.button = ".db.w4.mt2.pa2.white.br2";
-var processAttrs = function (attrs) {
-    if (attrs === void 0) { attrs = {}; }
-    Object.keys(attrs).forEach(function (key) {
-        if (key.startsWith("on")) {
-            var value = attrs[key];
-            delete attrs[key];
-            attrs[key.toLowerCase()] = value;
-        }
-    });
-    return attrs;
-};
-exports.h = sv(function (node) {
-    return (typeof node === "string")
-        ? { tag: "#", children: node }
-        : node.attrs && node.attrs.innerHTML
-            ? m(node.tag, m.trust(node.attrs.innerHTML))
-            : m(node.tag, processAttrs(node.attrs), node.children || []);
+  }
 });
 
-},{"mithril":2,"seview":326}],351:[function(require,module,exports){
+},{"./app":344,"meiosis-tracer":1,"mithril":2,"mithril/stream":3,"patchinko/constant":5}],348:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var getFn = function (component, prop) { return component[prop] || (function () { return null; }); };
-exports.wireActions = function (component, update, actions, updates) {
-    if (actions === void 0) { actions = {}; }
-    if (updates === void 0) { updates = {}; }
-    Object.assign(updates, component.updates);
-    Object.assign(actions, getFn(component, "actions")({ update: update, actions: actions, updates: updates }));
-    Object.keys(component.dependencies || {}).forEach(function (key) {
-        exports.wireActions(component.dependencies[key], update, actions, updates);
-    });
-    return actions;
-};
-exports.wireView = function (component, actions) {
-    var dependencies = {};
-    Object.keys(component.dependencies || {}).forEach(function (key) {
-        dependencies[key] = exports.wireView(component.dependencies[key], actions);
-    });
-    return getFn(component, "view")(Object.assign({ actions: actions }, dependencies));
-};
-exports.wirem = function (_a) {
-    var component = _a.component, data = _a.data, update = _a.update;
-    var model = component.model ? function () { return component.model(data); } : function () { return null; };
-    var actions = exports.wireActions(component, update);
-    var view = exports.wireView(component, actions);
-    var state = component.state || (function (x) { return x; });
-    var nextAction = component.nextAction ? component.nextAction(actions) : function () { return null; };
-    return { model: model, actions: actions, view: view, state: state, nextAction: nextAction };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var O = require("patchinko/constant");
+
+var R = require("ramda");
+
+var uuid = require("uuid");
+
+var _require = require("../random-gif"),
+    randomGif = _require.randomGif;
+
+exports.actions = function (update) {
+  return {
+    add: function add(id) {
+      var _update;
+
+      var newId = "randomGifList:" + uuid.v1();
+      var randomGifModel = randomGif.model();
+      update((_update = {}, _defineProperty(_update, newId, randomGifModel), _defineProperty(_update, id, O({
+        randomGifIds: O(R.append(newId))
+      })), _update));
+    },
+    remove: function remove(id, subId) {
+      var _update2;
+
+      return update((_update2 = {}, _defineProperty(_update2, id, O({
+        randomGifIds: O(function (list) {
+          return R.remove(list.indexOf(subId), 1, list);
+        })
+      })), _defineProperty(_update2, subId, O), _update2));
+    }
+  };
 };
 
-},{}]},{},[339]);
+},{"../random-gif":353,"patchinko/constant":5,"ramda":94,"uuid":339}],349:[function(require,module,exports){
+"use strict";
+
+var m = require("mithril");
+
+var O = require("patchinko/constant");
+
+var R = require("ramda");
+
+var _require = require("../util/ui"),
+    button = _require.button;
+
+var _require2 = require("./actions"),
+    actions = _require2.actions;
+
+var _require3 = require("../random-gif"),
+    RandomGif = _require3.RandomGif;
+
+exports.randomGifList = {
+  model: function model() {
+    return {
+      randomGifIds: []
+    };
+  },
+  actions: actions,
+  state: function state(model) {
+    return {
+      randomGifList: O({
+        hasGifs: R.any(R.equals("Y"), R.map(R.path(["image", "value", "value", "case"]), R.map(function (id) {
+          return R.prop(id, model);
+        }, model.randomGifList.randomGifIds)))
+      })
+    };
+  }
+};
+var RandomGifItem = {
+  view: function view(_ref) {
+    var _ref$attrs = _ref.attrs,
+        model = _ref$attrs.model,
+        id = _ref$attrs.id,
+        subId = _ref$attrs.subId,
+        actions = _ref$attrs.actions;
+    return m("div.dib.mr2", {
+      key: id
+    }, m(RandomGif, {
+      model: model,
+      id: subId,
+      actions: actions
+    }), m("button.bg-red" + button, {
+      onclick: function onclick() {
+        return actions.remove(id, subId);
+      }
+    }, "Remove"));
+  }
+};
+exports.RandomGifList = {
+  view: function view(_ref2) {
+    var _ref2$attrs = _ref2.attrs,
+        model = _ref2$attrs.model,
+        id = _ref2$attrs.id,
+        actions = _ref2$attrs.actions;
+    return m("div.ba.b--blue.pa2.mt2", m("div", "Has gifs: ", model[id].hasGifs ? "Yes" : "No"), m("button.bg-green" + button, {
+      onclick: function onclick() {
+        return actions.add(id);
+      }
+    }, "Add"), m("button.bg-red" + button, {
+      onclick: function onclick() {
+        return model[id].randomGifIds.forEach(actions.reset);
+      }
+    }, "Reset All"), m("div", model[id].randomGifIds.map(function (subId) {
+      return m(RandomGifItem, {
+        model: model,
+        id: id,
+        subId: subId,
+        actions: actions
+      });
+    })));
+  }
+};
+
+},{"../random-gif":353,"../util/ui":355,"./actions":348,"mithril":2,"patchinko/constant":5,"ramda":94}],350:[function(require,module,exports){
+"use strict";
+
+var m = require("mithril");
+
+var _require = require("../random-gif-pair"),
+    randomGifPair = _require.randomGifPair,
+    RandomGifPair = _require.RandomGifPair;
+
+exports.randomGifPairPair = {
+  model: function model(id) {
+    return Object.assign(randomGifPair.model(id + "One"), randomGifPair.model(id + "Two"));
+  }
+};
+exports.RandomGifPairPair = {
+  view: function view(_ref) {
+    var _ref$attrs = _ref.attrs,
+        model = _ref$attrs.model,
+        id = _ref$attrs.id,
+        actions = _ref$attrs.actions;
+    return m("div.ba.b--orange.pa2.mt2", m(RandomGifPair, {
+      model: model,
+      id: id + "One",
+      actions: actions
+    }), m(RandomGifPair, {
+      model: model,
+      id: id + "Two",
+      actions: actions
+    }));
+  }
+};
+
+},{"../random-gif-pair":351,"mithril":2}],351:[function(require,module,exports){
+"use strict";
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var m = require("mithril");
+
+var _require = require("../random-gif"),
+    randomGif = _require.randomGif,
+    RandomGif = _require.RandomGif;
+
+exports.randomGifPair = {
+  model: function model(id) {
+    var _ref;
+
+    return _ref = {}, _defineProperty(_ref, id + "First", randomGif.model()), _defineProperty(_ref, id + "Second", randomGif.model()), _ref;
+  }
+};
+exports.RandomGifPair = {
+  view: function view(_ref2) {
+    var _ref2$attrs = _ref2.attrs,
+        model = _ref2$attrs.model,
+        id = _ref2$attrs.id,
+        actions = _ref2$attrs.actions;
+    return m("div.ba.b--purple.pa2.mt2", m("div.dib", m(RandomGif, {
+      model: model,
+      id: id + "First",
+      actions: actions
+    })), m("div.dib.ml2", m(RandomGif, {
+      model: model,
+      id: id + "Second",
+      actions: actions
+    })));
+  }
+};
+
+},{"../random-gif":353,"mithril":2}],352:[function(require,module,exports){
+"use strict";
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var m = require("mithril");
+
+var O = require("patchinko/constant");
+
+var R = require("ramda");
+
+var _require = require("./types"),
+    Loaded = _require.Loaded,
+    Success = _require.Success,
+    Image = _require.Image;
+
+var gif_new_url = "https://api.giphy.com/v1/gifs/random";
+var api_key = "dc6zaTOxFJmzC";
+
+exports.actions = function (update, newGifGenerated) {
+  return {
+    editTag: function editTag(id, tag) {
+      return update(R.objOf(id, O({
+        tag: tag
+      })));
+    },
+    newGif: function newGif(id, model) {
+      update(R.objOf(id, O({
+        image: Loaded.N()
+      })));
+      m.request({
+        url: gif_new_url,
+        data: {
+          api_key: api_key,
+          tag: model[id].tag
+        }
+      }).then(function (response) {
+        update(Object.assign(_defineProperty({}, id, O({
+          image: Loaded.Y(Success.Y(Image.Y(response.data.image_url)))
+        })), newGifGenerated(model)));
+      }).catch(function () {
+        return update(R.objOf(id, O({
+          image: Loaded.Y(Success.N())
+        })));
+      });
+    },
+    reset: function reset(id) {
+      return update(R.objOf(id, O({
+        image: Loaded.Y(Success.Y(Image.N()))
+      })));
+    }
+  };
+};
+
+},{"./types":354,"mithril":2,"patchinko/constant":5,"ramda":94}],353:[function(require,module,exports){
+"use strict";
+
+var m = require("mithril");
+
+var _require = require("ramda"),
+    identity = _require.identity;
+
+var _require2 = require("static-sum-type"),
+    fold = _require2.fold;
+
+var _require3 = require("./types"),
+    Loaded = _require3.Loaded,
+    Success = _require3.Success,
+    Image = _require3.Image;
+
+var _require4 = require("./actions"),
+    actions = _require4.actions;
+
+var _require5 = require("../util/ui"),
+    button = _require5.button;
+
+var IMG_PREFIX = "/examples/random-gif/images/";
+exports.randomGif = {
+  model: function model() {
+    return {
+      image: Loaded.Y(Success.Y(Image.N())),
+      tag: ""
+    };
+  },
+  actions: actions
+};
+
+var imgsrc = function imgsrc(image) {
+  return fold(Loaded)({
+    N: function N() {
+      return IMG_PREFIX + "loading.gif";
+    },
+    Y: fold(Success)({
+      N: function N() {
+        return IMG_PREFIX + "error.png";
+      },
+      Y: fold(Image)({
+        N: function N() {
+          return IMG_PREFIX + "blank.png";
+        },
+        Y: identity
+      })
+    })
+  })(image);
+};
+
+exports.RandomGif = {
+  view: function view(_ref) {
+    var _ref$attrs = _ref.attrs,
+        model = _ref$attrs.model,
+        id = _ref$attrs.id,
+        actions = _ref$attrs.actions;
+    return m("div.ba.b--green.pa2.mt2", m("span.mr2", "Tag:"), m("input[type=text]", {
+      value: model[id].tag,
+      onkeyup: function onkeyup(evt) {
+        return actions.editTag(id, evt.target.value);
+      }
+    }), m("button.bg-blue" + button, {
+      onclick: function onclick() {
+        return actions.newGif(id, model);
+      }
+    }, "Random Gif"), m("button.bg-red" + button, {
+      onclick: function onclick() {
+        return actions.reset(id);
+      }
+    }, "Reset"), m("div.mt2", m("img", {
+      width: 200,
+      height: 200,
+      src: imgsrc(model[id].image)
+    })));
+  }
+};
+
+},{"../util/ui":355,"./actions":352,"./types":354,"mithril":2,"ramda":94,"static-sum-type":336}],354:[function(require,module,exports){
+"use strict";
+
+var yslashn = require("static-sum-type/modules/yslashn");
+
+module.exports = {
+  Loaded: yslashn.maybe("Loaded"),
+  Success: yslashn.maybe("Success"),
+  Image: yslashn.maybe("Image")
+};
+
+},{"static-sum-type/modules/yslashn":337}],355:[function(require,module,exports){
+"use strict";
+
+exports.button = ".db.w4.mt2.pa2.white.br2";
+
+},{}]},{},[347]);

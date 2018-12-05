@@ -86,51 +86,39 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./common/index.js":
+/***/ "./common/actions.js":
+/*!***************************!*\
+  !*** ./common/actions.js ***!
+  \***************************/
+/*! exports provided: actions */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"actions\", function() { return actions; });\nvar actions = function actions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(evt) {\n      return update(function (model) {\n        model.precipitations = evt.target.checked;\n        return model;\n      });\n    },\n    changePrecipitation: function changePrecipitation(evt) {\n      return update(function (model) {\n        model.precipitation = evt.target.value;\n        return model;\n      });\n    },\n    editDate: function editDate(evt) {\n      return update(function (model) {\n        model.date = evt.target.value;\n        return model;\n      });\n    },\n    increase: function increase(amount) {\n      return update(function (model) {\n        model.value = model.value + amount;\n        return model;\n      });\n    },\n    changeUnits: function changeUnits() {\n      return update(function (model) {\n        if (model.units === \"C\") {\n          model.units = \"F\";\n          model.value = Math.round(model.value * 9 / 5 + 32);\n        } else {\n          model.units = \"C\";\n          model.value = Math.round((model.value - 32) / 9 * 5);\n        }\n\n        return model;\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./common/actions.js?");
+
+/***/ }),
+
+/***/ "./common/model.js":
 /*!*************************!*\
-  !*** ./common/index.js ***!
+  !*** ./common/model.js ***!
   \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports provided: model */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.setup = undefined;\n\nvar _flyd = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n\nvar _flyd2 = _interopRequireDefault(_flyd);\n\nvar _temperature = __webpack_require__(/*! ./temperature */ \"./common/temperature/index.js\");\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar setup = exports.setup = function setup(render) {\n  var update = _flyd2.default.stream();\n  var temperature = (0, _temperature.createTemperature)(update);\n  var models = _flyd2.default.scan(function (model, func) {\n    return func(model);\n  }, temperature.model(), update);\n\n  var element = document.getElementById(\"app\");\n  models.map(function (model) {\n    return render(temperature.view(model), element);\n  });\n\n  // Only for using Meiosis Tracer in development.\n  __webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({ selector: \"#tracer\", streams: [models] });\n\n  return { models: models, view: temperature.view, element: element };\n};\n\n//# sourceURL=webpack:///./common/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"model\", function() { return model; });\nvar model = function model() {\n  return {\n    precipitations: false,\n    precipitation: null,\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  };\n};\n\n//# sourceURL=webpack:///./common/model.js?");
 
 /***/ }),
 
-/***/ "./common/temperature/actions.js":
-/*!***************************************!*\
-  !*** ./common/temperature/actions.js ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ "./common/view.js":
+/*!************************!*\
+  !*** ./common/view.js ***!
+  \************************/
+/*! exports provided: view */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nvar createActions = exports.createActions = function createActions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(evt) {\n      return update(function (model) {\n        model.precipitations = evt.target.checked;\n        return model;\n      });\n    },\n\n    changePrecipitation: function changePrecipitation(evt) {\n      return update(function (model) {\n        model.precipitation = evt.target.value;\n        return model;\n      });\n    },\n\n    editDate: function editDate(evt) {\n      return update(function (model) {\n        model.date = evt.target.value;\n        return model;\n      });\n    },\n\n    increase: function increase(amount) {\n      return update(function (model) {\n        model.value = model.value + amount;\n        return model;\n      });\n    },\n\n    changeUnits: function changeUnits() {\n      return update(function (model) {\n        if (model.units === \"C\") {\n          model.units = \"F\";\n          model.value = Math.round(model.value * 9 / 5 + 32);\n        } else {\n          model.units = \"C\";\n          model.value = Math.round((model.value - 32) / 9 * 5);\n        }\n        return model;\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./common/temperature/actions.js?");
-
-/***/ }),
-
-/***/ "./common/temperature/index.js":
-/*!*************************************!*\
-  !*** ./common/temperature/index.js ***!
-  \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.createTemperature = undefined;\n\nvar _actions = __webpack_require__(/*! ./actions */ \"./common/temperature/actions.js\");\n\nvar _view = __webpack_require__(/*! ./view */ \"./common/temperature/view.js\");\n\nvar createTemperature = exports.createTemperature = function createTemperature(update) {\n  return {\n    model: function model() {\n      return {\n        precipitations: false,\n        precipitation: null,\n        date: \"\",\n        value: 20,\n        units: \"C\"\n      };\n    },\n\n    view: (0, _view.createView)((0, _actions.createActions)(update))\n  };\n};\n\n//# sourceURL=webpack:///./common/temperature/index.js?");
-
-/***/ }),
-
-/***/ "./common/temperature/view.js":
-/*!************************************!*\
-  !*** ./common/temperature/view.js ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nvar precipitationOption = function precipitationOption(_ref) {\n  var model = _ref.model,\n      actions = _ref.actions,\n      id = _ref.id,\n      value = _ref.value,\n      label = _ref.label;\n  return [\"span\", [\"input:radio#\" + id + \"[name=precipitation]\", {\n    value: value, checked: model.precipitation === value,\n    onClick: actions.changePrecipitation\n  }], [\"label\", { htmlFor: id }, label]];\n};\n\nvar createView = exports.createView = function createView(actions) {\n  return function (model) {\n    return [\"div\", [\"div\", [\"input:checkbox#precipitations\", {\n      checked: model.precipitations,\n      onClick: actions.togglePrecipitations\n    }], [\"label\", { htmlFor: \"precipitations\" }, \"Precipitations\"]], [\"div\", precipitationOption({ model: model, actions: actions, id: \"rain\", value: \"RAIN\", label: \"Rain\" }), precipitationOption({ model: model, actions: actions, id: \"snow\", value: \"SNOW\", label: \"Snow\" }), precipitationOption({ model: model, actions: actions, id: \"sleet\", value: \"SLEET\", label: \"Sleet\" })], [\"div\", \"Date:\", [\"input:text[size=10]\", { value: model.date, onInput: actions.editDate }]], [\"span\", \"Temperature: \"], [\"span.tempValue\", model.value], [\"span\", { innerHTML: \"&deg;\" }], [\"span.tempUnits\", model.units], [\"div\", [\"button.btn.btn-default.increase\", { onClick: function onClick() {\n        return actions.increase(1);\n      } }, \"Increase\"], [\"button.btn.btn-default.decrease\", { onClick: function onClick() {\n        return actions.increase(-1);\n      } }, \"Decrease\"]], [\"div\", [\"button.btn.btn-primary.changeUnits\", { onClick: actions.changeUnits }, \"Change Units\"]]];\n  };\n};\n\n//# sourceURL=webpack:///./common/temperature/view.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"view\", function() { return view; });\nvar precipitationOption = function precipitationOption(_ref) {\n  var model = _ref.model,\n      actions = _ref.actions,\n      id = _ref.id,\n      value = _ref.value,\n      label = _ref.label;\n  return [\"span\", [\"input:radio#\".concat(id, \"[name=precipitation]\"), {\n    value: value,\n    checked: model.precipitation === value,\n    onChange: actions.changePrecipitation\n  }], [\"label\", {\n    htmlFor: id\n  }, label]];\n};\n\nvar view = function view(model, actions) {\n  return [\"div\", [\"div\", [\"input:checkbox#precipitations\", {\n    checked: model.precipitations,\n    onChange: actions.togglePrecipitations\n  }], [\"label\", {\n    htmlFor: \"precipitations\"\n  }, \"Precipitations\"]], [\"div\", precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"rain\",\n    value: \"RAIN\",\n    label: \"Rain\"\n  }), precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"snow\",\n    value: \"SNOW\",\n    label: \"Snow\"\n  }), precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"sleet\",\n    value: \"SLEET\",\n    label: \"Sleet\"\n  })], [\"div\", \"Date:\", [\"input:text[size=10]\", {\n    value: model.date,\n    onInput: actions.editDate\n  }]], [\"span\", \"Temperature: \"], [\"span.tempValue\", model.value], [\"span\", {\n    innerHTML: \"&deg;\"\n  }], [\"span.tempUnits\", model.units], [\"div\", [\"button.btn.btn-default.increase\", {\n    onClick: function onClick() {\n      return actions.increase(1);\n    }\n  }, \"Increase\"], [\"button.btn.btn-default.decrease\", {\n    onClick: function onClick() {\n      return actions.increase(-1);\n    }\n  }, \"Decrease\"]], [\"div\", [\"button.btn.btn-primary.changeUnits\", {\n    onClick: actions.changeUnits\n  }, \"Change Units\"]]];\n};\n\n//# sourceURL=webpack:///./common/view.js?");
 
 /***/ }),
 
@@ -366,27 +354,39 @@ eval("(function (global, factory) {\n   true ? factory(exports) :\n  undefined;\
 
 /***/ }),
 
+/***/ "./react/app.js":
+/*!**********************!*\
+  !*** ./react/app.js ***!
+  \**********************/
+/*! exports provided: app, App */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"app\", function() { return app; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"App\", function() { return App; });\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _seview_setup__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./seview-setup */ \"./react/seview-setup.js\");\n/* harmony import */ var _common_model__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../common/model */ \"./common/model.js\");\n/* harmony import */ var _common_actions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../common/actions */ \"./common/actions.js\");\n/* harmony import */ var _common_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../common/view */ \"./common/view.js\");\nfunction _typeof(obj) { if (typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === \"function\" && obj.constructor === Symbol && obj !== Symbol.prototype ? \"symbol\" : typeof obj; }; } return _typeof(obj); }\n\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\nfunction _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \"object\" || typeof call === \"function\")) { return call; } return _assertThisInitialized(self); }\n\nfunction _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\"this hasn't been initialised - super() hasn't been called\"); } return self; }\n\nfunction _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }\n\nfunction _inherits(subClass, superClass) { if (typeof superClass !== \"function\" && superClass !== null) { throw new TypeError(\"Super expression must either be null or a function\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }\n\nfunction _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }\n\n\n\n\n\n\nvar app = {\n  model: _common_model__WEBPACK_IMPORTED_MODULE_2__[\"model\"],\n  actions: _common_actions__WEBPACK_IMPORTED_MODULE_3__[\"actions\"]\n};\nvar App =\n/*#__PURE__*/\nfunction (_Component) {\n  _inherits(App, _Component);\n\n  function App(props) {\n    var _this;\n\n    _classCallCheck(this, App);\n\n    _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this, props));\n    _this.state = {\n      model: props.models()\n    };\n    return _this;\n  }\n\n  _createClass(App, [{\n    key: \"render\",\n    value: function render() {\n      var model = this.state.model;\n      var actions = this.props.actions;\n      return Object(_seview_setup__WEBPACK_IMPORTED_MODULE_1__[\"h\"])(Object(_common_view__WEBPACK_IMPORTED_MODULE_4__[\"view\"])(model, actions));\n    }\n  }, {\n    key: \"componentDidMount\",\n    value: function componentDidMount() {\n      var _this2 = this;\n\n      this.props.models.map(function (model) {\n        _this2.setState({\n          model: model\n        });\n      });\n    }\n  }]);\n\n  return App;\n}(react__WEBPACK_IMPORTED_MODULE_0__[\"Component\"]);\n\n//# sourceURL=webpack:///./react/app.js?");
+
+/***/ }),
+
 /***/ "./react/index.js":
 /*!************************!*\
   !*** ./react/index.js ***!
   \************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("\n\nvar _setup = __webpack_require__(/*! ./setup */ \"./react/setup.js\");\n\n(0, _setup.setupApp)();\n\n//# sourceURL=webpack:///./react/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ \"./node_modules/react-dom/index.js\");\n/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(flyd__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app */ \"./react/app.js\");\n\n\n\n\nvar update = flyd__WEBPACK_IMPORTED_MODULE_2___default.a.stream();\nvar models = flyd__WEBPACK_IMPORTED_MODULE_2___default.a.scan(function (model, func) {\n  return func(model);\n}, _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].model(), update); // Only for using Meiosis Tracer in development.\n\n__webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({\n  selector: \"#tracer\",\n  streams: [models]\n});\n\nvar actions = _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].actions(update);\nreact_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_app__WEBPACK_IMPORTED_MODULE_3__[\"App\"], {\n  models: models,\n  actions: actions\n}), document.getElementById(\"app\"));\n\n//# sourceURL=webpack:///./react/index.js?");
 
 /***/ }),
 
-/***/ "./react/setup.js":
-/*!************************!*\
-  !*** ./react/setup.js ***!
-  \************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ "./react/seview-setup.js":
+/*!*******************************!*\
+  !*** ./react/seview-setup.js ***!
+  \*******************************/
+/*! exports provided: h */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.setupApp = exports.setupRender = undefined;\n\nvar _reactDom = __webpack_require__(/*! react-dom */ \"./node_modules/react-dom/index.js\");\n\nvar _reactDom2 = _interopRequireDefault(_reactDom);\n\nvar _react = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n\nvar _react2 = _interopRequireDefault(_react);\n\nvar _common = __webpack_require__(/*! ../common */ \"./common/index.js\");\n\nvar _seview = __webpack_require__(/*! seview */ \"./node_modules/seview/dist/seview.js\");\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar h = (0, _seview.sv)(function (node) {\n  if (typeof node === \"string\") {\n    return node;\n  }\n  var attrs = node.attrs || {};\n  if (attrs.innerHTML) {\n    attrs.dangerouslySetInnerHTML = { __html: attrs.innerHTML };\n    delete attrs.innerHTML;\n  }\n  var args = [node.tag, node.attrs || {}].concat(node.children || []);\n  return _react2.default.createElement.apply(null, args);\n});\n\nvar setupRender = exports.setupRender = function setupRender() {\n  return function (view, element) {\n    return _reactDom2.default.render(h(view), element);\n  };\n};\n\nvar setupApp = exports.setupApp = function setupApp() {\n  return (0, _common.setup)(setupRender());\n};\n\n//# sourceURL=webpack:///./react/setup.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"h\", function() { return h; });\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var seview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! seview */ \"./node_modules/seview/dist/seview.js\");\n/* harmony import */ var seview__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(seview__WEBPACK_IMPORTED_MODULE_1__);\n\n\nvar h = Object(seview__WEBPACK_IMPORTED_MODULE_1__[\"sv\"])(function (node) {\n  if (typeof node === \"string\") {\n    return node;\n  }\n\n  var attrs = node.attrs || {};\n\n  if (attrs.innerHTML) {\n    attrs.dangerouslySetInnerHTML = {\n      __html: attrs.innerHTML\n    };\n    delete attrs.innerHTML;\n  }\n\n  if (attrs.onInput) {\n    attrs.onChange = attrs.onInput;\n    delete attrs.onInput;\n  }\n\n  var args = [node.tag, node.attrs || {}].concat(node.children || []);\n  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement.apply(null, args);\n});\n\n//# sourceURL=webpack:///./react/seview-setup.js?");
 
 /***/ })
 
