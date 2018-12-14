@@ -81,70 +81,10 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./lit-html/index.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.js");
 /******/ })
 /************************************************************************/
 /******/ ({
-
-/***/ "./common/actions.js":
-/*!***************************!*\
-  !*** ./common/actions.js ***!
-  \***************************/
-/*! exports provided: actions */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"actions\", function() { return actions; });\nvar actions = function actions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(evt) {\n      return update(function (model) {\n        model.precipitations = evt.target.checked;\n        return model;\n      });\n    },\n    changePrecipitation: function changePrecipitation(evt) {\n      return update(function (model) {\n        model.precipitation = evt.target.value;\n        return model;\n      });\n    },\n    editDate: function editDate(evt) {\n      return update(function (model) {\n        model.date = evt.target.value;\n        return model;\n      });\n    },\n    increase: function increase(amount) {\n      return update(function (model) {\n        model.value = model.value + amount;\n        return model;\n      });\n    },\n    changeUnits: function changeUnits() {\n      return update(function (model) {\n        if (model.units === \"C\") {\n          model.units = \"F\";\n          model.value = Math.round(model.value * 9 / 5 + 32);\n        } else {\n          model.units = \"C\";\n          model.value = Math.round((model.value - 32) / 9 * 5);\n        }\n\n        return model;\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./common/actions.js?");
-
-/***/ }),
-
-/***/ "./common/model.js":
-/*!*************************!*\
-  !*** ./common/model.js ***!
-  \*************************/
-/*! exports provided: model */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"model\", function() { return model; });\nvar model = function model() {\n  return {\n    precipitations: false,\n    precipitation: null,\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  };\n};\n\n//# sourceURL=webpack:///./common/model.js?");
-
-/***/ }),
-
-/***/ "./lit-html/app.js":
-/*!*************************!*\
-  !*** ./lit-html/app.js ***!
-  \*************************/
-/*! exports provided: app */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"app\", function() { return app; });\n/* harmony import */ var _common_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../common/model */ \"./common/model.js\");\n/* harmony import */ var _common_actions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../common/actions */ \"./common/actions.js\");\n/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./view */ \"./lit-html/view.js\");\n\n\n\nvar app = {\n  model: _common_model__WEBPACK_IMPORTED_MODULE_0__[\"model\"],\n  actions: _common_actions__WEBPACK_IMPORTED_MODULE_1__[\"actions\"],\n  view: _view__WEBPACK_IMPORTED_MODULE_2__[\"view\"]\n};\n\n//# sourceURL=webpack:///./lit-html/app.js?");
-
-/***/ }),
-
-/***/ "./lit-html/index.js":
-/*!***************************!*\
-  !*** ./lit-html/index.js ***!
-  \***************************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(flyd__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\n/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app */ \"./lit-html/app.js\");\n\n\n\nvar update = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.stream();\nvar models = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.scan(function (model, func) {\n  return func(model);\n}, _app__WEBPACK_IMPORTED_MODULE_2__[\"app\"].model(), update); // Only for using Meiosis Tracer in development.\n\n__webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({\n  selector: \"#tracer\",\n  streams: [models]\n});\n\nvar actions = _app__WEBPACK_IMPORTED_MODULE_2__[\"app\"].actions(update);\nvar element = document.getElementById(\"app\");\nmodels.map(function (model) {\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_1__[\"render\"])(_app__WEBPACK_IMPORTED_MODULE_2__[\"app\"].view(model, actions), element);\n});\n\n//# sourceURL=webpack:///./lit-html/index.js?");
-
-/***/ }),
-
-/***/ "./lit-html/view.js":
-/*!**************************!*\
-  !*** ./lit-html/view.js ***!
-  \**************************/
-/*! exports provided: view */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"view\", function() { return view; });\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\nfunction _templateObject2() {\n  var data = _taggedTemplateLiteral([\"\\n  <div>\\n    <div>\\n      <input type=\\\"checkbox\\\" .checked=\", \"\\n        @click=\", \" id=\\\"precipitations\\\"/>\\n      <label for=\\\"precipitations\\\">Precipitations</label>\\n    </div>\\n    <div>\\n      \", \"\\n      \", \"\\n      \", \"\\n    </div>\\n    <div>\\n      Date:\\n      <input type=\\\"text\\\" size=\\\"10\\\" @input=\", \" value=\", \">\\n    </div>\\n    <span>Temperature: </span>\\n    <span class=\\\"tempValue\\\">\", \"</span>&deg<span class=\\\"tempUnits\\\">\", \"</span>\\n    <div>\\n      <button class=\\\"btn btn-default increase\\\" @click=\", \">Increase</button>\\n      <button class=\\\"btn btn-default decrease\\\" @click=\", \">Decrease</button>\\n    </div>\\n    <div>\\n      <button class=\\\"btn btn-primary changeUnits\\\" @click=\", \">Change Units</button>\\n    </div>\\n  </div>\\n\"]);\n\n  _templateObject2 = function _templateObject2() {\n    return data;\n  };\n\n  return data;\n}\n\nfunction _templateObject() {\n  var data = _taggedTemplateLiteral([\"\\n  <span>\\n    <input type=\\\"radio\\\" id=\", \" name=\\\"precipitation\\\" value=\", \"\\n      .checked=\", \"\\n      @click=\", \"/>\\n    <label for=\", \">\", \"</label>\\n  </span>\\n\"]);\n\n  _templateObject = function _templateObject() {\n    return data;\n  };\n\n  return data;\n}\n\nfunction _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }\n\n\n\nvar precipitationOption = function precipitationOption(_ref) {\n  var model = _ref.model,\n      actions = _ref.actions,\n      id = _ref.id,\n      value = _ref.value,\n      label = _ref.label;\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_0__[\"html\"])(_templateObject(), id, value, model.precipitation === value, actions.changePrecipitation, id, label);\n};\n\nvar view = function view(model, actions) {\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_0__[\"html\"])(_templateObject2(), model.precipitations, actions.togglePrecipitations, precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"rain\",\n    value: \"RAIN\",\n    label: \"Rain\"\n  }), precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"snow\",\n    value: \"SNOW\",\n    label: \"Snow\"\n  }), precipitationOption({\n    model: model,\n    actions: actions,\n    id: \"sleet\",\n    value: \"SLEET\",\n    label: \"Sleet\"\n  }), actions.editDate, model.date, model.value, model.units, function () {\n    return actions.increase(1);\n  }, function () {\n    return actions.increase(-1);\n  }, actions.changeUnits);\n};\n\n//# sourceURL=webpack:///./lit-html/view.js?");
-
-/***/ }),
 
 /***/ "./node_modules/flyd/lib/index.js":
 /*!****************************************!*\
@@ -364,6 +304,54 @@ eval("var _arity = /*#__PURE__*/__webpack_require__(/*! ./_arity */ \"./node_mod
 /***/ (function(module, exports) {
 
 eval("function _isPlaceholder(a) {\n       return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;\n}\nmodule.exports = _isPlaceholder;\n\n//# sourceURL=webpack:///./node_modules/ramda/src/internal/_isPlaceholder.js?");
+
+/***/ }),
+
+/***/ "./src/app/actions.js":
+/*!****************************!*\
+  !*** ./src/app/actions.js ***!
+  \****************************/
+/*! exports provided: actions */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"actions\", function() { return actions; });\nvar actions = function actions(_ref) {\n  var update = _ref.update;\n  return {\n    togglePrecipitations: function togglePrecipitations(evt) {\n      return update(function (model) {\n        model.precipitations = evt.target.checked;\n        return model;\n      });\n    },\n    changePrecipitation: function changePrecipitation(evt) {\n      return update(function (model) {\n        model.precipitation = evt.target.value;\n        return model;\n      });\n    },\n    editDate: function editDate(evt) {\n      return update(function (model) {\n        model.date = evt.target.value;\n        return model;\n      });\n    },\n    increase: function increase(amount) {\n      return update(function (model) {\n        model.value = model.value + amount;\n        return model;\n      });\n    },\n    changeUnits: function changeUnits() {\n      return update(function (model) {\n        if (model.units === \"C\") {\n          model.units = \"F\";\n          model.value = Math.round(model.value * 9 / 5 + 32);\n        } else {\n          model.units = \"C\";\n          model.value = Math.round((model.value - 32) / 9 * 5);\n        }\n\n        return model;\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/app/actions.js?");
+
+/***/ }),
+
+/***/ "./src/app/index.js":
+/*!**************************!*\
+  !*** ./src/app/index.js ***!
+  \**************************/
+/*! exports provided: app, App */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"app\", function() { return app; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"App\", function() { return App; });\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\n/* harmony import */ var _initialState__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./initialState */ \"./src/app/initialState.js\");\n/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./actions */ \"./src/app/actions.js\");\nfunction _templateObject2() {\n  var data = _taggedTemplateLiteral([\"\\n  <div>\\n    <div>\\n      <input type=\\\"checkbox\\\" .checked=\", \"\\n        @click=\", \" id=\\\"precipitations\\\"/>\\n      <label for=\\\"precipitations\\\">Precipitations</label>\\n    </div>\\n    <div>\\n      \", \"\\n      \", \"\\n      \", \"\\n    </div>\\n    <div>\\n      Date:\\n      <input type=\\\"text\\\" size=\\\"10\\\" @input=\", \" value=\", \">\\n    </div>\\n    <span>Temperature: </span>\\n    <span class=\\\"tempValue\\\">\", \"</span>&deg<span class=\\\"tempUnits\\\">\", \"</span>\\n    <div>\\n      <button class=\\\"btn btn-default increase\\\" @click=\", \">Increase</button>\\n      <button class=\\\"btn btn-default decrease\\\" @click=\", \">Decrease</button>\\n    </div>\\n    <div>\\n      <button class=\\\"btn btn-primary changeUnits\\\" @click=\", \">Change Units</button>\\n    </div>\\n  </div>\\n\"]);\n\n  _templateObject2 = function _templateObject2() {\n    return data;\n  };\n\n  return data;\n}\n\nfunction _templateObject() {\n  var data = _taggedTemplateLiteral([\"\\n  <span>\\n    <input type=\\\"radio\\\" id=\", \" name=\\\"precipitation\\\" value=\", \"\\n      .checked=\", \"\\n      @click=\", \"/>\\n    <label for=\", \">\", \"</label>\\n  </span>\\n\"]);\n\n  _templateObject = function _templateObject() {\n    return data;\n  };\n\n  return data;\n}\n\nfunction _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }\n\n\n\n\nvar app = {\n  initialState: _initialState__WEBPACK_IMPORTED_MODULE_1__[\"initialState\"],\n  actions: _actions__WEBPACK_IMPORTED_MODULE_2__[\"actions\"]\n};\n\nvar precipitationOption = function precipitationOption(_ref) {\n  var state = _ref.state,\n      actions = _ref.actions,\n      id = _ref.id,\n      value = _ref.value,\n      label = _ref.label;\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_0__[\"html\"])(_templateObject(), id, value, state.precipitation === value, actions.changePrecipitation, id, label);\n};\n\nvar App = function App(_ref2) {\n  var state = _ref2.state,\n      actions = _ref2.actions;\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_0__[\"html\"])(_templateObject2(), state.precipitations, actions.togglePrecipitations, precipitationOption({\n    state: state,\n    actions: actions,\n    id: \"rain\",\n    value: \"RAIN\",\n    label: \"Rain\"\n  }), precipitationOption({\n    state: state,\n    actions: actions,\n    id: \"snow\",\n    value: \"SNOW\",\n    label: \"Snow\"\n  }), precipitationOption({\n    state: state,\n    actions: actions,\n    id: \"sleet\",\n    value: \"SLEET\",\n    label: \"Sleet\"\n  }), actions.editDate, state.date, state.value, state.units, function () {\n    return actions.increase(1);\n  }, function () {\n    return actions.increase(-1);\n  }, actions.changeUnits);\n};\n\n//# sourceURL=webpack:///./src/app/index.js?");
+
+/***/ }),
+
+/***/ "./src/app/initialState.js":
+/*!*********************************!*\
+  !*** ./src/app/initialState.js ***!
+  \*********************************/
+/*! exports provided: initialState */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"initialState\", function() { return initialState; });\nvar initialState = function initialState() {\n  return {\n    precipitations: false,\n    precipitation: null,\n    date: \"\",\n    value: 20,\n    units: \"C\"\n  };\n};\n\n//# sourceURL=webpack:///./src/app/initialState.js?");
+
+/***/ }),
+
+/***/ "./src/index.js":
+/*!**********************!*\
+  !*** ./src/index.js ***!
+  \**********************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(flyd__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\n/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app */ \"./src/app/index.js\");\n\n\n\nvar update = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.stream();\nvar states = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.scan(function (state, patch) {\n  return patch(state);\n}, _app__WEBPACK_IMPORTED_MODULE_2__[\"app\"].initialState(), update); // Only for using Meiosis Tracer in development.\n\n__webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({\n  selector: \"#tracer\",\n  streams: [states]\n});\n\nvar actions = _app__WEBPACK_IMPORTED_MODULE_2__[\"app\"].actions({\n  update: update\n});\nvar element = document.getElementById(\"app\");\nstates.map(function (state) {\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_1__[\"render\"])(Object(_app__WEBPACK_IMPORTED_MODULE_2__[\"App\"])({\n    state: state,\n    actions: actions\n  }), element);\n});\n\n//# sourceURL=webpack:///./src/index.js?");
 
 /***/ })
 
