@@ -5,14 +5,15 @@
 ## 01 - Hello World
 
 The first thing that we will do is render something onto the page - a "Hello, world" message,
-of course. With Mithril, this is accomplished using `m.render`. When calling this function, we
+of course. With Mithril, this is accomplished using `m.mount`. When calling this function, we
 must pass two parameters:
 
 1. The DOM element into which we want to render, and
-1. What we want to render. This is a virtual-DOM node, or **vnode** for short.
+1. The Mithril component that we want to render.
 
-We can use the `m()` function to describe the HTML structure of what we want to render and
-produce a vnode suitable for passing to `m.render`.
+A Mithril component is a plain JavaScript object with a `view` function. That function must
+return a virtual DOM node (or _vnode_ for short). We can use the `m()` function to describe the
+HTML structure of what we want to render and produce a vnode.
 
 ### Our First Example
 
@@ -29,10 +30,10 @@ Here is the code to render the message onto the page:
 
 @flems mithril/01-hello-world.js,app.html,app.css mithril
 
-Notice that `app.html` contains the `element` into which we render, and `m(...)` produces the
-vnode. These are the two arguments that we pass to `m.render`.
+Notice that `app.html` contains the `element` into which we render, and the component produces
+the view. These are the two arguments that we pass to `m.mount`.
 
-![The Render Function](01-hello-world-01.svg)
+![The mount Function](01-hello-world-01.svg)
 
 ### Exercises
 

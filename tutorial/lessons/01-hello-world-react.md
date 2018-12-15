@@ -8,11 +8,12 @@ The first thing that we will do is render something onto the page - a "Hello, wo
 of course. With React, this is accomplished using `ReactDOM.render`. When calling this function, we
 must pass two parameters:
 
-1. What we want to render. This is a virtual-DOM node, or **vnode** for short.
-1. The DOM element into which we want to render.
+1. The DOM element into which we want to render, and
+1. The React component that we want to render.
 
-We can use JSX to describe the HTML structure of what we want to render and produce a vnode
-suitable for passing to `ReactDOM.render`.
+A React component is a class that extends `React.Component` and that has a `render` method.
+That method must return a virtual DOM node (or _vnode_ for short). We can use JSX to describe the
+HTML structure of what we want to render and produce a vnode.
 
 ### Our First Example
 
@@ -28,7 +29,7 @@ Here is the code to render the message onto the page:
 
 @flems react/01-hello-world.jsx,app.html,app.css react,react-dom
 
-Notice that JSX produces the vnode, and `app.html` contains the `element` into which we render.
+Notice that the component produces the view, and `app.html` contains the `element` into which we render.
 These are the two arguments that we pass to `ReactDOM.render`.
 
 ![The Render Function](01-hello-world-02.svg)

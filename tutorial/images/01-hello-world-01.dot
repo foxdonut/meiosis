@@ -1,10 +1,10 @@
 digraph meiosistutorial {
-  mrender [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+  mmount [shape="plaintext", style="filled", fillcolor="lightblue", label=<
     <table border="0">
       <tr>
-        <td>m.render(</td>
+        <td>m.mount(</td>
         <td port="element">element,</td>
-        <td port="view">vnode</td>
+        <td port="view">component</td>
         <td>)</td>
       </tr>
     </table>
@@ -24,11 +24,23 @@ digraph meiosistutorial {
   view [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td port="mview">m("h1", "Hello, world")</td>
+        <td port="mview" align="left">{</td>
+      </tr>
+      <tr>
+        <td align="left">  view: function() { </td>
+      </tr>
+      <tr>
+        <td align="left">    return m("h1", "Hello, world");</td>
+      </tr>
+      <tr>
+        <td align="left">  }</td>
+      </tr>
+      <tr>
+        <td align="left">}</td>
       </tr>
     </table>
   >]
 
-  element:app -> mrender:element [label=""]
-  mrender:view -> view:mview [label="", dir="back"]
+  element:app -> mmount:element [label=""]
+  mmount:view -> view:mview [label="", dir="back"]
 }

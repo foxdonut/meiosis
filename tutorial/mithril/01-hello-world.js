@@ -1,3 +1,8 @@
 /*global m*/
+var App = {
+  view: function() {
+    return m("h1", "Hello, world");
+  }
+};
 var element = document.getElementById("app");
-m.render(element, m("h1", "Hello, world"));
+m.mount(element, App);
