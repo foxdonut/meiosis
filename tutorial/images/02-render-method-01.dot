@@ -3,7 +3,7 @@ digraph meiosistutorial {
     <table border="0">
       <tr>
         <td>ReactDOM.render(</td>
-        <td port="vnode">vnode, </td>
+        <td port="vnode">component, </td>
         <td port="element">element</td>
         <td>)</td>
       </tr>
@@ -24,20 +24,32 @@ digraph meiosistutorial {
   view [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td>m("div", "Counter: 0")</td>
+        <td>&lt;App state={initialState} /&gt;</td>
       </tr>
     </table>
   >]
 
-  vfunction [shape="plaintext", style="filled", fillcolor="orange", label=<
+  vfunction [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td>view(0)</td>
+        <td align="left">class App extends React.Component {</td>
+      </tr>
+      <tr>
+        <td align="left">  render() { </td>
+      </tr>
+      <tr>
+        <td align="left">    return &lt;div&gt;Counter: {this.props.state}&lt;/div&gt;</td>
+      </tr>
+      <tr>
+        <td align="left">  }</td>
+      </tr>
+      <tr>
+        <td port="mview" align="left">}</td>
       </tr>
     </table>
   >]
 
   mrender:element -> element [dir="back"]
   view -> mrender:vnode
-  vfunction -> view
+  vfunction -> view [dir="back"]
 }

@@ -1,10 +1,10 @@
 digraph meiosistutorial {
-  mrender [shape="plaintext", style="filled", fillcolor="lightblue", label=<
+  mmount [shape="plaintext", style="filled", fillcolor="lightblue", label=<
     <table border="0">
       <tr>
-        <td>m.render(</td>
+        <td>m.mount(</td>
         <td port="element">element,</td>
-        <td port="vnode">vnode</td>
+        <td port="component">component</td>
         <td>)</td>
       </tr>
     </table>
@@ -24,20 +24,44 @@ digraph meiosistutorial {
   view [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td>m("div", "Counter: 0")</td>
+        <td port="mview" align="left">{</td>
+      </tr>
+      <tr>
+        <td align="left">  view: function() { </td>
+      </tr>
+      <tr>
+        <td align="left">    return m(App, { state: initialState });</td>
+      </tr>
+      <tr>
+        <td align="left">  }</td>
+      </tr>
+      <tr>
+        <td align="left">}</td>
       </tr>
     </table>
   >]
 
-  vfunction [shape="plaintext", style="filled", fillcolor="orange", label=<
+  vfunction [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td>view(0)</td>
+        <td port="mview" align="left">var App = {</td>
+      </tr>
+      <tr>
+        <td align="left">  view: function(vnode) { </td>
+      </tr>
+      <tr>
+        <td align="left">    return m("div", "Counter: " + vnode.attrs.state);</td>
+      </tr>
+      <tr>
+        <td align="left">  }</td>
+      </tr>
+      <tr>
+        <td align="left">}</td>
       </tr>
     </table>
   >]
 
-  mrender:element -> element:app [dir="back"]
-  view -> mrender:vnode
-  vfunction -> view
+  mmount:element -> element:app [dir="back"]
+  view -> mmount:component
+  vfunction -> view [dir="back"]
 }

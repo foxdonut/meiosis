@@ -2,9 +2,9 @@
 
 [Table of Contents](toc.html)
 
-## 03 - Update Model
+## 03 - Update State
 
-In the previous lesson, [02 - View Function](02-view-function-react.html), we created a `view`
+In the previous lesson, [02 - Render Method](02-render-method-react.html), we created a `view`
 function that produces the vnode according to the `model` that is passed to the function.
 
 So, we can call `view(model)` and render it onto the page. Now, how do we make a change to the
@@ -41,7 +41,7 @@ used.
 As you can see in the code above, the `increase` function updates the model by adding 1 to the
 value. Then, it re-renders the view by calling `ReactDOM.render` again.
 
-![The onclick Function](03-update-model-02.svg)
+![The onclick Function](03-update-state-02.svg)
 
 > **Note:** you might wonder about rebuilding the whole view and re-rendering it when something
 changes. Generally speaking, producing a vnode is not a performance concern. Further, re-rendering
@@ -50,7 +50,7 @@ make the real DOM reflect the view.
 
 You can see the working code below:
 
-@flems react/03-update-model.jsx,app.html,app.css react,react-dom 550
+@flems react/03-update-state.jsx,app.html,app.css react,react-dom 550
 
 ### Exercises
 
@@ -61,7 +61,7 @@ model to produce the view, and change the `increase` function so that it increas
 
 ### Solution
 
-@flems react/03-update-model-solution.jsx,app.html,app.css react,react-dom 750 hidden
+@flems react/03-update-state-solution.jsx,app.html,app.css react,react-dom 750 hidden
 
 When you are ready, continue on to [04 - Update Function](04-update-function-react.html).
 

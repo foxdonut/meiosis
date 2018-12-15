@@ -1,8 +1,14 @@
 /*global m*/
-var view = function(model) {
-  return m("div", model.label + ": " + model.value);
+var App = {
+  view: function(vnode) {
+    var state = vnode.attrs.state;
+    return m("div", state.label + ": " + state.value);
+  }
 };
-
-var initial = { label: "The Counter", value: 0 };
+var initialState = { label: "The Counter", value: 0 };
 var element = document.getElementById("app");
-m.render(element, view(initial));
+m.mount(element, {
+  view: function() {
+    return m(App, { state: initialState });
+  }
+});

@@ -45,7 +45,7 @@ displayed before and after the message that you are rendering.
 1. Change the `element` into which to render, to `document.body`. Notice that your message
 now overwrites anything that you had in the `app.html` file.
 
-When you are ready, move on to the next lesson: [02 - View Function](02-view-function-react.html).
+When you are ready, move on to the next lesson: [02 - Render Method](02-render-method-react.html).
 
 [Table of Contents](toc.html)
 

@@ -3,7 +3,7 @@ digraph meiosistutorial {
     <table border="0">
       <tr>
         <td>ReactDOM.render(</td>
-        <td port="view">vnode, </td>
+        <td port="view">component, </td>
         <td port="element">element</td>
         <td>)</td>
       </tr>
@@ -24,7 +24,19 @@ digraph meiosistutorial {
   view [shape="plaintext", style="filled", fillcolor="yellow", label=<
     <table border="0">
       <tr>
-        <td port="mview">&lt;h1&gt;Hello, world&lt;/h1&gt;</td>
+        <td align="left">class App extends React.Component {</td>
+      </tr>
+      <tr>
+        <td align="left">  render() { </td>
+      </tr>
+      <tr>
+        <td align="left">    return &lt;h1&gt;Hello, world&lt;/h1&gt;</td>
+      </tr>
+      <tr>
+        <td align="left">  }</td>
+      </tr>
+      <tr>
+        <td port="mview" align="left">}</td>
       </tr>
     </table>
   >]

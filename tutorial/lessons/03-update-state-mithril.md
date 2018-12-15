@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## 03 - Update Model
+## 03 - Update State
 
 In the previous lesson, [02 - View Function](02-view-function-mithril.html), we created a `view`
 function that produces the vnode according to the `model` that is passed to the function.
@@ -41,7 +41,7 @@ used.
 As you can see in the code above, the `increase` function updates the model by adding 1 to the
 value. Then, it re-renders the view by calling `m.render` again.
 
-![The onclick Function](03-update-model-01.svg)
+![The onclick Function](03-update-state-01.svg)
 
 > **Note:** you might wonder about rebuilding the whole view and re-rendering it when something
 changes. Generally speaking, producing a vnode is not a performance concern. Further, re-rendering
@@ -50,7 +50,7 @@ make the real DOM reflect the view.
 
 You can see the working code below:
 
-@flems mithril/03-update-model.js,app.html,app.css mithril 550
+@flems mithril/03-update-state.js,app.html,app.css mithril 550
 
 ### Exercises
 
@@ -61,7 +61,7 @@ model to produce the view, and change the `increase` function so that it increas
 
 ### Solution
 
-@flems mithril/03-update-model-solution.js,app.html,app.css mithril 750 hidden
+@flems mithril/03-update-state-solution.js,app.html,app.css mithril 750 hidden
 
 When you are ready, continue on to [04 - Update Function](04-update-function-mithril.html).
 
