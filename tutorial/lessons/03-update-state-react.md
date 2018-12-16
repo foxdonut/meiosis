@@ -4,59 +4,121 @@
 
 ## 03 - Update State
 
-In the previous lesson, [02 - Render Method](02-render-method-react.html), we created a `view`
-function that produces the vnode according to the `model` that is passed to the function.
+In the previous lesson, [02 - Render Method](02-render-method-react.html), we passed a `state`
+prop to our component so that we could render according to the state.
 
-So, we can call `view(model)` and render it onto the page. Now, how do we make a change to the
-model and refresh the view?
+Now, how do we make a change to the state and refresh the view?
 
-Our model is a counter that has a value of `0`. Let's add a button to increase the counter.
+Our state is a counter that has a value of `0`. Let's add a button to increase the counter.
 
-### DOM Event Handler Functions
+### React state
 
-We can add a `+1` button with this code:
+To make changes to the state and refresh the view, we can use React's `state`. For this to work,
+the first thing we need to do is change our `state` to an object:
 
-```html
-<button onClick={increase}>+1</button>
-```
-
-It is important to remember that what we associate to `onClick` must be a **function**. This
-function will automatically be called when the user clicks on the button, and the function gets
-passed a DOM event as a parameter. Here, the function is `increase`:
-
-```js
-var increase = function(_event) {
-  model = model + 1;
-  ReactDOM.render(view(model), element);
+```javascript
+var state = {
+  value: 0
 };
 ```
 
-> **Note:** the `increase` function does not need to do anything with the DOM event. So, `increase`
-could have been a function with no parameters. For clarity, I included the event parameter in
-the function declaration, prefixed with an underscore to indicate that the parameter is not
-used.
+Next, when we pass this state to our component, we'll initialize the React state. We'll also
+use this state to render the value of the counter:
 
-### Updating the Model and Re-rendering the View
+```javascript
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.state;
+  }
+  render() {
+    var state = this.state;
+    return (<div>
+      <div>Counter: {state.value}</div>
+    </div>);
+  }
+}
+```
 
-As you can see in the code above, the `increase` function updates the model by adding 1 to the
-value. Then, it re-renders the view by calling `ReactDOM.render` again.
+### Increase Action
 
-![The onclick Function](03-update-state-02.svg)
+Now, we'll create an `actions` object with an `increase` function that increments the counter.
 
-> **Note:** you might wonder about rebuilding the whole view and re-rendering it when something
-changes. Generally speaking, producing a vnode is not a performance concern. Further, re-rendering
-the view is what virtual-DOM libraries are good at: figuring out what minimal changes are needed to
-make the real DOM reflect the view.
+```javascript
+var state = {
+  value: 0
+};
 
-You can see the working code below:
+var actions = {
+  increase: function() {
+    state.value = state.value + 1;
+  }
+};
+```
+
+That increments the counter, but has no way of sending the updated state back. For this purpose,
+we'll wrap `actions` in a function that gets an `update` callback:
+
+```javascript
+var state = {
+  value: 0
+};
+
+var actions = function(update) {
+  return {
+    increase: function() {
+      state.value = state.value + 1;
+      update(state);
+    }
+  };
+};
+```
+
+After updating the state, the `increase` function sends it back by calling `update(state)`.
+
+To be able to access `actions` from our `App` component, we'll pass it as a prop:
+
+```javascript
+ReactDOM.render(<App state={state} actions={actions} />, element);
+```
+
+That way, we'll be able to call actions from the view.
+
+### React setState
+
+To update React state and automatically refresh the view, we need to call `setState`. This
+is the function that we will pass as `update` to the actions. Now, when we call `increase()`,
+it will call `setState` with the state's value having been incremented by 1, and we will see
+the change in the view.
+
+Our `render` method is now:
+
+```javascript
+render() {
+  var state = this.state;
+  var setState = this.setState.bind(this);
+  var actions = this.props.actions(setState);
+  return (<div>
+    <div>Counter: {state.value}</div>
+    <button onClick={() => actions.increase()}>+1</button>
+  </div>);
+}
+```
+
+Notice what we are achieving here:
+
+- The application state is a separate object.
+- The actions are also separate; the `update` that we pass in is a way to send updated state
+back.
+- The React `state` and `setState` are used to "wire" in the state to the component and
+automatically refresh the view. We only need to do this one time, in one component.
+
+You can see the working code below.
 
 @flems react/03-update-state.jsx,app.html,app.css react,react-dom 550
 
 ### Exercises
 
-1. As in the [previous lesson](02-view-function-react.html), try passing in an object such as
-`{ label: "The Counter", value: 0 }` as the model. Change the `view` function so that it uses the
-model to produce the view, and change the `increase` function so that it increases the model value.
 1. Add a `-1` button that decreases the value by 1.
 
 ### Solution

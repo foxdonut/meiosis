@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-[00 - Introduction](00-introduction.html)
+[00 - Introduction and Goals](00-introduction.html)
 
 | Mithril | React |
 |---------|-------|

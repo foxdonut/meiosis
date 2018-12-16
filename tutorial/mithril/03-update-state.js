@@ -1,17 +1,25 @@
 /*global m*/
-var model = 0;
+var state = 0;
 
-var increase = function(_event) {
-  model = model + 1;
-  m.render(element, view(model));
+var actions = {
+  increase: function() {
+    state = state + 1;
+  }
 };
 
-var view = function(model) {
-  return [
-    m("div", "Counter: " + model),
-    m("button", { onclick: increase }, "+1")
-  ];
+var App = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return [
+      m("div", "Counter: " + state),
+      m("button", { onclick: () => actions.increase() }, "+1")
+    ];
+  }
 };
 
 var element = document.getElementById("app");
-m.render(element, view(model));
+m.mount(element, {
+  view: function() {
+    return m(App, { state: state, actions: actions });
+  }
+});

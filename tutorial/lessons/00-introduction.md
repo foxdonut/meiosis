@@ -2,12 +2,23 @@
 
 [Table of Contents](toc.html)
 
-## 00 - Introduction
+## 00 - Introduction and Goals
 
 Welcome to the [Meiosis](https://meiosis.js.org) Tutorial!
 
 The purpose of this tutorial is to explain the Meiosis pattern from the ground up, hopefully
 without assuming too much prior knowledge beyond the basics of JavaScript.
+
+### High Level Goals
+
+Meiosis is a simple pattern for managing application state. The idea is to have a single,
+top-level object that represents the state of your application, and having a straightforward
+way to update that state. Views are rendered according to the state, and trigger actions
+to make changes to the state. That's it!
+
+Alongside that, Meiosis aims to free your state management code from being deeply tied to
+complex libraries or frameworks. When using Meiosis, you manage your application state with
+plain objects and functions.
 
 ### Prerequisites
 
@@ -18,11 +29,11 @@ like to use. This tutorial is offered in two versions: one with
 ### View Libraries
 
 If neither of those is your preferred view library, fear not! It is trivial to use just about
-any view library with the Meiosis pattern, whether it's a virtual DOM library or even
+any view library with the Meiosis pattern, whether it's a virtual DOM library, or
 libraries such as [lit-html](https://meiosis.js.org/examples/setup/lit-html/index.html)
 and [hyperHTML](https://meiosis.js.org/examples/setup/hyperHTML/index.html).
 
-### JSX or hyperscript
+### JSX, hyperscript, or template literals
 
 Also note that if you prefer the [JSX](https://infernojs.org/docs/guides/what-is-jsx) syntax,
 you should read the React version. Again, it is simple to use another view library, such as
@@ -33,11 +44,43 @@ the Mithril version of the tutorial. Other view libraries such as
 [snabbdom](https://github.com/paldepind/snabbdom), [domVM](https://github.com/leeoniya/domvm),
 and other hyperscript view libraries are also easy to use with Meiosis.
 
+If you use a template literal library such as lit-html or hyperHTML, either version should be
+fine; you will simply be writing views with template literals instead of JSX or hyperscript.
+
 ### ES5 or ES6
 
 I purposely used ES5 syntax in the code examples so that readers who are not familiar with ES6
 could benefit from the tutorial, without requiring ES6 knowledge. If you prefer ES6, by all means
 go ahead and use it! It can certainly lead to more concise syntax in some cases.
+
+There are a few exceptions, however. Sometimes I use this syntax:
+
+```javascript
+() => someFunction()
+```
+
+Which is shorthand for:
+
+```javascript
+function() {
+  return someFunction();
+}
+```
+
+Also, know that this:
+
+```javascript
+var { foo, bar } = props;
+```
+
+is shorthand for:
+
+```javascript
+var foo = props.foo;
+var bar = props.bar;
+```
+
+Meiosis documentation and examples outside of this tutorial use ES6 syntax.
 
 ### Embedded Code Examples
 
@@ -51,9 +94,8 @@ full-sized page if that is more comfortable. You can do so using the
 ![Open Flems in new window](flems-open-in-new-window.png) at the top-right corner of the
 code window.
 
-Finally, also note that you can also download and run the code examples for this tutorial,
-as well as _all_ the Meiosis examples, by cloning the
-[github repository](https://github.com/foxdonut/meiosis-examples).
+Finally, also note that you can also download and run the code examples for this tutorial
+by cloning the [github repository](https://github.com/foxdonut/meiosis).
 
 Let's get started! Please continue by choosing a version:
 

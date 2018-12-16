@@ -1,28 +1,39 @@
 /*global React, ReactDOM*/
-// Pass an object as the model
-var model = { label: "The Counter", value: 0 };
-
-// Change the increase function to increase the model value
-var increase = function(_event) {
-  model.value = model.value + 1;
-  ReactDOM.render(view(model), element);
+var state = {
+  value: 0
 };
 
-// Add a decrease function
-var decrease = function(_event) {
-  model.value = model.value - 1;
-  ReactDOM.render(view(model), element);
+var actions = function(update) {
+  return {
+    increase: function() {
+      state.value = state.value + 1;
+      update(state);
+    },
+    // Add a decrease function
+    decrease: function() {
+      state.value = state.value - 1;
+      update(state);
+    },
+  };
 };
 
-// Use the model to produce the view
-var view = function(model) {
-  return (<div>
-    <div>{model.label}: {model.value}</div>
-    <button onClick={increase}>+1</button>
-    {/* Add a -1 button that decreases the value */}
-    <button onClick={decrease}>-1</button>
-  </div>);
-};
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.state;
+  }
+  render() {
+    var state = this.state;
+    var setState = this.setState.bind(this);
+    var actions = this.props.actions(setState);
+    return (<div>
+      <div>Counter: {state.value}</div>
+      <button onClick={() => actions.increase()}>+1</button>
+      {/* Add a -1 button that decreases the value */}
+      <button onClick={() => actions.decrease()}>-1</button>
+    </div>);
+  }
+}
 
 var element = document.getElementById("app");
-ReactDOM.render(view(model), element);
+ReactDOM.render(<App state={state} actions={actions} />, element);
