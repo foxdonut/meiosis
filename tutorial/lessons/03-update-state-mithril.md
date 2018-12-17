@@ -17,11 +17,13 @@ Before adding the button itself, we'll create an `actions` object with an `incre
 that increments the counter.
 
 ```javascript
-var state = 0;
+var state = {
+  value: 0
+};
 
 var actions = {
   increase: function() {
-    state = state + 1;
+    state.value = state.value + 1;
   }
 };
 ```
@@ -50,14 +52,14 @@ var App = {
   view: function(vnode) {
     var { state, actions } = vnode.attrs;
     return [
-      m("div", "Counter: " + state),
+      m("div", "Counter: " + state.value),
       m("button", { onclick: () => actions.increase() }, "+1")
     ];
   }
 };
 ```
 
-Clicking on the button calls `actions.increase()`, which adds `1` to the `state`.
+Clicking on the button calls `actions.increase()`, which adds `1` to `state.value`.
 
 ### Mithril's Auto-Redraw System
 
@@ -85,9 +87,6 @@ You can see the working code below:
 
 ### Exercises
 
-1. As in the [previous lesson](02-view-function-mithril.html), try passing in an object such as
-`{ label: "The Counter", value: 0 }` as the model. Change the `view` function so that it uses the
-model to produce the view, and change the `increase` function so that it increases the model value.
 1. Add a `-1` button that decreases the value by 1.
 
 ### Solution
