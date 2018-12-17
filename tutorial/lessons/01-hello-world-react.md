@@ -32,7 +32,7 @@ Here is the code to render the message onto the page:
 Notice that the component produces the view, and `app.html` contains the `element` into which we render.
 These are the two arguments that we pass to `ReactDOM.render`.
 
-![The Render Function](01-hello-world-02.svg)
+![The Render Function](01-hello-world-react-01.svg)
 
 ### Exercises
 

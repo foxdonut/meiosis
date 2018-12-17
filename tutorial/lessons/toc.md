@@ -9,7 +9,12 @@
 | [01 - Hello World](01-hello-world-mithril.html) | [01 - Hello World](01-hello-world-react.html) |
 | [02 - View Function](02-view-function-mithril.html) | [02 - Render Method](02-render-method-react.html) |
 | [03 - Update State](03-update-state-mithril.html) | [03 - Update State](03-update-state-react.html) |
-| [04 - Update Function](04-update-function-mithril.html)| [04 - Update Function](04-update-function-react.html) |
+| - | - |
+| [04 - Streams](04-streams-mithril.html) | [04 - Streams](04-streams-react.html) |
+| [05 - Function Patches](05-function-patches-mithril.html) | [05 - Function Patches](05-function-patches-react.html) |
+| [06 - Patchinko](06-patchinko-mithril.html) | [06 - Patchinko](06-patchinko-react.html) |
+| [07 - Components](07-components-mithril.html) | [07 - Components](07-components-react.html) |
+| - | - |
 | [05 - Stream](05-stream-mithril.html) | [05 - Stream](05-stream-react.html) |
 | [06 - Scan](06-scan-mithril.html) | [06 - Scan](06-scan-react.html) |
 | [07 - Stream Library](07-stream-lib-mithril.html) | [07 - Stream Library](07-stream-lib-react.html) |

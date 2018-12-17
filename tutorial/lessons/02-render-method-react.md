@@ -17,7 +17,7 @@ In our example below, the state is a counter. We'll create an **initial** state 
 `0`. When rendering with `ReactDOM.render`, we pass the `App` component as before, but we also
 pass a `state` prop.
 
-![The Render Method](02-render-method-01.svg)
+![The Render Method](02-render-method-react-01.svg)
 
 Within the `render` method, we can use `this.props` to read the props that were passed in. In
 this case, we are simply creating a `div` element with the text `Counter:` and the value that

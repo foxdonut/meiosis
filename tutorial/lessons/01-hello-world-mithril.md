@@ -33,7 +33,7 @@ Here is the code to render the message onto the page:
 Notice that `app.html` contains the `element` into which we render, and the component produces
 the view. These are the two arguments that we pass to `m.mount`.
 
-![The mount Function](01-hello-world-01.svg)
+![The mount Function](01-hello-world-mithril-01.svg)
 
 ### Exercises
 

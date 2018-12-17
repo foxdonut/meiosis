@@ -18,7 +18,7 @@ In our example below, the state is a counter. We'll create an **initial** state 
 `0`. When rendering with `m.mount`, we pass a component that in turn renders our `App` component
 and passes a `state` attribute with a value of `0`.
 
-![The View Function](02-view-function-01.svg)
+![The View Function](02-view-function-mithril-01.svg)
 
 Within the `view` function, we can use `vnode.attrs` to read the attributes that were passed in.
 In this case, we are simply creating a `div` element with the text `Counter:` and the value that
