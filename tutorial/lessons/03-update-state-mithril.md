@@ -93,7 +93,7 @@ You can see the working code below:
 
 @flems mithril/03-update-state-solution.js,app.html,app.css mithril 750 hidden
 
-When you are ready, continue on to [04 - Update Function](04-update-function-mithril.html).
+When you are ready, continue on to [04 - Streams](04-streams-mithril.html).
 
 [Table of Contents](toc.html)
 

@@ -125,7 +125,7 @@ You can see the working code below.
 
 @flems react/03-update-state-solution.jsx,app.html,app.css react,react-dom 750 hidden
 
-When you are ready, continue on to [04 - Update Function](04-update-function-react.html).
+When you are ready, continue on to [04 - Streams](04-streams-react.html).
 
 [Table of Contents](toc.html)
 
