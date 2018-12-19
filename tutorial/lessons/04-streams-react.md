@@ -4,71 +4,50 @@
 
 ## 04 - Streams
 
-In the previous lesson, [03 - Update State](03-update-state-react.html), we ...
+In the previous lesson, [03 - Update State](03-update-state-react.html), we created an `increase`
+function to update the application state. We passed React's `setState` to the actions as a
+callback so that the view gets refreshed after updating the state.
 
-![The Reactive Loop](04-streams-react-01.svg)
+This works, but we can improve the approach. Namely, we'd like to gain more control over the
+flow of data and how we make changes to the state. We can do this by using a **stream**. A
+stream is a nice and simple way to **communicate values** and to control the flow of data.
 
 ### Introducing Streams
 
-What we'd like to do is have `update` as a way for the view to send values out so that we can use
-them to update the model and re-render the view. But, we want `update` to **only** be a way to
-communicate values. **What** we do with those values (update the model, re-render the view) should
-be separate from `update`. This will solve our circular dependency problem.
-
-One nice and simple way to **communicate values** is to use a **stream**. If you already know what
-a stream is and are comfortable with them, great. But, if you have glanced at streams elsewhere and
-found them overly complicated, **please forget all of that** because the streams that we use here
-are very simple. In fact, to demystify them and make sure that you clearly understand how they
-work, we will start by writing a bare-bones yet sufficient implementation in just a handful of
-lines of code.
+> If you already know about streams and are comfortable with them, great. But, if you have
+glanced at streams elsewhere and found them overly complicated, **please forget all of that**
+because the streams that we use here are very simple. In fact, we only use one stream and only
+two stream operators, `map` and `scan`, and only to set up the Meiosis pattern at the starting
+point of the application.
 
 A stream is a **sequence of values**, similar to an array. Over time, you can send values onto
 a stream. You can also have functions that get called every time a value arrives on the stream.
-As you have probably figured out, we want `update` to be a stream.
 
-When we call `update(1)`, `update(-1)`, and so on from the view, these values will be in a stream:
+Let's say we create a stream called `update`. When we call `update(1)`, `update(-1)`, and so on,
+these values will be in a stream.
 
 ![Stream](04-streams-02.svg)
 
+We can pass values, objects, and even functions onto a stream.
+
+### Stream `.map`
+
 The way to **do** something with the values that arrive on the stream is by calling `.map()`. We
-**pass a function as a parameter** to `.map()`, and that function gets called every time a new
+pass a **function** as a parameter to `.map()`, and that function gets called every time a new
 value arrives onto the stream. The **result** of calling `.map()` is a **new stream** with the
-**values returned by the function**.
+values **returned by the function**.
 
 ![Map Stream](04-streams-03.svg)
 
-In our case, what we want to do with the values that arrive onto the `update` stream is to
-update the model and re-render the view:
+Although `map` produces a new stream, we don't always need it. The function that we pass may not
+return anything that we need to use. We can also use `map` to **do** something with the values
+(also known as **side effects**).
 
-```js
-var model = 0;
-var update = stream();
-var view = createView(update);
+### A simple stream library: flyd
 
-var element = document.getElementById("app");
-
-update.map(function(value) {
-  model = model + value;
-  ReactDOM.render(view(model), element);
-});
-```
-
-Although `map` produces a new stream, we don't need it here. The function that we pass does not
-return anything that we need to use. As you can see, `map` allows us not only to produce a new
-stream of values, but also to **do** something with the values (also known as **side effects**).
-
-As you can see, we have now successfully separated out `update` as a way for the view to send
-values, from **what to do with those values**. We no longer have a circular dependency between
-`update` and `view`!
-
-### A simple stream implementation
-
-As promised, we'll now write a simple implementation `stream` and `map`. Feel free to skip this
-section if you'd rather skip over the internals, and please know that later on we'll use a
-simple stream library that provides what we need. However, if you prefer to have an idea of
-what's going on within `stream`, or if you prefer **not** to have an additional dependency in
-your project, read on, as our bare-bones implementation is perfectly suitable to use in the
-Meiosis pattern.
+That being said, you can also use a stream library. It's your choice. In this lesson, we will
+use [flyd](https://github.com/paldepind/flyd). You can also use another stream library simply by
+using its equivalent of `map`, `scan`, and pushing a value onto a stream.
 
 There are two parts to a stream that we get when calling `var update = stream()`:
 
@@ -76,16 +55,7 @@ There are two parts to a stream that we get when calling `var update = stream()`
 1. Calling `update.map(someFunction)` creates a new stream. For every `value` that arrives
 onto the `update` stream, call `someFunction(value)` and push the result onto the new stream.
 
-Here is our stream implementation:
-
 @flems common/05-stream-impl.js [] 550
-
-We start with an empty array of `mapFunctions`. These are the functions passed in with `.map`.
-When the stream is called as a function, we go through every `mapFunction` and call them with
-the value.
-
-For `.map`, we create a new stream. We add a function to the current stream which will call
-the passed-in function and push the result onto the new stream.
 
 ### Exercises
 
@@ -104,87 +74,9 @@ Using the code above, take our stream implementation out for a test drive.
 
 @flems common/05-stream-impl-solution.js [] 800 hidden
 
-### Putting it all together
+### Stream `.scan`
 
-Now that we have our stream implementation, we can use it in our counter example:
-
-@flems react/05-stream.jsx,app.html,app.css react,react-dom 800
-
-Our application code did not need to change - it still calls the `update` function as before - but
-we now use a stream for `update`, which enables us to separate out the function that determines
-what to do with the incoming values.
-
-### Exercises
-
-The function that we pass to `update.map` does three things:
-
-- Updates the model
-- Calls `view` to produce a `vnode`
-- Renders the `vnode` with `ReactDOM.render`.
-
-Now,
-
-1. Separate out the first and the third task into separate functions: `updateModel` and `render`.
-1. Since `.map` returns a stream, you can chain calls to `.map`, so that each function gets the
-result of calling the previous function. Using this and the functions that you separated out,
-change the `update.map` block to:
-
-```js
-update
-  .map(updateModel)
-  .map(view)
-  .map(render);
-```
-
-Verify that the example still works properly. Hint: make sure to return the model from the
-`updateModel` function.
-
-Whether to use a single function, or to separate out the steps into individual functions, is up
-to your personal preference.
-
-### Solution
-
-@flems react/05-stream-solution.jsx,app.html,app.css react,react-dom 800 hidden
-
-
-
-## 06 - Scan
-
-In the previous lesson, [05 - Stream](05-stream-react.html), we learned about streams and
-wrote a simple implementation with a `map` method. Using a stream for `update`, we were able
-to have a better separation between a way for the view to issue updates, and the functions
-that use these updates to change the model and re-render the view.
-
-Recall that our Meiosis pattern setup code was:
-
-```js
-var model = 0;
-var update = stream();
-var view = createView(update);
-
-var element = document.getElementById("app");
-
-update.map(function(value) {
-  model = model + value;
-  ReactDOM.render(view(model), element)
-});
-
-ReactDOM.render(view(model), element);
-```
-
-- We have an **initial model** of 0.
-- We render the view with that initial model (on the last line).
-- When an update comes in, our function gets called to:
-  - Update the model, and
-  - Re-render the view.
-
-Notice that when we update the model, `model = model + value`, we are **combining** the incoming
-value with the current model (here, by addition), and the result becomes the current model for
-next time. Let's call this an **accumulator**.
-
-### Introducing `scan`
-
-It turns out that streams have, besides `map`, another method called `scan`. In fact, stream
+Besides `map`, another method called `scan`. In fact, stream
 libraries have a number of other methods (also called operators), ranging from a handful to an
 overwhelming amount! But, we **only** need `map` and `scan`. Furthermore, we only need to use
 them in **one place** - the Meiosis pattern setup code.
@@ -233,56 +125,6 @@ below:
 ![Scan](04-scan-01.svg)
 
 As you can certainly guess, this will fit in nicely for our Meiosis pattern setup code.
-
-### Implementing `scan`
-
-To implement `scan`, first we'll improve our `stream` by adding a feature: optionally passing
-in an initial value for the stream:
-
-```js
-var stream = function(initial) {
-  var mapFunctions = [];
-  var createdStream = function(value) {
-    for (var i in mapFunctions) {
-      mapFunctions[i](value);
-    }
-  };
-  createdStream.map = function(mapFunction) {
-    var newInitial = undefined;
-    if (initial !== undefined) {
-      newInitial = mapFunction(initial);
-    }
-    var newStream = stream(newInitial);
-
-    mapFunctions.push(function(value) {
-      newStream(mapFunction(value));
-    });
-
-    return newStream;
-  };
-  return createdStream;
-};
-```
-
-We've added the `initial` parameter. Then, when `map` is called, we check whether there was an
-initial value for the source stream. If there was, then the initial value for the new stream
-is the result of calling the passed in `mapFunction`.
-
-Now that we can specify an initial value for a stream, we can implement `scan`:
-
-```js
-var scan = function(accumulator, initial, sourceStream) {
-  var newStream = stream(initial);
-  var accumulated = initial;
-
-  sourceStream.map(function(value) {
-    accumulated = accumulator(accumulated, value);
-    newStream(accumulated);
-  });
-
-  return newStream;
-};
-```
 
 As we discussed, `scan` takes an accumulator function, an initial value, and a source stream.
 The new stream starts with the initial value. This is also the starting point for the
@@ -363,7 +205,7 @@ Finally, change the accumulator function that is passed to `scan` so that it loo
 
 @flems react/06-scan-solution.jsx,app.html,app.css react,react-dom 800 hidden
 
-When you are ready, continue on to [06 - Scan](06-scan-react.html).
+When you are ready, continue on to [05 - Function Patches](05-function-patches-react.html).
 
 [Table of Contents](toc.html)
 
