@@ -16,9 +16,9 @@ stream is a nice and simple way to **communicate values** and to control the flo
 
 > If you already know about streams and are comfortable with them, great. But, if you have
 glanced at streams elsewhere and found them overly complicated, **please forget all of that**
-because the streams that we use here are very simple. In fact, we only use one stream and only
-two stream operators, `map` and `scan`, and only to set up the Meiosis pattern at the starting
-point of the application.
+because the streams that we use here are very simple. In fact, we only use two stream operators,
+`map` and `scan`, and only to set up the Meiosis pattern at the starting point of the
+application.
 
 A stream is a **sequence of values**, similar to an array. Over time, you can send values onto
 a stream. You can also have functions that get called every time a value arrives on the stream.
@@ -45,21 +45,27 @@ return anything that we need to use. We can also use `map` to **do** something w
 
 ### A simple stream library: flyd
 
-That being said, you can also use a stream library. It's your choice. In this lesson, we will
-use [flyd](https://github.com/paldepind/flyd). You can also use another stream library simply by
-using its equivalent of `map`, `scan`, and pushing a value onto a stream.
+We will use [flyd](https://github.com/paldepind/flyd) as our stream library. You can also use
+another stream library simply by using its equivalents of:
+- pushing a value onto a stream
+- `map`
+- `scan`, which we will look at later on in this lesson.
 
-There are two parts to a stream that we get when calling `var update = stream()`:
+To create a stream with flyd, we simply call `flyd.stream()`:
 
-1. Calling it as a function, `update(value)`, pushes the value onto the stream.
-1. Calling `update.map(someFunction)` creates a new stream. For every `value` that arrives
-onto the `update` stream, call `someFunction(value)` and push the result onto the new stream.
+```javascript
+var update = flyd.stream();
+```
 
-@flems common/05-stream-impl.js [] 550
+Then we can call `.map` on the created stream, passing a function that will get called for
+every value that arrives onto the stream. The call to `.map` returns a new stream.
+
+I invite you to get familiar with streams. Using the code box below, which has `flyd`
+already loaded, try the exercises.
+
+@flems react/04-streams-01.js flyd 550
 
 ### Exercises
-
-Using the code above, take our stream implementation out for a test drive.
 
 1. Create an `update` stream.
 1. Create a `timesTen` stream that is the result of multiplying by ten each value from the
@@ -72,14 +78,14 @@ Using the code above, take our stream implementation out for a test drive.
 
 ### Solution
 
-@flems common/05-stream-impl-solution.js [] 800 hidden
+@flems react/04-streams-01-solution.js flyd 800 hidden
 
 ### Stream `.scan`
 
-Besides `map`, another method called `scan`. In fact, stream
-libraries have a number of other methods (also called operators), ranging from a handful to an
-overwhelming amount! But, we **only** need `map` and `scan`. Furthermore, we only need to use
-them in **one place** - the Meiosis pattern setup code.
+The other stream function that we'll use is called `scan`. Stream libraries have a number of
+other functions (also called operators), ranging from a handful to an
+overwhelming amount! But, we **only** need `map` and `scan`, and we only need them to set up
+the Meiosis pattern.
 
 Like `map`, `scan` takes a source stream and produces a new stream. Remember that with `map`,
 whenever a new value arrives on the source stream, the function that we passed to `map` gets
@@ -105,7 +111,7 @@ var update = stream();
 Next, we create an `otherStream` with `scan`:
 
 ```js
-var otherStream = scan(function(latest, next) {
+var otherStream = flyd.scan(function(latest, next) {
   return latest + next;
 }, 0, update);
 ```
@@ -124,62 +130,50 @@ below:
 
 ![Scan](04-scan-01.svg)
 
-As you can certainly guess, this will fit in nicely for our Meiosis pattern setup code.
+### Using `scan`
 
-As we discussed, `scan` takes an accumulator function, an initial value, and a source stream.
-The new stream starts with the initial value. This is also the starting point for the
-`accumulated` value, which is the latest result. Then, we `map` on the source stream, passing in
-a function that takes the incoming value, calls the `accumulator` function with the latest
-`accumulated` value and the incoming value, and pushes the result onto the new stream.
-
-### Putting it all together
-
-Now that we have `scan`, we can improve our Meiosis pattern setup code. Previously, we had:
+Now that we have `scan`, we can use it to manage our application state. Previously, we had:
 
 ```js
-var model = 0;
-var update = stream();
-var view = createView(update);
+var state = {
+  value: 0
+};
 
-var element = document.getElementById("app");
-
-update.map(function(value) {
-  model = model + value;
-  ReactDOM.render(view(model), element)
-});
-
-ReactDOM.render(view(model), element)
+var actions = function(update) {
+  return {
+    increase: function() {
+      state.value = state.value + 1;
+      update(state);
+    }
+  };
+};
 ```
 
-We can make these improvements:
+We can incorporate streams to manage the flow of data:
 
-- No longer have a `model` variable that we keep reassigning. Instead, our accumulator function
-can be cleaner and more self-contained: it can receive the latest model and the next value, and
-return the result. It will not refer to variables that are on the outside.
-- The initial value can simply be passed to `scan`.
-- The result of `scan` is a stream of models. We can `map` on that and re-render the view every
-time we have a new model value on the stream.
-- Since `scan` produces the initial value on the resulting stream, we no longer have to call
-`ReactDOM.render` initially (this was done at the bottom of our previous setup code). Instead, we
-have the initial model on the `models` stream, and the function that we pass to `map` will get
-called to render the initial view.
+- Create an `update` stream, and pass it to `actions`.
+- To update the state, `actions` passes a value onto the `update` stream.
+- Using `scan`, create a stream of states.
 
 Here are our changes:
 
 ```js
-var update = stream();
-var view = createView(update);
+var actions = function(update) {
+  return {
+    increase: function() {
+      update(1);
+    }
+  };
+};
 
-var models = scan(function(model, value) {
-  return model + value;
-}, 0, update);
-
-var element = document.getElementById("app");
-
-models.map(function(model) {
-  ReactDOM.render(view(model), element)
-});
+var update = flyd.stream();
+var states = flyd.scan(function(state, increment) {
+  state.value = state.value + increment;
+  return state;
+}, { value: 0 }, update);
 ```
+
+-----
 
 You can try out the complete example below.
 
