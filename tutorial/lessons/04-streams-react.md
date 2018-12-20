@@ -158,26 +158,36 @@ We can incorporate streams to manage the flow of data:
 Here are our changes:
 
 ```js
-var actions = function(update) {
-  return {
-    increase: function() {
-      update(1);
-    }
-  };
+var app = {
+  initialState: {
+    value: 0
+  },
+  actions: function(update) {
+    return {
+      increase: function() {
+        update(1);
+      }
+    };
+  }
 };
 
 var update = flyd.stream();
 var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
-}, { value: 0 }, update);
+}, app.initialState, update);
 ```
+
+The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives
+onto the `update` stream, the accumulator function adds that number to `state.value`. We have a
+stream of states, and the `increase` action can increment the value by pushing a number onto
+the `update` stream.
 
 -----
 
 You can try out the complete example below.
 
-@flems react/06-scan.jsx,app.html,app.css react,react-dom 800
+@flems react/04-streams-02.jsx,app.html,app.css react,react-dom,flyd 800
 
 ### Exercise
 
