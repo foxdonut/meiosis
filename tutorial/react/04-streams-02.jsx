@@ -5,8 +5,11 @@ var app = {
   },
   actions: function(update) {
     return {
-      increase: function() {
+      increment: function() {
         update(1);
+      },
+      decrement: function() {
+        update(-1);
       }
     };
   }
@@ -26,7 +29,8 @@ class App extends React.Component {
     var actions = this.props.actions;
     return (<div>
       <div>Counter: {state.value}</div>
-      <button onClick={() => actions.increase()}>+1</button>
+      <button onClick={() => actions.increment()}>+1</button>
+      <button onClick={() => actions.decrement()}>-1</button>
     </div>);
   }
 }

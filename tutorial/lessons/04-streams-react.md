@@ -4,7 +4,7 @@
 
 ## 04 - Streams
 
-In the previous lesson, [03 - Update State](03-update-state-react.html), we created an `increase`
+In the previous lesson, [03 - Update State](03-update-state-react.html), we created an `increment`
 function to update the application state. We passed React's `setState` to the actions as a
 callback so that the view gets refreshed after updating the state.
 
@@ -48,17 +48,44 @@ return anything that we need to use. We can also use `map` to **do** something w
 We will use [flyd](https://github.com/paldepind/flyd) as our stream library. You can also use
 another stream library simply by using its equivalents of:
 - pushing a value onto a stream
+- getting the latest value from a stream
 - `map`
 - `scan`, which we will look at later on in this lesson.
 
 To create a stream with flyd, we simply call `flyd.stream()`:
 
-```javascript
+```js
 var update = flyd.stream();
 ```
 
-Then we can call `.map` on the created stream, passing a function that will get called for
+To push a value onto the stream, we call it as a function and pass the value:
+
+```js
+update(1);
+```
+
+To get the latest value from a stream, we call it as a function with no parameters:
+
+```js
+var value = update();
+// value is 1
+```
+
+We can call `.map` on the created stream, passing a function that will get called for
 every value that arrives onto the stream. The call to `.map` returns a new stream.
+
+```js
+// otherStream is every value from the update stream plus ten
+var otherStream = update.map(function(value) {
+  return value + 10;
+});
+// display every value from the otherStream onto console.log
+// here we are doing something with every value, but not returning anything.
+// we are also ignoring the stream returned by otherStream.map(...).
+otherStream.map(function(value) {
+  console.log(value);
+});
+```
 
 I invite you to get familiar with streams. Using the code box below, which has `flyd`
 already loaded, try the exercises.
@@ -105,7 +132,7 @@ becomes starting point for the latest result, and the first value on the new str
 Let's look at an example. Say we start with an `update` stream:
 
 ```js
-var update = stream();
+var update = flyd.stream();
 ```
 
 Next, we create an `otherStream` with `scan`:
@@ -141,8 +168,12 @@ var state = {
 
 var actions = function(update) {
   return {
-    increase: function() {
+    increment: function() {
       state.value = state.value + 1;
+      update(state);
+    },
+    decrement: function() {
+      state.value = state.value - 1;
       update(state);
     }
   };
@@ -151,9 +182,12 @@ var actions = function(update) {
 
 We can incorporate streams to manage the flow of data:
 
-- Create an `update` stream, and pass it to `actions`.
-- To update the state, `actions` passes a value onto the `update` stream.
-- Using `scan`, create a stream of states.
+- We create an `update` stream, and pass it to `actions`.
+- To update the state, `actions` passes a value onto the `update` stream, indicating a state
+change. We'll call this a **patch**. In our example, the patches are numbers by which to
+increment the counter.
+- Using `scan`, we create a stream of states, starting with the initial state and incrementing
+the counter by the values coming in on the `update` stream.
 
 Here are our changes:
 
@@ -164,8 +198,11 @@ var app = {
   },
   actions: function(update) {
     return {
-      increase: function() {
+      increment: function() {
         update(1);
+      },
+      decrement: function() {
+        update(-1);
       }
     };
   }
@@ -180,36 +217,37 @@ var states = flyd.scan(function(state, increment) {
 
 The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives
 onto the `update` stream, the accumulator function adds that number to `state.value`. We have a
-stream of states, and the `increase` action can increment the value by pushing a number onto
-the `update` stream.
+stream of states, and the actions can change the value by pushing a patch (in this case, a number)
+onto the `update` stream.
 
------
+To use this with React, we'll pass the `states` stream to our `App` component. Then we can:
+- get the initial state in our `App` constructor: `this.state = props.states()`
+- in the `componentDidMount` method, use `map` to call `setState` every time there is a new
+state on the `states` stream: `this.props.states.map(setState)`
+- pass the `update` stream to `app.actions` to create `actions`, which we pass to `App`
+- get the current state in the `render()` method from `this.state`.
 
-You can try out the complete example below.
+Putting it all together, we have the complete example as shown below.
 
 @flems react/04-streams-02.jsx,app.html,app.css react,react-dom,flyd 800
 
-### Exercise
+We are starting to implement the Meiosis pattern:
 
-In our example, both the `model` and the values coming in on the `update` stream are numbers.
-However, `scan` also works with values of different types.
+- an `update` stream
+- actions push **patches** onto the `update` stream
+- a `states` stream that `scan`s the `update` stream, starting with an initial state and
+applying patches to the state with an **accumulator** function
+- a React component to which we pass `states` and `actions`
+- the component uses `states()` to get the initial state, and `states.map` to call `setState`
+when the state changes
+- `actions` are used by the component to trigger state changes.
 
-Keep the `model` as a number, but change the values that are sent on `update` to be objects of the
-form `{ oper: "add", value: 1 }`. Use this for the `+1` button.
+You've probably noticed that our patches and our accumulator function are pretty limited.
+Indeed, our patches are just numbers, and all the accumulator function does is add the
+number to the state value. In the next two sections, we will look at more general-purpose
+patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-Change the `-1` button's label to `*2`, and have its `onclick` function call
-`update({ oper: "times", value: 2 })`.
-
-Finally, change the accumulator function that is passed to `scan` so that it looks at the object's
-`oper` and `value`, and performs the operation on the model accordingly and returns the result.
-
-![Scan with different types](04-scan-02.svg)
-
-### Solution
-
-@flems react/06-scan-solution.jsx,app.html,app.css react,react-dom 800 hidden
-
-When you are ready, continue on to [05 - Function Patches](05-function-patches-react.html).
+When you are ready, continue on to [05 - Patchinko](05-patchinko-react.html).
 
 [Table of Contents](toc.html)
 

@@ -5,7 +5,7 @@ var state = {
 
 var actions = function(update) {
   return {
-    increase: function() {
+    increment: function() {
       state.value = state.value + 1;
       update(state);
     }
@@ -23,7 +23,7 @@ class App extends React.Component {
     var actions = this.props.actions(setState);
     return (<div>
       <div>Counter: {state.value}</div>
-      <button onClick={() => actions.increase()}>+1</button>
+      <button onClick={() => actions.increment()}>+1</button>
     </div>);
   }
 }

@@ -3,12 +3,12 @@
 var state = { label: "The Counter", value: 0 };
 
 var actions = {
-  // Change the increase function to increase the model value
-  increase: function(_event) {
+  // Change the increment function to increment the model value
+  increment: function(_event) {
     state.value = state.value + 1;
   },
-  // Add a decrease function
-  decrease: function(_event) {
+  // Add a decrement function
+  decrement: function(_event) {
     state.value = state.value - 1;
   }
 };
@@ -19,9 +19,9 @@ var App = {
     var { state, actions } = vnode.attrs;
     return [
       m("div", "Counter: " + state.value),
-      m("button", { onclick: actions.increase }, "+1"),
-      // Add a -1 button that decreases the value
-      m("button", { onclick: actions.decrease }, "-1")
+      m("button", { onclick: actions.increment }, "+1"),
+      // Add a -1 button that decrements the value
+      m("button", { onclick: actions.decrement }, "-1")
     ];
   }
 };

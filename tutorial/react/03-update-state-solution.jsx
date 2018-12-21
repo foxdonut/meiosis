@@ -5,15 +5,15 @@ var state = {
 
 var actions = function(update) {
   return {
-    increase: function() {
+    increment: function() {
       state.value = state.value + 1;
       update(state);
     },
-    // Add a decrease function
-    decrease: function() {
+    // Add a decrement function
+    decrement: function() {
       state.value = state.value - 1;
       update(state);
-    },
+    }
   };
 };
 
@@ -28,9 +28,9 @@ class App extends React.Component {
     var actions = this.props.actions(setState);
     return (<div>
       <div>Counter: {state.value}</div>
-      <button onClick={() => actions.increase()}>+1</button>
-      {/* Add a -1 button that decreases the value */}
-      <button onClick={() => actions.decrease()}>-1</button>
+      <button onClick={() => actions.increment()}>+1</button>
+      {/* Add a -1 button that decrements the value */}
+      <button onClick={() => actions.decrement()}>-1</button>
     </div>);
   }
 }

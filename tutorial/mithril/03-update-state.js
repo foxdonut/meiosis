@@ -4,7 +4,7 @@ var state = {
 };
 
 var actions = {
-  increase: function() {
+  increment: function() {
     state.value = state.value + 1;
   }
 };
@@ -14,7 +14,7 @@ var App = {
     var { state, actions } = vnode.attrs;
     return [
       m("div", "Counter: " + state.value),
-      m("button", { onclick: () => actions.increase() }, "+1")
+      m("button", { onclick: () => actions.increment() }, "+1")
     ];
   }
 };

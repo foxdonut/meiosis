@@ -9,7 +9,7 @@ prop to our component so that we could render according to the state.
 
 Now, how do we make a change to the state and refresh the view?
 
-Our state is a counter that has a value of `0`. Let's add a button to increase the counter.
+Our state is a counter that has a value of `0`. Let's add a button to increment the counter.
 
 ### React state
 
@@ -40,9 +40,9 @@ class App extends React.Component {
 }
 ```
 
-### Increase Action
+### Increment Action
 
-Now, we'll create an `actions` object with an `increase` function that increments the counter.
+Now, we'll create an `actions` object with an `increment` function that increments the counter.
 
 ```javascript
 var state = {
@@ -50,7 +50,7 @@ var state = {
 };
 
 var actions = {
-  increase: function() {
+  increment: function() {
     state.value = state.value + 1;
   }
 };
@@ -66,7 +66,7 @@ var state = {
 
 var actions = function(update) {
   return {
-    increase: function() {
+    increment: function() {
       state.value = state.value + 1;
       update(state);
     }
@@ -74,7 +74,7 @@ var actions = function(update) {
 };
 ```
 
-After updating the state, the `increase` function sends it back by calling `update(state)`.
+After updating the state, the `increment` function sends it back by calling `update(state)`.
 
 To be able to access `actions` from our `App` component, we'll pass it as a prop:
 
@@ -87,7 +87,7 @@ That way, we'll be able to call actions from the view.
 ### React setState
 
 To update React state and automatically refresh the view, we need to call `setState`. This
-is the function that we will pass as `update` to the actions. Now, when we call `increase()`,
+is the function that we will pass as `update` to the actions. Now, when we call `increment()`,
 it will call `setState` with the state's value having been incremented by 1, and we will see
 the change in the view.
 
@@ -100,7 +100,7 @@ render() {
   var actions = this.props.actions(setState);
   return (<div>
     <div>Counter: {state.value}</div>
-    <button onClick={() => actions.increase()}>+1</button>
+    <button onClick={() => actions.increment()}>+1</button>
   </div>);
 }
 ```
@@ -119,7 +119,7 @@ You can see the working code below.
 
 ### Exercises
 
-1. Add a `-1` button that decreases the value by 1.
+1. Add a `-1` button that decrements the value by 1.
 
 ### Solution
 

@@ -9,11 +9,11 @@ attribute to the `view` function so that we could render according to the state.
 
 Now, how do we make a change to the state and refresh the view?
 
-Our state is a counter that has a value of `0`. Let's add a button to increase the counter.
+Our state is a counter that has a value of `0`. Let's add a button to increment the counter.
 
-### Increase Action
+### Increment Action
 
-Before adding the button itself, we'll create an `actions` object with an `increase` function
+Before adding the button itself, we'll create an `actions` object with an `increment` function
 that increments the counter.
 
 ```javascript
@@ -22,7 +22,7 @@ var state = {
 };
 
 var actions = {
-  increase: function() {
+  increment: function() {
     state.value = state.value + 1;
   }
 };
@@ -30,12 +30,12 @@ var actions = {
 
 We'll be able to call this action from the view.
 
-### Increase Button
+### Increment Button
 
 We can add a `+1` button with this code:
 
 ```js
-m("button", { onclick: () => actions.increase() }, "+1")
+m("button", { onclick: () => actions.increment() }, "+1")
 ```
 
 How does the view get access to `actions`? Just like `state`, we can pass `actions` as an
@@ -53,17 +53,17 @@ var App = {
     var { state, actions } = vnode.attrs;
     return [
       m("div", "Counter: " + state.value),
-      m("button", { onclick: () => actions.increase() }, "+1")
+      m("button", { onclick: () => actions.increment() }, "+1")
     ];
   }
 };
 ```
 
-Clicking on the button calls `actions.increase()`, which adds `1` to `state.value`.
+Clicking on the button calls `actions.increment()`, which adds `1` to `state.value`.
 
 ### Mithril's Auto-Redraw System
 
-After clicking on the `+1` button, the `increase` function updates the state by adding 1. How
+After clicking on the `+1` button, the `increment` function updates the state by adding 1. How
 does the view reflect this change?
 
 Mithril has an [auto-redraw system](https://mithril.js.org/autoredraw.html) that automatically
@@ -87,7 +87,7 @@ You can see the working code below:
 
 ### Exercises
 
-1. Add a `-1` button that decreases the value by 1.
+1. Add a `-1` button that decrements the value by 1.
 
 ### Solution
 

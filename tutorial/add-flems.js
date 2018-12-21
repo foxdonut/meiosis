@@ -8,6 +8,7 @@ var linkMap = {
   "lodash": "https://unpkg.com/lodash@4.17.10",
   "mithril": "https://unpkg.com/mithril@1.1.6",
   "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
+  "patchinko": "https://unpkg.com/patchinko@4.1.0/explicit.js",
   "react": "https://unpkg.com/react@16.4.1/umd/react.development.js",
   "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"
 };

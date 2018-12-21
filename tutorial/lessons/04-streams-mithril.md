@@ -4,140 +4,95 @@
 
 ## 04 - Streams
 
-In the previous lesson, [03 - Update State](03-update-state-mithril.html), we used
-**functions that return functions** to extract the `update` logic out of the view, and also to
-create an event handler function that accepts a parameter.
+In the previous lesson, [03 - Update State](03-update-state-mithril.html), we created an `increment`
+function to update the application state. The function changed the state by directly modifying a
+global variable.
 
-Our Meiosis pattern setup code was as follows:
-
-```js
-var model = 0;
-var element = document.getElementById("app");
-var view = null;
-
-var update = function(value) {
-  model = model + value;
-  m.render(element, view(model));
-};
-
-view = createView(update);
-m.render(element, view(model));
-```
-
-Our initial model is `0`. When the view issues an update, such as `update(1)`, we add the value
-`1` to the model and re-render the view.
-
-That works, but what's not so great about this setup is that we have a circular dependency:
-
-- To create the `view` function, we need to pass `update` to `createView`.
-- To create the `update` function, we need the `view` function so that `update` can re-render
-the view.
-
-So `view` needs `update` and `update` needs `view`... We solved this problem by initializing
-`view` to `null`. Then we created the `update` function, which uses `view` but we know it won't
-get called until we have a chance to create the `view` function. This is okay as a workaround but
-it's not a great situation.
-
-### The Meiosis Pattern: A Reactive Loop
-
-What we've set up with the Meiosis Pattern is a **reactive loop**:
-
-![The Reactive Loop](04-streams-mithril-01.svg)
-
-- We start with a `model`
-- The `view` is a function of the model that produces a `vnode`
-- We `render` the `vnode` to the `element`
-- When an event occurs, such as `onclick`, we issue an `update`, passing it a value
-- The `update` uses the value to update the `model`
-- We call the `view` with the updated `model`
-- We `render` the `vnode` to the `element`
-- And the loop continues.
-
-The key here is the `update` function: it receives values from the `view`, updates the model, and
-re-renders the view. So, how do we solve the circular dependency between `update` and `view`?
+This works, but we can improve the approach. Namely, we'd like to gain more control over the
+flow of data and how we make changes to the state. We can do this by using a **stream**. A
+stream is a nice and simple way to **communicate values** and to control the flow of data.
 
 ### Introducing Streams
 
-What we'd like to do is have `update` as a way for the view to send values out so that we can use
-them to update the model and re-render the view. But, we want `update` to **only** be a way to
-communicate values. **What** we do with those values (update the model, re-render the view) should
-be separate from `update`. This will solve our circular dependency problem.
-
-One nice and simple way to **communicate values** is to use a **stream**. If you already know what
-a stream is and are comfortable with them, great. But, if you have glanced at streams elsewhere and
-found them overly complicated, **please forget all of that** because the streams that we use here
-are very simple. In fact, to demystify them and make sure that you clearly understand how they
-work, we will start by writing a bare-bones yet sufficient implementation in just a handful of
-lines of code.
+> If you already know about streams and are comfortable with them, great. But, if you have
+glanced at streams elsewhere and found them overly complicated, **please forget all of that**
+because the streams that we use here are very simple. In fact, we only use two stream operators,
+`map` and `scan`, and only to set up the Meiosis pattern at the starting point of the
+application.
 
 A stream is a **sequence of values**, similar to an array. Over time, you can send values onto
 a stream. You can also have functions that get called every time a value arrives on the stream.
-As you have probably figured out, we want `update` to be a stream.
 
-When we call `update(1)`, `update(-1)`, and so on from the view, these values will be in a stream:
+Let's say we create a stream called `update`. When we call `update(1)`, `update(-1)`, and so on,
+these values will be in a stream.
 
 ![Stream](04-streams-02.svg)
 
+We can pass values, objects, and even functions onto a stream.
+
+### Stream `.map`
+
 The way to **do** something with the values that arrive on the stream is by calling `.map()`. We
-**pass a function as a parameter** to `.map()`, and that function gets called every time a new
+pass a **function** as a parameter to `.map()`, and that function gets called every time a new
 value arrives onto the stream. The **result** of calling `.map()` is a **new stream** with the
-**values returned by the function**.
+values **returned by the function**.
 
 ![Map Stream](04-streams-03.svg)
 
-In our case, what we want to do with the values that arrive onto the `update` stream is to
-update the model and re-render the view:
+Although `map` produces a new stream, we don't always need it. The function that we pass may not
+return anything that we need to use. We can also use `map` to **do** something with the values
+(also known as **side effects**).
+
+### Using Mithril Streams
+
+Since we're already using Mithril, we'll use [Mithril Stream](https://mithril.js.org/stream.html)
+as our stream library. You can also use another stream library simply by using its equivalents of:
+- pushing a value onto a stream
+- getting the latest value from a stream
+- `map`
+- `scan`, which we will look at later on in this lesson.
+
+To create a stream with Mithrili Stream, we simply call `m.stream()`:
 
 ```js
-var model = 0;
-var update = stream();
-var view = createView(update);
+var update = m.stream();
+```
 
-var element = document.getElementById("app");
+To push a value onto the stream, we call it as a function and pass the value:
 
-update.map(function(value) {
-  model = model + value;
-  m.render(element, view(model));
+```js
+update(1);
+```
+
+To get the latest value from a stream, we call it as a function with no parameters:
+
+```js
+var value = update();
+// value is 1
+```
+
+We can call `.map` on the created stream, passing a function that will get called for
+every value that arrives onto the stream. The call to `.map` returns a new stream.
+
+```js
+// otherStream is every value from the update stream plus ten
+var otherStream = update.map(function(value) {
+  return value + 10;
+});
+// display every value from the otherStream onto console.log
+// here we are doing something with every value, but not returning anything.
+// we are also ignoring the stream returned by otherStream.map(...).
+otherStream.map(function(value) {
+  console.log(value);
 });
 ```
 
-Although `map` produces a new stream, we don't need it here. The function that we pass does not
-return anything that we need to use. As you can see, `map` allows us not only to produce a new
-stream of values, but also to **do** something with the values (also known as **side effects**).
+I invite you to get familiar with streams. Using the code box below, which has Mithril Stream
+already loaded, try the exercises.
 
-As you can see, we have now successfully separated out `update` as a way for the view to send
-values, from **what to do with those values**. We no longer have a circular dependency between
-`update` and `view`!
-
-### A simple stream implementation
-
-As promised, we'll now write a simple implementation `stream` and `map`. Feel free to skip this
-section if you'd rather skip over the internals, and please know that later on we'll use a
-simple stream library that provides what we need. However, if you prefer to have an idea of
-what's going on within `stream`, or if you prefer **not** to have an additional dependency in
-your project, read on, as our bare-bones implementation is perfectly suitable to use in the
-Meiosis pattern.
-
-There are two parts to a stream that we get when calling `var update = stream()`:
-
-1. Calling it as a function, `update(value)`, pushes the value onto the stream.
-1. Calling `update.map(someFunction)` creates a new stream. For every `value` that arrives
-onto the `update` stream, call `someFunction(value)` and push the result onto the new stream.
-
-Here is our stream implementation:
-
-@flems common/05-stream-impl.js [] 550
-
-We start with an empty array of `mapFunctions`. These are the functions passed in with `.map`.
-When the stream is called as a function, we go through every `mapFunction` and call them with
-the value.
-
-For `.map`, we create a new stream. We add a function to the current stream which will call
-the passed-in function and push the result onto the new stream.
+@flems mithril/04-streams-01.js mithril,mithril-stream 550
 
 ### Exercises
-
-Using the code above, take our stream implementation out for a test drive.
 
 1. Create an `update` stream.
 1. Create a `timesTen` stream that is the result of multiplying by ten each value from the
@@ -150,88 +105,14 @@ Using the code above, take our stream implementation out for a test drive.
 
 ### Solution
 
-@flems common/05-stream-impl-solution.js [] 800 hidden
+@flems mithril/04-streams-01-solution.js mithril,mithril-stream 800 hidden
 
-### Putting it all together
+### Stream `.scan`
 
-Now that we have our stream implementation, we can use it in our counter example:
-
-@flems mithril/05-stream.js,app.html,app.css mithril 800
-
-Our application code did not need to change - it still calls the `update` function as before - but
-we now use a stream for `update`, which enables us to separate out the function that determines
-what to do with the incoming values.
-
-### Exercises
-
-The function that we pass to `update.map` does three things:
-
-- Updates the model
-- Calls `view` to produce a `vnode`
-- Renders the `vnode` with `m.render`.
-
-Now,
-
-1. Separate out the first and the third task into separate functions: `updateModel` and `render`.
-1. Since `.map` returns a stream, you can chain calls to `.map`, so that each function gets the
-result of calling the previous function. Using this and the functions that you separated out,
-change the `update.map` block to:
-
-```js
-update
-  .map(updateModel)
-  .map(view)
-  .map(render);
-```
-
-Verify that the example still works properly. Hint: make sure to return the model from the
-`updateModel` function.
-
-Whether to use a single function, or to separate out the steps into individual functions, is up
-to your personal preference.
-
-### Solution
-
-@flems mithril/05-stream-solution.js,app.html,app.css mithril 800 hidden
-
-
-
-
-### Scan
-
-Recall that our Meiosis pattern setup code was:
-
-```js
-var model = 0;
-var update = stream();
-var view = createView(update);
-
-var element = document.getElementById("app");
-
-update.map(function(value) {
-  model = model + value;
-  m.render(element, view(model));
-});
-
-m.render(element, view(model));
-```
-
-- We have an **initial model** of 0.
-- We render the view with that initial model (on the last line).
-- When an update comes in, our function gets called to:
-  - Update the model, and
-  - Re-render the view.
-
-Notice that when we update the model, `model = model + value`, we are **combining** the incoming
-value with the current model (here, by addition), and the result becomes the current model for
-next time. Let's call this an **accumulator**.
-
-### Introducing `scan`
-
-It turns out that streams have, besides `map`, another method called `scan`. In fact, stream
-libraries have a number of other methods (also called operators), ranging from a handful to an
-overwhelming amount! But, we **only** need `map` and `scan`. Furthermore, we only need to use
-them in **one place** - the Meiosis pattern setup code.
+The other stream function that we'll use is called `scan`. Stream libraries have a number of
+other functions (also called operators), ranging from a handful to an
+overwhelming amount! But, we **only** need `map` and `scan`, and we only need them to set up
+the Meiosis pattern.
 
 Like `map`, `scan` takes a source stream and produces a new stream. Remember that with `map`,
 whenever a new value arrives on the source stream, the function that we passed to `map` gets
@@ -251,13 +132,13 @@ becomes starting point for the latest result, and the first value on the new str
 Let's look at an example. Say we start with an `update` stream:
 
 ```js
-var update = stream();
+var update = m.stream();
 ```
 
 Next, we create an `otherStream` with `scan`:
 
 ```js
-var otherStream = scan(function(latest, next) {
+var otherStream = m.stream.scan(function(latest, next) {
   return latest + next;
 }, 0, update);
 ```
@@ -276,138 +157,92 @@ below:
 
 ![Scan](04-scan-01.svg)
 
-As you can certainly guess, this will fit in nicely for our Meiosis pattern setup code.
+### Using `scan`
 
-### Implementing `scan`
-
-To implement `scan`, first we'll improve our `stream` by adding a feature: optionally passing
-in an initial value for the stream:
+Now that we have `scan`, we can use it to manage our application state. Previously, we had:
 
 ```js
-var stream = function(initial) {
-  var mapFunctions = [];
-  var createdStream = function(value) {
-    for (var i in mapFunctions) {
-      mapFunctions[i](value);
+var state = {
+  value: 0
+};
+
+var actions = function(update) {
+  return {
+    increment: function() {
+      state.value = state.value + 1;
+      update(state);
+    },
+    decrement: function() {
+      state.value = state.value - 1;
+      update(state);
     }
   };
-  createdStream.map = function(mapFunction) {
-    var newInitial = undefined;
-    if (initial !== undefined) {
-      newInitial = mapFunction(initial);
-    }
-    var newStream = stream(newInitial);
-
-    mapFunctions.push(function(value) {
-      newStream(mapFunction(value));
-    });
-
-    return newStream;
-  };
-  return createdStream;
 };
 ```
 
-We've added the `initial` parameter. Then, when `map` is called, we check whether there was an
-initial value for the source stream. If there was, then the initial value for the new stream
-is the result of calling the passed in `mapFunction`.
+We can incorporate streams to manage the flow of data:
 
-Now that we can specify an initial value for a stream, we can implement `scan`:
-
-```js
-var scan = function(accumulator, initial, sourceStream) {
-  var newStream = stream(initial);
-  var accumulated = initial;
-
-  sourceStream.map(function(value) {
-    accumulated = accumulator(accumulated, value);
-    newStream(accumulated);
-  });
-
-  return newStream;
-};
-```
-
-As we discussed, `scan` takes an accumulator function, an initial value, and a source stream.
-The new stream starts with the initial value. This is also the starting point for the
-`accumulated` value, which is the latest result. Then, we `map` on the source stream, passing in
-a function that takes the incoming value, calls the `accumulator` function with the latest
-`accumulated` value and the incoming value, and pushes the result onto the new stream.
-
-### Putting it all together
-
-Now that we have `scan`, we can improve our Meiosis pattern setup code. Previously, we had:
-
-```js
-var model = 0;
-var update = stream();
-var view = createView(update);
-
-var element = document.getElementById("app");
-
-update.map(function(value) {
-  model = model + value;
-  m.render(element, view(model));
-});
-
-m.render(element, view(model));
-```
-
-We can make these improvements:
-
-- No longer have a `model` variable that we keep reassigning. Instead, our accumulator function
-can be cleaner and more self-contained: it can receive the latest model and the next value, and
-return the result. It will not refer to variables that are on the outside.
-- The initial value can simply be passed to `scan`.
-- The result of `scan` is a stream of models. We can `map` on that and re-render the view every
-time we have a new model value on the stream.
-- Since `scan` produces the initial value on the resulting stream, we no longer have to call
-`m.render` initially (this was done at the bottom of our previous setup code). Instead, we have
-the initial model on the `models` stream, and the function that we pass to `map` will get
-called to render the initial view.
+- We create an `update` stream, and pass it to `actions`.
+- To update the state, `actions` passes a value onto the `update` stream, indicating a state
+change. We'll call this a **patch**. In our example, the patches are numbers by which to
+increment the counter.
+- Using `scan`, we create a stream of states, starting with the initial state and incrementing
+the counter by the values coming in on the `update` stream.
 
 Here are our changes:
 
 ```js
-var update = stream();
-var view = createView(update);
+var app = {
+  initialState: {
+    value: 0
+  },
+  actions: function(update) {
+    return {
+      increment: function() {
+        update(1);
+      },
+      decrement: function() {
+        update(-1);
+      }
+    };
+  }
+};
 
-var models = scan(function(model, value) {
-  return model + value;
-}, 0, update);
-
-var element = document.getElementById("app");
-
-models.map(function(model) {
-  m.render(element, view(model));
-});
+var update = m.stream();
+var states = m.stream.scan(function(state, increment) {
+  state.value = state.value + increment;
+  return state;
+}, app.initialState, update);
 ```
 
-You can try out the complete example below.
+The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives
+onto the `update` stream, the accumulator function adds that number to `state.value`. We have a
+stream of states, and the actions can change the value by pushing a patch (in this case, a number)
+onto the `update` stream.
 
-@flems mithril/06-scan.js,app.html,app.css mithril 800
+To use this with Mithril, we'll pass the `state` as the latest value from the `states` stream to
+our `App` component. We'll pass the `update` stream to `app.actions` to create `actions`, which
+we also pass to `App`.
 
-### Exercise
+Putting it all together, we have the complete example as shown below.
 
-In our example, both the `model` and the values coming in on the `update` stream are numbers.
-However, `scan` also works with values of different types.
+@flems mithril/04-streams-02.js,app.html,app.css mithril,mithril-stream 800
 
-Keep the `model` as a number, but change the values that are sent on `update` to be objects of the
-form `{ oper: "add", value: 1 }`. Use this for the `+1` button.
+We are starting to implement the Meiosis pattern:
 
-Change the `-1` button's label to `*2`, and have its `onclick` function call
-`update({ oper: "times", value: 2 })`.
+- an `update` stream
+- actions push **patches** onto the `update` stream
+- a `states` stream that `scan`s the `update` stream, starting with an initial state and
+applying patches to the state with an **accumulator** function
+- a Mithril component to which we pass `actions` and the latest `state`
+- `actions` are used by the component to trigger state changes.
 
-Finally, change the accumulator function that is passed to `scan` so that it looks at the object's
-`oper` and `value`, and performs the operation on the model accordingly and returns the result.
+You've probably noticed that our patches and our accumulator function are pretty limited.
+Indeed, our patches are just numbers, and all the accumulator function does is add the
+number to the state value. In the next two sections, we will look at more general-purpose
+patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-![Scan with different types](04-scan-02.svg)
-
-### Solution
-
-@flems mithril/06-scan-solution.js,app.html,app.css mithril 800 hidden
-
-When you are ready, continue on to [06 - Scan](06-scan-mithril.html).
+When you are ready, continue on to [05 - Patchinko](05-patchinko-mithril.html).
 
 [Table of Contents](toc.html)
 
