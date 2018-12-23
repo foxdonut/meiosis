@@ -1,49 +1,69 @@
-/*global m, P, S*/
+/*global m, P, S, PS*/
 var convert = function(value, to) {
   return Math.round(
     (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
   );
 };
 
-var app = {
-  initialState: {
-    value: 22,
-    units: "C"
+var temperature = {
+  initialState: function(label) {
+    return {
+      label,
+      value: 22,
+      units: "C"
+    };
   },
   actions: function(update) {
     return {
-      increment: function(amount) {
-        update({ value: S(current => current + amount) });
+      increment: function(id, amount) {
+        update({ [id]: PS({ value: S(current => current + amount) }) });
       },
-      changeUnits: function(state) {
-        var newUnits = state.units === "C" ? "F" : "C";
-        var newValue = convert(state.value, newUnits);
-        update({ value: newValue, units: newUnits });
+      changeUnits: function(id, state) {
+        var newUnits = state[id].units === "C" ? "F" : "C";
+        var newValue = convert(state[id].value, newUnits);
+        update({ [id]: PS({ value: newValue, units: newUnits }) });
       }
     };
   }
 };
 
-var App = {
+var Temperature = {
   view: function(vnode) {
-    var { state, actions } = vnode.attrs;
+    var { state, id, actions } = vnode.attrs;
+    var myState = state[id];
     return m("div.temperature", [
-      "Temperature: ", state.value, m.trust("&deg;"), state.units,
+      myState.label, " Temperature: ", myState.value, m.trust("&deg;"), myState.units,
       m("div",
-        m("button", { onclick: () => actions.increment( 1) }, "Increment"),
-        m("button", { onclick: () => actions.increment(-1) }, "Decrement")
+        m("button", { onclick: () => actions.increment(id,  1) }, "Increment"),
+        m("button", { onclick: () => actions.increment(id, -1) }, "Decrement")
       ),
       m("div",
-        m("button", { onclick: () => actions.changeUnits(state) }, "Change Units")
+        m("button", { onclick: () => actions.changeUnits(id, state) }, "Change Units")
       )
     ]);
   }
 };
 
+var app = {
+  initialState: {
+    air: temperature.initialState("Air"),
+    water: temperature.initialState("Water")
+  },
+  actions: temperature.actions
+};
+
+var App = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return m("div", [
+      m(Temperature, { state, id: "air", actions }),
+      m(Temperature, { state, id: "water", actions })
+    ]);
+  }
+};
+
 var update = m.stream();
-var states = m.stream.scan(function(state, patch) {
-  return P(state, patch);
-}, app.initialState, update);
+var states = m.stream.scan(P, app.initialState, update);
 
 var actions = app.actions(update);
 m.mount(document.getElementById("app"), {

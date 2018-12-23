@@ -5,23 +5,35 @@ var convert = function(value, to) {
   );
 };
 
+var units = {
+  initialState: function() {
+    return "C";
+  }
+};
+
+var Units = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return m("div.temperature", [
+      "Units: ", m.trust("&deg;"), state.units,
+      m("div",
+        m("button", { onclick: () => actions.changeUnits(state) }, "Change Units")
+      )
+    ]);
+  }
+};
+
 var temperature = {
   initialState: function(label) {
     return {
       label,
-      value: 22,
-      units: "C"
+      value: 22
     };
   },
   actions: function(update) {
     return {
       increment: function(id, amount) {
         update({ [id]: PS({ value: S(current => current + amount) }) });
-      },
-      changeUnits: function(id, state) {
-        var newUnits = state.units === "C" ? "F" : "C";
-        var newValue = convert(state.value, newUnits);
-        update({ [id]: PS({ value: newValue, units: newUnits }) });
       }
     };
   }
@@ -32,13 +44,10 @@ var Temperature = {
     var { state, id, actions } = vnode.attrs;
     var myState = state[id];
     return m("div.temperature", [
-      myState.label, " Temperature: ", myState.value, m.trust("&deg;"), myState.units,
+      myState.label, " Temperature: ", myState.value, m.trust("&deg;"), state.units,
       m("div",
         m("button", { onclick: () => actions.increment(id,  1) }, "Increment"),
         m("button", { onclick: () => actions.increment(id, -1) }, "Decrement")
-      ),
-      m("div",
-        m("button", { onclick: () => actions.changeUnits(id, myState) }, "Change Units")
       )
     ]);
   }
@@ -46,16 +55,30 @@ var Temperature = {
 
 var app = {
   initialState: {
+    units: units.initialState(),
     air: temperature.initialState("Air"),
     water: temperature.initialState("Water")
   },
-  actions: temperature.actions
+  actions: function(update) {
+    return P({
+      changeUnits: function(state) {
+        var newUnits = state.units === "C" ? "F" : "C";
+        update(Object.assign({ units: newUnits },
+          ["air", "water"].reduce((result, id) => {
+            result[id] = PS({ value: convert(state[id].value, newUnits) });
+            return result;
+          }, {})
+        ));
+      }
+    }, temperature.actions(update));
+  }
 };
 
 var App = {
   view: function(vnode) {
     var { state, actions } = vnode.attrs;
     return m("div", [
+      m(Units, { state, actions }),
       m(Temperature, { state, id: "air", actions }),
       m(Temperature, { state, id: "water", actions })
     ]);
@@ -63,9 +86,7 @@ var App = {
 };
 
 var update = m.stream();
-var states = m.stream.scan(function(state, patch) {
-  return P(state, patch);
-}, app.initialState, update);
+var states = m.stream.scan(P, app.initialState, update);
 
 var actions = app.actions(update);
 m.mount(document.getElementById("app"), {

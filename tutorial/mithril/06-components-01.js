@@ -1,4 +1,10 @@
-/*global m*/
+/*global m, P, S*/
+var convert = function(value, to) {
+  return Math.round(
+    (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+  );
+};
+
 var app = {
   initialState: {
     value: 22,
@@ -7,8 +13,12 @@ var app = {
   actions: function(update) {
     return {
       increment: function(amount) {
+        update({ value: S(current => current + amount) });
       },
       changeUnits: function(state) {
+        var newUnits = state.units === "C" ? "F" : "C";
+        var newValue = convert(state.value, newUnits);
+        update({ value: newValue, units: newUnits });
       }
     };
   }
@@ -31,9 +41,7 @@ var App = {
 };
 
 var update = m.stream();
-var states = m.stream.scan(function(state, patch) {
-  return state;
-}, app.initialState, update);
+var states = m.stream.scan(P, app.initialState, update);
 
 var actions = app.actions(update);
 m.mount(document.getElementById("app"), {

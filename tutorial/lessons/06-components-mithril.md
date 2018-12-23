@@ -1,3 +1,58 @@
+# [Meiosis](https://meiosis.js.org) Tutorial
+
+[Table of Contents](toc.html)
+
+## 06 - Components
+
+Let's combine the Meiosis pattern that we assembled at the end of
+[04 - Streams](04-streams-mithril.html) with [05 - Patchinko](05-patchinko-mithril.html).
+
+We'll change the counter to a temperature example with a state shaped as follows:
+
+```js
+{
+  value: 22,
+  units: "C"
+}
+```
+
+Previously, we were emitting patches onto the `update` stream in the form of numbers that
+represented the amount by which to increment the counter. Now, our patches will instead be
+Patchinko patches, giving us a much more powerful way to update the state and giving us a
+general-purpose approach.
+
+To increment the temperature value, we can use a patch as follows:
+
+```js
+increment: function(amount) {
+  update({ value: S(current => current + amount) });
+}
+```
+
+We can also convert the temperature between Celsius and Farenheit:
+
+```js
+var convert = function(value, to) {
+  return Math.round(
+    (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+  );
+};
+
+changeUnits: function(state) {
+  var newUnits = state.units === "C" ? "F" : "C";
+  var newValue = convert(state.value, newUnits);
+  update({ value: newValue, units: newUnits });
+}
+```
+
+So now `update` is a stream of Patchinko patches. To handle them in the accumulator function
+and produce a stream of updated states, we can use `P`:
+
+```js
+var states = m.stream.scan(function(state, patch) {
+  return P(state, patch);
+}, app.initialState, update);
+```
 
 ### Passing functions as parameters
 
@@ -35,3 +90,21 @@ callSomething(someFunction);
 ```
 
 Passing functions as parameters is very useful!
+
+Putting it all together, we have the example shown below.
+
+@flems mithril/06-components-01.js,app.html,app.css patchinko,mithril,mithril-stream 800
+
+-----
+
+@flems mithril/06-components-02.js,app.html,app.css patchinko,mithril,mithril-stream 800
+
+@flems mithril/06-components-03.js,app.html,app.css patchinko,mithril,mithril-stream 800
+
+@flems mithril/06-components-04.js,app.html,app.css patchinko,mithril,mithril-stream 800
+
+[Table of Contents](toc.html)
+
+-----
+
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
