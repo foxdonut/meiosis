@@ -11,8 +11,9 @@
 | [03 - Update State](03-update-state-mithril.html) | [03 - Update State](03-update-state-react.html) |
 | [04 - Streams](04-streams-mithril.html) | [04 - Streams](04-streams-react.html) |
 | [05 - Patchinko](05-patchinko-mithril.html) | [05 - Patchinko](05-patchinko-react.html) |
-| [06 - Function Patches](06-function-patches-mithril.html) | [06 - Function Patches](06-function-patches-react.html) |
-| [07 - Components](07-components-mithril.html) | [07 - Components](07-components-react.html) |
+| [06 - Components](06-components-mithril.html) | [06 - Components](06-components-react.html) |
+| [07 - Services](07-services-mithril.html) | [07 - Services](07-services-react.html) |
+| [08 - Function Patches](08-function-patches-mithril.html) | [08 - Function Patches](08-function-patches-react.html) |
 
 -----
 
