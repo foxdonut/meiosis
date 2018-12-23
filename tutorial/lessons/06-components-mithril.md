@@ -95,6 +95,28 @@ Putting it all together, we have the example shown below.
 
 @flems mithril/06-components-01.js,app.html,app.css patchinko,mithril,mithril-stream 800
 
+### Building Components
+
+When building components with the Meiosis pattern, we split code into two separate concerns:
+
+- **State management** code - initial state, actions that update the state
+- **View** code - view components that display the UI based on the state, and call actions.
+
+How you group together the code is up to you. In some cases, it might make sense to put state
+management and view code together into a folder for a component of your application. In other
+cases, you may prefer to have view components separate from the code that manages state.
+
+Let's change our previous example to move the code into a "temperature" component.
+
+```js
+{
+  temperature: {
+    value: 22,
+    units: "C"
+  }
+}
+```
+
 -----
 
 @flems mithril/06-components-02.js,app.html,app.css patchinko,mithril,mithril-stream 800
