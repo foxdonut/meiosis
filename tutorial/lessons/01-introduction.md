@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## 00 - Introduction and Goals
+## 01 - Introduction and Goals
 
 Welcome to the [Meiosis](https://meiosis.js.org) Tutorial!
 
@@ -23,29 +23,13 @@ plain objects and functions.
 ### Prerequisites
 
 Besides JavaScript, you will need to know, or learn, about the view library that you would
-like to use. This tutorial is offered in two versions: one with
-[React](https://reactjs.org), and one with [Mithril](http://mithril.js.org).
+like to use. Most of this tutorial is independent of the view library. When we put it all
+together, there are examples with [React](https://reactjs.org),
+[Mithril](http://mithril.js.org), [Preact](https://preactjs.com), and
+[lit-html](https://meiosis.js.org/examples/setup/lit-html/index.html).
 
-### View Libraries
-
-If neither of those is your preferred view library, fear not! It is trivial to use just about
-any view library with the Meiosis pattern, whether it's a virtual DOM library, or
-libraries such as [lit-html](https://meiosis.js.org/examples/setup/lit-html/index.html)
-and [hyperHTML](https://meiosis.js.org/examples/setup/hyperHTML/index.html).
-
-### JSX, hyperscript, or template literals
-
-Also note that if you prefer the [JSX](https://infernojs.org/docs/guides/what-is-jsx) syntax,
-you should read the React version. Again, it is simple to use another view library, such as
-[Preact](https://preactjs.com/), [Inferno](https://infernojs.org/), and so on.
-
-If you prefer the [hyperscript](https://github.com/hyperhype/hyperscript) syntax, please read
-the Mithril version of the tutorial. Other view libraries such as
-[snabbdom](https://github.com/paldepind/snabbdom), [domVM](https://github.com/leeoniya/domvm),
-and other hyperscript view libraries are also easy to use with Meiosis.
-
-If you use a template literal library such as lit-html or hyperHTML, either version should be
-fine; you will simply be writing views with template literals instead of JSX or hyperscript.
+If none of those is your preferred view library, fear not! It is trivial to use just about
+any view library with the Meiosis pattern.
 
 ### ES5 or ES6
 
@@ -56,14 +40,19 @@ go ahead and use it! It can certainly lead to more concise syntax in some cases.
 There are a few exceptions, however. Sometimes I use this syntax:
 
 ```javascript
-() => someFunction()
+() => someFunction(1)
+x => x + 1
 ```
 
 Which is shorthand for:
 
 ```javascript
 function() {
-  return someFunction();
+  return someFunction(1);
+}
+
+function(x) {
+  return x + 1;
 }
 ```
 
@@ -97,10 +86,8 @@ code window.
 Finally, also note that you can also download and run the code examples for this tutorial
 by cloning the [github repository](https://github.com/foxdonut/meiosis).
 
-Let's get started! Please continue by choosing a version:
-
-- [01 - Hello World - Mithril](01-hello-world-mithril.html)
-- [01 - Hello World - React](01-hello-world-react.html)
+Let's get started! Please continue on to
+[02 - Initial State and Actions](02-initial-state-and-actions.html)
 
 [Table of Contents](toc.html)
 

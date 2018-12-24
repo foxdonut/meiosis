@@ -2,9 +2,9 @@
 
 [Table of Contents](toc.html)
 
-## 05 - Patchinko
+## 04 - Patchinko
 
-In the previous lesson, [04 - Streams](04-streams-react.html), we started setting up the
+In the previous lesson, [04 - Streams](04-streams-mithril.html), we started setting up the
 Meiosis pattern:
 
 - an `update` stream of **patches**
@@ -12,7 +12,7 @@ Meiosis pattern:
 an **accumulator**
 - an `actions` object created by passing `update` and having functions that call `update`
 to trigger state changes
-- a component that receives the `states` stream and the `actions`.
+- a component that receives the latest `state` and the `actions`.
 
 Our state had the following shape:
 
@@ -49,7 +49,7 @@ We need to:
 - Write an accumulator function that will use those patches to produce the updated state.
 
 In this section, we will use one approach - my personal favourite - using a library called
-Patchinko. In a [later section](08-function-patches-react.html), we will look at another
+Patchinko. In a [later section](08-function-patches-mithril.html), we will look at another
 approach, using function patches. The Meiosis pattern is flexible enough that you can use
 either of these approaches or even one of your own.
 
@@ -253,7 +253,7 @@ P(
 Try it out. Using the code window below, try the following exercises. Use `console.log` to
 verify your answers.
 
-@flems common/05-patchinko-01.js patchinko 550
+@flems code/04-patchinko-01.js patchinko 550
 
 ### Exercises
 
@@ -265,7 +265,7 @@ opposite of what it was
 
 ### Solution
 
-@flems common/05-patchinko-01-solution.js patchinko 800 hidden
+@flems code/04-patchinko-01-solution.js patchinko 800 hidden
 
 ### Alternative: Using the Overloaded version of Patchinko
 
@@ -285,7 +285,7 @@ In a nutshell:
 - With a single **object** argument:`O({..})` does the same as `PS`
 - With no arguments, as the value of a property: `O` does the same as `D`.
 
-When you are ready, continue on to [06 - Components](06-components-react.html).
+When you are ready, continue on to [06 - Components](06-components-mithril.html).
 
 [Table of Contents](toc.html)
 

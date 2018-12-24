@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## 04 - Streams
+## 03 - Streams
 
 In the previous lesson, [03 - Update State](03-update-state-mithril.html), we created an `increment`
 function to update the application state. The function changed the state by directly modifying a
@@ -242,7 +242,7 @@ Indeed, our patches are just numbers, and all the accumulator function does is a
 number to the state value. In the next two sections, we will look at more general-purpose
 patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-When you are ready, continue on to [05 - Patchinko](05-patchinko-mithril.html).
+When you are ready, continue on to [04 - Patchinko](05-patchinko.html).
 
 [Table of Contents](toc.html)
 

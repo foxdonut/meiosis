@@ -2,17 +2,20 @@
 
 ## Table of Contents
 
-[00 - Introduction and Goals](00-introduction.html)
-
-| Mithril | React |
-|---------|-------|
-| [01 - Hello World](01-hello-world-mithril.html) | [01 - Hello World](01-hello-world-react.html) |
-| [02 - View Function](02-view-function-mithril.html) | [02 - Render Method](02-render-method-react.html) |
-| [03 - Update State](03-update-state-mithril.html) | [03 - Update State](03-update-state-react.html) |
-| [04 - Streams](04-streams-mithril.html) | [04 - Streams](04-streams-react.html) |
-| [05 - Patchinko](05-patchinko-mithril.html) | [05 - Patchinko](05-patchinko-react.html) |
-| [06 - Components](06-components-mithril.html) | [06 - Components](06-components-react.html) |
-| [07 - Function Patches](07-function-patches-mithril.html) | [07 - Function Patches](07-function-patches-react.html) |
+| |
+| ------ |
+| [01 - Introduction and Goals](01-introduction.html) |
+| [02 - Initial State and Actions](02-initial-state-and-actions.html) |
+| [03 - Streams](03-streams.html) |
+| [04 - Patchinko](04-patchinko.html) |
+| [05 - Meiosis with Patchinko](05-meiosis-with-patchinko.html) |
+| [06 - Meiosis with Function Patches](06-meiosis-with-function-patches.html) |
+| [07 - Components](07-components.html) |
+| [08 - Using Mithril](08-using-mithril.html) |
+| [09 - Using React](09-using-react.html) |
+| [10 - Using Preact](10-using-preact.html) |
+| [11 - Using lit-html](11-using-lit-html.html) |
+| [12 - What's Next?](12-whats-next.html) |
 
 -----
 
