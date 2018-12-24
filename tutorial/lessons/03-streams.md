@@ -28,18 +28,18 @@ a stream. You can also have functions that get called every time a value arrives
 Let's say we create a stream called `update`. When we call `update(1)`, `update(-1)`, and so on,
 these values will be in a stream.
 
-![Stream](04-streams-02.svg)
+![Stream](03-streams-01.svg)
 
 We can pass values, objects, and even functions onto a stream.
 
-### Stream `.map`
+### Stream `map`
 
-The way to **do** something with the values that arrive on the stream is by calling `.map()`. We
-pass a **function** as a parameter to `.map()`, and that function gets called every time a new
-value arrives onto the stream. The **result** of calling `.map()` is a **new stream** with the
+The way to **do** something with the values that arrive on the stream is by calling `map`. We
+pass a **function** as a parameter to `map`, and that function gets called every time a new
+value arrives onto the stream. The **result** of calling `map` is a **new stream** with the
 values **returned by the function**.
 
-![Map Stream](04-streams-03.svg)
+![Map Stream](03-streams-02.svg)
 
 Although `map` produces a new stream, we don't always need it. The function that we pass may not
 return anything that we need to use. We can also use `map` to **do** something with the values
@@ -73,8 +73,8 @@ var value = update();
 // value is 1
 ```
 
-We can call `.map` on the created stream, passing a function that will get called for
-every value that arrives onto the stream. The call to `.map` returns a new stream.
+We can call `map` on the created stream, passing a function that will get called for
+every value that arrives onto the stream. The call to `map` returns a new stream.
 
 ```js
 // otherStream is every value from the update stream plus ten
@@ -109,7 +109,7 @@ already loaded, try the exercises.
 
 @flems react/04-streams-01-solution.js flyd 800 hidden
 
-### Stream `.scan`
+### Stream `scan`
 
 The other stream function that we'll use is called `scan`. Stream libraries have a number of
 other functions (also called operators), ranging from a handful to an
@@ -157,28 +157,22 @@ If we call `update(5)`, the next value on `otherStream` will be `0 + 5 = 5`. If 
 The sequence continues, always adding the incoming value to the latest result, as illustrated
 below:
 
-![Scan](04-scan-01.svg)
+![Scan](03-streams-03.svg)
 
 ### Using `scan`
 
-Now that we have `scan`, we can use it to manage our application state. Previously, we had:
+Now that we streams, `map`, and `scan`, we can use themt to manage our application state.
+Previously, we had:
 
 ```js
-var state = {
+var initialState = {
   value: 0
 };
 
-var actions = function(update) {
-  return {
-    increment: function() {
-      state.value = state.value + 1;
-      update(state);
-    },
-    decrement: function() {
-      state.value = state.value - 1;
-      update(state);
-    }
-  };
+var actions = {
+  increment: function() {
+    initialState.value = initialState.value + 1;
+  }
 };
 ```
 
@@ -187,9 +181,10 @@ We can incorporate streams to manage the flow of data:
 - We create an `update` stream, and pass it to `actions`.
 - To update the state, `actions` passes a value onto the `update` stream, indicating a state
 change. We'll call this a **patch**. In our example, the patches are numbers by which to
-increment the counter.
+increment the value of the counter.
 - Using `scan`, we create a stream of states, starting with the initial state and incrementing
 the counter by the values coming in on the `update` stream.
+- Using `map`, we'll display the latest state.
 
 Here are our changes:
 
@@ -215,6 +210,9 @@ var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
 }, app.initialState, update);
+states.map(function(state) {
+  document.write("<pre>" + JSON.stringify(state) + "</pre>");
+});
 ```
 
 The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives
@@ -222,16 +220,9 @@ onto the `update` stream, the accumulator function adds that number to `state.va
 stream of states, and the actions can change the value by pushing a patch (in this case, a number)
 onto the `update` stream.
 
-To use this with React, we'll pass the `states` stream to our `App` component. Then we can:
-- get the initial state in our `App` constructor: `this.state = props.states()`
-- in the `componentDidMount` method, use `map` to call `setState` every time there is a new
-state on the `states` stream: `this.props.states.map(setState)`
-- pass the `update` stream to `app.actions` to create `actions`, which we pass to `App`
-- get the current state in the `render()` method from `this.state`.
-
 Putting it all together, we have the complete example as shown below.
 
-@flems react/04-streams-02.jsx,app.html,app.css react,react-dom,flyd 800
+@flems code/03-streams-01.js flyd 800
 
 We are starting to implement the Meiosis pattern:
 
@@ -239,14 +230,11 @@ We are starting to implement the Meiosis pattern:
 - actions push **patches** onto the `update` stream
 - a `states` stream that `scan`s the `update` stream, starting with an initial state and
 applying patches to the state with an **accumulator** function
-- a React component to which we pass `states` and `actions`
-- the component uses `states()` to get the initial state, and `states.map` to call `setState`
-when the state changes
-- `actions` are used by the component to trigger state changes.
+- `actions` are used to trigger state changes.
 
 You've probably noticed that our patches and our accumulator function are pretty limited.
 Indeed, our patches are just numbers, and all the accumulator function does is add the
-number to the state value. In the next two sections, we will look at more general-purpose
+number to the state value. In the upcoming sections, we will look at more general-purpose
 patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
 > **A Note about Using Mithril Streams**.
