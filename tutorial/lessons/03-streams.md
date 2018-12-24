@@ -224,13 +224,21 @@ Putting it all together, we have the complete example as shown below.
 
 @flems code/03-streams-01.js flyd 800
 
+Try it out: notice that `{"value":0}` appears in the output on the right. This is our initial
+state. Now, within the console, type and then press Enter:
+
+`actions.increment()`
+
+In the output on the right, you will see `{"value":1}` appear, showing that the state has
+been updated. Try `actions.increment()` again and also `actions.decrement()`.
+
 We are starting to implement the Meiosis pattern:
 
 - an `update` stream
 - actions push **patches** onto the `update` stream
 - a `states` stream that `scan`s the `update` stream, starting with an initial state and
 applying patches to the state with an **accumulator** function
-- `actions` are used to trigger state changes.
+- a `map` on the `states` stream to display the stream of states.
 
 You've probably noticed that our patches and our accumulator function are pretty limited.
 Indeed, our patches are just numbers, and all the accumulator function does is add the
