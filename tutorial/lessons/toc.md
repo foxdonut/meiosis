@@ -7,9 +7,9 @@
 | [01 - Introduction and Goals](01-introduction.html) |
 | [02 - Initial State and Actions](02-initial-state-and-actions.html) |
 | [03 - Streams](03-streams.html) |
-| [04 - Patchinko](04-patchinko.html) |
-| [05 - Meiosis with Patchinko](05-meiosis-with-patchinko.html) |
-| [06 - Meiosis with Function Patches](06-meiosis-with-function-patches.html) |
+| [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) |
+| [05 - Patchinko](05-patchinko.html) |
+| [06 - Meiosis with Patchinko](06-meiosis-with-patchinko.html) |
 | [07 - Components](07-components.html) |
 | [08 - Using Mithril](08-using-mithril.html) |
 | [09 - Using React](09-using-react.html) |

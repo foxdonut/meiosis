@@ -4,13 +4,13 @@
 
 ## 03 - Streams
 
-In the previous lesson, [03 - Update State](03-update-state-mithril.html), we created an `increment`
-function to update the application state. The function changed the state by directly modifying a
-global variable.
+In the previous lesson, [02 - Initial State and Actions](02-initial-state-and-actions.html), we
+created an `increment` function to update the application state. The function changed the state
+by directly modifying a global variable.
 
 This works, but we can improve the approach. Namely, we'd like to gain more control over the
 flow of data and how we make changes to the state. We can do this by using a **stream**. A
-stream is a nice and simple way to **communicate values** and to control the flow of data.
+stream is a nice and simple way to **communicate values** and to control data flow.
 
 ### Introducing Streams
 
@@ -43,19 +43,19 @@ Although `map` produces a new stream, we don't always need it. The function that
 return anything that we need to use. We can also use `map` to **do** something with the values
 (also known as **side effects**).
 
-### Using Mithril Streams
+### A simple stream library: flyd
 
-Since we're already using Mithril, we'll use [Mithril Stream](https://mithril.js.org/stream.html)
-as our stream library. You can also use another stream library simply by using its equivalents of:
+We will use [flyd](https://github.com/paldepind/flyd) as our stream library. You can also use
+another stream library simply by using its equivalents of:
 - pushing a value onto a stream
 - getting the latest value from a stream
 - `map`
 - `scan`, which we will look at later on in this lesson.
 
-To create a stream with Mithrili Stream, we simply call `m.stream()`:
+To create a stream with flyd, we simply call `flyd.stream()`:
 
 ```js
-var update = m.stream();
+var update = flyd.stream();
 ```
 
 To push a value onto the stream, we call it as a function and pass the value:
@@ -87,10 +87,10 @@ otherStream.map(function(value) {
 });
 ```
 
-I invite you to get familiar with streams. Using the code box below, which has Mithril Stream
+I invite you to get familiar with streams. Using the code box below, which has `flyd`
 already loaded, try the exercises.
 
-@flems mithril/04-streams-01.js mithril,mithril-stream 550
+@flems react/04-streams-01.js flyd 550
 
 ### Exercises
 
@@ -105,7 +105,7 @@ already loaded, try the exercises.
 
 ### Solution
 
-@flems mithril/04-streams-01-solution.js mithril,mithril-stream 800 hidden
+@flems react/04-streams-01-solution.js flyd 800 hidden
 
 ### Stream `.scan`
 
@@ -132,13 +132,13 @@ becomes starting point for the latest result, and the first value on the new str
 Let's look at an example. Say we start with an `update` stream:
 
 ```js
-var update = m.stream();
+var update = flyd.stream();
 ```
 
 Next, we create an `otherStream` with `scan`:
 
 ```js
-var otherStream = m.stream.scan(function(latest, next) {
+var otherStream = flyd.scan(function(latest, next) {
   return latest + next;
 }, 0, update);
 ```
@@ -208,8 +208,8 @@ var app = {
   }
 };
 
-var update = m.stream();
-var states = m.stream.scan(function(state, increment) {
+var update = flyd.stream();
+var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
 }, app.initialState, update);
@@ -220,13 +220,16 @@ onto the `update` stream, the accumulator function adds that number to `state.va
 stream of states, and the actions can change the value by pushing a patch (in this case, a number)
 onto the `update` stream.
 
-To use this with Mithril, we'll pass the `state` as the latest value from the `states` stream to
-our `App` component. We'll pass the `update` stream to `app.actions` to create `actions`, which
-we also pass to `App`.
+To use this with React, we'll pass the `states` stream to our `App` component. Then we can:
+- get the initial state in our `App` constructor: `this.state = props.states()`
+- in the `componentDidMount` method, use `map` to call `setState` every time there is a new
+state on the `states` stream: `this.props.states.map(setState)`
+- pass the `update` stream to `app.actions` to create `actions`, which we pass to `App`
+- get the current state in the `render()` method from `this.state`.
 
 Putting it all together, we have the complete example as shown below.
 
-@flems mithril/04-streams-02.js,app.html,app.css mithril,mithril-stream 800
+@flems react/04-streams-02.jsx,app.html,app.css react,react-dom,flyd 800
 
 We are starting to implement the Meiosis pattern:
 
@@ -234,7 +237,9 @@ We are starting to implement the Meiosis pattern:
 - actions push **patches** onto the `update` stream
 - a `states` stream that `scan`s the `update` stream, starting with an initial state and
 applying patches to the state with an **accumulator** function
-- a Mithril component to which we pass `actions` and the latest `state`
+- a React component to which we pass `states` and `actions`
+- the component uses `states()` to get the initial state, and `states.map` to call `setState`
+when the state changes
 - `actions` are used by the component to trigger state changes.
 
 You've probably noticed that our patches and our accumulator function are pretty limited.
@@ -242,7 +247,13 @@ Indeed, our patches are just numbers, and all the accumulator function does is a
 number to the state value. In the next two sections, we will look at more general-purpose
 patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-When you are ready, continue on to [04 - Patchinko](05-patchinko.html).
+> **A Note about Using Mithril Streams**.
+If you're using Mithril as a view library, you can use
+[Mithril Stream](https://mithril.js.org/stream.html) as a stream library. For our purposes,
+it works just like `flyd`. The only difference is that you call `m.stream()` instead of
+`flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
+
+When you are ready, continue on to [05 - Patchinko](05-patchinko-react.html).
 
 [Table of Contents](toc.html)
 
