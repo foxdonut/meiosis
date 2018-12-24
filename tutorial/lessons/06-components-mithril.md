@@ -1,4 +1,4 @@
-# [Meiosis](https://meiosis.js.org) Tutorial
+ [Meiosis](https://meiosis.js.org) Tutorial
 
 [Table of Contents](toc.html)
 
@@ -106,10 +106,12 @@ How you group together the code is up to you. In some cases, it might make sense
 management and view code together into a folder for a component of your application. In other
 cases, you may prefer to have view components separate from the code that manages state.
 
-Let's change our previous example to move the code into a "temperature" component.
+Let's change our previous example to move the code into a "temperature" component. We'll also
+add a "conditions" component for the current conditions (sunny, cloudy, rain):
 
 ```js
 {
+  conditions: "Sunny",
   temperature: {
     value: 22,
     units: "C"
@@ -117,13 +119,123 @@ Let's change our previous example to move the code into a "temperature" componen
 }
 ```
 
------
+Each component will have a state management part to indicate its initial state and the actions
+that it provides. We'll indicate this with a lowercase: `conditions` and `temperature`. Each
+component will also have a Mithril view component, which we'll designate with an uppercase:
+`Conditions` and `Temperature`.
+
+For the conditions, we have:
+
+```js
+// State management
+var conditions = {
+  initialState: "Sunny",
+  actions: function(update) {
+    return {
+      setConditions: function(conditions) {
+        update({ conditions: conditions });
+      }
+    };
+  }
+};
+
+// Mithril view
+var Conditions = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return m("div.temperature", [
+      ["Sunny", "Cloudy", "Rain"].map(key =>
+        m("label", [
+          m("input", { type: "radio", name: "conditions", value: key,
+            checked: state.conditions === key,
+            onchange: () => actions.setConditions(key)
+          }),
+          key, " "
+        ])
+      )
+    ]);
+  }
+};
+```
+
+For the temperature, we have essentially the same code as we previously had as `app` and `App`,
+but as `temperature` and `Temperature`.
+
+```js
+var temperature = {
+  initialState: {
+    value: 22,
+    units: "C"
+  },
+  actions: function(update) {
+    return {
+      increment: function(amount) {
+        update({ temperature: PS({ value: S(current => current + amount) }) });
+      },
+      changeUnits: function(state) {
+        var newUnits = state.temperature.units === "C" ? "F" : "C";
+        var newValue = convert(state.temperature.value, newUnits);
+        update({ temperature: PS({ value: newValue, units: newUnits }) });
+      }
+    };
+  }
+};
+
+var Temperature = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    var myState = state.temperature;
+    return m("div.temperature", [
+      "Temperature: ", myState.value, m.trust("&deg;"), myState.units,
+      m("div",
+        m("button", { onclick: () => actions.increment( 1) }, "Increment"),
+        m("button", { onclick: () => actions.increment(-1) }, "Decrement")
+      ),
+      m("div",
+        m("button", { onclick: () => actions.changeUnits(state) }, "Change Units")
+      )
+    ]);
+  }
+};
+```
+
+Then, to assemble the components into the top-level app, we put together the state management
+code by combining the initial state and the actions of the components. The top-level view
+simply renders the components as regular Mithril components, passing `state` and `actions`
+to them.
+
+```js
+var app = {
+  initialState: {
+    conditions: conditions.initialState,
+    temperature: temperature.initialState,
+  },
+  actions: function(update) {
+    return Object.assign({},
+      conditions.actions(update),
+      temperature.actions(update)
+    );
+  }
+};
+
+var App = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return m("div", [
+      m(Conditions, { state, actions }),
+      m(Temperature, { state, actions })
+    ]);
+  }
+};
+```
+
+Here is the complete example:
 
 @flems mithril/06-components-02.js,app.html,app.css patchinko,mithril,mithril-stream 800
 
-@flems mithril/06-components-03.js,app.html,app.css patchinko,mithril,mithril-stream 800
+-----
 
-@flems mithril/06-components-04.js,app.html,app.css patchinko,mithril,mithril-stream 800
+@flems mithril/06-components-03.js,app.html,app.css patchinko,mithril,mithril-stream 800
 
 [Table of Contents](toc.html)
 

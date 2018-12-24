@@ -1,4 +1,32 @@
 /*global m, P, S, PS*/
+var conditions = {
+  initialState: "Sunny",
+  actions: function(update) {
+    return {
+      setConditions: function(conditions) {
+        update({ conditions: conditions });
+      }
+    };
+  }
+};
+
+var Conditions = {
+  view: function(vnode) {
+    var { state, actions } = vnode.attrs;
+    return m("div.temperature", [
+      ["Sunny", "Cloudy", "Rain"].map(key =>
+        m("label", [
+          m("input", { type: "radio", name: "conditions", value: key,
+            checked: state.conditions === key,
+            onchange: () => actions.setConditions(key)
+          }),
+          key, " "
+        ])
+      )
+    ]);
+  }
+};
+
 var convert = function(value, to) {
   return Math.round(
     (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
@@ -46,16 +74,23 @@ var Temperature = {
 
 var app = {
   initialState: {
+    conditions: conditions.initialState,
     air: temperature.initialState("Air"),
     water: temperature.initialState("Water")
   },
-  actions: temperature.actions
+  actions: function(update) {
+    return Object.assign({},
+      conditions.actions(update),
+      temperature.actions(update)
+    );
+  }
 };
 
 var App = {
   view: function(vnode) {
     var { state, actions } = vnode.attrs;
     return m("div", [
+      m(Conditions, { state, actions }),
       m(Temperature, { state, id: "air", actions }),
       m(Temperature, { state, id: "water", actions })
     ]);

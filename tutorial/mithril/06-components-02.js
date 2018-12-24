@@ -1,12 +1,6 @@
 /*global m, P, S, PS*/
-var conditionMap = {
-  SUNNY: "Sunny",
-  CLOUDY: "Cloudy",
-  RAIN: "Rain"
-};
-
 var conditions = {
-  initialState: "SUNNY",
+  initialState: "Sunny",
   actions: function(update) {
     return {
       setConditions: function(conditions) {
@@ -20,11 +14,13 @@ var Conditions = {
   view: function(vnode) {
     var { state, actions } = vnode.attrs;
     return m("div.temperature", [
-      Object.keys(conditionMap).map(key =>
+      ["Sunny", "Cloudy", "Rain"].map(key =>
         m("label", [
           m("input", { type: "radio", name: "conditions", value: key,
-            checked: state.conditions === key, onchange: () => actions.setConditions(key) }),
-          conditionMap[key], " "
+            checked: state.conditions === key,
+            onchange: () => actions.setConditions(key)
+          }),
+          key, " "
         ])
       )
     ]);
@@ -61,7 +57,7 @@ var Temperature = {
     var { state, actions } = vnode.attrs;
     var myState = state.temperature;
     return m("div.temperature", [
-      " Temperature: ", myState.value, m.trust("&deg;"), myState.units,
+      "Temperature: ", myState.value, m.trust("&deg;"), myState.units,
       m("div",
         m("button", { onclick: () => actions.increment( 1) }, "Increment"),
         m("button", { onclick: () => actions.increment(-1) }, "Decrement")
