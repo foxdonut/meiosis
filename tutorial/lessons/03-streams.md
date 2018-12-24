@@ -92,7 +92,7 @@ otherStream.map(function(value) {
 I invite you to get familiar with streams. Using the code box below, which has `flyd`
 already loaded, try the exercises.
 
-@flems react/04-streams-01.js flyd 550
+@flems code/03-streams-01.js flyd 550
 
 ### Exercises
 
@@ -107,7 +107,7 @@ already loaded, try the exercises.
 
 ### Solution
 
-@flems react/04-streams-01-solution.js flyd 800 hidden
+@flems code/03-streams-01-solution.js flyd 800 hidden
 
 ### Stream `scan`
 
@@ -222,7 +222,9 @@ onto the `update` stream.
 
 Putting it all together, we have the complete example as shown below.
 
-@flems code/03-streams-01.js flyd 800
+@flems code/03-streams-02.js flyd 800
+
+### Exercises
 
 Try it out: notice that `{"value":0}` appears in the output on the right. This is our initial
 state. Now, within the console, type and then press Enter:

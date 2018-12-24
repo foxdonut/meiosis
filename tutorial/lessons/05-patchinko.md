@@ -6,54 +6,12 @@
 
 ## 05 - Patchinko
 
-In the previous lesson, [04 - Streams](04-streams-mithril.html), we started setting up the
-Meiosis pattern:
+In the previous lesson, [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html),
+we set up the Meiosis pattern with an `update` stream of function patches.
 
-- an `update` stream of **patches**
-- a `states` stream of states, obtained with `scan` on the `update` stream and applying
-an **accumulator**
-- an `actions` object created by passing `update` and having functions that call `update`
-to trigger state changes
-- a component that receives the latest `state` and the `actions`.
-
-Our state had the following shape:
-
-```js
-{
-  value: 0
-}
-```
-
-Our patches were numbers such as `1` and `-1`, and our accumulator applied the patches to the
-state by adding the number to `state.value`.
-
-We are going to change our patches and accumulator function to be general-purpose, so that the
-shape of our state can be much more flexible, and our actions can issue patches to make all sorts
-of changes to the state.
-
-### A Temperature Example
-
-Let's build a temperature example with the following initial state:
-
-```js
-{
-  value: 22,
-  units: "C"
-}
-```
-
-We can increase and decrease the value, as well as change the units betwen `C` (Celsius) and
-`F` (Farenheit), converting the value in the process.
-
-We need to:
-
-- Decide the shape of our patches
-- Write an accumulator function that will use those patches to produce the updated state.
-
-In this section, we will use one approach - my personal favourite - using a library called
-Patchinko. In a [later section](08-function-patches-mithril.html), we will look at another
-approach, using function patches. The Meiosis pattern is flexible enough that you can use
-either of these approaches or even one of your own.
+In this section, we will use another approach - my personal favourite - using a library called
+Patchinko. The Meiosis pattern is flexible enough that you can use either of these approaches
+or even one of your own.
 
 ### Introducing Patchinko
 
