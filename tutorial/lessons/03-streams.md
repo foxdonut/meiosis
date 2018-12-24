@@ -1,5 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
+[< Previous](02-initial-state-and-actions.html) |
+[Next >](04-meiosis-with-function-patches.html) |
 [Table of Contents](toc.html)
 
 ## 03 - Streams
@@ -253,8 +255,11 @@ If you're using Mithril as a view library, you can use
 it works just like `flyd`. The only difference is that you call `m.stream()` instead of
 `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
-When you are ready, continue on to [05 - Patchinko](05-patchinko-react.html).
+When you are ready, continue on to
+[04 - Meiosis with Function Patches](04-meiosis-with-function-patches.htm).
 
+[< Previous](02-initial-state-and-actions.html) |
+[Next >](04-meiosis-with-function-patches.html) |
 [Table of Contents](toc.html)
 
 -----

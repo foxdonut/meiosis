@@ -1,11 +1,10 @@
- [Meiosis](https://meiosis.js.org) Tutorial
+# [Meiosis](https://meiosis.js.org) Tutorial
 
+[< Previous](06-meiosis-with-patchinko.html) |
+[Next >](08-using-mithril.html) |
 [Table of Contents](toc.html)
 
-## 06 - Components
-
-Let's combine the Meiosis pattern that we assembled at the end of
-[04 - Streams](04-streams-mithril.html) with [05 - Patchinko](05-patchinko-mithril.html).
+## 07 - Components
 
 We'll change the counter to a temperature example with a state shaped as follows:
 
@@ -237,6 +236,8 @@ Here is the complete example:
 
 @flems mithril/06-components-03.js,app.html,app.css patchinko,mithril,mithril-stream 800
 
+[< Previous](06-meiosis-with-patchinko.html) |
+[Next >](08-using-mithril.html) |
 [Table of Contents](toc.html)
 
 -----

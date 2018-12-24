@@ -1,5 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
+[< Previous](01-introduction.html) |
+[Next >](03-streams.html) |
 [Table of Contents](toc.html)
 
 ## 02 - Initial State and Actions
@@ -44,7 +46,9 @@ notable, we'll want to refresh the view when the state has been updated.
 In the next section, we'll look at a way to gain control over the flow of data. When you are
 ready, continue on to [03 - Streams](03-streams.html).
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) |
+[< Previous](01-introduction.html) |
+[Next >](03-streams.html)
 
 -----
 

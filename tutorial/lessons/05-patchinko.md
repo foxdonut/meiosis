@@ -1,8 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
+[< Previous](04-meiosis-with-function-patches.html) |
+[Next >](06-meiosis-with-patchinko.html) |
 [Table of Contents](toc.html)
 
-## 04 - Patchinko
+## 05 - Patchinko
 
 In the previous lesson, [04 - Streams](04-streams-mithril.html), we started setting up the
 Meiosis pattern:
@@ -253,7 +255,7 @@ P(
 Try it out. Using the code window below, try the following exercises. Use `console.log` to
 verify your answers.
 
-@flems code/04-patchinko-01.js patchinko 550
+@flems code/05-patchinko-01.js patchinko 550
 
 ### Exercises
 
@@ -265,7 +267,7 @@ opposite of what it was
 
 ### Solution
 
-@flems code/04-patchinko-01-solution.js patchinko 800 hidden
+@flems code/05-patchinko-01-solution.js patchinko 800 hidden
 
 ### Alternative: Using the Overloaded version of Patchinko
 
@@ -285,8 +287,10 @@ In a nutshell:
 - With a single **object** argument:`O({..})` does the same as `PS`
 - With no arguments, as the value of a property: `O` does the same as `D`.
 
-When you are ready, continue on to [06 - Components](06-components-mithril.html).
+When you are ready, continue on to [06 - Meiosis with Patchinko](06-meiosis-with-patchinko.html).
 
+[< Previous](04-meiosis-with-function-patches.html) |
+[Next >](06-meiosis-with-patchinko.html) |
 [Table of Contents](toc.html)
 
 -----

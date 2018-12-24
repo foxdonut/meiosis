@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
+[< Previous](03-streams.html) |
+[Next >](05-patchinko.html) |
 [Table of Contents](toc.html)
 
-## 04 - Streams
+## 04 - Meiosis with Function Patches
 
-In the previous lesson, [03 - Update State](03-update-state-react.html), we created an `increment`
+In the previous lesson, [03 - Streams](03-streams.html), we created an `increment`
 function to update the application state. We passed React's `setState` to the actions as a
 callback so that the view gets refreshed after updating the state.
 
@@ -247,8 +249,10 @@ Indeed, our patches are just numbers, and all the accumulator function does is a
 number to the state value. In the next two sections, we will look at more general-purpose
 patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-When you are ready, continue on to [05 - Patchinko](05-patchinko-react.html).
+When you are ready, continue on to [05 - Patchinko](05-patchinko.html).
 
+[< Previous](03-streams.html) |
+[Next >](05-patchinko.html) |
 [Table of Contents](toc.html)
 
 -----

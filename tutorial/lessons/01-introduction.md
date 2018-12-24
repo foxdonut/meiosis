@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[Table of Contents](toc.html)
+[Next >](02-initial-state-and-actions.html) | [Table of Contents](toc.html)
 
 ## 01 - Introduction and Goals
 
@@ -87,9 +87,9 @@ Finally, also note that you can also download and run the code examples for this
 by cloning the [github repository](https://github.com/foxdonut/meiosis).
 
 Let's get started! Please continue on to
-[02 - Initial State and Actions](02-initial-state-and-actions.html)
+[02 - Initial State and Actions](02-initial-state-and-actions.html).
 
-[Table of Contents](toc.html)
+[Next >](02-initial-state-and-actions.html) | [Table of Contents](toc.html)
 
 -----
 
