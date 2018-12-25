@@ -20,6 +20,17 @@ or even one of your own.
 use it to issue patches onto our `update` stream, and to produce the updated state from
 our accumulator function.
 
+Let's say we have this initial state:
+
+```js
+{
+  temperature: {
+    value: 22,
+    units: "C"
+  }
+}
+```
+
 Imagine that our patches are objects that describe how we want to update the state. If
 we want to change the temperature value to 23, we would call:
 
