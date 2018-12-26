@@ -1,13 +1,11 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](05-patchinko.html) |
-[Next >](07-components.html) |
+[< Previous](10-using-lit-html.html) |
 [Table of Contents](toc.html)
 
-## 06 - Meiosis with Patchinko
+## 11 - What's Next?
 
-[< Previous](05-patchinko.html) |
-[Next >](07-components.html) |
+[< Previous](10-using-lit-html.html) |
 [Table of Contents](toc.html)
 
 -----

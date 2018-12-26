@@ -1,13 +1,13 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](10-using-preact.html) |
-[Next >](12-whats-next.html) |
+[< Previous](09-using-preact.html) |
+[Next >](11-whats-next.html) |
 [Table of Contents](toc.html)
 
-## 11 - Using lit-html
+## 10 - Using lit-html
 
-[< Previous](10-using-preact.html) |
-[Next >](12-whats-next.html) |
+[< Previous](09-using-preact.html) |
+[Next >](11-whats-next.html) |
 [Table of Contents](toc.html)
 
 -----

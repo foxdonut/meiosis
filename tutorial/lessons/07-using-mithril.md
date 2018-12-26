@@ -1,11 +1,13 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](11-using-lit-html.html) |
+[< Previous](06-components.html) |
+[Next >](08-using-react.html) |
 [Table of Contents](toc.html)
 
-## 12 - What's Next?
+## 07 - Using Mithril
 
-[< Previous](11-using-lit-html.html) |
+[< Previous](06-components.html) |
+[Next >](08-using-react.html) |
 [Table of Contents](toc.html)
 
 -----

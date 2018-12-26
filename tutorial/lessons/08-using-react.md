@@ -1,13 +1,13 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](07-components.html) |
-[Next >](09-using-react.html) |
+[< Previous](07-using-mithril.html) |
+[Next >](09-using-preact.html) |
 [Table of Contents](toc.html)
 
-## 08 - Using Mithril
+## 08 - Using React
 
-[< Previous](07-components.html) |
-[Next >](09-using-react.html) |
+[< Previous](07-using-mithril.html) |
+[Next >](09-using-preact.html) |
 [Table of Contents](toc.html)
 
 -----

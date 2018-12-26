@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
 [< Previous](03-streams.html) |
-[Next >](05-patchinko.html) |
+[Next >](05-meiosis-with-patchinko.html) |
 [Table of Contents](toc.html)
 
 ## 04 - Meiosis with Function Patches
@@ -73,10 +73,11 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-[05 - Patchinko](05-patchinko.html)
+In the next section, [05 - Meiosis with Patchinko](05-meiosis-with-patchinko.html), we will look
+at an alternative to function patches.
 
 [< Previous](03-streams.html) |
-[Next >](05-patchinko.html) |
+[Next >](05-meiosis-with-patchinko.html) |
 [Table of Contents](toc.html)
 
 -----
