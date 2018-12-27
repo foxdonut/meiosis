@@ -25,20 +25,21 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: {
-    temperature: {
+  initialState: function(label) {
+    return {
+      label: label,
       value: 22,
       units: "C"
-    }
+    };
   },
   actions: function(update) {
     return {
-      increment: function(amount) {
-        update({ temperature: PS({ value: S(x => x + amount) }) });
+      increment: function(id, amount) {
+        update({ [id]: PS({ value: S(x => x + amount) }) });
       },
-      changeUnits: function() {
+      changeUnits: function(id) {
         update({
-          temperature: S(state => {
+          [id]: S(state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
@@ -55,7 +56,8 @@ var temperature = {
 var app = {
   initialState: Object.assign({},
     conditions.initialState,
-    temperature.initialState
+    { air: temperature.initialState("Air") },
+    { water: temperature.initialState("Water") }
   ),
   actions: function(update) {
     return Object.assign({},

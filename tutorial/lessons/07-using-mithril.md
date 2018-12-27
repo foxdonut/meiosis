@@ -6,6 +6,8 @@
 
 ## 07 - Using Mithril
 
+@flems code/07-using-mithril-01.js,app.html,app.css mithril,mithril-stream,patchinko 800 shown 60
+
 [< Previous](06-components.html) |
 [Next >](08-using-react.html) |
 [Table of Contents](toc.html)

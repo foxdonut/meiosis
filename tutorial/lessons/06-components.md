@@ -14,7 +14,10 @@ state is now:
 
 ```js
 {
-  conditions: "Sunny",
+  conditions: {
+    precipitations: false,
+    sky: "Sunny"
+  },
   temperature: {
     value: 22,
     units: "C"
@@ -31,12 +34,18 @@ For the conditions, we have:
 ```js
 var conditions = {
   initialState: {
-    conditions: "Sunny"
+    conditions: {
+      precipitations: false,
+      sky: "Sunny"
+    }
   },
   actions: function(update) {
     return {
-      setConditions: function(conditions) {
-        update({ conditions: conditions });
+      togglePrecipitations: function(value) {
+        update({ conditions: PS({ precipitations: value }) });
+      },
+      changeSky: function(value) {
+        update({ conditions: PS({ sky: value }) });
       }
     };
   }
@@ -96,6 +105,8 @@ var app = {
 Here is the complete example:
 
 @flems code/06-components-01.js flyd,patchinko 800
+
+@flems code/06-components-02.js flyd,patchinko 800
 
 When building components with the Meiosis pattern, we split code into two separate concerns:
 

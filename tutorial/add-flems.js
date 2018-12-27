@@ -58,6 +58,11 @@ filenames.forEach(source => {
       }
       style += "\"";
 
+      var middle = "75";
+      if (parts.length > 5) {
+        middle = parts[5];
+      }
+
       line = (hidden
         ? `<div style="margin-bottom: 24px;"><a href="javascript:"
              onclick="this.style.display='none';document.getElementById('flems${flemNumber}').style.display='block'"
@@ -67,7 +72,7 @@ filenames.forEach(source => {
     window.Flems(flems${flemNumber}, {
       files: ${fileString},
       links: ${linkString},
-      middle: 75
+      middle: ${middle}
     })
   </script>
       `;

@@ -23,3 +23,9 @@ button.dark:hover {
 .temperature, .humidity {
   margin-bottom: 20px;
 }
+input {
+  margin-right: 4px;
+}
+label {
+  margin-right: 8px;
+}
