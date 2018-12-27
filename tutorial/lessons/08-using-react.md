@@ -6,6 +6,8 @@
 
 ## 08 - Using React
 
+@flems code/08-using-react-01.jsx,app.html,app.css flyd,react,react-dom,patchinko 800 shown 60
+
 [< Previous](07-using-mithril.html) |
 [Next >](09-using-preact.html) |
 [Table of Contents](toc.html)

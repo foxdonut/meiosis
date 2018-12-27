@@ -19,12 +19,12 @@ var conditions = {
 };
 
 var skyOption = function({ state, actions, value, label }) {
-  return m("span",
+  return m("label",
     m("input", { type: "radio", id: value, name: "sky",
       value, checked: state.conditions.sky === value,
       onchange: evt => actions.changeSky(evt.target.value)
     }),
-    m("label", { htmlFor: value }, label)
+    label
   );
 };
 
@@ -36,14 +36,18 @@ var Conditions = {
         m("input", {
           type: "checkbox",
           checked: state.conditions.precipitations,
-          onchange: evt => actions.togglePrecipitations(evt.target.checked)
+          onchange: evt =>
+            actions.togglePrecipitations(evt.target.checked)
         }),
         "Precipitations"
       ),
       m("div",
-        skyOption({ state, actions, value: "SUNNY", label: "Sunny"}),
-        skyOption({ state, actions, value: "CLOUDY", label: "Cloudy"}),
-        skyOption({ state, actions, value: "MIX", label: "Mix of sun and clouds"})
+        skyOption({ state, actions, value: "SUNNY",
+          label: "Sunny"}),
+        skyOption({ state, actions, value: "CLOUDY",
+          label: "Cloudy"}),
+        skyOption({ state, actions, value: "MIX",
+          label: "Mix of sun/clouds"})
       )
     );
   }
@@ -91,11 +95,17 @@ var Temperature = {
       state[id].label, " Temperature: ",
       state[id].value, m.trust("&deg;"), state[id].units,
       m("div",
-        m("button", { onclick: () => actions.increment(id, 1) }, "Increment"),
-        m("button", { onclick: () => actions.increment(id,-1) }, "Decrement")
+        m("button",
+          { onclick: () => actions.increment(id, 1) },
+          "Increment"),
+        m("button",
+          { onclick: () => actions.increment(id,-1) },
+          "Decrement")
       ),
       m("div",
-        m("button", { onclick: () => actions.changeUnits(id) }, "Change Units")
+        m("button",
+          { onclick: () => actions.changeUnits(id) },
+          "Change Units")
       )
     );
   }
