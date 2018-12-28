@@ -6,6 +6,8 @@
 
 ## 10 - Using lit-html
 
+@flems code/10-using-lit-html-01.js,app.html,app.css flyd,patchinko 800 shown 60
+
 [< Previous](09-using-preact.html) |
 [Next >](11-whats-next.html) |
 [Table of Contents](toc.html)

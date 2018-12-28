@@ -6,11 +6,12 @@ var toDir = process.argv[3];
 var linkMap = {
   "flyd": "https://unpkg.com/flyd@0.2.8/flyd.js",
   "lodash": "https://unpkg.com/lodash@4.17.10",
-  "mithril": "https://unpkg.com/mithril@1.1.6",
-  "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
+  "mithril": "https://unpkg.com/mithril@2.0.0-rc.3",
+  "mithril-stream": "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
   "patchinko": "https://unpkg.com/patchinko@4.1.0/explicit.js",
-  "react": "https://unpkg.com/react@16.4.1/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js"
+  "preact": "https://unpkg.com/preact@8.4.2/dist/preact.js",
+  "react": "https://unpkg.com/react@16.7.0/umd/react.development.js",
+  "react-dom": "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"
 };
 
 var filenames = fs.readdirSync(fromDir);
