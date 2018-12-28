@@ -69,6 +69,18 @@ var foo = props.foo;
 var bar = props.bar;
 ```
 
+Finally, this:
+
+```javascript
+{ foo, bar }
+```
+
+is short for:
+
+```javascript
+{ foo: foo, bar: bar }
+```
+
 Meiosis documentation and examples outside of this tutorial use ES6 syntax.
 
 ### Embedded Code Examples

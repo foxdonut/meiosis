@@ -27,7 +27,7 @@ var convert = function(value, to) {
 var temperature = {
   initialState: function(label) {
     return {
-      label: label,
+      label,
       value: 22,
       units: "C"
     };

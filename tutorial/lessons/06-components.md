@@ -106,16 +106,37 @@ Here is the complete example:
 
 @flems code/06-components-01.js flyd,patchinko 800
 
+In this example, components designate a property for their state (`conditions`, `temperature`).
+What if we want to designate a property from outside the component, to make sure there are no
+conflicts? Even more significantly, what if we want to have multiple instances of a component?
+
+### Using IDs for Components
+
+Whether it's to manage properties from outside of components, or to use multiple instances of
+a component, we can use IDs and pass them to components. Then, instead of having a hardcoded
+property in the component, the ID is used when reading and updating state.
+
+Continuing the previous example, let's say we want to have two instances of the `temperature`
+component: one for the air temperature and one for the water temperature. We want to use the
+`air` and `water` properties in the application state.
+
 @flems code/06-components-02.js flyd,patchinko 800
 
-When building components with the Meiosis pattern, we split code into two separate concerns:
+### State Management and View code
 
-- **State management** code - initial state, actions that update the state
-- **View** code - view components that display the UI based on the state, and call actions.
+So far, all we have is state management code; there is no view code. This is on purpose:
+we've built our state management code independently. We can trigger actions and see the
+updated state. Our code is not tied to any particular view code.
+
+The view code is a separate concern. It will display the UI based on the state, and call
+actions.
 
 How you group together the code is up to you. In some cases, it might make sense to put state
 management and view code together into a folder for a component of your application. In other
 cases, you may prefer to have view components separate from the code that manages state.
+
+In the following sections, we will look at wiring up the Meiosis pattern to a handful of
+view libraries. Feel free to jump straight to the view library in which you are interested.
 
 - [07 - Using Mithril](07-using-mithril.html)
 - [08 - Using React](08-using-react.html)
