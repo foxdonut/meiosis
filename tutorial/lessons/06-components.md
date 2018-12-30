@@ -120,7 +120,85 @@ Continuing the previous example, let's say we want to have two instances of the 
 component: one for the air temperature and one for the water temperature. We want to use the
 `air` and `water` properties in the application state.
 
+First, we'll change `initialState` to a function so that we get a separate instance for
+each temperature component:
+
+```js
+var temperature = {
+  initialState: function() {
+    return {
+      value: 22,
+      units: "C"
+    };
+  },
+  // ...
+};
+```
+
+Next, we'll change the actions to accept an `id` parameter. Then, we use the `id` when issuing
+updates, so that we dyamically update the `id` property of the state:
+
+```js
+actions: function(update) {
+  return {
+    increment: function(id, amount) {
+      update({ [id]: PS({ value: S(x => x + amount) }) });
+    },
+    changeUnits: function(id) {
+      update({
+        [id]: S(state => {
+          var value = state.value;
+          var newUnits = state.units === "C" ? "F" : "C";
+          var newValue = convert(value, newUnits);
+          state.value = newValue;
+          state.units = newUnits;
+          return state;
+        })
+      });
+    }
+  };
+}
+```
+
+Notice the `{ [id]: ... }` syntax which creates an object with a dynamic `id` property.
+
+Finally, we create the initial state with two instances of `temperature`, one with `air`
+and one with `water`. The `actions` are created the same as before. Indeed, we just need
+one instance of the temperature actions; it's the `id` that we pass to the actions that
+indicates which instance to act upon.
+
+```js
+var app = {
+  initialState: Object.assign({},
+    conditions.initialState,
+    { air: temperature.initialState() },
+    { water: temperature.initialState() }
+  ),
+  actions: function(update) {
+    return Object.assign({},
+      conditions.actions(update),
+      temperature.actions(update)
+    );
+  }
+};
+```
+
+Here is the complete example:
+
 @flems code/06-components-02.js flyd,patchinko 800
+
+### Exercises
+
+Try it out: notice that the initial state appears in the output on the right. Within the console,
+type and then press Enter:
+
+`actions.changeSky("Cloudy")`
+
+`actions.increment("air", 2)`
+
+`actions.changeUnits("water")`
+
+In the output on the right, you'll see the updated states.
 
 ### State Management and View code
 

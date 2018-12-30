@@ -25,9 +25,8 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: function(label) {
+  initialState: function() {
     return {
-      label,
       value: 22,
       units: "C"
     };
@@ -56,8 +55,8 @@ var temperature = {
 var app = {
   initialState: Object.assign({},
     conditions.initialState,
-    { air: temperature.initialState("Air") },
-    { water: temperature.initialState("Water") }
+    { air: temperature.initialState() },
+    { water: temperature.initialState() }
   ),
   actions: function(update) {
     return Object.assign({},
