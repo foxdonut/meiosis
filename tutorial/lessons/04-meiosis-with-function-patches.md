@@ -60,6 +60,39 @@ Instead of using plain numbers as patches, which are limited to incrementing a c
 use **functions**. Indeed, we can pass functions onto the `update` stream and use them in the
 accumulator to update the state.
 
+These functions receive the current state as a parameter, and return the updated state.
+For example, to increment the temperature value:
+
+```js
+increment: function(amount) {
+  update(function(state) {
+    state.temperature.value += amount;
+    return state;
+  });
+}
+```
+
+Now we need to use these function patches in the accumulator function. Remember that the
+accumulator gets the current state and the incoming patch as parameters, and must return the
+updated state. Since the incoming patches are functions, we just need to call them:
+
+```js
+var states = flyd.scan(function(state, patch) {
+  return patch(state);
+}, temperature.initialState, update);
+```
+
+Using the ES6 arrow function syntax, this would be:
+
+```js
+var states = flyd.scan((state, patch) => patch(state),
+  temperature.initialState, update);
+```
+
+Either way, it's a simple way to create the stream of states.
+
+Putting it all together, we have:
+
 @flems code/04-meiosis-with-function-patches-01.js flyd 800
 
 ### Exercises

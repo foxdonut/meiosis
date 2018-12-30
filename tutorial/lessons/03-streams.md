@@ -254,7 +254,7 @@ it works just like `flyd`. The only difference is that you call `m.stream()` ins
 `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
 When you are ready, continue on to
-[04 - Meiosis with Function Patches](04-meiosis-with-function-patches.htm).
+[04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html).
 
 [< Previous](02-initial-state-and-actions.html) |
 [Next >](04-meiosis-with-function-patches.html) |

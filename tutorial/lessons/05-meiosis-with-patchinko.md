@@ -256,7 +256,62 @@ In a nutshell:
 - With a single **object** argument:`O({..})` does the same as `PS`
 - With no arguments, as the value of a property: `O` does the same as `D`.
 
+### Using Patchinko with Meiosis
+
+To use Patchinko with Meiosis, we can pass object patches onto the `update` stream and use
+them in the accumulator to update the state.
+
+For example, to increment the temperature value:
+
+```js
+increment: function(amount) {
+  update({
+    temperature: PS({
+      value: S(x => x + amount)
+    })
+  });
+}
+```
+
+Now we need to use these object patches in the accumulator function. Remember that the
+accumulator gets the current state and the incoming patch as parameters, and must return the
+updated state. We can use `P`:
+
+```js
+var states = flyd.scan(function(state, patch) {
+  return P(state, patch);
+}, temperature.initialState, update);
+```
+
+Notice that the accumulator function that we are passing is:
+
+```js
+function(state, patch) {
+  return P(state, patch);
+}
+```
+
+We have a function that takes (state, patch) and calls `P` with (state, patch). But `P` already
+does what we want, so we can pass it directly:
+
+```js
+var states = flyd.scan(P, temperature.initialState, update);
+```
+
+Putting it all together, we have:
+
 @flems code/05-meiosis-with-patchinko-02.js flyd,patchinko 800
+
+### Exercises
+
+Try it out: notice that the initial state appears in the output on the right. Within the console,
+type and then press Enter:
+
+`actions.increment(2)`
+
+`actions.changeUnits()`
+
+In the output on the right, you'll see the updated states.
 
 When you are ready, continue on to [06 - Components](06-components.html).
 
