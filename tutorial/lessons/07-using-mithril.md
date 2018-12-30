@@ -6,11 +6,11 @@
 
 ## 07 - Using Mithril
 
-In the previous lesson, [06 - Components](06-components.html), we created the state management
+In the [06 - Components](06-components.html) lesson, we created the state management
 code for an example with a `conditions` component and two temperature components, `air` and
 `water`.
 
-In this section, we'll wire this up to Mithril.
+In this section, we'll wire this up to [Mithril](http://mithril.js.org/).
 
 ### Mithril Stream
 

@@ -1,11 +1,18 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](10-using-lit-html.html) |
 [Table of Contents](toc.html)
 
 ## 11 - What's Next?
 
-[< Previous](10-using-lit-html.html) |
+This concludes the Meiosis tutorial. Where do you go from here?
+
+- You will find more articles in the [Documentation](https://meiosis.js.org/docs/toc.html).
+- See also more [Examples](https://meiosis.js.org/examples.html).
+- The [Meiosis Tracer](https://meiosis.js.org/tracer) is a time-travel development tool.
+- Use the [Gitter chat](https://gitter.im/foxdonut/meiosis) to discuss and ask questions.
+
+Thank you for reading, I hope you enjoy Meiosis!
+
 [Table of Contents](toc.html)
 
 -----
