@@ -206,8 +206,15 @@ So far, all we have is state management code; there is no view code. This is on 
 we've built our state management code independently. We can trigger actions and see the
 updated state. Our code is not tied to any particular view code.
 
+Having independent state management code makes it easier to test and debug. You can organize
+and assemble actions as you prefer. For example, if you find that the number of actions in
+your application is getting large, you might decide to _namespace_ your actions by grouping
+them under properties, such as `actions.conditions.changeSky` and
+`actions.temperature.increment`.
+
 The view code is a separate concern. It will display the UI based on the state, and call
-actions.
+actions. No matter which view library you use, it is easy to wire up because views only
+depend on `state` and `actions`.
 
 How you group together the code is up to you. In some cases, it might make sense to put state
 management and view code together into a folder for a component of your application. In other
