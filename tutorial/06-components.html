@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meiosis Tutorial</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="skeleton.css">
+    <link rel="stylesheet" href="prism.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="container">
+    <script src="prism.js" type="text/javascript"></script>
+    <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+    <h1><a href="https://meiosis.js.org">Meiosis</a> Tutorial</h1><p><a href="05-meiosis-with-patchinko.html">&lt; Previous</a> |
+<a href="07-using-mithril.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<h2>06 - Components</h2><h3>Building Components</h3><p>Let&#39;s continue our previous example. We already had a &quot;temperature&quot; component. We&#39;ll add a
+&quot;conditions&quot; component for the current conditions (sunny, cloudy, rain) so that our initial
+state is now:</p>
+<pre><code class="language-js">{
+  conditions: {
+    precipitations: false,
+    sky: &quot;Sunny&quot;
+  },
+  temperature: {
+    value: 22,
+    units: &quot;C&quot;
+  }
+}</code></pre>
+<p>Each component will separately indicate its initial state and the actions that it provides.
+At the top-level app, we&#39;ll assemble these together into the complete initial state and set
+of actions.</p>
+<p>For the conditions, we have:</p>
+<pre><code class="language-js">var conditions = {
+  initialState: {
+    conditions: {
+      precipitations: false,
+      sky: &quot;Sunny&quot;
+    }
+  },
+  actions: function(update) {
+    return {
+      togglePrecipitations: function(value) {
+        update({ conditions: PS({ precipitations: value }) });
+      },
+      changeSky: function(value) {
+        update({ conditions: PS({ sky: value }) });
+      }
+    };
+  }
+};</code></pre>
+<p>For the temperature, we have essentially the same code as we previously had.</p>
+<pre><code class="language-js">var temperature = {
+  initialState: {
+    temperature: {
+      value: 22,
+      units: &quot;C&quot;
+    }
+  },
+  actions: function(update) {
+    return {
+      increment: function(amount) {
+        update({ temperature: PS({ value: S(x =&gt; x + amount) }) });
+      },
+      changeUnits: function() {
+        update({
+          temperature: S(state =&gt; {
+            var value = state.value;
+            var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
+            var newValue = convert(value, newUnits);
+            state.value = newValue;
+            state.units = newUnits;
+            return state;
+          })
+        });
+      }
+    };
+  }
+};</code></pre>
+<p>Then, to assemble the components into the top-level app, we put together the state management
+code by combining the initial state and the actions of the components.</p>
+<pre><code class="language-js">var app = {
+  initialState: Object.assign({},
+    conditions.initialState,
+    temperature.initialState
+  ),
+  actions: function(update) {
+    return Object.assign({},
+      conditions.actions(update),
+      temperature.actions(update)
+    );
+  }
+};</code></pre>
+<p>Here is the complete example:</p>
+<div id="flems1" class="flemscode" style="height:800px"></div>
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "06-components-01.js", content: "/*global flyd, P, S, PS*/\nvar conditions = {\n  initialState: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: PS({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: PS({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n  );\n};\n\nvar temperature = {\n  initialState: {\n    temperature: {\n      value: 22,\n      units: \"C\"\n    }\n  },\n  actions: function(update) {\n    return {\n      increment: function(amount) {\n        update({ temperature: PS({ value: S(x => x + amount) }) });\n      },\n      changeUnits: function() {\n        update({\n          temperature: S(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initialState: Object.assign({},\n    conditions.initialState,\n    temperature.initialState\n  ),\n  actions: function(update) {\n    return Object.assign({},\n      conditions.actions(update),\n      temperature.actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(P, app.initialState, update);\n\nvar actions = app.actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\");\n});\n"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/explicit.js"}],
+      middle: 75
+    })
+  </script>
+
+
+<p>In this example, components designate a property for their state (<code>conditions</code>, <code>temperature</code>).
+What if we want to designate a property from outside the component, to make sure there are no
+conflicts? Even more significantly, what if we want to have multiple instances of a component?</p>
+<h3>Using IDs for Components</h3><p>Whether it&#39;s to manage properties from outside of components, or to use multiple instances of
+a component, we can use IDs and pass them to components. Then, instead of having a hardcoded
+property in the component, the ID is used when reading and updating state.</p>
+<p>Continuing the previous example, let&#39;s say we want to have two instances of the <code>temperature</code>
+component: one for the air temperature and one for the water temperature. We want to use the
+<code>air</code> and <code>water</code> properties in the application state.</p>
+<p>First, we&#39;ll change <code>initialState</code> to a function so that we get a separate instance for
+each temperature component:</p>
+<pre><code class="language-js">var temperature = {
+  initialState: function() {
+    return {
+      value: 22,
+      units: &quot;C&quot;
+    };
+  },
+  // ...
+};</code></pre>
+<p>Next, we&#39;ll change the actions to accept an <code>id</code> parameter. Then, we use the <code>id</code> when issuing
+updates, so that we dyamically update the <code>id</code> property of the state:</p>
+<pre><code class="language-js">actions: function(update) {
+  return {
+    increment: function(id, amount) {
+      update({ [id]: PS({ value: S(x =&gt; x + amount) }) });
+    },
+    changeUnits: function(id) {
+      update({
+        [id]: S(state =&gt; {
+          var value = state.value;
+          var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
+          var newValue = convert(value, newUnits);
+          state.value = newValue;
+          state.units = newUnits;
+          return state;
+        })
+      });
+    }
+  };
+}</code></pre>
+<p>Notice the <code>{ [id]: ... }</code> syntax which creates an object with a dynamic <code>id</code> property.</p>
+<p>Finally, we create the initial state with two instances of <code>temperature</code>, one with <code>air</code>
+and one with <code>water</code>. The <code>actions</code> are created the same as before. Indeed, we just need
+one instance of the temperature actions; it&#39;s the <code>id</code> that we pass to the actions that
+indicates which instance to act upon.</p>
+<pre><code class="language-js">var app = {
+  initialState: Object.assign({},
+    conditions.initialState,
+    { air: temperature.initialState() },
+    { water: temperature.initialState() }
+  ),
+  actions: function(update) {
+    return Object.assign({},
+      conditions.actions(update),
+      temperature.actions(update)
+    );
+  }
+};</code></pre>
+<p>Here is the complete example:</p>
+<div id="flems2" class="flemscode" style="height:800px"></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "06-components-02.js", content: "/*global flyd, P, S, PS*/\nvar conditions = {\n  initialState: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: PS({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: PS({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n  );\n};\n\nvar temperature = {\n  initialState: function() {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: PS({ value: S(x => x + amount) }) });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: S(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initialState: Object.assign({},\n    conditions.initialState,\n    { air: temperature.initialState() },\n    { water: temperature.initialState() }\n  ),\n  actions: function(update) {\n    return Object.assign({},\n      conditions.actions(update),\n      temperature.actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(P, app.initialState, update);\n\nvar actions = app.actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\");\n});\n"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/explicit.js"}],
+      middle: 75
+    })
+  </script>
+
+
+<h3>Exercises</h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
+type and then press Enter:</p>
+<p><code>actions.changeSky(&quot;Cloudy&quot;)</code></p>
+<p><code>actions.increment(&quot;air&quot;, 2)</code></p>
+<p><code>actions.changeUnits(&quot;water&quot;)</code></p>
+<p>In the output on the right, you&#39;ll see the updated states.</p>
+<h3>State Management and View code</h3><p>So far, all we have is state management code; there is no view code. This is on purpose:
+we&#39;ve built our state management code independently. We can trigger actions and see the
+updated state. Our code is not tied to any particular view code.</p>
+<p>Having independent state management code makes it easier to test and debug. You can organize
+and assemble actions as you prefer. For example, if you find that the number of actions in
+your application is getting large, you might decide to <em>namespace</em> your actions by grouping
+them under properties, such as <code>actions.conditions.changeSky</code> and
+<code>actions.temperature.increment</code>.</p>
+<p>The view code is a separate concern. It will display the UI based on the state, and call
+actions. No matter which view library you use, it is easy to wire up because views only
+depend on <code>state</code> and <code>actions</code>.</p>
+<p>How you group together the code is up to you. In some cases, it might make sense to put state
+management and view code together into a folder for a component of your application. In other
+cases, you may prefer to have view components separate from the code that manages state.</p>
+<p>In the following sections, we will look at wiring up the Meiosis pattern to a handful of
+view libraries. Feel free to jump straight to the view library in which you are interested.</p>
+<ul>
+<li><a href="07-using-mithril.html">07 - Using Mithril</a></li>
+<li><a href="08-using-react.html">08 - Using React</a></li>
+<li><a href="09-using-preact.html">09 - Using Preact</a></li>
+<li><a href="10-using-lit-html.html">10 - Using lit-html</a></li>
+</ul>
+<p><a href="05-meiosis-with-patchinko.html">&lt; Previous</a> |
+<a href="07-using-mithril.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+  </body>
+</html>
