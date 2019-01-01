@@ -13,8 +13,8 @@ All you need is a simple stream library such as Flyd or Mithril Stream in one pl
 the pattern. You do not need anything else, not even Meiosis itself. You could even implement the
 stream yourself with a handful of lines of code. Zero dependencies!
 
-Easily use the pattern with your favourite virtual dom library (React, Mithril, Snabbdom,
-Inferno, Preact, domvm) or even lit-html, hyperHTML, etc.
+Easily use the pattern with your favourite view library: React, Preact, Mithril, lit-html,
+and so on.
 
 ## Ready to have a closer look?
 
@@ -51,6 +51,16 @@ using search engines.
 Meiosis is the result of a whole adventure of exploring other architectures. Credit goes to their authors; I am grateful
 for their work and that of their respective communities.
 
+- [Mithril](http://mithril.js.org/) and its fantastic community. Special thanks to
+[James Forbes](https://twitter.com/james_a_forbes),
+[Barney Carroll](https://github.com/barneycarroll),
+[Stefan Thon](https://github.com/smuemd),
+[Rasmus Porsager](https://github.com/porsager),
+[Devin Ivy](https://github.com/devinivy),
+[Scotty Simpson](https://github.com/CreaturesInUnitards),
+[Daniel Loomer](https://github.com/fuzetsu),
+and many others, for all their help, sharing their knowledge, and discussing ideas!
+
 - [CycleJS driven by state](http://www.christianalfoni.com/articles/2016_04_06_CycleJS-driven-by-state)
 by [Christian Alfoni](http://www.christianalfoni.com/). This article was very inspirational to me and
 I am very grateful to Christian! I also find Christian's other projects very interesting, including
@@ -66,31 +76,8 @@ and willing to share his knowledge and experience.
 [Flyd](https://github.com/paldepind/flyd),
 [Snabbdom](https://github.com/snabbdom/snabbdom), and others. I use Flyd as a stream library for Meiosis.
 
-- [Mithril](http://mithril.js.org) and its fantastic community. Special thanks to
-[James Forbes](https://twitter.com/james_a_forbes) for all the help, sharing your knowledge, and
-discussing ideas!
-
-- [Vesa Karvonen](https://twitter.com/VesaKarvonen), creator of
-[partial.lenses](https://github.com/calmm-js/partial.lenses) and
-[Calmm](https://github.com/calmm-js/documentation).
-
-- [The Elm Architecture](http://guide.elm-lang.org/architecture/index.html), by
-[Evan Czaplicki](http://evan.czaplicki.us/home).
-
-- [Redux](http://redux.js.org/), by
-[Dan Abramov](https://github.com/gaearon).
-
 - [hyperapp](https://github.com/hyperapp/hyperapp), by
 [Jorge Bucaran](https://twitter.com/jbucaran).
-
-- [CycleJS](http://cycle.js.org/), by
-[André Staltz/Medeiros](http://staltz.com/).
-
-- Other reactive Libraries such as
-[RxJS](https://github.com/ReactiveX/rxjs),
-[Kefir](https://rpominov.github.io/kefir/),
-[most](https://github.com/cujojs/most), and
-[Bacon.js](https://baconjs.github.io/).
 
 ----
 
