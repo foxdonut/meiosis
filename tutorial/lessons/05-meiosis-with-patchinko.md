@@ -16,7 +16,7 @@ or even one of your own.
 ### Introducing Patchinko
 
 [Patchinko](https://github.com/barneycarroll/patchinko) is a brilliant utility that
-[Barney Carroll](http://barneycarroll.com/) wrote in just 30-some lines of code. We will
+[Barney Carroll](https://github.com/barneycarroll) wrote in just 30-some lines of code. We will
 use it to issue patches onto our `update` stream, and to produce the updated state from
 our accumulator function.
 

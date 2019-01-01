@@ -53,12 +53,12 @@ var temperature = {
 };
 
 var app = {
-  initialState: Object.assign({},
+  initialState: P({},
     conditions.initialState,
     temperature.initialState
   ),
   actions: function(update) {
-    return Object.assign({},
+    return P({},
       conditions.actions(update),
       temperature.actions(update)
     );

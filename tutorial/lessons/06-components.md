@@ -89,12 +89,12 @@ code by combining the initial state and the actions of the components.
 
 ```js
 var app = {
-  initialState: Object.assign({},
+  initialState: P({},
     conditions.initialState,
     temperature.initialState
   ),
   actions: function(update) {
-    return Object.assign({},
+    return P({},
       conditions.actions(update),
       temperature.actions(update)
     );
@@ -169,13 +169,13 @@ indicates which instance to act upon.
 
 ```js
 var app = {
-  initialState: Object.assign({},
+  initialState: P({},
     conditions.initialState,
     { air: temperature.initialState() },
     { water: temperature.initialState() }
   ),
   actions: function(update) {
-    return Object.assign({},
+    return P({},
       conditions.actions(update),
       temperature.actions(update)
     );

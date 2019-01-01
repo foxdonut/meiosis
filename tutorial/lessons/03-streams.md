@@ -161,7 +161,7 @@ below:
 
 ### Using `scan`
 
-Now that we streams, `map`, and `scan`, we can use themt to manage our application state.
+Now that have we streams, `map`, and `scan`, we can use themt to manage our application state.
 Previously, we had:
 
 ```js
