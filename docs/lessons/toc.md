@@ -5,10 +5,11 @@
 _Please note that the Meiosis documentation is currently under construction._
 
 - [The Meiosis Pattern](the-meiosis-pattern.html)
-- [Services](services.html)
-- [Using a Router](using-a-router.html)
-- [Preventing Re-renders](preventing-re-renders.html)
-- [SAM Pattern](sam-pattern.html)
+- [Services](services.html) (coming soon)
+- [Using a Router](using-a-router.html) (coming soon)
+- [Preventing Re-renders](preventing-re-renders.html) (coming soon)
+- [Unit Testing](unit-testing.html) (coming soon)
+- [SAM Pattern](sam-pattern.html) (coming soon)
 
 -----
 
