@@ -159,8 +159,8 @@ const App = {
 };
 
 const update = m.stream();
-const states = m.stream.scan(P,
-  /*(state, patch) => P({}, state, patch),*/ app.initialState(), update);
+const states = m.stream.scan((state, patch) => P({}, state, patch),
+  app.initialState(), update);
 
 const actions = app.actions(update);
 m.mount(document.getElementById("app"),

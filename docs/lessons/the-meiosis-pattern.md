@@ -28,17 +28,17 @@ const app = {
   actions: update => {
     return ...
   }
-}
+};
 
-const update = flyd.stream()
+const update = flyd.stream();
 
 // Using Patchinko:
-const states = flyd.scan(P, app.initialState(), update)
+const states = flyd.scan(P, app.initialState(), update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) => f(x), app.initialState(), update)
+const states = flyd.scan((x, f) => f(x), app.initialState(), update);
 
-const actions = app.actions(update)
+const actions = app.actions(update);
 ```
 
 Then, pass `state` and `actions` to views.
@@ -51,11 +51,11 @@ const App = {
     // render view according to state, call actions to trigger changes
     // pass { state, actions } to other components.
   }
-}
+};
 
 m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), actions })
-})
+});
 ```
 
 ### Using React
@@ -63,23 +63,23 @@ m.mount(document.getElementById("app"), {
 ```js
 class App extends React.Component {
   constructor(props) {
-    super(props)
-    this.state = props.states()
+    super(props);
+    this.state = props.states();
   }
   componentDidMount() {
-    const setState = this.setState.bind(this)
-    this.props.states.map(state => { setState(state) })
+    const setState = this.setState.bind(this);
+    this.props.states.map(state => { setState(state); })
   }
   render() {
-    const state = this.state
-    const { actions } = this.props
+    const state = this.state;
+    const { actions } = this.props;
     // render view according to state, call actions to trigger changes
     // pass state={state} actions={actions} to other components.
   }
 }
 
 ReactDOM.render(<App states={states} actions={actions} />,
-  document.getElementById("app"))
+  document.getElementById("app"));
 ```
 
 ### Using Preact
@@ -87,19 +87,19 @@ ReactDOM.render(<App states={states} actions={actions} />,
 ```js
 class App extends preact.Component {
   componentWillMount() {
-    const setState = this.setState.bind(this)
-    this.props.states.map(state => { setState(state) })
+    const setState = this.setState.bind(this);
+    this.props.states.map(state => { setState(state); });
   }
   render() {
-    const state = this.state
-    const { actions } = this.props
+    const state = this.state;
+    const { actions } = this.props;
     // render view according to state, call actions to trigger changes
     // pass state={state} actions={actions} to other components.
   }
 }
 
 preact.render(<App states={states} actions={actions} />,
-  document.getElementById("app"))
+  document.getElementById("app"));
 ```
 
 ### Using lit-html
@@ -108,10 +108,10 @@ preact.render(<App states={states} actions={actions} />,
 const App = (state, actions) => {
   // render view according to state, call actions to trigger changes
   // pass (state, actions) to other view functions.
-}
+};
 
-const element = document.getElementById("app")
-states.map(state => render(App(state, actions), element))
+const element = document.getElementById("app");
+states.map(state => render(App(state, actions), element));
 ```
 
 ### Components

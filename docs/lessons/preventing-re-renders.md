@@ -34,10 +34,30 @@ actions: update => ({
 })
 ```
 
+For patches that use `S`, we can use `P({}, ...)` when returning the result in order to create
+a new object instance. For example:
 
+```js
+changeUnits: id => evt => {
+  evt.preventDefault();
+  update({ [id]: S(state => {
+    const newUnits = state.units === "C" ? "F" : "C";
+    const newValue = convert(state.value, newUnits);
+    return P({}, state, { units: newUnits, value: newValue });
+  }) });
+}
+```
 
+Finally, we need to change the accumulator function from `P` to
+`(state, patch) => P({}, state, patch)`. Again, this is to ensure we are creating new object
+instances instead of mutating the existing state object.
 
-Continue reading for the React version, or
+```js
+const states = m.stream.scan((state, patch) => P({}, state, patch),
+  app.initialState(), update);
+```
+
+We are now ready to prevent re-renders. Continue reading for the React version, or
 [click here to skip to the Mithril version](#mithril_prevent_re_render).
 
 ### React version
@@ -45,36 +65,17 @@ Continue reading for the React version, or
 We can use React's
 [shouldComponentUpdate](https://reactjs.org/docs/react-component.html#shouldcomponentupdate)
 lifecycle method to prevent a component from re-rendering when the state has not changed. For
-this to work, we need to make sure to produce **new object instances** from `update()` instead
-of mutating the existing object.
+this to work, we need to compare the component's next state to the current state.
 
-For example, instead of issuing an update like so:
-
-```js
-update(state => Object.assign(state, { value: evt.target.value }))
-```
-
-We switch to:
+The next props get passed as a parameter to the `shouldComponentUpdate` method. From them we
+can extract the `state` and use the `id` to get the component's state. Then, we compare to
+the current state using `this.props`. We return `true` or `false` depending on whether or
+not they are the same:
 
 ```js
-update(state => Object.assign({}, state, { value: evt.target.value }))
-```
-
-This creates a new object instance instead of mutating the state.
-
-Next, instead of extending `React.Component`:
-
-```js
-return class extends React.Component {
-  //...
-}
-```
-
-We now extend `React.PureComponent`:
-
-```js
-return class extends React.PureComponent {
-  //...
+shouldComponentUpdate(nextProps) {
+  return nextProps.state[nextProps.id] !==
+    this.props.state[this.props.id];
 }
 ```
 
@@ -96,20 +97,9 @@ re-rendered.
 We can use Mithril's
 [onbeforeupdate lifecycle method](https://mithril.js.org/lifecycle-methods.html#onbeforeupdate)
 to prevent a component from re-rendering when the state has not changed. For this to work, we
-need to make sure to produce **new object instances** from `update()` instead of mutating the
-existing object.
+need to compare the component's next state to the current state.
 
-Because we are using [Patchinko](https://github.com/barneycarroll/patchinko) to issue and
-handle state updates, this is simply a matter of switching from
-[overloaded](https://github.com/barneycarroll/patchinko#overloaded) to
-[immutable](https://github.com/barneycarroll/patchinko#immutable).
-This creates a new object instance instead of mutating the state.
-
-> In case you missed it, refer to the
-[Documentation section on using Patchinko](03-Model-and-Nesting-C-Patchinko.html).
-
-Next, we can write a simple helper function that checks whether the component's state
-has changed:
+We can write a simple helper function that checks whether the component's state has changed:
 
 ```js
 const checkIfStateChanged = (next, prev) =>
@@ -117,7 +107,7 @@ const checkIfStateChanged = (next, prev) =>
   prev.attrs.state[prev.attrs.id];
 ```
 
-Finally, we add the `onbeforeupdate` lifecycle method to the component:
+Then, we add the `onbeforeupdate` lifecycle method to the component:
 
 ```js
 onbeforeupdate: checkIfStateChanged
