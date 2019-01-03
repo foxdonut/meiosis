@@ -35,69 +35,69 @@ or your own patches.</li>
   actions: update =&gt; {
     return ...
   }
-}
+};
 
-const update = flyd.stream()
+const update = flyd.stream();
 
 // Using Patchinko:
-const states = flyd.scan(P, app.initialState(), update)
+const states = flyd.scan(P, app.initialState(), update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update)
+const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);
 
-const actions = app.actions(update)</code></pre>
+const actions = app.actions(update);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
 <h3>Using Mithril</h3><pre><code class="language-js">const App = {
   view: function({ attrs: { state, actions } }) {
     // render view according to state, call actions to trigger changes
     // pass { state, actions } to other components.
   }
-}
+};
 
 m.mount(document.getElementById(&quot;app&quot;), {
   view: () =&gt; m(App, { state: states(), actions })
-})</code></pre>
+});</code></pre>
 <h3>Using React</h3><pre><code class="language-js">class App extends React.Component {
   constructor(props) {
-    super(props)
-    this.state = props.states()
+    super(props);
+    this.state = props.states();
   }
   componentDidMount() {
-    const setState = this.setState.bind(this)
-    this.props.states.map(state =&gt; { setState(state) })
+    const setState = this.setState.bind(this);
+    this.props.states.map(state =&gt; { setState(state); })
   }
   render() {
-    const state = this.state
-    const { actions } = this.props
+    const state = this.state;
+    const { actions } = this.props;
     // render view according to state, call actions to trigger changes
     // pass state={state} actions={actions} to other components.
   }
 }
 
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
-  document.getElementById(&quot;app&quot;))</code></pre>
+  document.getElementById(&quot;app&quot;));</code></pre>
 <h3>Using Preact</h3><pre><code class="language-js">class App extends preact.Component {
   componentWillMount() {
-    const setState = this.setState.bind(this)
-    this.props.states.map(state =&gt; { setState(state) })
+    const setState = this.setState.bind(this);
+    this.props.states.map(state =&gt; { setState(state); });
   }
   render() {
-    const state = this.state
-    const { actions } = this.props
+    const state = this.state;
+    const { actions } = this.props;
     // render view according to state, call actions to trigger changes
     // pass state={state} actions={actions} to other components.
   }
 }
 
 preact.render(&lt;App states={states} actions={actions} /&gt;,
-  document.getElementById(&quot;app&quot;))</code></pre>
+  document.getElementById(&quot;app&quot;));</code></pre>
 <h3>Using lit-html</h3><pre><code class="language-js">const App = (state, actions) =&gt; {
   // render view according to state, call actions to trigger changes
   // pass (state, actions) to other view functions.
-}
+};
 
-const element = document.getElementById(&quot;app&quot;)
-states.map(state =&gt; render(App(state, actions), element))</code></pre>
+const element = document.getElementById(&quot;app&quot;);
+states.map(state =&gt; render(App(state, actions), element));</code></pre>
 <h3>Components</h3><p>To use multiple instances of a component, or to specify the state property outside of a component,
 pass an <code>id</code> along with <code>state</code> and <code>actions</code> to views. Use <code>state[id]</code> to read the component&#39;s
 state, pass the <code>id</code> to <code>actions</code>, and use the <code>id</code> in actions to issue patches that update the
