@@ -11,13 +11,12 @@ var linkMap = {
   "lodash": "https://unpkg.com/lodash@4.17.10",
   "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
   "meiosis-tracer": "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
-  "mithril": "https://unpkg.com/mithril@1.1.6",
-  "mithril-stream": "https://unpkg.com/mithril-stream@1.1.0",
-  "patchinko": "https://unpkg.com/patchinko@3.2.1/overloaded.js",
-  "patchinko-immutable": "https://unpkg.com/patchinko@3.2.1/immutable.js",
+  "mithril": "https://unpkg.com/mithril@2.0.0-rc.3",
+  "mithril-stream": "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
+  "patchinko": "https://unpkg.com/patchinko@4.1.0/explicit.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
-  "react": "https://unpkg.com/react@16.4.1/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.4.1/umd/react-dom.development.js",
+  "react": "https://unpkg.com/react@16.7.0/umd/react.development.js",
+  "react-dom": "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js",
   "seview": "https://unpkg.com/seview"
 };
 
