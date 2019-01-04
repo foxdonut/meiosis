@@ -247,8 +247,8 @@ Indeed, our patches are just numbers, and all the accumulator function does is a
 number to the state value. In the upcoming sections, we will look at more general-purpose
 patches and accumulator functions, fully implementing the Meiosis pattern in the process.
 
-> **A Note about Using Mithril Streams**.
-If you're using Mithril as a view library, you can use
+> **A Note about Using Mithril Streams**:
+if you're using Mithril as a view library, you can use
 [Mithril Stream](https://mithril.js.org/stream.html) as a stream library. For our purposes,
 it works just like `flyd`. The only difference is that you call `m.stream()` instead of
 `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.

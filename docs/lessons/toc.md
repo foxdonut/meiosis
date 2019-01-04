@@ -2,7 +2,8 @@
 
 ## Table of Contents
 
-_Please note that the Meiosis documentation is currently under construction._
+> IMPORTANT: For a complete explanation of the Meiosis Pattern,
+please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern](the-meiosis-pattern.html)
 - [Services](services.html) (coming soon)

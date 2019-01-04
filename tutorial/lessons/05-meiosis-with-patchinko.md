@@ -238,23 +238,23 @@ opposite of what it was
 
 @flems code/05-meiosis-with-patchinko-01-solution.js patchinko 800 hidden
 
-### Alternative: Using the Overloaded version of Patchinko
-
-We are using the
+> **Alternative: Using the Overloaded version of Patchinko**
+>
+> We are using the
 [explicit](https://github.com/barneycarroll/patchinko#explicit) version of Patchinko, which
 provides `P`, `S`, `PS`, and `D`.
-
-If you prefer, you can also use the
+>
+> If you prefer, you can also use the
 [overloaded](https://github.com/barneycarroll/patchinko#overloaded) version, which provides
 a single function, `O`, that uses what you pass to the function to determine whether to do the
 equivalent of `P`, `S`, `PS`, or `D`.
-
-In a nutshell:
-
-- With multiple arguments: `O(target, patch)`, does the same as `P`
-- With a single **function** argument: `O(x => y)` does the same as `S`
-- With a single **object** argument:`O({..})` does the same as `PS`
-- With no arguments, as the value of a property: `O` does the same as `D`.
+>
+> In a nutshell:
+>
+> - With multiple arguments: `O(target, patch)`, does the same as `P`
+> - With a single **function** argument: `O(x => y)` does the same as `S`
+> - With a single **object** argument:`O({..})` does the same as `PS`
+> - With no arguments, as the value of a property: `O` does the same as `D`.
 
 ### Using Patchinko with Meiosis
 

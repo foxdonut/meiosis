@@ -22,8 +22,15 @@ h4 {
   height: 500px;
 }
 blockquote {
-  padding-left: 20px;
-  border-left: 2px solid gray;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
+  margin-left: 0;
+  border: 2px solid #FFAA99;
+  background-color: #FFFFEE;
+}
+blockquote > p {
+  margin-bottom: 1rem;
 }
 img {
   max-width: 100%;
