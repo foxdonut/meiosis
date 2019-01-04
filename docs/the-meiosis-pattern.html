@@ -76,6 +76,32 @@ m.mount(document.getElementById(&quot;app&quot;), {
 
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
+<p>This setup initally calls <code>render()</code> twice. If this is problematic in your application,
+we can use a <code>skippedFirst</code> flag:</p>
+<pre><code class="language-js">class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.states();
+    this.skippedFirst = false;
+  }
+  componentDidMount() {
+    const setState = this.setState.bind(this);
+    this.props.states.map(state =&gt; {
+      if (this.skippedFirst) {
+        setState(state);
+      }
+      else {
+        this.skippedFirst = true;
+      }
+    });
+  }
+  render() {
+    const state = this.state;
+    const { actions } = this.props;
+    // render view according to state, call actions to trigger changes
+    // pass state={state} actions={actions} to other components.
+  }
+}</code></pre>
 <h3>Using Preact</h3><pre><code class="language-js">class App extends preact.Component {
   componentWillMount() {
     const setState = this.setState.bind(this);

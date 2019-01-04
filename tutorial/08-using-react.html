@@ -59,6 +59,30 @@ to each one.</p>
     &lt;/div&gt;);
   }
 }</code></pre>
+<p>Note that React will technically call <code>render()</code> twice initially: once after the constructor,
+and once after <code>componentDidMount</code>. This may or may not be a problem depending on your
+application. To prevent this, we can use a <code>skippedFirst</code> flag so that we don&#39;t initially
+render twice:</p>
+<pre><code class="language-js">class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.states();
+    this.skippedFirst = false;
+  }
+  componentDidMount() {
+    var setState = this.setState.bind(this);
+    this.props.states.map(function(state) {
+      if (this.skippedFirst) {
+        setState(state);
+      }
+      else {
+        this.skippedFirst = true;
+      }
+    });
+  }
+  render() {
+    // same as before
+}</code></pre>
 <h3>The Conditions Component</h3><p>The <code>Conditions</code> component displays a checkbox for &quot;precipitations&quot; and a series of radio
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The <code>state</code> is used to reflect the
 current state, and <code>actions</code> are called to update the state when the user changes the
