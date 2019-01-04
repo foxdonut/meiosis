@@ -186,7 +186,8 @@ class App extends React.Component {
 }
 
 const update = flyd.stream();
-const states = flyd.scan(P, app.initialState(), update);
+const states = flyd.scan((state, patch) => P({}, state, patch),
+  app.initialState(), update);
 const actions = app.actions(update);
 
 ReactDOM.render(<App states={states} actions={actions} />,

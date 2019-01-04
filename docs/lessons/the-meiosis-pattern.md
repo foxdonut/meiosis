@@ -82,6 +82,36 @@ ReactDOM.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
 ```
 
+This setup initally calls `render()` twice. If this is problematic in your application,
+we can use a `skippedFirst` flag:
+
+```js
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.states();
+    this.skippedFirst = false;
+  }
+  componentDidMount() {
+    const setState = this.setState.bind(this);
+    this.props.states.map(state => {
+      if (this.skippedFirst) {
+        setState(state);
+      }
+      else {
+        this.skippedFirst = true;
+      }
+    });
+  }
+  render() {
+    const state = this.state;
+    const { actions } = this.props;
+    // render view according to state, call actions to trigger changes
+    // pass state={state} actions={actions} to other components.
+  }
+}
+```
+
 ### Using Preact
 
 ```js

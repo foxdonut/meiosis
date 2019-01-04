@@ -71,6 +71,34 @@ class App extends React.Component {
 }
 ```
 
+Note that React will technically call `render()` twice initially: once after the constructor,
+and once after `componentDidMount`. This may or may not be a problem depending on your
+application. To prevent this, we can use a `skippedFirst` flag so that we don't initially
+render twice:
+
+```js
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = props.states();
+    this.skippedFirst = false;
+  }
+  componentDidMount() {
+    var setState = this.setState.bind(this);
+    this.props.states.map(function(state) {
+      if (this.skippedFirst) {
+        setState(state);
+      }
+      else {
+        this.skippedFirst = true;
+      }
+    });
+  }
+  render() {
+    // same as before
+}
+```
+
 ### The Conditions Component
 
 The `Conditions` component displays a checkbox for "precipitations" and a series of radio
