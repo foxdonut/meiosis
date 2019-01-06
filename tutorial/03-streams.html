@@ -176,6 +176,8 @@ var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
 }, app.initialState, update);
+
+var actions = app.actions(update);
 states.map(function(state) {
   document.write(&quot;&lt;pre&gt;&quot; + JSON.stringify(state) + &quot;&lt;/pre&gt;&quot;);
 });</code></pre>

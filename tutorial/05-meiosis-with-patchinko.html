@@ -39,11 +39,6 @@ we want to change the temperature value to 23, we would call:</p>
 <pre><code class="language-js">update({ value: 72, units: &quot;F&quot; })</code></pre>
 <p>How to we write an accumulator function that handles these object patches to update the
 state?</p>
-<p>Remember that the accumulator function gets the current state and the incoming patch as
-parameters, and must return the updated state:</p>
-<pre><code class="language-js">function(state, patch) {
-  return state;
-}</code></pre>
 <p>Patchinko comes with a function, <code>P</code> (for &quot;Patch&quot;) that takes a target object as its first
 parameter, and patch objects in the remainder of the parameters. It patches the target object
 by copying over the properties from the patch objects onto the target object:</p>
