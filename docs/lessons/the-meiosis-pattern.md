@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## The Meiosis Pattern
+## The Meiosis Pattern Cheatsheet
 
 > IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern,
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
