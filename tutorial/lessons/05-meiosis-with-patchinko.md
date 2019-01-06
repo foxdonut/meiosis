@@ -53,15 +53,6 @@ update({ value: 72, units: "F" })
 How to we write an accumulator function that handles these object patches to update the
 state?
 
-Remember that the accumulator function gets the current state and the incoming patch as
-parameters, and must return the updated state:
-
-```js
-function(state, patch) {
-  return state;
-}
-```
-
 Patchinko comes with a function, `P` (for "Patch") that takes a target object as its first
 parameter, and patch objects in the remainder of the parameters. It patches the target object
 by copying over the properties from the patch objects onto the target object:
