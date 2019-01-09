@@ -96,18 +96,15 @@ const view = update => state =>
     )
   );
 
-const update = m.stream();
-const T = (x,f) => f(x);
-
 const StatsService = {
-  initial(model) {
-    return model.colors
+  initial(state) {
+    return state.colors
       .map(R.objOf)
       .map(K(0))
       .reduce(R.merge, {});
   },
-  start(model) {
-    return dropRepeats( model.map( x => x.boxes ) )
+  start(state) {
+    return dropRepeats( state.map( x => x.boxes ) )
       .map( R.countBy(I) )
       .map( R.assoc("stats") );
   }
@@ -121,10 +118,10 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  start(model) {
+  start(state) {
     const update = m.stream();
 
-    dropRepeats( model.map( R.pick(["boxes"]) ) )
+    dropRepeats( state.map( R.pick(["boxes"]) ) )
       .map(x => localStorage.setItem("v1", JSON.stringify(x)));
 
     return update;
@@ -137,8 +134,8 @@ const DescriptionService = {
       description: ""
     };
   },
-  start(model) {
-    return dropRepeats( model.map( x => x.stats ) )
+  start(state) {
+    return dropRepeats( state.map( x => x.stats ) )
       .map(
         R.pipe(
           R.toPairs,
@@ -162,25 +159,27 @@ const services = [
   DescriptionService
 ];
 
-const initialModel = () => {
-  const model =
-    {  boxes: []
+const initialState = () => {
+  const state =
+    { boxes: []
       , colors:
       [ "red"
         , "purple"
         , "blue"
-      ],
+      ]
     };
   return {
-    ...model,
+    ...state,
     ...services
-      .map(s => s.initial(model))
+      .map(s => s.initial(state))
       .reduce(R.merge, {})
   };
 };
 
-const models = m.stream.scan( T, initialModel(), update );
+const update = m.stream();
+const T = (x,f) => f(x);
+const states = m.stream.scan( T, initialState(), update );
 const element = document.getElementById("app");
-models.map(view(update)).map(v => m.render(element, v));
+states.map(view(update)).map(v => m.render(element, v));
 
-services.map(s => s.start(models).map(update));
+services.map(s => s.start(states).map(update));

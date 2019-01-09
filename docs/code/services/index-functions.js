@@ -1,4 +1,4 @@
-/* global b, m, R, O */
+/* global b, m, R */
 
 const I = x => x;
 const o = (f, g) => x => f(g(x));
@@ -28,11 +28,12 @@ const Action = {
   addBox: x =>
     pipe(
       [ K(x)
-        , x => ({ boxes: O(xs => xs.concat(x)) })
+        , x => xs => xs.concat(x)
+        , $boxes
       ]
     ),
   removeBox: i =>
-    ({ boxes: O( xs => xs.filter( (x,j) => i != j ) ) })
+    $boxes( xs => xs.filter( (x,j) => i != j ) )
 };
 
 const view = update => state =>
@@ -83,12 +84,11 @@ const view = update => state =>
     )
   );
 
-const update = m.stream();
 const T = (x,f) => f(x);
 
 const StatsService = {
-  initial(model) {
-    return model.colors
+  initial(state) {
+    return state.colors
       .map(R.objOf)
       .map(K(0))
       .reduce(R.merge, {});
@@ -96,7 +96,8 @@ const StatsService = {
   state: R.pipe(
     x => x.boxes,
     R.countBy(I),
-    R.objOf("stats")
+    R.objOf("stats"),
+    R.mergeDeepLeft
   )
 };
 
@@ -108,9 +109,9 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  state(model) {
+  state(state) {
     T(
-      model,
+      state,
       R.pipe(
         R.pick(["boxes"]),
         x => localStorage.setItem("v1", JSON.stringify(x))
@@ -136,7 +137,8 @@ const DescriptionService = {
     R.map(R.join(" ")),
     humanList("and"),
     x => x + ".",
-    R.objOf("description")
+    R.objOf("description"),
+    R.mergeDeepLeft
   )
 };
 
@@ -146,32 +148,29 @@ const services = [
   DescriptionService
 ];
 
-const initialModel = () => {
-  const model =
-    {  boxes: []
+const initialState = () => {
+  const state =
+    { boxes: []
       , colors:
       [ "red"
         , "purple"
         , "blue"
-      ],
+      ]
     };
   return {
-    ...model,
+    ...state,
     ...services
-      .map(s => s.initial(model))
+      .map(s => s.initial(state))
       .reduce(R.merge, {})
   };
 };
 
-const models = m.stream.scan( O, initialModel(), update );
-const states = models.map(
-  R.apply(
-    R.pipe,
-    services
-      .map(s => s.state)
-      .map(f => model => O(model, f(model)))
-  )
-);
+const service = state => services
+  .map(s => s.state)
+  .reduce((x, f) => f(x)(x), state);
 
+const update = m.stream();
+const states = m.stream.scan( T, initialState(), update )
+  .map(service);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));

@@ -1,11 +1,8 @@
-/* global b, m, R */
+/* global b, m, R, P, S */
 
 const I = x => x;
 const o = (f, g) => x => f(g(x));
 const K = x => () => x;
-
-// Reference: https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45
-const W = f => x => f(x)(x); // W combinator, "duplication"
 
 const humanList = s => xs =>
   xs.length > 1
@@ -31,12 +28,11 @@ const Action = {
   addBox: x =>
     pipe(
       [ K(x)
-        , x => xs => xs.concat(x)
-        , $boxes
+        , x => ({ boxes: S(xs => xs.concat(x)) })
       ]
     ),
   removeBox: i =>
-    $boxes( xs => xs.filter( (x,j) => i != j ) )
+    ({ boxes: S( xs => xs.filter( (x,j) => i != j ) ) })
 };
 
 const view = update => state =>
@@ -87,12 +83,11 @@ const view = update => state =>
     )
   );
 
-const update = m.stream();
 const T = (x,f) => f(x);
 
 const StatsService = {
-  initial(model) {
-    return model.colors
+  initial(state) {
+    return state.colors
       .map(R.objOf)
       .map(K(0))
       .reduce(R.merge, {});
@@ -100,8 +95,7 @@ const StatsService = {
   state: R.pipe(
     x => x.boxes,
     R.countBy(I),
-    R.objOf("stats"),
-    R.mergeDeepLeft
+    R.objOf("stats")
   )
 };
 
@@ -113,15 +107,15 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  state(model) {
+  state(state) {
     T(
-      model,
+      state,
       R.pipe(
         R.pick(["boxes"]),
         x => localStorage.setItem("v1", JSON.stringify(x))
       )
     );
-    return I;
+    return null;
   }
 };
 
@@ -141,8 +135,7 @@ const DescriptionService = {
     R.map(R.join(" ")),
     humanList("and"),
     x => x + ".",
-    R.objOf("description"),
-    R.mergeDeepLeft
+    R.objOf("description")
   )
 };
 
@@ -152,32 +145,29 @@ const services = [
   DescriptionService
 ];
 
-const initialModel = () => {
-  const model =
-    {  boxes: []
+const initialState = () => {
+  const state =
+    { boxes: []
       , colors:
       [ "red"
         , "purple"
         , "blue"
-      ],
+      ]
     };
   return {
-    ...model,
+    ...state,
     ...services
-      .map(s => s.initial(model))
+      .map(s => s.initial(state))
       .reduce(R.merge, {})
   };
 };
 
-const models = m.stream.scan( T, initialModel(), update );
-const states = models.map(
-  R.apply(
-    R.pipe,
-    services
-      .map(s => s.state)
-      .map(W)
-  )
-);
+const service = state => services
+  .map(s => s.state)
+  .reduce((x, f) => P(x, f(x)), state);
 
+const update = m.stream();
+const states = m.stream.scan( P, initialState(), update )
+  .map(service);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));
