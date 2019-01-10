@@ -168,16 +168,16 @@ const initialState = () => {
         , "blue"
       ]
     };
-  return {
-    ...state,
-    ...services
+  return Object.assign({},
+    state,
+    services
       .map(s => s.initial(state))
       .reduce(R.merge, {})
-  };
+  );
 };
 
 const update = m.stream();
-const T = (x,f) => f(x);
+const T = (x, f) => f(x);
 const states = m.stream.scan( T, initialState(), update );
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));

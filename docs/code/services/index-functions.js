@@ -84,7 +84,7 @@ const view = update => state =>
     )
   );
 
-const T = (x,f) => f(x);
+const T = (x, f) => f(x);
 
 const StatsService = {
   initial(state) {
@@ -93,7 +93,7 @@ const StatsService = {
       .map(K(0))
       .reduce(R.merge, {});
   },
-  state: R.pipe(
+  service: R.pipe(
     x => x.boxes,
     R.countBy(I),
     R.objOf("stats"),
@@ -109,7 +109,7 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  state(state) {
+  service(state) {
     T(
       state,
       R.pipe(
@@ -127,7 +127,7 @@ const DescriptionService = {
       description: ""
     };
   },
-  state: R.pipe(
+  service: R.pipe(
     x => x.stats,
     R.toPairs,
     R.groupBy(R.last),
@@ -157,16 +157,16 @@ const initialState = () => {
         , "blue"
       ]
     };
-  return {
-    ...state,
-    ...services
+  return Object.assign({},
+    state,
+    services
       .map(s => s.initial(state))
       .reduce(R.merge, {})
-  };
+  );
 };
 
 const service = state => services
-  .map(s => s.state)
+  .map(s => s.service)
   .reduce((x, f) => f(x)(x), state);
 
 const update = m.stream();

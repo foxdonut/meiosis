@@ -21,13 +21,13 @@ James' version uses streams to implement services. The structure is as follows:
 ```javascript
 {
   initial: state => initialState,
-  start: state$ => patch$
+  start: states => patches
 }
 ```
 
 A service has an `initial` function which produces the service's initial state. The `start`
-function takes the Meiosis stream of states and returns a stream of patches. The service emits
-patches on this stream.
+function takes the Meiosis **stream** of states and returns a **stream** of patches. The
+service emits patches onto this stream.
 
 The application's initial state is combined with each service's initial state to produce the
 final initial state:
@@ -44,19 +44,13 @@ const initialState = () => {
         , "blue"
       ]
     };
-  return {
-    ...state,
-    ...services
+  return Object.assign({},
+    state,
+    services
       .map(s => s.initial(state))
       .reduce(R.merge, {})
-  };
+  );
 };
-
-const update = m.stream();
-const T = (x,f) => f(x);
-const state = m.stream.scan( T, initialState(), update );
-const element = document.getElementById("app");
-states.map(view(update)).map(v => m.render(element, v));
 ```
 
 Then, every service is started by passing in the stream of states, and mapping the resulting stream
@@ -120,18 +114,34 @@ function dropRepeats(s) {
 }
 ```
 
+The example uses function patches. Here is the setup for the Meiosis pattern:
+
+```javascript
+const update = m.stream();
+const T = (x, f) => f(x);
+const state = m.stream.scan( T, initialState(), update );
+const element = document.getElementById("app");
+states.map(view(update)).map(v => m.render(element, v));
+```
+
 The complete example is below.
 
 @flems code/services/index-streams.js,app.html mithril,mithril-stream,ramda,bss 700 60
+
+#### Flexibility
 
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish. Now, let's look at a slightly different approach, using Patchinko.
 
 ### Using Patchinko
 
-An alternative to using functions for patches is using
-[Patchinko](https://github.com/barneycarroll/patchinko), which we looked at in
-[this section of the tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
+An alternative to emitting patches from services is to define a service as a function that
+receives the current state as a parameter and returns a patch. Then, these service functions
+can be combined together with `reduce` to produce a single service function that receives
+the current state and produces an updated state.
+
+In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we
+looked at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
 
 To use Patchinko, we emit patches as objects instead of functions, and we use `P`
 as our accumulator:
@@ -140,41 +150,49 @@ as our accumulator:
 const states = m.stream.scan( P, initialState(), update );
 ```
 
-Our services also return objects instead of functions to indicate patches. Now, when we
-call `state` on our services:
+Instead of a `start` function, we'll use a `service` function to which we'll pass the latest
+state from the Meiosis `states` stream. The `service` function returns a patch:
 
 ```javascript
-services
-  .map(s => s.state)
+{
+  initial: state => initialState,
+  service: state => patch
+}
 ```
 
-We still have an array of functions:
+Before, we took a **stream** of states and we returned a **stream** of patches; now, we just
+take a state and return a patch.
+
+We'll taking our array of services and call `service` on each one:
+
+```javascript
+services.map(s => s.service)
+```
+
+This gives us an array of functions:
 
 ```javascript
 [ f1, f2, f3 ]
 ```
 
-But each function returns an object to update the model. To apply the patch, we need to call
-`P(state, f(state))`:
+Each function `f` takes the state and returns a patch to update the model. Thus calling `f(state)`
+gives us a patch. To apply the patch, we call `P(state, f(state))`. Finally, to combine the array
+of functions into a single function, we can use `reduce`:
 
 ```javascript
-services
-  .map(s => s.state)
-  .map(f => state => P(state, f(state)))
+// Top-level service function
+const service = state => services
+  .map(s => s.service)
+  .reduce((x, f) => P(x, f(x)), state);
 ```
 
-Again, this gives us an array of functions ready to be called with the model, and we can combine
-them as before into a single function, by applying `pipe`:
+This gives us a single top-level `service` function that takes the state, calls all services,
+and produces the updated state. We can just `map` this service function to our stream of
+states:
 
 ```javascript
-const states = m.stream.scan( P, initialState(), update ).map(
-  R.apply(
-    R.pipe,
-    services
-      .map(s => s.state)
-      .map(f => state => O(state, f(state)))
-  )
-);
+const states = m.stream.scan( P, initialState(), update )
+  .map(service);
 ```
 
 Finally, as before we use our `states` stream to render the view:
@@ -187,81 +205,64 @@ You will find the complete example below.
 
 @flems code/services/index-patchinko.js,app.html mithril,mithril-stream,ramda,bss,patchinko 700 60
 
+#### No Worries about Infinite Loops
+
 Note that we no longer need `dropRepeats`, because we are not feeding patches back into the
 `update` stream. Instead, we have a separate `states` stream, so we don't need to worry about
 creating an infinite loop.
 
 ### Using Function Patches
 
-Instead of a `start` function, we'll use a `state` function to which we'll pass the latest state
-from the Meiosis `states` stream. The `state` function returns a patch as a function:
+We can also use this approach with function patches instead of Patchinko. Remember that with
+function patches, we produce functions `f(state) => updatedState` instead of object patches,
+and we wire up Meiosis like this:
+
+```javascript
+const T = (x, f) => f(x);
+const update = m.stream();
+const states = m.stream.scan( T, initialState(), update );
+```
+
+Our services have the same structure as before, namely:
 
 ```javascript
 {
-  initial: state => state,
-  state: state => action
+  initial: state => initialState,
+  service: state => patch
 }
 ```
 
-Before, we took a _stream of states_ and we returned a _stream of actions_; now, we have a function
-that just takes a state and returns an action, which is a function patch.
+The only difference is that `patch` is now a function instead of an object.
 
-To wire up our services, we'll create a `states` stream.
-
-First, we'll taking our array of services and call the `state` function on each one:
+Again we take the array of services and call `service` on each one:
 
 ```javascript
-services
-  .map(s => s.state)
+services.map(s => s.service)
 ```
 
-This gives us an array of functions:
+This still gives us an array of functions:
 
-```
+```javascript
 [ f1, f2, f3 ]
 ```
 
-Each of these functions takes a state and returns a patch, which itself is a function of
-the state. So, we need to pass the state to each function, and call the result again with the
-state:
+But now each function `f` takes the state and returns a **function** patch to update the model.
+When we call `f(state)`, we get a function. To apply the patch, we just call the function:
+`f(state)(state)`. Finally, we use `reduce` to write our top-level `service` function:
 
 ```javascript
-f1(state)(state)
+// Top-level service function
+const service = state => services
+  .map(s => s.service)
+  .reduce((x, f) => f(x)(x), state);
 ```
 
-This is actually called the `W` combinator, or _duplication_
-combinator<sup>[1](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45)</sup>
+As before, we `map` our service function to the `states` stream, and use the `states` stream
+to render the view:
 
 ```javascript
-// W combinator, "duplication"
-const W = f => x => f(x)(x);
-```
-
-Now we have:
-
-```javascript
-services
-  .map(s => s.state)
-  .map(W)
-```
-
-This gives us an array of functions ready to be called with the state. To combine them all into
-a single function, we need to apply `pipe`:
-
-```javascript
-const states = m.stream.scan( T, initialState(), update ).map(
-  R.apply(
-    R.pipe,
-    services
-      .map(s => s.state)
-      .map(W)
-  )
-);
-```
-
-Finally, we use our `states` stream to render the view:
-
-```javascript
+const states = m.stream.scan( T, initialState(), update )
+  .map(service);
 states.map(view(update)).map(v => m.render(element, v));
 ```
 
@@ -272,8 +273,8 @@ Have a look at the complete example below.
 ### Conclusion
 
 We can wire up services in different ways, and use them for computed properties, state
-synchronization, and other purposes. Please note, however, that not everything belongs in a service,
-so it's important to avoid getting carried away.
+synchronization, and other purposes. Please note, however, that not everything belongs in
+a service, so it's important to avoid getting carried away.
 
 [Table of Contents](toc.html)
 

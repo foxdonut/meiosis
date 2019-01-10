@@ -2,14 +2,14 @@
 
 ## Table of Contents
 
-> IMPORTANT: For a complete explanation of the Meiosis Pattern,
+> **IMPORTANT**: For a complete explanation of the Meiosis Pattern,
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
-- [Services](services.html) (coming soon)
+- [Services](services.html)
 - [Using a Router](using-a-router.html) (coming soon)
-- [Preventing Re-renders](preventing-re-renders.html)
 - [Unit Testing](unit-testing.html) (coming soon)
+- [Preventing Re-renders](preventing-re-renders.html)
 - [SAM Pattern](sam-pattern.html)
 
 -----
