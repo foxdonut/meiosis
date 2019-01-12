@@ -1,0 +1,43 @@
+{
+  "name": "navigation-without-routes",
+  "version": "1.0.0",
+  "description": "meiosis docs example",
+  "main": "src/index.jsx",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "meiosis",
+    "react",
+    "router"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "flyd": "^0.2.8",
+    "patchinko": "^4.1.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.12.0",
+    "eslint-plugin-react": "^7.12.3",
+    "meiosis-tracer": "^2.0.3",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1"
+  }
+}
