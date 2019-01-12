@@ -23,7 +23,7 @@
     <hr>
 
     <div>
-      <a href="https://meiosis.js.org/docs/services.html" target="_blank">Services</a> - Using Patchinko
+      <a href="https://meiosis.js.org/docs/preventing-re-renders.html" target="_blank">Preventing Re-Renders</a> - Using React
     </div>
     <hr>
 
@@ -35,17 +35,17 @@
     <div id="tracer"></div>
     <footer class="footer">
       Using
-        <a href="https://mithril.js.org" target="_blank">Mithril</a>
+        <a href="https://reactjs.org" target="_blank">React</a>
         &bullet;
-        <a href="https://ramdajs.com" target="_blank">Ramda</a>
+        <a href="https://github.com/paldepind/flyd" target="_blank">Flyd</a>
         &bullet;
         <a href="https://github.com/barneycarroll/patchinko" target="_blank">Patchinko</a>
     </footer>
   </body>
-  <script src="/lib/ramda.min.js"></script>
+  <script src="/lib/babel.js"></script>
+  <script src="/lib/react.development.js"></script>
+  <script src="/lib/react-dom.development.js"></script>
+  <script src="/lib/flyd.js"></script>
   <script src="/lib/patchinko-explicit.js"></script>
-  <script src="/lib/bss.js"></script>
-  <script src="/lib/mithril.js"></script>
-  <script src="/lib/mithril-stream.js"></script>
-  <script src="index-patchinko.js"></script>
+  <script src="index-react.jsx" type="text/babel"></script>
 </html>

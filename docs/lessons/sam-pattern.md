@@ -50,7 +50,7 @@ the model to indicate the current page. The view uses the model to render the co
 The example is below. Notice how you can go to different pages; _Logout_ sends you back to _Home_;
 and the _Data_ page has no data to show, so it displays a _Loading, please wait..._ message.
 
-@flems code/sam-pattern/example-01.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+@flems code/sam-pattern/navigation-example.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
 
 Let's see how we can apply the SAM pattern.
 
@@ -120,7 +120,7 @@ Below, try it out:
 to the _Home_ page, and you now have access to the _Settings_ page.
 - Notice that if you go back to the _Login_ page, whatever you typed is still there.
 
-@flems code/sam-pattern/example-02.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+@flems code/sam-pattern/acceptor.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
 
 ### State
 
@@ -182,7 +182,7 @@ Try it out below. Now you are sent to the _Settings_ page after logging in, if y
 attempted to go to _Settings_. Also notice that if you go back to the `Login` page, the form is
 now cleared out.
 
-@flems code/sam-pattern/example-03.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+@flems code/sam-pattern/state.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
 
 ### Next-Action-Predicate
 
@@ -219,7 +219,7 @@ of the application state.
 
 Try it out:
 
-@flems code/sam-pattern/example-04.js,app.html,public/css/spectre.css react,react-dom,flyd,seview,patchinko 700 60
+@flems code/sam-pattern/next-action-predicate.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
 
 With `present`, `acceptor`, `state`, and `nap`, we have used Meiosis as a foundation and
 implemented SAM.
