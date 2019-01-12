@@ -4,7 +4,7 @@
 
 ## Using a Router
 
-_Coming soon._
+_More to come._
 
 [Table of Contents](toc.html)
 
