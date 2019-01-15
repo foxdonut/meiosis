@@ -40,3 +40,4 @@ tutorial/build
 tutorial/dist
 docs/build
 docs/dist
+docs/code/**/build
