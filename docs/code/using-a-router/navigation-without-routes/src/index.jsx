@@ -6,6 +6,9 @@ import { P } from "patchinko/explicit";
 import { app, App } from "./app";
 
 const update = flyd.stream();
+const navigate = flyd.stream();
+
+
 const states = flyd.scan(P, app.initialState(), update);
 
 // Only for using Meiosis Tracer in development.
