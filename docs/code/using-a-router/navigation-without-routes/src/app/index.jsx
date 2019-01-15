@@ -5,17 +5,17 @@ import { Beer } from "../beer";
 
 export const app = {
   initialState: () => ({
-    pageId: "HomePage"
+    route: { id: "Home" }
   }),
   actions: update => Object.assign({}, {
-    navigateTo: pageId => update({ pageId })
+    navigateTo: id => update({ route: { id } })
   })
 };
 
 const componentMap = {
-  "HomePage": Home,
-  "CoffeePage": Coffee,
-  "BeerPage": Beer
+  Home,
+  Coffee,
+  Beer
 };
 
 export class App extends Component {
@@ -34,40 +34,40 @@ export class App extends Component {
     const state = this.state;
     const { actions } = this.props;
 
-    const Component = componentMap[state.pageId];
-    const currentTab = state.pageId;
-    const isActive = tab => tab === currentTab ? "active" : "";
+    const componentId = state.route.id;
+    const Component = componentMap[componentId];
+    const isActive = tab => tab === componentId ? "active" : "";
 
     return (
       <div>
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
-            <li className={isActive("HomePage")}>
+            <li className={isActive("Home")}>
               <a href="#"
-                onClick={() => actions.navigateTo("HomePage")}
+                onClick={() => actions.navigateTo("Home")}
               >Home</a>
             </li>
-            <li className={isActive("CoffeePage")}>
+            <li className={isActive("Coffee")}>
               <a href="#"
-                onClick={() => actions.navigateTo("CoffeePage")}
+                onClick={() => actions.navigateTo("Coffee")}
               >Coffee</a>
             </li>
-            <li className={isActive("BeerPage")}>
+            <li className={isActive("Beer")}>
               <a href="#"
-                onClick={() => actions.navigateTo("BeerPage")}
+                onClick={() => actions.navigateTo("Beer")}
               >Beer</a>
             </li>
             <li className="btn">
               <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("HomePage")}>Home</button>
+                onClick={_evt => actions.navigateTo("Home")}>Home</button>
             </li>
             <li className="btn">
               <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("CoffeePage")}>Coffee</button>
+                onClick={_evt => actions.navigateTo("Coffee")}>Coffee</button>
             </li>
             <li className="btn">
               <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("BeerPage")}>Beer</button>
+                onClick={_evt => actions.navigateTo("Beer")}>Beer</button>
             </li>
           </ul>
         </nav>
