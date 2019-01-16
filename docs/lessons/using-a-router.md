@@ -39,6 +39,48 @@ So in 2) we can either show "please wait" right away and load data in 3), or we 
 asynchronously load data in 2) by returning a Promise, in which case the page will wait
 to be shown.
 
+-----
+
+### Summary
+
+- Have a separate `navigate` stream.
+- Push **navigation** objects onto the `navigate` stream:
+  - These are data objects such as `{ route: { id: "Home", values: { ... } } }`
+- `map` the `navigate` stream to call `app.onNavigate`:
+  - The default is `update`, i.e. `navigation => update(navigation)`
+  - Should create `app.onNavigate({ update, navigate })` since those streams don't change
+  - `onNavigate` receives `({ state: states(), navigation })`
+  - can use `state` and `navigate` to decide to navigate somewhere else
+  - can load data asynchronously
+  - ultimately should call `update(navigation)` or e.g. `update(Oa({}, data, navigation))`
+- Define a component lookup, `{ pageId: Component }`
+- Render the route component by using state `{ route: { id: ..., values: ... } }`
+- To synchronize the location bar, define a router `service` function:
+
+```js
+service: state => {
+  const url = getUrl(state.route, state.query)
+  if (document.location.hash !== url) {
+    window.history.pushState({}, "", url)
+  }
+}
+```
+
+Simple router requirements:
+
+- Provide a `getUrl(pageId, values) => string` function
+- Provide a `parseUrl(url) => ({ pageId, values })` function
+- Define a `routeMap` with `{ pageId: route }` and create the router so that `getUrl` and
+`parseUrl` can be imported directly
+- Handle query string parameters
+- Listen to route changes:
+
+```js
+window.onpopstate = () => navigate(routing.parseUrl())
+```
+
+-----
+
 [Table of Contents](toc.html)
 
 -----
