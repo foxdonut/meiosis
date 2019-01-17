@@ -1,9 +1,12 @@
 import React, { Component } from "react";
+
 import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
+
+import { getNavigation } from "../util";
 
 const componentMap = {
   HomePage: Home,
@@ -11,6 +14,12 @@ const componentMap = {
   SettingsPage: Settings,
   CoffeePage: Coffee,
   BeerPage: Beer
+};
+
+export const root = {
+  actions: ({ navigate }) => ({
+    navigateTo: id => navigate(getNavigation(id))
+  })
 };
 
 export class Root extends Component {
@@ -52,6 +61,7 @@ export class Root extends Component {
             </li>
           </ul>
         </nav>
+        {state.message ? <div>{state.message}</div> : null}
         <Component state={state} actions={actions} />
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>

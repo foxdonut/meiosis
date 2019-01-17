@@ -3,21 +3,44 @@ import { P } from "patchinko/explicit";
 
 import { getNavigation } from "../util";
 
-import { Root } from "../root";
+import { root, Root } from "../root";
 import { login } from "../login";
 import { settings } from "../settings";
 import { coffee } from "../coffee";
+import { beer } from "../beer";
 
 const defaultValidateNavigation = () => true;
-const defaultOnNavigate = () => ({});
+const defaultOnNavigateTo = () => ({});
+const defaultOnNavigateAway = () => ({});
+const defaultPostNavigate = () => null;
 
 const validateNavigation = {
   SettingsPage: settings.validateNavigation
 };
 
-const onNavigate = {
-  LoginPage: login.onNavigate,
-  CoffeePage: coffee.onNavigate
+const onNavigateTo = {
+  LoginPage: login.onNavigateTo,
+  CoffeePage: coffee.onNavigateTo,
+  BeerPage: beer.onNavigateTo
+};
+
+const onNavigateAway = {
+  LoginPage: login.onNavigateAway
+};
+
+const postNavigate = {
+  BeerPage: beer.postNavigate
+};
+
+// This is external to the app and is meant to simulate the browser's location bar.
+const getPath = () => document.getElementById("pathInput").value;
+const setPath = path => document.getElementById("pathInput").value = path;
+
+const service = state => {
+  const path = "/" + state.route.id;
+  if (getPath() !== path) {
+    setPath(path);
+  }
 };
 
 export const app = {
@@ -30,38 +53,39 @@ export const app = {
     }
     return app.validateNavigation({ state, navigation: result });
   },
+
   // Sync or async return data for page
   // For please wait, return sync { pleaseWait } and then load async in postNavigate
   // To wait for loading to complete before going to page, return async data
-  onNavigate: ({ state, navigation }) =>
+  onNavigateTo: ({ state, navigation }) =>
     Promise.resolve()
-      .then(() => (onNavigate[navigation.route.id] || defaultOnNavigate)({ state, navigation }))
-      .then(data => P({}, navigation, data)),
-  /*
-    if (state && navigation) {
-      return new Promise(resolve =>
-        setTimeout(() => resolve(P({ async: true }, navigation)), 1000)
-      );
-    }
-    return navigation;
-  },
-  */
+      .then(() => (onNavigateTo[navigation.route.id] || defaultOnNavigateTo)({ state, navigation }))
+      .then(data => Object.assign({}, navigation, data)),
+
   // Async load data and update
-  postNavigate: ({ state, navigation, update }) => {
-    if (state && navigation) {
-      setTimeout(() => update({ data: true }), 1000);
-    }
-  },
+  postNavigate: ({ state, navigation, update }) =>
+    (postNavigate[navigation.route.id] || defaultPostNavigate)({ state, navigation, update }),
+
+  onNavigateAway: ({ state, navigation }) =>
+    Promise.resolve()
+      .then(() => (onNavigateAway[navigation.route.id] || defaultOnNavigateAway)({ state, navigation })),
+
   initialState: () => {
     const navigation = getNavigation("HomePage"); // parseUrl(getPath());
     //const nav = validateNavigation(navigation);
     //postNavigate({ state, navigation, update });
-    //return Promise.resolve({}).then(() => onNavigate({ state, navigation }))
+    //return Promise.resolve({}).then(() => onNavigateTo({ state, navigation }))
     return navigation;
   },
-  actions: ({ navigate }) => Object.assign({}, {
-    navigateTo: id => navigate(getNavigation(id))
-  })
+
+  actions: ({ update, navigate }) => P({},
+    root.actions({ update, navigate }),
+    login.actions({ update, navigate })
+  ),
+
+  service: state => [
+    service
+  ].reduce((x, f) => P(x, f(x)), state)
 };
 
 export class App extends Component {

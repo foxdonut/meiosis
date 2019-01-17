@@ -1,5 +1,16 @@
 import React, { Component } from "react";
 
+const beers = [
+  { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
+  { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
+];
+
+export const beer = {
+  onNavigateTo: () => ({ pleaseWait: true, beers: [] }),
+  postNavigate: ({ update }) =>
+    setTimeout(() => update({ pleaseWait: false, beers }), 1000)
+};
+
 export class Beer extends Component {
   render() {
     const { state } = this.props;
@@ -8,7 +19,7 @@ export class Beer extends Component {
       <div>
         <p>Beer Page</p>
         <ul>
-          {(state.beers || []).map(beer =>
+          {state.beers.map(beer =>
             <li key={beer.id}>
               <a href={navigator.blankHref}
                 onClick={() => null /*navigator.navigateTo("BeerDetailsPage", { id: beer.id })*/}

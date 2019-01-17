@@ -4,7 +4,9 @@ import { getNavigation } from "../util";
 
 export const settings = {
   validateNavigation: ({ state }) =>
-    state.user ? true : getNavigation("LoginPage")
+    state.user
+      ? true
+      : Object.assign({ message: "Please login." }, getNavigation("LoginPage"))
 };
 
 export class Settings extends Component {
