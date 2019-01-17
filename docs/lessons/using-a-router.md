@@ -4,7 +4,7 @@
 
 ## Using a Router
 
-_More to come._
+_Don't bother reading this yet, it is work-in-progress!_
 
 ### 1) Validate navigation
 

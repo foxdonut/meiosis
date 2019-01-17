@@ -1,5 +1,23 @@
 import React, { Component } from "react";
 
+const coffees = [
+  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
+  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
+];
+
+/*
+const coffeeMap = coffees.reduce((result, next) => {
+  result[next.id] = next;
+  return result;
+}, {});
+*/
+
+export const coffee = {
+  onNavigate: () => new Promise(resolve =>
+    setTimeout(() => resolve({ coffees }), 500)
+  )
+};
+
 export class Coffee extends Component {
   render() {
     const { state } = this.props;
@@ -8,7 +26,7 @@ export class Coffee extends Component {
       <div>
         <p>Coffee Page</p>
         <ul>
-          {(state.coffees || []).map(coffee =>
+          {state.coffees.map(coffee =>
             <li key={coffee.id}>
               <a href="#"
                 onClick={() => null /*navigator.navigateTo(CoffeePage, { id: coffee.id })*/}

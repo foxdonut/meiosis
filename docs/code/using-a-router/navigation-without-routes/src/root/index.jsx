@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import { Home } from "../home";
+import { Login } from "../login";
+import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
 const componentMap = {
-  Home,
-  Coffee,
-  Beer
+  HomePage: Home,
+  LoginPage: Login,
+  SettingsPage: Settings,
+  CoffeePage: Coffee,
+  BeerPage: Beer
 };
 
 export class Root extends Component {
@@ -21,32 +25,30 @@ export class Root extends Component {
       <div>
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
-            <li className={isActive("Home")}>
-              <a href="#"
-                onClick={() => actions.navigateTo("Home")}
+            <li className={isActive("HomePage")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("HomePage")}
               >Home</a>
             </li>
-            <li className={isActive("Coffee")}>
-              <a href="#"
-                onClick={() => actions.navigateTo("Coffee")}
+            <li className={isActive("LoginPage")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("LoginPage")}
+              >Login</a>
+            </li>
+            <li className={isActive("SettingsPage")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("SettingsPage")}
+              >Settings</a>
+            </li>
+            <li className={isActive("CoffeePage")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("CoffeePage")}
               >Coffee</a>
             </li>
-            <li className={isActive("Beer")}>
-              <a href="#"
-                onClick={() => actions.navigateTo("Beer")}
+            <li className={isActive("BeerPage")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("BeerPage")}
               >Beer</a>
-            </li>
-            <li className="btn">
-              <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("Home")}>Home</button>
-            </li>
-            <li className="btn">
-              <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("Coffee")}>Coffee</button>
-            </li>
-            <li className="btn">
-              <button className="btn btn-default"
-                onClick={_evt => actions.navigateTo("Beer")}>Beer</button>
             </li>
           </ul>
         </nav>
