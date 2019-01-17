@@ -10,15 +10,19 @@ export const login = {
     password: value =>
       update({ login: PS({ password: value })})
   }),
-  onNavigateTo: () => ({
-    login: PS({
-      username: "",
-      password: ""
-    })
-  }),
-  onNavigateAway: () => ({
-    message: null
-  })
+  navigation: {
+    LoginPage: {
+      before: () => ({
+        login: PS({
+          username: "",
+          password: ""
+        })
+      }),
+      leave: () => ({
+        message: null
+      })
+    }
+  }
 };
 
 export class Login extends Component {

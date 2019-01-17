@@ -13,9 +13,13 @@ const coffeeMap = coffees.reduce((result, next) => {
 */
 
 export const coffee = {
-  onNavigateTo: () => new Promise(resolve =>
-    setTimeout(() => resolve({ coffees }), 500)
-  )
+  navigation: {
+    CoffeePage: {
+      before: () => new Promise(resolve =>
+        setTimeout(() => resolve({ coffees }), 500)
+      )
+    }
+  }
 };
 
 export class Coffee extends Component {

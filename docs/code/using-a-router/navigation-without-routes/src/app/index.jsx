@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { P } from "patchinko/explicit";
 
-import { getNavigation } from "../util";
+import { get, getNavigation, getPath, parsePath, setPath } from "../util";
 
 import { root, Root } from "../root";
 import { login } from "../login";
@@ -9,33 +9,22 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-const defaultValidateNavigation = () => true;
-const defaultOnNavigateTo = () => ({});
-const defaultOnNavigateAway = () => ({});
-const defaultPostNavigate = () => null;
-
-const validateNavigation = {
-  SettingsPage: settings.validateNavigation
+const navigationDefaults = {
+  validate: () => true,
+  before: () => ({}),
+  after: () => null,
+  leave: () => ({})
 };
 
-const onNavigateTo = {
-  LoginPage: login.onNavigateTo,
-  CoffeePage: coffee.onNavigateTo,
-  BeerPage: beer.onNavigateTo
-};
+const navigationConfig = [
+  root,
+  login,
+  settings,
+  coffee,
+  beer
+].reduce((result, next) => P(result, next.navigation), {});
 
-const onNavigateAway = {
-  LoginPage: login.onNavigateAway
-};
-
-const postNavigate = {
-  BeerPage: beer.postNavigate
-};
-
-// This is external to the app and is meant to simulate the browser's location bar.
-const getPath = () => document.getElementById("pathInput").value;
-const setPath = path => document.getElementById("pathInput").value = path;
-
+// Service to keep the location bar in sync
 const service = state => {
   const path = "/" + state.route.id;
   if (getPath() !== path) {
@@ -44,38 +33,12 @@ const service = state => {
 };
 
 export const app = {
-  // Returns true if navigation is value, or another navigation to redirect
-  validateNavigation: ({ state, navigation }) => {
-    const fn = (validateNavigation[navigation.route.id] || defaultValidateNavigation);
-    const result = fn({ state, navigation });
-    if (result === true) {
-      return navigation;
-    }
-    return app.validateNavigation({ state, navigation: result });
-  },
-
-  // Sync or async return data for page
-  // For please wait, return sync { pleaseWait } and then load async in postNavigate
-  // To wait for loading to complete before going to page, return async data
-  onNavigateTo: ({ state, navigation }) =>
-    Promise.resolve()
-      .then(() => (onNavigateTo[navigation.route.id] || defaultOnNavigateTo)({ state, navigation }))
-      .then(data => Object.assign({}, navigation, data)),
-
-  // Async load data and update
-  postNavigate: ({ state, navigation, update }) =>
-    (postNavigate[navigation.route.id] || defaultPostNavigate)({ state, navigation, update }),
-
-  onNavigateAway: ({ state, navigation }) =>
-    Promise.resolve()
-      .then(() => (onNavigateAway[navigation.route.id] || defaultOnNavigateAway)({ state, navigation })),
-
-  initialState: () => {
-    const navigation = getNavigation("HomePage"); // parseUrl(getPath());
-    //const nav = validateNavigation(navigation);
-    //postNavigate({ state, navigation, update });
-    //return Promise.resolve({}).then(() => onNavigateTo({ state, navigation }))
-    return navigation;
+  initialState: ({ update }) => {
+    const state = {};
+    const navigation = app.navigation.validate({ state, navigation: getNavigation(parsePath(getPath())) });
+    const result = app.navigation.before({ state, navigation });
+    app.navigation.after({ state, navigation, update });
+    return result;
   },
 
   actions: ({ update, navigate }) => P({},
@@ -85,7 +48,41 @@ export const app = {
 
   service: state => [
     service
-  ].reduce((x, f) => P(x, f(x)), state)
+  ].reduce((x, f) => P(x, f(x)), state),
+
+  navigation: {
+    // Returns true if navigation is value, or another navigation to redirect
+    validate: ({ state, navigation }) => {
+      const fn = get(navigationConfig, [navigation.route.id, "validate"])
+        || navigationDefaults.validate;
+      const result = fn({ state, navigation });
+      if (result === true) {
+        return navigation;
+      }
+      return app.navigation.validate({ state, navigation: result });
+    },
+
+    // Sync or async return data for page
+    // For please wait, return sync { pleaseWait } and then load async in postNavigate
+    // To wait for loading to complete before going to page, return async data
+    before: ({ state, navigation }) =>
+      Promise.resolve()
+        .then(() => (
+          get(navigationConfig, [navigation.route.id, "before"]) || navigationDefaults.before
+        )({ state, navigation }))
+        .then(data => Object.assign({}, navigation, data)),
+
+    // Async load data and update
+    after: ({ state, navigation, update }) => (
+      get(navigationConfig, [navigation.route.id, "after"]) || navigationDefaults.after
+    )({ state, navigation, update }),
+
+    leave: ({ state, navigation }) =>
+      Promise.resolve()
+        .then(() => (
+          get(navigationConfig, [navigation.route.id, "leave"]) || navigationDefaults.leave
+        )({ state, navigation }))
+  }
 };
 
 export class App extends Component {

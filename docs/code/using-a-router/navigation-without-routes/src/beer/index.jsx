@@ -6,9 +6,13 @@ const beers = [
 ];
 
 export const beer = {
-  onNavigateTo: () => ({ pleaseWait: true, beers: [] }),
-  postNavigate: ({ update }) =>
-    setTimeout(() => update({ pleaseWait: false, beers }), 1000)
+  navigation: {
+    BeerPage: {
+      before: () => ({ pleaseWait: true, beers: [] }),
+      after: ({ update }) =>
+        setTimeout(() => update({ pleaseWait: false, beers }), 1000)
+    }
+  }
 };
 
 export class Beer extends Component {

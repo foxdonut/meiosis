@@ -30,7 +30,7 @@
       <div class="col-md-7">
         <div>
           <span>Path:</span>
-          <input type="text" id="pathInput">
+          <input type="text" id="pathInput" value="/HomePage">
           <button class="btn btn-default" id="pathButton">Go</button>
         </div>
         <div id="app"></div>
@@ -46,5 +46,11 @@
         <a href="https://github.com/barneycarroll/patchinko" target="_blank">Patchinko</a>
     </footer>
   </body>
+  <script>
+    var search = document.location.search
+    if (search) {
+      pathInput.value = "/" + search.substring(search.indexOf("=") + 1)
+    }
+  </script>
   <script src="build/generated-app.js"></script>
 </html>
