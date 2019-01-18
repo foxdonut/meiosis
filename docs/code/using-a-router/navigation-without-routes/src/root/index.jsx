@@ -18,7 +18,7 @@ const componentMap = {
 
 export const root = {
   actions: ({ navigate }) => ({
-    navigateTo: id => navigate(getNavigation(id))
+    navigateTo: (id, value) => navigate(getNavigation({ id, values: { id: value } }))
   })
 };
 

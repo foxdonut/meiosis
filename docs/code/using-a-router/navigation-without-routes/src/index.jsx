@@ -23,13 +23,6 @@ Promise.resolve().then(() => app.initialState({ update, navigate })).then(initia
   const actions = app.actions({ update, navigate });
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-  /*
-  navigate.map(navigation => {
-    const state = states();
-    const validatedNavigation = app.navigateValidate({ state, navigation });
-    app.onNavigateTo({ state, navigation: validatedNavigation }).then(update);
-  });
-  */
   flyd.scan((previous, navigation) => {
     const state = states();
     const validatedNavigation = app.navigation.validate({ state, navigation });

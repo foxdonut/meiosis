@@ -26,7 +26,10 @@ const navigationConfig = [
 
 // Service to keep the location bar in sync
 const service = state => {
-  const path = "/" + state.route.id;
+  let path = "/" + state.route.id;
+  if (state.route.values && state.route.values.id) {
+    path = path + "/" + state.route.values.id;
+  }
   if (getPath() !== path) {
     setPath(path);
   }

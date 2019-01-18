@@ -8,7 +8,7 @@ export const settings = {
       validate: ({ state }) =>
         state.user
           ? true
-          : Object.assign({ message: "Please login." }, getNavigation("LoginPage"))
+          : Object.assign({ message: "Please login." }, getNavigation({ id: "LoginPage" }))
     }
   }
 };

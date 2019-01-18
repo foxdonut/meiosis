@@ -1,30 +1,33 @@
 import React, { Component } from "react";
 
+import { get } from "../util";
+
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
   { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
 ];
 
-/*
 const coffeeMap = coffees.reduce((result, next) => {
   result[next.id] = next;
   return result;
 }, {});
-*/
 
 export const coffee = {
   navigation: {
     CoffeePage: {
-      before: () => new Promise(resolve =>
-        setTimeout(() => resolve({ coffees }), 500)
-      )
+      before: ({ navigation }) => new Promise(resolve => {
+        const coffeeId = get(navigation, ["route", "values", "id"]);
+        const coffee = coffeeId ? coffeeMap[coffeeId].description : null;
+
+        setTimeout(() => resolve({ coffees, coffee }), 500);
+      })
     }
   }
 };
 
 export class Coffee extends Component {
   render() {
-    const { state } = this.props;
+    const { state, actions } = this.props;
 
     return (
       <div>
@@ -32,14 +35,9 @@ export class Coffee extends Component {
         <ul>
           {state.coffees.map(coffee =>
             <li key={coffee.id}>
-              <a href="#"
-                onClick={() => null /*navigator.navigateTo(CoffeePage, { id: coffee.id })*/}
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("CoffeePage", coffee.id)}
               >{coffee.title}</a>
-              <button className="btn btn-default btn-xs"
-                onClick={() => null /*
-                navigator.navigateTo(CoffeePage, { id: coffee.id })*/}>
-                {coffee.title}
-              </button>
             </li>
           )}
         </ul>
