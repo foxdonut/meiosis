@@ -10,7 +10,7 @@ export const login = {
     password: value =>
       update({ login: PS({ password: value })})
   }),
-  navigation: {
+  onNavigate: {
     LoginPage: {
       before: () => ({
         login: PS({

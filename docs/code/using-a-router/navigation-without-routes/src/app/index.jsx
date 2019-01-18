@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { P } from "patchinko/explicit";
 
-import { get, getNavigation, getPath, parsePath, setPath } from "../util";
+import { getNavigation, getPath, parsePath, setPath } from "../util";
 
 import { root, Root } from "../root";
 import { login } from "../login";
@@ -9,20 +9,15 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-const navigationDefaults = {
-  validate: () => true,
-  before: () => ({}),
-  after: () => null,
-  leave: () => ({})
-};
+const onNavigateDefault = x => x;
 
-const navigationConfig = [
+const onNavigateConfig = [
   root,
   login,
   settings,
   coffee,
   beer
-].reduce((result, next) => P(result, next.navigation), {});
+].reduce((result, next) => P(result, next.onNavigate), {});
 
 // Service to keep the location bar in sync
 const service = state => {
@@ -36,12 +31,9 @@ const service = state => {
 };
 
 export const app = {
-  initialState: ({ update }) => {
+  initialState: () => {
     const state = {};
-    const navigation = app.navigation.validate({ state, navigation: getNavigation(parsePath(getPath())) });
-    const result = app.navigation.before({ state, navigation });
-    app.navigation.after({ state, navigation, update });
-    return result;
+    return app.onNavigate({ state, navigation: getNavigation(parsePath(getPath())) });
   },
 
   actions: ({ update, navigate }) => P({},
@@ -53,39 +45,11 @@ export const app = {
     service
   ].reduce((x, f) => P(x, f(x)), state),
 
-  navigation: {
-    // Returns true if navigation is value, or another navigation to redirect
-    validate: ({ state, navigation }) => {
-      const fn = get(navigationConfig, [navigation.route.id, "validate"])
-        || navigationDefaults.validate;
-      const result = fn({ state, navigation });
-      if (result === true) {
-        return navigation;
-      }
-      return app.navigation.validate({ state, navigation: result });
-    },
-
+  onNavigate: ({ state, navigation }) =>
     // Sync or async return data for page
     // For please wait, return sync { pleaseWait } and then load async in postNavigate
     // To wait for loading to complete before going to page, return async data
-    before: ({ state, navigation }) =>
-      Promise.resolve()
-        .then(() => (
-          get(navigationConfig, [navigation.route.id, "before"]) || navigationDefaults.before
-        )({ state, navigation }))
-        .then(data => Object.assign({}, navigation, data)),
-
-    // Async load data and update
-    after: ({ state, navigation, update }) => (
-      get(navigationConfig, [navigation.route.id, "after"]) || navigationDefaults.after
-    )({ state, navigation, update }),
-
-    leave: ({ state, navigation }) =>
-      Promise.resolve()
-        .then(() => (
-          get(navigationConfig, [navigation.route.id, "leave"]) || navigationDefaults.leave
-        )({ state, navigation }))
-  }
+    (onNavigateConfig[navigation.route.id] || onNavigateDefault)({ state, navigation })
 };
 
 export class App extends Component {

@@ -9,7 +9,7 @@ import { T, getNavigation, getPath, parsePath, pipe } from "./util";
 const update = flyd.stream();
 const navigate = flyd.stream();
 
-Promise.resolve().then(() => app.initialState({ update, navigate })).then(initialState => {
+Promise.resolve().then(() => app.initialState().then(initialState => {
   const states0 = flyd.scan(P, initialState, update);
   const states = states0.map(app.service);
 
@@ -25,16 +25,9 @@ Promise.resolve().then(() => app.initialState({ update, navigate })).then(initia
 
   flyd.scan((previous, navigation) => {
     const state = states();
-    const validatedNavigation = app.navigation.validate({ state, navigation });
-
-    Promise.all([
-      app.navigation.leave({ state, navigation: previous }),
-      app.navigation.before({ state, navigation: validatedNavigation })
-    ]).then(values => update(Object.assign.apply(null, values)));
-
-    app.navigation.after({ state, navigation: validatedNavigation, update });
-
-    return validatedNavigation;
+    const nextNavigation = app.onNavigate({ state, navigation, previous });
+    update(Object.assign({}, previous, nextNavigation));
+    return nextNavigation;
   }, { route: { id: null } }, navigate);
 
   // This is the equivalent to listening for route changes,

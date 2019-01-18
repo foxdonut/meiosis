@@ -13,15 +13,13 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  navigation: {
-    CoffeePage: {
-      before: ({ navigation }) => new Promise(resolve => {
-        const coffeeId = get(navigation, ["route", "values", "id"]);
-        const coffee = coffeeId ? coffeeMap[coffeeId].description : null;
+  onNavigate: {
+    CoffeePage: ({ navigation }) => new Promise(resolve => {
+      const coffeeId = get(navigation, ["route", "values", "id"]);
+      const coffee = coffeeId ? coffeeMap[coffeeId].description : null;
 
-        setTimeout(() => resolve({ coffees, coffee }), 500);
-      })
-    }
+      setTimeout(() => resolve({ coffees, coffee }), 500);
+    })
   }
 };
 

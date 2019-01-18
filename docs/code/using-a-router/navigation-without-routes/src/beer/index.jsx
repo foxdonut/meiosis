@@ -41,7 +41,7 @@ const componentMap = {
 };
 
 export const beer = {
-  navigation: {
+  onNavigate: {
     BeerPage: {
       before: ({ state }) => ({ pleaseWait: true, beers: state.beers || [] }),
       after: ({ navigation, update }) =>
