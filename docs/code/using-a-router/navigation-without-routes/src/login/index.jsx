@@ -16,10 +16,10 @@ export const login = {
     message: null
   })
   */
-  service: ({ state, update }) => {
+  service: ({ state, serviceUpdate }) => {
     NavigateTo.map(navigateTo =>
       fold({
-        Login: () => update({
+        Login: () => serviceUpdate({
           route: navigateTo,
           navigateTo: NavigateTo.N(),
           login: PS({

@@ -13,13 +13,13 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  service: ({ state, update }) => {
+  service: ({ state, serviceUpdate }) => {
     NavigateTo.map(navigateTo =>
       fold({
         Coffee: ({ id }) => {
           const coffee = id ? coffeeMap[id].description : null;
 
-          setTimeout(() => update({
+          setTimeout(() => serviceUpdate({
             route: navigateTo,
             navigateTo: NavigateTo.N(),
             coffees,

@@ -24,7 +24,7 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
   });
 
   models.map(state =>
-    app.services.forEach(service => service({ state, update: serviceUpdate })));
+    app.services.forEach(service => service({ state, update, serviceUpdate })));
 
   const actions = app.actions({ update });
   render(<App states={states} actions={actions}/>, document.getElementById("app"));

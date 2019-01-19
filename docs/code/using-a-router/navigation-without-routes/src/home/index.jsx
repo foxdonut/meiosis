@@ -4,10 +4,10 @@ import { NavigateTo, fold } from "../util";
 
 export const home = {
   // FIXME: build up a fold object for RoutePage, with defaults
-  service: ({ state, update }) => {
+  service: ({ state, serviceUpdate }) => {
     NavigateTo.map(navigateTo =>
       fold({
-        Home: () => update({
+        Home: () => serviceUpdate({
           route: navigateTo,
           navigateTo: NavigateTo.N()
         })
