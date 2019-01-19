@@ -1,5 +1,4 @@
-import { maybe } from "stags";
-import taggy from "static-sum-type/modules/taggy";
+import { maybe, tagged } from "stags";
 
 export const T = (x, f) => f(x);
 
@@ -15,7 +14,7 @@ export const preventDefault = evt => {
   return evt;
 };
 
-export const RoutePage = taggy("RoutePage")({
+export const RoutePage = tagged("RoutePage")({
   Home: ["values"],
   Login: ["values"],
   Settings: ["values"],

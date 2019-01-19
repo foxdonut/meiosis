@@ -28,8 +28,7 @@
     "patchinko": "^4.1.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "stags": "^1.0.0-rc9",
-    "static-sum-type": "^0.18.1"
+    "stags": "^1.0.0-rc9"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",

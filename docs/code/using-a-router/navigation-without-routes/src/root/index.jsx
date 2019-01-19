@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { fold } from "static-sum-type";
+import { fold } from "stags";
 
 import { Home } from "../home";
 import { Login } from "../login";
