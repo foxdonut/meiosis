@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { fold } from "static-sum-type";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -6,19 +7,19 @@ import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { getNavigation } from "../util";
+import { RoutePage, getNavigation } from "../util";
 
-const componentMap = {
-  HomePage: Home,
-  LoginPage: Login,
-  SettingsPage: Settings,
-  CoffeePage: Coffee,
-  BeerPage: Beer
-};
+const componentMap = fold(RoutePage)({
+  Home: () => Home,
+  Login: () => Login,
+  Settings: () => Settings,
+  Coffee: () => Coffee,
+  Beer: () => Beer
+});
 
 export const root = {
-  actions: ({ navigate }) => ({
-    navigateTo: (id, value) => navigate(getNavigation({ id, values: { id: value } }))
+  actions: ({ update }) => ({
+    navigateTo: (id, value) => update(getNavigation({ id, values: { id: value } }))
   })
 };
 
@@ -26,37 +27,37 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.route.id;
-    const Component = componentMap[componentId];
+    const componentId = state.route.case;
+    const Component = componentMap(state.route);
     const isActive = tab => tab === componentId ? "active" : "";
 
     return (
       <div>
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
-            <li className={isActive("HomePage")}>
+            <li className={isActive("Home")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("HomePage")}
+                onClick={() => actions.navigateTo("Home")}
               >Home</a>
             </li>
-            <li className={isActive("LoginPage")}>
+            <li className={isActive("Login")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("LoginPage")}
+                onClick={() => actions.navigateTo("Login")}
               >Login</a>
             </li>
-            <li className={isActive("SettingsPage")}>
+            <li className={isActive("Settings")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("SettingsPage")}
+                onClick={() => actions.navigateTo("Settings")}
               >Settings</a>
             </li>
-            <li className={isActive("CoffeePage")}>
+            <li className={isActive("Coffee")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("CoffeePage")}
+                onClick={() => actions.navigateTo("Coffee")}
               >Coffee</a>
             </li>
-            <li className={isActive("BeerPage")}>
+            <li className={isActive("Beer")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("BeerPage")}
+                onClick={() => actions.navigateTo("Beer")}
               >Beer</a>
             </li>
           </ul>

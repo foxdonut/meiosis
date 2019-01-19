@@ -41,22 +41,24 @@ const componentMap = {
 };
 
 export const beer = {
+  service: () => null
+  /*
   onNavigate: {
-    BeerPage: {
-      before: ({ state }) => ({ pleaseWait: true, beers: state.beers || [] }),
-      after: ({ navigation, update }) =>
-        setTimeout(() => update({
-          pleaseWait: false,
-          beers,
-          beer: get(beerMap, [navigation.route.values.id, "description"]),
-          route: PS({
-            values: PS({
-              child: navigation.route.values.id ? "BeerDetailsPage" : null
-            })
-          })
-        }), 1000)
-    }
-  }
+    BeerPage: ({ state }) => ({ pleaseWait: true, beers: state.beers || [] })
+  },
+  // after
+  service: ({ navigation, update }) =>
+    setTimeout(() => update({
+      pleaseWait: false,
+      beers,
+      beer: get(beerMap, [navigation.route.values.id, "description"]),
+      route: PS({
+        values: PS({
+          child: navigation.route.values.id ? "BeerDetailsPage" : null
+        })
+      })
+    }), 1000)
+  */
 };
 
 export class Beer extends Component {

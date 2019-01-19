@@ -7,32 +7,31 @@ import { app, App } from "./app";
 import { T, getNavigation, getPath, parsePath, pipe } from "./util";
 
 const update = flyd.stream();
-const navigate = flyd.stream();
+const serviceUpdate = flyd.stream();
 
-Promise.resolve().then(() => app.initialState().then(initialState => {
-  const states0 = flyd.scan(P, initialState, update);
-  const states = states0.map(app.service);
+Promise.resolve().then(() => app.initialState()).then(initialState => {
+  const models = flyd.scan(P, initialState, update);
+  const states = flyd.scan(P, models(), serviceUpdate);
 
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",
     rows: 10,
-    streams: [ navigate, states0, states ]
+    streams: [
+      { stream: models, label: "models" },
+      { stream: states, label: "states" }
+    ]
   });
 
-  const actions = app.actions({ update, navigate });
-  render(<App states={states} actions={actions}/>, document.getElementById("app"));
+  models.map(state =>
+    app.services.forEach(service => service({ state, update: serviceUpdate })));
 
-  flyd.scan((previous, navigation) => {
-    const state = states();
-    const nextNavigation = app.onNavigate({ state, navigation, previous });
-    update(Object.assign({}, previous, nextNavigation));
-    return nextNavigation;
-  }, { route: { id: null } }, navigate);
+  const actions = app.actions({ update });
+  render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
   // This is the equivalent to listening for route changes,
   // window.onpopstate = () => navigate(routing.parseUrl())
   document.getElementById("pathButton").addEventListener("click", () => {
-    T(getPath(), pipe(parsePath, getNavigation, navigate));
+    T(getPath(), pipe(parsePath, getNavigation, update));
   });
 });

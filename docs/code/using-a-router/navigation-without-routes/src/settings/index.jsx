@@ -3,12 +3,16 @@ import React, { Component } from "react";
 import { getNavigation } from "../util";
 
 export const settings = {
+  service: () => null
+  /*
   onNavigate: {
-    SettingsPage: ({ state }) =>
+    // validate
+    SettingsPage: ({ state, navigation }) =>
       state.user
-        ? true
+        ? navigation
         : Object.assign({ message: "Please login." }, getNavigation({ id: "LoginPage" }))
   }
+  */
 };
 
 export class Settings extends Component {

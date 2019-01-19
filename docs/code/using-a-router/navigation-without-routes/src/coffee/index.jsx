@@ -13,6 +13,8 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
+  service: () => null
+  /*
   onNavigate: {
     CoffeePage: ({ navigation }) => new Promise(resolve => {
       const coffeeId = get(navigation, ["route", "values", "id"]);
@@ -21,6 +23,7 @@ export const coffee = {
       setTimeout(() => resolve({ coffees, coffee }), 500);
     })
   }
+  */
 };
 
 export class Coffee extends Component {
