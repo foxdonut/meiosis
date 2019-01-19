@@ -1,9 +1,17 @@
 import React, { Component } from "react";
 
-import { getNavigation } from "../util";
+import { NavigateTo, RoutePage, fold } from "../util";
 
 export const settings = {
-  service: () => null
+  service: ({ state, update }) => {
+    NavigateTo.map(navigateTo =>
+      fold({
+        Settings: () => update({
+          navigateTo: NavigateTo.Y(RoutePage.Login({ values: null }))
+        })
+      })(navigateTo)
+    )(state.navigateTo);
+  }
   /*
   onNavigate: {
     // validate
