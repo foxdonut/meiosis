@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { get } from "../util";
+import { NavigateTo, fold } from "../util";
 
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
@@ -13,17 +13,22 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  service: () => null
-  /*
-  onNavigate: {
-    CoffeePage: ({ navigation }) => new Promise(resolve => {
-      const coffeeId = get(navigation, ["route", "values", "id"]);
-      const coffee = coffeeId ? coffeeMap[coffeeId].description : null;
+  service: ({ state, update }) => {
+    NavigateTo.map(navigateTo =>
+      fold({
+        Coffee: ({ id }) => {
+          const coffee = id ? coffeeMap[id].description : null;
 
-      setTimeout(() => resolve({ coffees, coffee }), 500);
-    })
+          setTimeout(() => update({
+            route: navigateTo,
+            navigateTo: NavigateTo.N(),
+            coffees,
+            coffee
+          }), 500);
+        }
+      })(navigateTo)
+    )(state.navigateTo);
   }
-  */
 };
 
 export class Coffee extends Component {

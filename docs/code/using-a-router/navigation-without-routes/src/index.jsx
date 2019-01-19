@@ -4,7 +4,7 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { T, getNavigation, getPath, parsePath, pipe } from "./util";
+import { T, getNavigation, getPath, parsePath, pipe, setPath } from "./util";
 
 const update = flyd.stream();
 const serviceUpdate = flyd.stream();
@@ -33,5 +33,16 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
   // window.onpopstate = () => navigate(routing.parseUrl())
   document.getElementById("pathButton").addEventListener("click", () => {
     T(getPath(), pipe(parsePath, getNavigation, update));
+  });
+
+  // Keep the location bar in sync
+  states.map(state => {
+    let path = "/" + state.route.case;
+    if (state.route.value && state.route.value.id) {
+      path = path + "/" + state.route.value.id;
+    }
+    if (getPath() !== path) {
+      setPath(path);
+    }
   });
 });

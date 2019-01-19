@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
-import { fold } from "static-sum-type";
 
-import { NavigateTo, RoutePage, pipe, preventDefault, withDefaults } from "../util";
+import { NavigateTo, fold, pipe, preventDefault } from "../util";
 
 export const login = {
   actions: ({ update }) => ({
@@ -19,7 +18,7 @@ export const login = {
   */
   service: ({ state, update }) => {
     NavigateTo.map(navigateTo =>
-      fold(RoutePage)(withDefaults({
+      fold({
         Login: () => update({
           route: navigateTo,
           navigateTo: NavigateTo.N(),
@@ -28,7 +27,7 @@ export const login = {
             password: ""
           })
         })
-      }))(navigateTo)
+      })(navigateTo)
     )(state.navigateTo);
   }
 };

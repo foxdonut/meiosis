@@ -23,13 +23,8 @@ export const RoutePage = taggy("RoutePage")({
   Beer: ["values"]
 });
 
-export const withDefaults = handler => Object.assign({
-  Home: () => null,
-  Login: () => null,
-  Settings: () => null,
-  Coffee: () => null,
-  Beer: () => null
-}, handler);
+export const fold = handlers => obj =>
+  (handlers[obj.case] || (() => null))(obj.value);
 
 export const NavigateTo = maybe("NavigateTo");
 
