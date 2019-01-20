@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { PS } from "patchinko/explicit";
 
 import { NavigateTo, RoutePage, fold } from "../util";
 
@@ -16,7 +17,9 @@ export const settings = {
           else {
             update({
               navigateTo: NavigateTo.Y(RoutePage.Login({ values: null })),
-              message: "Please login."
+              login: PS({
+                message: "Please login."
+              })
             });
           }
         }

@@ -37,7 +37,9 @@ export const login = {
           NavigateTo.map(navigateTo => {
             if (navigateTo.case !== "Login") {
               updateState({
-                message: null
+                login: PS({
+                  message: null
+                })
               });
             }
           })(state.navigateTo);
@@ -52,6 +54,7 @@ export class Login extends Component {
     const { state, actions } = this.props;
     return (
       <div>
+        {state.login.message ? <div>{state.login.message}</div> : null}
         <div>Login</div>
         <form className="form">
           <div className="form-group">
