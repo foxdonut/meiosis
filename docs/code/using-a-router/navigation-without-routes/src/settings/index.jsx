@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { NavigateTo, RoutePage, fold } from "../util";
+import { fold } from "../util";
+import { NavigateTo, RoutePage } from "../util/navigation";
 
 export const settings = {
   service: ({ state, update, updateState }) => {

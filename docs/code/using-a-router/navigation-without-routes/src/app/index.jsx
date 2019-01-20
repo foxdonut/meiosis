@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { P } from "patchinko/explicit";
 
-import { NavigateTo, RoutePage, getPath, parsePath } from "../util";
+import { NavigateTo, RoutePage } from "../util/navigation";
+import { getPath, parsePath } from "../util/router";
 
 import { root, Root } from "../root";
 import { home } from "../home";

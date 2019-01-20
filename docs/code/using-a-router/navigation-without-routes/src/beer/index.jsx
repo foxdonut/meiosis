@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { NavigateTo, fold, get } from "../util";
+import { fold, get } from "../util";
+import { NavigateTo } from "../util/navigation";
 
 const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },

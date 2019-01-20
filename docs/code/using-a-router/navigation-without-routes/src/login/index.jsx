@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { NavigateTo, fold, pipe, preventDefault } from "../util";
+import { fold, pipe, preventDefault } from "../util";
+import { NavigateTo } from "../util/navigation";
 
 export const login = {
   actions: ({ update }) => ({

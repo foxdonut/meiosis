@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
-import { NavigateTo, fold } from "../util";
+import { fold } from "../util";
+import { NavigateTo } from "../util/navigation";
 
 export const home = {
   // FIXME: build up a fold object for RoutePage, with defaults

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
-import { NavigateTo, fold } from "../util";
+import { fold } from "../util";
+import { NavigateTo } from "../util/navigation";
 
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },

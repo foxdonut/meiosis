@@ -4,7 +4,9 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { T, getNavigation, getPath, parsePath, pipe } from "./util";
+import { T, pipe } from "./util";
+import { getNavigation } from "./util/navigation";
+import { getPath, parsePath } from "./util/router";
 
 const update = flyd.stream();
 const updateState = flyd.stream();
