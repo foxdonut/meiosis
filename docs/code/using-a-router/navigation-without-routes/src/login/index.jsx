@@ -17,7 +17,8 @@ export const login = {
   })
   */
   service: ({ state, updateState }) => {
-    NavigateTo.map(navigateTo =>
+    NavigateTo.map(navigateTo => {
+      // Navigating to Login
       fold({
         Login: () => updateState({
           route: navigateTo,
@@ -27,8 +28,22 @@ export const login = {
             password: ""
           })
         })
-      })(navigateTo)
-    )(state.navigateTo);
+      })(navigateTo);
+
+
+      // Leaving Login
+      fold({
+        Login: () => {
+          NavigateTo.map(navigateTo => {
+            if (navigateTo.case !== "Login") {
+              updateState({
+                message: null
+              });
+            }
+          })(state.navigateTo);
+        }
+      })(state.route);
+    })(state.navigateTo);
   }
 };
 
