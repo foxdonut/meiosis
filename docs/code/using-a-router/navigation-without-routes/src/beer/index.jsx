@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { get } from "../util";
+import { NavigateTo, fold, get } from "../util";
 
 const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
@@ -41,24 +41,30 @@ const componentMap = {
 };
 
 export const beer = {
-  service: () => null
-  /*
-  onNavigate: {
-    BeerPage: ({ state }) => ({ pleaseWait: true, beers: state.beers || [] })
-  },
-  // after
-  service: ({ navigation, update }) =>
-    setTimeout(() => update({
-      pleaseWait: false,
-      beers,
-      beer: get(beerMap, [navigation.route.values.id, "description"]),
-      route: PS({
-        values: PS({
-          child: navigation.route.values.id ? "BeerDetailsPage" : null
-        })
-      })
-    }), 1000)
-  */
+  service: ({ state, updateState }) => {
+    NavigateTo.map(navigateTo =>
+      fold({
+        Beer: ({ id }) => {
+          updateState({
+            route: navigateTo,
+            navigateTo: NavigateTo.N(),
+            pleaseWait: true,
+            beers: state.beers || []
+          });
+          setTimeout(() => updateState({
+            pleaseWait: false,
+            beers,
+            beer: get(beerMap, [id, "description"]),
+            route: PS({
+              values: PS({
+                child: id ? "BeerDetailsPage" : null
+              })
+            })
+          }), 1000);
+        }
+      })(navigateTo)
+    )(state.navigateTo);
+  }
 };
 
 export class Beer extends Component {
