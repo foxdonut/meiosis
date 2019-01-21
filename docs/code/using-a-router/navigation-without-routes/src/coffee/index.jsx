@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { fold } from "../util";
+import { T, fold } from "../util";
 import { NavigateTo } from "../util/navigation";
 
 const coffees = [
@@ -15,8 +15,8 @@ const coffeeMap = coffees.reduce((result, next) => {
 
 export const coffee = {
   service: ({ state, updateState }) => {
-    NavigateTo.map(navigateTo =>
-      fold({
+    T(state.navigateTo, NavigateTo.map(navigateTo =>
+      T(navigateTo, fold({
         Coffee: ({ id }) => {
           const coffee = id ? coffeeMap[id].description : null;
 
@@ -27,8 +27,8 @@ export const coffee = {
             coffee
           }), 500);
         }
-      })(navigateTo)
-    )(state.navigateTo);
+      }))
+    ));
   }
 };
 
