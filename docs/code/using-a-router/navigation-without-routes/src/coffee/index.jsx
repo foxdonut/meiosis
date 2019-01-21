@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import { T, fold } from "../util";
-import { NavigateTo } from "../util/navigation";
+import { Navigation } from "../util/navigation";
 
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
@@ -15,14 +15,14 @@ const coffeeMap = coffees.reduce((result, next) => {
 
 export const coffee = {
   service: ({ state, updateState }) => {
-    T(state.navigateTo, NavigateTo.map(navigateTo =>
+    T(state.navigateTo, Navigation.map(navigateTo =>
       T(navigateTo, fold({
         Coffee: ({ id }) => {
           const coffee = id ? coffeeMap[id].description : null;
 
           setTimeout(() => updateState({
             route: navigateTo,
-            navigateTo: NavigateTo.N(),
+            navigateTo: Navigation.N(),
             coffees,
             coffee
           }), 500);

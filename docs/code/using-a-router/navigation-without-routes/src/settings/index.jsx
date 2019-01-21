@@ -2,22 +2,22 @@ import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
 import { T, fold } from "../util";
-import { NavigateTo, RoutePage } from "../util/navigation";
+import { Navigation, RoutePage } from "../util/navigation";
 
 export const settings = {
   service: ({ state, update, updateState }) => {
-    T(state.navigateTo, NavigateTo.map(navigateTo =>
+    T(state.navigateTo, Navigation.map(navigateTo =>
       T(navigateTo,fold({
         Settings: () => {
           if (state.user) {
             updateState({
               route: navigateTo,
-              navigateTo: NavigateTo.N(),
+              navigateTo: Navigation.N(),
             });
           }
           else {
             update({
-              navigateTo: NavigateTo.Y(RoutePage.Login({ values: null })),
+              navigateTo: Navigation.Y(RoutePage.Login({ values: null })),
               login: PS({
                 message: "Please login."
               })

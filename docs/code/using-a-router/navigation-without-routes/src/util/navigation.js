@@ -8,7 +8,7 @@ export const RoutePage = tagged("RoutePage")({
   Beer: ["values"]
 });
 
-export const NavigateTo = maybe("NavigateTo");
+export const Navigation = maybe("Navigation");
 
 export const getNavigation = ({ id, values }) =>
-  ({ navigateTo: NavigateTo.Y(RoutePage[id]({ values })) });
+  ({ navigateTo: Navigation.Y(RoutePage[id]({ values })) });

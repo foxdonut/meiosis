@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
 import { T, fold, pipe, preventDefault } from "../util";
-import { NavigateTo } from "../util/navigation";
+import { Navigation } from "../util/navigation";
 
 export const login = {
   actions: ({ update }) => ({
@@ -11,13 +11,13 @@ export const login = {
     password: value =>
       update({ login: PS({ password: value })})
   }),
-  service: ({ state, updateState }) => {
-    T(state.navigateTo, NavigateTo.map(navigateTo => {
+  service: ({ state, update, updateState }) => {
+    T(state.navigateTo, Navigation.map(navigateTo => {
       // Navigating to Login
       T(navigateTo, fold({
-        Login: () => updateState({
+        Login: () => update({
           route: navigateTo,
-          navigateTo: NavigateTo.N(),
+          navigateTo: Navigation.N(),
           login: PS({
             username: "",
             password: ""
@@ -25,20 +25,15 @@ export const login = {
         })
       }));
 
-
       // Leaving Login
-      T(state.route, fold({
-        Login: () => {
-          T(state.navigateTo, NavigateTo.map(navigateTo => {
-            if (navigateTo.case !== "Login") {
-              updateState({
-                login: PS({
-                  message: null
-                })
-              });
-            }
-          }));
-        }
+      T(state.navigateAway, Navigation.map(navigateAway => {
+        T(navigateAway, fold({
+          Login: () => updateState({
+            login: PS({
+              message: null
+            })
+          })
+        }));
       }));
     }));
   }

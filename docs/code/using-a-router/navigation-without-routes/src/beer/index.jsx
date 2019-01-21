@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
 import { T, fold, get } from "../util";
-import { NavigateTo } from "../util/navigation";
+import { Navigation } from "../util/navigation";
 
 const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
@@ -43,12 +43,12 @@ const componentMap = {
 
 export const beer = {
   service: ({ state, updateState }) => {
-    T(state.navigateTo, NavigateTo.map(navigateTo =>
+    T(state.navigateTo, Navigation.map(navigateTo =>
       T(navigateTo, fold({
         Beer: ({ id }) => {
           updateState({
             route: navigateTo,
-            navigateTo: NavigateTo.N(),
+            navigateTo: Navigation.N(),
             pleaseWait: true,
             beers: state.beers || []
           });

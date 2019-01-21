@@ -35,6 +35,7 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
 
   // This is the equivalent to listening for route changes,
   // window.onpopstate = () => navigate(routing.parseUrl())
+  // FIXME: this should go somewhere else
   document.getElementById("pathButton").addEventListener("click", () => {
     T(getPath(), pipe(parsePath, getNavigation, update));
   });

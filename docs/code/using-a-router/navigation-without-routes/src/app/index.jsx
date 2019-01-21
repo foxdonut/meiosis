@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { P } from "patchinko/explicit";
 
-import { NavigateTo, RoutePage } from "../util/navigation";
+import { Navigation, RoutePage } from "../util/navigation";
 import { getPath, parsePath } from "../util/router";
 
 import { root, Root } from "../root";
@@ -14,7 +14,8 @@ import { beer } from "../beer";
 export const app = {
   initialState: () => ({
     route: RoutePage[parsePath(getPath()).id]({ values: null }),
-    navigateTo: NavigateTo.N()
+    navigateTo: Navigation.N(),
+    navigateAway: Navigation.N()
   }),
 
   actions: ({ update, navigate }) => P({},
@@ -23,6 +24,7 @@ export const app = {
   ),
 
   services: [
+    root.service,
     home.service,
     login.service,
     settings.service,

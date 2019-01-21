@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { fold } from "stags";
 
 import { RoutePage, getNavigation } from "../util/navigation";
+import { T } from "../util";
+import { Navigation } from "../util/navigation";
 import { LocationBarSync } from "../util/router";
 
 import { Home } from "../home";
@@ -21,7 +23,21 @@ const componentMap = fold(RoutePage)({
 export const root = {
   actions: ({ update }) => ({
     navigateTo: (id, value) => update(getNavigation({ id, values: { id: value } }))
-  })
+  }),
+  service: ({ state, update, updateState }) => {
+    T(state.navigateTo, Navigation.map(navigateTo => {
+      if (navigateTo.case !== state.route.case) {
+        T(state.navigateAway, Navigation.bifold(
+          () => update({
+            navigateAway: Navigation.Y(state.route)
+          }),
+          () => updateState({
+            navigateAway: Navigation.N()
+          })
+        ));
+      }
+    }));
+  }
 };
 
 export class Root extends Component {
