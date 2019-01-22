@@ -5,7 +5,6 @@ import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
 import { T, pipe } from "./util";
-import { getNavigation } from "./util/navigation";
 import { getPath, parsePath } from "./util/router";
 
 const update = flyd.stream();
@@ -37,6 +36,6 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
   // window.onpopstate = () => navigate(routing.parseUrl())
   // FIXME: this should go somewhere else
   document.getElementById("pathButton").addEventListener("click", () => {
-    T(getPath(), pipe(parsePath, getNavigation, update));
+    T(getPath(), pipe(parsePath, route => ({ route }), update));
   });
 });

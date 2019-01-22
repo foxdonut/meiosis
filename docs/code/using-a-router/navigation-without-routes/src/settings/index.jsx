@@ -1,31 +1,20 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { T, fold } from "../util";
-import { Navigation, RoutePage } from "../util/navigation";
+import { get } from "../util";
 
 export const settings = {
-  service: ({ state, update, updateState }) => {
-    T(state.navigateTo, Navigation.map(navigateTo =>
-      T(navigateTo,fold({
-        Settings: () => {
-          if (state.user) {
-            updateState({
-              route: navigateTo,
-              navigateTo: Navigation.N(),
-            });
-          }
-          else {
-            update({
-              navigateTo: Navigation.Y(RoutePage.Login({ values: null })),
-              login: PS({
-                message: "Please login."
-              })
-            });
-          }
-        }
-      }))
-    ));
+  service: ({ state, update }) => {
+    if (get(state, ["navigateTo", "id"]) === "Settings") {
+      if (!state.user) {
+        update({
+          navigateTo: { id: "Login" },
+          login: PS({
+            message: "Please login."
+          })
+        });
+      }
+    }
   }
 };
 

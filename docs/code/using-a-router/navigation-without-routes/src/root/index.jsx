@@ -1,9 +1,6 @@
 import React, { Component } from "react";
-import { fold } from "stags";
 
-import { RoutePage, getNavigation } from "../util/navigation";
-import { T } from "../util";
-import { Navigation } from "../util/navigation";
+import { get } from "../util";
 import { LocationBarSync } from "../util/router";
 
 import { Home } from "../home";
@@ -12,31 +9,39 @@ import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-const componentMap = fold(RoutePage)({
-  Home: () => Home,
-  Login: () => Login,
-  Settings: () => Settings,
-  Coffee: () => Coffee,
-  Beer: () => Beer
-});
+const componentMap = {
+  Home,
+  Login,
+  Settings,
+  Coffee,
+  Beer
+};
 
 export const root = {
   actions: ({ update }) => ({
-    navigateTo: (id, value) => update(getNavigation({ id, values: { id: value } }))
+    navigateTo: (id, value) => update({ navigateTo: { id, values: { id: value } } })
   }),
   service: ({ state, update, updateState }) => {
-    T(state.navigateTo, Navigation.map(navigateTo => {
-      if (navigateTo.case !== state.route.case) {
-        T(state.navigateAway, Navigation.bifold(
-          () => update({
-            navigateAway: Navigation.Y(state.route)
-          }),
-          () => updateState({
-            navigateAway: Navigation.N()
-          })
-        ));
+    // Navigate To => route
+    if (get(state, ["navigateTo", "id"])) {
+      update({
+        route: state.navigateTo,
+        navigateTo: null
+      });
+    }
+    // Navigate Away
+    if (state.navigateTo && state.navigateTo.id !== state.route.id) {
+      if (state.navigateAway) {
+        updateState({
+          navigateAway: null
+        });
       }
-    }));
+      else {
+        update({
+          navigateAway: state.route
+        });
+      }
+    }
   }
 };
 
@@ -44,8 +49,8 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.route.case;
-    const Component = componentMap(state.route);
+    const componentId = state.route.id;
+    const Component = componentMap[componentId];
     const isActive = tab => tab === componentId ? "active" : "";
 
     return (

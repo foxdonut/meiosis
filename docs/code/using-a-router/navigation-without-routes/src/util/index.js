@@ -11,6 +11,3 @@ export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
-
-export const fold = handlers => obj =>
-  (handlers[obj.case] || (() => null))(obj.value);

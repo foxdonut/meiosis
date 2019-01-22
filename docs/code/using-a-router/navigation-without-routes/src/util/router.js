@@ -18,9 +18,9 @@ export class LocationBarSync extends Component {
   render() {
     const { state } = this.props;
 
-    let path = "/" + state.route.case;
-    if (state.route.value && state.route.value.id) {
-      path = path + "/" + state.route.value.id;
+    let path = "/" + state.route.id;
+    if (state.route.values && state.route.values.id) {
+      path = path + "/" + state.route.values.id;
     }
     if (getPath() !== path) {
       setPath(path);

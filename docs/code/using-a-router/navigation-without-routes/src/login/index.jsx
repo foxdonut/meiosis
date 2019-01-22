@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { T, fold, pipe, preventDefault } from "../util";
-import { Navigation } from "../util/navigation";
+import { get, pipe, preventDefault } from "../util";
 
 export const login = {
   actions: ({ update }) => ({
@@ -12,30 +11,23 @@ export const login = {
       update({ login: PS({ password: value })})
   }),
   service: ({ state, update, updateState }) => {
-    T(state.navigateTo, Navigation.map(navigateTo => {
+    if (get(state, ["navigateTo", "id"]) === "Login") {
       // Navigating to Login
-      T(navigateTo, fold({
-        Login: () => update({
-          route: navigateTo,
-          navigateTo: Navigation.N(),
-          login: PS({
-            username: "",
-            password: ""
-          })
+      update({
+        login: PS({
+          username: "",
+          password: ""
         })
-      }));
-
+      });
+    }
+    else if (get(state, ["navigateAway", "id"]) === "Login") {
       // Leaving Login
-      T(state.navigateAway, Navigation.map(navigateAway => {
-        T(navigateAway, fold({
-          Login: () => updateState({
-            login: PS({
-              message: null
-            })
-          })
-        }));
-      }));
-    }));
+      updateState({
+        login: PS({
+          message: null
+        })
+      });
+    }
   }
 };
 
