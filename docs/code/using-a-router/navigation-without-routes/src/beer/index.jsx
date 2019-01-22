@@ -41,14 +41,14 @@ const componentMap = {
 };
 
 export const beer = {
-  service: ({ state, updateState }) => {
+  service: ({ state, update }) => {
     if (get(state, ["navigateTo", "id"]) === "Beer") {
-      updateState({
+      update({
         pleaseWait: true,
         beers: state.beers || []
       });
       const id = get(state, ["navigateTo", "values", "id"]);
-      setTimeout(() => updateState({
+      setTimeout(() => update({
         pleaseWait: false,
         beers,
         beer: get(beerMap, [id, "description"]),

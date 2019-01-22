@@ -21,7 +21,7 @@ export const root = {
   actions: ({ update }) => ({
     navigateTo: (id, value) => update({ navigateTo: { id, values: { id: value } } })
   }),
-  service: ({ state, update, updateState }) => {
+  service: ({ state, update }) => {
     // Navigate To => route
     if (get(state, ["navigateTo", "id"])) {
       update({
@@ -29,19 +29,23 @@ export const root = {
         navigateTo: null
       });
     }
+
     // Navigate Away
-    if (state.navigateTo && state.navigateTo.id !== state.route.id) {
-      if (state.navigateAway) {
-        updateState({
-          navigateAway: null
-        });
-      }
-      else {
-        update({
-          navigateAway: state.route
-        });
-      }
+    if (state.navigateTo &&
+        state.route &&
+        state.navigateTo.id !== state.route.id &&
+        get(state, ["navigateAway", "id"]) !== state.route.id)
+    {
+      update({
+        navigateAway: state.route
+      });
     }
+    // Just a computed value for a scenario where we want to avoid infinite loops
+    /*
+    update({
+      usernameLength: (get(state, ["login", "username"]) || "").length
+    });
+    */
   }
 };
 

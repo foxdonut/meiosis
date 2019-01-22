@@ -13,12 +13,12 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  service: ({ state, updateState }) => {
+  service: ({ state, update }) => {
     if (get(state, ["navigateTo", "id"]) === "Coffee") {
       const id = get(state, ["navigateTo", "values", "id"]);
       const coffee = id ? coffeeMap[id].description : null;
 
-      setTimeout(() => updateState({
+      setTimeout(() => update({
         coffees,
         coffee
       }), 500);
@@ -34,7 +34,7 @@ export class Coffee extends Component {
       <div>
         <p>Coffee Page</p>
         <ul>
-          {state.coffees.map(coffee =>
+          {state.coffees && state.coffees.map(coffee =>
             <li key={coffee.id}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("CoffeePage", coffee.id)}

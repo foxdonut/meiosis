@@ -10,7 +10,7 @@ export const login = {
     password: value =>
       update({ login: PS({ password: value })})
   }),
-  service: ({ state, update, updateState }) => {
+  service: ({ state, update }) => {
     if (get(state, ["navigateTo", "id"]) === "Login") {
       // Navigating to Login
       update({
@@ -22,7 +22,8 @@ export const login = {
     }
     else if (get(state, ["navigateAway", "id"]) === "Login") {
       // Leaving Login
-      updateState({
+      update({
+        navigateAway: null,
         login: PS({
           message: null
         })
