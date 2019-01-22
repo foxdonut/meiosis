@@ -41,11 +41,12 @@ export const root = {
       });
     }
     // Just a computed value for a scenario where we want to avoid infinite loops
-    /*
-    update({
-      usernameLength: (get(state, ["login", "username"]) || "").length
-    });
-    */
+    if (state.fresh) {
+      update({
+        fresh: false,
+        usernameLength: (get(state, ["login", "username"]) || "").length
+      });
+    }
   }
 };
 

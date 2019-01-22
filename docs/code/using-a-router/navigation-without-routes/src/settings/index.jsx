@@ -15,6 +15,15 @@ export const settings = {
         });
       }
     }
+    // Another computed property. Every service gets a chance to handle a "fresh" state.
+    if (state.fresh) {
+      update({
+        fresh: false,
+        userAndPasswordLength:
+          (get(state, ["login", "username"]) || "").length +
+          (get(state, ["login", "password"]) || "").length
+      });
+    }
   }
 };
 
