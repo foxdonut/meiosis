@@ -22,31 +22,23 @@ export const root = {
     navigateTo: (id, value) => update({ navigateTo: { id, values: { id: value } } })
   }),
   service: ({ state, update }) => {
+    const result = {};
+
     // Navigate To => route
-    if (get(state, ["navigateTo", "id"])) {
-      update({
-        route: state.navigateTo,
-        navigateTo: null
-      });
+    if (state.navigateTo.id) {
+      result.route = state.navigateTo;
+      result.navigateTo = {};
     }
 
-    // Navigate Away
-    if (state.navigateTo &&
-        state.route &&
-        state.navigateTo.id !== state.route.id &&
-        get(state, ["navigateAway", "id"]) !== state.route.id)
-    {
-      update({
-        navigateAway: state.route
-      });
-    }
     // Just a computed value for a scenario where we want to avoid infinite loops
-    if (state.fresh) {
-      update({
-        fresh: false,
-        usernameLength: (get(state, ["login", "username"]) || "").length
-      });
+    result.usernameLength = (get(state, ["login", "username"]) || "").length;
+
+    // Navigate Away - call update because we want other services to see this
+    if (state.navigateTo.id !== state.route.id && state.navigateAway.id !== state.route.id) {
+      result.navigateAway = state.route;
     }
+
+    return result;
   }
 };
 

@@ -5,7 +5,7 @@ import { get } from "../util";
 
 export const settings = {
   service: ({ state, update }) => {
-    if (get(state, ["navigateTo", "id"]) === "Settings") {
+    if (state.navigateTo.id === "Settings") {
       if (!state.user) {
         update({
           navigateTo: { id: "Login" },
@@ -15,15 +15,12 @@ export const settings = {
         });
       }
     }
-    // Another computed property. Every service gets a chance to handle a "fresh" state.
-    if (state.fresh) {
-      update({
-        fresh: false,
-        userAndPasswordLength:
-          (get(state, ["login", "username"]) || "").length +
-          (get(state, ["login", "password"]) || "").length
-      });
-    }
+    // Another computed property. Every service gets a chance to act upon the same state.
+    return {
+      userAndPasswordLength:
+        (get(state, ["login", "username"]) || "").length +
+        (get(state, ["login", "password"]) || "").length
+    };
   }
 };
 

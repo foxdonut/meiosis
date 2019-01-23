@@ -14,7 +14,7 @@ const coffeeMap = coffees.reduce((result, next) => {
 
 export const coffee = {
   service: ({ state, update }) => {
-    if (get(state, ["navigateTo", "id"]) === "Coffee") {
+    if (state.navigateTo.id === "Coffee") {
       const id = get(state, ["navigateTo", "values", "id"]);
       const coffee = id ? coffeeMap[id].description : null;
 

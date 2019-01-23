@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { get, pipe, preventDefault } from "../util";
+import { pipe, preventDefault } from "../util";
 
 export const login = {
   actions: ({ update }) => ({
@@ -10,24 +10,25 @@ export const login = {
     password: value =>
       update({ login: PS({ password: value })})
   }),
-  service: ({ state, update }) => {
-    if (get(state, ["navigateTo", "id"]) === "Login") {
+
+  service: ({ state }) => {
+    if (state.navigateTo.id === "Login") {
       // Navigating to Login
-      update({
+      return {
         login: PS({
           username: "",
           password: ""
         })
-      });
+      };
     }
-    else if (get(state, ["navigateAway", "id"]) === "Login") {
+    else if (state.navigateAway.id === "Login") {
       // Leaving Login
-      update({
-        navigateAway: null,
+      return {
+        navigateAway: {},
         login: PS({
           message: null
         })
-      });
+      };
     }
   }
 };

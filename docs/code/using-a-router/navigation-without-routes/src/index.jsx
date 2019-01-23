@@ -8,11 +8,14 @@ import { T, pipe } from "./util";
 import { getPath, parsePath } from "./util/router";
 
 const update = flyd.stream();
-const serviceUpdate = flyd.stream();
 
 Promise.resolve().then(() => app.initialState()).then(initialState => {
   const models = flyd.scan(P, initialState, update);
-  const states = flyd.scan(P, models(), serviceUpdate);
+  const states = models.map(state =>
+    P.apply(null, [state].concat(
+      app.services.map(service => service({ state, update }))
+    ))
+  );
 
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
@@ -22,18 +25,6 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
       { stream: models, label: "models" },
       { stream: states, label: "states" }
     ]
-  });
-
-  models.map(state => {
-    app.services.forEach(service =>
-      service({ state: P(state, { fresh: true }), update: serviceUpdate })
-    );
-  });
-
-  states.map(state => {
-    app.services.forEach(service =>
-      service({ state, update: serviceUpdate })
-    );
   });
 
   const actions = app.actions({ update });

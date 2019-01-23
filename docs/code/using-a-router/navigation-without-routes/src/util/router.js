@@ -1,5 +1,3 @@
-import { Component } from "react";
-
 export const parsePath = path => {
   const first = path.indexOf("/");
   const last = path.lastIndexOf("/");
@@ -14,18 +12,14 @@ export const getPath = () => document.getElementById("pathInput").value;
 export const setPath = path => document.getElementById("pathInput").value = path;
 
 // Keeps the location bar in sync
-export class LocationBarSync extends Component {
-  render() {
-    const { state } = this.props;
-
-    let path = "/" + state.route.id;
-    if (state.route.values && state.route.values.id) {
-      path = path + "/" + state.route.values.id;
-    }
-    if (getPath() !== path) {
-      setPath(path);
-    }
-
-    return null;
+export const LocationBarSync = ({ state }) => {
+  let path = "/" + state.route.id;
+  if (state.route.values && state.route.values.id) {
+    path = path + "/" + state.route.values.id;
   }
-}
+  if (getPath() !== path) {
+    setPath(path);
+  }
+
+  return null;
+};

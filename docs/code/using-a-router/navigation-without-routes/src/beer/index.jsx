@@ -42,11 +42,7 @@ const componentMap = {
 
 export const beer = {
   service: ({ state, update }) => {
-    if (get(state, ["navigateTo", "id"]) === "Beer") {
-      update({
-        pleaseWait: true,
-        beers: state.beers || []
-      });
+    if (state.navigateTo.id === "Beer") {
       const id = get(state, ["navigateTo", "values", "id"]);
       setTimeout(() => update({
         pleaseWait: false,
@@ -58,6 +54,11 @@ export const beer = {
           })
         })
       }), 1000);
+
+      return {
+        pleaseWait: true,
+        beers: state.beers || []
+      };
     }
   }
 };
