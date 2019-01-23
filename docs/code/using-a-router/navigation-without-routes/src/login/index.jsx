@@ -21,10 +21,12 @@ export const login = {
         })
       };
     }
-    else if (state.navigateAway.id === "Login") {
+    else if (state.navigateTo &&
+        state.navigateTo.id !== state.route.id &&
+        state.route.id === "Login")
+    {
       // Leaving Login
       return {
-        navigateAway: {},
         login: PS({
           message: null
         })

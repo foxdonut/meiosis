@@ -21,7 +21,7 @@ export const root = {
   actions: ({ update }) => ({
     navigateTo: (id, value) => update({ navigateTo: { id, values: { id: value } } })
   }),
-  service: ({ state, update }) => {
+  service: ({ state }) => {
     const result = {};
 
     // Navigate To => route
@@ -32,11 +32,6 @@ export const root = {
 
     // Just a computed value for a scenario where we want to avoid infinite loops
     result.usernameLength = (get(state, ["login", "username"]) || "").length;
-
-    // Navigate Away - call update because we want other services to see this
-    if (state.navigateTo.id !== state.route.id && state.navigateAway.id !== state.route.id) {
-      result.navigateAway = state.route;
-    }
 
     return result;
   }

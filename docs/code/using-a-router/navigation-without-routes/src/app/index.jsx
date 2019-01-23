@@ -12,8 +12,7 @@ import { beer } from "../beer";
 export const app = {
   initialState: () => ({
     route: parsePath(getPath()),
-    navigateTo: {},
-    navigateAway: {}
+    navigateTo: {}
   }),
 
   actions: ({ update, navigate }) => P({},

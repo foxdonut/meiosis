@@ -5,15 +5,13 @@ import { get } from "../util";
 
 export const settings = {
   service: ({ state, update }) => {
-    if (state.navigateTo.id === "Settings") {
-      if (!state.user) {
-        update({
-          navigateTo: { id: "Login" },
-          login: PS({
-            message: "Please login."
-          })
-        });
-      }
+    if (state.navigateTo.id === "Settings" && !state.user) {
+      update({
+        navigateTo: { id: "Login" },
+        login: PS({
+          message: "Please login."
+        })
+      });
     }
     // Another computed property. Every service gets a chance to act upon the same state.
     return {
