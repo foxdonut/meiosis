@@ -4,8 +4,7 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { T, pipe } from "./util";
-import { getPath, parsePath } from "./util/router";
+import { listenToRouteChanges } from "./util/router";
 
 const update = flyd.stream();
 
@@ -30,10 +29,5 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
   const actions = app.actions({ update });
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-  // This is the equivalent to listening for route changes,
-  // window.onpopstate = () => navigate(routing.parseUrl())
-  // FIXME: this should go somewhere else
-  document.getElementById("pathButton").addEventListener("click", () => {
-    T(getPath(), pipe(parsePath, route => ({ route }), update));
-  });
+  listenToRouteChanges(update);
 });
