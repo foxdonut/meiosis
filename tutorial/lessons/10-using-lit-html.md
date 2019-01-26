@@ -12,7 +12,8 @@ code for an example with a `conditions` component and two temperature components
 
 In this section, we'll wire this up to [lit-html](https://lit-html.polymer-project.org/).
 
-### Wiring Meiosis
+<a name="wiring_meiosis"></a>
+### [Wiring Meiosis](#wiring_meiosis)
 
 Remember that we had an `actions` object and a `states` stream:
 
@@ -32,7 +33,8 @@ var element = document.getElementById("app");
 states.map(state => render(App(state, actions), element));
 ```
 
-### The App View Function
+<a name="the_app_view_function"></a>
+### [The App View Function](#the_app_view_function)
 
 The `App` view function receives `state` and `actions` as parameters. We pass these on to other
 view functions, in this case `Conditions` and `Temperature`. Notice that we have two instances
@@ -49,7 +51,8 @@ var App = function(state, actions) {
 };
 ```
 
-### The Conditions View Function
+<a name="the_conditions_view_function"></a>
+### [The Conditions View Function](#the_conditions_view_function)
 
 The `Conditions` view function displays a checkbox for "precipitations" and a series of radio
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the
@@ -89,7 +92,8 @@ var Conditions = function(state, actions) {
 };
 ```
 
-### The Temperature View Function
+<a name="the_temperature_view_function"></a>
+### [The Temperature View Function](#the_temperature_view_function)
 
 The `Temperature` view function is similar, except that it also receives an `id` and uses it to
 read its state:
@@ -123,7 +127,8 @@ You can see the complete example below.
 
 @flems code/10-using-lit-html-01.js,app.html,app.css flyd,patchinko 800 shown 60
 
-### Takeaways
+<a name="takeaways"></a>
+### [Takeaways](#takeaways)
 
 We can wire up Meiosis to lit-html using `render` and passing `state` and `actions` as
 parameters to the top-level `App` view function. We call `map` on the `states` stream to
@@ -137,7 +142,8 @@ property outside of the view function, you also pass the `id`.
 View functions can then use the `state` to render the view according to the current application
 state, and call `actions` to trigger changes.
 
-### Conclusion
+<a name="conclusion"></a>
+### [Conclusion](#conclusion)
 
 This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
 to go from here.

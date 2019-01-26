@@ -9,7 +9,8 @@ Welcome to the [Meiosis](https://meiosis.js.org) Tutorial!
 The purpose of this tutorial is to explain the Meiosis pattern from the ground up, hopefully
 without assuming too much prior knowledge beyond the basics of JavaScript.
 
-### High Level Goals
+<a name="high_level_goals"></a>
+### [High Level Goals](#high_level_goals)
 
 Meiosis is a simple pattern for managing application state. The idea is to have a single,
 top-level object that represents the state of your application, and having a straightforward
@@ -20,7 +21,8 @@ Alongside that, Meiosis aims to free your state management code from being deepl
 complex libraries or frameworks. When using Meiosis, you manage your application state with
 plain objects and functions.
 
-### Prerequisites
+<a name="prerequisites"></a>
+### [Prerequisites](#prerequisites)
 
 Besides JavaScript, you will need to know, or learn, about the view library that you would
 like to use. Most of this tutorial is independent of the view library. When we put it all
@@ -31,7 +33,8 @@ together, there are examples with [React](https://reactjs.org),
 If none of those is your preferred view library, fear not! It is trivial to use just about
 any view library with the Meiosis pattern.
 
-### ES5 or ES6
+<a name="es5_or_es6"></a>
+### [ES5 or ES6](#es5_or_es6)
 
 I purposely used ES5 syntax in the code examples so that readers who are not familiar with ES6
 could benefit from the tutorial, without requiring ES6 knowledge. If you prefer ES6, by all means
@@ -83,7 +86,8 @@ is short for:
 
 Meiosis documentation and examples outside of this tutorial use ES6 syntax.
 
-### Embedded Code Examples
+<a name="embedded_code_examples"></a>
+### [Embedded Code Examples](#embedded_code_examples)
 
 The best way to learn is to practice! So, all code examples for this tutorial are embedded
 into the page using [Flems](https://github.com/porsager/flems), so that you can edit the

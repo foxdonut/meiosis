@@ -12,7 +12,8 @@ code for an example with a `conditions` component and two temperature components
 
 In this section, we'll wire this up to [Preact](https://preactjs.com/).
 
-### Wiring Meiosis
+<a name="wiring_meiosis"></a>
+### [Wiring Meiosis](#wiring_meiosis)
 
 Remember that we had an `actions` object and a `states` stream:
 
@@ -34,7 +35,8 @@ preact.render(<App states={states} actions={actions} />,
 Within the `App` component, we'll use `map` on the `states` stream and call `setState` so
 that the view gets refreshed whenever the state changes.
 
-### The App Component
+<a name="the_app_component"></a>
+### [The App Component](#the_app_component)
 
 The `App` component retrieves `states` and `actions` from the passed-in props. In the
 `componentWillMount` lifecycle method, we `map` the `states` stream and call `setState` so
@@ -68,7 +70,8 @@ class App extends preact.Component {
 }
 ```
 
-### The Conditions Component
+<a name="the_conditions_component"></a>
+### [The Conditions Component](#the_conditions_component)
 
 The `Conditions` component displays a checkbox for "precipitations" and a series of radio
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the
@@ -111,7 +114,8 @@ class Conditions extends preact.Component {
 }
 ```
 
-### The Temperature Component
+<a name="the_temperature_component"></a>
+### [The Temperature Component](#the_temperature_component)
 
 The `Temperature` component is similar, except that it also receives an `id` and uses it to
 read its state:
@@ -148,7 +152,8 @@ You can see the complete example below.
 
 @flems code/09-using-preact-01.jsx,app.html,app.css flyd,preact,patchinko 800 shown 60
 
-### Takeaways
+<a name="takeaways"></a>
+### [Takeaways](#takeaways)
 
 We can wire up Meiosis to Preact using `preact.render` and passing `states` and `actions` as
 props to the top-level `App` Preact component. In the `componentWillMount` lifecycle method,
@@ -163,7 +168,8 @@ the component, you also pass the `id`.
 Components can then use the `state` to render the view according to the current application
 state, and call `actions` to trigger changes.
 
-### Conclusion
+<a name="conclusion"></a>
+### [Conclusion](#conclusion)
 
 This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
 to go from here.

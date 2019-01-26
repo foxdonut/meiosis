@@ -10,9 +10,10 @@ h2 {
   color: #F43c1d;
   font-size: 2.8rem;
 }
-h3, th {
+h3, h3 a, th {
   color: #3355FF;
   font-size: 2.4rem;
+  text-decoration: none;
 }
 h4 {
   color: #559977;

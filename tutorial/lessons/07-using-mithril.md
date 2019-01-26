@@ -12,13 +12,15 @@ code for an example with a `conditions` component and two temperature components
 
 In this section, we'll wire this up to [Mithril](http://mithril.js.org/).
 
-### Mithril Stream
+<a name="mithril_stream"></a>
+### [Mithril Stream](#mithril_stream)
 
 First, we can use [Mithril Stream](https://mithril.js.org/stream.html) as a stream library.
 For our purposes, it works just like `flyd`. The only difference is that you call `m.stream()`
 instead of `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
-### Wiring Meiosis
+<a name="wiring_meiosis"></a>
+### [Wiring Meiosis](#wiring_meiosis)
 
 Next, remember that we had an `actions` object and a `states` stream:
 
@@ -44,7 +46,8 @@ With Mithril's
 [auto-redraw system](https://mithril.js.org/autoredraw.html), the view is automatically
 re-rendered after user interaction.
 
-### The App Component
+<a name="the_app_component"></a>
+### [The App Component](#the_app_component)
 
 The `App` component retrieves `state` and `actions` from the passed-in attributes. We pass these
 on to other components, in this case `Conditions` and `Temperature`. Notice that we have two
@@ -64,7 +67,8 @@ var App = {
 };
 ```
 
-### The Conditions Component
+<a name="the_conditions_component"></a>
+### [The Conditions Component](#the_conditions_component)
 
 The `Conditions` component displays a checkbox for "precipitations" and a series of radio
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the
@@ -108,7 +112,8 @@ var Conditions = {
 };
 ```
 
-### The Temperature Component
+<a name="the_temperature_component"></a>
+### [The Temperature Component](#the_temperature_component)
 
 The `Temperature` component is similar, except that it also receives an `id` and uses it to
 read its state:
@@ -142,7 +147,8 @@ You can see the complete example below.
 
 @flems code/07-using-mithril-01.js,app.html,app.css mithril,mithril-stream,patchinko 800 shown 60
 
-### Takeaways
+<a name="takeaways"></a>
+### [Takeaways](#takeaways)
 
 We can wire up Meiosis to Mithril using `m.mount` and passing `state` from the latest value
 of the `states` stream, along with `actions`, to the top-level Mithril component.
@@ -160,7 +166,8 @@ re-rendered. Of course, if you trigger state changes outside of Mithril's auto-r
 [When Mithril does not redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw))
 you have to call `m.redraw()` yourself.
 
-### Conclusion
+<a name="conclusion"></a>
+### [Conclusion](#conclusion)
 
 This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
 to go from here.

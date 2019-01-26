@@ -13,7 +13,8 @@ In this section, we will use another approach - my personal favourite - using a 
 Patchinko. The Meiosis pattern is flexible enough that you can use either of these approaches
 or even one of your own.
 
-### Introducing Patchinko
+<a name="introducing_patchinko"></a>
+### [Introducing Patchinko](#introducing_patchinko)
 
 [Patchinko](https://github.com/barneycarroll/patchinko) is a brilliant utility that
 [Barney Carroll](https://github.com/barneycarroll) wrote in just 30-some lines of code. We will
@@ -71,7 +72,8 @@ If you find that this looks like `Object.assign`, you are correct: `P` does the 
 However, `P` has more capabilities when combined with Patchinko's other functions:
 `S`, `PS`, and `D`.
 
-### Patching based on the current value: `S`
+<a name="patching_based_on_current"></a>
+### [Patching based on the current value: `S`](#patching_based_on_current)
 
 Within a patch, you can include calls to other Patchinko functions. One of those is `S` (Scope).
 `S` allows us to use the current value of the target object to determine the updated value.
@@ -100,7 +102,8 @@ By passing `S()` for the `value` property, Patchinko passes the previous value o
 to the function that we indicate in our call to `S()`. Our function receives `22`, adds `1` and
 returns `23`, which Patchinko assigns back to the `value` property.
 
-### Deep Patching: `PS`
+<a name="deep_patching"></a>
+### [Deep Patching: `PS`](#deep_patching)
 
 When we pass plain objects to `P`, it acts like `Object.assign` and does a _shallow_ merge.
 If our target object is:
@@ -181,7 +184,8 @@ P(
 }
 ```
 
-### Deleting a property: `D`
+<a name="deleting_a_property"></a>
+### [Deleting a property: `D`](#deleting_a_property)
 
 Finally, Patchinko provides `D` to delete a property. To use it, we just have to specify `D`
 as the value for the property that we wish to delete:
@@ -217,7 +221,8 @@ verify your answers.
 
 @flems code/05-meiosis-with-patchinko-01.js patchinko 550
 
-### Exercises
+<a name="exercises_1"></a>
+### [Exercises](#exercises_1)
 
 1. Change `water` to `{ value: 84, units: "F" }`
 1. Toggle the `comfortable` property with a function that changes the value to the
@@ -225,7 +230,8 @@ opposite of what it was
 1. Change the `air` value to `20` without losing the units
 1. Delete the `invalid` property.
 
-### Solution
+<a name="solution_1"></a>
+### [Solution](#solution_1)
 
 @flems code/05-meiosis-with-patchinko-01-solution.js patchinko 800 hidden
 
@@ -247,7 +253,8 @@ equivalent of `P`, `S`, `PS`, or `D`.
 > - With a single **object** argument:`O({..})` does the same as `PS`
 > - With no arguments, as the value of a property: `O` does the same as `D`.
 
-### Using Patchinko with Meiosis
+<a name="using_patchinko_with_meiosis"></a>
+### [Using Patchinko with Meiosis](#using_patchinko_with_meiosis)
 
 To use Patchinko with Meiosis, we can pass object patches onto the `update` stream and use
 them in the accumulator to update the state.
@@ -293,7 +300,8 @@ Putting it all together, we have:
 
 @flems code/05-meiosis-with-patchinko-02.js flyd,patchinko 800
 
-### Exercises
+<a name="exercises_2"></a>
+### [Exercises](#exercises_2)
 
 Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:

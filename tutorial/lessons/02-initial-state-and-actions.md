@@ -21,7 +21,8 @@ A plain JavaScript object with a `value` property indicating the value of the co
 
 Now, we want to create an action that increments the counter.
 
-### Increment Action
+<a name="increment_action"></a>
+### [Increment Action](#increment_action)
 
 We'll create an `actions` object with an `increment` function that increments the counter.
 

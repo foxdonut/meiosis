@@ -14,7 +14,8 @@ This works, but we can improve the approach. Namely, we'd like to gain more cont
 flow of data and how we make changes to the state. We can do this by using a **stream**. A
 stream is a nice and simple way to **communicate values** and to control data flow.
 
-### Introducing Streams
+<a name="introducing_streams"></a>
+### [Introducing Streams](#introducing_streams)
 
 > If you already know about streams and are comfortable with them, great. But, if you have
 glanced at streams elsewhere and found them overly complicated, **please forget all of that**
@@ -32,7 +33,8 @@ these values will be in a stream.
 
 We can pass values, objects, and even functions onto a stream.
 
-### Stream `map`
+<a name="stream_map"></a>
+### [Stream `map`](#stream_map)
 
 The way to **do** something with the values that arrive on the stream is by calling `map`. We
 pass a **function** as a parameter to `map`, and that function gets called every time a new
@@ -45,7 +47,8 @@ Although `map` produces a new stream, we don't always need it. The function that
 return anything that we need to use. We can also use `map` to **do** something with the values
 (also known as **side effects**).
 
-### A simple stream library: flyd
+<a name="stream_library_flyd"></a>
+### [A simple stream library: flyd](#stream_library_flyd)
 
 We will use [flyd](https://github.com/paldepind/flyd) as our stream library. You can also use
 another stream library simply by using its equivalents of:
@@ -94,7 +97,8 @@ already loaded, try the exercises.
 
 @flems code/03-streams-01.js flyd 550
 
-### Exercises
+<a name="exercises_1"></a>
+### [Exercises](#exercises_1)
 
 1. Create an `update` stream.
 1. Create a `timesTen` stream that is the result of multiplying by ten each value from the
@@ -105,11 +109,13 @@ already loaded, try the exercises.
 1. Verify that everything is working by calling `update(1)` and `update(2)` and seeing
 `12` and `22` on the console log.
 
-### Solution
+<a name="solution_1"></a>
+### [Solution](#solution_1)
 
 @flems code/03-streams-01-solution.js flyd 800 hidden
 
-### Stream `scan`
+<a name="stream_scan"></a>
+### [Stream `scan`](#stream_scan)
 
 The other stream function that we'll use is called `scan`. Stream libraries have a number of
 other functions (also called operators), ranging from a handful to an
@@ -159,7 +165,8 @@ below:
 
 ![Scan](03-streams-03.svg)
 
-### Using `scan`
+<a name="using_scan"></a>
+### [Using `scan`](#using_scan)
 
 Now that have we streams, `map`, and `scan`, we can use themt to manage our application state.
 Previously, we had:
@@ -226,7 +233,8 @@ Putting it all together, we have the complete example as shown below.
 
 @flems code/03-streams-02.js flyd 800
 
-### Exercises
+<a name="exercises_2"></a>
+### [Exercises](#exercises_2)
 
 Try it out: notice that `{"value":0}` appears in the output on the right. This is our initial
 state. Now, within the console, type and then press Enter:

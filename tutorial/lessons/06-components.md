@@ -6,7 +6,8 @@
 
 ## 06 - Components
 
-### Building Components
+<a name="building_components"></a>
+### [Building Components](#building_components)
 
 Let's continue our previous example. We already had a "temperature" component. We'll add a
 "conditions" component for the current conditions (sunny, cloudy, rain) so that our initial
@@ -110,7 +111,8 @@ In this example, components designate a property for their state (`conditions`, 
 What if we want to designate a property from outside the component, to make sure there are no
 conflicts? Even more significantly, what if we want to have multiple instances of a component?
 
-### Using IDs for Components
+<a name="using_ids_for_components"></a>
+### [Using IDs for Components](#using_ids_for_components)
 
 Whether it's to manage properties from outside of components, or to use multiple instances of
 a component, we can use IDs and pass them to components. Then, instead of having a hardcoded
@@ -187,7 +189,8 @@ Here is the complete example:
 
 @flems code/06-components-02.js flyd,patchinko 800
 
-### Exercises
+<a name="exercises"></a>
+### [Exercises](#exercises)
 
 Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:
@@ -200,7 +203,8 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-### State Management and View code
+<a name="state_management_and_view_code"></a>
+### [State Management and View code](#state_management_and_view_code)
 
 So far, all we have is state management code; there is no view code. This is on purpose:
 we've built our state management code independently. We can trigger actions and see the

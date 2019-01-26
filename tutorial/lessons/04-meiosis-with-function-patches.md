@@ -30,7 +30,8 @@ We are going to change our patches and accumulator function to be general-purpos
 shape of our state can be much more flexible, and our actions can issue patches to make all sorts
 of changes to the state.
 
-### A Temperature Example
+<a name="temperature_example"></a>
+### [A Temperature Example](#temperature_example)
 
 Let's build a temperature example with the following initial state:
 
@@ -54,7 +55,8 @@ We need to:
 In this section, we will use one approach using **function patches**. In the next section, we
 will look at another approach - my personal favourite - using a small utility called Patchinko.
 
-### Using Function Patches
+<a name="using_function_patches"></a>
+### [Using Function Patches](#using_function_patches)
 
 Instead of using plain numbers as patches, which are limited to incrementing a counter, we can
 use **functions**. Indeed, we can pass functions onto the `update` stream and use them in the
@@ -95,7 +97,8 @@ Putting it all together, we have:
 
 @flems code/04-meiosis-with-function-patches-01.js flyd 800
 
-### Exercises
+<a name="exercises"></a>
+### [Exercises](#exercises)
 
 Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:
