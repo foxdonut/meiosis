@@ -1,38 +1,87 @@
 import React, { Component } from "react";
+import { PS } from "patchinko/explicit";
+
+import { get } from "../util";
+
+const beers = [
+  { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
+  { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
+];
+
+const beerMap = beers.reduce((result, next) => {
+  result[next.id] = next;
+  return result;
+}, {});
+
+class BeerDetails extends Component {
+  render() {
+    const { state, actions } = this.props;
+
+    return (<div>
+      <p>{state.beer}</p>
+      <a href="javascript://"
+        onClick={() => actions.navigateTo("BeerPage", state.beer.id)}>Brewer</a>
+    </div>);
+  }
+}
+
+class Brewer extends Component {
+  render() {
+    const { state } = this.props;
+
+    return (
+      <p>{state.brewer}</p>
+    );
+  }
+}
+
+const componentMap = {
+  BeerDetailsPage: BeerDetails,
+  BrewerPage: Brewer
+};
+
+export const beer = {
+  service: ({ state, update }) => {
+    if (state.navigateTo.id === "Beer") {
+      const id = get(state, ["navigateTo", "values", "id"]);
+      setTimeout(() => update({
+        pleaseWait: false,
+        beers,
+        beer: get(beerMap, [id, "description"]),
+        route: PS({
+          values: PS({
+            child: id ? "BeerDetailsPage" : null
+          })
+        })
+      }), 1000);
+
+      return {
+        pleaseWait: true,
+        beers: state.beers || []
+      };
+    }
+  }
+};
 
 export class Beer extends Component {
   render() {
-    const { state } = this.props;
+    const { state, actions } = this.props;
+    const Component = componentMap[get(state, ["route", "values", "child"])];
 
     return (
       <div>
         <p>Beer Page</p>
         <ul>
-          {(state.beers || []).map(beer =>
+          {state.beers.map(beer =>
             <li key={beer.id}>
-              <a href={navigator.blankHref}
-                onClick={() => null /*navigator.navigateTo("BeerDetailsPage", { id: beer.id })*/}
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("BeerPage", beer.id)}
               >{beer.title}</a>
-              {" "}
-              <button className="btn btn-default btn-xs"
-                onClick={() => null /*
-                navigator.navigateTo("BeerDetailsPage", { id: beer.id })*/}>
-                {beer.title}
-              </button>
             </li>
           )}
         </ul>
+        {Component && <Component state={state} actions={actions}/>}
       </div>
-    );
-  }
-}
-
-export class BeerDetails extends Component {
-  render() {
-    const { state } = this.props;
-
-    return (
-      <p>{state.beer}</p>
     );
   }
 }

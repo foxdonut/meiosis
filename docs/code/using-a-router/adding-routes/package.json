@@ -26,7 +26,7 @@
   "dependencies": {
     "flyd": "^0.2.8",
     "patchinko": "^4.1.0",
-    "path-to-regexp": "^2.4.0",
+    "path-to-regexp": "^3.0.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0"
   },

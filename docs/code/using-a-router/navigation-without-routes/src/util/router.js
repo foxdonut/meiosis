@@ -36,8 +36,8 @@ export const LocationBarSync = ({ state }) => {
 };
 
 // This is the equivalent to listening for route changes,
-// window.onpopstate = () => update({ route: parsePath(getPath()) });
+// window.onpopstate = () => update({ navigateTo: parsePath(getPath()) });
 export const listenToRouteChanges = update =>
   document.getElementById("pathButton").addEventListener("click", () => {
-    update(({ route: parsePath(getPath()) }));
+    update(({ navigateTo: parsePath(getPath()) }));
   });

@@ -4,25 +4,30 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
+import { listenToRouteChanges } from "./util/router";
 
 const update = flyd.stream();
-const navigate = flyd.stream();
-const states = flyd.scan(P, app.initialState(), update);
-states.map(app.service);
 
-// Only for using Meiosis Tracer in development.
-require("meiosis-tracer")(
-  { selector: "#tracer",
+Promise.resolve().then(() => app.initialState()).then(initialState => {
+  const models = flyd.scan(P, initialState, update);
+  const states = models.map(state =>
+    P.apply(null, [state].concat(
+      app.services.map(service => service({ state, update }))
+    ))
+  );
+
+  // Only for using Meiosis Tracer in development.
+  require("meiosis-tracer")({
+    selector: "#tracer",
     rows: 10,
-    streams: [ navigate, states ]
-  }
-);
+    streams: [
+      { stream: models, label: "models" },
+      { stream: states, label: "states" }
+    ]
+  });
 
-const actions = app.actions(update, navigate);
-render(<App states={states} actions={actions}/>, document.getElementById("app"));
+  const actions = app.actions({ update });
+  render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-navigate.map(update);
-
-// Listen to route changes
-window.onpopstate = () =>
-  navigate({ route: app.routing.parseUrl(document.location.hash.substring(1) || "/") });
+  listenToRouteChanges(update);
+});
