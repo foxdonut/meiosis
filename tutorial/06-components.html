@@ -14,7 +14,8 @@
     <h1><a href="https://meiosis.js.org">Meiosis</a> Tutorial</h1><p><a href="05-meiosis-with-patchinko.html">&lt; Previous</a> |
 <a href="07-using-mithril.html">Next &gt;</a> |
 <a href="toc.html">Table of Contents</a></p>
-<h2>06 - Components</h2><h3>Building Components</h3><p>Let&#39;s continue our previous example. We already had a &quot;temperature&quot; component. We&#39;ll add a
+<h2>06 - Components</h2><p><a name="building_components"></a></p>
+<h3><a href="#building_components">Building Components</a></h3><p>Let&#39;s continue our previous example. We already had a &quot;temperature&quot; component. We&#39;ll add a
 &quot;conditions&quot; component for the current conditions (sunny, cloudy, rain) so that our initial
 state is now:</p>
 <pre><code class="language-js">{
@@ -105,7 +106,8 @@ code by combining the initial state and the actions of the components.</p>
 <p>In this example, components designate a property for their state (<code>conditions</code>, <code>temperature</code>).
 What if we want to designate a property from outside the component, to make sure there are no
 conflicts? Even more significantly, what if we want to have multiple instances of a component?</p>
-<h3>Using IDs for Components</h3><p>Whether it&#39;s to manage properties from outside of components, or to use multiple instances of
+<p><a name="using_ids_for_components"></a></p>
+<h3><a href="#using_ids_for_components">Using IDs for Components</a></h3><p>Whether it&#39;s to manage properties from outside of components, or to use multiple instances of
 a component, we can use IDs and pass them to components. Then, instead of having a hardcoded
 property in the component, the ID is used when reading and updating state.</p>
 <p>Continuing the previous example, let&#39;s say we want to have two instances of the <code>temperature</code>
@@ -172,13 +174,15 @@ indicates which instance to act upon.</p>
   </script>
 
 
-<h3>Exercises</h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
+<p><a name="exercises"></a></p>
+<h3><a href="#exercises">Exercises</a></h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:</p>
 <p><code>actions.changeSky(&quot;Cloudy&quot;)</code></p>
 <p><code>actions.increment(&quot;air&quot;, 2)</code></p>
 <p><code>actions.changeUnits(&quot;water&quot;)</code></p>
 <p>In the output on the right, you&#39;ll see the updated states.</p>
-<h3>State Management and View code</h3><p>So far, all we have is state management code; there is no view code. This is on purpose:
+<p><a name="state_management_and_view_code"></a></p>
+<h3><a href="#state_management_and_view_code">State Management and View code</a></h3><p>So far, all we have is state management code; there is no view code. This is on purpose:
 we&#39;ve built our state management code independently. We can trigger actions and see the
 updated state. Our code is not tied to any particular view code.</p>
 <p>Having independent state management code makes it easier to test and debug. You can organize

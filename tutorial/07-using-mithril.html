@@ -18,10 +18,12 @@
 code for an example with a <code>conditions</code> component and two temperature components, <code>air</code> and
 <code>water</code>.</p>
 <p>In this section, we&#39;ll wire this up to <a href="http://mithril.js.org/">Mithril</a>.</p>
-<h3>Mithril Stream</h3><p>First, we can use <a href="https://mithril.js.org/stream.html">Mithril Stream</a> as a stream library.
+<p><a name="mithril_stream"></a></p>
+<h3><a href="#mithril_stream">Mithril Stream</a></h3><p>First, we can use <a href="https://mithril.js.org/stream.html">Mithril Stream</a> as a stream library.
 For our purposes, it works just like <code>flyd</code>. The only difference is that you call <code>m.stream()</code>
 instead of <code>flyd.stream()</code>, and <code>m.stream.scan</code> instead of <code>flyd.scan</code>.</p>
-<h3>Wiring Meiosis</h3><p>Next, remember that we had an <code>actions</code> object and a <code>states</code> stream:</p>
+<p><a name="wiring_meiosis"></a></p>
+<h3><a href="#wiring_meiosis">Wiring Meiosis</a></h3><p>Next, remember that we had an <code>actions</code> object and a <code>states</code> stream:</p>
 <pre><code class="language-js">var actions = app.actions(update);
 states.map(function(state) {
   document.write(&quot;&lt;pre&gt;&quot; + JSON.stringify(state, null, 2) + &quot;&lt;/pre&gt;&quot;);
@@ -35,7 +37,8 @@ states.map(function(state) {
 <p>With Mithril&#39;s
 <a href="https://mithril.js.org/autoredraw.html">auto-redraw system</a>, the view is automatically
 re-rendered after user interaction.</p>
-<h3>The App Component</h3><p>The <code>App</code> component retrieves <code>state</code> and <code>actions</code> from the passed-in attributes. We pass these
+<p><a name="the_app_component"></a></p>
+<h3><a href="#the_app_component">The App Component</a></h3><p>The <code>App</code> component retrieves <code>state</code> and <code>actions</code> from the passed-in attributes. We pass these
 on to other components, in this case <code>Conditions</code> and <code>Temperature</code>. Notice that we have two
 instances of <code>Temperature</code>, and we pass a different <code>id</code> to each one.</p>
 <pre><code class="language-js">var App = {
@@ -49,7 +52,8 @@ instances of <code>Temperature</code>, and we pass a different <code>id</code> t
     );
   }
 };</code></pre>
-<h3>The Conditions Component</h3><p>The <code>Conditions</code> component displays a checkbox for &quot;precipitations&quot; and a series of radio
+<p><a name="the_conditions_component"></a></p>
+<h3><a href="#the_conditions_component">The Conditions Component</a></h3><p>The <code>Conditions</code> component displays a checkbox for &quot;precipitations&quot; and a series of radio
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The <code>state</code> is used to reflect the
 current state, and <code>actions</code> are called to update the state when the user changes the
 checkbox and radio buttons:</p>
@@ -87,7 +91,8 @@ var Conditions = {
     );
   }
 };</code></pre>
-<h3>The Temperature Component</h3><p>The <code>Temperature</code> component is similar, except that it also receives an <code>id</code> and uses it to
+<p><a name="the_temperature_component"></a></p>
+<h3><a href="#the_temperature_component">The Temperature Component</a></h3><p>The <code>Temperature</code> component is similar, except that it also receives an <code>id</code> and uses it to
 read its state:</p>
 <pre><code class="language-js">var Temperature = {
   view: function(vnode) {
@@ -122,7 +127,8 @@ read its state:</p>
   </script>
 
 
-<h3>Takeaways</h3><p>We can wire up Meiosis to Mithril using <code>m.mount</code> and passing <code>state</code> from the latest value
+<p><a name="takeaways"></a></p>
+<h3><a href="#takeaways">Takeaways</a></h3><p>We can wire up Meiosis to Mithril using <code>m.mount</code> and passing <code>state</code> from the latest value
 of the <code>states</code> stream, along with <code>actions</code>, to the top-level Mithril component.</p>
 <p>Then, all Mithril components in the application are consistent: they all receive <code>state</code>
 and <code>actions</code>. When rendering other components, <code>state</code> and <code>actions</code> are passed along. When
@@ -135,7 +141,8 @@ re-rendered. Of course, if you trigger state changes outside of Mithril&#39;s au
 (see
 <a href="https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw">When Mithril does not redraw</a>)
 you have to call <code>m.redraw()</code> yourself.</p>
-<h3>Conclusion</h3><p>This concludes the Meiosis tutorial. See <a href="11-whats-next.html">11 - What&#39;s Next?</a> for ideas on where
+<p><a name="conclusion"></a></p>
+<h3><a href="#conclusion">Conclusion</a></h3><p>This concludes the Meiosis tutorial. See <a href="11-whats-next.html">11 - What&#39;s Next?</a> for ideas on where
 to go from here.</p>
 <p><a href="06-components.html">&lt; Previous</a> |
 <a href="08-using-react.html">Next &gt;</a> |

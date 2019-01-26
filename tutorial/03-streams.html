@@ -20,7 +20,8 @@ by directly modifying a global variable.</p>
 <p>This works, but we can improve the approach. Namely, we&#39;d like to gain more control over the
 flow of data and how we make changes to the state. We can do this by using a <strong>stream</strong>. A
 stream is a nice and simple way to <strong>communicate values</strong> and to control data flow.</p>
-<h3>Introducing Streams</h3><blockquote>
+<p><a name="introducing_streams"></a></p>
+<h3><a href="#introducing_streams">Introducing Streams</a></h3><blockquote>
 <p>If you already know about streams and are comfortable with them, great. But, if you have
 glanced at streams elsewhere and found them overly complicated, <strong>please forget all of that</strong>
 because the streams that we use here are very simple. In fact, we only use two stream operators,
@@ -33,7 +34,8 @@ a stream. You can also have functions that get called every time a value arrives
 these values will be in a stream.</p>
 <p><img src="03-streams-01.svg" alt="Stream"></p>
 <p>We can pass values, objects, and even functions onto a stream.</p>
-<h3>Stream <code>map</code></h3><p>The way to <strong>do</strong> something with the values that arrive on the stream is by calling <code>map</code>. We
+<p><a name="stream_map"></a></p>
+<h3><a href="#stream_map">Stream <code>map</code></a></h3><p>The way to <strong>do</strong> something with the values that arrive on the stream is by calling <code>map</code>. We
 pass a <strong>function</strong> as a parameter to <code>map</code>, and that function gets called every time a new
 value arrives onto the stream. The <strong>result</strong> of calling <code>map</code> is a <strong>new stream</strong> with the
 values <strong>returned by the function</strong>.</p>
@@ -41,7 +43,8 @@ values <strong>returned by the function</strong>.</p>
 <p>Although <code>map</code> produces a new stream, we don&#39;t always need it. The function that we pass may not
 return anything that we need to use. We can also use <code>map</code> to <strong>do</strong> something with the values
 (also known as <strong>side effects</strong>).</p>
-<h3>A simple stream library: flyd</h3><p>We will use <a href="https://github.com/paldepind/flyd">flyd</a> as our stream library. You can also use
+<p><a name="stream_library_flyd"></a></p>
+<h3><a href="#stream_library_flyd">A simple stream library: flyd</a></h3><p>We will use <a href="https://github.com/paldepind/flyd">flyd</a> as our stream library. You can also use
 another stream library simply by using its equivalents of:</p>
 <ul>
 <li>pushing a value onto a stream</li>
@@ -80,7 +83,8 @@ already loaded, try the exercises.</p>
   </script>
 
 
-<h3>Exercises</h3><ol>
+<p><a name="exercises_1"></a></p>
+<h3><a href="#exercises_1">Exercises</a></h3><ol>
 <li>Create an <code>update</code> stream.</li>
 <li>Create a <code>timesTen</code> stream that is the result of multiplying by ten each value from the
 <code>update</code> stream.</li>
@@ -90,7 +94,8 @@ already loaded, try the exercises.</p>
 <li>Verify that everything is working by calling <code>update(1)</code> and <code>update(2)</code> and seeing
 <code>12</code> and <code>22</code> on the console log.</li>
 </ol>
-<h3>Solution</h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
+<p><a name="solution_1"></a></p>
+<h3><a href="#solution_1">Solution</a></h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
   <script>
     window.Flems(flems2, {
       files: [{name: "03-streams-01-solution.js", content: "/*global flyd*/\n\n// 1. Create an update stream.\nvar update = flyd.stream();\n\n// 2. Create a timesTen stream that is the result of multiplying by ten each\n// value from the update stream.\nvar timesTen = update.map(function(value) {\n  return value * 10;\n});\n\n// 3. Create a plusTwo stream that is the result of adding two to each value\n// from the timesTen stream.\nvar plusTwo = timesTen.map(function(value) {\n  return value + 2;\n});\n\n// 4. Map a function to the plusTwo stream that outputs each value using\n// console.log.\nplusTwo.map(function(value) {\n  console.log(value);\n});\n\n// 5. Verify that everything is working by calling update(1) and update(2) and\n// seeing 12 and 22 on the console log.\nupdate(1);\nupdate(2);\n"}],
@@ -100,7 +105,8 @@ already loaded, try the exercises.</p>
   </script>
 
 
-<h3>Stream <code>scan</code></h3><p>The other stream function that we&#39;ll use is called <code>scan</code>. Stream libraries have a number of
+<p><a name="stream_scan"></a></p>
+<h3><a href="#stream_scan">Stream <code>scan</code></a></h3><p>The other stream function that we&#39;ll use is called <code>scan</code>. Stream libraries have a number of
 other functions (also called operators), ranging from a handful to an
 overwhelming amount! But, we <strong>only</strong> need <code>map</code> and <code>scan</code>, and we only need them to set up
 the Meiosis pattern.</p>
@@ -133,7 +139,8 @@ latest value.</li>
 The sequence continues, always adding the incoming value to the latest result, as illustrated
 below:</p>
 <p><img src="03-streams-03.svg" alt="Scan"></p>
-<h3>Using <code>scan</code></h3><p>Now that have we streams, <code>map</code>, and <code>scan</code>, we can use themt to manage our application state.
+<p><a name="using_scan"></a></p>
+<h3><a href="#using_scan">Using <code>scan</code></a></h3><p>Now that have we streams, <code>map</code>, and <code>scan</code>, we can use themt to manage our application state.
 Previously, we had:</p>
 <pre><code class="language-js">var initialState = {
   value: 0
@@ -196,7 +203,8 @@ onto the <code>update</code> stream.</p>
   </script>
 
 
-<h3>Exercises</h3><p>Try it out: notice that <code>{&quot;value&quot;:0}</code> appears in the output on the right. This is our initial
+<p><a name="exercises_2"></a></p>
+<h3><a href="#exercises_2">Exercises</a></h3><p>Try it out: notice that <code>{&quot;value&quot;:0}</code> appears in the output on the right. This is our initial
 state. Now, within the console, type and then press Enter:</p>
 <p><code>actions.increment()</code></p>
 <p>In the output on the right, you will see <code>{&quot;value&quot;:1}</code> appear, showing that the state has

@@ -32,7 +32,8 @@ state by adding the number to <code>state.value</code>.</p>
 <p>We are going to change our patches and accumulator function to be general-purpose, so that the
 shape of our state can be much more flexible, and our actions can issue patches to make all sorts
 of changes to the state.</p>
-<h3>A Temperature Example</h3><p>Let&#39;s build a temperature example with the following initial state:</p>
+<p><a name="temperature_example"></a></p>
+<h3><a href="#temperature_example">A Temperature Example</a></h3><p>Let&#39;s build a temperature example with the following initial state:</p>
 <pre><code class="language-js">{
   temperature: {
     value: 22,
@@ -48,7 +49,8 @@ of changes to the state.</p>
 </ul>
 <p>In this section, we will use one approach using <strong>function patches</strong>. In the next section, we
 will look at another approach - my personal favourite - using a small utility called Patchinko.</p>
-<h3>Using Function Patches</h3><p>Instead of using plain numbers as patches, which are limited to incrementing a counter, we can
+<p><a name="using_function_patches"></a></p>
+<h3><a href="#using_function_patches">Using Function Patches</a></h3><p>Instead of using plain numbers as patches, which are limited to incrementing a counter, we can
 use <strong>functions</strong>. Indeed, we can pass functions onto the <code>update</code> stream and use them in the
 accumulator to update the state.</p>
 <p>These functions receive the current state as a parameter, and return the updated state.
@@ -80,7 +82,8 @@ updated state. Since the incoming patches are functions, we just need to call th
   </script>
 
 
-<h3>Exercises</h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
+<p><a name="exercises"></a></p>
+<h3><a href="#exercises">Exercises</a></h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:</p>
 <p><code>actions.increment(2)</code></p>
 <p><code>actions.changeUnits()</code></p>

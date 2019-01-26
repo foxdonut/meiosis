@@ -19,7 +19,8 @@ we set up the Meiosis pattern with an <code>update</code> stream of function pat
 <p>In this section, we will use another approach - my personal favourite - using a library called
 Patchinko. The Meiosis pattern is flexible enough that you can use either of these approaches
 or even one of your own.</p>
-<h3>Introducing Patchinko</h3><p><a href="https://github.com/barneycarroll/patchinko">Patchinko</a> is a brilliant utility that
+<p><a name="introducing_patchinko"></a></p>
+<h3><a href="#introducing_patchinko">Introducing Patchinko</a></h3><p><a href="https://github.com/barneycarroll/patchinko">Patchinko</a> is a brilliant utility that
 <a href="https://github.com/barneycarroll">Barney Carroll</a> wrote in just 30-some lines of code. We will
 use it to issue patches onto our <code>update</code> stream, and to produce the updated state from
 our accumulator function.</p>
@@ -52,7 +53,8 @@ P({ value: 23, units: &quot;C&quot; }, { comfortable: true })
 <p>If you find that this looks like <code>Object.assign</code>, you are correct: <code>P</code> does the equivalent.
 However, <code>P</code> has more capabilities when combined with Patchinko&#39;s other functions:
 <code>S</code>, <code>PS</code>, and <code>D</code>.</p>
-<h3>Patching based on the current value: <code>S</code></h3><p>Within a patch, you can include calls to other Patchinko functions. One of those is <code>S</code> (Scope).
+<p><a name="patching_based_on_current"></a></p>
+<h3><a href="#patching_based_on_current">Patching based on the current value: <code>S</code></a></h3><p>Within a patch, you can include calls to other Patchinko functions. One of those is <code>S</code> (Scope).
 <code>S</code> allows us to use the current value of the target object to determine the updated value.</p>
 <p>We pass a <strong>function</strong> to <code>S()</code>. Patchinko passes the value of that property to the function, and
 assigns the function&#39;s return value back to that property.</p>
@@ -71,7 +73,8 @@ value. We can pass a function to <code>S()</code>:</p>
 <p>By passing <code>S()</code> for the <code>value</code> property, Patchinko passes the previous value of that property
 to the function that we indicate in our call to <code>S()</code>. Our function receives <code>22</code>, adds <code>1</code> and
 returns <code>23</code>, which Patchinko assigns back to the <code>value</code> property.</p>
-<h3>Deep Patching: <code>PS</code></h3><p>When we pass plain objects to <code>P</code>, it acts like <code>Object.assign</code> and does a <em>shallow</em> merge.
+<p><a name="deep_patching"></a></p>
+<h3><a href="#deep_patching">Deep Patching: <code>PS</code></a></h3><p>When we pass plain objects to <code>P</code>, it acts like <code>Object.assign</code> and does a <em>shallow</em> merge.
 If our target object is:</p>
 <pre><code class="language-javascript">{ air:   { value: 22, units: &quot;C&quot; },
   water: { value: 84, units: &quot;F&quot; }
@@ -123,7 +126,8 @@ number of levels deep within our objects.</p>
 { air:   { value: 30, units: &quot;C&quot; }, // we increased the value by 8, and didn&#39;t lose the units
   water: { value: 84, units: &quot;F&quot; }
 }</code></pre>
-<h3>Deleting a property: <code>D</code></h3><p>Finally, Patchinko provides <code>D</code> to delete a property. To use it, we just have to specify <code>D</code>
+<p><a name="deleting_a_property"></a></p>
+<h3><a href="#deleting_a_property">Deleting a property: <code>D</code></a></h3><p>Finally, Patchinko provides <code>D</code> to delete a property. To use it, we just have to specify <code>D</code>
 as the value for the property that we wish to delete:</p>
 <pre><code class="language-js">P(
   { air:   { value: 22, units: &quot;C&quot; },
@@ -156,14 +160,16 @@ verify your answers.</p>
   </script>
 
 
-<h3>Exercises</h3><ol>
+<p><a name="exercises_1"></a></p>
+<h3><a href="#exercises_1">Exercises</a></h3><ol>
 <li>Change <code>water</code> to <code>{ value: 84, units: &quot;F&quot; }</code></li>
 <li>Toggle the <code>comfortable</code> property with a function that changes the value to the
 opposite of what it was</li>
 <li>Change the <code>air</code> value to <code>20</code> without losing the units</li>
 <li>Delete the <code>invalid</code> property.</li>
 </ol>
-<h3>Solution</h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
+<p><a name="solution_1"></a></p>
+<h3><a href="#solution_1">Solution</a></h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
   <script>
     window.Flems(flems2, {
       files: [{name: "05-meiosis-with-patchinko-01-solution.js", content: "/*global P, S, PS, D*/\n\nvar target = {\n  air:   { value: 22, units: \"C\" },\n  water: { value: 29, units: \"F\" },\n  comfortable: false,\n  invalid: true\n};\n\n// Change `water` to `{ value: 84, units: \"F\" }`\nconsole.log(\n  P(target, { water: { value: 84, units: \"F\" } })\n);\n\n// Toggle the `comfortable` property with a function that changes the value to the\n// opposite of what it was\nconsole.log(\n  P(target, { comfortable: S(x => !x) })\n);\n\n// Change the `air` value to `20` without losing the units.\nconsole.log(\n  P(target, { air: PS({ value: 20 }) })\n);\n\n// Delete the `invalid` property\nconsole.log(\n  P(target, { invalid: D })\n);\n"}],
@@ -190,7 +196,8 @@ equivalent of <code>P</code>, <code>S</code>, <code>PS</code>, or <code>D</code>
 <li>With no arguments, as the value of a property: <code>O</code> does the same as <code>D</code>.</li>
 </ul>
 </blockquote>
-<h3>Using Patchinko with Meiosis</h3><p>To use Patchinko with Meiosis, we can pass object patches onto the <code>update</code> stream and use
+<p><a name="using_patchinko_with_meiosis"></a></p>
+<h3><a href="#using_patchinko_with_meiosis">Using Patchinko with Meiosis</a></h3><p>To use Patchinko with Meiosis, we can pass object patches onto the <code>update</code> stream and use
 them in the accumulator to update the state.</p>
 <p>For example, to increment the temperature value:</p>
 <pre><code class="language-js">increment: function(amount) {
@@ -224,7 +231,8 @@ does what we want, so we can pass it directly:</p>
   </script>
 
 
-<h3>Exercises</h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
+<p><a name="exercises_2"></a></p>
+<h3><a href="#exercises_2">Exercises</a></h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:</p>
 <p><code>actions.increment(2)</code></p>
 <p><code>actions.changeUnits()</code></p>

@@ -15,21 +15,24 @@
 <h2>01 - Introduction and Goals</h2><p>Welcome to the <a href="https://meiosis.js.org">Meiosis</a> Tutorial!</p>
 <p>The purpose of this tutorial is to explain the Meiosis pattern from the ground up, hopefully
 without assuming too much prior knowledge beyond the basics of JavaScript.</p>
-<h3>High Level Goals</h3><p>Meiosis is a simple pattern for managing application state. The idea is to have a single,
+<p><a name="high_level_goals"></a></p>
+<h3><a href="#high_level_goals">High Level Goals</a></h3><p>Meiosis is a simple pattern for managing application state. The idea is to have a single,
 top-level object that represents the state of your application, and having a straightforward
 way to update that state. Views are rendered according to the state, and trigger actions
 to make changes to the state. That&#39;s it!</p>
 <p>Alongside that, Meiosis aims to free your state management code from being deeply tied to
 complex libraries or frameworks. When using Meiosis, you manage your application state with
 plain objects and functions.</p>
-<h3>Prerequisites</h3><p>Besides JavaScript, you will need to know, or learn, about the view library that you would
+<p><a name="prerequisites"></a></p>
+<h3><a href="#prerequisites">Prerequisites</a></h3><p>Besides JavaScript, you will need to know, or learn, about the view library that you would
 like to use. Most of this tutorial is independent of the view library. When we put it all
 together, there are examples with <a href="https://reactjs.org">React</a>,
 <a href="http://mithril.js.org">Mithril</a>, <a href="https://preactjs.com">Preact</a>, and
 <a href="https://lit-html.polymer-project.org/">lit-html</a>.</p>
 <p>If none of those is your preferred view library, fear not! It is trivial to use just about
 any view library with the Meiosis pattern.</p>
-<h3>ES5 or ES6</h3><p>I purposely used ES5 syntax in the code examples so that readers who are not familiar with ES6
+<p><a name="es5_or_es6"></a></p>
+<h3><a href="#es5_or_es6">ES5 or ES6</a></h3><p>I purposely used ES5 syntax in the code examples so that readers who are not familiar with ES6
 could benefit from the tutorial, without requiring ES6 knowledge. If you prefer ES6, by all means
 go ahead and use it! It can certainly lead to more concise syntax in some cases.</p>
 <p>There are a few exceptions, however. Sometimes I use this syntax:</p>
@@ -53,7 +56,8 @@ var bar = props.bar;</code></pre>
 <p>is short for:</p>
 <pre><code class="language-javascript">{ foo: foo, bar: bar }</code></pre>
 <p>Meiosis documentation and examples outside of this tutorial use ES6 syntax.</p>
-<h3>Embedded Code Examples</h3><p>The best way to learn is to practice! So, all code examples for this tutorial are embedded
+<p><a name="embedded_code_examples"></a></p>
+<h3><a href="#embedded_code_examples">Embedded Code Examples</a></h3><p>The best way to learn is to practice! So, all code examples for this tutorial are embedded
 into the page using <a href="https://github.com/porsager/flems">Flems</a>, so that you can edit the
 code and see the results right there in the page. In fact, I strongly encourage you to try
 things out with the code, this will help you understand how things work.</p>
