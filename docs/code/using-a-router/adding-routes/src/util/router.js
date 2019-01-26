@@ -4,8 +4,8 @@ const routeMap = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",
-  Coffee: "/coffee",
-  Beer: "/beer"
+  Coffee: "/coffee/:id?",
+  Beer: "/beer/:id?/:brewer?"
 };
 
 const router = createRouter({ routeMap, prefix: "#" });

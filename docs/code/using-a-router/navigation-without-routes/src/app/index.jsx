@@ -9,10 +9,12 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
+const initialRoute = parsePath(getPath());
+
 export const app = {
   initialState: () => ({
-    route: parsePath(getPath()),
-    navigateTo: {}
+    route: initialRoute,
+    navigateTo: initialRoute
   }),
 
   actions: ({ update, navigate }) => P({},

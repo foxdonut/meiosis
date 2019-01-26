@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
 import { get } from "../util";
+import { toPath } from "../util/router";
 
 const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
@@ -15,12 +16,12 @@ const beerMap = beers.reduce((result, next) => {
 
 class BeerDetails extends Component {
   render() {
-    const { state, actions } = this.props;
+    const { state } = this.props;
 
     return (<div>
       <p>{state.beer}</p>
-      <a href="javascript://"
-        onClick={() => actions.navigateTo("BeerPage", state.beer.id)}>Brewer</a>
+      <a href={toPath({ id: "Beer", values: { id: state.route.values.id, brewer: "brewer" } })}
+      >Brewer</a>
     </div>);
   }
 }
@@ -36,21 +37,24 @@ class Brewer extends Component {
 }
 
 const componentMap = {
-  BeerDetailsPage: BeerDetails,
-  BrewerPage: Brewer
+  BeerDetails,
+  Brewer
 };
 
 export const beer = {
   service: ({ state, update }) => {
     if (state.navigateTo.id === "Beer") {
       const id = get(state, ["navigateTo", "values", "id"]);
+      const brewer = get(state, ["navigateTo", "values", "brewer"]);
+
       setTimeout(() => update({
         pleaseWait: false,
         beers,
         beer: get(beerMap, [id, "description"]),
+        brewer: brewer && "Brewer of beer " + id,
         route: PS({
           values: PS({
-            child: id ? "BeerDetailsPage" : null
+            child: brewer ? "Brewer" : id ? "BeerDetails" : null
           })
         })
       }), 1000);
@@ -74,8 +78,7 @@ export class Beer extends Component {
         <ul>
           {state.beers.map(beer =>
             <li key={beer.id}>
-              <a href="javascript://"
-                onClick={() => actions.navigateTo("BeerPage", beer.id)}
+              <a href={toPath({ id: "Beer", values: { id: beer.id } })}
               >{beer.title}</a>
             </li>
           )}

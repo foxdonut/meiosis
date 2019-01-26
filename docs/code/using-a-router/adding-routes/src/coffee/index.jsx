@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
 import { get } from "../util";
+import { toPath } from "../util/router";
 
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
@@ -28,7 +29,7 @@ export const coffee = {
 
 export class Coffee extends Component {
   render() {
-    const { state, actions } = this.props;
+    const { state } = this.props;
 
     return (
       <div>
@@ -36,8 +37,7 @@ export class Coffee extends Component {
         <ul>
           {state.coffees && state.coffees.map(coffee =>
             <li key={coffee.id}>
-              <a href="javascript://"
-                onClick={() => actions.navigateTo("CoffeePage", coffee.id)}
+              <a href={toPath({ id: "Coffee", values: { id: coffee.id } })}
               >{coffee.title}</a>
             </li>
           )}
