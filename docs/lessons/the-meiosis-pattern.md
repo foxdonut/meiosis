@@ -43,7 +43,8 @@ const actions = app.actions(update);
 
 Then, pass `state` and `actions` to views.
 
-### Using Mithril
+<a name="using_mithril"></a>
+### [Using Mithril](#using_mithril)
 
 ```js
 const App = {
@@ -58,7 +59,8 @@ m.mount(document.getElementById("app"), {
 });
 ```
 
-### Using React
+<a name="using_react"></a>
+### [Using React](#using_react)
 
 ```js
 class App extends React.Component {
@@ -112,7 +114,8 @@ class App extends React.Component {
 }
 ```
 
-### Using Preact
+<a name="using_preact"></a>
+### [Using Preact](#using_preact)
 
 ```js
 class App extends preact.Component {
@@ -132,7 +135,8 @@ preact.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
 ```
 
-### Using lit-html
+<a name="using_lit_html"></a>
+### [Using lit-html](#using_lit_html)
 
 ```js
 const App = (state, actions) => {
@@ -144,7 +148,8 @@ const element = document.getElementById("app");
 states.map(state => render(App(state, actions), element));
 ```
 
-### Components
+<a name="components"></a>
+### [Components](#components)
 
 To use multiple instances of a component, or to specify the state property outside of a component,
 pass an `id` along with `state` and `actions` to views. Use `state[id]` to read the component's

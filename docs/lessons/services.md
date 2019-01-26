@@ -14,7 +14,8 @@ James explains that while one-off actions occur after click events, user input, 
 services are for ongoing state synchronization. They can produce computed properties, store and
 retrieve state from local storage, and trigger other actions.
 
-### Using Streams
+<a name="using_streams"></a>
+### [Using Streams](#using_streams)
 
 James' version uses streams to implement services. The structure is as follows:
 
@@ -133,7 +134,8 @@ The complete example is below.
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish. Now, let's look at a slightly different approach, using Patchinko.
 
-### Using Patchinko
+<a name="using_patchinko"></a>
+### [Using Patchinko](#using_patchinko)
 
 An alternative to emitting patches from services is to define a service as a function that
 receives the current state as a parameter and returns a patch. Then, these service functions
@@ -211,7 +213,8 @@ Note that we no longer need `dropRepeats`, because we are not feeding patches ba
 `update` stream. Instead, we have a separate `states` stream, so we don't need to worry about
 creating an infinite loop.
 
-### Using Function Patches
+<a name="using_function_patches"></a>
+### [Using Function Patches](#using_function_patches)
 
 We can also use this approach with function patches instead of Patchinko. Remember that with
 function patches, we produce functions `f(state) => updatedState` instead of object patches,
@@ -270,7 +273,8 @@ Have a look at the complete example below.
 
 @flems code/services/index-functions.js,app.html mithril,mithril-stream,ramda,bss 700 60
 
-### Conclusion
+<a name="conclusion"></a>
+### [Conclusion](#conclusion)
 
 We can wire up services in different ways, and use them for computed properties, state
 synchronization, and other purposes. Please note, however, that not everything belongs in

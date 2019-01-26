@@ -23,7 +23,8 @@ to produce the application state for the View; and the Next-Action-Predicate.
 Let's see how we can use the Meiosis pattern as a foundation and augment it to add these
 concepts of the SAM pattern.
 
-### Meiosis Pattern
+<a name="meiosis_pattern"></a>
+### [Meiosis Pattern](#meiosis_pattern)
 
 Remember the fundamental Meiosis Pattern:
 
@@ -41,7 +42,8 @@ Actions send patches in the form of objects or functions to the `update` stream.
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.
 
-### A Navigation Example
+<a name="navigation_example"></a>
+### [A Navigation Example](#navigation_example)
 
 Let's look at an example. Say we have navigation between different pages. Clicking on a section
 of the navigation bar shows the corresponding page. To navigate, we have actions that update
@@ -54,7 +56,8 @@ and the _Data_ page has no data to show, so it displays a _Loading, please wait.
 
 Let's see how we can apply the SAM pattern.
 
-### Using `update` as `present`
+<a name="using_present"></a>
+### [Using `update` as `present`](#using_present)
 
 In SAM, actions _present_ values to the model, and the model's acceptor function decides if
 and how to update the model. The `update` stream from Meiosis can be used as a `present` function
@@ -68,7 +71,8 @@ const states = flyd.scan(P, app.initialState(), update);
 
 This is just a name change, but it conveys the role of `present` in the SAM pattern.
 
-### Acceptor
+<a name="acceptor"></a>
+### [Acceptor](#acceptor)
 
 Next, SAM has the concept of an _acceptor_ function in the model which receives the values
 presented by actions and updates the model accordingly. In Meiosis, the acceptor function is the
@@ -122,7 +126,8 @@ to the _Home_ page, and you now have access to the _Settings_ page.
 
 @flems code/sam-pattern/acceptor.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
 
-### State
+<a name="state"></a>
+### [State](#state)
 
 The State function looks at the model and makes any changes necessary to produce application
 state that is suitable for the view.
@@ -184,7 +189,8 @@ now cleared out.
 
 @flems code/sam-pattern/state.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
 
-### Next-Action-Predicate
+<a name="next_action_predicate"></a>
+### [Next-Action-Predicate](#next_action_predicate)
 
 The final part of the SAM pattern is the Next-Action-Predicate (nap). This is a function that
 looks at the application state and decides whether to automatically trigger another action

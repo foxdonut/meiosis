@@ -18,7 +18,8 @@ users narrow down what they are looking for.
 
 If you still need to prevent re-rendering, read on.
 
-### Producing New Object Instances
+<a name="producing_new_object_instances"></a>
+### [Producing New Object Instances](#producing_new_object_instances)
 
 To prevent re-renders of a component, we determine whether a component's state has changed. We
 need to produce **new object instances** when updating the state, instead of mutating the
@@ -60,7 +61,8 @@ const states = m.stream.scan((state, patch) => P({}, state, patch),
 We are now ready to prevent re-renders. Continue reading for the React version, or
 [click here to skip to the Mithril version](#mithril_prevent_re_render).
 
-### React version
+<a name="react_version"></a>
+### [React version](#react_version)
 
 We can use React's
 [shouldComponentUpdate](https://reactjs.org/docs/react-component.html#shouldcomponentupdate)
@@ -92,7 +94,7 @@ re-rendered.
 @flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,patchinko 800 70
 
 <a name="mithril_prevent_re_render"></a>
-### Mithril version
+### [Mithril version](#mithril_prevent_re_render)
 
 We can use Mithril's
 [onbeforeupdate lifecycle method](https://mithril.js.org/lifecycle-methods.html#onbeforeupdate)
