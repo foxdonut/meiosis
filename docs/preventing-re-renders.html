@@ -24,7 +24,8 @@ your application, ask yourself whether users want to look at all that data at on
 Perhaps pagination would be more appropriate? Or, think about whether adding some filters will help
 users narrow down what they are looking for.</p>
 <p>If you still need to prevent re-rendering, read on.</p>
-<h3>Producing New Object Instances</h3><p>To prevent re-renders of a component, we determine whether a component&#39;s state has changed. We
+<p><a name="producing_new_object_instances"></a></p>
+<h3><a href="#producing_new_object_instances">Producing New Object Instances</a></h3><p>To prevent re-renders of a component, we determine whether a component&#39;s state has changed. We
 need to produce <strong>new object instances</strong> when updating the state, instead of mutating the
 existing object.</p>
 <p>We can do this with Patchinko&#39;s <code>PS</code> function, passing <code>{}</code> as the first argument. This produces
@@ -50,7 +51,8 @@ instances instead of mutating the existing state object.</p>
   app.initialState(), update);</code></pre>
 <p>We are now ready to prevent re-renders. Continue reading for the React version, or
 <a href="#mithril_prevent_re_render">click here to skip to the Mithril version</a>.</p>
-<h3>React version</h3><p>We can use React&#39;s
+<p><a name="react_version"></a></p>
+<h3><a href="#react_version">React version</a></h3><p>We can use React&#39;s
 <a href="https://reactjs.org/docs/react-component.html#shouldcomponentupdate">shouldComponentUpdate</a>
 lifecycle method to prevent a component from re-rendering when the state has not changed. For
 this to work, we need to compare the component&#39;s next state to the current state.</p>
@@ -84,7 +86,7 @@ re-rendered.</p>
 
 
 <p><a name="mithril_prevent_re_render"></a></p>
-<h3>Mithril version</h3><p>We can use Mithril&#39;s
+<h3><a href="#mithril_prevent_re_render">Mithril version</a></h3><p>We can use Mithril&#39;s
 <a href="https://mithril.js.org/lifecycle-methods.html#onbeforeupdate">onbeforeupdate lifecycle method</a>
 to prevent a component from re-rendering when the state has not changed. For this to work, we
 need to compare the component&#39;s next state to the current state.</p>

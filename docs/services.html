@@ -20,7 +20,8 @@ function patches.</p>
 <p>James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
 retrieve state from local storage, and trigger other actions.</p>
-<h3>Using Streams</h3><p>James&#39; version uses streams to implement services. The structure is as follows:</p>
+<p><a name="using_streams"></a></p>
+<h3><a href="#using_streams">Using Streams</a></h3><p>James&#39; version uses streams to implement services. The structure is as follows:</p>
 <pre><code class="language-javascript">{
   initial: state =&gt; initialState,
   start: states =&gt; patches
@@ -115,7 +116,8 @@ states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
 
 <h4>Flexibility</h4><p>Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish. Now, let&#39;s look at a slightly different approach, using Patchinko.</p>
-<h3>Using Patchinko</h3><p>An alternative to emitting patches from services is to define a service as a function that
+<p><a name="using_patchinko"></a></p>
+<h3><a href="#using_patchinko">Using Patchinko</a></h3><p>An alternative to emitting patches from services is to define a service as a function that
 receives the current state as a parameter and returns a patch. Then, these service functions
 can be combined together with <code>reduce</code> to produce a single service function that receives
 the current state and produces an updated state.</p>
@@ -167,7 +169,8 @@ states:</p>
 <h4>No Worries about Infinite Loops</h4><p>Note that we no longer need <code>dropRepeats</code>, because we are not feeding patches back into the
 <code>update</code> stream. Instead, we have a separate <code>states</code> stream, so we don&#39;t need to worry about
 creating an infinite loop.</p>
-<h3>Using Function Patches</h3><p>We can also use this approach with function patches instead of Patchinko. Remember that with
+<p><a name="using_function_patches"></a></p>
+<h3><a href="#using_function_patches">Using Function Patches</a></h3><p>We can also use this approach with function patches instead of Patchinko. Remember that with
 function patches, we produce functions <code>f(state) =&gt; updatedState</code> instead of object patches,
 and we wire up Meiosis like this:</p>
 <pre><code class="language-javascript">const T = (x, f) =&gt; f(x);
@@ -209,7 +212,8 @@ states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
   </script>
 
 
-<h3>Conclusion</h3><p>We can wire up services in different ways, and use them for computed properties, state
+<p><a name="conclusion"></a></p>
+<h3><a href="#conclusion">Conclusion</a></h3><p>We can wire up services in different ways, and use them for computed properties, state
 synchronization, and other purposes. Please note, however, that not everything belongs in
 a service, so it&#39;s important to avoid getting carried away.</p>
 <p><a href="toc.html">Table of Contents</a></p>

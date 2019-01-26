@@ -28,7 +28,8 @@ the concept of <em>presenting</em> values and <em>accepting</em> or <em>rejectin
 to produce the application state for the View; and the Next-Action-Predicate.</p>
 <p>Let&#39;s see how we can use the Meiosis pattern as a foundation and augment it to add these
 concepts of the SAM pattern.</p>
-<h3>Meiosis Pattern</h3><p>Remember the fundamental Meiosis Pattern:</p>
+<p><a name="meiosis_pattern"></a></p>
+<h3><a href="#meiosis_pattern">Meiosis Pattern</a></h3><p>Remember the fundamental Meiosis Pattern:</p>
 <pre><code class="language-javascript">const update = flyd.stream();
 
 // Using Patchinko:
@@ -39,7 +40,8 @@ const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);</code><
 <p>Actions send patches in the form of objects or functions to the <code>update</code> stream. Using <code>scan</code>26GI
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.</p>
-<h3>A Navigation Example</h3><p>Let&#39;s look at an example. Say we have navigation between different pages. Clicking on a section
+<p><a name="navigation_example"></a></p>
+<h3><a href="#navigation_example">A Navigation Example</a></h3><p>Let&#39;s look at an example. Say we have navigation between different pages. Clicking on a section
 of the navigation bar shows the corresponding page. To navigate, we have actions that update
 the model to indicate the current page. The view uses the model to render the corresponding page.</p>
 <p>The example is below. Notice how you can go to different pages; <em>Logout</em> sends you back to <em>Home</em>;
@@ -58,14 +60,16 @@ and the <em>Data</em> page has no data to show, so it displays a <em>Loading, pl
 
 
 <p>Let&#39;s see how we can apply the SAM pattern.</p>
-<h3>Using <code>update</code> as <code>present</code></h3><p>In SAM, actions <em>present</em> values to the model, and the model&#39;s acceptor function decides if
+<p><a name="using_present"></a></p>
+<h3><a href="#using_present">Using <code>update</code> as <code>present</code></a></h3><p>In SAM, actions <em>present</em> values to the model, and the model&#39;s acceptor function decides if
 and how to update the model. The <code>update</code> stream from Meiosis can be used as a <code>present</code> function
 for actions.</p>
 <pre><code class="language-javascript">const present = flyd.stream();
 const actions = app.actions(present);
 const states = flyd.scan(P, app.initialState(), update);</code></pre>
 <p>This is just a name change, but it conveys the role of <code>present</code> in the SAM pattern.</p>
-<h3>Acceptor</h3><p>Next, SAM has the concept of an <em>acceptor</em> function in the model which receives the values
+<p><a name="acceptor"></a></p>
+<h3><a href="#acceptor">Acceptor</a></h3><p>Next, SAM has the concept of an <em>acceptor</em> function in the model which receives the values
 presented by actions and updates the model accordingly. In Meiosis, the acceptor function is the
 <em>accumulator</em> function that we use with <code>scan</code>. Right now this is Patchinko&#39;s <code>P</code> function, which
 merges changes into the model. Let&#39;s separate it out into an explicit <code>acceptor</code> function:</p>
@@ -116,7 +120,8 @@ to the <em>Home</em> page, and you now have access to the <em>Settings</em> page
   </script>
 
 
-<h3>State</h3><p>The State function looks at the model and makes any changes necessary to produce application
+<p><a name="state"></a></p>
+<h3><a href="#state">State</a></h3><p>The State function looks at the model and makes any changes necessary to produce application
 state that is suitable for the view.</p>
 <p>For example, say we want to prepare a login form by initializing the username and password
 to blank strings. Further, we want to clear out those values when navigating away from the
@@ -169,7 +174,8 @@ now cleared out.</p>
   </script>
 
 
-<h3>Next-Action-Predicate</h3><p>The final part of the SAM pattern is the Next-Action-Predicate (nap). This is a function that
+<p><a name="next_action_predicate"></a></p>
+<h3><a href="#next_action_predicate">Next-Action-Predicate</a></h3><p>The final part of the SAM pattern is the Next-Action-Predicate (nap). This is a function that
 looks at the application state and decides whether to automatically trigger another action
 (the next action).</p>
 <p>Let&#39;s use this to load the data on the <em>Data</em> page. We want the action to complete -- navigating
