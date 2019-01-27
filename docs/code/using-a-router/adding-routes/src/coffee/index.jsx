@@ -21,9 +21,7 @@ export const coffee = {
       const id = state.navigateTo.values.id;
       const coffee = coffeeMap[id].description;
 
-      return {
-        coffee
-      };
+      return { coffee };
     }
   }
 };
