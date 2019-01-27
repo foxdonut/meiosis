@@ -14,7 +14,10 @@ const componentMap = {
   Login,
   Settings,
   Coffee,
-  Beer
+  CoffeeDetails: Coffee,
+  Beer,
+  BeerDetails: Beer,
+  BeerBrewer: Beer
 };
 
 export const root = {
@@ -43,25 +46,25 @@ export class Root extends Component {
 
     const componentId = state.route.id;
     const Component = componentMap[componentId];
-    const isActive = tab => tab === componentId ? "active" : "";
+    const isActive = tab => tab === Component ? "active" : "";
 
     return (
       <div>
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
-            <li className={isActive("Home")}>
+            <li className={isActive(Home)}>
               <a href={toPath({ id: "Home" })}>Home</a>
             </li>
-            <li className={isActive("Login")}>
+            <li className={isActive(Login)}>
               <a href={toPath({ id: "Login" })}>Login</a>
             </li>
-            <li className={isActive("Settings")}>
+            <li className={isActive(Settings)}>
               <a href={toPath({ id: "Settings" })}>Settings</a>
             </li>
-            <li className={isActive("Coffee")}>
+            <li className={isActive(Coffee)}>
               <a href={toPath({ id: "Coffee" })}>Coffee</a>
             </li>
-            <li className={isActive("Beer")}>
+            <li className={isActive(Beer)}>
               <a href={toPath({ id: "Beer" })}>Beer</a>
             </li>
           </ul>

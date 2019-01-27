@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 
-import { get } from "../util";
 import { toPath } from "../util/router";
 
 const coffees = [
@@ -16,13 +15,15 @@ const coffeeMap = coffees.reduce((result, next) => {
 export const coffee = {
   service: ({ state, update }) => {
     if (state.navigateTo.id === "Coffee") {
-      const id = get(state, ["navigateTo", "values", "id"]);
-      const coffee = id ? coffeeMap[id].description : null;
+      setTimeout(() => update({ coffees }), 500);
+    }
+    else if (state.navigateTo.id === "CoffeeDetails") {
+      const id = state.navigateTo.values.id;
+      const coffee = coffeeMap[id].description;
 
-      setTimeout(() => update({
-        coffees,
+      return {
         coffee
-      }), 500);
+      };
     }
   }
 };
@@ -37,7 +38,7 @@ export class Coffee extends Component {
         <ul>
           {state.coffees && state.coffees.map(coffee =>
             <li key={coffee.id}>
-              <a href={toPath({ id: "Coffee", values: { id: coffee.id } })}
+              <a href={toPath({ id: "CoffeeDetails", values: { id: coffee.id } })}
               >{coffee.title}</a>
             </li>
           )}

@@ -1,7 +1,5 @@
-import React, { Component } from "react";
-import { PS } from "patchinko/explicit";
+import React from "react";
 
-import { get } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -14,49 +12,29 @@ const beerMap = beers.reduce((result, next) => {
   return result;
 }, {});
 
-class BeerDetails extends Component {
-  render() {
-    const { state } = this.props;
+const BeerDetails = ({ state }) => (
+  <div>
+    <p>{state.beer}</p>
+    <a href={toPath({ id: "BeerBrewer", values: { id: state.route.values.id } })}
+    >Brewer</a>
+  </div>
+);
 
-    return (<div>
-      <p>{state.beer}</p>
-      <a href={toPath({ id: "Beer", values: { id: state.route.values.id, brewer: "brewer" } })}
-      >Brewer</a>
-    </div>);
-  }
-}
-
-class Brewer extends Component {
-  render() {
-    const { state } = this.props;
-
-    return (
-      <p>{state.brewer}</p>
-    );
-  }
-}
+const BeerBrewer = ({ state }) => (
+  <p>{state.brewer}</p>
+);
 
 const componentMap = {
   BeerDetails,
-  Brewer
+  BeerBrewer
 };
 
 export const beer = {
   service: ({ state, update }) => {
     if (state.navigateTo.id === "Beer") {
-      const id = get(state, ["navigateTo", "values", "id"]);
-      const brewer = get(state, ["navigateTo", "values", "brewer"]);
-
       setTimeout(() => update({
         pleaseWait: false,
         beers,
-        beer: get(beerMap, [id, "description"]),
-        brewer: brewer && "Brewer of beer " + id,
-        route: PS({
-          values: PS({
-            child: brewer ? "Brewer" : id ? "BeerDetails" : null
-          })
-        })
       }), 1000);
 
       return {
@@ -64,27 +42,38 @@ export const beer = {
         beers: state.beers || []
       };
     }
+    else if (state.navigateTo.id === "BeerDetails") {
+      const id = state.navigateTo.values.id;
+
+      return {
+        beer: beerMap[id].description
+      };
+    }
+    else if (state.navigateTo.id === "BeerBrewer") {
+      const id = state.navigateTo.values.id;
+
+      return {
+        brewer: "Brewer of beer " + id
+      };
+    }
   }
 };
 
-export class Beer extends Component {
-  render() {
-    const { state, actions } = this.props;
-    const Component = componentMap[get(state, ["route", "values", "child"])];
+export const Beer = ({ state, actions }) => {
+  const Component = componentMap[state.route.id];
 
-    return (
-      <div>
-        <p>Beer Page</p>
-        <ul>
-          {state.beers.map(beer =>
-            <li key={beer.id}>
-              <a href={toPath({ id: "Beer", values: { id: beer.id } })}
-              >{beer.title}</a>
-            </li>
-          )}
-        </ul>
-        {Component && <Component state={state} actions={actions}/>}
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <p>Beer Page</p>
+      <ul>
+        {state.beers.map(beer =>
+          <li key={beer.id}>
+            <a href={toPath({ id: "BeerDetails", values: { id: beer.id } })}
+            >{beer.title}</a>
+          </li>
+        )}
+      </ul>
+      {Component && <Component state={state} actions={actions}/>}
+    </div>
+  );
+};

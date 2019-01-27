@@ -4,8 +4,11 @@ const routeMap = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",
-  Coffee: "/coffee/:id?",
-  Beer: "/beer/:id?/:brewer?"
+  Coffee: "/coffee",
+  CoffeeDetails: "/coffee/:id",
+  Beer: "/beer",
+  BeerDetails: "/beer/:id",
+  BeerBrewer: "/beer/:id/brewer"
 };
 
 const router = createRouter({ routeMap, prefix: "#" });
@@ -28,6 +31,7 @@ export const LocationBarSync = ({ state }) => {
   return null;
 };
 
+// Listens to route changes and triggers updates
 export const listenToRouteChanges = update => {
   window.onpopstate = () => update({ navigateTo: parsePath(getPath()) });
 };
