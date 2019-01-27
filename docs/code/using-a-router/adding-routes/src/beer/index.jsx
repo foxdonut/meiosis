@@ -12,55 +12,73 @@ const beerMap = beers.reduce((result, next) => {
   return result;
 }, {});
 
-const BeerDetails = ({ state }) => (
-  <div>
-    <p>{state.beer}</p>
-    <a href={toPath({ id: "BeerBrewer", values: { id: state.route.values.id } })}
-    >Brewer</a>
-  </div>
-);
+export const beer = {
+  service: ({ state, update }) => {
+    if (state.navigateTo.id === "Beer" ||
+        state.navigateTo.id === "BeerDetails" ||
+        state.navigateTo.id === "BeerBrewer")
+    {
+      const needToLoadBeers = !state.beers || state.beers.length === 0;
+      const result = {};
+
+      if (needToLoadBeers) {
+        setTimeout(() => update({
+          pleaseWait: false,
+          beers,
+        }), 1000);
+      }
+
+      result.pleaseWait = needToLoadBeers;
+      result.beers = state.beers || [];
+
+      if (state.navigateTo.id === "BeerDetails" ||
+          state.navigateTo.id === "BeerBrewer")
+      {
+        const id = state.navigateTo.values.id;
+
+        result.beer = beerMap[id].description;
+
+        if (state.navigateTo.id === "BeerBrewer") {
+          result.brewer = "Brewer of beer " + id;
+        }
+      }
+
+      return result;
+    }
+  }
+};
 
 const BeerBrewer = ({ state }) => (
   <p>{state.brewer}</p>
 );
 
-const componentMap = {
-  BeerDetails,
+const beerDetailsComponentMap = {
   BeerBrewer
 };
 
-export const beer = {
-  service: ({ state, update }) => {
-    if (state.navigateTo.id === "Beer") {
-      setTimeout(() => update({
-        pleaseWait: false,
-        beers,
-      }), 1000);
+const BeerDetails = ({ state, actions }) => {
+  const Component = beerDetailsComponentMap[state.route.id];
 
-      return {
-        pleaseWait: true,
-        beers: state.beers || []
-      };
-    }
-    else if (state.navigateTo.id === "BeerDetails") {
-      const id = state.navigateTo.values.id;
+  return (
+    <div>
+      <p>{state.beer}</p>
+      {Component && <Component state={state} actions={actions}/> ||
+        <a href={toPath({
+          id: "BeerBrewer",
+          values: { id: state.route.values.id }
+        })}>Brewer</a>
+      }
+    </div>
+  );
+};
 
-      return {
-        beer: beerMap[id].description
-      };
-    }
-    else if (state.navigateTo.id === "BeerBrewer") {
-      const id = state.navigateTo.values.id;
-
-      return {
-        brewer: "Brewer of beer " + id
-      };
-    }
-  }
+const beerComponentMap = {
+  BeerDetails,
+  BeerBrewer: BeerDetails
 };
 
 export const Beer = ({ state, actions }) => {
-  const Component = componentMap[state.route.id];
+  const Component = beerComponentMap[state.route.id];
 
   return (
     <div>
