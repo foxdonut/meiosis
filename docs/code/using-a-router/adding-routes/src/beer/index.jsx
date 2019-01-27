@@ -1,5 +1,6 @@
 import React from "react";
 
+import { mergeAll } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -12,39 +13,42 @@ const beerMap = beers.reduce((result, next) => {
   return result;
 }, {});
 
+const beerService = ({ state, update }) => {
+  const needToLoadBeers = !state.beers || state.beers.length === 0;
+
+  if (needToLoadBeers) {
+    setTimeout(() => update({
+      pleaseWait: false,
+      beers,
+    }), 1000);
+  }
+
+  return {
+    pleaseWait: needToLoadBeers,
+    beers: state.beers || []
+  };
+};
+
+const beerDetailsService = ({ state }) => {
+  const id = state.navigateTo.values.id;
+  return { beer: beerMap[id].description };
+};
+
+const beerBrewerService = ({ state }) => {
+  const id = state.navigateTo.values.id;
+  return { brewer: "Brewer of beer " + id };
+};
+
+const beerServices = {
+  Beer: [ beerService ],
+  BeerDetails : [ beerService, beerDetailsService ],
+  BeerBrewer : [ beerService, beerDetailsService, beerBrewerService ]
+};
+
 export const beer = {
   service: ({ state, update }) => {
-    if (state.navigateTo.id === "Beer" ||
-        state.navigateTo.id === "BeerDetails" ||
-        state.navigateTo.id === "BeerBrewer")
-    {
-      const needToLoadBeers = !state.beers || state.beers.length === 0;
-      const result = {};
-
-      if (needToLoadBeers) {
-        setTimeout(() => update({
-          pleaseWait: false,
-          beers,
-        }), 1000);
-      }
-
-      result.pleaseWait = needToLoadBeers;
-      result.beers = state.beers || [];
-
-      if (state.navigateTo.id === "BeerDetails" ||
-          state.navigateTo.id === "BeerBrewer")
-      {
-        const id = state.navigateTo.values.id;
-
-        result.beer = beerMap[id].description;
-
-        if (state.navigateTo.id === "BeerBrewer") {
-          result.brewer = "Brewer of beer " + id;
-        }
-      }
-
-      return result;
-    }
+    const services = beerServices[state.navigateTo.id] || [];
+    return mergeAll(services.map(service => service({ state, update })));
   }
 };
 

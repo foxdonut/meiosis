@@ -1,3 +1,4 @@
+export const I = x => x;
 export const T = (x, f) => f(x);
 
 export const pipe = (...fns) => input => fns.reduce((value, fn) =>
@@ -11,3 +12,7 @@ export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
+
+export const mergeAll = objects =>
+  T(objects.filter(I), objs =>
+    objs.length > 0 ? Object.assign.apply(null, objs) : {});
