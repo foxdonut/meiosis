@@ -4,7 +4,7 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { mergeAll } from "./util";
+import { combineAll } from "./util";
 import { listenToRouteChanges } from "./util/router";
 
 const update = flyd.stream();
@@ -12,7 +12,7 @@ const update = flyd.stream();
 Promise.resolve().then(() => app.initialState()).then(initialState => {
   const models = flyd.scan(P, initialState, update);
   const states = models.map(state =>
-    P(state, mergeAll(app.services.map(service => service({ state, update }))))
+    P(state, combineAll(app.services.map(service => service({ state, update }))))
   );
 
   // Only for using Meiosis Tracer in development.

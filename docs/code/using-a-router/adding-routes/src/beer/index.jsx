@@ -1,6 +1,6 @@
 import React from "react";
 
-import { mergeAll } from "../util";
+import { combineAll } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -48,7 +48,7 @@ const beerServices = {
 export const beer = {
   service: ({ state, update }) => {
     const services = beerServices[state.navigateTo.id] || [];
-    return mergeAll(services.map(service => service({ state, update })));
+    return combineAll(services.map(service => service({ state, update })));
   }
 };
 

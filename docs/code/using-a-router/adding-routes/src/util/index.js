@@ -13,6 +13,6 @@ export const preventDefault = evt => {
   return evt;
 };
 
-export const mergeAll = objects =>
+export const combineAll = objects =>
   T(objects.filter(I), objs =>
     objs.length > 0 ? Object.assign.apply(null, objs) : {});
