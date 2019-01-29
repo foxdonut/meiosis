@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { get } from "../util";
-
 export const settings = {
   service: ({ state, update }) => {
     if (state.navigateTo.id === "Settings" && !state.user) {
@@ -12,13 +10,9 @@ export const settings = {
           message: "Please login."
         })
       });
+
+      return { route: state.route };
     }
-    // Another computed property. Every service gets a chance to act upon the same state.
-    return {
-      userAndPasswordLength:
-        (get(state, ["login", "username"]) || "").length +
-        (get(state, ["login", "password"]) || "").length
-    };
   }
 };
 
