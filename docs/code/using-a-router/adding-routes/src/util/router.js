@@ -24,9 +24,11 @@ export const setPath = path => window.history.pushState({}, "", path);
 
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
-  const path = toPath(state.route);
-  if (getPath() !== path) {
-    setPath(path);
+  if (state.route.id) {
+    const path = toPath(state.route);
+    if (getPath() !== path) {
+      setPath(path);
+    }
   }
   return null;
 };

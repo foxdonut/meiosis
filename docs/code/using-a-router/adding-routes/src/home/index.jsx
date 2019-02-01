@@ -1,7 +1,15 @@
-import React, { Component } from "react";
+import React from "react";
 
-export class Home extends Component {
-  render() {
-    return (<div>Home Page</div>);
+export const home = {
+  service: ({ state, update }) => {
+    if (state.navigateTo.id === "Home") {
+      // Navigating to Home
+      update({
+        route: state.navigateTo,
+        navigateTo: {}
+      });
+    }
   }
-}
+};
+
+export const Home = () => (<div>Home Page</div>);

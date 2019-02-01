@@ -3,7 +3,8 @@ import { P } from "patchinko/explicit";
 
 import { getPath, parsePath } from "../util/router";
 
-import { root, Root } from "../root";
+import { Root } from "../root";
+import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { coffee } from "../coffee";
@@ -13,17 +14,21 @@ const initialRoute = parsePath(getPath());
 
 export const app = {
   initialState: () => ({
-    route: initialRoute,
-    navigateTo: initialRoute
+    route: {},
+    navigateTo: initialRoute,
+    navigateAway: {}
   }),
 
-  actions: ({ update, navigate }) => P({},
-    root.actions({ update, navigate }),
-    login.actions({ update, navigate })
+  actions: ({ update }) => P({},
+    login.actions({ update })
   ),
 
+  computed: [
+    login.computed
+  ],
+
   services: [
-    root.service,
+    home.service,
     login.service,
     settings.service,
     coffee.service,

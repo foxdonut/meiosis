@@ -1,6 +1,5 @@
 import React from "react";
 
-import { combineAll } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -16,17 +15,17 @@ const beerMap = beers.reduce((result, next) => {
 const beerService = ({ state, update }) => {
   const needToLoadBeers = !state.beers || state.beers.length === 0;
 
+  update({
+    pleaseWait: needToLoadBeers,
+    beers: state.beers || []
+  });
+
   if (needToLoadBeers) {
     setTimeout(() => update({
       pleaseWait: false,
       beers,
     }), 1000);
   }
-
-  return {
-    pleaseWait: needToLoadBeers,
-    beers: state.beers || []
-  };
 };
 
 const beerDetailsService = ({ state }) => {
@@ -48,7 +47,7 @@ const beerServices = {
 export const beer = {
   service: ({ state, update }) => {
     const services = beerServices[state.navigateTo.id] || [];
-    return combineAll(services.map(service => service({ state, update })));
+    return services.forEach(service => service({ state, update }));
   }
 };
 

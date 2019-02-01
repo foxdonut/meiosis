@@ -10,8 +10,6 @@ export const settings = {
           message: "Please login."
         })
       });
-
-      return { route: state.route };
     }
   }
 };

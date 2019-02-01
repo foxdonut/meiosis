@@ -12,7 +12,3 @@ export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
-
-export const combineAll = objects =>
-  T(objects.filter(I), objs =>
-    objs.length > 0 ? Object.assign.apply(null, objs) : {});
