@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 
+import { dropRepeats } from "../util";
 import { toPath } from "../util/router";
 
 const coffees = [
@@ -13,16 +14,18 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  service: ({ state, update }) => {
-    if (state.navigateTo.id === "Coffee") {
-      setTimeout(() => update({ coffees }), 500);
-    }
-    else if (state.navigateTo.id === "CoffeeDetails") {
-      const id = state.navigateTo.values.id;
-      const coffee = coffeeMap[id].description;
+  service: (states, update) => {
+    dropRepeats(states, ["navigateTo"]).map(state => {
+      if (state.navigateTo.id === "Coffee") {
+        setTimeout(() => update({ coffees, route: state.navigateTo }), 500);
+      }
+      else if (state.navigateTo.id === "CoffeeDetails") {
+        const id = state.navigateTo.values.id;
+        const coffee = coffeeMap[id].description;
 
-      update({ coffee });
-    }
+        update({ coffee, route: state.navigateTo });
+      }
+    });
   }
 };
 

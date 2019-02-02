@@ -1,3 +1,5 @@
+import flyd from "flyd";
+
 export const I = x => x;
 export const T = (x, f) => f(x);
 
@@ -11,4 +13,17 @@ export const get = (object, path) =>
 export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
+};
+
+export const dropRepeats = (stream, path) => {
+  const result = flyd.stream();
+  let previous = get(stream(), path);
+  stream.map(state => {
+    const value = get(state, path);
+    if (value != null && value !== previous) {
+      previous = value;
+      result(state);
+    }
+  });
+  return result;
 };

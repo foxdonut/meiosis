@@ -1,5 +1,6 @@
 import React from "react";
 
+import { dropRepeats } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -12,10 +13,11 @@ const beerMap = beers.reduce((result, next) => {
   return result;
 }, {});
 
-const beerService = ({ state, update }) => {
+const beerService = (state, update) => {
   const needToLoadBeers = !state.beers || state.beers.length === 0;
 
   update({
+    route: state.navigateTo,
     pleaseWait: needToLoadBeers,
     beers: state.beers || []
   });
@@ -28,14 +30,14 @@ const beerService = ({ state, update }) => {
   }
 };
 
-const beerDetailsService = ({ state }) => {
+const beerDetailsService = (state, update) => {
   const id = state.navigateTo.values.id;
-  return { beer: beerMap[id].description };
+  update({ beer: beerMap[id].description });
 };
 
-const beerBrewerService = ({ state }) => {
+const beerBrewerService = (state, update) => {
   const id = state.navigateTo.values.id;
-  return { brewer: "Brewer of beer " + id };
+  update({ brewer: "Brewer of beer " + id });
 };
 
 const beerServices = {
@@ -45,9 +47,11 @@ const beerServices = {
 };
 
 export const beer = {
-  service: ({ state, update }) => {
-    const services = beerServices[state.navigateTo.id] || [];
-    return services.forEach(service => service({ state, update }));
+  service: (states, update) => {
+    dropRepeats(states, ["navigateTo"]).map(state => {
+      const services = beerServices[state.navigateTo.id] || [];
+      services.forEach(service => service(state, update));
+    });
   }
 };
 

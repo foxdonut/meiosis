@@ -1,14 +1,17 @@
 import React from "react";
 
+import { dropRepeats } from "../util";
+
 export const home = {
-  service: ({ state, update }) => {
-    if (state.navigateTo.id === "Home") {
-      // Navigating to Home
-      update({
-        route: state.navigateTo,
-        navigateTo: {}
-      });
-    }
+  service: (states, update) => {
+    dropRepeats(states, ["navigateTo"]).map(state => {
+      if (state.navigateTo.id === "Home") {
+        // Navigating to Home
+        update({
+          route: state.navigateTo
+        });
+      }
+    });
   }
 };
 

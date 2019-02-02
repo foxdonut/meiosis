@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { PS } from "patchinko/explicit";
 
-import { get, pipe, preventDefault } from "../util";
+import { dropRepeats, get, pipe, preventDefault } from "../util";
 
 export const login = {
-  actions: ({ update }) => ({
+  actions: update => ({
     username: value =>
       update({ login: PS({ username: value })}),
     password: value =>
@@ -15,27 +15,29 @@ export const login = {
     usernameLength: (get(state, ["login", "username"]) || "").length
   }),
 
-  service: ({ state, update }) => {
-    if (state.navigateTo.id === "Login") {
-      // Navigating to Login
-      update({
-        route: state.navigateTo,
-        navigateTo: {},
-        login: PS({
-          username: "",
-          password: ""
-        })
-      });
-    }
-    else if (state.navigateAway.id === "Login") {
-      // Leaving Login
-      update({
-        login: PS({
-          message: null
-        }),
-        navigateAway: {}
-      });
-    }
+  service: (states, update) => {
+    dropRepeats(states, ["navigateTo"]).map(state => {
+      if (state.navigateTo.id === "Login") {
+        // Navigating to Login
+        update({
+          route: state.navigateTo,
+          login: PS({
+            username: "",
+            password: ""
+          })
+        });
+      }
+    });
+    dropRepeats(states, ["navigateAway"]).map(state => {
+      if (state.navigateAway.id === "Login") {
+        // Leaving Login
+        update({
+          login: PS({
+            message: null
+          })
+        });
+      }
+    });
   }
 };
 

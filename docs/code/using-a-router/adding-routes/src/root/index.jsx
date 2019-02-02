@@ -8,6 +8,14 @@ import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
+export const root = {
+  computed: state => {
+    if (state.navigateTo.id != null && state.navigateTo.id != state.route.id) {
+      return { navigateAway: state.route };
+    }
+  }
+};
+
 const componentMap = {
   Home,
   Login,

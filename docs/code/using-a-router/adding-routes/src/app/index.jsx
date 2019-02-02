@@ -3,7 +3,7 @@ import { P } from "patchinko/explicit";
 
 import { getPath, parsePath } from "../util/router";
 
-import { Root } from "../root";
+import { Root, root } from "../root";
 import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
@@ -19,11 +19,12 @@ export const app = {
     navigateAway: {}
   }),
 
-  actions: ({ update }) => P({},
-    login.actions({ update })
+  actions: update => P({},
+    login.actions(update)
   ),
 
   computed: [
+    root.computed,
     login.computed
   ],
 

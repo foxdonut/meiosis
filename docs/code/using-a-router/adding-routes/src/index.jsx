@@ -24,10 +24,10 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
     ]
   });
 
-  const actions = app.actions({ update });
+  const actions = app.actions(update);
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-  states.map(state => app.services.forEach(service => service({ state, update })));
+  app.services.forEach(service => service(states, update));
 
   listenToRouteChanges(update);
 });
