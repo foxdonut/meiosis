@@ -17,7 +17,7 @@ export const preventDefault = evt => {
 
 export const dropRepeats = (stream, path) => {
   const result = flyd.stream();
-  let previous = get(stream(), path);
+  let previous = null;
   stream.map(state => {
     const value = get(state, path);
     if (value != null && value !== previous) {
