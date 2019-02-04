@@ -20,7 +20,8 @@ export const app = {
   }),
 
   actions: update => P({},
-    login.actions(update)
+    login.actions(update),
+    settings.actions(update)
   ),
 
   computed: [

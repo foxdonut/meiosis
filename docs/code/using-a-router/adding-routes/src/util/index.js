@@ -10,16 +10,18 @@ export const pipe = (...fns) => input => fns.reduce((value, fn) =>
 export const get = (object, path) =>
   path.reduce((obj, key) => obj == undefined ? undefined : obj[key], object);
 
+export const propPath = path => object => get(object, path);
+
 export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
 
-export const dropRepeats = (stream, path) => {
+export const dropRepeats = getter => stream => {
   const result = flyd.stream();
   let previous = null;
   stream.map(state => {
-    const value = get(state, path);
+    const value = getter(state);
     if (value != null && value !== previous) {
       previous = value;
       result(state);

@@ -1,10 +1,10 @@
 import React from "react";
 
-import { dropRepeats } from "../util";
+import { dropRepeats, propPath } from "../util";
 
 export const home = {
   service: (states, update) => {
-    dropRepeats(states, ["navigateTo"]).map(state => {
+    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
       if (state.navigateTo.id === "Home") {
         // Navigating to Home
         update({
@@ -15,4 +15,9 @@ export const home = {
   }
 };
 
-export const Home = () => (<div>Home Page</div>);
+export const Home = ({ state }) => (
+  <div>
+    <div>Home Page</div>
+    {state.user && <div>You are logged in as: {state.user}</div>}
+  </div>
+);

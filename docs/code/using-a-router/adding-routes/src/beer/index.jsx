@@ -1,6 +1,6 @@
 import React from "react";
 
-import { dropRepeats } from "../util";
+import { dropRepeats, propPath } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -48,7 +48,7 @@ const beerServices = {
 
 export const beer = {
   service: (states, update) => {
-    dropRepeats(states, ["navigateTo"]).map(state => {
+    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
       const services = beerServices[state.navigateTo.id] || [];
       services.forEach(service => service(state, update));
     });

@@ -1,14 +1,19 @@
 import React, { Component } from "react";
-import { PS } from "patchinko/explicit";
+import { P, PS } from "patchinko/explicit";
 
-import { dropRepeats, get, pipe, preventDefault } from "../util";
+import { dropRepeats, get, pipe, preventDefault, propPath } from "../util";
+import { navigateTo } from "../util/router";
 
 export const login = {
   actions: update => ({
     username: value =>
       update({ login: PS({ username: value })}),
+
     password: value =>
-      update({ login: PS({ password: value })})
+      update({ login: PS({ password: value })}),
+
+    login: username =>
+      update(P({ user: username }, navigateTo("Home")))
   }),
 
   computed: state => ({
@@ -16,7 +21,7 @@ export const login = {
   }),
 
   service: (states, update) => {
-    dropRepeats(states, ["navigateTo"]).map(state => {
+    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
       if (state.navigateTo.id === "Login") {
         // Navigating to Login
         update({
@@ -28,7 +33,7 @@ export const login = {
         });
       }
     });
-    dropRepeats(states, ["navigateAway"]).map(state => {
+    dropRepeats(propPath(["navigateAway"]))(states).map(state => {
       if (state.navigateAway.id === "Login") {
         // Leaving Login
         update({
@@ -65,7 +70,7 @@ export class Login extends Component {
           </div>
           <button type="submit" className="btn btn-primary"
             onClick={pipe(preventDefault,
-              () => actions.login(state.login))}>Login</button>
+              () => actions.login(state.login.username))}>Login</button>
         </form>
       </div>
     );

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { dropRepeats } from "../util";
+import { dropRepeats, propPath } from "../util";
 import { toPath } from "../util/router";
 
 const coffees = [
@@ -15,7 +15,7 @@ const coffeeMap = coffees.reduce((result, next) => {
 
 export const coffee = {
   service: (states, update) => {
-    dropRepeats(states, ["navigateTo"]).map(state => {
+    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
       if (state.navigateTo.id === "Coffee") {
         setTimeout(() => update({ coffees, route: state.navigateTo }), 500);
       }

@@ -22,6 +22,8 @@ export const toPath = router.toPath;
 export const getPath = () => document.location.hash;
 export const setPath = path => window.history.pushState({}, "", path);
 
+export const navigateTo = id => ({ navigateTo: { id }});
+
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
   if (state.route.id) {
