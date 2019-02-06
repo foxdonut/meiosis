@@ -1,6 +1,7 @@
 import React, { Component } from "react";
+import { PS } from "patchinko/explicit";
 
-import { dropRepeats, propPath } from "../util";
+import { onChange } from "../util";
 import { toPath } from "../util/router";
 
 const coffees = [
@@ -15,15 +16,21 @@ const coffeeMap = coffees.reduce((result, next) => {
 
 export const coffee = {
   service: (states, update) => {
-    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
-      if (state.navigateTo.id === "Coffee") {
-        setTimeout(() => update({ coffees, route: state.navigateTo }), 500);
+    onChange(states, ["route", "request"], state => {
+      if (state.route.request.id === "Coffee") {
+        setTimeout(() => update({
+          route: PS({ next: state.route.request }),
+          coffees
+        }), 500);
       }
-      else if (state.navigateTo.id === "CoffeeDetails") {
-        const id = state.navigateTo.values.id;
+      else if (state.route.request.id === "CoffeeDetails") {
+        const id = state.route.request.values.id;
         const coffee = coffeeMap[id].description;
 
-        update({ coffee, route: state.navigateTo });
+        update({
+          route: PS({ next: state.route.request }),
+          coffee
+        });
       }
     });
   }

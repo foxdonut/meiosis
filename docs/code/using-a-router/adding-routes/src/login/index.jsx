@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { P, PS } from "patchinko/explicit";
+import { PS } from "patchinko/explicit";
 
-import { dropRepeats, get, pipe, preventDefault, propPath } from "../util";
+import { onChange, get, pipe, preventDefault } from "../util";
 import { navigateTo } from "../util/router";
 
 export const login = {
@@ -13,7 +13,7 @@ export const login = {
       update({ login: PS({ password: value })}),
 
     login: username =>
-      update(P({ user: username }, navigateTo("Home")))
+      update(Object.assign({ user: username }, navigateTo("Home")))
   }),
 
   computed: state => ({
@@ -21,11 +21,11 @@ export const login = {
   }),
 
   service: (states, update) => {
-    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
-      if (state.navigateTo.id === "Login") {
+    onChange(states, ["route", "request"], state => {
+      if (state.route.request.id === "Login") {
         // Navigating to Login
         update({
-          route: state.navigateTo,
+          route: PS({ next: state.route.request }),
           login: PS({
             username: "",
             password: ""
@@ -33,8 +33,8 @@ export const login = {
         });
       }
     });
-    dropRepeats(propPath(["navigateAway"]))(states).map(state => {
-      if (state.navigateAway.id === "Login") {
+    onChange(states, ["route", "previous"], state => {
+      if (state.route.previous.id === "Login") {
         // Leaving Login
         update({
           login: PS({

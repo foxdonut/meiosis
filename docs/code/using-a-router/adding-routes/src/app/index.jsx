@@ -14,9 +14,12 @@ const initialRoute = parsePath(getPath());
 
 export const app = {
   initialState: () => ({
-    route: {},
-    navigateTo: initialRoute,
-    navigateAway: {}
+    route: {
+      previous: {},
+      current: {},
+      next: {},
+      request: initialRoute
+    }
   }),
 
   actions: update => P({},
@@ -25,11 +28,11 @@ export const app = {
   ),
 
   computed: [
-    root.computed,
     login.computed
   ],
 
   services: [
+    root.service,
     home.service,
     login.service,
     settings.service,

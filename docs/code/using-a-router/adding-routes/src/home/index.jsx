@@ -1,14 +1,15 @@
 import React from "react";
+import { PS } from "patchinko/explicit";
 
-import { dropRepeats, propPath } from "../util";
+import { onChange } from "../util";
 
 export const home = {
   service: (states, update) => {
-    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
-      if (state.navigateTo.id === "Home") {
+    onChange(states, ["route", "request"], state => {
+      if (state.route.request.id === "Home") {
         // Navigating to Home
         update({
-          route: state.navigateTo
+          route: PS({ next: state.route.request })
         });
       }
     });

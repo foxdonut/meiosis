@@ -1,26 +1,25 @@
 import React from "react";
-import { P, PS } from "patchinko/explicit";
+import { PS } from "patchinko/explicit";
 
-import { dropRepeats, propPath } from "../util";
+import { onChange } from "../util";
 import { navigateTo } from "../util/router";
 
 export const settings = {
   actions: update => ({
-    logout: () => update(P({ user: null }, navigateTo("Home")))
+    logout: () => update(Object.assign({ user: null }, navigateTo("Home")))
   }),
   service: (states, update) => {
-    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
-      if (state.navigateTo.id === "Settings") {
+    onChange(states, ["route", "request"], state => {
+      if (state.route.request.id === "Settings") {
         if (state.user) {
-          update({ route: state.navigateTo });
+          update({ route: PS({ next: state.route.request }) });
         }
         else {
-          update({
-            navigateTo: { id: "Login" },
+          update(Object.assign({
             login: PS({
               message: "Please login."
             })
-          });
+          }, navigateTo("Login")));
         }
       }
     });
@@ -30,6 +29,6 @@ export const settings = {
 export const Settings = ({ actions }) => (
   <div>
     <div>Settings Page</div>
-    <button className="btn btn-sm btn-danger" onClick={actions.logout}>Logout</button>
+    <button className="btn btn-danger" onClick={actions.logout}>Logout</button>
   </div>
 );

@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+import { PS } from "patchinko/explicit";
 
+import { onChange } from "../util";
 import { LocationBarSync, toPath } from "../util/router";
 
 import { Home } from "../home";
@@ -9,10 +11,17 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
 export const root = {
-  computed: state => {
-    if (state.navigateTo.id != null && state.navigateTo.id != state.route.id) {
-      return { navigateAway: state.route };
-    }
+  service: (states, update) => {
+    onChange(states, ["route", "next"], state => {
+      update({
+        route: PS({
+          previous: state.route.current.id !== state.route.next.id
+            && state.route.current
+            || {},
+          current: state.route.next
+        })
+      });
+    });
   }
 };
 
@@ -31,7 +40,7 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.route.id;
+    const componentId = state.route.current.id;
     const Component = componentMap[componentId];
     const isActive = tab => tab === Component ? "active" : "";
 

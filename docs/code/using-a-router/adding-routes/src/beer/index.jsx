@@ -1,6 +1,7 @@
 import React from "react";
+import { PS } from "patchinko/explicit";
 
-import { dropRepeats, propPath } from "../util";
+import { onChange } from "../util";
 import { toPath } from "../util/router";
 
 const beers = [
@@ -17,7 +18,7 @@ const beerService = (state, update) => {
   const needToLoadBeers = !state.beers || state.beers.length === 0;
 
   update({
-    route: state.navigateTo,
+    route: PS({ next: state.route.request }),
     pleaseWait: needToLoadBeers,
     beers: state.beers || []
   });
@@ -31,12 +32,12 @@ const beerService = (state, update) => {
 };
 
 const beerDetailsService = (state, update) => {
-  const id = state.navigateTo.values.id;
+  const id = state.route.request.values.id;
   update({ beer: beerMap[id].description });
 };
 
 const beerBrewerService = (state, update) => {
-  const id = state.navigateTo.values.id;
+  const id = state.route.request.values.id;
   update({ brewer: "Brewer of beer " + id });
 };
 
@@ -48,8 +49,8 @@ const beerServices = {
 
 export const beer = {
   service: (states, update) => {
-    dropRepeats(propPath(["navigateTo"]))(states).map(state => {
-      const services = beerServices[state.navigateTo.id] || [];
+    onChange(states, ["route", "request"], state => {
+      const services = beerServices[state.route.request.id] || [];
       services.forEach(service => service(state, update));
     });
   }
@@ -64,7 +65,7 @@ const beerDetailsComponentMap = {
 };
 
 const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.route.id];
+  const Component = beerDetailsComponentMap[state.route.current.id];
 
   return (
     <div>
@@ -72,7 +73,7 @@ const BeerDetails = ({ state, actions }) => {
       {Component && <Component state={state} actions={actions}/> ||
         <a href={toPath({
           id: "BeerBrewer",
-          values: { id: state.route.values.id }
+          values: { id: state.route.current.values.id }
         })}>Brewer</a>
       }
     </div>
@@ -85,7 +86,7 @@ const beerComponentMap = {
 };
 
 export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.route.id];
+  const Component = beerComponentMap[state.route.current.id];
 
   return (
     <div>
