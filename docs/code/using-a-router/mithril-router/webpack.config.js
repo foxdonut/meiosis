@@ -3,18 +3,18 @@ var path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.jsx",
+  entry: "./src/index.js",
   output: {
     path: path.join(__dirname, "build"),
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: [".js"]
   },
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.js$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader"

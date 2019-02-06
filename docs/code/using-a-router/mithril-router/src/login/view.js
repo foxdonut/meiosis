@@ -1,0 +1,37 @@
+import m from "mithril";
+
+import { pipe, preventDefault } from "../util";
+
+export const Login = {
+  view: ({ attrs: { state, actions } }) => (
+    m("div",
+      (state.login.message ? m("div", state.login.message) : null),
+      m("div", "Login"),
+      m("form.form",
+        m("div.form-group",
+          m("input.form-control", {
+            type: "text",
+            placeholder: "username",
+            value: state.login.username,
+            onchange: evt =>
+              actions.username(evt.target.value)
+          })
+        ),
+        m("div.form-group",
+          m("input.form-control", {
+            type: "password",
+            placeholder: "password",
+            value: state.login.password,
+            onchange: evt =>
+              actions.password(evt.target.value)
+          })
+        ),
+        m("button.btn.btn-primary", {
+          type: "submit",
+          onclick: pipe(preventDefault,
+            () => actions.login(state.login.username))
+        }, "Login")
+      )
+    )
+  )
+};

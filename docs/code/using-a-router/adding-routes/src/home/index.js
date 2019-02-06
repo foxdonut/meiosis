@@ -1,4 +1,3 @@
-import React from "react";
 import { PS } from "patchinko/explicit";
 
 import { onChange } from "../util";
@@ -16,9 +15,4 @@ export const home = {
   }
 };
 
-export const Home = ({ state }) => (
-  <div>
-    <div>Home Page</div>
-    {state.user && <div>You are logged in as: {state.user}</div>}
-  </div>
-);
+export { Home } from "./view";

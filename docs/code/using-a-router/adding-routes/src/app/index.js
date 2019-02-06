@@ -1,16 +1,15 @@
-import React, { Component } from "react";
 import { P } from "patchinko/explicit";
 
-import { getPath, parsePath } from "../util/router";
+import { parsePath } from "../util/router";
 
-import { Root, root } from "../root";
+import { root } from "../root";
 import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-const initialRoute = parsePath(getPath());
+const initialRoute = parsePath();
 
 export const app = {
   initialState: () => ({
@@ -41,22 +40,4 @@ export const app = {
   ]
 };
 
-export class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-  }
-
-  componentDidMount() {
-    this.props.states.map(state => {
-      this.setState(state);
-    });
-  }
-
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-
-    return (<Root state={state} actions={actions} />);
-  }
-}
+export { App } from "./view";

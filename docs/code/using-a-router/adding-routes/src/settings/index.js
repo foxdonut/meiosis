@@ -1,4 +1,3 @@
-import React from "react";
 import { PS } from "patchinko/explicit";
 
 import { onChange } from "../util";
@@ -26,9 +25,4 @@ export const settings = {
   }
 };
 
-export const Settings = ({ actions }) => (
-  <div>
-    <div>Settings Page</div>
-    <button className="btn btn-danger" onClick={actions.logout}>Logout</button>
-  </div>
-);
+export { Settings } from "./view";

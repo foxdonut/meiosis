@@ -1,8 +1,6 @@
-import React from "react";
 import { PS } from "patchinko/explicit";
 
 import { onChange } from "../util";
-import { toPath } from "../util/router";
 
 const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
@@ -56,50 +54,4 @@ export const beer = {
   }
 };
 
-const BeerBrewer = ({ state }) => (
-  <p>{state.brewer}</p>
-);
-
-const beerDetailsComponentMap = {
-  BeerBrewer
-};
-
-const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.route.current.id];
-
-  return (
-    <div>
-      <p>{state.beer}</p>
-      {Component && <Component state={state} actions={actions}/> ||
-        <a href={toPath({
-          id: "BeerBrewer",
-          values: { id: state.route.current.values.id }
-        })}>Brewer</a>
-      }
-    </div>
-  );
-};
-
-const beerComponentMap = {
-  BeerDetails,
-  BeerBrewer: BeerDetails
-};
-
-export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.route.current.id];
-
-  return (
-    <div>
-      <p>Beer Page</p>
-      <ul>
-        {state.beers.map(beer =>
-          <li key={beer.id}>
-            <a href={toPath({ id: "BeerDetails", values: { id: beer.id } })}
-            >{beer.title}</a>
-          </li>
-        )}
-      </ul>
-      {Component && <Component state={state} actions={actions}/>}
-    </div>
-  );
-};
+export { Beer } from "./view";

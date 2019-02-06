@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-import { PS } from "patchinko/explicit";
 
-import { onChange } from "../util";
 import { LocationBarSync, toPath } from "../util/router";
 
 import { Home } from "../home";
@@ -9,21 +7,6 @@ import { Login } from "../login";
 import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
-
-export const root = {
-  service: (states, update) => {
-    onChange(states, ["route", "next"], state => {
-      update({
-        route: PS({
-          previous: state.route.current.id !== state.route.next.id
-            && state.route.current
-            || {},
-          current: state.route.next
-        })
-      });
-    });
-  }
-};
 
 const componentMap = {
   Home,

@@ -30,9 +30,9 @@ const convert = (result, id, keys) => {
  * @param defaultValues (optional) values for invalid url
  */
 export const createRouter = ({ routeMap, prefix, defaultId, defaultValues }) => {
-  const routes = Object.keys(routeMap).reduce((result, id) => {
+  const routes = Object.entries(routeMap).reduce((result, [id, path]) => {
     const keyDefs = [];
-    const re = pathToRegexp(routeMap[id], keyDefs);
+    const re = pathToRegexp(path, keyDefs);
     // keyDefs now contains [{name: keyName1}, {name: keyName2}, ...]
     const keys = keyDefs.map(k => k.name);
     // keys is [keyName1, keyName2, ...]
@@ -43,7 +43,7 @@ export const createRouter = ({ routeMap, prefix, defaultId, defaultValues }) => 
       // convert to { id, values }
       return result && convert(result, id, keys);
     };
-    result[id] = { exec, toPath: pathToRegexp.compile(routeMap[id]) };
+    result[id] = { exec, toPath: pathToRegexp.compile(path) };
     return result;
   }, {});
   // routes is { id: { exec, toPath } }

@@ -1,0 +1,40 @@
+{
+  "name": "mithril-router",
+  "version": "1.0.0",
+  "description": "meiosis docs example",
+  "main": "src/index.jsx",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "meiosis",
+    "react",
+    "router"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "mithril": "^2.0.0-rc.3",
+    "patchinko": "^4.1.0",
+    "path-to-regexp": "^3.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.13.0",
+    "meiosis-tracer": "^2.0.3",
+    "webpack": "^4.29.1",
+    "webpack-cli": "^3.2.3"
+  }
+}
