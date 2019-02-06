@@ -12,7 +12,7 @@ const beerDetailsComponentMap = {
 
 const BeerDetails = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = beerDetailsComponentMap[state.route.current.id];
+    const Component = beerDetailsComponentMap[state.routeCurrent.id];
 
     return (
       m("div",
@@ -21,7 +21,7 @@ const BeerDetails = {
           m("a", {
             href: toPath({
               id: "BeerBrewer",
-              values: { id: state.route.current.values.id }
+              values: { id: state.routeCurrent.values.id }
             })
           }, "Brewer")
         )
@@ -37,7 +37,7 @@ const beerComponentMap = {
 
 export const Beer = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = beerComponentMap[state.route.current.id];
+    const Component = beerComponentMap[state.routeCurrent.id];
 
     return (
       m("div",

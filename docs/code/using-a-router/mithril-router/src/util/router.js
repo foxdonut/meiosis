@@ -1,5 +1,5 @@
 import m from "mithril";
-import { PS } from "patchinko/explicit";
+import pathToRegexp from "path-to-regexp";
 
 const routeMap = {
   Home: "/",
@@ -12,16 +12,16 @@ const routeMap = {
   BeerBrewer: "/beer/:id/brewer"
 };
 
+const toPathMap = Object.entries(routeMap).reduce((result, [id, path]) => {
+  result[id] = pathToRegexp.compile(path);
+  return result;
+}, {});
+
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
-// converts the path to { id, values }
-export const parsePath = () => "#!/";
-
 // converts { id, values } to path
-export const toPath = ({ id }) => "#!/" + id.toLowerCase();
-
-export const navigateTo = id => ({ route: PS({ request: { id } }) });
+export const toPath = ({ id, values }) => "#!" + toPathMap[id](values);
 
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
@@ -37,7 +37,7 @@ export const LocationBarSync = ({ state }) => {
 export const createRoutes = ({ states, actions, update, App }) =>
   Object.entries(routeMap).reduce((result, [id, path]) => {
     result[path] = {
-      onmatch: () => update({ route: PS({ request: { id } }) }),
+      onmatch: values => update({ routeRequest: { id, values } }),
       render: () => m(App, { state: states(), actions })
     };
     return result;

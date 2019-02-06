@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { pipe, preventDefault } from "../util";
+import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
   view: ({ attrs: { state, actions } }) => (

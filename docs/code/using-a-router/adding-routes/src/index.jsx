@@ -19,6 +19,7 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
     selector: "#tracer",
     rows: 10,
     streams: [
+      { stream: update, label: "update" },
       { stream: models, label: "models" },
       { stream: states, label: "states" }
     ]

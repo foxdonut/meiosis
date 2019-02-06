@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { pipe, preventDefault } from "../util";
+import { pipe, preventDefault } from "routing-common/src/util";
 
 export class Login extends Component {
   render() {

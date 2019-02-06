@@ -23,3 +23,5 @@ export const onChange = (stream, path, handler) => {
     }
   });
 };
+
+export const navigateTo = id => ({ routeRequest: { id } });

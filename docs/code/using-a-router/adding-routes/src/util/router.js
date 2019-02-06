@@ -1,5 +1,3 @@
-import { PS } from "patchinko/explicit";
-
 import { createRouter } from "./basic-router";
 
 const routeMap = {
@@ -24,12 +22,10 @@ export const parsePath = () => router.parsePath(getPath());
 // converts { id, values } to path
 export const toPath = router.toPath;
 
-export const navigateTo = id => ({ route: PS({ request: { id } }) });
-
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
-  if (state.route.id) {
-    const path = toPath(state.route);
+  if (state.routeCurrent.id) {
+    const path = toPath(state.routeCurrent);
     if (getPath() !== path) {
       setPath(path);
     }
@@ -39,5 +35,8 @@ export const LocationBarSync = ({ state }) => {
 
 // Listens to route changes and triggers updates
 export const listenToRouteChanges = update => {
-  window.onpopstate = () => update({ route: PS({ request: parsePath() }) });
+  const emitRouteUpdate = () => update({ routeRequest: parsePath() });
+  window.onpopstate = emitRouteUpdate;
+  // Parse initial route
+  emitRouteUpdate();
 };

@@ -9,7 +9,11 @@ module.exports = {
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: [".js", ".jsx"],
+    // This is so that routing-common can find patchinko from peerDependencies
+    alias: {
+      "patchinko": path.resolve("./node_modules/patchinko")
+    }
   },
   module: {
     rules: [

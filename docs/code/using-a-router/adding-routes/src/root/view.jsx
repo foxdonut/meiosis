@@ -23,7 +23,7 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.route.current.id;
+    const componentId = state.routeCurrent.id;
     const Component = componentMap[componentId];
     const isActive = tab => tab === Component ? "active" : "";
 

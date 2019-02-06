@@ -11,7 +11,7 @@ const beerDetailsComponentMap = {
 };
 
 const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.route.current.id];
+  const Component = beerDetailsComponentMap[state.routeCurrent.id];
 
   return (
     <div>
@@ -19,7 +19,7 @@ const BeerDetails = ({ state, actions }) => {
       {Component && <Component state={state} actions={actions}/> ||
         <a href={toPath({
           id: "BeerBrewer",
-          values: { id: state.route.current.values.id }
+          values: { id: state.routeCurrent.values.id }
         })}>Brewer</a>
       }
     </div>
@@ -32,7 +32,7 @@ const beerComponentMap = {
 };
 
 export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.route.current.id];
+  const Component = beerComponentMap[state.routeCurrent.id];
 
   return (
     <div>
