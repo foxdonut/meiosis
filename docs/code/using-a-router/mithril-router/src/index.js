@@ -9,9 +9,13 @@ const update = stream();
 
 Promise.resolve().then(app.initialState).then(initialState => {
   const models = stream.scan(P, initialState, update);
+  const actions = app.actions(update);
+
   const computed = models.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
   );
+  app.services.forEach(service => service(computed, update));
+
   const states = stream();
   computed.map(states);
 
@@ -25,11 +29,8 @@ Promise.resolve().then(app.initialState).then(initialState => {
     ]
   });
 
-  const actions = app.actions(update);
   m.route(document.getElementById("app"), "/",
     createRoutes({ states, actions, update, App }));
-
-  app.services.forEach(service => service(computed, update));
 
   states.map(() => m.redraw());
 });

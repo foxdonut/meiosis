@@ -1,5 +1,6 @@
 import m from "mithril";
 
+import { caseOf } from "routing-common/src/util";
 import { toPath } from "../util/router";
 
 import { Home } from "../home";
@@ -21,7 +22,7 @@ const componentMap = {
 
 export const Root = {
   view: ({ attrs: { state, actions }}) => {
-    const componentId = state.routeCurrent.id;
+    const componentId = state.routeCurrent.case;
     const Component = componentMap[componentId];
     const isActive = tab => tab === Component ? ".active" : "";
 
@@ -30,19 +31,19 @@ export const Root = {
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
             m("li" + isActive(Home),
-              m("a", { href: toPath({ id: "Home" }) }, "Home")
+              m("a", { href: toPath(caseOf("Home")) }, "Home")
             ),
             m("li" + isActive(Login),
-              m("a", { href: toPath({ id: "Login" }) }, "Login")
+              m("a", { href: toPath(caseOf("Login")) }, "Login")
             ),
             m("li" + isActive(Settings),
-              m("a", { href: toPath({ id: "Settings" }) }, "Settings")
+              m("a", { href: toPath(caseOf("Settings")) }, "Settings")
             ),
             m("li" + isActive(Coffee),
-              m("a", { href: toPath({ id: "Coffee" }) }, "Coffee")
+              m("a", { href: toPath(caseOf("Coffee")) }, "Coffee")
             ),
             m("li" + isActive(Beer),
-              m("a", { href: toPath({ id: "Beer" }) }, "Beer")
+              m("a", { href: toPath(caseOf("Beer")) }, "Beer")
             )
           )
         ),

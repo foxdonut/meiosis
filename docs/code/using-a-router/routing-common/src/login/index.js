@@ -1,6 +1,6 @@
 import { PS } from "patchinko/explicit";
 
-import { navigateTo, onChange, get } from "../util";
+import { T, caseOf, fold, get, onChange } from "../util";
 
 export const login = {
   actions: update => ({
@@ -11,7 +11,10 @@ export const login = {
       update({ login: PS({ password: value })}),
 
     login: username =>
-      update(Object.assign({ user: username }, navigateTo("Home")))
+      update({
+        routeStatus: caseOf("Request", caseOf("Home")),
+        user: username
+      })
   }),
 
   computed: state => ({
@@ -19,27 +22,36 @@ export const login = {
   }),
 
   service: (states, update) => {
-    onChange(states, ["routeRequest"], state => {
-      if (state.routeRequest.id === "Login") {
-        // Navigating to Login
-        update({
-          routeNext: state.routeRequest,
-          login: PS({
-            username: "",
-            password: ""
-          })
-        });
-      }
-    });
-    onChange(states, ["routePrevious"], state => {
-      if (state.routePrevious.id === "Login") {
-        // Leaving Login
-        update({
-          login: PS({
-            message: null
-          })
-        });
-      }
+    onChange(states, ["routeStatus"], state => {
+      T(state.routeStatus, fold({
+        Change: change => T(change.leave, fold({
+          Login: () => {
+            if (!(state.login.username || state.login.password)
+                || confirm("You have unsaved data. Discard?"))
+            {
+              update({
+                routeStatus: caseOf("Arrive", change.destination),
+                login: PS({
+                  message: null
+                })
+              });
+            }
+          }
+        })),
+
+        Arrive: route => T(route, fold({
+          Login: () => {
+            update({
+              routeCurrent: route,
+              routeStatus: caseOf("None"),
+              login: PS({
+                username: "",
+                password: ""
+              })
+            });
+          }
+        }))
+      }));
     });
   }
 };

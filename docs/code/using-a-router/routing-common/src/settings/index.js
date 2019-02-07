@@ -1,25 +1,45 @@
 import { PS } from "patchinko/explicit";
 
-import { navigateTo, onChange } from "../util";
+import { T, caseOf, fold, onChange } from "../util";
 
 export const settings = {
   actions: update => ({
-    logout: () => update(Object.assign({ user: null }, navigateTo("Home")))
+    logout: () => update({
+      routeStatus: caseOf("Request", caseOf("Home")),
+      user: null
+    })
   }),
+
   service: (states, update) => {
-    onChange(states, ["routeRequest"], state => {
-      if (state.routeRequest.id === "Settings") {
-        if (state.user) {
-          update({ routeNext: state.routeRequest });
-        }
-        else {
-          update(Object.assign({
-            login: PS({
-              message: "Please login."
-            })
-          }, navigateTo("Login")));
-        }
-      }
+    onChange(states, ["routeStatus"], state => {
+      T(state.routeStatus, fold({
+        Change: route => T(route.leave, fold({
+          Settings: () => {
+            update({
+              routeStatus: caseOf("Arrive", route.destination)
+            });
+          }
+        })),
+
+        Arrive: route => T(route, fold({
+          Settings: () => {
+            if (state.user) {
+              update({
+                routeCurrent: route,
+                routeStatus: caseOf("None"),
+              });
+            }
+            else {
+              update({
+                routeStatus: caseOf("Request", caseOf("Login")),
+                login: PS({
+                  message: "Please login."
+                })
+              });
+            }
+          }
+        }))
+      }));
     });
   }
 };

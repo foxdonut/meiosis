@@ -14,7 +14,7 @@ const beerService = (state, update) => {
   const needToLoadBeers = !state.beers || state.beers.length === 0;
 
   update({
-    routeNext: state.routeRequest,
+    routeStatus: state.routeRequest,
     pleaseWait: needToLoadBeers,
     beers: state.beers || []
   });

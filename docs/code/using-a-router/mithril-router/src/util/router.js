@@ -20,12 +20,12 @@ const toPathMap = Object.entries(routeMap).reduce((result, [id, path]) => {
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
-// converts { id, values } to path
-export const toPath = ({ id, values }) => "#!" + toPathMap[id](values);
+// converts { case, value } to path
+export const toPath = route => "#!" + toPathMap[route.case](route.value);
 
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
-  if (state.route.id) {
+  if (state.route.case) {
     const path = toPath(state.route);
     if (getPath() !== path) {
       setPath(path);
@@ -37,7 +37,12 @@ export const LocationBarSync = ({ state }) => {
 export const createRoutes = ({ states, actions, update, App }) =>
   Object.entries(routeMap).reduce((result, [id, path]) => {
     result[path] = {
-      onmatch: values => update({ routeRequest: { id, values } }),
+      onmatch: value => update({
+        routeStatus: {
+          case: "Request",
+          value: { case: id, value }
+        }
+      }),
       render: () => m(App, { state: states(), actions })
     };
     return result;

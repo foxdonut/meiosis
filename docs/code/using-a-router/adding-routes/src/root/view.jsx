@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 
+import { caseOf } from "routing-common/src/util";
 import { LocationBarSync, toPath } from "../util/router";
 
 import { Home } from "../home";
@@ -23,7 +24,7 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.routeCurrent.id;
+    const componentId = state.routeCurrent.case;
     const Component = componentMap[componentId];
     const isActive = tab => tab === Component ? "active" : "";
 
@@ -32,19 +33,19 @@ export class Root extends Component {
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
             <li className={isActive(Home)}>
-              <a href={toPath({ id: "Home" })}>Home</a>
+              <a href={toPath(caseOf("Home"))}>Home</a>
             </li>
             <li className={isActive(Login)}>
-              <a href={toPath({ id: "Login" })}>Login</a>
+              <a href={toPath(caseOf("Login"))}>Login</a>
             </li>
             <li className={isActive(Settings)}>
-              <a href={toPath({ id: "Settings" })}>Settings</a>
+              <a href={toPath(caseOf("Settings"))}>Settings</a>
             </li>
             <li className={isActive(Coffee)}>
-              <a href={toPath({ id: "Coffee" })}>Coffee</a>
+              <a href={toPath(caseOf("Coffee"))}>Coffee</a>
             </li>
             <li className={isActive(Beer)}>
-              <a href={toPath({ id: "Beer" })}>Beer</a>
+              <a href={toPath(caseOf("Beer"))}>Beer</a>
             </li>
           </ul>
         </nav>

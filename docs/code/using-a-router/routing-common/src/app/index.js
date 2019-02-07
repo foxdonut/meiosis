@@ -9,10 +9,8 @@ import { beer } from "../beer";
 
 export const app = {
   initialState: () => ({
-    routePrevious: {},
     routeCurrent: {},
-    routeNext: {},
-    routeRequest: {}
+    routeStatus: {}
   }),
 
   actions: update => P({},

@@ -15,7 +15,7 @@ export const coffee = {
     onChange(states, ["routeRequest"], state => {
       if (state.routeRequest.id === "Coffee") {
         setTimeout(() => update({
-          routeNext: state.routeRequest,
+          routeStatus: state.routeRequest,
           coffees
         }), 500);
       }
@@ -24,7 +24,7 @@ export const coffee = {
         const coffee = coffeeMap[id].description;
 
         update({
-          routeNext: state.routeRequest,
+          routeStatus: state.routeRequest,
           coffee
         });
       }

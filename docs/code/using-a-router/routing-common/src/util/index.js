@@ -13,6 +13,12 @@ export const preventDefault = evt => {
   return evt;
 };
 
+export const caseOf = (id, value) => ({ case: id, value });
+
+export const fold = handlers => caseObj =>
+  handlers[caseObj.case] &&
+  handlers[caseObj.case](caseObj.value);
+
 export const onChange = (stream, path, handler) => {
   let previous = null;
   stream.map(state => {
@@ -23,5 +29,3 @@ export const onChange = (stream, path, handler) => {
     }
   });
 };
-
-export const navigateTo = id => ({ routeRequest: { id } });

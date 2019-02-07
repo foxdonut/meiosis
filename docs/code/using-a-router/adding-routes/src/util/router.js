@@ -16,15 +16,15 @@ const router = createRouter({ routeMap, prefix: "#" });
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
-// converts the path to { id, values }
+// converts the path to { case, value }
 const parsePath = () => router.parsePath(getPath());
 
-// converts { id, values } to path
+// converts { case, value } to path
 export const toPath = router.toPath;
 
 // Keeps the location bar in sync
 export const LocationBarSync = ({ state }) => {
-  if (state.routeCurrent.id) {
+  if (state.routeCurrent.case) {
     const path = toPath(state.routeCurrent);
     if (getPath() !== path) {
       setPath(path);
@@ -35,7 +35,12 @@ export const LocationBarSync = ({ state }) => {
 
 // Listens to route changes and triggers updates
 export const listenToRouteChanges = update => {
-  const emitRouteUpdate = () => update({ routeRequest: parsePath() });
+  const emitRouteUpdate = () => update({
+    routeStatus: {
+      case: "Request",
+      value: parsePath()
+    }
+  });
   window.onpopstate = emitRouteUpdate;
   // Parse initial route
   emitRouteUpdate();

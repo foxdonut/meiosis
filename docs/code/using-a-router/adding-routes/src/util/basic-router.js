@@ -3,7 +3,7 @@ import pathToRegexp from "path-to-regexp";
 const I = x => x;
 
 /**
- * Converts a path-to-regexp result to { id, values }
+ * Converts a path-to-regexp result to { case, value }
  * @param result an array [route, value1, value2, ...]
  * @param id the page id
  * @param keys the parameter names that correspond to the values
@@ -12,24 +12,24 @@ const convert = (result, id, keys) => {
   // result contains [route, values] so extract the values into 'rest'
   const rest = result.slice(1);
   // match the keys to the values to build a { key: value } object
-  const values = keys.reduce((acc, key, index) => {
+  const value = keys.reduce((acc, key, index) => {
     acc[key] = rest[index];
     return acc;
   }, {});
-  return { id, values };
+  return { case: id, value };
 };
 
 /**
  * Returns {
- *   parsePath(path) => ({ id, values })
- *   toPath({ id, values }) => path
+ *   parsePath(path) => ({ case, value })
+ *   toPath({ case, value }) => path
  * }
- * @param routeMap { id: route }
+ * @param routeMap { case: route }
  * @param prefix the path prefix
- * @param defaultId (optional) id for invalid url
- * @param defaultValues (optional) values for invalid url
+ * @param defaultCase (optional) case for invalid url
+ * @param defaultValue (optional) value for invalid url
  */
-export const createRouter = ({ routeMap, prefix, defaultId, defaultValues }) => {
+export const createRouter = ({ routeMap, prefix, defaultCase, defaultValue }) => {
   const routes = Object.entries(routeMap).reduce((result, [id, path]) => {
     const keyDefs = [];
     const re = pathToRegexp(path, keyDefs);
@@ -40,23 +40,23 @@ export const createRouter = ({ routeMap, prefix, defaultId, defaultValues }) => 
     const exec = path => {
       const result = re.exec(path);
       // result is [ route, value1, value2, ... ]
-      // convert to { id, values }
+      // convert to { case, value }
       return result && convert(result, id, keys);
     };
     result[id] = { exec, toPath: pathToRegexp.compile(path) };
     return result;
   }, {});
-  // routes is { id: { exec, toPath } }
+  // routes is { case: { exec, toPath } }
 
-  const ids = Object.keys(routes);
-  // parsePath calls exec on each id and uses the first defined result as { id, values }
+  const cases = Object.keys(routes);
+  // parsePath calls exec on each case and uses the first defined result as { case, value }
   const parsePath = path => {
     path = path || prefix + "/";
-    const result = ids.map(id => routes[id].exec(path.substring(prefix.length))).filter(I)[0];
-    return result || (defaultId && { id: defaultId, values: defaultValues });
+    const result = cases.map(id => routes[id].exec(path.substring(prefix.length))).filter(I)[0];
+    return result || (defaultCase && { case: defaultCase, value: defaultValue });
   };
-  // toPath calls toPath on the id
-  const toPath = ({ id, values }) => prefix + routes[id].toPath(values);
+  // toPath calls toPath on the case
+  const toPath = caseObj => prefix + routes[caseObj.case].toPath(caseObj.value);
 
   return { parsePath, toPath };
 };
