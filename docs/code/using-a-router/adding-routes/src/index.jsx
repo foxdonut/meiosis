@@ -8,11 +8,13 @@ import { listenToRouteChanges } from "./util/router";
 
 const update = flyd.stream();
 
-Promise.resolve().then(() => app.initialState()).then(initialState => {
+Promise.resolve().then(app.initialState).then(initialState => {
   const models = flyd.scan(P, initialState, update);
-  const states = models.map(state =>
+  const computed = models.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
   );
+  const states = flyd.stream();
+  computed.map(states);
 
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
@@ -20,7 +22,6 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
     rows: 10,
     streams: [
       { stream: update, label: "update" },
-      { stream: models, label: "models" },
       { stream: states, label: "states" }
     ]
   });
@@ -28,7 +29,7 @@ Promise.resolve().then(() => app.initialState()).then(initialState => {
   const actions = app.actions(update);
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-  app.services.forEach(service => service(states, update));
+  app.services.forEach(service => service(computed, update));
 
   listenToRouteChanges(update);
 });

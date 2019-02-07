@@ -17,7 +17,7 @@ const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
 // converts the path to { id, values }
-export const parsePath = () => router.parsePath(getPath());
+const parsePath = () => router.parsePath(getPath());
 
 // converts { id, values } to path
 export const toPath = router.toPath;

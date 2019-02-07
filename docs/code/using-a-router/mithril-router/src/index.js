@@ -7,7 +7,7 @@ import { createRoutes } from "./util/router";
 
 const update = stream();
 
-Promise.resolve().then(() => app.initialState()).then(initialState => {
+Promise.resolve().then(app.initialState).then(initialState => {
   const models = stream.scan(P, initialState, update);
   const computed = models.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
