@@ -24,13 +24,14 @@ export const login = {
   service: (states, update) => {
     onChange(states, ["routeStatus"], state => {
       T(state.routeStatus, fold({
-        Change: change => T(change.leave, fold({
+        Leaving: route => T(route.from, fold({
           Login: () => {
             if (!(state.login.username || state.login.password)
+                || state.user
                 || confirm("You have unsaved data. Discard?"))
             {
               update({
-                routeStatus: caseOf("Arrive", change.destination),
+                routeStatus: caseOf("Arriving", route.to),
                 login: PS({
                   message: null
                 })
@@ -39,7 +40,7 @@ export const login = {
           }
         })),
 
-        Arrive: route => T(route, fold({
+        Arriving: route => T(route, fold({
           Login: () => {
             update({
               routeCurrent: route,

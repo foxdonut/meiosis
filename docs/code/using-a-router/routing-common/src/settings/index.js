@@ -13,15 +13,15 @@ export const settings = {
   service: (states, update) => {
     onChange(states, ["routeStatus"], state => {
       T(state.routeStatus, fold({
-        Change: route => T(route.leave, fold({
+        Leaving: route => T(route.from, fold({
           Settings: () => {
             update({
-              routeStatus: caseOf("Arrive", route.destination)
+              routeStatus: caseOf("Arriving", route.to)
             });
           }
         })),
 
-        Arrive: route => T(route, fold({
+        Arriving: route => T(route, fold({
           Settings: () => {
             if (state.user) {
               update({

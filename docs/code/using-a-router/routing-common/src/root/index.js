@@ -7,18 +7,18 @@ export const root = {
         Request: route => {
           if (route.case !== state.routeCurrent.case) {
             update({
-              routeStatus: caseOf("Change", {
-                leave: state.routeCurrent,
-                destination: route
+              routeStatus: caseOf("Leaving", {
+                from: state.routeCurrent,
+                to: route
               })
             });
           }
         },
 
-        Change: change => {
-          if (!change.leave.case) {
+        Leaving: route => {
+          if (!route.from.case) {
             update({
-              routeStatus: caseOf("Arrive", change.destination)
+              routeStatus: caseOf("Arriving", route.to)
             });
           }
         }

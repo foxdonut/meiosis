@@ -4,15 +4,15 @@ export const home = {
   service: (states, update) => {
     onChange(states, ["routeStatus"], state => {
       T(state.routeStatus, fold({
-        Change: change => T(change.leave, fold({
+        Leaving: route => T(route.from, fold({
           Home: () => {
             update({
-              routeStatus: caseOf("Arrive", change.destination)
+              routeStatus: caseOf("Arriving", route.to)
             });
           }
         })),
 
-        Arrive: route => T(route, fold({
+        Arriving: route => T(route, fold({
           Home: () => {
             update({
               routeCurrent: route,
