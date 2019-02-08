@@ -1,5 +1,6 @@
 import m from "mithril";
 
+import { caseOf } from "routing-common/src/util";
 import { toPath } from "../util/router";
 
 export const Coffee = {
@@ -10,10 +11,7 @@ export const Coffee = {
         state.coffees && state.coffees.map(coffee =>
           m("li", { key: coffee.id },
             m("a", {
-              href: toPath({
-                id: "CoffeeDetails",
-                values: { id: coffee.id }
-              })
+              href: toPath(caseOf("CoffeeDetails", { id: coffee.id }))
             }, coffee.title)
           )
         )

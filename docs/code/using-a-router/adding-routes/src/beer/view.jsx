@@ -1,5 +1,6 @@
 import React from "react";
 
+import { caseOf } from "routing-common/src/util";
 import { toPath } from "../util/router";
 
 const BeerBrewer = ({ state }) => (
@@ -11,16 +12,14 @@ const beerDetailsComponentMap = {
 };
 
 const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.routeCurrent.id];
+  const Component = beerDetailsComponentMap[state.routeCurrent.case];
 
   return (
     <div>
       <p>{state.beer}</p>
       {Component && <Component state={state} actions={actions}/> ||
-        <a href={toPath({
-          id: "BeerBrewer",
-          values: { id: state.routeCurrent.values.id }
-        })}>Brewer</a>
+        <a href={toPath(caseOf("BeerBrewer", { id: state.routeCurrent.value.id }))}
+        >Brewer</a>
       }
     </div>
   );
@@ -32,7 +31,7 @@ const beerComponentMap = {
 };
 
 export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.routeCurrent.id];
+  const Component = beerComponentMap[state.routeCurrent.case];
 
   return (
     <div>
@@ -40,7 +39,7 @@ export const Beer = ({ state, actions }) => {
       <ul>
         {state.beers.map(beer =>
           <li key={beer.id}>
-            <a href={toPath({ id: "BeerDetails", values: { id: beer.id } })}
+            <a href={toPath(caseOf("BeerDetails", { id: beer.id }))}
             >{beer.title}</a>
           </li>
         )}

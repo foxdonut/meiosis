@@ -1,5 +1,6 @@
 import m from "mithril";
 
+import { caseOf } from "routing-common/src/util";
 import { toPath } from "../util/router";
 
 const BeerBrewer = {
@@ -12,17 +13,14 @@ const beerDetailsComponentMap = {
 
 const BeerDetails = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = beerDetailsComponentMap[state.routeCurrent.id];
+    const Component = beerDetailsComponentMap[state.routeCurrent.case];
 
     return (
       m("div",
         m("p", state.beer),
         (Component && m(Component, { state, actions }) ||
           m("a", {
-            href: toPath({
-              id: "BeerBrewer",
-              values: { id: state.routeCurrent.values.id }
-            })
+            href: toPath(caseOf("BeerBrewer", { id: state.routeCurrent.value.id }))
           }, "Brewer")
         )
       )
@@ -37,7 +35,7 @@ const beerComponentMap = {
 
 export const Beer = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = beerComponentMap[state.routeCurrent.id];
+    const Component = beerComponentMap[state.routeCurrent.case];
 
     return (
       m("div",
@@ -46,10 +44,7 @@ export const Beer = {
           state.beers.map(beer =>
             m("li", { key: beer.id },
               m("a", {
-                href: toPath({
-                  id: "BeerDetails",
-                  values: { id: beer.id }
-                })
+                href: toPath(caseOf("BeerDetails", { id: beer.id }))
               }, beer.title)
             )
           )

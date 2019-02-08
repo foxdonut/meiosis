@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 
+import { caseOf } from "routing-common/src/util";
 import { toPath } from "../util/router";
 
 export class Coffee extends Component {
@@ -12,7 +13,7 @@ export class Coffee extends Component {
         <ul>
           {state.coffees && state.coffees.map(coffee =>
             <li key={coffee.id}>
-              <a href={toPath({ id: "CoffeeDetails", values: { id: coffee.id } })}
+              <a href={toPath(caseOf("CoffeeDetails", { id: coffee.id }))}
               >{coffee.title}</a>
             </li>
           )}

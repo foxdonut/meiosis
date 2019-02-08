@@ -1,4 +1,4 @@
-import { onChange } from "../util";
+import { T, caseOf, fold } from "../util";
 
 const coffees = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
@@ -11,23 +11,24 @@ const coffeeMap = coffees.reduce((result, next) => {
 }, {});
 
 export const coffee = {
-  service: (states, update) => {
-    onChange(states, ["routeRequest"], state => {
-      if (state.routeRequest.id === "Coffee") {
+  routing: {
+    Arriving: ({ route, update }) => T(route, fold({
+      Coffee: () => {
         setTimeout(() => update({
-          routeStatus: state.routeRequest,
+          routeCurrent: route,
+          routeStatus: caseOf("None"),
           coffees
         }), 500);
-      }
-      else if (state.routeRequest.id === "CoffeeDetails") {
-        const id = state.routeRequest.values.id;
+      },
+      CoffeeDetails: ({ id }) => {
         const coffee = coffeeMap[id].description;
 
         update({
-          routeStatus: state.routeRequest,
+          routeCurrent: route,
+          routeStatus: caseOf("None"),
           coffee
         });
       }
-    });
+    }))
   }
 };

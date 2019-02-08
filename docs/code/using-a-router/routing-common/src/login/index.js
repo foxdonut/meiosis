@@ -1,6 +1,6 @@
 import { PS } from "patchinko/explicit";
 
-import { T, caseOf, fold, get, onChange } from "../util";
+import { caseOf, get } from "../util";
 
 export const login = {
   actions: update => ({
@@ -21,38 +21,30 @@ export const login = {
     usernameLength: (get(state, ["login", "username"]) || "").length
   }),
 
-  service: (states, update) => {
-    onChange(states, ["routeStatus"], state => {
-      T(state.routeStatus, fold({
-        Leaving: route => T(route.from, fold({
-          Login: () => {
-            if (!(state.login.username || state.login.password)
-                || state.user
-                || confirm("You have unsaved data. Discard?"))
-            {
-              update({
-                routeStatus: caseOf("Arriving", route.to),
-                login: PS({
-                  message: null
-                })
-              });
-            }
-          }
-        })),
+  routing: {
+    Leaving: ({ route, state, update }) => {
+      if (!(state.login.username || state.login.password)
+          || state.user
+          || confirm("You have unsaved data. Discard?"))
+      {
+        update({
+          routeStatus: caseOf("Arriving", route.to),
+          login: PS({
+            message: null
+          })
+        });
+      }
+    },
 
-        Arriving: route => T(route, fold({
-          Login: () => {
-            update({
-              routeCurrent: route,
-              routeStatus: caseOf("None"),
-              login: PS({
-                username: "",
-                password: ""
-              })
-            });
-          }
-        }))
-      }));
-    });
+    Arriving: ({ route, update }) => {
+      update({
+        routeCurrent: route,
+        routeStatus: caseOf("None"),
+        login: PS({
+          username: "",
+          password: ""
+        })
+      });
+    }
   }
 };
