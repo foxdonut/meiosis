@@ -11,6 +11,7 @@ export const app = {
   }),
 
   actions: update => P({},
+    root.actions(update),
     login.actions(update),
     settings.actions(update)
   ),

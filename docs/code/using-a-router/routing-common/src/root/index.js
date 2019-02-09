@@ -6,6 +6,12 @@ import { beer } from "../beer";
 import { caseOf, fold, get, onChange } from "../util";
 
 export const root = {
+  actions: update => ({
+    navigateTo: (id, value) => update({
+      routeStatus: caseOf("Request", caseOf(id, value))
+    })
+  }),
+
   service: (states, update) => {
     const routing = {
       Login: login.routing,
