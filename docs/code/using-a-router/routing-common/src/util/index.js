@@ -1,6 +1,3 @@
-export const I = x => x;
-export const T = (x, f) => f(x);
-
 export const pipe = (...fns) => input => fns.reduce((value, fn) =>
   fn(value), input);
 
@@ -15,7 +12,7 @@ export const preventDefault = evt => {
 
 export const caseOf = (id, value) => ({ case: id, value });
 
-export const fold = handlers => caseObj =>
+export const fold = (caseObj, handlers) =>
   handlers[caseObj.case] &&
   handlers[caseObj.case](caseObj.value);
 

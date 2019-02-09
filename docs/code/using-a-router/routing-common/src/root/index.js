@@ -3,7 +3,7 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-import { T, caseOf, fold, get, onChange } from "../util";
+import { caseOf, fold, get, onChange } from "../util";
 
 export const root = {
   service: (states, update) => {
@@ -18,9 +18,9 @@ export const root = {
     };
 
     onChange(states, ["routeStatus"], state => {
-      T(state.routeStatus, fold({
+      fold(state.routeStatus, {
         Request: route => {
-          if (route.case !== state.routeCurrent.case) {
+          if (route.case !== state.routeCurrent.case || route.value !== state.routeCurrent.value) {
             update({
               routeStatus: caseOf("Leaving", {
                 from: state.routeCurrent,
@@ -56,7 +56,7 @@ export const root = {
             });
           }
         }
-      }));
+      });
     });
   }
 };
