@@ -4,7 +4,6 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { caseOf } from "routing-common/src/util";
 
 const update = flyd.stream();
 
@@ -33,5 +32,5 @@ Promise.resolve().then(app.initialState).then(initialState => {
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
   // Initial navigation
-  update({ routeStatus: caseOf("Request", caseOf("Home")) });
+  actions.navigateTo("Home");
 });

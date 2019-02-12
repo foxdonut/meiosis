@@ -1,25 +1,27 @@
-import { caseOf, fold } from "../util";
+import { coffeeDetails } from "../coffeeDetails";
+import { caseOf, get } from "../util";
 
-const coffees = [
-  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
-  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" }
-];
-
-const coffeeMap = coffees.reduce((result, next) => {
-  result[next.id] = next;
-  return result;
-}, {});
+const routing = {
+  CoffeeDetails: coffeeDetails.routing
+};
 
 export const coffee = {
   routing: {
-    Arriving: ({ route, update }) => fold(route, {
-      Coffee: () => {
-        setTimeout(() => update({
-          routeCurrent: route,
+    Arriving: ({ routes, state, update }) => {
+      setTimeout(() => {
+        update({
+          routeCurrent: routes,
           routeStatus: caseOf("None"),
-          coffees
-        }), 500);
-      },
+          coffees: coffeeDetails.coffees
+        });
+
+        const fn = get(routing, [get(routes[1], ["case"]), "Arriving"]);
+        if (fn) {
+          fn({ routes: routes.slice(1), state, update });
+        }
+      }, 500);
+    }
+    /*
       CoffeeDetails: ({ id }) => {
         const coffee = coffeeMap[id].description;
 
@@ -30,5 +32,6 @@ export const coffee = {
         });
       }
     })
+    */
   }
 };

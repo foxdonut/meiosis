@@ -6,46 +6,45 @@ import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
+import { get } from "routing-common/src/util";
+
 const componentMap = {
   Home,
   Login,
   Settings,
   Coffee,
-  CoffeeDetails: Coffee,
-  Beer,
-  BeerDetails: Beer,
-  BeerBrewer: Beer
+  Beer
 };
 
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const componentId = state.routeCurrent.case;
+    const componentId = get(state.routeCurrent[0], ["case"]);
     const Component = componentMap[componentId];
-    const isActive = tab => tab === Component ? "active" : "";
+    const isActive = tab => tab === componentId ? "active" : "";
 
     return (
       <div>
         <nav className="navbar navbar-default">
           <ul className="nav navbar-nav">
-            <li className={isActive(Home)}>
+            <li className={isActive("Home")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Home")}>Home</a>
             </li>
-            <li className={isActive(Login)}>
+            <li className={isActive("Login")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Login")}>Login</a>
             </li>
-            <li className={isActive(Settings)}>
+            <li className={isActive("Settings")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Settings")}>Settings</a>
             </li>
-            <li className={isActive(Coffee)}>
+            <li className={isActive("Coffee")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Coffee")}>Coffee</a>
             </li>
-            <li className={isActive(Beer)}>
+            <li className={isActive("Beer")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Beer")}>Beer</a>
             </li>

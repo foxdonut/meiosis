@@ -12,7 +12,7 @@ export const login = {
 
     login: username =>
       update({
-        routeStatus: caseOf("Request", caseOf("Home")),
+        routeStatus: caseOf("Request", [caseOf("Home")]),
         user: username
       })
   }),
@@ -22,13 +22,13 @@ export const login = {
   }),
 
   routing: {
-    Leaving: ({ route, state, update }) => {
+    Leaving: ({ transition, state, update }) => {
       if (!(state.login.username || state.login.password)
           || state.user
           || confirm("You have unsaved data. Discard?"))
       {
         update({
-          routeStatus: caseOf("Arriving", route.to),
+          routeStatus: caseOf("Arriving", transition.to),
           login: PS({
             message: null
           })
@@ -36,9 +36,9 @@ export const login = {
       }
     },
 
-    Arriving: ({ route, update }) => {
+    Arriving: ({ routes, update }) => {
       update({
-        routeCurrent: route,
+        routeCurrent: routes,
         routeStatus: caseOf("None"),
         login: PS({
           username: "",

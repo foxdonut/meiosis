@@ -11,7 +11,9 @@ export class Coffee extends Component {
           {state.coffees && state.coffees.map(coffee =>
             <li key={coffee.id}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("CoffeeDetails", { id: coffee.id })}
+                onClick={() =>
+                  actions.deepLink(state, "CoffeeDetails", { id: coffee.id })
+                }
               >{coffee.title}</a>
             </li>
           )}

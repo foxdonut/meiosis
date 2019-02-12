@@ -6,7 +6,7 @@ import { settings } from "../settings";
 
 export const app = {
   initialState: () => ({
-    routeCurrent: {},
+    routeCurrent: [],
     routeStatus: {}
   }),
 
