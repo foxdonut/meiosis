@@ -1,12 +1,10 @@
-import { coffeeDetails } from "../coffeeDetails";
+import { coffeeDetails, coffees } from "../coffeeDetails";
 
 export const coffee = {
   routing: {
     Arriving: ({ update }) => {
       setTimeout(() => {
-        update({
-          coffees: coffeeDetails.coffees
-        });
+        update({ coffees });
       }, 500);
     },
 

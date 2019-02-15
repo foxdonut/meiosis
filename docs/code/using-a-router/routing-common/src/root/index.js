@@ -27,7 +27,21 @@ const leaving = routing => ({ transition, state, update }) => {
   }
 };
 
-const validateArrive = () => null;
+const validateArrive = ({ routings, routes, state, update }) => {
+  const routing = get(routings, [get(head(routes), ["case"])]);
+  const fn = get(routing, ["ValidateArrive"]);
+
+  if (fn) {
+    const result = fn({ routes, state, update });
+    if (result) {
+      return result;
+    }
+  }
+  if (routing) {
+    return validateArrive({ routings: routing, routes: tail(routes), state, update });
+  }
+  return null;
+};
 
 const arriving = ({ routings, routes, state, update }) => {
   const routing = get(routings, [get(head(routes), ["case"])]);
@@ -83,7 +97,7 @@ export const root = {
         },
 
         ValidateArrive: routes => {
-          const result = validateArrive(routes);
+          const result = validateArrive({ routings, routes, state, update });
           if (result) {
             update(result);
           }

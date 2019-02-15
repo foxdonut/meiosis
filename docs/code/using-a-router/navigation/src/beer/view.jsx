@@ -1,35 +1,15 @@
 import React from "react";
 
-const BeerBrewer = ({ state }) => (
-  <p>{state.brewer}</p>
-);
+import { BeerDetails } from "../beerDetails/view";
+import { childRoutes, get, head } from "routing-common/src/util";
 
-const beerDetailsComponentMap = {
-  BeerBrewer
+const componentMap = {
+  BeerDetails
 };
 
-const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.routeCurrent.case];
-
-  return (
-    <div>
-      <p>{state.beer}</p>
-      {Component && <Component state={state} actions={actions}/> ||
-        <a href="javascript://"
-          onClick={() => actions.navigateTo("BeerBrewer", { id: state.routeCurrent.value.id })}
-        >Brewer</a>
-      }
-    </div>
-  );
-};
-
-const beerComponentMap = {
-  BeerDetails,
-  BeerBrewer: BeerDetails
-};
-
-export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.routeCurrent.case];
+export const Beer = ({ state, actions, routes }) => {
+  const componentId = get(head(routes.routeChildren), ["case"]);
+  const Component = componentMap[componentId];
 
   return (
     <div>
@@ -38,12 +18,12 @@ export const Beer = ({ state, actions }) => {
         {state.beers.map(beer =>
           <li key={beer.id}>
             <a href="javascript://"
-              onClick={() => actions.navigateTo("BeerDetails", { id: beer.id })}
+              onClick={() => actions.deepLink(routes.routeRelative, "BeerDetails", { id: beer.id })}
             >{beer.title}</a>
           </li>
         )}
       </ul>
-      {Component && <Component state={state} actions={actions}/>}
+      {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
     </div>
   );
 };

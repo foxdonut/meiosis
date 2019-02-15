@@ -1,0 +1,27 @@
+import React from "react";
+
+import { Brewer } from "../brewer/view";
+import { childRoutes, get, head, last } from "routing-common/src/util";
+
+const componentMap = {
+  Brewer
+};
+
+export const BeerDetails = ({ state, actions, routes }) => {
+  const componentId = get(head(routes.routeChildren), ["case"]);
+  const Component = componentMap[componentId];
+
+  return (
+    <div>
+      <p>{state.beer}</p>
+      <a href="javascript://"
+        onClick={
+          () => actions.deepLink(routes.routeRelative, "Brewer",
+            { id: last(routes.routeRelative).value.id }
+          )
+        }
+      >Brewer</a>
+      {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
+    </div>
+  );
+};
