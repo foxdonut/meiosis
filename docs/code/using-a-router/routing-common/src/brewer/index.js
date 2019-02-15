@@ -1,11 +1,8 @@
-import { head } from "../util";
-
 export const brewer = {
   routing: {
-    Arriving: ({ routes, update }) => {
-      const id = head(routes).value.id;
+    Arriving: ({ value, update }) => {
       update({
-        brewer: "Brewer of beer " + id
+        brewer: "Brewer of beer " + value.id
       });
     }
   }

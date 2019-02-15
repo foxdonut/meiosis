@@ -12,18 +12,32 @@ const routings = {
   Beer: beer.routing
 };
 
-const validateLeave = () => true;
+const validateLeave = ({ routings, routes, state, update }) => {
+  const routing = get(routings, [get(head(routes), ["case"])]);
+  const fn = get(routing, ["ValidateLeave"]);
 
-const leaving = routing => ({ transition, state, update }) => {
+  if (fn) {
+    const result = fn({ state, update, value: head(routes).value });
+    if (!result) {
+      return false;
+    }
+  }
+  if (routing) {
+    return validateLeave({ routings: routing, routes: tail(routes), state, update });
+  }
+  return true;
+};
+
+
+const leaving = ({ routings, routes, state, update }) => {
+  const routing = get(routings, [get(head(routes), ["case"])]);
   const fn = get(routing, ["Leaving"]);
 
   if (fn) {
-    fn({ transition, state, update });
+    fn({ state, update, value: head(routes).value });
   }
-  else {
-    update({
-      routeStatus: caseOf("Arriving", transition.to)
-    });
+  if (routing) {
+    leaving({ routings: routing, routes: tail(routes), state, update });
   }
 };
 
@@ -32,7 +46,7 @@ const validateArrive = ({ routings, routes, state, update }) => {
   const fn = get(routing, ["ValidateArrive"]);
 
   if (fn) {
-    const result = fn({ routes, state, update });
+    const result = fn({ state, update, value: head(routes).value });
     if (result) {
       return result;
     }
@@ -48,16 +62,11 @@ const arriving = ({ routings, routes, state, update }) => {
   const fn = get(routing, ["Arriving"]);
 
   if (fn) {
-    fn({ routes, state, update });
+    fn({ state, update, value: head(routes).value });
   }
   if (routing) {
     arriving({ routings: routing, routes: tail(routes), state, update });
   }
-
-  update({
-    routeCurrent: routes,
-    routeStatus: caseOf("None")
-  });
 };
 
 export const root = {
@@ -85,15 +94,18 @@ export const root = {
         },
 
         ValidateLeave: transition => {
-          if (validateLeave({ state, transition })) {
+          const result = validateLeave({ routings, routes: transition.from, state, update });
+          if (result) {
             update({ routeStatus: caseOf("Leaving", transition) });
           }
         },
 
         Leaving: transition => {
-          const routing = get(routings, [get(transition.from[0], ["case"])]);
-          leaving(routing);
-          update({ routeStatus: caseOf("ValidateArrive", transition.to) });
+          leaving({ routings, routes: transition.from, state, update });
+
+          update({
+            routeStatus: caseOf("ValidateArrive", transition.to)
+          });
         },
 
         ValidateArrive: routes => {
@@ -108,6 +120,7 @@ export const root = {
 
         Arriving: routes => {
           arriving({ routings, routes, state, update });
+
           update({
             routeCurrent: routes,
             routeStatus: caseOf("None")

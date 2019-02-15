@@ -1,5 +1,4 @@
 import { brewer } from "../brewer";
-import { head } from "../util";
 
 export const beers = [
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
@@ -13,10 +12,9 @@ const beerMap = beers.reduce((result, next) => {
 
 export const beerDetails = {
   routing: {
-    Arriving: ({ routes, update }) => {
-      const id = head(routes).value.id;
+    Arriving: ({ value, update }) => {
       update({
-        beer: beerMap[id].description
+        beer: beerMap[value.id].description
       });
     },
 
