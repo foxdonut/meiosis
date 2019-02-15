@@ -11,20 +11,14 @@ export const settings = {
   }),
 
   routing: {
-    Arriving: ({ routes, state, update }) => {
-      if (state.user) {
-        update({
-          routeCurrent: routes,
-          routeStatus: caseOf("None"),
-        });
-      }
-      else {
-        update({
-          routeStatus: caseOf("Request", [caseOf("Login")]),
+    ValidateArrive: ({ state }) => {
+      if (!state.user) {
+        return {
+          routeStatus: caseOf("ValidateArrive", [caseOf("Login")]),
           login: PS({
             message: "Please login."
           })
-        });
+        };
       }
     }
   }

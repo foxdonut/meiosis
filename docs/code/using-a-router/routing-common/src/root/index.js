@@ -3,13 +3,47 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-import { caseOf, fold, get, onChange } from "../util";
+import { caseOf, fold, get, head, tail, onChange } from "../util";
 
-const routing = {
+const routings = {
   Login: login.routing,
   Settings: settings.routing,
   Coffee: coffee.routing,
   Beer: beer.routing
+};
+
+const validateLeave = () => true;
+
+const leaving = routing => ({ transition, state, update }) => {
+  const fn = get(routing, ["Leaving"]);
+
+  if (fn) {
+    fn({ transition, state, update });
+  }
+  else {
+    update({
+      routeStatus: caseOf("Arriving", transition.to)
+    });
+  }
+};
+
+const validateArrive = () => null;
+
+const arriving = ({ routings, routes, state, update }) => {
+  const routing = get(routings, [get(head(routes), ["case"])]);
+  const fn = get(routing, ["Arriving"]);
+
+  if (fn) {
+    fn({ routes, state, update });
+  }
+  if (routing) {
+    arriving({ routings: routing, routes: tail(routes), state, update });
+  }
+
+  update({
+    routeCurrent: routes,
+    routeStatus: caseOf("None")
+  });
 };
 
 export const root = {
@@ -18,9 +52,9 @@ export const root = {
       routeStatus: caseOf("Request", [caseOf(id, value)])
     }),
 
-    deepLink: (state, id, value) => update({
+    deepLink: (routes, id, value) => update({
       routeStatus: caseOf("Request",
-        state.routeCurrent.concat([caseOf(id, value)]))
+        routes.concat([caseOf(id, value)]))
     })
   }),
 
@@ -29,38 +63,41 @@ export const root = {
       fold(state.routeStatus, {
         Request: routes => {
           update({
-            routeStatus: caseOf("Leaving", {
+            routeStatus: caseOf("ValidateLeave", {
               from: state.routeCurrent,
               to: routes
             })
           });
         },
 
-        Leaving: transition => {
-          const fn = get(routing, [get(transition.from[0], ["case"]), "Leaving"]);
+        ValidateLeave: transition => {
+          if (validateLeave({ state, transition })) {
+            update({ routeStatus: caseOf("Leaving", transition) });
+          }
+        },
 
-          if (fn) {
-            fn({ transition, state, update });
+        Leaving: transition => {
+          const routing = get(routings, [get(transition.from[0], ["case"])]);
+          leaving(routing);
+          update({ routeStatus: caseOf("ValidateArrive", transition.to) });
+        },
+
+        ValidateArrive: routes => {
+          const result = validateArrive(routes);
+          if (result) {
+            update(result);
           }
           else {
-            update({
-              routeStatus: caseOf("Arriving", transition.to)
-            });
+            update({ routeStatus: caseOf("Arriving", routes) });
           }
         },
 
         Arriving: routes => {
-          const fn = get(routing, [routes[0].case, "Arriving"]);
-
-          if (fn) {
-            fn({ routes, state, update });
-          }
-          else {
-            update({
-              routeCurrent: routes,
-              routeStatus: caseOf("None")
-            });
-          }
+          arriving({ routings, routes, state, update });
+          update({
+            routeCurrent: routes,
+            routeStatus: caseOf("None")
+          });
         }
       });
     });

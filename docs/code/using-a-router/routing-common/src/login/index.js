@@ -22,24 +22,22 @@ export const login = {
   }),
 
   routing: {
-    Leaving: ({ transition, state, update }) => {
-      if (!(state.login.username || state.login.password)
+    ValidateLeave: ({ state }) => {
+      return (!(state.login.username || state.login.password)
           || state.user
-          || confirm("You have unsaved data. Discard?"))
-      {
-        update({
-          routeStatus: caseOf("Arriving", transition.to),
-          login: PS({
-            message: null
-          })
-        });
-      }
+          || confirm("You have unsaved data. Discard?"));
     },
 
-    Arriving: ({ routes, update }) => {
+    Leaving: ({ update }) => {
       update({
-        routeCurrent: routes,
-        routeStatus: caseOf("None"),
+        login: PS({
+          message: null
+        })
+      });
+    },
+
+    Arriving: ({ update }) => {
+      update({
         login: PS({
           username: "",
           password: ""

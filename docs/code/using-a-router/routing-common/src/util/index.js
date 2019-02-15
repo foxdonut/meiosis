@@ -5,6 +5,12 @@ export const pipe = (...fns) => input => fns.reduce((value, fn) =>
 export const get = (object, path) =>
   path.reduce((obj, key) => obj == undefined ? undefined : obj[key], object);
 
+export const head = arr => arr[0];
+export const tail = arr => arr.slice(1);
+export const init = arr => arr.slice(0, arr.length - 1);
+export const last = arr => arr[arr.length - 1];
+export const append = (arr, element) => arr.slice().concat([element]);
+
 export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
@@ -26,3 +32,13 @@ export const onChange = (stream, path, handler) => {
     }
   });
 };
+
+export const currentRoutes = routes => ({
+  routeRelative: [],
+  routeChildren: routes
+});
+
+export const childRoutes = ({ routeRelative, routeChildren }) => ({
+  routeRelative: routeChildren.length > 0 ? append(routeRelative, head(routeChildren)) : routeRelative,
+  routeChildren: tail(routeChildren)
+});

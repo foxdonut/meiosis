@@ -6,7 +6,7 @@ import { Settings } from "../settings";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { get } from "routing-common/src/util";
+import { childRoutes, currentRoutes, get, head } from "routing-common/src/util";
 
 const componentMap = {
   Home,
@@ -19,8 +19,9 @@ const componentMap = {
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
+    const routes = currentRoutes(state.routeCurrent);
 
-    const componentId = get(state.routeCurrent[0], ["case"]);
+    const componentId = get(head(routes.routeChildren), ["case"]);
     const Component = componentMap[componentId];
     const isActive = tab => tab === componentId ? "active" : "";
 
@@ -50,7 +51,7 @@ export class Root extends Component {
             </li>
           </ul>
         </nav>
-        {Component && <Component state={state} actions={actions} />}
+        {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>
           <div className="modal">
