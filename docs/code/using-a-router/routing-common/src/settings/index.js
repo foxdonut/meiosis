@@ -11,15 +11,17 @@ export const settings = {
   }),
 
   routing: {
-    ValidateArrive: ({ state }) => {
+    ValidateArrive: ({ state, update }) => {
       if (!state.user) {
-        return {
+        update({
           routeNext: [caseOf("Login")],
           login: PS({
             message: "Please login."
           })
-        };
+        });
+        return false;
       }
+      return true;
     }
   }
 };

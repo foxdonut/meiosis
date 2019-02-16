@@ -47,14 +47,14 @@ const validateArrive = ({ routings, routes, state, update }) => {
 
   if (fn) {
     const result = fn({ state, update, value: head(routes).value });
-    if (result) {
-      return result;
+    if (!result) {
+      return false;
     }
   }
   if (routing) {
     return validateArrive({ routings: routing, routes: tail(routes), state, update });
   }
-  return null;
+  return true;
 };
 
 const arriving = ({ routings, routes, state, update }) => {
@@ -94,9 +94,6 @@ export const root = {
 
         const okArrive = validateArrive({ routings, routes, state, update });
         if (okArrive) {
-          update(okArrive);
-        }
-        else {
           arriving({ routings, routes, state, update });
 
           update({
