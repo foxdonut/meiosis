@@ -3,7 +3,7 @@ import { settings } from "../settings";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-import { caseOf, fold, get, head, tail, onChange } from "../util";
+import { caseOf, get, head, tail, onChange } from "../util";
 
 const routings = {
   Login: login.routing,
@@ -72,53 +72,31 @@ const arriving = ({ routings, routes, state, update }) => {
 export const root = {
   actions: update => ({
     navigateTo: (id, value) => update({
-      routeStatus: caseOf("Request", [caseOf(id, value)])
+      routeNext: [caseOf(id, value)]
     }),
 
     deepLink: (routes, id, value) => update({
-      routeStatus: caseOf("Request",
-        routes.concat([caseOf(id, value)]))
+      routeNext: routes.concat([caseOf(id, value)])
     })
   }),
 
   service: (states, update) => {
-    onChange(states, ["routeStatus"], state => {
-      fold(state.routeStatus, {
-        Request: routes => {
-          update({
-            routeStatus: caseOf("ValidateLeave", {
-              from: state.routeCurrent,
-              to: routes
-            })
-          });
-        },
+    onChange(states, ["routeNext"], state => {
+      const routes = state.routeNext;
+      const transition = {
+        from: state.routeCurrent,
+        to: routes
+      };
 
-        ValidateLeave: transition => {
-          const result = validateLeave({ routings, routes: transition.from, state, update });
-          if (result) {
-            update({ routeStatus: caseOf("Leaving", transition) });
-          }
-        },
+      const okLeave = validateLeave({ routings, routes: transition.from, state, update });
+      if (okLeave) {
+        leaving({ routings, routes: transition.from, state, update });
 
-        Leaving: transition => {
-          leaving({ routings, routes: transition.from, state, update });
-
-          update({
-            routeStatus: caseOf("ValidateArrive", transition.to)
-          });
-        },
-
-        ValidateArrive: routes => {
-          const result = validateArrive({ routings, routes, state, update });
-          if (result) {
-            update(result);
-          }
-          else {
-            update({ routeStatus: caseOf("Arriving", routes) });
-          }
-        },
-
-        Arriving: routes => {
+        const okArrive = validateArrive({ routings, routes, state, update });
+        if (okArrive) {
+          update(okArrive);
+        }
+        else {
           arriving({ routings, routes, state, update });
 
           update({
@@ -126,7 +104,7 @@ export const root = {
             routeStatus: caseOf("None")
           });
         }
-      });
+      }
     });
   }
 };

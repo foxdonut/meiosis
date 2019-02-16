@@ -5,7 +5,7 @@ import { caseOf } from "../util";
 export const settings = {
   actions: update => ({
     logout: () => update({
-      routeStatus: caseOf("Request", [caseOf("Home")]),
+      routeNext: [caseOf("Home")],
       user: null
     })
   }),
@@ -14,7 +14,7 @@ export const settings = {
     ValidateArrive: ({ state }) => {
       if (!state.user) {
         return {
-          routeStatus: caseOf("ValidateArrive", [caseOf("Login")]),
+          routeNext: [caseOf("Login")],
           login: PS({
             message: "Please login."
           })

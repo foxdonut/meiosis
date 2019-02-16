@@ -7,7 +7,7 @@ import { settings } from "../settings";
 export const app = {
   initialState: () => ({
     routeCurrent: [],
-    routeStatus: {}
+    routeNext: []
   }),
 
   actions: update => P({},

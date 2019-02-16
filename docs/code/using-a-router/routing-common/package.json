@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "meiosis docs example",
   "main": "src/index.js",
-  "scripts": {
-    "start": "webpack",
-    "watch": "webpack --progress --colors --watch"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/foxdonut/meiosis.git"

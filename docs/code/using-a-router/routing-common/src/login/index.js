@@ -12,7 +12,7 @@ export const login = {
 
     login: username =>
       update({
-        routeStatus: caseOf("Request", [caseOf("Home")]),
+        routeNext: [caseOf("Home")],
         user: username
       })
   }),
