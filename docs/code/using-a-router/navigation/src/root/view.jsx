@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
+import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
@@ -12,6 +13,7 @@ const componentMap = {
   Home,
   Login,
   Settings,
+  Tea,
   Coffee,
   Beer
 };
@@ -40,6 +42,10 @@ export class Root extends Component {
             <li className={isActive("Settings")}>
               <a href="javascript://"
                 onClick={() => actions.navigateTo("Settings")}>Settings</a>
+            </li>
+            <li className={isActive("Tea")}>
+              <a href="javascript://"
+                onClick={() => actions.navigateTo("Tea")}>Tea</a>
             </li>
             <li className={isActive("Coffee")}>
               <a href="javascript://"

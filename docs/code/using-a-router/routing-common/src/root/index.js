@@ -1,5 +1,6 @@
 import { login } from "../login";
 import { settings } from "../settings";
+import { tea } from "../tea";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
@@ -8,6 +9,7 @@ import { caseOf, get, head, tail, onChange } from "../util";
 const routings = {
   Login: login.routing,
   Settings: settings.routing,
+  Tea: tea.routing,
   Coffee: coffee.routing,
   Beer: beer.routing
 };
@@ -95,11 +97,7 @@ export const root = {
         const okArrive = validateArrive({ routings, routes, state, update });
         if (okArrive) {
           arriving({ routings, routes, state, update });
-
-          update({
-            routeCurrent: routes,
-            routeStatus: caseOf("None")
-          });
+          update({ routeCurrent: routes });
         }
       }
     });
