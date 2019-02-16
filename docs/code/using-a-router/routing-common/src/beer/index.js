@@ -1,4 +1,4 @@
-import { beverage, beverages } from "../beverage";
+import { beverage, beers } from "../beverage";
 
 export const beer = {
   routing: {
@@ -13,7 +13,7 @@ export const beer = {
       if (needToLoad) {
         setTimeout(() => update({
           pleaseWait: false,
-          beverages,
+          beverages: beers,
         }), 1000);
       }
     },
