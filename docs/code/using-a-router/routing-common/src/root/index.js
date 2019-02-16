@@ -59,15 +59,25 @@ const validateArrive = ({ routings, routes, state, update }) => {
   return true;
 };
 
-const arriving = ({ routings, routes, state, update }) => {
-  const routing = get(routings, [get(head(routes), ["case"])]);
+const arriving = ({ routings, transition, state, update }) => {
+  const from = head(transition.from);
+  const to = head(transition.to);
+  const routing = get(routings, [get(to, ["case"])]);
   const fn = get(routing, ["Arriving"]);
 
-  if (fn) {
-    fn({ state, update, value: head(routes).value });
+  if (fn && (from !== to)) {
+    fn({ state, update, value: to.value });
   }
   if (routing) {
-    arriving({ routings: routing, routes: tail(routes), state, update });
+    arriving({
+      routings: routing,
+      transition: {
+        from: tail(transition.from),
+        to: tail(transition.to)
+      },
+      state,
+      update
+    });
   }
 };
 
@@ -96,7 +106,7 @@ export const root = {
 
         const okArrive = validateArrive({ routings, routes, state, update });
         if (okArrive) {
-          arriving({ routings, routes, state, update });
+          arriving({ routings, transition, state, update });
           update({ routeCurrent: routes });
         }
       }
