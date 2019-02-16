@@ -1,10 +1,10 @@
 import React from "react";
 
-import { BeerDetails } from "../beerDetails/view";
+import { Beverage } from "../beverage/view";
 import { childRoutes, get, head } from "routing-common/src/util";
 
 const componentMap = {
-  BeerDetails
+  Beverage
 };
 
 export const Beer = ({ state, actions, routes }) => {
@@ -15,11 +15,12 @@ export const Beer = ({ state, actions, routes }) => {
     <div>
       <p>Beer Page</p>
       <ul>
-        {state.beers.map(beer =>
-          <li key={beer.id}>
+        {state.beverages.map(beverage =>
+          <li key={beverage.id}>
             <a href="javascript://"
-              onClick={() => actions.deepLink(routes.routeRelative, "BeerDetails", { id: beer.id })}
-            >{beer.title}</a>
+              onClick={() => actions.deepLink(routes.routeRelative,
+                "Beverage", { id: beverage.id })}
+            >{beverage.title}</a>
           </li>
         )}
       </ul>

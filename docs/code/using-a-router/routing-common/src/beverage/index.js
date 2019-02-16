@@ -1,20 +1,22 @@
 import { brewer } from "../brewer";
 
-export const beers = [
+export const beverages = [
+  { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
+  { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" },
   { id: "b1", title: "Beer 1", description: "Description of Beer 1" },
   { id: "b2", title: "Beer 2", description: "Description of Beer 2" }
 ];
 
-const beerMap = beers.reduce((result, next) => {
+const beverageMap = beverages.reduce((result, next) => {
   result[next.id] = next;
   return result;
 }, {});
 
-export const beerDetails = {
+export const beverage = {
   routing: {
     Arriving: ({ value, update }) => {
       update({
-        beer: beerMap[value.id].description
+        beverage: beverageMap[value.id].description
       });
     },
 

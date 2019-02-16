@@ -7,13 +7,13 @@ const componentMap = {
   Brewer
 };
 
-export const BeerDetails = ({ state, actions, routes }) => {
+export const Beverage = ({ state, actions, routes }) => {
   const componentId = get(head(routes.routeChildren), ["case"]);
   const Component = componentMap[componentId];
 
   return (
     <div>
-      <p>{state.beer}</p>
+      <p>{state.beverage}</p>
       <a href="javascript://"
         onClick={
           () => actions.deepLink(routes.routeRelative, "Brewer",

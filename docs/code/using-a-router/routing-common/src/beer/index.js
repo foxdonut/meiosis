@@ -1,23 +1,23 @@
-import { beerDetails, beers } from "../beerDetails";
+import { beverage, beverages } from "../beverage";
 
 export const beer = {
   routing: {
     Arriving: ({ state, update }) => {
-      const needToLoadBeers = !state.beers || state.beers.length === 0;
+      const needToLoad = !state.beverages || state.beverages.length === 0;
 
       update({
-        pleaseWait: needToLoadBeers,
-        beers: state.beers || []
+        pleaseWait: needToLoad,
+        beverages: state.beverages || []
       });
 
-      if (needToLoadBeers) {
+      if (needToLoad) {
         setTimeout(() => update({
           pleaseWait: false,
-          beers,
+          beverages,
         }), 1000);
       }
     },
 
-    BeerDetails: beerDetails.routing
+    Beverage: beverage.routing
   }
 };
