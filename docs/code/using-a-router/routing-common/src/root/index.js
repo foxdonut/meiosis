@@ -1,3 +1,5 @@
+import equal from "deep-equal";
+
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -30,16 +32,25 @@ const validateLeave = ({ routings, routes, state, update }) => {
   return true;
 };
 
-
-const leaving = ({ routings, routes, state, update }) => {
-  const routing = get(routings, [get(head(routes), ["case"])]);
+const leaving = ({ routings, transition, state, update }) => {
+  const from = head(transition.from);
+  const to = head(transition.to);
+  const routing = get(routings, [get(from, ["case"])]);
   const fn = get(routing, ["Leaving"]);
 
-  if (fn) {
-    fn({ state, update, value: head(routes).value });
+  if (fn && (!equal(from, to))) {
+    fn({ state, update, value: from.value });
   }
   if (routing) {
-    leaving({ routings: routing, routes: tail(routes), state, update });
+    leaving({
+      routings: routing,
+      transition: {
+        from: tail(transition.from),
+        to: tail(transition.to)
+      },
+      state,
+      update
+    });
   }
 };
 
@@ -65,7 +76,7 @@ const arriving = ({ routings, transition, state, update }) => {
   const routing = get(routings, [get(to, ["case"])]);
   const fn = get(routing, ["Arriving"]);
 
-  if (fn && (from !== to)) {
+  if (fn && (!equal(from, to))) {
     fn({ state, update, value: to.value });
   }
   if (routing) {
@@ -102,7 +113,7 @@ export const root = {
 
       const okLeave = validateLeave({ routings, routes: transition.from, state, update });
       if (okLeave) {
-        leaving({ routings, routes: transition.from, state, update });
+        leaving({ routings, transition, state, update });
 
         const okArrive = validateArrive({ routings, routes, state, update });
         if (okArrive) {
