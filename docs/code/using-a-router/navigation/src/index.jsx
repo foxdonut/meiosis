@@ -32,5 +32,5 @@ Promise.resolve().then(app.initialState).then(initialState => {
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
   // Initial navigation
-  actions.navigateTo("Home");
+  actions.navigateTo(["Home"]);
 });

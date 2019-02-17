@@ -33,27 +33,27 @@ export class Root extends Component {
           <ul className="nav navbar-nav">
             <li className={isActive("Home")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Home")}>Home</a>
+                onClick={() => actions.navigateTo(["Home"])}>Home</a>
             </li>
             <li className={isActive("Login")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Login")}>Login</a>
+                onClick={() => actions.navigateTo(["Login"])}>Login</a>
             </li>
             <li className={isActive("Settings")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Settings")}>Settings</a>
+                onClick={() => actions.navigateTo(["Settings"])}>Settings</a>
             </li>
             <li className={isActive("Tea")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Tea")}>Tea</a>
+                onClick={() => actions.navigateTo(["Tea"])}>Tea</a>
             </li>
             <li className={isActive("Coffee")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Coffee")}>Coffee</a>
+                onClick={() => actions.navigateTo(["Coffee", "Beverages"])}>Coffee</a>
             </li>
             <li className={isActive("Beer")}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo("Beer")}>Beer</a>
+                onClick={() => actions.navigateTo(["Beer", "Beverages"])}>Beer</a>
             </li>
           </ul>
         </nav>

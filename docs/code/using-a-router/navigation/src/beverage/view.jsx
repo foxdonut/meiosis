@@ -16,12 +16,17 @@ export const Beverage = ({ state, actions, routes }) => {
       <p>{state.beverage}</p>
       <a href="javascript://"
         onClick={
-          () => actions.deepLink(routes.routeRelative, "Brewer",
+          () => actions.navigateToChild(routes.routeRelative, "Brewer",
             { id: last(routes.routeRelative).value.id }
           )
         }
       >Brewer</a>
       {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
+      <div>
+        <a href="javascript://"
+          onClick={() => actions.navigateToSibling(routes.routeRelative, "Beverages")}
+        >Back to list</a>
+      </div>
     </div>
   );
 };

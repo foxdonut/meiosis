@@ -21,7 +21,7 @@ export class Tea extends Component {
             <li key={tea.id}>
               <a href="javascript://"
                 onClick={() =>
-                  actions.deepLink(routes.routeRelative, "TeaDetails", { id: tea.id })
+                  actions.navigateToChild(routes.routeRelative, "TeaDetails", { id: tea.id })
                 }
               >{tea.title}</a>
             </li>

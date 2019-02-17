@@ -6,7 +6,7 @@ import { tea } from "../tea";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-import { caseOf, get, head, tail, onChange } from "../util";
+import { caseOf, get, head, init, tail, onChange } from "../util";
 
 const routings = {
   Login: login.routing,
@@ -94,12 +94,20 @@ const arriving = ({ routings, transition, state, update }) => {
 
 export const root = {
   actions: update => ({
-    navigateTo: (id, value) => update({
-      routeNext: [caseOf(id, value)]
+    navigateTo: ids => update({
+      routeNext: ids.map(caseOf)
     }),
 
-    deepLink: (routes, id, value) => update({
+    navigateToChild: (routes, id, value) => update({
       routeNext: routes.concat([caseOf(id, value)])
+    }),
+
+    navigateToParent: routes => update({
+      routeNext: init(routes)
+    }),
+
+    navigateToSibling: (routes, id, value) => update({
+      routeNext: init(routes).concat([caseOf(id, value)])
     })
   }),
 
