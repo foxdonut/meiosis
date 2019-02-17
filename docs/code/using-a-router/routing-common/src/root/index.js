@@ -95,7 +95,7 @@ const arriving = ({ routings, transition, state, update }) => {
 export const root = {
   actions: update => ({
     navigateTo: ids => update({
-      routeNext: ids.map(caseOf)
+      routeNext: ids.map(id => caseOf(id))
     }),
 
     navigateToChild: (routes, id, value) => update({
