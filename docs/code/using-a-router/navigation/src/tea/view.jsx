@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { TeaDetails } from "../teaDetails/view";
+import { TeaDetails } from "../teaDetails";
 import { childRoutes, get, head } from "routing-common/src/util";
 
 const componentMap = {
@@ -15,7 +15,7 @@ export class Tea extends Component {
 
     return (
       <div>
-        <p>Tea Page</p>
+        <div>Tea Page</div>
         <ul>
           {state.teas && state.teas.map(tea =>
             <li key={tea.id}>

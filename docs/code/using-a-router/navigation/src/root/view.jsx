@@ -62,7 +62,7 @@ export class Root extends Component {
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>
           <div className="modal">
             <div className="box">
-              <p>Loading, please wait...</p>
+              <div>Loading, please wait...</div>
             </div>
           </div>
         </div>

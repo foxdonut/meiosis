@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Beverages } from "../beverages/view";
-import { Beverage } from "../beverage/view";
+import { Beverages } from "../beverages";
+import { Beverage } from "../beverage";
 import { childRoutes, get, head } from "routing-common/src/util";
 
 const componentMap = {
@@ -15,7 +15,7 @@ export const Coffee = ({ state, actions, routes }) => {
 
   return (
     <div>
-      <p>Coffee Page</p>
+      <div>Coffee Page</div>
       {
         Component &&
         <Component
