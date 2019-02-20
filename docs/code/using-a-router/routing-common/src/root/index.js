@@ -6,7 +6,7 @@ import { tea } from "../tea";
 import { coffee } from "../coffee";
 import { beer } from "../beer";
 
-import { caseOf, get, head, init, tail, onChange } from "../util";
+import { append, caseOf, get, head, init, tail, onChange } from "../util";
 
 const routings = {
   Login: login.routing,
@@ -99,7 +99,7 @@ export const root = {
     }),
 
     navigateToChild: (routes, id, value) => update({
-      routeNext: routes.concat([caseOf(id, value)])
+      routeNext: append(routes, caseOf(id, value))
     }),
 
     navigateToParent: routes => update({
@@ -107,7 +107,7 @@ export const root = {
     }),
 
     navigateToSibling: (routes, id, value) => update({
-      routeNext: init(routes).concat([caseOf(id, value)])
+      routeNext: append(init(routes), caseOf(id, value))
     })
   }),
 
