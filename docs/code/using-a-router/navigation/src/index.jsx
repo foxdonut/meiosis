@@ -4,6 +4,7 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
+import { Route } from "routing-common/src/root";
 
 const update = flyd.stream();
 
@@ -32,5 +33,5 @@ Promise.resolve().then(app.initialState).then(initialState => {
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
   // Initial navigation
-  actions.navigateTo(["Home"]);
+  actions.navigateTo(Route.Home());
 });

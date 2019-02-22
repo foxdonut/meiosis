@@ -1,4 +1,5 @@
 import equal from "deep-equal";
+import { maybe, tagged } from "stags";
 
 import { login } from "../login";
 import { settings } from "../settings";
@@ -7,6 +8,27 @@ import { coffee } from "../coffee";
 import { beer } from "../beer";
 
 import { append, caseOf, get, head, init, tail, onChange } from "../util";
+
+export const Route = tagged("Route")({
+  Loading: [],
+  Home: [],
+  Login: [],
+  Settings: [],
+  Tea: ["details"],  // TeaDetailsPage
+  Coffee: ["child"], // BeveragePage
+  Beer: ["child"]    // BeveragePage
+});
+
+export const Loaded = maybe("Loaded");
+
+export const TeaDetailsPage = maybe("TeaDetailsPage");
+
+export const BeveragePage = tagged("BeveragePage")({
+  Beverages: [],
+  Beverage: ["id", "brewer"]
+});
+
+export const Brewer = maybe("Brewer");
 
 const routings = {
   Login: login.routing,
@@ -94,8 +116,8 @@ const arriving = ({ routings, transition, state, update }) => {
 
 export const root = {
   actions: update => ({
-    navigateTo: ids => update({
-      routeNext: ids.map(id => caseOf(id))
+    navigateTo: route => update({
+      routeCurrent: route
     }),
 
     navigateToChild: (routes, id, value) => update({

@@ -1,13 +1,19 @@
 import { P } from "patchinko/explicit";
 
-import { root } from "../root";
+import { root, Loaded, Route } from "../root";
 import { login } from "../login";
 import { settings } from "../settings";
+import { tea } from "../tea";
 
 export const app = {
   initialState: () => ({
-    routeCurrent: [],
-    routeNext: []
+    routeCurrent: Route.Loading(),
+    routeNext: null,
+    login: {
+      username: "",
+      password: ""
+    },
+    teas: Loaded.N()
   }),
 
   actions: update => P({},
@@ -21,6 +27,7 @@ export const app = {
   ],
 
   services: [
-    root.service
+    root.service,
+    tea.service
   ]
 };

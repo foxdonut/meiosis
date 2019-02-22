@@ -1,33 +1,38 @@
 import React, { Component } from "react";
 
 import { TeaDetails } from "../teaDetails";
-import { childRoutes, get, head } from "routing-common/src/util";
-
-const componentMap = {
-  TeaDetails
-};
+import { Loaded, Route, TeaDetailsPage } from "routing-common/src/root";
 
 export class Tea extends Component {
   render() {
-    const { state, actions, routes } = this.props;
-    const componentId = get(head(routes.routeChildren), ["case"]);
-    const Component = componentMap[componentId];
+    const { state, actions } = this.props;
+    const route = state.routeCurrent;
 
     return (
       <div>
         <div>Tea Page</div>
         <ul>
-          {state.teas && state.teas.map(tea =>
-            <li key={tea.id}>
-              <a href="javascript://"
-                onClick={() =>
-                  actions.navigateToChild(routes.routeRelative, "TeaDetails", { id: tea.id })
-                }
-              >{tea.title}</a>
-            </li>
-          )}
+          {
+            Loaded.bifold(
+              () => <li>Loading...</li>,
+              teas => teas.map(tea => (
+                <li key={tea.id}>
+                  <a href="javascript://"
+                    onClick={() =>
+                      actions.navigateTo(Route.Tea({ details: TeaDetailsPage.Y({ id: tea.id }) }))
+                    }
+                  >{tea.title}</a>
+                </li>
+              ))
+            )(state.teas)
+          }
         </ul>
-        {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
+        {
+          TeaDetailsPage.bifold(
+            () => null,
+            () => <TeaDetails state={state} actions={actions} />
+          )(route.value.details)
+        }
       </div>
     );
   }

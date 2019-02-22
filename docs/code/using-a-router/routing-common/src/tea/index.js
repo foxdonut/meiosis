@@ -1,13 +1,20 @@
-import { teaDetails, teas } from "../teaDetails";
+import { foldCase } from "stags";
+
+import { teas } from "../teaDetails";
+import { Loaded, Route } from "../root";
+import { onChange } from "../util";
 
 export const tea = {
-  routing: {
-    Arriving: ({ update }) => {
-      setTimeout(() => {
-        update({ teas });
-      }, 500);
-    },
-
-    TeaDetails: teaDetails.routing
+  service: (states, update) => {
+    onChange(states, ["routeCurrent"], state => {
+      foldCase(Route.Tea({ details: null }))(
+        null,
+        () => {
+          setTimeout(() => {
+            update({ teas: Loaded.Y(teas) });
+          }, 500);
+        }
+      )(state.routeCurrent);
+    });
   }
 };

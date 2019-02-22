@@ -28,7 +28,8 @@
     "patchinko": "^4.1.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "routing-common": "../routing-common"
+    "routing-common": "../routing-common",
+    "stags": "^1.0.0-rc9"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
