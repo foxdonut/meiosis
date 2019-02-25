@@ -1,6 +1,7 @@
 import { PS } from "patchinko/explicit";
 
-import { caseOf, get } from "../util";
+import { Route } from "../root";
+import { get } from "../util";
 
 export const login = {
   actions: update => ({
@@ -12,7 +13,7 @@ export const login = {
 
     login: username =>
       update({
-        routeNext: [caseOf("Home")],
+        routeNext: Route.Home(),
         user: username
       })
   }),

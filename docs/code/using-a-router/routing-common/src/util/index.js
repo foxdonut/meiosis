@@ -16,8 +16,6 @@ export const preventDefault = evt => {
   return evt;
 };
 
-export const caseOf = (id, value) => ({ case: id, value });
-
 export const fold = (caseObj, handlers) =>
   handlers[caseObj.case] &&
   handlers[caseObj.case](caseObj.value);

@@ -1,11 +1,9 @@
 import { PS } from "patchinko/explicit";
 
-import { caseOf } from "../util";
-
 export const settings = {
   actions: update => ({
     logout: () => update({
-      routeNext: [caseOf("Home")],
+      //routeNext: [caseOf("Home")],
       user: null
     })
   }),
@@ -14,7 +12,7 @@ export const settings = {
     ValidateArrive: ({ state, update }) => {
       if (!state.user) {
         update({
-          routeNext: [caseOf("Login")],
+          //routeNext: [caseOf("Login")],
           login: PS({
             message: "Please login."
           })
