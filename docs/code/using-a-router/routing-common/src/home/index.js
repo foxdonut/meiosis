@@ -10,7 +10,7 @@ export const home = {
         null,
         ({ to }) => foldCase(Route.Home())(
           null,
-          () => update({ routeCurrent: Route.Home() })
+          () => update({ routeCurrent: to })
         )(to)
       )(state.routeCurrent);
     });

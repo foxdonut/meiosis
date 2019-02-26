@@ -5,6 +5,7 @@ import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
+import { teaDetails } from "../teaDetails";
 
 export const app = {
   initialState: () => ({
@@ -29,6 +30,7 @@ export const app = {
   services: [
     root.service,
     home.service,
-    tea.service
+    tea.service,
+    teaDetails.service
   ]
 };

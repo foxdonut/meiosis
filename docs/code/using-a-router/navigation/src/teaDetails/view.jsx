@@ -1,10 +1,12 @@
 import React from "react";
 
-export const TeaDetails = ({ state, actions, routes }) => (
+import { Route, TeaDetailsPage } from "routing-common/src/root";
+
+export const TeaDetails = ({ state, actions }) => (
   <div>
     <div>{state.tea}</div>
     <a href="javascript://"
-      onClick={() => actions.navigateToParent(routes.routeRelative)}
+      onClick={() => actions.navigateTo(Route.Tea({ details: TeaDetailsPage.N() }))}
     >Back to list</a>
   </div>
 );
