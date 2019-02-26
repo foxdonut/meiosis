@@ -16,10 +16,6 @@ export const preventDefault = evt => {
   return evt;
 };
 
-export const fold = (caseObj, handlers) =>
-  handlers[caseObj.case] &&
-  handlers[caseObj.case](caseObj.value);
-
 export const onChange = (stream, path, handler) => {
   let previous = null;
   stream.map(state => {
@@ -30,13 +26,3 @@ export const onChange = (stream, path, handler) => {
     }
   });
 };
-
-export const currentRoutes = routes => ({
-  routeRelative: [],
-  routeChildren: routes
-});
-
-export const childRoutes = ({ routeRelative, routeChildren }) => ({
-  routeRelative: routeChildren.length > 0 ? append(routeRelative, head(routeChildren)) : routeRelative,
-  routeChildren: tail(routeChildren)
-});

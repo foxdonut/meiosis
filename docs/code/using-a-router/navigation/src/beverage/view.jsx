@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Brewer } from "../brewer";
-import { childRoutes, get, head, last } from "routing-common/src/util";
+import { get, head, last } from "routing-common/src/util";
 
 const componentMap = {
   Brewer
@@ -19,7 +19,7 @@ export const Beverage = ({ state, actions, routes }) => {
           onClick={() => actions.navigateToChild(routes.routeRelative, "Brewer",
             { id: last(routes.routeRelative).value.id })}>Brewer</a>
       </div>
-      {Component && <Component state={state} actions={actions} routes={childRoutes(routes)}/>}
+      {Component && <Component state={state} actions={actions} />}
       <div>
         <a href="javascript://"
           onClick={() => actions.navigateToSibling(routes.routeRelative, "Beverages")}

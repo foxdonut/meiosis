@@ -2,7 +2,7 @@ import React from "react";
 
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
-import { childRoutes, get, head } from "routing-common/src/util";
+import { get, head } from "routing-common/src/util";
 
 const componentMap = {
   Beverages,
@@ -18,10 +18,7 @@ export const Beer = ({ state, actions, routes }) => {
       <div>Beer Page</div>
       {
         Component &&
-        <Component
-          state={state}
-          actions={actions}
-          routes={childRoutes(routes)} />
+        <Component state={state} actions={actions} />
       }
     </div>
   );
