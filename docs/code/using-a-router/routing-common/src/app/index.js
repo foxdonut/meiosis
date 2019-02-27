@@ -1,7 +1,6 @@
 import { P } from "patchinko/explicit";
 
 import { root, Loaded, Route } from "../root";
-import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -28,8 +27,8 @@ export const app = {
   ],
 
   services: [
-    root.service,
-    home.service,
+    login.service,
+    settings.service,
     tea.service,
     teaDetails.service
   ]

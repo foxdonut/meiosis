@@ -12,7 +12,6 @@ import { Route, TeaDetailsPage } from "routing-common/src/root";
 
 const componentMap = fold(Route)({
   Loading: () => () => (<div>Loading, please wait...</div>),
-  Transition: () => () => (<div>Loading, please wait...</div>),
   Home: () => Home,
   Login: () => Login,
   Settings: () => Settings,

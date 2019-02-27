@@ -1,25 +1,32 @@
 import { PS } from "patchinko/explicit";
+import { foldCase } from "stags";
+
+import { Route } from "../root";
+import { onChange } from "../util";
 
 export const settings = {
   actions: update => ({
     logout: () => update({
-      //routeNext: [caseOf("Home")],
+      routeCurrent: Route.Home(),
       user: null
     })
   }),
 
-  routing: {
-    ValidateArrive: ({ state, update }) => {
-      if (!state.user) {
-        update({
-          //routeNext: [caseOf("Login")],
-          login: PS({
-            message: "Please login."
-          })
-        });
-        return false;
-      }
-      return true;
-    }
+  service: (states, update) => {
+    onChange(states, ["routeCurrent"], state => {
+      foldCase(Route.Settings())(
+        null,
+        () => {
+          if (!state.user) {
+            update({
+              routeCurrent: Route.Login(),
+              login: PS({
+                message: "Please login."
+              })
+            });
+          }
+        }
+      )(state.routeCurrent);
+    });
   }
 };

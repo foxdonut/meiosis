@@ -1,7 +1,8 @@
 import { PS } from "patchinko/explicit";
+import { bifoldCase } from "stags";
 
 import { Route } from "../root";
-import { get } from "../util";
+import { get, onChange } from "../util";
 
 export const login = {
   actions: update => ({
@@ -13,7 +14,7 @@ export const login = {
 
     login: username =>
       update({
-        routeNext: Route.Home(),
+        routeCurrent: Route.Home(),
         user: username
       })
   }),
@@ -22,28 +23,26 @@ export const login = {
     usernameLength: (get(state, ["login", "username"]) || "").length
   }),
 
-  routing: {
-    ValidateLeave: ({ state }) => {
-      return (!(state.login.username || state.login.password)
-          || state.user
-          || confirm("You have unsaved data. Discard?"));
-    },
-
-    Leaving: ({ update }) => {
-      update({
-        login: PS({
-          message: null
-        })
-      });
-    },
-
-    Arriving: ({ update }) => {
-      update({
-        login: PS({
-          username: "",
-          password: ""
-        })
-      });
-    }
+  service: (states, update) => {
+    onChange(states, ["routeCurrent"], state => {
+      bifoldCase(Route.Login())(
+        () => {
+          update({ login: PS({ message: null }) });
+          /*
+          return (!(state.login.username || state.login.password)
+            || state.user
+            || confirm("You have unsaved data. Discard?"));
+          */
+        },
+        () => {
+          update({
+            login: PS({
+              username: "",
+              password: ""
+            })
+          });
+        }
+      )(state.routeCurrent);
+    });
   }
 };

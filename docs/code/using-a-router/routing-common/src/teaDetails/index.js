@@ -16,20 +16,17 @@ const teaMap = teas.reduce((result, next) => {
 export const teaDetails = {
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      foldCase(Route.Transition({ from: null, to: null }))(
+      foldCase(Route.Tea({ details: null }))(
         null,
-        ({ to }) => foldCase(Route.Tea({ details: null }))(
-          null,
-          ({ details }) => {
-            TeaDetailsPage.bifold(
-              () => null,
-              ({ id }) => {
-                const tea = teaMap[id].description;
-                update({ tea });
-              }
-            )(details);
-          }
-        )(to)
+        ({ details }) => {
+          TeaDetailsPage.bifold(
+            () => null,
+            ({ id }) => {
+              const tea = teaMap[id].description;
+              update({ tea });
+            }
+          )(details);
+        }
       )(state.routeCurrent);
     });
   }
