@@ -5,6 +5,8 @@ import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
+import { coffee } from "../coffee";
+import { beer } from "../beer";
 
 export const app = {
   initialState: () => ({
@@ -13,7 +15,8 @@ export const app = {
       username: "",
       password: ""
     },
-    teas: Loaded.N()
+    teas: Loaded.N(),
+    beverages: []
   }),
 
   actions: update => P({},
@@ -30,6 +33,8 @@ export const app = {
     login.service,
     settings.service,
     tea.service,
-    teaDetails.service
+    teaDetails.service,
+    coffee.service,
+    beer.service
   ]
 };

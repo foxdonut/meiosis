@@ -1,22 +1,18 @@
 import React from "react";
+import { fold } from "stags";
 
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
-import { get, head } from "routing-common/src/util";
+import { BeveragePage } from "routing-common/src/root";
 
-const componentMap = {
-  Beverages,
-  Beverage
-};
-
-export const Coffee = ({ state, actions, routes }) => {
-  const componentId = get(head(routes.routeChildren), ["case"]);
-  const Component = componentMap[componentId];
-
-  return (
-    <div>
-      <div>Coffee Page</div>
-      {Component && <Component state={state} actions={actions} />}
-    </div>
-  );
-};
+export const Coffee = ({ state, actions }) => (
+  <div>
+    <div>Coffee Page</div>
+    {
+      fold(BeveragePage)({
+        Beverages: () => <Beverages state={state} actions={actions} />,
+        Beverage: () => <Beverage state={state} actions={actions} />
+      })(state.routeCurrent.value.child)
+    }
+  </div>
+);

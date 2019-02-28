@@ -8,7 +8,7 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { Route, TeaDetailsPage } from "routing-common/src/root";
+import { BeveragePage, Route, TeaDetailsPage } from "routing-common/src/root";
 
 const componentMap = fold(Route)({
   Loading: () => () => (<div>Loading, please wait...</div>),
@@ -50,15 +50,15 @@ export class Root extends Component {
             </li>
             <li className={isActive(Coffee)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo(Route.Coffee())}>Coffee</a>
+                onClick={() => actions.navigateTo(Route.Coffee({ child: BeveragePage.Beverages() }))}>Coffee</a>
             </li>
             <li className={isActive(Beer)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo(Route.Beer())}>Beer</a>
+                onClick={() => actions.navigateTo(Route.Beer({ child: BeveragePage.Beverages() }))}>Beer</a>
             </li>
           </ul>
         </nav>
-        {Component && <Component state={state} actions={actions} />}
+        <Component state={state} actions={actions} />
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>
           <div className="modal">

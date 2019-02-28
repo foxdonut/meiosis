@@ -1,19 +1,26 @@
-import { beverage, beers } from "../beverage";
+import { foldCase } from "stags";
+
+import { beers } from "../beverage";
+import { Route } from "../root";
+import { onChange } from "../util";
 
 export const beer = {
-  routing: {
-    Arriving: ({ state, update }) => {
-      update({
-        pleaseWait: true,
-        beverages: state.beverages || []
-      });
+  service: (states, update) => {
+    onChange(states, ["routeCurrent"], state => {
+      foldCase(Route.Beer({ child: null }))(
+        null,
+        () => {
+          update({
+            pleaseWait: true,
+            beverages: state.beverages || []
+          });
 
-      setTimeout(() => update({
-        pleaseWait: false,
-        beverages: beers,
-      }), 1000);
-    },
-
-    Beverage: beverage.routing
+          setTimeout(() => update({
+            pleaseWait: false,
+            beverages: beers,
+          }), 1000);
+        }
+      )(state.routeCurrent);
+    });
   }
 };
