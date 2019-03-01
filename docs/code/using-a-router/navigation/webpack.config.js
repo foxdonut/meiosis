@@ -13,7 +13,7 @@ module.exports = {
     // This is so that routing-common can find peerDependencies
     alias: {
       "patchinko": path.resolve("./node_modules/patchinko"),
-      "stags": path.resolve("./node_modules/stags")
+      "static-tagged-union": path.resolve("./node_modules/static-tagged-union")
     }
   },
   module: {

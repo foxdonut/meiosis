@@ -1,27 +1,26 @@
-import { bifoldCase } from "stags";
+import { fold } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
-import { Loaded, Route } from "../root";
+import { Loaded } from "../root";
 import { onChange } from "../util";
 
 export const tea = {
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      bifoldCase(Route.Tea({ details: null }))(
-        () => {
-          update({ teas: Loaded.N() });
-        },
-        () => {
-          Loaded.bifold(
-            () => {
+      state.routeCurrent.forEach(fold({
+        Tea: () => {
+          fold({
+            N: () => {
               setTimeout(() => {
                 update({ teas: Loaded.Y(teas) });
               }, 500);
-            },
-            () => null
-          )(state.teas);
+            }
+          })(state.teas);
+        },
+        _: () => {
+          update({ teas: Loaded.N() });
         }
-      )(state.routeCurrent);
+      }));
     });
   }
 };

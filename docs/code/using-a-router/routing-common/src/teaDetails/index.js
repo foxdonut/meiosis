@@ -1,6 +1,5 @@
-import { foldCase } from "stags";
+import { fold } from "static-tagged-union";
 
-import { Route, TeaDetailsPage } from "../root";
 import { onChange } from "../util";
 
 export const teas = [
@@ -16,18 +15,12 @@ const teaMap = teas.reduce((result, next) => {
 export const teaDetails = {
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      foldCase(Route.Tea({ details: null }))(
-        null,
-        ({ details }) => {
-          TeaDetailsPage.bifold(
-            () => null,
-            ({ id }) => {
-              const tea = teaMap[id].description;
-              update({ tea });
-            }
-          )(details);
+      state.routeCurrent.forEach(fold({
+        TeaDetails: ({ id }) => {
+          const tea = teaMap[id].description;
+          update({ tea });
         }
-      )(state.routeCurrent);
+      }));
     });
   }
 };

@@ -1,15 +1,13 @@
-import { foldCase } from "stags";
+import { fold } from "static-tagged-union";
 
 import { beers } from "../beverage";
-import { Route } from "../root";
 import { onChange } from "../util";
 
 export const beer = {
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      foldCase(Route.Beer({ child: null }))(
-        null,
-        () => {
+      state.routeCurrent.forEach(fold({
+        Beer: () => {
           update({
             pleaseWait: true,
             beverages: state.beverages || []
@@ -20,7 +18,7 @@ export const beer = {
             beverages: beers,
           }), 1000);
         }
-      )(state.routeCurrent);
+      }));
     });
   }
 };

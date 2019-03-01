@@ -1,5 +1,5 @@
 import { PS } from "patchinko/explicit";
-import { bifoldCase } from "stags";
+import { fold } from "static-tagged-union";
 
 import { Route } from "../root";
 import { get, onChange } from "../util";
@@ -14,7 +14,7 @@ export const login = {
 
     login: username =>
       update({
-        routeCurrent: Route.Home(),
+        routeCurrent: [Route.Home()],
         user: username
       })
   }),
@@ -25,24 +25,24 @@ export const login = {
 
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      bifoldCase(Route.Login())(
-        () => {
-          update({ login: PS({ message: null }) });
-          /*
-          return (!(state.login.username || state.login.password)
-            || state.user
-            || confirm("You have unsaved data. Discard?"));
-          */
-        },
-        () => {
+      state.routeCurrent.forEach(fold({
+        Login: () => {
           update({
             login: PS({
               username: "",
               password: ""
             })
           });
+        },
+        _: () => {
+          update({ login: PS({ message: null }) });
+          /*
+          return (!(state.login.username || state.login.password)
+            || state.user
+            || confirm("You have unsaved data. Discard?"));
+          */
         }
-      )(state.routeCurrent);
+      }));
     });
   }
 };

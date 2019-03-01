@@ -21,7 +21,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "peerDependencies": {
     "patchinko": "4.x",
-    "stags": "*"
+    "static-tagged-union": "*"
   },
   "devDependencies": {
     "eslint": "^5.13.0"
