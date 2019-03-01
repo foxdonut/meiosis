@@ -1,3 +1,5 @@
+import { Maybe } from "static-tagged-union";
+
 export const pipe = (...fns) => input => fns.reduce((value, fn) =>
   fn(value), input);
 
@@ -14,6 +16,11 @@ export const append = (arr, element) => arr.slice().concat([element]);
 export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
+};
+
+export const contains = cx => list => {
+  const matches = list.filter(it => it.case === cx.case);
+  return matches.length > 0 ? Maybe.Y(matches[0].value) : Maybe.N();
 };
 
 export const onChange = (stream, path, handler) => {

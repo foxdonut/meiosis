@@ -1,14 +1,17 @@
-import { fold } from "static-tagged-union";
+import { bifold, fold } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
-import { Loaded } from "../root";
-import { onChange } from "../util";
+import { Loaded, Route } from "../root";
+import { contains, onChange } from "../util";
 
 export const tea = {
   service: (states, update) => {
     onChange(states, ["routeCurrent"], state => {
-      state.routeCurrent.forEach(fold({
-        Tea: () => {
+      bifold(
+        () => {
+          update({ teas: Loaded.N() });
+        },
+        () => {
           fold({
             N: () => {
               setTimeout(() => {
@@ -16,11 +19,8 @@ export const tea = {
               }, 500);
             }
           })(state.teas);
-        },
-        _: () => {
-          update({ teas: Loaded.N() });
         }
-      }));
+      )(contains(Route.Tea())(state.routeCurrent));
     });
   }
 };
