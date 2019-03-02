@@ -1,4 +1,3 @@
-import { PS } from "patchinko/explicit";
 import { fold } from "static-tagged-union";
 
 import { Route } from "../root";
@@ -18,10 +17,9 @@ export const settings = {
         Settings: () => {
           if (!state.user) {
             update({
-              routeCurrent: [Route.Login()],
-              login: PS({
+              routeCurrent: [Route.Login({
                 message: "Please login."
-              })
+              })]
             });
           }
         }

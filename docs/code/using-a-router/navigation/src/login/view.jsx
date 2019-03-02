@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 
-import { pipe, preventDefault } from "routing-common/src/util";
+import { get, pipe, preventDefault } from "routing-common/src/util";
 
 export class Login extends Component {
   render() {
-    const { state, actions } = this.props;
+    const { state, actions, routeIndex } = this.props;
+    const message = get(state, ["routeCurrent", routeIndex, "value", "message"]);
     return (
       <div>
-        {state.login.message ? <div>{state.login.message}</div> : null}
+        {message ? <div>{message}</div> : null}
         <div>Login</div>
         <form className="form">
           <div className="form-group">

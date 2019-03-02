@@ -5,6 +5,8 @@ export const T = (x, f) => f(x);
 export const pipe = (...fns) => input => fns.reduce((value, fn) =>
   fn(value), input);
 
+export const Tpipe = (x, ...fns) => T(x, pipe(...fns));
+
 // Using reduce, courtesy Barney Carroll (https://github.com/barneycarroll)
 export const get = (object, path) =>
   path.reduce((obj, key) => obj == undefined ? undefined : obj[key], object);

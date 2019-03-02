@@ -33,14 +33,6 @@ export const login = {
               password: ""
             })
           });
-        },
-        _: () => {
-          update({ login: PS({ message: null }) });
-          /*
-          return (!(state.login.username || state.login.password)
-            || state.user
-            || confirm("You have unsaved data. Discard?"));
-          */
         }
       }));
     });
