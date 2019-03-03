@@ -168,7 +168,7 @@ below:
 <a name="using_scan"></a>
 ### [Using `scan`](#using_scan)
 
-Now that have we streams, `map`, and `scan`, we can use themt to manage our application state.
+Now that have we streams, `map`, and `scan`, we can use them to manage our application state.
 Previously, we had:
 
 ```js
