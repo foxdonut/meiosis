@@ -4,8 +4,8 @@ import { get, pipe, preventDefault } from "routing-common/src/util";
 
 export class Login extends Component {
   render() {
-    const { state, actions, routeIndex } = this.props;
-    const message = get(state, ["routeCurrent", routeIndex, "value", "message"]);
+    const { state, actions, route } = this.props;
+    const message = get(route.local, ["value", "message"]);
     return (
       <div>
         {message ? <div>{message}</div> : null}

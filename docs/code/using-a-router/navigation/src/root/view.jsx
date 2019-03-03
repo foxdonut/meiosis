@@ -8,7 +8,7 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { Route } from "routing-common/src/root";
+import { Route, initRoute, childRoute } from "routing-common/src/root";
 
 const componentMap = fold({
   Loading: () => () => (<div>Loading, please wait...</div>),
@@ -23,9 +23,9 @@ const componentMap = fold({
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
-    const routeIndex = 0;
+    const route = initRoute(state.routeCurrent);
 
-    const Component = componentMap(state.routeCurrent[routeIndex]);
+    const Component = componentMap(route.child);
     const isActive = tab => tab === Component ? "active" : "";
 
     return (
@@ -58,7 +58,7 @@ export class Root extends Component {
             </li>
           </ul>
         </nav>
-        <Component state={state} actions={actions} routeIndex={routeIndex} />
+        <Component state={state} actions={actions} route={childRoute(route)} />
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>
           <div className="modal">

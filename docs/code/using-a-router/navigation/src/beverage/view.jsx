@@ -8,9 +8,9 @@ const componentMap = fold({
   Brewer: () => Brewer
 });
 
-export const Beverage = ({ state, actions, routeIndex }) => {
-  const Component = componentMap(state.routeCurrent[routeIndex + 1]);
-  const id = state.routeCurrent[routeIndex].value.id;
+export const Beverage = ({ state, actions, route }) => {
+  const Component = componentMap(route.child);
+  const id = route.local.value.id;
 
   return (
     <div>
@@ -18,18 +18,14 @@ export const Beverage = ({ state, actions, routeIndex }) => {
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateToChild(
-              state.routeCurrent, [Route.Brewer({ id })]
-            )
+            () => actions.navigateToChild(route, [Route.Brewer({ id })])
           }>Brewer</a>
       </div>
       {Component && <Component state={state} actions={actions} />}
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateToSibling(
-              state.routeCurrent, routeIndex, Route.Beverages()
-            )
+            () => actions.navigateToSibling(route, [Route.Beverages()])
           }
         >Back to list</a>
       </div>

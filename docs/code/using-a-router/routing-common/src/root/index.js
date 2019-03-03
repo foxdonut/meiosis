@@ -14,6 +14,23 @@ export const Route = TaggedUnion([
   "Brewer"
 ]);
 
+export const initRoute = routes => ({
+  routes,
+  index: -1,
+  local: null,
+  child: routes[0]
+});
+
+export const childRoute = route => {
+  const index = route.index + 1;
+  return {
+    routes: route.routes,
+    index,
+    local: route.routes[index],
+    child: route.routes[index + 1]
+  };
+};
+
 export const Loaded = Maybe;
 
 export const root = {
@@ -22,16 +39,16 @@ export const root = {
       routeCurrent: routeList
     }),
 
-    navigateToParent: (currentRoutes, index) => update({
-      routeCurrent: currentRoutes.slice(0, index)
+    navigateToParent: route => update({
+      routeCurrent: route.routes.slice(0, route.index)
     }),
 
-    navigateToChild: (currentRoutes, routeList) => update({
-      routeCurrent: currentRoutes.concat(routeList)
+    navigateToChild: (route, routeList) => update({
+      routeCurrent: route.routes.concat(routeList)
     }),
 
-    navigateToSibling: (currentRoutes, index, routeList) => update({
-      routeCurrent: currentRoutes.slice(0, index).concat(routeList)
+    navigateToSibling: (route, routeList) => update({
+      routeCurrent: route.routes.slice(0, route.index).concat(routeList)
     })
   })
 };
