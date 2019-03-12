@@ -11,7 +11,9 @@ export const tea = {
       contains(Route.Tea()),
       bifold(
         () => {
-          update({ teas: Loaded.N() });
+          fold({
+            Y: () => update({ teas: Loaded.N() })
+          })(state.teas);
         },
         () => {
           fold({

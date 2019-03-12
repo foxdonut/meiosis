@@ -11,7 +11,9 @@ export const beer = {
       contains(Route.Beer()),
       bifold(
         () => {
-          update({ beers: Loaded.N() });
+          fold({
+            Y: () => update({ beers: Loaded.N() })
+          })(state.beers);
         },
         () => fold({
           N: () => {
