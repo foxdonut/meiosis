@@ -2,7 +2,7 @@ import { PS } from "patchinko/explicit";
 import { fold } from "static-tagged-union";
 
 import { Route } from "../root";
-import { get, onChange } from "../util";
+import { get } from "../util";
 
 export const login = {
   actions: update => ({
@@ -23,11 +23,12 @@ export const login = {
     usernameLength: (get(state, ["login", "username"]) || "").length
   }),
 
-  service: (states, update) => {
-    onChange(states, ["routeCurrent"], state => {
+  service: (state, update) => {
+    if (state.arriving) {
       state.routeCurrent.forEach(fold({
         Login: () => {
           update({
+            arriving: false,
             login: PS({
               username: "",
               password: ""
@@ -35,6 +36,6 @@ export const login = {
           });
         }
       }));
-    });
+    }
   }
 };

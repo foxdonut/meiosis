@@ -1,17 +1,16 @@
 import { fold } from "static-tagged-union";
 
-import { onChange } from "../util";
-
 export const brewer = {
-  service: (states, update) => {
-    onChange(states, ["routeCurrent"], state => {
+  service: (state, update) => {
+    if (state.arriving) {
       state.routeCurrent.forEach(fold({
         Brewer: ({ id }) => {
           update({
+            arriving: false,
             brewer: `Brewer of beverage ${id}`
           });
         }
       }));
-    });
+    }
   }
 };

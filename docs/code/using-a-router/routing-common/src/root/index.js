@@ -36,19 +36,30 @@ export const Loaded = Maybe;
 export const root = {
   actions: update => ({
     navigateTo: routeList => update({
-      routeCurrent: routeList
+      routeRequest: routeList
     }),
 
     navigateToParent: route => update({
-      routeCurrent: route.routes.slice(0, route.index)
+      routeRequest: route.routes.slice(0, route.index)
     }),
 
     navigateToChild: (route, routeList) => update({
-      routeCurrent: route.routes.concat(routeList)
+      routeRequest: route.routes.concat(routeList)
     }),
 
     navigateToSibling: (route, routeList) => update({
-      routeCurrent: route.routes.slice(0, route.index).concat(routeList)
+      routeRequest: route.routes.slice(0, route.index).concat(routeList)
     })
-  })
+  }),
+
+  computed: state => {
+    if (state.routeRequest) {
+      return ({
+        routeRequest: null,
+        routePrevious: state.routeCurrent,
+        routeCurrent: state.routeRequest,
+        arriving: true
+      });
+    }
+  }
 };

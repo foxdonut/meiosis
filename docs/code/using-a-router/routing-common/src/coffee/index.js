@@ -1,35 +1,35 @@
-import { bifold, fold } from "static-tagged-union";
+import { map } from "static-tagged-union";
 
 import { coffees } from "../beverage";
 import { Loaded, Route } from "../root";
-import { Tpipe, contains, onChange } from "../util";
+import { Tpipe, contains } from "../util";
 
 export const coffee = {
-  service: (states, update) => {
-    onChange(states, ["routeCurrent"], state => Tpipe(
-      state.routeCurrent,
-      contains(Route.Coffee()),
-      bifold(
-        () => {
-          fold({
-            Y: () => update({ coffees: Loaded.N() })
-          })(state.coffees);
-        },
-        () => fold({
-          N: () => {
-            update({
-              pleaseWait: true,
-              beverages: state.beverages || []
-            });
+  service: (state, update) => {
+    if (state.arriving) {
+      Tpipe(
+        state.routeCurrent,
+        contains(Route.Coffee()),
+        map(() => {
+          update({
+            arriving: false,
+            pleaseWait: true,
+            beverages: state.beverages || []
+          });
 
-            setTimeout(() => update({
-              pleaseWait: false,
-              beverages: coffees,
-              coffees: Loaded.Y()
-            }), 1000);
-          }
-        })(state.coffees)
-      )
-    ));
+          setTimeout(() => update({
+            pleaseWait: false,
+            beverages: coffees,
+            coffees: Loaded.Y()
+          }), 1000);
+        })
+      );
+    }
+
+    Tpipe(
+      state.routePrevious,
+      contains(Route.Coffee()),
+      map(() => update({ routePrevious: null, coffees: Loaded.N() }))
+    );
   }
 };

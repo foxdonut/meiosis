@@ -23,17 +23,6 @@ export const preventDefault = evt => {
 };
 
 export const contains = cx => list => {
-  const matches = list.filter(it => it.case === cx.case);
-  return matches.length > 0 ? Maybe.Y(matches[0].value) : Maybe.N();
-};
-
-export const onChange = (stream, path, handler) => {
-  let previous = null;
-  stream.map(state => {
-    const value = get(state, path);
-    if (value != null && value !== previous) {
-      previous = value;
-      handler(state);
-    }
-  });
+  const matches = list && list.filter(it => (it.case === cx.case) && (it.value === cx.value));
+  return (matches && matches.length > 0) ? Maybe.Y(matches[0].value) : Maybe.N();
 };

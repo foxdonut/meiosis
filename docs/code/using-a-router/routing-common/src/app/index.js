@@ -28,6 +28,7 @@ export const app = {
   ),
 
   computed: [
+    root.computed,
     login.computed
   ],
 
