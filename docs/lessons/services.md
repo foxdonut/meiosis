@@ -5,10 +5,10 @@
 ## Services
 
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll
-look at James' version using streams, another version using
+look at James' version using streams, and another version using a separate computed state function
+and a service trigger. For the latter, we'll use two variants, one with
 [Barney Carroll](https://barneycarroll.com)'s
-[Patchinko](https://github.com/barneycarroll/patchinko), and finally a version that uses
-function patches.
+[Patchinko](https://github.com/barneycarroll/patchinko), and one with function patches.
 
 James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
@@ -132,15 +132,29 @@ The complete example is below.
 #### Flexibility
 
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
-wish. Now, let's look at a slightly different approach, using Patchinko.
+wish.
 
-<a name="using_patchinko"></a>
-### [Using Patchinko](#using_patchinko)
+<a name="using_computed_and_services"></a>
+### [Using Computed State and Services](#using_computed_and_services)
 
-An alternative to emitting patches from services is to define a service as a function that
-receives the current state as a parameter and returns a patch. Then, these service functions
-can be combined together with `reduce` to produce a single service function that receives
-the current state and produces an updated state.
+An alternative to emitting patches from services is to define _computed_ state as a function
+that receives the current state as a parameter and returns a patch. Then, these computed
+functions can be combined together with `reduce` to produce a single computed function that
+receives the current state and produces an updated state containing the computed properties.
+
+Computed state runs _synchronously_. For asynchronous changes, we define a `service` function
+that receives the current state and the `update` stream, and decides whether to call `update()`.
+Our service structure is thus:
+
+```javascript
+{
+  initial: state => initialState,
+  computed: state => patch,
+  service: (state, update) => { /* call update() based on state */ }
+}
+```
+
+#### With Patchinko
 
 In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we
 looked at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
@@ -152,49 +166,81 @@ as our accumulator:
 const states = m.stream.scan( P, initialState(), update );
 ```
 
-Instead of a `start` function, we'll use a `service` function to which we'll pass the latest
-state from the Meiosis `states` stream. The `service` function returns a patch:
+Instead of a `start` function, we'll use a `computed` function to which we'll pass the latest
+state from the Meiosis `states` stream. The `computed` function returns a patch:
 
 ```javascript
 {
-  initial: state => initialState,
-  service: state => patch
+  computed: state => patch
 }
 ```
 
 Before, we took a **stream** of states and we returned a **stream** of patches; now, we just
 take a state and return a patch.
 
-We'll taking our array of services and call `service` on each one:
+We'll assemble the `computed` functions into an array:
 
 ```javascript
-services.map(s => s.service)
+const computes = [ f1, f2, f3 ];
 ```
 
-This gives us an array of functions:
-
-```javascript
-[ f1, f2, f3 ]
-```
-
-Each function `f` takes the state and returns a patch to update the model. Thus calling `f(state)`
+Each function `f` takes the state and returns a patch to update the state. Thus calling `f(state)`
 gives us a patch. To apply the patch, we call `P(state, f(state))`. Finally, to combine the array
 of functions into a single function, we can use `reduce`:
 
 ```javascript
-// Top-level service function
-const service = state => services
-  .map(s => s.service)
-  .reduce((x, f) => P(x, f(x)), state);
+// Top-level computed function
+const computed = state =>
+  computes.reduce((x, f) => P(x, f(x)), state);
 ```
 
-This gives us a single top-level `service` function that takes the state, calls all services,
-and produces the updated state. We can just `map` this service function to our stream of
-states:
+This gives us a single top-level `computed` function that takes the state, calls all computed
+functions, and produces the updated state. We can just `map` this computed function to our
+stream of states:
 
 ```javascript
 const states = m.stream.scan( P, initialState(), update )
-  .map(service);
+  .map(computed);
+```
+
+Computed functions are for _synchronous_ calculations based on the state. For asynchronous
+changes, such as loading data from a server, we'll separately define _services_ as functions
+that receive the current state and the `update` stream, and call `update` as they see fit:
+
+```javascript
+service: (state, update) => {
+  // determine whether to call update() based on state
+}
+```
+
+As in the previous section, we have to be careful about infinite loops. Indeed, when the
+service calls `update()`, the service will be triggered again.
+
+In this example, the `LocalStorageService` doesn't call `update`, so it's not an issue:
+
+```javascript
+service(state, _update) {
+  T(
+    state,
+    R.pipe(
+      R.pick(["boxes"]),
+      x => localStorage.setItem("v1", JSON.stringify(x))
+    )
+  );
+}
+```
+
+You can see another example of services in the
+[Next-Action-Predicate section of the SAM Pattern](sam-pattern.html#next_action_predicate).
+There, the function has a condition which ensures not to keep calling `update()` in an
+infinite loop.
+
+After assembling service functions into an array, wiring them up is simply a matter of
+calling them every time the state changes:
+
+```javascript
+states.map(state =>
+  services.forEach(service => service(state, update)));
 ```
 
 Finally, as before we use our `states` stream to render the view:
@@ -207,14 +253,7 @@ You will find the complete example below.
 
 @flems code/services/index-patchinko.js,app.html mithril,mithril-stream,ramda,bss,patchinko 700 60
 
-#### No Worries about Infinite Loops
-
-Note that we no longer need `dropRepeats`, because we are not feeding patches back into the
-`update` stream. Instead, we have a separate `states` stream, so we don't need to worry about
-creating an infinite loop.
-
-<a name="using_function_patches"></a>
-### [Using Function Patches](#using_function_patches)
+#### With Function Patches
 
 We can also use this approach with function patches instead of Patchinko. Remember that with
 function patches, we produce functions `f(state) => updatedState` instead of object patches,
@@ -231,22 +270,17 @@ Our services have the same structure as before, namely:
 ```javascript
 {
   initial: state => initialState,
-  service: state => patch
+  computed: state => patch,
+  service: (state, update) => { /* call update() based on state */ }
 }
 ```
 
 The only difference is that `patch` is now a function instead of an object.
 
-Again we take the array of services and call `service` on each one:
+Again we have an array of functions for computed state:
 
 ```javascript
-services.map(s => s.service)
-```
-
-This still gives us an array of functions:
-
-```javascript
-[ f1, f2, f3 ]
+const computes = [ f1, f2, f3 ];
 ```
 
 But now each function `f` takes the state and returns a **function** patch to update the model.
@@ -254,10 +288,9 @@ When we call `f(state)`, we get a function. To apply the patch, we just call the
 `f(state)(state)`. Finally, we use `reduce` to write our top-level `service` function:
 
 ```javascript
-// Top-level service function
-const service = state => services
-  .map(s => s.service)
-  .reduce((x, f) => f(x)(x), state);
+// Top-level computed function
+const computed = state =>
+  computes.reduce((x, f) => f(x)(x), state);
 ```
 
 As before, we `map` our service function to the `states` stream, and use the `states` stream

@@ -93,7 +93,7 @@ const StatsService = {
       .map(K(0))
       .reduce(R.merge, {});
   },
-  service: R.pipe(
+  computed: R.pipe(
     x => x.boxes,
     R.countBy(I),
     R.objOf("stats"),
@@ -109,7 +109,7 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  service(state) {
+  service(state, _update) {
     T(
       state,
       R.pipe(
@@ -117,7 +117,6 @@ const LocalStorageService = {
         x => localStorage.setItem("v1", JSON.stringify(x))
       )
     );
-    return I;
   }
 };
 
@@ -127,7 +126,7 @@ const DescriptionService = {
       description: ""
     };
   },
-  service: R.pipe(
+  computed: R.pipe(
     x => x.stats,
     R.toPairs,
     R.groupBy(R.last),
@@ -142,10 +141,19 @@ const DescriptionService = {
   )
 };
 
+const initial = [
+  LocalStorageService.initial,
+  StatsService.initial,
+  DescriptionService.initial
+];
+
+const computes = [
+  StatsService.computed,
+  DescriptionService.computed
+];
+
 const services = [
-  LocalStorageService,
-  StatsService,
-  DescriptionService
+  LocalStorageService.service
 ];
 
 const initialState = () => {
@@ -159,18 +167,20 @@ const initialState = () => {
     };
   return Object.assign({},
     state,
-    services
-      .map(s => s.initial(state))
+    initial
+      .map(fn => fn(state))
       .reduce(R.merge, {})
   );
 };
 
-const service = state => services
-  .map(s => s.service)
-  .reduce((x, f) => f(x)(x), state);
+const computed = state =>
+  computes.reduce((x, f) => f(x)(x), state);
 
 const update = m.stream();
 const states = m.stream.scan( T, initialState(), update )
-  .map(service);
+  .map(computed);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));
+
+states.map(state =>
+  services.forEach(service => service(state, update)));

@@ -4,7 +4,9 @@
 
 ## SAM Pattern
 
-The SAM (State-Action-Model) Pattern is a way to structure code into these parts:
+The [SAM (State-Action-Model) Pattern](https://sam.js.org), by
+[Jean-Jacques Dubray](https://www.ebpml.org/about),
+is a way to structure code into these parts:
 
 - the Model, which contains the application state
 - Actions, which _present_ values to the Model. The Model accepts (or partially accepts, or
@@ -14,11 +16,15 @@ even rejects) the presented values and modifies the application state accordingl
 - the Next-Action-Predicate (nap), which looks at the application state and decides whether
 to automatically trigger another Action.
 
-You can find more details and explanations on the [SAM web site](http://sam.js.org).
+You can find more details and explanations on the [SAM web site](https://sam.js.org).
 
-As you can see, the basis of Meiosis is similar to SAM, but SAM goes further with
-the concept of _presenting_ values and _accepting_ or _rejecting_ them; the State function
-to produce the application state for the View; and the Next-Action-Predicate.
+As you can see, the basis of Meiosis is similar to SAM. The SAM State corresponds to
+Computed properties, and the Next-Action-Predicate corresponds to services, as we saw in
+[Using Computed State and Services](#using_computed_and_services).
+
+SAM goes one step further with the concept of _presenting_ values and _accepting_ or
+_rejecting_ them. This is essentially the _accumulator_ function of Meiosis, but it does
+not automatically apply incoming patches.
 
 Let's see how we can use the Meiosis pattern as a foundation and augment it to add these
 concepts of the SAM pattern.
@@ -38,7 +44,7 @@ const states = flyd.scan(P, app.initialState(), update);
 const states = flyd.scan((x, f) => f(x), app.initialState(), update);
 ```
 
-Actions send patches in the form of objects or functions to the `update` stream. Using `scan`26GI
+Actions send patches in the form of objects or functions to the `update` stream. Using `scan`
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.
 
