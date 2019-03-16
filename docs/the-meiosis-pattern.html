@@ -47,6 +47,25 @@ const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);
 
 const actions = app.actions(update);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
+<p>Optionally, add <a href="#using_computed_and_services">Computed State and Services</a>:</p>
+<pre><code class="language-javascript">// Using Patchinko:
+const computed = state =&gt;
+  computes.reduce((x, f) =&gt; P(x, f(x)), state);
+
+const states = flyd.scan(P, app.initialState(), update)
+  .map(computed);
+
+states.map(state =&gt;
+  services.forEach(service =&gt; service(state, update)));
+
+// Using Function Patches:
+const computed = state =&gt;
+  computes.reduce((x, f) =&gt; f(x)(x), state);
+
+const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);
+
+states.map(state =&gt;
+  services.forEach(service =&gt; service(state, update)));</code></pre>
 <p><a name="using_mithril"></a></p>
 <h3><a href="#using_mithril">Using Mithril</a></h3><pre><code class="language-js">const App = {
   view: function({ attrs: { state, actions } }) {

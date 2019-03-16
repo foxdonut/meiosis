@@ -12,7 +12,9 @@
     <script src="prism.js" type="text/javascript"></script>
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
     <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
-<h2>SAM Pattern</h2><p>The SAM (State-Action-Model) Pattern is a way to structure code into these parts:</p>
+<h2>SAM Pattern</h2><p>The <a href="https://sam.js.org">SAM (State-Action-Model) Pattern</a>, by
+<a href="https://www.ebpml.org/about">Jean-Jacques Dubray</a>,
+is a way to structure code into these parts:</p>
 <ul>
 <li>the Model, which contains the application state</li>
 <li>Actions, which <em>present</em> values to the Model. The Model accepts (or partially accepts, or
@@ -22,24 +24,33 @@ even rejects) the presented values and modifies the application state accordingl
 <li>the Next-Action-Predicate (nap), which looks at the application state and decides whether
 to automatically trigger another Action.</li>
 </ul>
-<p>You can find more details and explanations on the <a href="http://sam.js.org">SAM web site</a>.</p>
-<p>As you can see, the basis of Meiosis is similar to SAM, but SAM goes further with
-the concept of <em>presenting</em> values and <em>accepting</em> or <em>rejecting</em> them; the State function
-to produce the application state for the View; and the Next-Action-Predicate.</p>
+<p>You can find more details and explanations on the <a href="https://sam.js.org">SAM web site</a>.</p>
+<p>As you can see, the basis of Meiosis is similar to SAM. The SAM State corresponds to
+Computed properties, and the Next-Action-Predicate corresponds to services, as we saw in
+<a href="#using_computed_and_services">Using Computed State and Services</a>.</p>
+<p>SAM goes one step further with the concept of <em>presenting</em> values and <em>accepting</em> or
+<em>rejecting</em> them. This is essentially the <em>accumulator</em> function of Meiosis, but it does
+not automatically apply incoming patches.</p>
 <p>Let&#39;s see how we can use the Meiosis pattern as a foundation and augment it to add these
 concepts of the SAM pattern.</p>
 <p><a name="meiosis_pattern"></a></p>
 <h3><a href="#meiosis_pattern">Meiosis Pattern</a></h3><p>Remember the fundamental Meiosis Pattern:</p>
 <pre><code class="language-javascript">const update = flyd.stream();
-
-// Using Patchinko:
-const states = flyd.scan(P, app.initialState(), update);
-
-// Using Function Patches:
-const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);</code></pre>
-<p>Actions send patches in the form of objects or functions to the <code>update</code> stream. Using <code>scan</code>26GI
+const states = flyd.scan(P, app.initialState(), update);</code></pre>
+<p>Actions send patches in the form of objects or functions to the <code>update</code> stream. Using <code>scan</code>
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.</p>
+<p>In <a href="#using_computed_and_services">Using Computed State and Services</a>, we added <code>computed</code>
+and <code>services</code>:</p>
+<pre><code class="language-javascript">const computed = state =&gt;
+  computes.reduce((x, f) =&gt; P(x, f(x)), state);
+
+const states = flyd.scan(P, app.initialState(), update)
+  .map(computed);
+
+states.map(state =&gt;
+  services.forEach(service =&gt; service(state, update)));</code></pre>
+<p>Let&#39;s look at how we can use Meiosis as a basis to implement the SAM pattern.</p>
 <p><a name="navigation_example"></a></p>
 <h3><a href="#navigation_example">A Navigation Example</a></h3><p>Let&#39;s look at an example. Say we have navigation between different pages. Clicking on a section
 of the navigation bar shows the corresponding page. To navigate, we have actions that update

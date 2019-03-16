@@ -13,10 +13,10 @@
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
     <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>Services</h2><p><a href="https://james-forbes.com">James Forbes</a> shared his idea of <em>Services</em>. In this section, we&#39;ll
-look at James&#39; version using streams, another version using
+look at James&#39; version using streams, and another version using a separate computed state function
+and a service trigger. For the latter, we&#39;ll use two variants, one with
 <a href="https://barneycarroll.com">Barney Carroll</a>&#39;s
-<a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, and finally a version that uses
-function patches.</p>
+<a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, and one with function patches.</p>
 <p>James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
 retrieve state from local storage, and trigger other actions.</p>
@@ -115,41 +115,71 @@ states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
 
 
 <h4>Flexibility</h4><p>Using streams gives you the flexibility of being able to hook into them and wiring them as you
-wish. Now, let&#39;s look at a slightly different approach, using Patchinko.</p>
-<p><a name="using_patchinko"></a></p>
-<h3><a href="#using_patchinko">Using Patchinko</a></h3><p>An alternative to emitting patches from services is to define a service as a function that
-receives the current state as a parameter and returns a patch. Then, these service functions
-can be combined together with <code>reduce</code> to produce a single service function that receives
-the current state and produces an updated state.</p>
-<p>In this section, we&#39;ll use <a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, which we
+wish.</p>
+<p><a name="using_computed_and_services"></a></p>
+<h3><a href="#using_computed_and_services">Using Computed State and Services</a></h3><p>An alternative to emitting patches from services is to define <em>computed</em> state as a function
+that receives the current state as a parameter and returns a patch. Then, these computed
+functions can be combined together with <code>reduce</code> to produce a single computed function that
+receives the current state and produces an updated state containing the computed properties.</p>
+<p>Computed state runs <em>synchronously</em>. For asynchronous changes, we define a <code>service</code> function
+that receives the current state and the <code>update</code> stream, and decides whether to call <code>update()</code>.
+Our service structure is thus:</p>
+<pre><code class="language-javascript">{
+  initial: state =&gt; initialState,
+  computed: state =&gt; patch,
+  service: (state, update) =&gt; { /* call update() based on state */ }
+}</code></pre>
+<h4>With Patchinko</h4><p>In this section, we&#39;ll use <a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, which we
 looked at in the <a href="http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html">tutorial</a>.</p>
 <p>To use Patchinko, we emit patches as objects instead of functions, and we use <code>P</code>
 as our accumulator:</p>
 <pre><code class="language-javascript">const states = m.stream.scan( P, initialState(), update );</code></pre>
-<p>Instead of a <code>start</code> function, we&#39;ll use a <code>service</code> function to which we&#39;ll pass the latest
-state from the Meiosis <code>states</code> stream. The <code>service</code> function returns a patch:</p>
+<p>Instead of a <code>start</code> function, we&#39;ll use a <code>computed</code> function to which we&#39;ll pass the latest
+state from the Meiosis <code>states</code> stream. The <code>computed</code> function returns a patch:</p>
 <pre><code class="language-javascript">{
-  initial: state =&gt; initialState,
-  service: state =&gt; patch
+  computed: state =&gt; patch
 }</code></pre>
 <p>Before, we took a <strong>stream</strong> of states and we returned a <strong>stream</strong> of patches; now, we just
 take a state and return a patch.</p>
-<p>We&#39;ll taking our array of services and call <code>service</code> on each one:</p>
-<pre><code class="language-javascript">services.map(s =&gt; s.service)</code></pre>
-<p>This gives us an array of functions:</p>
-<pre><code class="language-javascript">[ f1, f2, f3 ]</code></pre>
-<p>Each function <code>f</code> takes the state and returns a patch to update the model. Thus calling <code>f(state)</code>
+<p>We&#39;ll assemble the <code>computed</code> functions into an array:</p>
+<pre><code class="language-javascript">const computes = [ f1, f2, f3 ];</code></pre>
+<p>Each function <code>f</code> takes the state and returns a patch to update the state. Thus calling <code>f(state)</code>
 gives us a patch. To apply the patch, we call <code>P(state, f(state))</code>. Finally, to combine the array
 of functions into a single function, we can use <code>reduce</code>:</p>
-<pre><code class="language-javascript">// Top-level service function
-const service = state =&gt; services
-  .map(s =&gt; s.service)
-  .reduce((x, f) =&gt; P(x, f(x)), state);</code></pre>
-<p>This gives us a single top-level <code>service</code> function that takes the state, calls all services,
-and produces the updated state. We can just <code>map</code> this service function to our stream of
-states:</p>
+<pre><code class="language-javascript">// Top-level computed function
+const computed = state =&gt;
+  computes.reduce((x, f) =&gt; P(x, f(x)), state);</code></pre>
+<p>This gives us a single top-level <code>computed</code> function that takes the state, calls all computed
+functions, and produces the updated state. We can just <code>map</code> this computed function to our
+stream of states:</p>
 <pre><code class="language-javascript">const states = m.stream.scan( P, initialState(), update )
-  .map(service);</code></pre>
+  .map(computed);</code></pre>
+<p>Computed functions are for <em>synchronous</em> calculations based on the state. For asynchronous
+changes, such as loading data from a server, we&#39;ll separately define <em>services</em> as functions
+that receive the current state and the <code>update</code> stream, and call <code>update</code> as they see fit:</p>
+<pre><code class="language-javascript">service: (state, update) =&gt; {
+  // determine whether to call update() based on state
+}</code></pre>
+<p>As in the previous section, we have to be careful about infinite loops. Indeed, when the
+service calls <code>update()</code>, the service will be triggered again.</p>
+<p>In this example, the <code>LocalStorageService</code> doesn&#39;t call <code>update</code>, so it&#39;s not an issue:</p>
+<pre><code class="language-javascript">service(state, _update) {
+  T(
+    state,
+    R.pipe(
+      R.pick([&quot;boxes&quot;]),
+      x =&gt; localStorage.setItem(&quot;v1&quot;, JSON.stringify(x))
+    )
+  );
+}</code></pre>
+<p>You can see another example of services in the
+<a href="sam-pattern.html#next_action_predicate">Next-Action-Predicate section of the SAM Pattern</a>.
+There, the function has a condition which ensures not to keep calling <code>update()</code> in an
+infinite loop.</p>
+<p>After assembling service functions into an array, wiring them up is simply a matter of
+calling them every time the state changes:</p>
+<pre><code class="language-javascript">states.map(state =&gt;
+  services.forEach(service =&gt; service(state, update)));</code></pre>
 <p>Finally, as before we use our <code>states</code> stream to render the view:</p>
 <pre><code class="language-javascript">states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
 <p>You will find the complete example below.</p>
@@ -157,7 +187,7 @@ states:</p>
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "index-patchinko.js", content: "/* global b, m, R, P, S */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => ({ boxes: S(xs => xs.concat(x)) })\n      ]\n    ),\n  removeBox: i =>\n    ({ boxes: S( xs => xs.filter( (x,j) => i != j ) ) })\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst T = (x, f) => f(x);\n\nconst StatsService = {\n  initial(state) {\n    return state.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  service: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\")\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  service(state) {\n    T(\n      state,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n    return null;\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  service: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\")\n  )\n};\n\nconst services = [\n  LocalStorageService,\n  StatsService,\n  DescriptionService\n];\n\nconst initialState = () => {\n  const state =\n    { boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ]\n    };\n  return P({},\n    state,\n    services\n      .map(s => s.initial(state))\n      .reduce(R.merge, {})\n  );\n};\n\nconst service = state => services\n  .map(s => s.service)\n  .reduce((x, f) => P(x, f(x)), state);\n\nconst update = m.stream();\nconst states = m.stream.scan( P, initialState(), update )\n  .map(service);\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      files: [{name: "index-patchinko.js", content: "/* global b, m, R, P, S */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => ({ boxes: S(xs => xs.concat(x)) })\n      ]\n    ),\n  removeBox: i =>\n    ({ boxes: S( xs => xs.filter( (x,j) => i != j ) ) })\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst T = (x, f) => f(x);\n\nconst StatsService = {\n  initial(state) {\n    return state.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  computed: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\")\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  service(state, _update) {\n    T(\n      state,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  computed: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\")\n  )\n};\n\nconst initial = [\n  LocalStorageService.initial,\n  StatsService.initial,\n  DescriptionService.initial\n];\n\nconst computes = [\n  StatsService.computed,\n  DescriptionService.computed\n];\n\nconst services = [\n  LocalStorageService.service\n];\n\nconst initialState = () => {\n  const state =\n    { boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ]\n    };\n  return P({},\n    state,\n    initial\n      .map(fn => fn(state))\n      .reduce(R.merge, {})\n  );\n};\n\nconst computed = state =>\n  computes.reduce((x, f) => P(x, f(x)), state);\n\nconst update = m.stream();\nconst states = m.stream.scan( P, initialState(), update )\n  .map(computed);\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n\nstates.map(state =>\n  services.forEach(service => service(state, update)));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
       links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/explicit.js"}],
       middle: 60,
 
@@ -166,11 +196,7 @@ states:</p>
   </script>
 
 
-<h4>No Worries about Infinite Loops</h4><p>Note that we no longer need <code>dropRepeats</code>, because we are not feeding patches back into the
-<code>update</code> stream. Instead, we have a separate <code>states</code> stream, so we don&#39;t need to worry about
-creating an infinite loop.</p>
-<p><a name="using_function_patches"></a></p>
-<h3><a href="#using_function_patches">Using Function Patches</a></h3><p>We can also use this approach with function patches instead of Patchinko. Remember that with
+<h4>With Function Patches</h4><p>We can also use this approach with function patches instead of Patchinko. Remember that with
 function patches, we produce functions <code>f(state) =&gt; updatedState</code> instead of object patches,
 and we wire up Meiosis like this:</p>
 <pre><code class="language-javascript">const T = (x, f) =&gt; f(x);
@@ -179,20 +205,18 @@ const states = m.stream.scan( T, initialState(), update );</code></pre>
 <p>Our services have the same structure as before, namely:</p>
 <pre><code class="language-javascript">{
   initial: state =&gt; initialState,
-  service: state =&gt; patch
+  computed: state =&gt; patch,
+  service: (state, update) =&gt; { /* call update() based on state */ }
 }</code></pre>
 <p>The only difference is that <code>patch</code> is now a function instead of an object.</p>
-<p>Again we take the array of services and call <code>service</code> on each one:</p>
-<pre><code class="language-javascript">services.map(s =&gt; s.service)</code></pre>
-<p>This still gives us an array of functions:</p>
-<pre><code class="language-javascript">[ f1, f2, f3 ]</code></pre>
+<p>Again we have an array of functions for computed state:</p>
+<pre><code class="language-javascript">const computes = [ f1, f2, f3 ];</code></pre>
 <p>But now each function <code>f</code> takes the state and returns a <strong>function</strong> patch to update the model.
 When we call <code>f(state)</code>, we get a function. To apply the patch, we just call the function:
 <code>f(state)(state)</code>. Finally, we use <code>reduce</code> to write our top-level <code>service</code> function:</p>
-<pre><code class="language-javascript">// Top-level service function
-const service = state =&gt; services
-  .map(s =&gt; s.service)
-  .reduce((x, f) =&gt; f(x)(x), state);</code></pre>
+<pre><code class="language-javascript">// Top-level computed function
+const computed = state =&gt;
+  computes.reduce((x, f) =&gt; f(x)(x), state);</code></pre>
 <p>As before, we <code>map</code> our service function to the <code>states</code> stream, and use the <code>states</code> stream
 to render the view:</p>
 <pre><code class="language-javascript">const states = m.stream.scan( T, initialState(), update )
@@ -203,7 +227,7 @@ states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
 
   <script>
     window.Flems(flems3, {
-      files: [{name: "index-functions.js", content: "/* global b, m, R */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => xs => xs.concat(x)\n        , $boxes\n      ]\n    ),\n  removeBox: i =>\n    $boxes( xs => xs.filter( (x,j) => i != j ) )\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst T = (x, f) => f(x);\n\nconst StatsService = {\n  initial(state) {\n    return state.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  service: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  service(state) {\n    T(\n      state,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n    return I;\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  service: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst services = [\n  LocalStorageService,\n  StatsService,\n  DescriptionService\n];\n\nconst initialState = () => {\n  const state =\n    { boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ]\n    };\n  return Object.assign({},\n    state,\n    services\n      .map(s => s.initial(state))\n      .reduce(R.merge, {})\n  );\n};\n\nconst service = state => services\n  .map(s => s.service)\n  .reduce((x, f) => f(x)(x), state);\n\nconst update = m.stream();\nconst states = m.stream.scan( T, initialState(), update )\n  .map(service);\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      files: [{name: "index-functions.js", content: "/* global b, m, R */\n\nconst I = x => x;\nconst o = (f, g) => x => f(g(x));\nconst K = x => () => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0,-1).join(\", \") + \" \"+s+\" \" + xs.slice(-1)\n    : xs.join(\"\");\n\nconst pipe = xs => xs.reduceRight(o, I);\nconst $ =\n  { prop: k => f => o =>\n    ({ ...o, [k]: f(o[k]) })\n  , get: lens => o => {\n    var y;\n    lens (  x => y = x ) (o);\n    return y;\n  }\n  };\n\nconst $boxes = $.prop (\"boxes\");\nconst $description = $.prop (\"description\");\nconst $colors = $.prop (\"colors\");\n\nconst Action = {\n  addBox: x =>\n    pipe(\n      [ K(x)\n        , x => xs => xs.concat(x)\n        , $boxes\n      ]\n    ),\n  removeBox: i =>\n    $boxes( xs => xs.filter( (x,j) => i != j ) )\n};\n\nconst view = update => state =>\n  m( \".app\" + b.d(\"grid\").ff(\"Helvetica\")\n    , m(\"nav.header\"\n        + b\n          .d(\"flex\")\n          .jc(\"space-between\")\n          .ai(\"center\")\n          .bc(\"steelblue\")\n          .c(\"white\")\n          .p(\"1em\")\n\n    , m(\"h1\"+b.m(0), \"Boxes\")\n    , $.get( $colors ) (state)\n      .map(\n        x => m(\"button\"\n            + b\n              .bc(x)\n              .c(\"white\")\n              .w(\"2em\")\n              .h(\"2em\")\n              .fs(\"2em\")\n              .m(0)\n              .border(\"none\")\n        ,\n        { onclick: pipe([Action.addBox(x), update]) }, \"+\"\n        )\n      )\n    )\n    ,m(\"p\", $.get($description) (state) )\n    ,m(\"\" + b.d(\"grid\").gridTemplateColumns(\"repeat(3, 1fr)\")\n      .alignItems(\"center\")\n      .justifyItems(\"center\")\n      .padding(\"1em\")\n      .gridRowGap(\"1em\")\n      .maxHeight(\"14em\")\n      .overflowY(\"auto\")\n\n    ,$.get( $boxes ) (state) .map(\n      (x, i) =>\n        m(\"\" + b.bc(x).c(\"white\").w(\"4em\").h(\"4em\"),\n          { onclick:\n              pipe([ K( Action.removeBox(i) ), update ])\n          }\n        )\n    )\n    )\n  );\n\nconst T = (x, f) => f(x);\n\nconst StatsService = {\n  initial(state) {\n    return state.colors\n      .map(R.objOf)\n      .map(K(0))\n      .reduce(R.merge, {});\n  },\n  computed: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst LocalStorageService = {\n  initial() {\n    return [localStorage.getItem(\"v1\")]\n      .filter(Boolean)\n      .map(JSON.parse)\n      .concat({ boxes: [] })\n      .shift();\n  },\n  service(state, _update) {\n    T(\n      state,\n      R.pipe(\n        R.pick([\"boxes\"]),\n        x => localStorage.setItem(\"v1\", JSON.stringify(x))\n      )\n    );\n  }\n};\n\nconst DescriptionService = {\n  initial() {\n    return {\n      description: \"\"\n    };\n  },\n  computed: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\"),\n    R.mergeDeepLeft\n  )\n};\n\nconst initial = [\n  LocalStorageService.initial,\n  StatsService.initial,\n  DescriptionService.initial\n];\n\nconst computes = [\n  StatsService.computed,\n  DescriptionService.computed\n];\n\nconst services = [\n  LocalStorageService.service\n];\n\nconst initialState = () => {\n  const state =\n    { boxes: []\n      , colors:\n      [ \"red\"\n        , \"purple\"\n        , \"blue\"\n      ]\n    };\n  return Object.assign({},\n    state,\n    initial\n      .map(fn => fn(state))\n      .reduce(R.merge, {})\n  );\n};\n\nconst computed = state =>\n  computes.reduce((x, f) => f(x)(x), state);\n\nconst update = m.stream();\nconst states = m.stream.scan( T, initialState(), update )\n  .map(computed);\nconst element = document.getElementById(\"app\");\nstates.map(view(update)).map(v => m.render(element, v));\n\nstates.map(state =>\n  services.forEach(service => service(state, update)));\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
       links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"}],
       middle: 60,
 
