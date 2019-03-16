@@ -36,17 +36,28 @@ Remember the fundamental Meiosis Pattern:
 
 ```javascript
 const update = flyd.stream();
-
-// Using Patchinko:
 const states = flyd.scan(P, app.initialState(), update);
-
-// Using Function Patches:
-const states = flyd.scan((x, f) => f(x), app.initialState(), update);
 ```
 
 Actions send patches in the form of objects or functions to the `update` stream. Using `scan`
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.
+
+In [Using Computed State and Services](#using_computed_and_services), we added `computed`
+and `services`:
+
+```javascript
+const computed = state =>
+  computes.reduce((x, f) => P(x, f(x)), state);
+
+const states = flyd.scan(P, app.initialState(), update)
+  .map(computed);
+
+states.map(state =>
+  services.forEach(service => service(state, update)));
+```
+
+Let's look at how we can use Meiosis as a basis to implement the SAM pattern.
 
 <a name="navigation_example"></a>
 ### [A Navigation Example](#navigation_example)
