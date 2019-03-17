@@ -34,32 +34,26 @@ export const childRoute = route => {
 export const Loaded = Maybe;
 
 export const root = {
-  actions: update => ({
-    navigateTo: routeList => update({
-      routeRequest: routeList
-    }),
+  actions: update => {
+    const navigateTo = routeList => update({
+      routeCurrent: routeList,
+      arriving: true
+    });
 
-    navigateToParent: route => update({
-      routeRequest: route.routes.slice(0, route.index)
-    }),
+    return {
+      navigateTo,
 
-    navigateToChild: (route, routeList) => update({
-      routeRequest: route.routes.concat(routeList)
-    }),
+      navigateToParent: route => navigateTo(
+        route.routes.slice(0, route.index)
+      ),
 
-    navigateToSibling: (route, routeList) => update({
-      routeRequest: route.routes.slice(0, route.index).concat(routeList)
-    })
-  }),
+      navigateToChild: (route, routeList) => navigateTo(
+        route.routes.concat(routeList)
+      ),
 
-  computed: state => {
-    if (state.routeRequest) {
-      return ({
-        routeRequest: null,
-        routePrevious: state.routeCurrent,
-        routeCurrent: state.routeRequest,
-        arriving: true
-      });
-    }
+      navigateToSibling: (route, routeList) => navigateTo(
+        route.routes.slice(0, route.index).concat(routeList)
+      )
+    };
   }
 };

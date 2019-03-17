@@ -1,4 +1,4 @@
-import { map } from "static-tagged-union";
+import { bifold, fold, map } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
 import { Loaded, Route } from "../root";
@@ -10,18 +10,15 @@ export const tea = {
       Tpipe(
         state.routeCurrent,
         contains(Route.Tea()),
-        map(() => {
-          setTimeout(() => {
-            update({ arriving: false, teas: Loaded.Y(teas) });
-          }, 500);
-        })
+        bifold(
+          () => map(() => update({ teas: Loaded.N() }))(state.teas),
+          () => fold({
+            N: () => setTimeout(() => {
+              update({ arriving: false, teas: Loaded.Y(teas) });
+            }, 500)
+          })(state.teas)
+        )
       );
     }
-
-    Tpipe(
-      state.routePrevious,
-      contains(Route.Tea()),
-      map(() => update({ routePrevious: null, teas: Loaded.N() }))
-    );
   }
 };

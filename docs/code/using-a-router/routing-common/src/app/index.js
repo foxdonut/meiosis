@@ -18,6 +18,8 @@ export const app = {
       password: ""
     },
     teas: Loaded.N(),
+    coffees: Loaded.N(),
+    beers: Loaded.N(),
     beverages: []
   }),
 
@@ -28,7 +30,6 @@ export const app = {
   ),
 
   computed: [
-    root.computed,
     login.computed
   ],
 

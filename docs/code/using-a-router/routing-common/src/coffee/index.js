@@ -1,4 +1,4 @@
-import { map } from "static-tagged-union";
+import { bifold, fold, map } from "static-tagged-union";
 
 import { coffees } from "../beverage";
 import { Loaded, Route } from "../root";
@@ -10,26 +10,24 @@ export const coffee = {
       Tpipe(
         state.routeCurrent,
         contains(Route.Coffee()),
-        map(() => {
-          update({
-            arriving: false,
-            pleaseWait: true,
-            beverages: state.beverages || []
-          });
+        bifold(
+          () => map(() => update({ coffees: Loaded.N() }))(state.coffees),
+          () => fold({
+            N: () => {
+              update({
+                arriving: false,
+                pleaseWait: true
+              });
 
-          setTimeout(() => update({
-            pleaseWait: false,
-            beverages: coffees,
-            coffees: Loaded.Y()
-          }), 1000);
-        })
+              setTimeout(() => update({
+                pleaseWait: false,
+                beverages: coffees,
+                coffees: Loaded.Y()
+              }), 1000);
+            }
+          })(state.coffees)
+        )
       );
     }
-
-    Tpipe(
-      state.routePrevious,
-      contains(Route.Coffee()),
-      map(() => update({ routePrevious: null, coffees: Loaded.N() }))
-    );
   }
 };

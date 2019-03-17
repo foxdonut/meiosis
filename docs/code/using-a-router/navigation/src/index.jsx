@@ -27,7 +27,6 @@ Promise.resolve().then(app.initialState).then(initialState => {
     rows: 10,
     streams: [
       { stream: update, label: "update" },
-      { stream: computed, label: "computed" },
       { stream: states, label: "states" }
     ]
   });
