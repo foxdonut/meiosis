@@ -29,7 +29,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "routing-common": "../routing-common",
-    "static-tagged-union": "^0.1.0"
+    "static-tagged-union": "^0.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",

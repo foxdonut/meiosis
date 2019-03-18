@@ -1,5 +1,3 @@
-import { Maybe } from "static-tagged-union";
-
 export const T = (x, f) => f(x);
 
 export const pipe = (...fns) => input => fns.reduce((value, fn) =>
@@ -20,9 +18,4 @@ export const append = (arr, element) => arr.slice().concat([element]);
 export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
-};
-
-export const contains = cx => list => {
-  const matches = list && list.filter(it => (it.case === cx.case) && (it.value === cx.value));
-  return (matches && matches.length > 0) ? Maybe.Y(matches[0].value) : Maybe.N();
 };

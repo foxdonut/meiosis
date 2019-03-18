@@ -33,27 +33,25 @@ export const childRoute = route => {
 
 export const Loaded = Maybe;
 
+export const navigateTo = routeList => ({
+  routeCurrent: routeList,
+  arriving: true
+});
+
 export const root = {
-  actions: update => {
-    const navigateTo = routeList => update({
-      routeCurrent: routeList,
-      arriving: true
-    });
+  actions: update => ({
+    navigateTo: routeList => update(navigateTo(routeList)),
 
-    return {
-      navigateTo,
+    navigateToParent: route => update(navigateTo(
+      route.routes.slice(0, route.index)
+    )),
 
-      navigateToParent: route => navigateTo(
-        route.routes.slice(0, route.index)
-      ),
+    navigateToChild: (route, routeList) => update(navigateTo(
+      route.routes.concat(routeList)
+    )),
 
-      navigateToChild: (route, routeList) => navigateTo(
-        route.routes.concat(routeList)
-      ),
-
-      navigateToSibling: (route, routeList) => navigateTo(
-        route.routes.slice(0, route.index).concat(routeList)
-      )
-    };
-  }
+    navigateToSibling: (route, routeList) => update(navigateTo(
+      route.routes.slice(0, route.index).concat(routeList)
+    ))
+  })
 };

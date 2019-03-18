@@ -1,8 +1,8 @@
-import { bifold, fold, map } from "static-tagged-union";
+import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
 import { Loaded, Route } from "../root";
-import { Tpipe, contains } from "../util";
+import { Tpipe } from "../util";
 
 export const tea = {
   service: (state, update) => {
@@ -12,11 +12,11 @@ export const tea = {
         contains(Route.Tea()),
         bifold(
           () => map(() => update({ teas: Loaded.N() }))(state.teas),
-          () => fold({
-            N: () => setTimeout(() => {
+          () => unless(
+            () => setTimeout(() => {
               update({ arriving: false, teas: Loaded.Y(teas) });
             }, 500)
-          })(state.teas)
+          )(state.teas)
         )
       );
     }

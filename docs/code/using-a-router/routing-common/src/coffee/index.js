@@ -1,8 +1,8 @@
-import { bifold, fold, map } from "static-tagged-union";
+import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { coffees } from "../beverage";
 import { Loaded, Route } from "../root";
-import { Tpipe, contains } from "../util";
+import { Tpipe } from "../util";
 
 export const coffee = {
   service: (state, update) => {
@@ -12,8 +12,8 @@ export const coffee = {
         contains(Route.Coffee()),
         bifold(
           () => map(() => update({ coffees: Loaded.N() }))(state.coffees),
-          () => fold({
-            N: () => {
+          () => unless(
+            () => {
               update({
                 arriving: false,
                 pleaseWait: true
@@ -25,7 +25,7 @@ export const coffee = {
                 coffees: Loaded.Y()
               }), 1000);
             }
-          })(state.coffees)
+          )(state.coffees)
         )
       );
     }
