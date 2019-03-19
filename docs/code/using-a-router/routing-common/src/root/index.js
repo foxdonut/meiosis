@@ -14,44 +14,57 @@ export const Route = TaggedUnion([
   "Brewer"
 ]);
 
-export const initRoute = routes => ({
-  routes,
-  index: -1,
-  local: null,
-  child: routes[0]
+export const Loaded = Maybe;
+
+const omit = (obj, prop) => Object.keys(obj).reduce(
+  (result, key) => {
+    if (key !== prop) {
+      result[key] = obj[key];
+    }
+    return result;
+  }, {});
+
+export const parentRoute = (route, local) => ({
+  case: route.case,
+  value: (route.case === local.case) || (route.value.child.case === local.case)
+    ? omit(route.value, "child")
+    : parentRoute(route.value.child, local)
 });
 
-export const childRoute = route => {
-  const index = route.index + 1;
-  return {
-    routes: route.routes,
-    index,
-    local: route.routes[index],
-    child: route.routes[index + 1]
-  };
+export const siblingRoute = (route, local, child) => {
+  const result = parentRoute(route, local);
+  result.value = Object.assign({ child }, result.value);
+  return result;
 };
 
-export const Loaded = Maybe;
-export const Arrived = Maybe;
+export const childRoute = (route, local, child) => {
+  if (route.case === local.case) {
+    const value = Object.assign({}, local.value, { child });
+    const result = Object.assign({}, local, { value });
+    return result;
+  }
+  else {
+    const result = parentRoute(route, local);
+    result.value = Object.assign({
+      child: {
+        case: local.case,
+        value: Object.assign({}, local.value, { child })
+      }
+    }, result.value);
+    return result;
+  }
+};
 
-export const navigateTo = routeList => ({
-  routeCurrent: Arrived.N({ route: routeList })
+export const routeList = route =>
+  route ? [ route ].concat(routeList(route.value.child)) : [];
+
+export const navigateTo = route => ({
+  route: route,
+  arriving: true
 });
 
 export const root = {
   actions: update => ({
-    navigateTo: routeList => update(navigateTo(routeList)),
-
-    navigateToParent: route => update(navigateTo(
-      route.routes.slice(0, route.index)
-    )),
-
-    navigateToChild: (route, routeList) => update(navigateTo(
-      route.routes.concat(routeList)
-    )),
-
-    navigateToSibling: (route, routeList) => update(navigateTo(
-      route.routes.slice(0, route.index).concat(routeList)
-    ))
+    navigateTo: route => update(navigateTo(route))
   })
 };

@@ -7,6 +7,7 @@ import { Route, childRoute } from "routing-common/src/root";
 export class Tea extends Component {
   render() {
     const { state, actions, route } = this.props;
+    const child = route.value.child;
 
     return (
       <div>
@@ -19,7 +20,9 @@ export class Tea extends Component {
                 <li key={tea.id}>
                   <a href="javascript://"
                     onClick={() =>
-                      actions.navigateToChild(route, [Route.TeaDetails({ id: tea.id })])
+                      actions.navigateTo(
+                        childRoute(state.route, route, Route.TeaDetails({ id: tea.id }))
+                      )
                     }
                   >{tea.title}</a>
                 </li>
@@ -29,8 +32,8 @@ export class Tea extends Component {
         </ul>
         {
           fold({
-            TeaDetails: () => <TeaDetails state={state} actions={actions} route={childRoute(route)} />
-          })(route.child)
+            TeaDetails: () => <TeaDetails state={state} actions={actions} route={child} />
+          })(child)
         }
       </div>
     );

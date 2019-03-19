@@ -1,7 +1,7 @@
 import React from "react";
 import { fold } from "static-tagged-union";
 
-import { Route } from "routing-common/src/root";
+import { Route, childRoute, siblingRoute } from "routing-common/src/root";
 import { Brewer } from "../brewer";
 
 const componentMap = fold({
@@ -9,8 +9,9 @@ const componentMap = fold({
 });
 
 export const Beverage = ({ state, actions, route }) => {
-  const Component = componentMap(route.child);
-  const id = route.local.value.id;
+  const child = route.value.child;
+  const Component = componentMap(child);
+  const id = route.value.id;
 
   return (
     <div>
@@ -18,14 +19,18 @@ export const Beverage = ({ state, actions, route }) => {
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateToChild(route, [Route.Brewer({ id })])
+            () => actions.navigateTo(
+              childRoute(state.route, route, Route.Brewer({ id }))
+            )
           }>Brewer</a>
       </div>
-      {Component && <Component state={state} actions={actions} />}
+      {Component && <Component state={state} actions={actions} route={child} />}
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateToSibling(route, [Route.Beverages()])
+            () => actions.navigateTo(
+              siblingRoute(state.route, route, Route.Beverages())
+            )
           }
         >Back to list</a>
       </div>

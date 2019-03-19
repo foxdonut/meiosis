@@ -1,7 +1,6 @@
 import React from "react";
 import { fold } from "static-tagged-union";
 
-import { childRoute } from "routing-common/src/root";
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
 
@@ -11,12 +10,13 @@ const componentMap = fold({
 });
 
 export const Coffee = ({ state, actions, route }) => {
-  const Component = componentMap(route.child);
+  const child = route.value.child;
+  const Component = componentMap(child);
 
   return (
     <div>
       <div>Coffee Page</div>
-      <Component state={state} actions={actions} route={childRoute(route)} />
+      <Component state={state} actions={actions} route={child} />
     </div>
   );
 };

@@ -1,18 +1,18 @@
-import { fold, unless } from "static-tagged-union";
+import { fold } from "static-tagged-union";
 
-import { Arrived } from "../root";
+import { routeList } from "../root";
 
 export const brewer = {
   service: (state, update) => {
-    unless(({ route }) =>
-      route.forEach(fold({
+    if (state.arriving) {
+      routeList(state.route).forEach(fold({
         Brewer: ({ id }) => {
           update({
-            routeCurrent: Arrived.Y({ route }),
+            arriving: false,
             brewer: `Brewer of beverage ${id}`
           });
         }
-      }))
-    )(state.routeCurrent);
+      }));
+    }
   }
 };

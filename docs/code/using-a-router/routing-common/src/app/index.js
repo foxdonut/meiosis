@@ -1,6 +1,6 @@
 import { P } from "patchinko/explicit";
 
-import { root, Arrived, Loaded, Route } from "../root";
+import { root, Loaded, Route } from "../root";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -12,7 +12,8 @@ import { brewer } from "../brewer";
 
 export const app = {
   initialState: () => ({
-    routeCurrent: Arrived.N({ route: [Route.Loading()] }),
+    route: Route.Loading(),
+    arriving: true,
     login: {
       username: "",
       password: ""

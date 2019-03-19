@@ -8,7 +8,7 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { Route, initRoute, childRoute } from "routing-common/src/root";
+import { Route } from "routing-common/src/root";
 
 const componentMap = fold({
   Loading: () => () => (<div>Loading, please wait...</div>),
@@ -23,9 +23,9 @@ const componentMap = fold({
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
-    const route = initRoute(state.routeCurrent.value.route);
 
-    const Component = componentMap(route.child);
+    const route = state.route;
+    const Component = componentMap(route);
     const isActive = tab => tab === Component ? "active" : "";
 
     return (
@@ -34,31 +34,31 @@ export class Root extends Component {
           <ul className="nav navbar-nav">
             <li className={isActive(Home)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Home()])}>Home</a>
+                onClick={() => actions.navigateTo(Route.Home())}>Home</a>
             </li>
             <li className={isActive(Login)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Login()])}>Login</a>
+                onClick={() => actions.navigateTo(Route.Login())}>Login</a>
             </li>
             <li className={isActive(Settings)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Settings()])}>Settings</a>
+                onClick={() => actions.navigateTo(Route.Settings())}>Settings</a>
             </li>
             <li className={isActive(Tea)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Tea()])}>Tea</a>
+                onClick={() => actions.navigateTo(Route.Tea())}>Tea</a>
             </li>
             <li className={isActive(Coffee)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Coffee(), Route.Beverages()])}>Coffee</a>
+                onClick={() => actions.navigateTo(Route.Coffee({ child: Route.Beverages() }))}>Coffee</a>
             </li>
             <li className={isActive(Beer)}>
               <a href="javascript://"
-                onClick={() => actions.navigateTo([Route.Beer(), Route.Beverages()])}>Beer</a>
+                onClick={() => actions.navigateTo(Route.Beer({ child: Route.Beverages() }))}>Beer</a>
             </li>
           </ul>
         </nav>
-        <Component state={state} actions={actions} route={childRoute(route)} />
+        <Component state={state} actions={actions} route={route} />
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{visibility: state.pleaseWait ? "visible" : "hidden"}}>
           <div className="modal">

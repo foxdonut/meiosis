@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 
-import { get, pipe, preventDefault } from "routing-common/src/util";
+import { pipe, preventDefault } from "routing-common/src/util";
 
 export class Login extends Component {
   render() {
-    const { state, actions, route } = this.props;
-    const message = get(route.local, ["value", "message"]);
+    const { state, actions } = this.props;
+    const message = state.route.value.message;
     return (
       <div>
         {message ? <div>{message}</div> : null}

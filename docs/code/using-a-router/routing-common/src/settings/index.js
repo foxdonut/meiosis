@@ -1,28 +1,29 @@
-import { contains, map, unless } from "static-tagged-union";
+import { contains, map } from "static-tagged-union";
 
-import { Route, navigateTo } from "../root";
+import { Route, navigateTo, routeList } from "../root";
 import { Tpipe } from "../util";
 
 export const settings = {
   actions: update => ({
     logout: () => update(Object.assign({
       user: null
-    }, navigateTo([Route.Home()])))
+    }, navigateTo(Route.Home())))
   }),
 
   service: (state, update) => {
-    unless(({ route }) =>
+    if (state.arriving) {
       Tpipe(
-        route,
+        state.route,
+        routeList,
         contains(Route.Settings()),
         map(() => {
           if (!state.user) {
-            update(navigateTo([
+            update(navigateTo(
               Route.Login({ message: "Please login." })
-            ]));
+            ));
           }
         })
-      )
-    )(state.routeCurrent);
+      );
+    }
   }
 };

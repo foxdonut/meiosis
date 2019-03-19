@@ -1,21 +1,22 @@
 import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { coffees } from "../beverage";
-import { Arrived, Loaded, Route } from "../root";
+import { Loaded, Route, routeList } from "../root";
 import { Tpipe } from "../util";
 
 export const coffee = {
   service: (state, update) => {
-    unless(({ route }) =>
+    if (state.arriving) {
       Tpipe(
-        route,
+        state.route,
+        routeList,
         contains(Route.Coffee()),
         bifold(
           () => map(() => update({ coffees: Loaded.N() }))(state.coffees),
           () => unless(
             () => {
               update({
-                routeCurrent: Arrived.Y({ route }),
+                arriving: false,
                 pleaseWait: true
               });
 
@@ -27,7 +28,7 @@ export const coffee = {
             }
           )(state.coffees)
         )
-      )
-    )(state.routeCurrent);
+      );
+    }
   }
 };

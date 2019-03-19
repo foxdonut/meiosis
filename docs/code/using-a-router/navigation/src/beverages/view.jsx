@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Route } from "routing-common/src/root";
+import { Route, siblingRoute } from "routing-common/src/root";
 
 export const Beverages = ({ state, actions, route }) => (
   <ul>
@@ -8,8 +8,8 @@ export const Beverages = ({ state, actions, route }) => (
       <li key={beverage.id}>
         <a href="javascript://"
           onClick={
-            () => actions.navigateToSibling(
-              route, [Route.Beverage({ id: beverage.id })]
+            () => actions.navigateTo(
+              siblingRoute(state.route, route, Route.Beverage({ id: beverage.id }))
             )
           }
         >{beverage.title}</a>
