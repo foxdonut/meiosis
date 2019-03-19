@@ -1,4 +1,4 @@
-import { contains, map } from "static-tagged-union";
+import { contains, map, unless } from "static-tagged-union";
 
 import { Route, navigateTo } from "../root";
 import { Tpipe } from "../util";
@@ -11,9 +11,9 @@ export const settings = {
   }),
 
   service: (state, update) => {
-    if (state.arriving) {
+    unless(({ route }) =>
       Tpipe(
-        state.routeCurrent,
+        route,
         contains(Route.Settings()),
         map(() => {
           if (!state.user) {
@@ -22,7 +22,7 @@ export const settings = {
             ]));
           }
         })
-      );
-    }
+      )
+    )(state.routeCurrent);
   }
 };

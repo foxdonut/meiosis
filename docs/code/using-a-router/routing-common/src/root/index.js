@@ -32,10 +32,10 @@ export const childRoute = route => {
 };
 
 export const Loaded = Maybe;
+export const Arrived = Maybe;
 
 export const navigateTo = routeList => ({
-  routeCurrent: routeList,
-  arriving: true
+  routeCurrent: Arrived.N({ route: routeList })
 });
 
 export const root = {

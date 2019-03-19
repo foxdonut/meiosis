@@ -23,7 +23,7 @@ const componentMap = fold({
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
-    const route = initRoute(state.routeCurrent);
+    const route = initRoute(state.routeCurrent.value.route);
 
     const Component = componentMap(route.child);
     const isActive = tab => tab === Component ? "active" : "";

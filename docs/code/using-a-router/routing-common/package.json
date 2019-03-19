@@ -26,7 +26,5 @@
   "devDependencies": {
     "eslint": "^5.13.0"
   },
-  "dependencies": {
-    "deep-equal": "^1.0.1"
-  }
+  "dependencies": {}
 }

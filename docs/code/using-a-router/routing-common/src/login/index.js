@@ -1,7 +1,7 @@
 import { PS } from "patchinko/explicit";
-import { fold } from "static-tagged-union";
+import { fold, unless } from "static-tagged-union";
 
-import { Route } from "../root";
+import { Arrived, Route, navigateTo } from "../root";
 import { get } from "../util";
 
 export const login = {
@@ -13,10 +13,9 @@ export const login = {
       update({ login: PS({ password: value })}),
 
     login: username =>
-      update({
-        routeCurrent: [Route.Home()],
+      update(Object.assign({
         user: username
-      })
+      }, navigateTo([Route.Home()])))
   }),
 
   computed: state => ({
@@ -24,18 +23,18 @@ export const login = {
   }),
 
   service: (state, update) => {
-    if (state.arriving) {
-      state.routeCurrent.forEach(fold({
+    unless(({ route }) =>
+      route.forEach(fold({
         Login: () => {
           update({
-            arriving: false,
+            routeCurrent: Arrived.Y({ route }),
             login: PS({
               username: "",
               password: ""
             })
           });
         }
-      }));
-    }
+      }))
+    )(state.routeCurrent);
   }
 };
