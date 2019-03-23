@@ -1,29 +1,27 @@
 import m from "mithril";
-
-import { caseOf } from "routing-common/src/util";
-import { toPath } from "../util/router";
+import { fold } from "static-tagged-union";
 
 import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
+import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-const componentMap = {
-  Home,
-  Login,
-  Settings,
-  Coffee,
-  CoffeeDetails: Coffee,
-  Beer,
-  BeerDetails: Beer,
-  BeerBrewer: Beer
-};
+const componentMap = fold({
+  Loading: () => () => m("div", "Loading, please wait..."),
+  Home: () => Home,
+  Login: () => Login,
+  Settings: () => Settings,
+  Tea: () => Tea,
+  Coffee: () => Coffee,
+  Beer: () => Beer
+});
 
 export const Root = {
   view: ({ attrs: { state, actions }}) => {
-    const componentId = state.routeCurrent.case;
-    const Component = componentMap[componentId];
+    const route = state.route;
+    const Component = componentMap(route);
     const isActive = tab => tab === Component ? ".active" : "";
 
     return (
@@ -31,28 +29,31 @@ export const Root = {
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
             m("li" + isActive(Home),
-              m("a", { href: toPath(caseOf("Home")) }, "Home")
+              m("a", { href: "/", oncreate: m.route.link }, "Home")
             ),
             m("li" + isActive(Login),
-              m("a", { href: toPath(caseOf("Login")) }, "Login")
+              m("a", { href: "/login", oncreate: m.route.link }, "Login")
             ),
             m("li" + isActive(Settings),
-              m("a", { href: toPath(caseOf("Settings")) }, "Settings")
+              m("a", { href: "/settings", oncreate: m.route.link }, "Settings")
+            ),
+            m("li" + isActive(Tea),
+              m("a", { href: "/tea", oncreate: m.route.link }, "Tea")
             ),
             m("li" + isActive(Coffee),
-              m("a", { href: toPath(caseOf("Coffee")) }, "Coffee")
+              m("a", { href: "/coffee", oncreate: m.route.link }, "Coffee")
             ),
             m("li" + isActive(Beer),
-              m("a", { href: toPath(caseOf("Beer")) }, "Beer")
+              m("a", { href: "/beer", oncreate: m.route.link }, "Beer")
             )
           )
         ),
-        Component && m(Component, { state, actions }),
+        m(Component, { state, actions, route }),
         /* Show or hide the Please Wait modal. See public/css/style.css */
         m("div", { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
           m("div.modal",
             m("div.box",
-              m("p", "Loading, please wait...")
+              m("div", "Loading, please wait...")
             )
           )
         )

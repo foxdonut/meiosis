@@ -15,8 +15,11 @@ Promise.resolve().then(app.initialState).then(initialState => {
   const computed = models.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
   );
-  computed.map(state =>
-    app.services.forEach(service => service(state, update)));
+  computed.map(state => app.services
+    .map(service => service(state, update))
+    .filter(x => x)
+    .forEach(f => f())
+  );
 
   const states = flyd.stream();
   computed.map(states);

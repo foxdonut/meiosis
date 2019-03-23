@@ -1,22 +1,24 @@
 import m from "mithril";
+import { fold } from "static-tagged-union";
 
-import { caseOf } from "routing-common/src/util";
-import { toPath } from "../util/router";
+import { Beverages } from "../beverages";
+import { Beverage } from "../beverage";
+
+const componentMap = fold({
+  Beverages: () => Beverages,
+  Beverage: () => Beverage
+});
 
 export const Coffee = {
-  view: ({ attrs: { state } }) => (
-    m("div",
-      m("p", "Coffee Page"),
-      m("ul",
-        state.coffees && state.coffees.map(coffee =>
-          m("li", { key: coffee.id },
-            m("a", {
-              href: toPath(caseOf("CoffeeDetails", { id: coffee.id }))
-            }, coffee.title)
-          )
-        )
-      ),
-      state.coffee
-    )
-  )
+  view: ({ attrs: { state, actions, route } }) => {
+    const child = route.value.child;
+    const Component = componentMap(child);
+
+    return (
+      m("div",
+        m("div", "Coffee Page"),
+        m(Component, { state, actions, route: child })
+      )
+    );
+  }
 };

@@ -21,19 +21,17 @@ export const login = {
     usernameLength: state.login.username.length
   }),
 
-  service: (state, update) => {
-    if (state.arriving) {
-      routeList(state.route).forEach(fold({
-        Login: () => {
-          update({
-            arriving: false,
-            login: PS({
-              username: "",
-              password: ""
-            })
-          });
-        }
-      }));
-    }
-  }
+  service: (state, update) => (state.arriving) && (() =>
+    routeList(state.route).forEach(fold({
+      Login: () => {
+        update({
+          arriving: false,
+          login: PS({
+            username: "",
+            password: ""
+          })
+        });
+      }
+    }))
+  )
 };

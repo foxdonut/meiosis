@@ -10,9 +10,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".js"],
-    // This is so that routing-common can find patchinko from peerDependencies
+    // This is so that routing-common can find peerDependencies
     alias: {
-      "patchinko": path.resolve("./node_modules/patchinko")
+      "patchinko": path.resolve("./node_modules/patchinko"),
+      "static-tagged-union": path.resolve("./node_modules/static-tagged-union")
     }
   },
   module: {

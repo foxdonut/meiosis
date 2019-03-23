@@ -13,17 +13,15 @@ const teaMap = teas.reduce((result, next) => {
 }, {});
 
 export const teaDetails = {
-  service: (state, update) => {
-    if (state.arriving) {
-      routeList(state.route).forEach(fold({
-        TeaDetails: ({ id }) => {
-          const tea = teaMap[id].description;
-          update({
-            arriving: false,
-            tea
-          });
-        }
-      }));
-    }
-  }
+  service: (state, update) => (state.arriving) && (() =>
+    routeList(state.route).forEach(fold({
+      TeaDetails: ({ id }) => {
+        const tea = teaMap[id].description;
+        update({
+          arriving: false,
+          tea
+        });
+      }
+    }))
+  )
 };

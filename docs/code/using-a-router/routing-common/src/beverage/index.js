@@ -18,16 +18,14 @@ const beverageMap = beverages.reduce((result, next) => {
 }, {});
 
 export const beverage = {
-  service: (state, update) => {
-    if (state.arriving) {
-      routeList(state.route).forEach(fold({
-        Beverage: ({ id }) => {
-          update({
-            arriving: false,
-            beverage: beverageMap[id].description
-          });
-        }
-      }));
-    }
-  }
+  service: (state, update) => (state.arriving) && (() =>
+    routeList(state.route).forEach(fold({
+      Beverage: ({ id }) => {
+        update({
+          arriving: false,
+          beverage: beverageMap[id].description
+        });
+      }
+    }))
+  )
 };

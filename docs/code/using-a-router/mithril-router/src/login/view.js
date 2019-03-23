@@ -3,9 +3,10 @@ import m from "mithril";
 import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
-  view: ({ attrs: { state, actions } }) => (
-    m("div",
-      (state.login.message ? m("div", state.login.message) : null),
+  view: ({ attrs: { state, actions } }) => {
+    const message = state.route.value.message;
+    return m("div",
+      (message ? m("div", message) : null),
       m("div", "Login"),
       m("form.form",
         m("div.form-group",
@@ -32,6 +33,6 @@ export const Login = {
             () => actions.login(state.login.username))
         }, "Login")
       )
-    )
-  )
+    );
+  }
 };
