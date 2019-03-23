@@ -12,7 +12,7 @@ import { brewer } from "../brewer";
 
 export const app = {
   initialState: () => ({
-    route: Route.Loading(),
+    route: [ Route.Loading() ],
     arriving: true,
     login: {
       username: "",

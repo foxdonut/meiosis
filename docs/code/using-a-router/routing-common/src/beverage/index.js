@@ -1,7 +1,5 @@
 import { fold } from "static-tagged-union";
 
-import { routeList } from "../root";
-
 export const beverages = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
   { id: "c2", title: "Coffee 2", description: "Description of Coffee 2" },
@@ -19,7 +17,7 @@ const beverageMap = beverages.reduce((result, next) => {
 
 export const beverage = {
   service: (state, update) => (state.arriving) && (() =>
-    routeList(state.route).forEach(fold({
+    state.route.forEach(fold({
       Beverage: ({ id }) => {
         update({
           arriving: false,

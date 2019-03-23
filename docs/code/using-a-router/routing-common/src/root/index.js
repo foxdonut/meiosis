@@ -16,50 +16,34 @@ export const Route = TaggedUnion([
 
 export const Loaded = Maybe;
 
-const omit = (obj, prop) => Object.keys(obj).reduce(
-  (result, key) => {
-    if (key !== prop) {
-      result[key] = obj[key];
-    }
-    return result;
-  }, {});
-
-export const parentRoute = (route, local) => ({
-  id: route.id,
-  params: (route.id === local.id) || (route.params.child.id === local.id)
-    ? omit(route.params, "child")
-    : parentRoute(route.params.child, local)
+export const initRoute = routes => ({
+  routes,
+  index: 0,
+  local: routes[0],
+  child: routes[1]
 });
 
-export const siblingRoute = (route, local, child) => {
-  const result = parentRoute(route, local);
-  result.params = Object.assign({ child }, result.params);
-  return result;
+export const nextRoute = route => {
+  const index = route.index + 1;
+  return {
+    routes: route.routes,
+    index,
+    local: route.routes[index],
+    child: route.routes[index + 1]
+  };
 };
 
-export const childRoute = (route, local, child) => {
-  if (route.id === local.id) {
-    const params = Object.assign({}, local.params, { child });
-    const result = Object.assign({}, local, { params });
-    return result;
-  }
-  else {
-    const result = parentRoute(route, local);
-    result.params = Object.assign({
-      child: {
-        id: local.id,
-        params: Object.assign({}, local.params, { child })
-      }
-    }, result.params);
-    return result;
-  }
-};
+export const parentRoute = route =>
+  route.routes.slice(0, route.index);
 
-export const routeList = route =>
-  route ? [ route ].concat(routeList(route.params.child)) : [];
+export const childRoute = (route, routeList) =>
+  route.routes.concat(routeList);
+
+export const siblingRoute = (route, routeList) =>
+  route.routes.slice(0, route.index).concat(routeList);
 
 export const navigateTo = route => ({
-  route: route,
+  route,
   arriving: true
 });
 

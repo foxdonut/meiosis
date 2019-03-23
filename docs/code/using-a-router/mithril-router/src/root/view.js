@@ -8,6 +8,8 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
+import { initRoute } from "routing-common/src/root";
+
 const componentMap = fold({
   Loading: () => () => m("div", "Loading, please wait..."),
   Home: () => Home,
@@ -20,8 +22,8 @@ const componentMap = fold({
 
 export const Root = {
   view: ({ attrs: { state, actions }}) => {
-    const route = state.route;
-    const Component = componentMap(route);
+    const route = initRoute(state.route);
+    const Component = componentMap(route.local);
     const isActive = tab => tab === Component ? ".active" : "";
 
     return (

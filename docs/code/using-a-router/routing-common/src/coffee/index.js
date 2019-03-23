@@ -1,14 +1,13 @@
 import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { coffees } from "../beverage";
-import { Loaded, Route, routeList } from "../root";
+import { Loaded, Route } from "../root";
 import { Tpipe } from "../util";
 
 export const coffee = {
   service: (state, update) => (state.arriving) && (() =>
     Tpipe(
       state.route,
-      routeList,
       contains(Route.Coffee()),
       bifold(
         () => map(() => update({ coffees: Loaded.N() }))(state.coffees),

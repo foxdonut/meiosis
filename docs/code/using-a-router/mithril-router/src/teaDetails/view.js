@@ -7,7 +7,7 @@ export const TeaDetails = {
     m("div",
       m("div", state.tea),
       m("a", { href: "javascript://",
-        onclick: () => actions.navigateTo(parentRoute(state.route, route))
+        onclick: () => actions.navigateTo(parentRoute(route))
       }, "Back to list")
     )
   )

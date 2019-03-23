@@ -1,7 +1,7 @@
 import { PS } from "patchinko/explicit";
 import { fold } from "static-tagged-union";
 
-import { Route, navigateTo, routeList } from "../root";
+import { Route, navigateTo } from "../root";
 
 export const login = {
   actions: update => ({
@@ -14,7 +14,7 @@ export const login = {
     login: username =>
       update(Object.assign({
         user: username
-      }, navigateTo(Route.Home())))
+      }, navigateTo([ Route.Home() ])))
   }),
 
   computed: state => ({
@@ -22,7 +22,7 @@ export const login = {
   }),
 
   service: (state, update) => (state.arriving) && (() =>
-    routeList(state.route).forEach(fold({
+    state.route.forEach(fold({
       Login: () => {
         update({
           arriving: false,

@@ -2,12 +2,11 @@ import React, { Component } from "react";
 import { bifold, fold } from "static-tagged-union";
 
 import { TeaDetails } from "../teaDetails";
-import { Route, childRoute } from "routing-common/src/root";
+import { Route, childRoute, nextRoute } from "routing-common/src/root";
 
 export class Tea extends Component {
   render() {
     const { state, actions, route } = this.props;
-    const child = route.params.child;
 
     return (
       <div>
@@ -21,7 +20,7 @@ export class Tea extends Component {
                   <a href="javascript://"
                     onClick={() =>
                       actions.navigateTo(
-                        childRoute(state.route, route, Route.TeaDetails({ id: tea.id }))
+                        childRoute(route, [ Route.TeaDetails({ id: tea.id }) ])
                       )
                     }
                   >{tea.title}</a>
@@ -32,8 +31,8 @@ export class Tea extends Component {
         </ul>
         {
           fold({
-            TeaDetails: () => <TeaDetails state={state} actions={actions} route={child} />
-          })(child)
+            TeaDetails: () => <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
+          })(route.child)
         }
       </div>
     );

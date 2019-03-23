@@ -9,7 +9,7 @@ export const Beverages = ({ state, actions, route }) => (
         <a href="javascript://"
           onClick={
             () => actions.navigateTo(
-              siblingRoute(state.route, route, Route.Beverage({ id: beverage.id }))
+              siblingRoute(route, [ Route.Beverage({ id: beverage.id }) ])
             )
           }
         >{beverage.title}</a>

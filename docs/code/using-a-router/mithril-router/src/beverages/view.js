@@ -7,13 +7,11 @@ export const Beverages = {
     m("ul",
       state.beverages.map(beverage =>
         m("li", { key: beverage.id },
-          m("a", { href: document.location.hash + "/" + beverage.id, // FIXME
-            /*
+          m("a", { href: "javascript://", // document.location.hash + "/" + beverage.id, // FIXME
             onclick:
               () => actions.navigateTo(
-                siblingRoute(state.route, route, Route.Beverage({ id: beverage.id }))
+                siblingRoute(route, [ Route.Beverage({ id: beverage.id }) ])
               )
-            */
           }, beverage.title)
         )
       )
