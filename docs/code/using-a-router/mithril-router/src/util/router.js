@@ -4,25 +4,6 @@ import pathToRegexp from "path-to-regexp";
 import { Route } from "routing-common/src/root";
 
 /*
-const beverageRoutes = [
-  { path: "", route: Route.Beverages },
-  { path: "/:id", route: Route.Beverage, children: [
-    { path: "/brewer", route: Route.Brewer }
-  ] }
-];
-
-const routeMap = [
-  { path: "/", route: Route.Home },
-  { path: "/login", route: Route.Login },
-  { path: "/settings", route: Route.Settings },
-  { path: "/tea", route: Route.Tea, children: [
-    { path: "/:id", route: Route.TeaDetails }
-  ] },
-  { path: "/coffee", route: Route.Coffee, children: beverageRoutes },
-  { path: "/beer", route: Route.Beer, children: beverageRoutes }
-];
-*/
-
 const beverageRoutes = {
   Beverages: { path: "" },
   Beverage: { path: "/:id", children: {
@@ -60,20 +41,15 @@ const convertToPath = (route, localPathMap = pathMap) => {
   }
   return path;
 };
-
-/*
-
-"/beer/:id/brewer"
-  ^v
-Route.Beer({
-  child: Route.Beverage({
-    id,
-    child: Route.Brewer()
-  })
-})
-
 */
 
+/*
+"/beer/:id/brewer"
+  ^v
+[ Route.Beer(), Route.Beverage({ id }), Route.Brewer() ]
+*/
+
+/*
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
@@ -101,6 +77,21 @@ const createRoute = (id, config, path = "", result = {}) => {
   });
 
   return result;
+};
+*/
+
+const routeMap = {
+  "/": () => [ Route.Home() ],
+  "/login": () => [ Route.Login() ],
+  "/settings": () => [ Route.Settings() ],
+  "/tea": () => [ Route.Tea() ],
+  "/tea/:id": params => [ Route.Tea(), Route.TeaDetails(params) ],
+  "/coffee": () => [ Route.Coffee(), Route.Beverages() ],
+  "/coffee/:id": params => [ Route.Coffee(), Route.Beverage(params) ],
+  "/coffee/:id/brewer": params => [ Route.Coffee(), Route.Beverage(params), Route.Brewer ],
+  "/beer": () => [ Route.Beer(), Route.Beverages() ],
+  "/beer/:id": params => [ Route.Beer(), Route.Beverage(params) ],
+  "/beer/:id/brewer": params => [ Route.Beer(), Route.Beverage(params), Route.Brewer ]
 };
 
 export const createRoutes = ({ states, actions, App }) =>
