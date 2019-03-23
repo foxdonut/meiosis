@@ -3,7 +3,6 @@ import pathToRegexp from "path-to-regexp";
 
 import { Route } from "routing-common/src/root";
 
-/*
 const beverageRoutes = {
   Beverages: { path: "" },
   Beverage: { path: "/:id", children: {
@@ -22,6 +21,15 @@ const routeMap = {
   Beer: { path: "/beer", children: beverageRoutes }
 };
 
+const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) => Object.entries(routeMap)
+  .reduce((result, [id, config]) => {
+    const localPath = path + config.path;
+    const routeFn = params => fn(params).concat([ Route[id](params) ]);
+    result[localPath] = routeFn;
+    createRouteMap(config.children, localPath, routeFn, result);
+    return result;
+  }, acc);
+
 const createPathMap = routeMap => Object.entries(routeMap)
   .reduce((result, [id, config]) => {
     result[id] = {
@@ -31,7 +39,7 @@ const createPathMap = routeMap => Object.entries(routeMap)
     return result;
   }, {});
 
-const pathMap = createPathMap(routeMap);
+// const pathMap = createPathMap(routeMap);
 
 const convertToPath = (route, localPathMap = pathMap) => {
   const localPathDef = localPathMap[route.case];
@@ -41,7 +49,6 @@ const convertToPath = (route, localPathMap = pathMap) => {
   }
   return path;
 };
-*/
 
 /*
 "/beer/:id/brewer"
@@ -49,7 +56,6 @@ const convertToPath = (route, localPathMap = pathMap) => {
 [ Route.Beer(), Route.Beverage({ id }), Route.Brewer() ]
 */
 
-/*
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
@@ -67,19 +73,7 @@ export const LocationBarSync = ({ state }) => {
   return null;
 };
 
-const createRoute = (id, config, path = "", result = {}) => {
-  const localPath = path + config.path;
-  result[localPath] = value => Route[id]({ value });
-
-  Object.entries(config.children || {}).forEach(([childId, childConfig]) => {
-    const childPath = localPath + childConfig.path;
-    result[childPath] = value => Route[id]({ value, child: Route[childId]({ value }) });
-  });
-
-  return result;
-};
-*/
-
+/*
 const routeMap = {
   "/": () => [ Route.Home() ],
   "/login": () => [ Route.Login() ],
@@ -93,9 +87,10 @@ const routeMap = {
   "/beer/:id": params => [ Route.Beer(), Route.Beverage(params) ],
   "/beer/:id/brewer": params => [ Route.Beer(), Route.Beverage(params), Route.Brewer ]
 };
+*/
 
 export const createRoutes = ({ states, actions, App }) =>
-  Object.entries(routeMap).reduce((result, [path, fn]) => {
+  Object.entries(createRouteMap(routeMap)).reduce((result, [path, fn]) => {
     result[path] = {
       onmatch: value => actions.navigateTo(fn(value)),
       render: () => m(App, { state: states(), actions })
