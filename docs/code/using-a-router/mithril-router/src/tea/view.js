@@ -6,7 +6,7 @@ import { Route, childRoute } from "routing-common/src/root";
 
 export const Tea = {
   view: ({ attrs: { state, actions, route } }) => {
-    const child = route.value.child;
+    const child = route.params.child;
 
     return (
       m("div",

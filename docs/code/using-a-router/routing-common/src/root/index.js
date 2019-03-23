@@ -25,38 +25,38 @@ const omit = (obj, prop) => Object.keys(obj).reduce(
   }, {});
 
 export const parentRoute = (route, local) => ({
-  case: route.case,
-  value: (route.case === local.case) || (route.value.child.case === local.case)
-    ? omit(route.value, "child")
-    : parentRoute(route.value.child, local)
+  id: route.id,
+  params: (route.id === local.id) || (route.params.child.id === local.id)
+    ? omit(route.params, "child")
+    : parentRoute(route.params.child, local)
 });
 
 export const siblingRoute = (route, local, child) => {
   const result = parentRoute(route, local);
-  result.value = Object.assign({ child }, result.value);
+  result.params = Object.assign({ child }, result.params);
   return result;
 };
 
 export const childRoute = (route, local, child) => {
-  if (route.case === local.case) {
-    const value = Object.assign({}, local.value, { child });
-    const result = Object.assign({}, local, { value });
+  if (route.id === local.id) {
+    const params = Object.assign({}, local.params, { child });
+    const result = Object.assign({}, local, { params });
     return result;
   }
   else {
     const result = parentRoute(route, local);
-    result.value = Object.assign({
+    result.params = Object.assign({
       child: {
-        case: local.case,
-        value: Object.assign({}, local.value, { child })
+        id: local.id,
+        params: Object.assign({}, local.params, { child })
       }
-    }, result.value);
+    }, result.params);
     return result;
   }
 };
 
 export const routeList = route =>
-  route ? [ route ].concat(routeList(route.value.child)) : [];
+  route ? [ route ].concat(routeList(route.params.child)) : [];
 
 export const navigateTo = route => ({
   route: route,

@@ -7,7 +7,7 @@ import { Route, childRoute } from "routing-common/src/root";
 export class Tea extends Component {
   render() {
     const { state, actions, route } = this.props;
-    const child = route.value.child;
+    const child = route.params.child;
 
     return (
       <div>

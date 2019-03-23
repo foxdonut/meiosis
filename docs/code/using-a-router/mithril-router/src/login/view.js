@@ -4,7 +4,7 @@ import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
   view: ({ attrs: { state, actions } }) => {
-    const message = state.route.value.message;
+    const message = state.route.params.message;
     return m("div",
       (message ? m("div", message) : null),
       m("div", "Login"),

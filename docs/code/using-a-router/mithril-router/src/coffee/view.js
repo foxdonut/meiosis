@@ -11,7 +11,7 @@ const componentMap = fold({
 
 export const Coffee = {
   view: ({ attrs: { state, actions, route } }) => {
-    const child = route.value.child;
+    const child = route.params.child;
     const Component = componentMap(child);
 
     return (

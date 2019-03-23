@@ -9,9 +9,9 @@ const componentMap = fold({
 });
 
 export const Beverage = ({ state, actions, route }) => {
-  const child = route.value.child;
+  const child = route.params.child;
   const Component = componentMap(child);
-  const id = route.value.id;
+  const id = route.params.id;
 
   return (
     <div>
