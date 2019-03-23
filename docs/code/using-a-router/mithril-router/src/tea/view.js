@@ -1,6 +1,7 @@
 import m from "mithril";
 import { bifold, fold } from "static-tagged-union";
 
+import { toPath } from "../util/router";
 import { TeaDetails } from "../teaDetails";
 import { Route, childRoute, nextRoute } from "routing-common/src/root";
 
@@ -13,11 +14,8 @@ export const Tea = {
           () => m("li", "Loading..."),
           teas => teas.map(tea => (
             m("li", { key: tea.id },
-              m("a", { href: "javascript://",
-                onclick: () =>
-                  actions.navigateTo(
-                    childRoute(route, [ Route.TeaDetails({ id: tea.id }) ])
-                  )
+              m("a", {
+                href: toPath(childRoute(route, [ Route.TeaDetails({ id: tea.id }) ]))
               }, tea.title)
             )
           ))

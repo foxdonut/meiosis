@@ -30,23 +30,16 @@ const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) => Ob
     return result;
   }, acc);
 
-const createPathMap = routeMap => Object.entries(routeMap)
-  .reduce((result, [id, config]) => {
-    result[id] = {
-      toPath: pathToRegexp.compile(config.path),
-      children: createPathMap(config.children)
-    };
-    return result;
-  }, {});
+const convertToPath = routes => {
+  console.log('convertToPath:', routes)
+  let path = "";
+  let lookup = routeMap;
 
-// const pathMap = createPathMap(routeMap);
+  routes.forEach(route => {
+    path += pathToRegexp.compile(lookup[route.id].path)(route.params);
+    lookup = lookup[route.id].children;
+  });
 
-const convertToPath = (route, localPathMap = pathMap) => {
-  const localPathDef = localPathMap[route.case];
-  let path = localPathDef.toPath(route.value);
-  if (route.child) {
-    path += convertToPath(route.child, localPathDef.children);
-  }
   return path;
 };
 
@@ -59,7 +52,6 @@ const convertToPath = (route, localPathMap = pathMap) => {
 const getPath = () => document.location.hash;
 const setPath = path => window.history.pushState({}, "", path);
 
-// converts { case, value } to path
 export const toPath = route => "#!" + convertToPath(route);
 
 // Keeps the location bar in sync
