@@ -1,4 +1,7 @@
-import { fold } from "static-tagged-union";
+import { bifold, contains } from "static-tagged-union";
+
+import { Route } from "../root";
+import { Tpipe } from "../util";
 
 export const beverages = [
   { id: "c1", title: "Coffee 1", description: "Description of Coffee 1" },
@@ -16,16 +19,22 @@ const beverageMap = beverages.reduce((result, next) => {
 }, {});
 
 export const beverage = {
-  service: (state, update) => {
-    if (state.arriving) {
-      state.route.forEach(fold({
-        Beverage: ({ id }) => {
-          update({
-            arriving: false,
-            beverage: beverageMap[id].description
-          });
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Beverage()),
+      bifold(
+        () => {
+          if (Object.keys(state.beverage).length > 0) {
+            update({ beverage: {} });
+          }
+        },
+        ({ id }) => {
+          if (!state.beverage[id]) {
+            const description = beverageMap[id].description;
+            update({ beverage: { [id]: description } });
+          }
         }
-      }));
-    }
-  }
+      )
+    )
 };

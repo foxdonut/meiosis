@@ -2,32 +2,28 @@ import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { beers } from "../beverage";
 import { Loaded, Route } from "../root";
-import { Tpipe } from "../util";
+import { T, Tpipe } from "../util";
 
 export const beer = {
-  service: (state, update) => {
-    if (state.arriving) {
-      Tpipe(
-        state.route,
-        contains(Route.Beer()),
-        bifold(
-          () => map(() => update({ beers: Loaded.N() }))(state.beers),
-          () => unless(
-            () => {
-              update({
-                arriving: false,
-                pleaseWait: true
-              });
-
-              setTimeout(() => update({
-                pleaseWait: false,
-                beverages: beers,
-                beers: Loaded.Y()
-              }), 1000);
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Beer()),
+      bifold(
+        () => T(state.beers, map(() => update({ beers: Loaded.N() }))),
+        () => T(state.beers, unless(
+          () => {
+            if (!state.pleaseWait) {
+              update({ pleaseWait: true });
             }
-          )(state.beers)
-        )
-      );
-    }
-  }
+
+            setTimeout(() => update({
+              pleaseWait: false,
+              beverages: beers,
+              beers: Loaded.Y()
+            }), 1000);
+          }
+        ))
+      )
+    )
 };

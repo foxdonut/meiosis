@@ -6,7 +6,7 @@ import { toPath } from "../util/router";
 export const TeaDetails = {
   view: ({ attrs: { state, route } }) => (
     m("div",
-      m("div", state.tea),
+      m("div", state.tea[route.local.params.id]),
       m("a", { href: toPath(parentRoute(route)) }, "Back to list")
     )
   )

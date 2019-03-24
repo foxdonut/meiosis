@@ -14,7 +14,7 @@ export const Beverage = ({ state, actions, route }) => {
 
   return (
     <div>
-      <div>{state.beverage}</div>
+      <div>{state.beverage[id]}</div>
       <div>
         <a href="javascript://"
           onClick={

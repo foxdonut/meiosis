@@ -16,7 +16,7 @@ export const Beverage = {
 
     return (
       m("div",
-        m("div", state.beverage),
+        m("div", state.beverage[id]),
         m("div",
           m("a",
             { href: toPath(childRoute(route, [ Route.Brewer({ id }) ])) },

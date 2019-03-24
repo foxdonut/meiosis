@@ -2,26 +2,20 @@ import { bifold, contains, map, unless } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
 import { Loaded, Route } from "../root";
-import { Tpipe } from "../util";
+import { T, Tpipe } from "../util";
 
 export const tea = {
-  service: (state, update) => {
-    if (state.arriving) {
-      Tpipe(
-        state.route,
-        contains(Route.Tea()),
-        bifold(
-          () => map(() => update({ teas: Loaded.N() }))(state.teas),
-          () => unless(
-            () => setTimeout(() => {
-              update({
-                arriving: false,
-                teas: Loaded.Y(teas)
-              });
-            }, 500)
-          )(state.teas)
-        )
-      );
-    }
-  }
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Tea()),
+      bifold(
+        () => T(state.teas, map(() => update({ teas: Loaded.N() }))),
+        () => T(state.teas, unless(
+          () => setTimeout(() => {
+            update({ teas: Loaded.Y(teas) });
+          }, 500)
+        ))
+      )
+    )
 };

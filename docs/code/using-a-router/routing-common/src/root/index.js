@@ -42,10 +42,7 @@ export const childRoute = (route, routeList) =>
 export const siblingRoute = (route, routeList) =>
   route.routes.slice(0, route.index).concat(routeList);
 
-export const navigateTo = route => ({
-  route,
-  arriving: true
-});
+export const navigateTo = route => ({ route });
 
 export const root = {
   actions: update => ({

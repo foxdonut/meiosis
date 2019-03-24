@@ -10,19 +10,16 @@ export const settings = {
     }, navigateTo([ Route.Home() ])))
   }),
 
-  service: (state, update) => {
-    if (state.arriving) {
-      Tpipe(
-        state.route,
-        contains(Route.Settings()),
-        map(() => {
-          if (!state.user) {
-            update(navigateTo(
-              [ Route.Login({ message: "Please login." }) ]
-            ));
-          }
-        })
-      );
-    }
-  }
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Settings()),
+      map(() => {
+        if (!state.user) {
+          update(navigateTo(
+            [ Route.Login({ message: "Please login." }) ]
+          ));
+        }
+      })
+    )
 };

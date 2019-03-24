@@ -1,16 +1,24 @@
-import { fold } from "static-tagged-union";
+import { bifold, contains } from "static-tagged-union";
+
+import { Route } from "../root";
+import { Tpipe } from "../util";
 
 export const brewer = {
-  service: (state, update) => {
-    if (state.arriving) {
-      state.route.forEach(fold({
-        Brewer: ({ id }) => {
-          update({
-            arriving: false,
-            brewer: `Brewer of beverage ${id}`
-          });
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Brewer()),
+      bifold(
+        () => {
+          if (state.brewer) {
+            update({ brewer: null });
+          }
+        },
+        ({ id }) => {
+          if (!state.brewer) {
+            update({ brewer: `Brewer of beverage ${id}` });
+          }
         }
-      }));
-    }
-  }
+      )
+    )
 };
