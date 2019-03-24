@@ -1,4 +1,4 @@
-import { bifold, contains } from "static-tagged-union";
+import { contains, fold } from "static-tagged-union";
 
 import { Route } from "../root";
 import { Tpipe } from "../util";
@@ -23,18 +23,18 @@ export const beverage = {
     Tpipe(
       state.route,
       contains(Route.Beverage()),
-      bifold(
-        () => {
-          if (Object.keys(state.beverage).length > 0) {
-            update({ beverage: {} });
-          }
-        },
-        ({ id }) => {
+      fold({
+        Y: ({ id }) => {
           if (!state.beverage[id]) {
             const description = beverageMap[id].description;
             update({ beverage: { [id]: description } });
           }
+        },
+        N: () => {
+          if (Object.keys(state.beverage).length > 0) {
+            update({ beverage: {} });
+          }
         }
-      )
+      })
     )
 };

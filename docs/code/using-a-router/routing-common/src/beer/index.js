@@ -1,4 +1,4 @@
-import { bifold, contains, map, unless } from "static-tagged-union";
+import { contains, fold } from "static-tagged-union";
 
 import { beers } from "../beverage";
 import { Loaded, Route } from "../root";
@@ -9,10 +9,9 @@ export const beer = {
     Tpipe(
       state.route,
       contains(Route.Beer()),
-      bifold(
-        () => T(state.beers, map(() => update({ beers: Loaded.N() }))),
-        () => T(state.beers, unless(
-          () => {
+      fold({
+        Y: () => T(state.beers, fold({
+          N: () => {
             if (!state.pleaseWait) {
               update({ pleaseWait: true });
             }
@@ -23,7 +22,10 @@ export const beer = {
               beers: Loaded.Y()
             }), 1000);
           }
-        ))
-      )
+        })),
+        N: () => T(state.beers, fold({
+          Y: () => update({ beers: Loaded.N() })
+        }))
+      })
     )
 };

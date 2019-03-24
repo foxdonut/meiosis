@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { bifold, fold } from "static-tagged-union";
+import { fold } from "static-tagged-union";
 
 import { TeaDetails } from "../teaDetails";
 import { Route, childRoute, nextRoute } from "routing-common/src/root";
@@ -13,9 +13,9 @@ export class Tea extends Component {
         <div>Tea Page</div>
         <ul>
           {
-            bifold(
-              () => <li>Loading...</li>,
-              teas => teas.map(tea => (
+            fold({
+              N: () => <li>Loading...</li>,
+              Y: teas => teas.map(tea => (
                 <li key={tea.id}>
                   <a href="javascript://"
                     onClick={() =>
@@ -26,7 +26,7 @@ export class Tea extends Component {
                   >{tea.title}</a>
                 </li>
               ))
-            )(state.teas)
+            })(state.teas)
           }
         </ul>
         {

@@ -13,10 +13,6 @@ import { brewer } from "../brewer";
 export const app = {
   initialState: () => ({
     route: [ Route.Loading() ],
-    login: {
-      username: "",
-      password: ""
-    },
     teas: Loaded.N(),
     tea: {},
     coffees: Loaded.N(),

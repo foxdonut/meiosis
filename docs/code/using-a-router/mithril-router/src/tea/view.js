@@ -1,5 +1,5 @@
 import m from "mithril";
-import { bifold, fold } from "static-tagged-union";
+import { fold } from "static-tagged-union";
 
 import { toPath } from "../util/router";
 import { TeaDetails } from "../teaDetails";
@@ -10,16 +10,16 @@ export const Tea = {
     m("div",
       m("div", "Tea Page"),
       m("ul",
-        bifold(
-          () => m("li", "Loading..."),
-          teas => teas.map(tea => (
+        fold({
+          N: () => m("li", "Loading..."),
+          Y: teas => teas.map(tea => (
             m("li", { key: tea.id },
               m("a", {
                 href: toPath(childRoute(route, [ Route.TeaDetails({ id: tea.id }) ]))
               }, tea.title)
             )
           ))
-        )(state.teas)
+        })(state.teas)
       ),
       fold({
         TeaDetails: () => m(TeaDetails, { state, actions, route: nextRoute(route) })

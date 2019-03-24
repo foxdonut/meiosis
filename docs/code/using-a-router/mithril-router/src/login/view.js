@@ -14,7 +14,7 @@ export const Login = {
             type: "text",
             placeholder: "username",
             value: state.login.username,
-            onchange: evt =>
+            oninput: evt =>
               actions.username(evt.target.value)
           })
         ),
@@ -23,7 +23,7 @@ export const Login = {
             type: "password",
             placeholder: "password",
             value: state.login.password,
-            onchange: evt =>
+            oninput: evt =>
               actions.password(evt.target.value)
           })
         ),

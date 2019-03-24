@@ -1,4 +1,4 @@
-import { contains, map } from "static-tagged-union";
+import { contains, fold } from "static-tagged-union";
 
 import { Route, navigateTo } from "../root";
 import { Tpipe } from "../util";
@@ -14,11 +14,13 @@ export const settings = {
     Tpipe(
       state.route,
       contains(Route.Settings()),
-      map(() => {
-        if (!state.user) {
-          update(navigateTo(
-            [ Route.Login({ message: "Please login." }) ]
-          ));
+      fold({
+        Y: () => {
+          if (!state.user) {
+            update(navigateTo(
+              [ Route.Login({ message: "Please login." }) ]
+            ));
+          }
         }
       })
     )

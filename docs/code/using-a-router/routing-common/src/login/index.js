@@ -1,7 +1,8 @@
 import { PS } from "patchinko/explicit";
-import { fold } from "static-tagged-union";
+import { contains, fold } from "static-tagged-union";
 
 import { Route, navigateTo } from "../root";
+import { Tpipe } from "../util";
 
 export const login = {
   actions: update => ({
@@ -18,22 +19,29 @@ export const login = {
   }),
 
   computed: state => ({
-    usernameLength: state.login.username.length
+    usernameLength: state.login && state.login.username.length
   }),
 
-  service: (state, update) => {
-    if (state.arriving) {
-      state.route.forEach(fold({
-        Login: () => {
-          update({
-            arriving: false,
-            login: PS({
-              username: "",
-              password: ""
-            })
-          });
+  service: (state, update) =>
+    Tpipe(
+      state.route,
+      contains(Route.Login()),
+      fold({
+        Y: () => {
+          if (!state.login) {
+            update({
+              login: PS({
+                username: "",
+                password: ""
+              })
+            });
+          }
+        },
+        N: () => {
+          if (state.login) {
+            update({ login: null });
+          }
         }
-      }));
-    }
-  }
+      })
+    )
 };
