@@ -21,14 +21,15 @@ const routeMap = {
   Beer: { path: "/beer", children: beverageRoutes }
 };
 
-const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) => Object.entries(routeMap)
-  .reduce((result, [id, config]) => {
-    const localPath = path + config.path;
-    const routeFn = params => fn(params).concat([ Route[id](params) ]);
-    result[localPath] = routeFn;
-    createRouteMap(config.children, localPath, routeFn, result);
-    return result;
-  }, acc);
+const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) =>
+  Object.entries(routeMap)
+    .reduce((result, [id, config]) => {
+      const localPath = path + config.path;
+      const routeFn = params => fn(params).concat([ Route[id](params) ]);
+      result[localPath] = routeFn;
+      createRouteMap(config.children, localPath, routeFn, result);
+      return result;
+    }, acc);
 
 const convertToPath = routes => {
   let path = "";

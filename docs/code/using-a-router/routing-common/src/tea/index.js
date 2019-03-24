@@ -5,21 +5,23 @@ import { Loaded, Route } from "../root";
 import { Tpipe } from "../util";
 
 export const tea = {
-  service: (state, update) => (state.arriving) && (() =>
-    Tpipe(
-      state.route,
-      contains(Route.Tea()),
-      bifold(
-        () => map(() => update({ teas: Loaded.N() }))(state.teas),
-        () => unless(
-          () => setTimeout(() => {
-            update({
-              arriving: false,
-              teas: Loaded.Y(teas)
-            });
-          }, 500)
-        )(state.teas)
-      )
-    )
-  )
+  service: (state, update) => {
+    if (state.arriving) {
+      Tpipe(
+        state.route,
+        contains(Route.Tea()),
+        bifold(
+          () => map(() => update({ teas: Loaded.N() }))(state.teas),
+          () => unless(
+            () => setTimeout(() => {
+              update({
+                arriving: false,
+                teas: Loaded.Y(teas)
+              });
+            }, 500)
+          )(state.teas)
+        )
+      );
+    }
+  }
 };
