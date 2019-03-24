@@ -31,7 +31,6 @@ const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) => Ob
   }, acc);
 
 const convertToPath = routes => {
-  console.log('convertToPath:', routes)
   let path = "";
   let lookup = routeMap;
 

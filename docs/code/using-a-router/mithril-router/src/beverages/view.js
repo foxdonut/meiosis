@@ -1,18 +1,16 @@
 import m from "mithril";
 
 import { Route, siblingRoute } from "routing-common/src/root";
+import { toPath } from "../util/router";
 
 export const Beverages = {
-  view: ({ attrs: { state, actions, route } }) => (
+  view: ({ attrs: { state, route } }) => (
     m("ul",
       state.beverages.map(beverage =>
         m("li", { key: beverage.id },
-          m("a", { href: document.location.hash + "/" + beverage.id, // FIXME
-            onclick:
-              () => actions.navigateTo(
-                siblingRoute(route, [ Route.Beverage({ id: beverage.id }) ])
-              )
-          }, beverage.title)
+          m("a",
+            { href: toPath(siblingRoute(route, [ Route.Beverage({ id: beverage.id }) ])) },
+            beverage.title)
         )
       )
     )

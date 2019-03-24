@@ -37,7 +37,7 @@ export const parentRoute = route =>
   route.routes.slice(0, route.index);
 
 export const childRoute = (route, routeList) =>
-  route.routes.concat(routeList);
+  route.routes.slice(0, route.index + 1).concat(routeList);
 
 export const siblingRoute = (route, routeList) =>
   route.routes.slice(0, route.index).concat(routeList);

@@ -8,7 +8,8 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { initRoute } from "routing-common/src/root";
+import { Route, initRoute } from "routing-common/src/root";
+import { toPath } from "../util/router";
 
 const componentMap = fold({
   Loading: () => () => m("div", "Loading, please wait..."),
@@ -25,28 +26,27 @@ export const Root = {
     const route = initRoute(state.route);
     const Component = componentMap(route.local);
     const isActive = tab => tab === Component ? ".active" : "";
-
     return (
       m("div",
         m("nav.navbar.navbar-default",
           m("ul.nav.navbar-nav",
             m("li" + isActive(Home),
-              m("a", { href: "/", oncreate: m.route.link }, "Home")
+              m("a", { href: toPath([ Route.Home() ]) }, "Home")
             ),
             m("li" + isActive(Login),
-              m("a", { href: "/login", oncreate: m.route.link }, "Login")
+              m("a", { href: toPath([ Route.Login() ]) }, "Login")
             ),
             m("li" + isActive(Settings),
-              m("a", { href: "/settings", oncreate: m.route.link }, "Settings")
+              m("a", { href: toPath([ Route.Settings() ]) }, "Settings")
             ),
             m("li" + isActive(Tea),
-              m("a", { href: "/tea", oncreate: m.route.link }, "Tea")
+              m("a", { href: toPath([ Route.Tea() ]) }, "Tea")
             ),
             m("li" + isActive(Coffee),
-              m("a", { href: "/coffee", oncreate: m.route.link }, "Coffee")
+              m("a", { href: toPath([ Route.Coffee(), Route.Beverages() ]) }, "Coffee")
             ),
             m("li" + isActive(Beer),
-              m("a", { href: "/beer", oncreate: m.route.link }, "Beer")
+              m("a", { href: toPath([ Route.Beer(), Route.Beverages() ]) }, "Beer")
             )
           )
         ),

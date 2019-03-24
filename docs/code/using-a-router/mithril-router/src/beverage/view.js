@@ -2,6 +2,7 @@ import m from "mithril";
 import { fold } from "static-tagged-union";
 
 import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/root";
+import { toPath } from "../util/router";
 import { Brewer } from "../brewer";
 
 const componentMap = fold({
@@ -17,21 +18,15 @@ export const Beverage = {
       m("div",
         m("div", state.beverage),
         m("div",
-          m("a", { href: document.location.hash + "/brewer", // FIXME
-            onclick:
-              () => actions.navigateTo(
-                childRoute(route, [ Route.Brewer({ id }) ])
-              )
-          }, "Brewer")
+          m("a",
+            { href: toPath(childRoute(route, [ Route.Brewer({ id }) ])) },
+            "Brewer")
         ),
         Component && m(Component, { state, actions, route: nextRoute(route) }),
         m("div",
-          m("a", { href: "javascript://",
-            onclick:
-              () => actions.navigateTo(
-                siblingRoute(route, [ Route.Beverages() ])
-              )
-          }, "Back to list")
+          m("a",
+            { href: toPath(siblingRoute(route, [ Route.Beverages() ])) },
+            "Back to list")
         )
       )
     );
