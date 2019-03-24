@@ -9,7 +9,7 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
 import { Route, initRoute } from "routing-common/src/root";
-import { toPath } from "../util/router";
+import { toPath, LocationBarSync } from "../util/router";
 
 const componentMap = fold({
   Loading: () => () => m("div", "Loading, please wait..."),
@@ -51,6 +51,7 @@ export const Root = {
           )
         ),
         m(Component, { state, actions, route }),
+        m(LocationBarSync, { state }),
         /* Show or hide the Please Wait modal. See public/css/style.css */
         m("div", { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
           m("div.modal",

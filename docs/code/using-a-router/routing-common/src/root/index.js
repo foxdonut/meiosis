@@ -36,11 +36,11 @@ export const nextRoute = route => {
 export const parentRoute = route =>
   route.routes.slice(0, route.index);
 
-export const childRoute = (route, routeList) =>
-  route.routes.slice(0, route.index + 1).concat(routeList);
+export const childRoute = (route, routes) =>
+  route.routes.slice(0, route.index + 1).concat(routes);
 
-export const siblingRoute = (route, routeList) =>
-  route.routes.slice(0, route.index).concat(routeList);
+export const siblingRoute = (route, routes) =>
+  route.routes.slice(0, route.index).concat(routes);
 
 export const navigateTo = route => ({ route });
 
