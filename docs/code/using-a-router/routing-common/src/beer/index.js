@@ -18,8 +18,7 @@ export const beer = {
 
             setTimeout(() => update({
               pleaseWait: false,
-              beverages: beers,
-              beers: Loaded.Y()
+              beers: Loaded.Y(beers)
             }), 1000);
           }
         })),

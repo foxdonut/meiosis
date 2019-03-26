@@ -18,8 +18,7 @@ export const coffee = {
 
             setTimeout(() => update({
               pleaseWait: false,
-              beverages: coffees,
-              coffees: Loaded.Y()
+              coffees: Loaded.Y(coffees)
             }), 1000);
           }
         })),

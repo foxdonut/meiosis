@@ -17,7 +17,6 @@ export const app = {
     tea: {},
     coffees: Loaded.N(),
     beers: Loaded.N(),
-    beverages: [],
     beverage: {}
   }),
 

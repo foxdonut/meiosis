@@ -17,7 +17,9 @@ export const Beer = {
     return (
       m("div",
         m("div", "Beer Page"),
-        m(Component, { state, actions, route: nextRoute(route) })
+        m(Component, {
+          state, actions, route: nextRoute(route), beveragesId: "beers"
+        })
       )
     );
   }

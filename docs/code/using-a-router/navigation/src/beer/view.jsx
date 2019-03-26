@@ -16,7 +16,8 @@ export const Beer = ({ state, actions, route }) => {
   return (
     <div>
       <div>Beer Page</div>
-      <Component state={state} actions={actions} route={nextRoute(route)} />
+      <Component state={state} actions={actions} route={nextRoute(route)}
+        beveragesId="beers" />
     </div>
   );
 };
