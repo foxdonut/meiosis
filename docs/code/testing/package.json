@@ -1,0 +1,37 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "meiosis docs example",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "jest",
+    "meiosis",
+    "testing"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.15.1",
+    "jest": "^24.4.0",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
+  }
+}
