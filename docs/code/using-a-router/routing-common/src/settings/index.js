@@ -10,14 +10,14 @@ export const settings = {
     }, navigateTo([ Route.Home() ])))
   }),
 
-  service: (state, update) =>
+  computed: state =>
     Tpipe(
       state.route,
       contains(Route.Settings()),
       fold({
         Y: () => {
           if (!state.user) {
-            update(navigateTo(
+            return (navigateTo(
               [ Route.Login({ message: "Please login." }) ]
             ));
           }

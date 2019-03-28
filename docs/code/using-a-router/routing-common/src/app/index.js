@@ -27,12 +27,12 @@ export const app = {
   ),
 
   computed: [
-    login.computed
+    login.computed,
+    settings.computed
   ],
 
   services: [
     login.service,
-    settings.service,
     tea.service,
     teaDetails.service,
     coffee.service,

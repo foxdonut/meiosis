@@ -16,7 +16,8 @@ const routeMap = {
     TeaDetails: "/:id"
   }],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer", beverageRoutes]
+  Beer: ["/beer", beverageRoutes],
+  Invalid: "/:404..."
 };
 
 const getConfig = config =>
@@ -57,9 +58,11 @@ export const toPath = route => "#!" + convertToPath(route);
 // Keeps the location bar in sync
 export const LocationBarSync = {
   view: ({ attrs: { state } }) => {
-    const path = toPath(state.route);
-    if (getPath() !== path) {
-      setPath(path);
+    if (!state.route[0].id === "Invalid") {
+      const path = toPath(state.route);
+      if (getPath() !== path) {
+        setPath(path);
+      }
     }
     return null;
   }

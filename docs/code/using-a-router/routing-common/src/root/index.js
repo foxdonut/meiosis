@@ -11,7 +11,8 @@ export const Route = TaggedUnion([
   "Beer",
   "Beverages",
   "Beverage",
-  "Brewer"
+  "Brewer",
+  "Invalid"
 ]);
 
 export const Loaded = Maybe;

@@ -12,13 +12,14 @@ import { Route, initRoute } from "routing-common/src/root";
 import { toPath, LocationBarSync } from "../util/router";
 
 const componentMap = fold({
-  Loading: () => () => m("div", "Loading, please wait..."),
+  Loading: () => ({ view: () => m("div", "Loading, please wait...") }),
   Home: () => Home,
   Login: () => Login,
   Settings: () => Settings,
   Tea: () => Tea,
   Coffee: () => Coffee,
-  Beer: () => Beer
+  Beer: () => Beer,
+  Invalid: () => ({ view: () => m("div", "Oops, page not found.") })
 });
 
 export const Root = {
