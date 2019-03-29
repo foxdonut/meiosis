@@ -26,13 +26,15 @@ export const app = {
     settings.actions(update)
   ),
 
+  accept: [
+    settings.accept
+  ],
+
   computed: [
-    login.computed,
-    settings.computed
+    login.computed
   ],
 
   services: [
-    login.service,
     tea.service,
     teaDetails.service,
     coffee.service,

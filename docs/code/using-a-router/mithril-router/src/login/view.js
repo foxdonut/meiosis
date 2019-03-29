@@ -4,7 +4,8 @@ import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
   view: ({ attrs: { state, actions, route } }) => {
-    const message = route.local.params.message;
+    const { message, returnTo } = route.local.params;
+
     return m("div",
       (message ? m("div", message) : null),
       m("div", "Login"),
@@ -30,7 +31,7 @@ export const Login = {
         m("button.btn.btn-primary", {
           type: "submit",
           onclick: pipe(preventDefault,
-            () => actions.login(state.login.username))
+            () => actions.login(state.login.username, returnTo))
         }, "Login")
       )
     );

@@ -10,7 +10,7 @@ export const settings = {
     }, navigateTo([ Route.Home() ])))
   }),
 
-  computed: state =>
+  accept: state =>
     Tpipe(
       state.route,
       contains(Route.Settings()),
@@ -18,7 +18,7 @@ export const settings = {
         Y: () => {
           if (!state.user) {
             return (navigateTo(
-              [ Route.Login({ message: "Please login." }) ]
+              [ Route.Login({ message: "Please login.", returnTo: Route.Settings() }) ]
             ));
           }
         }

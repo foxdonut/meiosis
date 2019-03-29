@@ -5,7 +5,8 @@ import { pipe, preventDefault } from "routing-common/src/util";
 export class Login extends Component {
   render() {
     const { state, actions, route } = this.props;
-    const message = route.local.params.message;
+    const { message, returnTo } = route.local.params;
+
     return (
       <div>
         {message ? <div>{message}</div> : null}
@@ -27,7 +28,7 @@ export class Login extends Component {
           </div>
           <button type="submit" className="btn btn-primary"
             onClick={pipe(preventDefault,
-              () => actions.login(state.login.username))}>Login</button>
+              () => actions.login(state.login.username, returnTo))}>Login</button>
         </form>
       </div>
     );

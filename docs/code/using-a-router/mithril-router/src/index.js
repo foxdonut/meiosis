@@ -9,11 +9,15 @@ const update = stream();
 
 Promise.resolve().then(app.initialState).then(initialState => {
   const models = stream.scan(P, initialState, update);
-  const actions = app.actions(update);
 
-  const computed = models.map(state =>
+  const accept = models.map(state =>
+    app.accept.reduce((x, f) => P(x, f(x)), state)
+  );
+
+  const computed = accept.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
   );
+
   computed.map(state => app.services.map(service => service(state, update)));
 
   const states = stream();
@@ -28,6 +32,8 @@ Promise.resolve().then(app.initialState).then(initialState => {
       { stream: states, label: "states" }
     ]
   });
+
+  const actions = app.actions(update);
 
   m.route(document.getElementById("app"), "/",
     createRoutes({ states, actions, update, App }));
