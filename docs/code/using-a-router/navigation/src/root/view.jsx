@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { fold } from "static-tagged-union";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -10,22 +9,22 @@ import { Beer } from "../beer";
 
 import { Route, initRoute } from "routing-common/src/root";
 
-const componentMap = fold({
-  Loading: () => () => (<div>Loading, please wait...</div>),
-  Home: () => Home,
-  Login: () => Login,
-  Settings: () => Settings,
-  Tea: () => Tea,
-  Coffee: () => Coffee,
-  Beer: () => Beer
-});
+const componentMap = {
+  Loading: () => (<div>Loading, please wait...</div>),
+  Home,
+  Login,
+  Settings,
+  Tea,
+  Coffee,
+  Beer
+};
 
 export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
     const route = initRoute(state.route);
-    const Component = componentMap(route.local);
+    const Component = componentMap[route.local.id];
     const isActive = tab => tab === Component ? "active" : "";
 
     return (

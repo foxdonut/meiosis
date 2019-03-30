@@ -1,17 +1,16 @@
 import React from "react";
-import { fold } from "static-tagged-union";
 
 import { nextRoute } from "routing-common/src/root";
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
 
-const componentMap = fold({
-  Beverages: () => Beverages,
-  Beverage: () => Beverage
-});
+const componentMap = {
+  Beverages,
+  Beverage
+};
 
 export const Beer = ({ state, actions, route }) => {
-  const Component = componentMap(route.child);
+  const Component = componentMap[route.child.id];
 
   return (
     <div>

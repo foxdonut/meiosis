@@ -20,8 +20,8 @@ export const Loaded = Maybe;
 export const initRoute = routes => ({
   routes,
   index: 0,
-  local: routes[0],
-  child: routes[1]
+  local: routes[0] || {},
+  child: routes[1] || {}
 });
 
 export const nextRoute = route => {
@@ -29,8 +29,8 @@ export const nextRoute = route => {
   return {
     routes: route.routes,
     index,
-    local: route.routes[index],
-    child: route.routes[index + 1]
+    local: route.routes[index] || {},
+    child: route.routes[index + 1] || {}
   };
 };
 

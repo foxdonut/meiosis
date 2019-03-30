@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { fold } from "static-tagged-union";
 
 import { TeaDetails } from "../teaDetails";
 import { Route, childRoute, nextRoute } from "routing-common/src/root";
@@ -13,9 +12,8 @@ export class Tea extends Component {
         <div>Tea Page</div>
         <ul>
           {
-            fold({
-              N: () => <li>Loading...</li>,
-              Y: teas => teas.map(tea => (
+            state.teas
+              ? state.teas.map(tea => (
                 <li key={tea.id}>
                   <a href="javascript://"
                     onClick={() =>
@@ -26,13 +24,12 @@ export class Tea extends Component {
                   >{tea.title}</a>
                 </li>
               ))
-            })(state.teas)
+              : (<li>Loading...</li>)
           }
         </ul>
         {
-          fold({
-            TeaDetails: () => <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
-          })(route.child)
+          route.child.id === "TeaDetails" &&
+            <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
         }
       </div>
     );
