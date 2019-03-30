@@ -18,6 +18,22 @@ export const login = {
       }, navigateTo([ returnTo || Route.Home() ])))
   }),
 
+  accept: state =>
+    Tpipe(
+      state.route,
+      contains(Route.Login()),
+      fold({
+        N: () => {
+          if (state.login &&
+              (state.login.username || state.login.password) &&
+              !confirm("You have unsaved data. Continue?"))
+          {
+            return navigateTo([ Route.Login() ]);
+          }
+        }
+      })
+    ),
+
   computed: state =>
     Tpipe(
       state.route,

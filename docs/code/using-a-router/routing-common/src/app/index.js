@@ -27,7 +27,8 @@ export const app = {
   ),
 
   accept: [
-    settings.accept
+    settings.accept,
+    login.accept
   ],
 
   computed: [
