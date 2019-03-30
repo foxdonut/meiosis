@@ -9,3 +9,6 @@ export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
+
+export const contains = (routes, id) =>
+  routes.find(route => route.id === id);

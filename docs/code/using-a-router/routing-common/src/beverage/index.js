@@ -31,7 +31,7 @@ export const beverage = {
           }
         },
         N: () => {
-          if (Object.keys(state.beverage).length > 0) {
+          if (Object.keys(state.beverage).length > 0) { // FIXME
             update({ beverage: {} });
           }
         }

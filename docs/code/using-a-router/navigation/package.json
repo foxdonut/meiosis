@@ -28,7 +28,7 @@
     "patchinko": "^4.1.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "routing-common": "../routing-common",
+    "routing-common": "../routing-common-core",
     "static-tagged-union": "^0.6.0"
   },
   "devDependencies": {

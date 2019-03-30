@@ -1,0 +1,29 @@
+{
+  "name": "routing-common-core",
+  "version": "1.0.0",
+  "description": "meiosis docs example",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "meiosis",
+    "react",
+    "router"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "peerDependencies": {
+    "patchinko": "4.x"
+  },
+  "devDependencies": {
+    "eslint": "^5.13.0"
+  },
+  "dependencies": {}
+}

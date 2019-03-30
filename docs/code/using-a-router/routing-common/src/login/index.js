@@ -24,7 +24,8 @@ export const login = {
       contains(Route.Login()),
       fold({
         N: () => {
-          if (state.login &&
+          if (!state.user &&
+              state.login &&
               (state.login.username || state.login.password) &&
               !confirm("You have unsaved data. Continue?"))
           {

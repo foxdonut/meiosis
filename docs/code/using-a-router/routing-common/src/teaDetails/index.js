@@ -26,7 +26,7 @@ export const teaDetails = {
           }
         },
         N: () => {
-          if (Object.keys(state.tea).length > 0) {
+          if (Object.keys(state.tea).length > 0) { // FIXME
             update({ tea: {} });
           }
         },

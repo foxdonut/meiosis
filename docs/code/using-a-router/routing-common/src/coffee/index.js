@@ -12,7 +12,7 @@ export const coffee = {
       fold({
         Y: () => T(state.coffees, fold({
           N: () => {
-            if (!state.pleaseWait) {
+            if (!state.pleaseWait) { // FIXME
               update({ pleaseWait: true });
             }
 
