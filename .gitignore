@@ -33,9 +33,6 @@ node_modules
 .node_repl_history
 
 .vscode
-test/build
-meiosis*.tgz
-typings
 tutorial/build
 tutorial/dist
 docs/build
