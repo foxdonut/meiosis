@@ -2,7 +2,7 @@
 
 [Table of Contents](toc.html)
 
-## Services
+## Services and Computed Properties
 
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll
 look at James' version using streams, and another version using a separate computed state function
