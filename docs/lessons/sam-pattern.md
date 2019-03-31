@@ -304,10 +304,15 @@ const actions = app.actions(update);
 const models = flyd.scan(P, app.initialState(), update);
 
 const reducer = (x, f) => P(x, f(x));
-const accept = models.map(state => app.accept.reduce(reducer, state));
-const computed = accept.map(state => app.computed.reduce(reducer, state));
 
-computed.map(state => app.services.forEach(service => service(state, actions)));
+const accept = models.map(state =>
+  app.accept.reduce(reducer, state));
+
+const computed = accept.map(state =>
+  app.computed.reduce(reducer, state));
+
+computed.map(state =>
+  app.services.forEach(service => service(state, actions)));
 
 const states = flyd.stream();
 computed.map(states);
