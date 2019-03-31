@@ -1,7 +1,7 @@
 import m from "mithril";
 
 import { parentRoute } from "routing-common/src/root";
-import { toPath } from "../util/router";
+import { toPath } from "../router";
 
 export const TeaDetails = {
   view: ({ attrs: { state, route } }) => (

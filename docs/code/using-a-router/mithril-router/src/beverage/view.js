@@ -2,7 +2,7 @@ import m from "mithril";
 import { fold } from "static-tagged-union";
 
 import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/root";
-import { toPath } from "../util/router";
+import { toPath } from "../router";
 import { Brewer } from "../brewer";
 
 const componentMap = fold({

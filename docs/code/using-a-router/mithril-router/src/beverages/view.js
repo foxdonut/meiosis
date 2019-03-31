@@ -3,7 +3,7 @@ import { fold } from "static-tagged-union";
 
 import { Route, siblingRoute } from "routing-common/src/root";
 import { T } from "routing-common/src/util";
-import { toPath } from "../util/router";
+import { toPath } from "../router";
 
 export const Beverages = {
   view: ({ attrs: { state, route, beveragesId } }) =>

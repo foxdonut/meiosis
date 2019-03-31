@@ -1,50 +1,22 @@
 import React from "react";
 
-import { caseOf } from "routing-common/src/util";
-import { toPath } from "../util/router";
+import { nextRoute } from "routing-common/src/root";
+import { Beverages } from "../beverages";
+import { Beverage } from "../beverage";
 
-const BeerBrewer = ({ state }) => (
-  <p>{state.brewer}</p>
-);
-
-const beerDetailsComponentMap = {
-  BeerBrewer
+const componentMap = {
+  Beverages,
+  Beverage
 };
 
-const BeerDetails = ({ state, actions }) => {
-  const Component = beerDetailsComponentMap[state.routeCurrent.case];
+export const Beer = ({ state, actions, route }) => {
+  const Component = componentMap[route.child.id];
 
   return (
     <div>
-      <p>{state.beer}</p>
-      {Component && <Component state={state} actions={actions}/> ||
-        <a href={toPath(caseOf("BeerBrewer", { id: state.routeCurrent.value.id }))}
-        >Brewer</a>
-      }
-    </div>
-  );
-};
-
-const beerComponentMap = {
-  BeerDetails,
-  BeerBrewer: BeerDetails
-};
-
-export const Beer = ({ state, actions }) => {
-  const Component = beerComponentMap[state.routeCurrent.case];
-
-  return (
-    <div>
-      <p>Beer Page</p>
-      <ul>
-        {state.beers.map(beer =>
-          <li key={beer.id}>
-            <a href={toPath(caseOf("BeerDetails", { id: beer.id }))}
-            >{beer.title}</a>
-          </li>
-        )}
-      </ul>
-      {Component && <Component state={state} actions={actions}/>}
+      <div>Beer Page</div>
+      <Component state={state} actions={actions} route={nextRoute(route)}
+        beveragesId="beers" />
     </div>
   );
 };

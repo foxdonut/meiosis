@@ -1,25 +1,22 @@
-import React, { Component } from "react";
+import React from "react";
 
-import { caseOf } from "routing-common/src/util";
-import { toPath } from "../util/router";
+import { nextRoute } from "routing-common/src/root";
+import { Beverages } from "../beverages";
+import { Beverage } from "../beverage";
 
-export class Coffee extends Component {
-  render() {
-    const { state } = this.props;
+const componentMap = {
+  Beverages,
+  Beverage
+};
 
-    return (
-      <div>
-        <p>Coffee Page</p>
-        <ul>
-          {state.coffees && state.coffees.map(coffee =>
-            <li key={coffee.id}>
-              <a href={toPath(caseOf("CoffeeDetails", { id: coffee.id }))}
-              >{coffee.title}</a>
-            </li>
-          )}
-        </ul>
-        {state.coffee}
-      </div>
-    );
-  }
-}
+export const Coffee = ({ state, actions, route }) => {
+  const Component = componentMap[route.child.id];
+
+  return (
+    <div>
+      <div>Coffee Page</div>
+      <Component state={state} actions={actions} route={nextRoute(route)}
+        beveragesId="coffees" />
+    </div>
+  );
+};

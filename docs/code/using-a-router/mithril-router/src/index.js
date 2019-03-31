@@ -3,7 +3,7 @@ import stream from "mithril/stream";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { createRoutes } from "./util/router";
+import { createRoutes } from "./router";
 
 const update = stream();
 

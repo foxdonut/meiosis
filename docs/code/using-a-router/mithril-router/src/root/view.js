@@ -9,7 +9,7 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
 import { Route, initRoute } from "routing-common/src/root";
-import { toPath, LocationBarSync } from "../util/router";
+import { toPath, LocationBarSync } from "../router";
 
 const componentMap = fold({
   Loading: () => ({ view: () => m("div", "Loading, please wait...") }),

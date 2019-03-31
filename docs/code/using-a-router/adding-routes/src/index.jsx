@@ -4,18 +4,22 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { listenToRouteChanges } from "./util/router";
+import { Route } from "routing-common/src/root";
 
 const update = flyd.stream();
 
 Promise.resolve().then(app.initialState).then(initialState => {
   const models = flyd.scan(P, initialState, update);
-  const actions = app.actions(update);
 
-  const computed = models.map(state =>
+  const accept = models.map(state =>
+    app.accept.reduce((x, f) => P(x, f(x)), state)
+  );
+
+  const computed = accept.map(state =>
     app.computed.reduce((x, f) => P(x, f(x)), state)
   );
-  app.services.forEach(service => service(computed, update));
+
+  computed.map(state => app.services.map(service => service(state, update)));
 
   const states = flyd.stream();
   computed.map(states);
@@ -30,7 +34,10 @@ Promise.resolve().then(app.initialState).then(initialState => {
     ]
   });
 
+  const actions = app.actions(update);
+
   render(<App states={states} actions={actions}/>, document.getElementById("app"));
 
-  listenToRouteChanges(update);
+  // Initial navigation
+  actions.navigateTo([ Route.Home() ]);
 });
