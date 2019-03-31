@@ -1,5 +1,5 @@
 {
-  "name": "routing-common",
+  "name": "routing-common-tagged",
   "version": "1.0.0",
   "description": "meiosis docs example",
   "main": "src/index.js",

@@ -26,16 +26,16 @@
   "dependencies": {
     "flyd": "^0.2.8",
     "patchinko": "^4.1.0",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "routing-common": "../routing-common-core"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
-    "@babel/preset-env": "^7.4.1",
+    "@babel/preset-env": "^7.4.2",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
-    "eslint": "^5.15.3",
+    "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.12.4",
     "meiosis-tracer": "^2.0.3",
     "webpack": "^4.29.6",
