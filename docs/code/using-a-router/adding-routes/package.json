@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
+    "feather-route-matcher": "^3.0.0",
     "flyd": "^0.2.8",
     "patchinko": "^4.1.0",
     "react": "^16.8.6",
