@@ -1,7 +1,7 @@
 import m from "mithril";
 import { fold } from "static-tagged-union";
 
-import { nextRoute } from "routing-common/src/root";
+import { nextRoute } from "routing-common/src/routes";
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
 

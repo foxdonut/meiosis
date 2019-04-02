@@ -1,7 +1,7 @@
 import { contains, fold } from "static-tagged-union";
 
 import { teas } from "../teaDetails";
-import { Loaded, Route } from "../root";
+import { Loaded, Route } from "../routes";
 import { T, Tpipe } from "../util";
 
 export const tea = {

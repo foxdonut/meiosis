@@ -4,7 +4,7 @@ import flyd from "flyd";
 import { P } from "patchinko/explicit";
 
 import { app, App } from "./app";
-import { Route } from "routing-common/src/root";
+import { Route } from "routing-common/src/routes";
 
 const update = flyd.stream();
 

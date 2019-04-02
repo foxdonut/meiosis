@@ -1,4 +1,4 @@
-import { Route, navigateTo } from "../root";
+import { Route, navigateTo } from "../routes";
 import { contains } from "../util";
 
 export const settings = {

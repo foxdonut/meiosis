@@ -7,7 +7,7 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { Route, initRoute } from "routing-common/src/root";
+import { Route, initRoute } from "routing-common/src/routes";
 
 const componentMap = {
   Loading: () => (<div>Loading, please wait...</div>),

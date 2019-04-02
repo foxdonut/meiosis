@@ -1,6 +1,6 @@
 import { PS } from "patchinko/explicit";
 
-import { Route, navigateTo } from "../root";
+import { Route, navigateTo } from "../routes";
 import { contains } from "../util";
 
 export const login = {

@@ -1,2 +1,2 @@
-export { root } from "routing-common/src/root";
+export { routes } from "routing-common/src/routes";
 export { Root } from "./view";

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import { TeaDetails } from "../teaDetails";
-import { Route, childRoute, nextRoute } from "routing-common/src/root";
+import { Route, childRoute, nextRoute } from "routing-common/src/routes";
 
 export class Tea extends Component {
   render() {

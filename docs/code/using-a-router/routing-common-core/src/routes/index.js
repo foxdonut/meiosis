@@ -46,7 +46,7 @@ export const siblingRoute = (route, routes) =>
 
 export const navigateTo = route => ({ route });
 
-export const root = {
+export const routes = {
   actions: update => ({
     navigateTo: route => update(navigateTo(route))
   })

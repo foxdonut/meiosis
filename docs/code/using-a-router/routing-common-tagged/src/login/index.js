@@ -1,7 +1,7 @@
 import { PS } from "patchinko/explicit";
 import { contains, fold } from "static-tagged-union";
 
-import { Route, navigateTo } from "../root";
+import { Route, navigateTo } from "../routes";
 import { Tpipe } from "../util";
 
 export const login = {

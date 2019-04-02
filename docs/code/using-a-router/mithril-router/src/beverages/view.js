@@ -1,7 +1,7 @@
 import m from "mithril";
 import { fold } from "static-tagged-union";
 
-import { Route, siblingRoute } from "routing-common/src/root";
+import { Route, siblingRoute } from "routing-common/src/routes";
 import { T } from "routing-common/src/util";
 import { toPath } from "../router";
 

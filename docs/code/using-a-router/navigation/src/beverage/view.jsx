@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/root";
+import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/routes";
 import { Brewer } from "../brewer";
 
 const componentMap = {

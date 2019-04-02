@@ -1,6 +1,6 @@
 import { P } from "patchinko/explicit";
 
-import { root, Route } from "../root";
+import { routes, Route } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -21,7 +21,7 @@ export const app = {
   }),
 
   actions: update => P({},
-    root.actions(update),
+    routes.actions(update),
     login.actions(update),
     settings.actions(update)
   ),

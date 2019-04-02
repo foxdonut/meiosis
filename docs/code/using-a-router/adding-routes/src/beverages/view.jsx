@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Route, siblingRoute } from "routing-common/src/root";
+import { Route, siblingRoute } from "routing-common/src/routes";
 
 export const Beverages = ({ state, actions, route, beveragesId }) =>
   state[beveragesId] && (

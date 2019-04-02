@@ -1,6 +1,6 @@
 import React from "react";
 
-import { parentRoute } from "routing-common/src/root";
+import { parentRoute } from "routing-common/src/routes";
 
 export const TeaDetails = ({ state, actions, route }) => (
   <div>

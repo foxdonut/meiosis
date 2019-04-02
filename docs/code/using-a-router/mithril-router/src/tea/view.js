@@ -3,7 +3,7 @@ import { fold } from "static-tagged-union";
 
 import { toPath } from "../router";
 import { TeaDetails } from "../teaDetails";
-import { Route, childRoute, nextRoute } from "routing-common/src/root";
+import { Route, childRoute, nextRoute } from "routing-common/src/routes";
 
 export const Tea = {
   view: ({ attrs: { state, actions, route } }) => (

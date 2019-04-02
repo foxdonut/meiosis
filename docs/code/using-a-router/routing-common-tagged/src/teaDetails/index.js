@@ -1,6 +1,6 @@
 import { contains, fold } from "static-tagged-union";
 
-import { Route } from "../root";
+import { Route } from "../routes";
 import { Tpipe } from "../util";
 
 export const teas = [
