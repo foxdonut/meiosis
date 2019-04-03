@@ -1,18 +1,19 @@
-import { contains } from "../util";
+import { findRoute } from "../routes";
+import { get } from "../util";
 
 export const brewer = {
-  service: (state, update) => {
-    const route = contains(state.route, "Brewer");
+  computed: state => {
+    const route = findRoute(state.route, "Brewer");
 
     if (route) {
       const id = route.params.id;
 
-      if (!state.brewer) {
-        update({ brewer: `Brewer of beverage ${id}` });
+      if (!get(state, ["brewer", id])) {
+        return { brewer: { [id]: `Brewer of beverage ${id}` } };
       }
     }
     else if (state.brewer) {
-      update({ brewer: null });
+      return { brewer: null };
     }
   }
 };

@@ -1,9 +1,10 @@
 import m from "mithril";
 
+import { login } from "routing-common/src/login";
 import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
-  view: ({ attrs: { state, actions, route } }) => {
+  view: ({ attrs: { state, update, route } }) => {
     const { message, returnTo } = route.local.params;
 
     return m("div",
@@ -16,7 +17,7 @@ export const Login = {
             placeholder: "username",
             value: state.login.username,
             oninput: evt =>
-              actions.username(evt.target.value)
+              update(login.actions.username(evt.target.value))
           })
         ),
         m("div.form-group",
@@ -25,13 +26,14 @@ export const Login = {
             placeholder: "password",
             value: state.login.password,
             oninput: evt =>
-              actions.password(evt.target.value)
+              update(login.actions.password(evt.target.value))
           })
         ),
         m("button.btn.btn-primary", {
           type: "submit",
           onclick: pipe(preventDefault,
-            () => actions.login(state.login.username, returnTo))
+            () => update(login.actions.login(state.login.username, returnTo))
+          )
         }, "Login")
       )
     );

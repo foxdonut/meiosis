@@ -18,6 +18,9 @@ export const Route = [
   }, {}
 );
 
+export const findRoute = (routes, id) =>
+  routes.find(route => route.id === id);
+
 export const initRoute = routes => ({
   routes,
   index: 0,
@@ -43,11 +46,3 @@ export const childRoute = (route, routes) =>
 
 export const siblingRoute = (route, routes) =>
   route.routes.slice(0, route.index).concat(routes);
-
-export const navigateTo = route => ({ route });
-
-export const routes = {
-  actions: update => ({
-    navigateTo: route => update(navigateTo(route))
-  })
-};

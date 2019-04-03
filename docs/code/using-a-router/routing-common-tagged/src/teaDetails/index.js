@@ -1,7 +1,7 @@
 import { contains, fold } from "static-tagged-union";
 
 import { Route } from "../routes";
-import { Tpipe } from "../util";
+import { Tpipe, get } from "../util";
 
 export const teas = [
   { id: "c1", title: "Tea 1", description: "Description of Tea 1" },
@@ -14,22 +14,22 @@ const teaMap = teas.reduce((result, next) => {
 }, {});
 
 export const teaDetails = {
-  service: (state, update) =>
+  computed: state =>
     Tpipe(
       state.route,
       contains(Route.TeaDetails()),
       fold({
         Y: ({ id }) => {
-          if (!state.tea[id]) {
+          if (!get(state, ["tea", id])) {
             const description = teaMap[id].description;
-            update({ tea: { [id]: description } });
+            return { tea: { [id]: description } };
           }
         },
         N: () => {
-          if (Object.keys(state.tea).length > 0) { // FIXME
-            update({ tea: {} });
+          if (state.tea) {
+            return { tea: null };
           }
-        },
+        }
       })
     )
 };

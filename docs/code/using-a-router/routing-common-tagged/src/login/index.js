@@ -1,22 +1,19 @@
 import { PS } from "patchinko/explicit";
 import { contains, fold } from "static-tagged-union";
 
-import { Route, navigateTo } from "../routes";
+import { Route } from "../routes";
 import { Tpipe } from "../util";
 
 export const login = {
-  actions: update => ({
-    username: value =>
-      update({ login: PS({ username: value })}),
+  actions: {
+    username: value => ({ login: PS({ username: value })}),
+    password: value => ({ login: PS({ password: value })}),
 
-    password: value =>
-      update({ login: PS({ password: value })}),
-
-    login: (username, returnTo) =>
-      update(Object.assign({
-        user: username
-      }, navigateTo([ returnTo || Route.Home() ])))
-  }),
+    login: (username, returnTo) => ({
+      user: username,
+      route: [ returnTo || Route.Home() ]
+    })
+  },
 
   accept: state =>
     Tpipe(
@@ -29,7 +26,7 @@ export const login = {
               (state.login.username || state.login.password) &&
               !confirm("You have unsaved data. Continue?"))
           {
-            return navigateTo([ Route.Login() ]);
+            return { route: [ Route.Login() ] };
           }
         }
       })

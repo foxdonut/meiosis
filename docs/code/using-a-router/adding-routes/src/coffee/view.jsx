@@ -9,13 +9,13 @@ const componentMap = {
   Beverage
 };
 
-export const Coffee = ({ state, actions, route }) => {
+export const Coffee = ({ state, update, route }) => {
   const Component = componentMap[route.child.id];
 
   return (
     <div>
       <div>Coffee Page</div>
-      <Component state={state} actions={actions} route={nextRoute(route)}
+      <Component state={state} update={update} route={nextRoute(route)}
         beveragesId="coffees" />
     </div>
   );

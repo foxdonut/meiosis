@@ -16,8 +16,8 @@ export class App extends Component {
 
   render() {
     const state = this.state;
-    const { actions } = this.props;
+    const { update } = this.props;
 
-    return (<Root state={state} actions={actions} />);
+    return (<Root state={state} update={update} />);
   }
 }

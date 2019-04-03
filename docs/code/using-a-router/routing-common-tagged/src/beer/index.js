@@ -12,14 +12,15 @@ export const beer = {
       fold({
         Y: () => T(state.beers, fold({
           N: () => {
-            if (!state.pleaseWait) { // FIXME
+            if (!state.pleaseWait) {
               update({ pleaseWait: true });
             }
-
-            setTimeout(() => update({
-              pleaseWait: false,
-              beers: Loaded.Y(beers)
-            }), 1000);
+            else {
+              setTimeout(() => update({
+                pleaseWait: false,
+                beers: Loaded.Y(beers)
+              }), 1000);
+            }
           }
         })),
         N: () => T(state.beers, fold({

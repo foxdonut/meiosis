@@ -1,9 +1,9 @@
 import { teas } from "../teaDetails";
-import { contains } from "../util";
+import { findRoute } from "../routes";
 
 export const tea = {
   service: (state, update) => {
-    if (contains(state.route, "Tea")) {
+    if (findRoute(state.route, "Tea")) {
       if (!state.teas) {
         setTimeout(() => {
           update({ teas });

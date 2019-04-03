@@ -11,14 +11,14 @@ const componentMap = fold({
 });
 
 export const Coffee = {
-  view: ({ attrs: { state, actions, route } }) => {
+  view: ({ attrs: { state, update, route } }) => {
     const Component = componentMap(route.child);
 
     return (
       m("div",
         m("div", "Coffee Page"),
         m(Component, {
-          state, actions, route: nextRoute(route), beveragesId: "coffees"
+          state, update, route: nextRoute(route), beveragesId: "coffees"
         })
       )
     );

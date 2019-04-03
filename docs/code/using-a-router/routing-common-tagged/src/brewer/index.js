@@ -1,22 +1,22 @@
 import { contains, fold } from "static-tagged-union";
 
 import { Route } from "../routes";
-import { Tpipe } from "../util";
+import { Tpipe, get } from "../util";
 
 export const brewer = {
-  service: (state, update) =>
+  computed: state =>
     Tpipe(
       state.route,
       contains(Route.Brewer()),
       fold({
         Y: ({ id }) => {
-          if (!state.brewer) {
-            update({ brewer: `Brewer of beverage ${id}` });
+          if (!get(state, ["brewer", id])) {
+            return { brewer: { [id]: `Brewer of beverage ${id}` } };
           }
         },
         N: () => {
           if (state.brewer) {
-            update({ brewer: null });
+            return { brewer: null };
           }
         },
       })

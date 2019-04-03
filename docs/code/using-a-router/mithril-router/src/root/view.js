@@ -23,7 +23,7 @@ const componentMap = fold({
 });
 
 export const Root = {
-  view: ({ attrs: { state, actions }}) => {
+  view: ({ attrs: { state, update }}) => {
     const route = initRoute(state.route);
     const Component = componentMap(route.local);
     const isActive = tab => tab === Component ? ".active" : "";
@@ -51,7 +51,7 @@ export const Root = {
             )
           )
         ),
-        m(Component, { state, actions, route }),
+        m(Component, { state, update, route }),
         m(LocationBarSync, { state }),
         /* Show or hide the Please Wait modal. See public/css/style.css */
         m("div", { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },

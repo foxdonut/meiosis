@@ -34,10 +34,8 @@ Promise.resolve().then(app.initialState).then(initialState => {
     ]
   });
 
-  const actions = app.actions(update);
-
-  render(<App states={states} actions={actions}/>, document.getElementById("app"));
+  render(<App states={states} update={update}/>, document.getElementById("app"));
 
   // Initial navigation
-  actions.navigateTo([ Route.Home() ]);
+  update({ route: [ Route.Home() ] });
 });

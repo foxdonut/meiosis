@@ -1,6 +1,4 @@
-import { P } from "patchinko/explicit";
-
-import { routes, Loaded, Route } from "../routes";
+import { Loaded, Route } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -14,17 +12,11 @@ export const app = {
   initialState: () => ({
     route: [ Route.Loading() ],
     teas: Loaded.N(),
-    tea: {},
+    tea: null,
     coffees: Loaded.N(),
     beers: Loaded.N(),
-    beverage: {}
+    beverage: null
   }),
-
-  actions: update => P({},
-    routes.actions(update),
-    login.actions(update),
-    settings.actions(update)
-  ),
 
   accept: [
     settings.accept,
@@ -32,15 +24,15 @@ export const app = {
   ],
 
   computed: [
-    login.computed
+    login.computed,
+    teaDetails.computed,
+    beverage.computed,
+    brewer.computed
   ],
 
   services: [
     tea.service,
-    teaDetails.service,
     coffee.service,
-    beer.service,
-    beverage.service,
-    brewer.service
+    beer.service
   ]
 };

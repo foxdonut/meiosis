@@ -1,4 +1,5 @@
-import { contains } from "../util";
+import { findRoute } from "../routes";
+import { get } from "../util";
 
 export const teas = [
   { id: "c1", title: "Tea 1", description: "Description of Tea 1" },
@@ -11,18 +12,18 @@ const teaMap = teas.reduce((result, next) => {
 }, {});
 
 export const teaDetails = {
-  service: (state, update) => {
-    const route = contains(state.route, "TeaDetails");
+  computed: state => {
+    const route = findRoute(state.route, "TeaDetails");
     if (route) {
       const id = route.params.id;
 
-      if (!state.tea[id]) {
+      if (!get(state, ["tea", id])) {
         const description = teaMap[id].description;
-        update({ tea: { [id]: description } });
+        return { tea: { [id]: description } };
       }
     }
-    else if (Object.keys(state.tea).length > 0) {
-      update({ tea: {} });
+    else if (state.tea) {
+      return { tea: null };
     }
   }
 };

@@ -7,7 +7,7 @@ const componentMap = {
   Brewer
 };
 
-export const Beverage = ({ state, actions, route }) => {
+export const Beverage = ({ state, update, route }) => {
   const Component = componentMap[route.child.id];
   const id = route.local.params.id;
 
@@ -17,18 +17,18 @@ export const Beverage = ({ state, actions, route }) => {
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateTo(
-              childRoute(route, [ Route.Brewer({ id }) ])
-            )
+            () => update({
+              route: childRoute(route, [ Route.Brewer({ id }) ])
+            })
           }>Brewer</a>
       </div>
-      {Component && <Component state={state} actions={actions} route={nextRoute(route)} />}
+      {Component && <Component state={state} update={update} route={nextRoute(route)} />}
       <div>
         <a href="javascript://"
           onClick={
-            () => actions.navigateTo(
-              siblingRoute(route, [ Route.Beverages() ])
-            )
+            () => update({
+              route: siblingRoute(route, [ Route.Beverages() ])
+            })
           }
         >Back to list</a>
       </div>

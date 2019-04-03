@@ -33,10 +33,8 @@ Promise.resolve().then(app.initialState).then(initialState => {
     ]
   });
 
-  const actions = app.actions(update);
-
   m.route(document.getElementById("app"), "/",
-    createRoutes({ states, actions, update, App }));
+    createRoutes({ states, update, App }));
 
   states.map(() => m.redraw());
 });

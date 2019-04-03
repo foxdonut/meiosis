@@ -42,11 +42,3 @@ export const childRoute = (route, routes) =>
 
 export const siblingRoute = (route, routes) =>
   route.routes.slice(0, route.index).concat(routes);
-
-export const navigateTo = route => ({ route });
-
-export const routes = {
-  actions: update => ({
-    navigateTo: route => update(navigateTo(route))
-  })
-};
