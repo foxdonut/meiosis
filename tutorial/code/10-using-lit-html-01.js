@@ -1,4 +1,7 @@
-import { html, render } from "https://unpkg.com/lit-html?module";
+import {
+  html,
+  render
+} from "https://unpkg.com/lit-html?module";
 
 /*global flyd, P, S, PS*/
 var conditions = {
@@ -21,39 +24,59 @@ var conditions = {
 };
 
 var skyOption = function({ state, actions, value, label }) {
-  return html`<label>
-    <input type="radio" id=${value} name="sky"
-      value=${value} .checked=${state.conditions.sky === value}
-      @change=${evt => actions.changeSky(evt.target.value)}/>
-    ${label}
-  </label>`;
+  return html`
+    <label>
+      <input
+        type="radio"
+        id=${value}
+        name="sky"
+        value=${value}
+        .checked=${state.conditions.sky === value}
+        @change=${evt => actions.changeSky(evt.target.value)}
+      />
+      ${label}
+    </label>
+  `;
 };
 
 var Conditions = function(state, actions) {
-  return html`<div>
-    <label>
-      <input
-        type="checkbox"
-        .checked=${state.conditions.precipitations}
-        @change=${evt =>
-          actions.togglePrecipitations(evt.target.checked)
-        }/>
-      Precipitations
-    </label>
+  return html`
     <div>
-      ${skyOption({ state, actions, value: "SUNNY",
-        label: "Sunny"})}
-      ${skyOption({ state, actions, value: "CLOUDY",
-        label: "Cloudy"})}
-      ${skyOption({ state, actions, value: "MIX",
-        label: "Mix of sun/clouds"})}
+      <label>
+        <input
+          type="checkbox"
+          .checked=${state.conditions.precipitations}
+          @change=${evt =>
+            actions.togglePrecipitations(evt.target.checked)}
+        />
+        Precipitations
+      </label>
+      <div>
+        ${skyOption({
+          state,
+          actions,
+          value: "SUNNY",
+      label: "Sunny"
+        })}
+        ${skyOption({
+          state,
+          actions,
+          value: "CLOUDY",
+      label: "Cloudy"
+        })}
+        ${skyOption({
+          state,
+          actions,
+          value: "MIX",
+    label: "Mix of sun/clouds"})}
+      </div>
     </div>
-  </div>`;
+  `;
 };
 
 var convert = function(value, to) {
   return Math.round(
-    (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -87,36 +110,37 @@ var temperature = {
 };
 
 var Temperature = function(state, id, actions) {
-  return html`<div>
-    ${state[id].label} Temperature:
-    ${state[id].value} &deg; ${state[id].units}
+  return html`
     <div>
-      <button
-        @click=${() => actions.increment(id, 1)}>
-        Increment
-      </button>
-      <button
-        @click=${() => actions.increment(id,-1)}>
-        Decrement
-      </button>
+      ${state[id].label} Temperature: ${state[id].value} &deg;
+      ${state[id].units}
+      <div>
+        <button @click=${() => actions.increment(id, 1)}>
+          Increment
+        </button>
+        <button @click=${() => actions.increment(id, -1)}>
+          Decrement
+        </button>
+      </div>
+      <div>
+        <button @click=${() => actions.changeUnits(id)}>
+          Change Units
+        </button>
+      </div>
     </div>
-    <div>
-      <button
-        @click=${() => actions.changeUnits(id)}>
-        Change Units
-      </button>
-    </div>
-  </div>`;
+  `;
 };
 
 var app = {
-  initialState: Object.assign({},
+  initialState: Object.assign(
+    {},
     conditions.initialState,
     { air: temperature.initialState("Air") },
     { water: temperature.initialState("Water") }
   ),
   actions: function(update) {
-    return Object.assign({},
+    return Object.assign(
+      {},
       conditions.actions(update),
       temperature.actions(update)
     );
@@ -124,12 +148,14 @@ var app = {
 };
 
 var App = function(state, actions) {
-  return html`<div>
-    ${Conditions(state, actions)}
-    ${Temperature(state, "air", actions)}
-    ${Temperature(state, "water", actions)}
-    <pre>${JSON.stringify(state, null, 4)}</pre>
-  </div>`;
+  return html`
+    <div>
+      ${Conditions(state, actions)}
+      ${Temperature(state, "air", actions)}
+      ${Temperature(state, "water", actions)}
+      <pre>${JSON.stringify(state, null, 4)}</pre>
+    </div>
+  `;
 };
 
 var update = flyd.stream();

@@ -1,7 +1,7 @@
 /*global flyd*/
 var convert = function(value, to) {
   return Math.round(
-    (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -23,7 +23,8 @@ var temperature = {
       changeUnits: function() {
         update(function(state) {
           var value = state.temperature.value;
-          var newUnits = state.temperature.units === "C" ? "F" : "C";
+          var newUnits =
+            state.temperature.units === "C" ? "F" : "C";
           var newValue = convert(value, newUnits);
           state.temperature.value = newValue;
           state.temperature.units = newUnits;
@@ -35,11 +36,17 @@ var temperature = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(function(state, patch) {
-  return patch(state);
-}, temperature.initialState, update);
+var states = flyd.scan(
+  function(state, patch) {
+    return patch(state);
+  },
+  temperature.initialState,
+  update
+);
 
 var actions = temperature.actions(update);
 states.map(function(state) {
-  document.write("<pre>" + JSON.stringify(state, null, 2) + "</pre>");
+  document.write(
+    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+  );
 });

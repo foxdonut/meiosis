@@ -16,10 +16,14 @@ var app = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(function(state, increment) {
-  state.value = state.value + increment;
-  return state;
-}, app.initialState, update);
+var states = flyd.scan(
+  function(state, increment) {
+    state.value = state.value + increment;
+    return state;
+  },
+  app.initialState,
+  update
+);
 
 var actions = app.actions(update);
 states.map(function(state) {

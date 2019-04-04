@@ -1,11 +1,16 @@
 module.exports = {
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "prettier",
+    "prettier/react"
+  ],
   "env": {
     "browser": true,
     "commonjs": true,
     "es6": true,
     "mocha": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "parserOptions": {
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
@@ -49,8 +54,19 @@ module.exports = {
     ],
     "react/prop-types": [
       0
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        "printWidth": 64,
+        "semi": true,
+        "singleQuote": false
+      }
     ]
   },
+  "plugins": [
+    "prettier"
+  ],
   "settings": {
     "react": {
       "pragma": "React"

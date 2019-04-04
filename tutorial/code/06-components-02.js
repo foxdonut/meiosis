@@ -20,7 +20,7 @@ var conditions = {
 
 var convert = function(value, to) {
   return Math.round(
-    (to === "C") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)
+    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -53,13 +53,15 @@ var temperature = {
 };
 
 var app = {
-  initialState: P({},
+  initialState: P(
+    {},
     conditions.initialState,
     { air: temperature.initialState() },
     { water: temperature.initialState() }
   ),
   actions: function(update) {
-    return P({},
+    return P(
+      {},
       conditions.actions(update),
       temperature.actions(update)
     );
@@ -71,5 +73,7 @@ var states = flyd.scan(P, app.initialState, update);
 
 var actions = app.actions(update);
 states.map(function(state) {
-  document.write("<pre>" + JSON.stringify(state, null, 2) + "</pre>");
+  document.write(
+    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+  );
 });
