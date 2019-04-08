@@ -3,14 +3,12 @@ import { findRoute } from "../routes";
 
 export const tea = {
   service: (state, update) => {
-    if (findRoute(state.route, "Tea")) {
-      if (!state.teas) {
-        setTimeout(() => {
-          update({ teas });
-        }, 500);
-      }
+    if (findRoute(state.routeArrive, "Tea")) {
+      setTimeout(() => {
+        update({ teas });
+      }, 500);
     }
-    else if (state.teas) {
+    else if (findRoute(state.routeLeave, "Tea")) {
       update({ teas: null });
     }
   }

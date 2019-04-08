@@ -1,3 +1,5 @@
+import { shallowEqual } from "../util";
+
 export const Route = [
   "Loading",
   "Home",
@@ -20,6 +22,10 @@ export const Route = [
 
 export const findRoute = (routes, id) =>
   routes.find(route => route.id === id);
+
+export const findRouteWithParams = (routes, routeWithParams) =>
+  routes.find(route => route.id === routeWithParams.id
+    && shallowEqual(route.params, routeWithParams.params));
 
 export const initRoute = routes => ({
   routes,
@@ -46,3 +52,21 @@ export const childRoute = (route, routes) =>
 
 export const siblingRoute = (route, routes) =>
   route.routes.slice(0, route.index).concat(routes);
+
+const diffRoute = (from, to) => from.reduce(
+  (result, route) => result.concat(findRouteWithParams(to, route) ? [] : route),
+  []
+);
+
+export const routes = {
+  computed: state => {
+    const routeLeave = diffRoute(state.routePrevious, state.route);
+    const routeArrive = diffRoute(state.route, state.routePrevious);
+
+    return {
+      routePrevious: state.route,
+      routeLeave,
+      routeArrive
+    };
+  }
+};

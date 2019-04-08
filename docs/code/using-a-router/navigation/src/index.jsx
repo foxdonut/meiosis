@@ -27,9 +27,9 @@ Promise.resolve().then(app.initialState).then(initialState => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",
-    rows: 10,
+    rows: 45,
     streams: [
-      { stream: update, label: "update" },
+      // { stream: update, label: "update" },
       { stream: states, label: "states" }
     ]
   });

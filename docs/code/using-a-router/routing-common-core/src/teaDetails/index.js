@@ -1,5 +1,4 @@
 import { findRoute } from "../routes";
-import { get } from "../util";
 
 export const teas = [
   { id: "c1", title: "Tea 1", description: "Description of Tea 1" },
@@ -13,16 +12,13 @@ const teaMap = teas.reduce((result, next) => {
 
 export const teaDetails = {
   computed: state => {
-    const route = findRoute(state.route, "TeaDetails");
-    if (route) {
-      const id = route.params.id;
-
-      if (!get(state, ["tea", id])) {
-        const description = teaMap[id].description;
-        return { tea: { [id]: description } };
-      }
+    const routeArrive = findRoute(state.routeArrive, "TeaDetails");
+    if (routeArrive) {
+      const id = routeArrive.params.id;
+      const description = teaMap[id].description;
+      return { tea: { [id]: description } };
     }
-    else if (state.tea) {
+    else if (findRoute(state.routeLeave, "TeaDetails")) {
       return { tea: null };
     }
   }

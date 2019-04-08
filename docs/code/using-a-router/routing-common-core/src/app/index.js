@@ -1,4 +1,4 @@
-import { Route } from "../routes";
+import { Route, routes } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -10,6 +10,7 @@ import { brewer } from "../brewer";
 
 export const app = {
   initialState: () => ({
+    routePrevious: [],
     route: [ Route.Loading() ],
     teas: null,
     tea: null,
@@ -24,6 +25,7 @@ export const app = {
   ],
 
   computed: [
+    routes.computed,
     login.computed,
     teaDetails.computed,
     beverage.computed,
