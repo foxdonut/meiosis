@@ -31,12 +31,12 @@
     "static-tagged-union": "^0.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
     "babel-loader": "^8.0.5",
     "eslint": "^5.16.0",
     "meiosis-tracer": "^2.0.3",
-    "webpack": "^4.29.6",
+    "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0"
   }
 }

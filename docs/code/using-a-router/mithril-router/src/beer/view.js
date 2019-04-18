@@ -11,16 +11,18 @@ const componentMap = fold({
 });
 
 export const Beer = {
-  view: ({ attrs: { state, update, route } }) => {
+  view: ({ attrs: { state, actions, route } }) => {
     const Component = componentMap(route.child);
 
-    return (
-      m("div",
-        m("div", "Beer Page"),
-        m(Component, {
-          state, update, route: nextRoute(route), beveragesId: "beers"
-        })
-      )
+    return m(
+      "div",
+      m("div", "Beer Page"),
+      m(Component, {
+        state,
+        actions,
+        route: nextRoute(route),
+        beveragesId: "beers"
+      })
     );
   }
 };

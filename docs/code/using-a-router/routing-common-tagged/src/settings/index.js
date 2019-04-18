@@ -7,7 +7,7 @@ export const settings = {
   actions: {
     logout: () => ({
       user: null,
-      route: [ Route.Home() ]
+      route: [Route.Home()]
     })
   },
 
@@ -19,7 +19,7 @@ export const settings = {
         Y: () => {
           if (!state.user) {
             return {
-              route: [ Route.Login({ message: "Please login.", returnTo: Route.Settings() }) ]
+              route: [Route.Login({ message: "Please login.", returnTo: Route.Settings() })]
             };
           }
         }

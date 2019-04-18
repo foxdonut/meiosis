@@ -10,14 +10,23 @@ export const tea = {
       state.route,
       contains(Route.Tea()),
       fold({
-        Y: () => T(state.teas, fold({
-          N: () => setTimeout(() => {
-            update({ teas: Loaded.Y(teas) });
-          }, 500)
-        })),
-        N: () => T(state.teas, fold({
-          Y: (() => update({ teas: Loaded.N() }))
-        })),
+        Y: () =>
+          T(
+            state.teas,
+            fold({
+              N: () =>
+                setTimeout(() => {
+                  update({ teas: Loaded.Y(teas) });
+                }, 500)
+            })
+          ),
+        N: () =>
+          T(
+            state.teas,
+            fold({
+              Y: () => update({ teas: Loaded.N() })
+            })
+          )
       })
     )
 };

@@ -2,29 +2,20 @@ module.exports = {
   "env": {
     "browser": true,
     "commonjs": true,
-    "es6": true,
-    "mocha": true
+    "es6": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "prettier"
+  ],
   "parserOptions": {
     "ecmaFeatures": {
-      "experimentalObjectRestSpread": true,
       "jsx": true
     },
     "sourceType": "module"
   },
-  "plugins": [
-    "react"
-  ],
   "rules": {
-    "indent": [
-      "error",
-      2
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
     "no-unused-vars": [
       "error",
       {
@@ -32,13 +23,13 @@ module.exports = {
         "argsIgnorePattern": "^_"
       }
     ],
-    "quotes": [
+    "prettier/prettier": [
       "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
+      {
+        "printWidth": 100,
+        "semi": true,
+        "singleQuote": false
+      }
     ],
     "react/display-name": [
       0
@@ -51,9 +42,13 @@ module.exports = {
       0
     ]
   },
+  "plugins": [
+    "prettier",
+    "react"
+  ],
   "settings": {
     "react": {
       "pragma": "React"
     }
   }
-};
+}

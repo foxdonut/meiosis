@@ -11,7 +11,7 @@ import { brewer } from "../brewer";
 export const app = {
   initialState: () => ({
     routePrevious: [],
-    route: [ Route.Loading() ],
+    route: [Route.Loading()],
     teas: null,
     tea: null,
     coffees: null,
@@ -19,10 +19,10 @@ export const app = {
     beverage: null
   }),
 
-  accept: [
-    settings.accept,
-    login.accept
-  ],
+  actions: update =>
+    Object.assign({}, routes.actions(update), login.actions(update), settings.actions(update)),
+
+  accept: [settings.accept, login.accept],
 
   computed: [
     routes.computed,
@@ -32,9 +32,5 @@ export const app = {
     brewer.computed
   ],
 
-  services: [
-    tea.service,
-    coffee.service,
-    beer.service
-  ]
+  services: [tea.service, coffee.service, beer.service]
 };

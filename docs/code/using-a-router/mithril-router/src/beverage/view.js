@@ -10,25 +10,16 @@ const componentMap = fold({
 });
 
 export const Beverage = {
-  view: ({ attrs: { state, update, route } }) => {
+  view: ({ attrs: { state, actions, route } }) => {
     const Component = componentMap(route.child);
     const id = route.local.params.id;
 
-    return (
-      m("div",
-        m("div", state.beverage[id]),
-        m("div",
-          m("a",
-            { href: toPath(childRoute(route, [ Route.Brewer({ id }) ])) },
-            "Brewer")
-        ),
-        Component && m(Component, { state, update, route: nextRoute(route) }),
-        m("div",
-          m("a",
-            { href: toPath(siblingRoute(route, [ Route.Beverages() ])) },
-            "Back to list")
-        )
-      )
+    return m(
+      "div",
+      m("div", state.beverage[id]),
+      m("div", m("a", { href: toPath(childRoute(route, [Route.Brewer({ id })])) }, "Brewer")),
+      Component && m(Component, { state, actions, route: nextRoute(route) }),
+      m("div", m("a", { href: toPath(siblingRoute(route, [Route.Beverages()])) }, "Back to list"))
     );
   }
 };

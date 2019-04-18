@@ -7,16 +7,24 @@ import { toPath } from "../router";
 
 export const Beverages = {
   view: ({ attrs: { state, route, beveragesId } }) =>
-    T(state[beveragesId], fold({
-      Y: beverages =>
-        m("ul",
-          beverages.map(beverage =>
-            m("li", { key: beverage.id },
-              m("a",
-                { href: toPath(siblingRoute(route, [ Route.Beverage({ id: beverage.id }) ])) },
-                beverage.title)
+    T(
+      state[beveragesId],
+      fold({
+        Y: beverages =>
+          m(
+            "ul",
+            beverages.map(beverage =>
+              m(
+                "li",
+                { key: beverage.id },
+                m(
+                  "a",
+                  { href: toPath(siblingRoute(route, [Route.Beverage({ id: beverage.id })])) },
+                  beverage.title
+                )
+              )
             )
           )
-        )
-    }))
+      })
+    )
 };

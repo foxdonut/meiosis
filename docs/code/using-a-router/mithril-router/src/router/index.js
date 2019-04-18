@@ -3,46 +3,48 @@ import pathToRegexp from "path-to-regexp";
 
 const beverageRoutes = {
   Beverages: "",
-  Beverage: ["/:id", {
-    Brewer: "/brewer"
-  }]
+  Beverage: [
+    "/:id",
+    {
+      Brewer: "/brewer"
+    }
+  ]
 };
 
 const routeMap = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",
-  Tea: ["/tea", {
-    TeaDetails: "/:id"
-  }],
+  Tea: [
+    "/tea",
+    {
+      TeaDetails: "/:id"
+    }
+  ],
   Coffee: ["/coffee", beverageRoutes],
   Beer: ["/beer", beverageRoutes],
   Invalid: "/:404..."
 };
 
-const getConfig = config =>
-  (typeof config === "string")
-    ? [ config, {} ]
-    : config;
+const getConfig = config => (typeof config === "string" ? [config, {}] : config);
 
 const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) =>
-  Object.entries(routeMap)
-    .reduce((result, [id, config]) => {
-      const [ configPath, children ] = getConfig(config);
+  Object.entries(routeMap).reduce((result, [id, config]) => {
+    const [configPath, children] = getConfig(config);
 
-      const localPath = path + configPath;
-      const routeFn = params => fn(params).concat([ { id, params } ]);
-      result[localPath] = routeFn;
-      createRouteMap(children, localPath, routeFn, result);
-      return result;
-    }, acc);
+    const localPath = path + configPath;
+    const routeFn = params => fn(params).concat([{ id, params }]);
+    result[localPath] = routeFn;
+    createRouteMap(children, localPath, routeFn, result);
+    return result;
+  }, acc);
 
 const convertToPath = routes => {
   let path = "";
   let lookup = routeMap;
 
   routes.forEach(route => {
-    const [ configPath, children ] = getConfig(lookup[route.id]);
+    const [configPath, children] = getConfig(lookup[route.id]);
     path += pathToRegexp.compile(configPath)(route.params);
     lookup = children;
   });

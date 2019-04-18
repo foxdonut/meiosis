@@ -23,44 +23,37 @@ const componentMap = fold({
 });
 
 export const Root = {
-  view: ({ attrs: { state, update }}) => {
+  view: ({ attrs: { state, actions } }) => {
     const route = initRoute(state.route);
     const Component = componentMap(route.local);
-    const isActive = tab => tab === Component ? ".active" : "";
-    return (
-      m("div",
-        m("nav.navbar.navbar-default",
-          m("ul.nav.navbar-nav",
-            m("li" + isActive(Home),
-              m("a", { href: toPath([ Route.Home() ]) }, "Home")
-            ),
-            m("li" + isActive(Login),
-              m("a", { href: toPath([ Route.Login() ]) }, "Login")
-            ),
-            m("li" + isActive(Settings),
-              m("a", { href: toPath([ Route.Settings() ]) }, "Settings")
-            ),
-            m("li" + isActive(Tea),
-              m("a", { href: toPath([ Route.Tea() ]) }, "Tea")
-            ),
-            m("li" + isActive(Coffee),
-              m("a", { href: toPath([ Route.Coffee(), Route.Beverages() ]) }, "Coffee")
-            ),
-            m("li" + isActive(Beer),
-              m("a", { href: toPath([ Route.Beer(), Route.Beverages() ]) }, "Beer")
-            )
-          )
-        ),
-        m(Component, { state, update, route }),
-        m(LocationBarSync, { state }),
-        /* Show or hide the Please Wait modal. See public/css/style.css */
-        m("div", { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
-          m("div.modal",
-            m("div.box",
-              m("div", "Loading, please wait...")
-            )
+    const isActive = tab => (tab === Component ? ".active" : "");
+    return m(
+      "div",
+      m(
+        "nav.navbar.navbar-default",
+        m(
+          "ul.nav.navbar-nav",
+          m("li" + isActive(Home), m("a", { href: toPath([Route.Home()]) }, "Home")),
+          m("li" + isActive(Login), m("a", { href: toPath([Route.Login()]) }, "Login")),
+          m("li" + isActive(Settings), m("a", { href: toPath([Route.Settings()]) }, "Settings")),
+          m("li" + isActive(Tea), m("a", { href: toPath([Route.Tea()]) }, "Tea")),
+          m(
+            "li" + isActive(Coffee),
+            m("a", { href: toPath([Route.Coffee(), Route.Beverages()]) }, "Coffee")
+          ),
+          m(
+            "li" + isActive(Beer),
+            m("a", { href: toPath([Route.Beer(), Route.Beverages()]) }, "Beer")
           )
         )
+      ),
+      m(Component, { state, actions, route }),
+      m(LocationBarSync, { state }),
+      /* Show or hide the Please Wait modal. See public/css/style.css */
+      m(
+        "div",
+        { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
+        m("div.modal", m("div.box", m("div", "Loading, please wait...")))
       )
     );
   }

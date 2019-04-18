@@ -23,7 +23,7 @@
     "patchinko": "4.x"
   },
   "devDependencies": {
-    "eslint": "^5.13.0"
+    "eslint": "^5.16.0"
   },
   "dependencies": {}
 }

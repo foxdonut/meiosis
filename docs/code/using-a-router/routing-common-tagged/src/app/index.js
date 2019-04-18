@@ -1,4 +1,4 @@
-import { Loaded, Route } from "../routes";
+import { Loaded, Route, routes } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -10,7 +10,7 @@ import { brewer } from "../brewer";
 
 export const app = {
   initialState: () => ({
-    route: [ Route.Loading() ],
+    route: [Route.Loading()],
     teas: Loaded.N(),
     tea: null,
     coffees: Loaded.N(),
@@ -18,21 +18,12 @@ export const app = {
     beverage: null
   }),
 
-  accept: [
-    settings.accept,
-    login.accept
-  ],
+  actions: update =>
+    Object.assign({}, routes.actions(update), login.actions(update), settings.actions(update)),
 
-  computed: [
-    login.computed,
-    teaDetails.computed,
-    beverage.computed,
-    brewer.computed
-  ],
+  accept: [settings.accept, login.accept],
 
-  services: [
-    tea.service,
-    coffee.service,
-    beer.service
-  ]
+  computed: [login.computed, teaDetails.computed, beverage.computed, brewer.computed],
+
+  services: [tea.service, coffee.service, beer.service]
 };

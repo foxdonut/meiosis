@@ -1,4 +1,5 @@
-import { shallowEqual } from "../util";
+import { actions } from "./actions";
+import { computed } from "./computed";
 
 export const Route = [
   "Loading",
@@ -13,19 +14,12 @@ export const Route = [
   "Beverage",
   "Brewer",
   "Invalid"
-].reduce(
-  (result, id) => {
-    result[id] = params => ({ id, params: params == null ? {} : params });
-    return result;
-  }, {}
-);
+].reduce((result, id) => {
+  result[id] = params => ({ id, params: params == null ? {} : params });
+  return result;
+}, {});
 
-export const findRoute = (routes, id) =>
-  routes.find(route => route.id === id);
-
-export const findRouteWithParams = (routes, routeWithParams) =>
-  routes.find(route => route.id === routeWithParams.id
-    && shallowEqual(route.params, routeWithParams.params));
+export const findRoute = (routes, id) => routes.find(route => route.id === id);
 
 export const initRoute = routes => ({
   routes,
@@ -44,29 +38,13 @@ export const nextRoute = route => {
   };
 };
 
-export const parentRoute = route =>
-  route.routes.slice(0, route.index);
+export const parentRoute = route => route.routes.slice(0, route.index);
 
-export const childRoute = (route, routes) =>
-  route.routes.slice(0, route.index + 1).concat(routes);
+export const childRoute = (route, routes) => route.routes.slice(0, route.index + 1).concat(routes);
 
-export const siblingRoute = (route, routes) =>
-  route.routes.slice(0, route.index).concat(routes);
-
-const diffRoute = (from, to) => from.reduce(
-  (result, route) => result.concat(findRouteWithParams(to, route) ? [] : route),
-  []
-);
+export const siblingRoute = (route, routes) => route.routes.slice(0, route.index).concat(routes);
 
 export const routes = {
-  computed: state => {
-    const routeLeave = diffRoute(state.routePrevious, state.route);
-    const routeArrive = diffRoute(state.route, state.routePrevious);
-
-    return {
-      routePrevious: state.route,
-      routeLeave,
-      routeArrive
-    };
-  }
+  actions,
+  computed
 };
