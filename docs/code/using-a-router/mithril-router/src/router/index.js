@@ -70,11 +70,11 @@ export const LocationBarSync = {
   }
 };
 
-export const createRoutes = ({ states, update, App }) =>
+export const createRoutes = ({ states, actions, App }) =>
   Object.entries(createRouteMap(routeMap)).reduce((result, [path, fn]) => {
     result[path] = {
-      onmatch: value => update({ route: fn(value) }),
-      render: () => m(App, { state: states(), update })
+      onmatch: value => actions.navigateTo(fn(value)),
+      render: () => m(App, { state: states(), actions })
     };
     return result;
   }, {});

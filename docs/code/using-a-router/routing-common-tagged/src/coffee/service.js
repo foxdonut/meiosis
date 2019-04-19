@@ -1,6 +1,6 @@
 import { contains, fold } from "static-tagged-union";
 
-import { coffees } from "../beverage";
+import { coffees } from "../beverage/data";
 import { Loaded, Route } from "../routes";
 import { T, Tpipe } from "../util";
 
