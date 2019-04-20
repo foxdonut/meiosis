@@ -5,32 +5,32 @@ import { Route, childRoute, nextRoute } from "routing-common/src/routes";
 
 export class Tea extends Component {
   render() {
-    const { state, update, route } = this.props;
+    const { state, actions, route } = this.props;
 
     return (
       <div>
         <div>Tea Page</div>
         <ul>
-          {
-            state.teas
-              ? state.teas.map(tea => (
-                <li key={tea.id}>
-                  <a href="javascript://"
-                    onClick={() =>
-                      update({
-                        route: childRoute(route, [ Route.TeaDetails({ id: tea.id }) ])
-                      })
-                    }
-                  >{tea.title}</a>
-                </li>
-              ))
-              : (<li>Loading...</li>)
-          }
+          {state.teas ? (
+            state.teas.map(tea => (
+              <li key={tea.id}>
+                <a
+                  href="javascript://"
+                  onClick={() =>
+                    actions.navigateTo(childRoute(route, [Route.TeaDetails({ id: tea.id })]))
+                  }
+                >
+                  {tea.title}
+                </a>
+              </li>
+            ))
+          ) : (
+            <li>Loading...</li>
+          )}
         </ul>
-        {
-          route.child.id === "TeaDetails" &&
-            <TeaDetails state={state} update={update} route={nextRoute(route)} />
-        }
+        {route.child.id === "TeaDetails" && (
+          <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
+        )}
       </div>
     );
   }

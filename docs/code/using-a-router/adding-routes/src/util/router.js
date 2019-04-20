@@ -35,12 +35,13 @@ export const LocationBarSync = ({ state }) => {
 
 // Listens to route changes and triggers updates
 export const listenToRouteChanges = update => {
-  const emitRouteUpdate = () => update({
-    routeStatus: {
-      case: "Request",
-      value: parsePath()
-    }
-  });
+  const emitRouteUpdate = () =>
+    update({
+      routeStatus: {
+        case: "Request",
+        value: parsePath()
+      }
+    });
   window.onpopstate = emitRouteUpdate;
   // Parse initial route
   emitRouteUpdate();

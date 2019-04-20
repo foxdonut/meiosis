@@ -21,9 +21,5 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "peerDependencies": {
     "patchinko": "4.x"
-  },
-  "devDependencies": {
-    "eslint": "^5.16.0"
-  },
-  "dependencies": {}
+  }
 }

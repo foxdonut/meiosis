@@ -22,9 +22,5 @@
   "peerDependencies": {
     "patchinko": "4.x",
     "static-tagged-union": "*"
-  },
-  "devDependencies": {
-    "eslint": "^5.13.0"
-  },
-  "dependencies": {}
+  }
 }

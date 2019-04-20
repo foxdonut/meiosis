@@ -1,11 +1,10 @@
 import React from "react";
 
-import { settings } from "routing-common/src/settings";
-
-export const Settings = ({ update }) => (
+export const Settings = ({ actions }) => (
   <div>
     <div>Settings Page</div>
-    <button className="btn btn-danger"
-      onClick={() => update(settings.actions.logout())}>Logout</button>
+    <button className="btn btn-danger" onClick={() => actions.logout()}>
+      Logout
+    </button>
   </div>
 );
