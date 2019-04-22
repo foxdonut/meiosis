@@ -27,8 +27,7 @@
     "mithril": "^2.0.0-rc.4",
     "patchinko": "^4.1.0",
     "path-to-regexp": "^3.0.0",
-    "routing-common": "../routing-common-tagged",
-    "static-tagged-union": "^0.6.0"
+    "routing-common": "../routing-common-core"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",

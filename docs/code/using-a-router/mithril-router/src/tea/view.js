@@ -1,5 +1,4 @@
 import m from "mithril";
-import { fold } from "static-tagged-union";
 
 import { toPath } from "../router";
 import { TeaDetails } from "../teaDetails";
@@ -12,10 +11,8 @@ export const Tea = {
       m("div", "Tea Page"),
       m(
         "ul",
-        fold({
-          N: () => m("li", "Loading..."),
-          Y: teas =>
-            teas.map(tea =>
+        state.teas
+          ? state.teas.map(tea =>
               m(
                 "li",
                 { key: tea.id },
@@ -28,10 +25,9 @@ export const Tea = {
                 )
               )
             )
-        })(state.teas)
+          : m("li", "Loading...")
       ),
-      fold({
-        TeaDetails: () => m(TeaDetails, { state, actions, route: nextRoute(route) })
-      })(route.child)
+
+      route.child.id === "TeaDetails" && m(TeaDetails, { state, actions, route: nextRoute(route) })
     )
 };

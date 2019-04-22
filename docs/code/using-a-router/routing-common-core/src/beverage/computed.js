@@ -1,17 +1,19 @@
+import O from "patchinko/constant";
+
 import { beverageMap } from "./data";
 import { findRoute } from "../routes";
-import { get } from "../util";
 
 export const computed = state => {
-  const route = findRoute(state.route, "Beverage");
-  if (route) {
-    const id = route.params.id;
-
-    if (!get(state, ["beverage", id])) {
-      const description = beverageMap[id].description;
-      return { beverage: { [id]: description } };
+  const arrive = findRoute(state.route.arrive, "Beverage");
+  if (arrive) {
+    const id = arrive.params.id;
+    const description = beverageMap[id].description;
+    return { beverage: { [id]: description } };
+  } else {
+    const leave = findRoute(state.route.leave, "Beverage");
+    if (leave) {
+      const id = leave.params.id;
+      return { beverage: { [id]: O } };
     }
-  } else if (state.beverage) {
-    return { beverage: null };
   }
 };

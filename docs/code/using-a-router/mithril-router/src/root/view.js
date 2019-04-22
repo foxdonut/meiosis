@@ -1,5 +1,4 @@
 import m from "mithril";
-import { fold } from "static-tagged-union";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -11,22 +10,23 @@ import { Beer } from "../beer";
 import { Route, initRoute } from "routing-common/src/routes";
 import { toPath, LocationBarSync } from "../router";
 
-const componentMap = fold({
-  Loading: () => ({ view: () => m("div", "Loading, please wait...") }),
-  Home: () => Home,
-  Login: () => Login,
-  Settings: () => Settings,
-  Tea: () => Tea,
-  Coffee: () => Coffee,
-  Beer: () => Beer,
-  Invalid: () => ({ view: () => m("div", "Oops, page not found.") })
-});
+const componentMap = {
+  Loading: { view: () => m("div", "Loading, please wait...") },
+  Home: Home,
+  Login: Login,
+  Settings: Settings,
+  Tea: Tea,
+  Coffee: Coffee,
+  Beer: Beer,
+  Invalid: { view: () => m("div", "Oops, page not found.") }
+};
 
 export const Root = {
   view: ({ attrs: { state, actions } }) => {
-    const route = initRoute(state.route);
-    const Component = componentMap(route.local);
+    const route = initRoute(state.route.current);
+    const Component = componentMap[route.local.id];
     const isActive = tab => (tab === Component ? ".active" : "");
+
     return m(
       "div",
       m(

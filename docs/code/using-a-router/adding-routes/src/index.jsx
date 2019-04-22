@@ -25,7 +25,7 @@ Promise.resolve()
     // Only for using Meiosis Tracer in development.
     require("meiosis-tracer")({
       selector: "#tracer",
-      rows: 45,
+      rows: 40,
       streams: [
         // { stream: update, label: "update" },
         { stream: states, label: "states" }
@@ -36,5 +36,5 @@ Promise.resolve()
     render(<App states={states} actions={actions} />, document.getElementById("app"));
 
     // Initial navigation
-    update({ route: [Route.Home()] });
+    actions.navigateTo([Route.Home()]);
   });

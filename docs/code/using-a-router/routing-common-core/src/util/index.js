@@ -22,7 +22,7 @@ export const shallowEqual = (obj1, obj2) => {
 
   const keys = Object.keys(obj1);
 
-  if (keys.length === Object.keys(obj2)) {
+  if (keys.length === Object.keys(obj2).length) {
     for (let i = 0, t = keys.length; i < t; i++) {
       const key = keys[i];
       if (obj1[key] !== obj2[key]) {

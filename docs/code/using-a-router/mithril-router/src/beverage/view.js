@@ -1,17 +1,16 @@
 import m from "mithril";
-import { fold } from "static-tagged-union";
 
 import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/routes";
 import { toPath } from "../router";
 import { Brewer } from "../brewer";
 
-const componentMap = fold({
-  Brewer: () => Brewer
-});
+const componentMap = {
+  Brewer
+};
 
 export const Beverage = {
   view: ({ attrs: { state, actions, route } }) => {
-    const Component = componentMap(route.child);
+    const Component = componentMap[route.child.id];
     const id = route.local.params.id;
 
     return m(

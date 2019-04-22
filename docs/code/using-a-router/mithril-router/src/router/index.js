@@ -28,12 +28,21 @@ const routeMap = {
 
 const getConfig = config => (typeof config === "string" ? [config, {}] : config);
 
+const pick = (obj, props) =>
+  props.reduce((result, prop) => {
+    result[prop] = obj[prop];
+    return result;
+  }, {});
+
 const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) =>
   Object.entries(routeMap).reduce((result, [id, config]) => {
     const [configPath, children] = getConfig(config);
 
     const localPath = path + configPath;
-    const routeFn = params => fn(params).concat([{ id, params }]);
+    const keys = [];
+    pathToRegexp(localPath, keys);
+    const pathParams = keys.map(key => key.name);
+    const routeFn = params => fn().concat({ id, params: pick(params, pathParams) });
     result[localPath] = routeFn;
     createRouteMap(children, localPath, routeFn, result);
     return result;
@@ -60,8 +69,8 @@ export const toPath = route => "#!" + convertToPath(route);
 // Keeps the location bar in sync
 export const LocationBarSync = {
   view: ({ attrs: { state } }) => {
-    if (!state.route[0].id === "Invalid") {
-      const path = toPath(state.route);
+    if (!state.route.current[0].id === "Invalid") {
+      const path = toPath(state.route.current);
       if (getPath() !== path) {
         setPath(path);
       }

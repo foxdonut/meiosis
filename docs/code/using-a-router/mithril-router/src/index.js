@@ -24,8 +24,11 @@ Promise.resolve()
     // Only for using Meiosis Tracer in development.
     require("meiosis-tracer")({
       selector: "#tracer",
-      rows: 10,
-      streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]
+      rows: 40,
+      streams: [
+        // { stream: update, label: "update" },
+        { stream: states, label: "states" }
+      ]
     });
 
     const actions = app.actions(update);

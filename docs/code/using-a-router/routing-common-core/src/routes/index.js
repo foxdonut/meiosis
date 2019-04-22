@@ -44,6 +44,8 @@ export const childRoute = (route, routes) => route.routes.slice(0, route.index +
 
 export const siblingRoute = (route, routes) => route.routes.slice(0, route.index).concat(routes);
 
+export { navigateTo } from "./actions";
+
 export const routes = {
   actions,
   computed

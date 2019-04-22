@@ -10,8 +10,10 @@ import { brewer } from "../brewer";
 
 export const app = {
   initialState: () => ({
-    routePrevious: [],
-    route: [Route.Loading()],
+    route: {
+      current: [Route.Loading()],
+      previous: []
+    },
     teas: null,
     tea: null,
     coffees: null,

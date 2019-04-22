@@ -1,9 +1,13 @@
-import { Route } from "../routes";
+import { Route, navigateTo } from "../routes";
 
 export const actions = update => ({
   logout: () =>
-    update({
-      user: null,
-      route: [Route.Home()]
-    })
+    update(
+      Object.assign(
+        {
+          user: null
+        },
+        navigateTo([Route.Home()])
+      )
+    )
 });

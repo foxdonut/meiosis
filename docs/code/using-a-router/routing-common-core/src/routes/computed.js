@@ -1,3 +1,5 @@
+import O from "patchinko/constant";
+
 import { shallowEqual } from "../util";
 
 export const findRouteWithParams = (routes, routeWithParams) =>
@@ -9,12 +11,14 @@ const diffRoute = (from, to) =>
   from.reduce((result, route) => result.concat(findRouteWithParams(to, route) ? [] : route), []);
 
 export const computed = state => {
-  const routeLeave = diffRoute(state.routePrevious, state.route);
-  const routeArrive = diffRoute(state.route, state.routePrevious);
+  const leave = diffRoute(state.route.previous, state.route.current);
+  const arrive = diffRoute(state.route.current, state.route.previous);
 
   return {
-    routePrevious: state.route,
-    routeLeave,
-    routeArrive
+    route: O({
+      previous: state.route.current,
+      leave,
+      arrive
+    })
   };
 };
