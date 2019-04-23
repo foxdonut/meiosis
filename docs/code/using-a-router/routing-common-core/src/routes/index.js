@@ -1,5 +1,5 @@
 import { actions } from "./actions";
-import { computed } from "./computed";
+import { accept } from "./accept";
 
 export const Route = [
   "Loading",
@@ -48,5 +48,5 @@ export { navigateTo } from "./actions";
 
 export const routes = {
   actions,
-  computed
+  accept
 };

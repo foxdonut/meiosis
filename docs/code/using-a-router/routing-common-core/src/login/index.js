@@ -1,9 +1,9 @@
 import { accept } from "./accept";
 import { actions } from "./actions";
-import { computed } from "./computed";
+import { service } from "./service";
 
 export const login = {
   accept,
   actions,
-  computed
+  service
 };

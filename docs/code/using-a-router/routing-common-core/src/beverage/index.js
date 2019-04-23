@@ -1,5 +1,5 @@
-import { computed } from "./computed";
+import { service } from "./service";
 
 export const beverage = {
-  computed
+  service
 };

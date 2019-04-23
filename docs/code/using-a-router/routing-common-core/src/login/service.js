@@ -2,15 +2,15 @@ import O from "patchinko/constant";
 
 import { findRoute } from "../routes";
 
-export const computed = state => {
+export const service = (state, update) => {
   if (findRoute(state.route.arrive, "Login")) {
-    return {
+    update({
       login: O({
         username: "",
         password: ""
       })
-    };
+    });
   } else if (findRoute(state.route.leave, "Login")) {
-    return { login: null };
+    update({ login: null });
   }
 };

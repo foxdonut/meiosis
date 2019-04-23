@@ -42,7 +42,7 @@ const createRouteMap = (routeMap = {}, path = "", fn = () => [], acc = {}) =>
     const keys = [];
     pathToRegexp(localPath, keys);
     const pathParams = keys.map(key => key.name);
-    const routeFn = params => fn().concat({ id, params: pick(params, pathParams) });
+    const routeFn = params => fn(params).concat({ id, params: pick(params, pathParams) });
     result[localPath] = routeFn;
     createRouteMap(children, localPath, routeFn, result);
     return result;

@@ -24,15 +24,15 @@ export const app = {
   actions: update =>
     Object.assign({}, routes.actions(update), login.actions(update), settings.actions(update)),
 
-  accept: [settings.accept, login.accept],
+  accept: [settings.accept, login.accept, routes.accept],
 
-  computed: [
-    routes.computed,
-    login.computed,
-    teaDetails.computed,
-    beverage.computed,
-    brewer.computed
-  ],
-
-  services: [tea.service, coffee.service, beer.service]
+  services: [
+    login.service,
+    tea.service,
+    teaDetails.service,
+    coffee.service,
+    beer.service,
+    beverage.service,
+    brewer.service
+  ]
 };
