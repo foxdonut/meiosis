@@ -3,7 +3,7 @@ import O from "patchinko/constant";
 import { beverageMap } from "./data";
 import { findRoute } from "../routes";
 
-export const service = (state, update) => {
+export const service = ({ state, update }) => {
   const arrive = findRoute(state.route.arrive, "Beverage");
   if (arrive) {
     const id = arrive.params.id;

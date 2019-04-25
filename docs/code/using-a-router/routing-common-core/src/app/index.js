@@ -9,7 +9,7 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
 export const app = {
-  initialState: () => ({
+  initial: () => ({
     route: {
       current: [Route.Loading()],
       previous: []
@@ -24,7 +24,7 @@ export const app = {
   actions: update =>
     Object.assign({}, routes.actions(update), login.actions(update), settings.actions(update)),
 
-  accept: [settings.accept, login.accept, routes.accept],
+  acceptors: [settings.accept, login.accept, routes.accept],
 
   services: [
     login.service,

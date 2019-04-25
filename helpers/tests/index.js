@@ -10,26 +10,21 @@ test("patchinko", t => {
   t.test("setup", t => {
     t.test("flyd", t => {
       t.test("minimal", t => {
-        meiosis.patchinko
-          .setup({
-            O,
-            stream: flyd
-          })
-          .then(({ update, states }) => {
-            t.deepEqual(states(), {});
+        meiosis.patchinko.setup(flyd, O).then(({ update, states }) => {
+          t.deepEqual(states(), {});
 
-            update({ duck: { sound: "quack" } });
-            update({ duck: O({ color: "yellow" }) });
+          update({ duck: { sound: "quack" } });
+          update({ duck: O({ color: "yellow" }) });
 
-            t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } });
+          t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } });
 
-            t.end();
-          });
+          t.end();
+        });
       });
 
       t.test("initial state", t => {
         meiosis.patchinko
-          .setup({ O, stream: flyd, initial: () => ({ duck: "yellow" }) })
+          .setup(flyd, O, { initial: () => ({ duck: "yellow" }) })
           .then(({ states }) => {
             t.deepEqual(states(), { duck: "yellow" });
             t.end();
@@ -42,7 +37,7 @@ test("patchinko", t => {
             setTimeout(() => resolve({ duck: "yellow" }), 10);
           });
 
-        meiosis.patchinko.setup({ O, stream: flyd, initial: initialState }).then(({ states }) => {
+        meiosis.patchinko.setup(flyd, O, { initial: initialState }).then(({ states }) => {
           t.deepEqual(states(), { duck: "yellow" });
           t.end();
         });
@@ -56,7 +51,7 @@ test("patchinko", t => {
         ];
 
         meiosis.patchinko
-          .setup({ O, stream: flyd, initial: () => ({ count: 0 }), acceptors })
+          .setup(flyd, O, { initial: () => ({ count: 0 }), acceptors })
           .then(({ update, states }) => {
             update({ increment: 1 });
             update({ increment: 10 });
@@ -87,7 +82,7 @@ test("patchinko", t => {
         ];
 
         meiosis.patchinko
-          .setup({ O, stream: flyd, initial: () => ({ count: 0 }), services, actions })
+          .setup(flyd, O, { initial: () => ({ count: 0 }), services, actions })
           .then(({ update, states, actions }) => {
             t.ok(typeof actions.increment === "function");
 
@@ -101,21 +96,16 @@ test("patchinko", t => {
 
     t.test("mithril-stream", t => {
       t.test("minimal", t => {
-        meiosis.patchinko
-          .setup({
-            O,
-            stream
-          })
-          .then(({ update, states }) => {
-            t.deepEqual(states(), {});
+        meiosis.patchinko.setup(stream, O).then(({ update, states }) => {
+          t.deepEqual(states(), {});
 
-            update({ duck: { sound: "quack" } });
-            update({ duck: O({ color: "yellow" }) });
+          update({ duck: { sound: "quack" } });
+          update({ duck: O({ color: "yellow" }) });
 
-            t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } });
+          t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } });
 
-            t.end();
-          });
+          t.end();
+        });
       });
     });
   });

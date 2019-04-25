@@ -1,7 +1,7 @@
 import { teas } from "../teaDetails/data";
 import { findRoute } from "../routes";
 
-export const service = (state, update) => {
+export const service = ({ state, update }) => {
   if (findRoute(state.route.arrive, "Tea")) {
     setTimeout(() => {
       update({ teas });

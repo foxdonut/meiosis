@@ -25,6 +25,8 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "flyd": "^0.2.8",
+    "meiosis-helpers": "file:../../../../helpers/meiosis-helpers-0.1.0.tgz",
+    "mithril": "^1.1.6",
     "patchinko": "^4.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

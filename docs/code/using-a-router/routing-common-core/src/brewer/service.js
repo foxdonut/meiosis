@@ -2,7 +2,7 @@ import O from "patchinko/constant";
 
 import { findRoute } from "../routes";
 
-export const service = (state, update) => {
+export const service = ({ state, update }) => {
   const arrive = findRoute(state.route.arrive, "Brewer");
 
   if (arrive) {
