@@ -7,7 +7,6 @@ import { setup as commonSetup } from "../common/setup";
  * for which you provide either a function or an object with a `stream` function to create a stream.
  * The function or object must also have a `scan` property.
  * The returned stream must have a `map` method.
- * @param {O} the Patchinko function
  * @param {initial} (optional) a function that creates the initial state. This function can return
  * a result * or a Promise. If not specified, the initial state will be `{}`.
  * @param {acceptors} (optional) an array of `accept` functions, each of which should be
@@ -19,4 +18,4 @@ import { setup as commonSetup } from "../common/setup";
  * @returns a Promise that resolves to { update, models, accepted, states, actions }
  * all of which are streams, except for `actions` which is the created actions.
  */
-export const setup = (stream, O, app) => commonSetup(stream, O, (x, f) => O(x, f(x)), app);
+export const setup = (stream, app) => commonSetup(stream, (x, f) => f(x), (x, f) => f(x)(x), app);
