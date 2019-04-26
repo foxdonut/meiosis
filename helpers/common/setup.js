@@ -7,24 +7,32 @@
  * The returned stream must have a `map` method.
  * @param {accumulator} the accumulator function.
  * @param {acceptor} the acceptor reduce function.
- * @param {initial} (optional) a function that creates the initial state. This function can return
+ * @param {app.initial} (optional) a function that creates the initial state. This function can return
  * a result * or a Promise. If not specified, the initial state will be `{}`.
- * @param {acceptors} (optional) an array of `accept` functions, each of which should be
+ * @param {app.Actions} (optional) a function that creates actions, of the form `update => actions`.
+ * @param {app.acceptors} (optional) an array of `accept` functions, each of which should be
  * `state => patch`.
- * @param {services} (optional) an array of `service` functions, each of which should be
+ * @param {app.services} (optional) an array of `service` functions, each of which should be
  * `({ state, update, actions }) => void`.
- * @param {actions} (optional) a function that creates actions, of the form `update => actions`.
  *
  * @returns a Promise that resolves to { update, models, accepted, states, actions }
  * all of which are streams, except for `actions` which is the created actions.
  */
-export const setup = (stream, accumulator, acceptor, app) => {
+export const setup = ({ stream, accumulator, acceptor, app }) => {
   app = app || {};
-  let { initial, acceptors, services, actions } = app;
+  let { initial, acceptors, services, Actions } = app;
 
   initial = initial || (() => ({}));
   acceptors = acceptors || [];
   services = services || [];
+
+  if (!acceptor) {
+    if (acceptors.length > 0) {
+      throw new Error("There are acceptors in app, but no acceptor function was specified.");
+    } else {
+      acceptor = x => x;
+    }
+  }
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
@@ -54,7 +62,7 @@ export const setup = (stream, accumulator, acceptor, app) => {
 
       const states = createStream();
 
-      actions = (actions || (() => ({})))(bufferedUpdate);
+      const actions = (Actions || (() => ({})))(bufferedUpdate);
 
       models.map(state => {
         // For synchronous updates, prevent re-calling all services,

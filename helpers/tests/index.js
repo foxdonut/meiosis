@@ -1,7 +1,7 @@
 const test = require("tape");
 
 const flyd = require("flyd");
-const stream = require("mithril/stream");
+const Stream = require("mithril/stream");
 const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
 const R = require("ramda");
@@ -11,7 +11,7 @@ const meiosis = require("../dist/meiosis-helpers");
 const patchinkoTest = (O, streamLib, label) => {
   test("patchinko setup", t => {
     t.test(label + " / minimal", t => {
-      meiosis.patchinko.setup(streamLib, O).then(({ update, states }) => {
+      meiosis.patchinko.setup({ stream: streamLib, O }).then(({ update, states }) => {
         t.deepEqual(states(), {}, "initial state");
 
         update({ duck: { sound: "quack" } });
@@ -25,7 +25,7 @@ const patchinkoTest = (O, streamLib, label) => {
 
     t.test(label + " / initial state", t => {
       meiosis.patchinko
-        .setup(streamLib, O, { initial: () => ({ duck: "yellow" }) })
+        .setup({ stream: streamLib, O, app: { initial: () => ({ duck: "yellow" }) } })
         .then(({ states }) => {
           t.deepEqual(states(), { duck: "yellow" }, "initial state");
           t.end();
@@ -38,10 +38,12 @@ const patchinkoTest = (O, streamLib, label) => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
         });
 
-      meiosis.patchinko.setup(streamLib, O, { initial: initialState }).then(({ states }) => {
-        t.deepEqual(states(), { duck: "yellow" }, "initial state");
-        t.end();
-      });
+      meiosis.patchinko
+        .setup({ stream: streamLib, O, app: { initial: initialState } })
+        .then(({ states }) => {
+          t.deepEqual(states(), { duck: "yellow" }, "initial state");
+          t.end();
+        });
     });
 
     t.test(label + " / acceptors", t => {
@@ -52,7 +54,7 @@ const patchinkoTest = (O, streamLib, label) => {
       ];
 
       meiosis.patchinko
-        .setup(streamLib, O, { initial: () => ({ count: 0 }), acceptors })
+        .setup({ stream: streamLib, O, app: { initial: () => ({ count: 0 }), acceptors } })
         .then(({ update, states }) => {
           update({ increment: 1 });
           update({ increment: 10 });
@@ -69,7 +71,11 @@ const patchinkoTest = (O, streamLib, label) => {
       ];
 
       meiosis.patchinko
-        .setup(streamLib, O, { initial: () => ({ count: 0, increment: 1 }), acceptors })
+        .setup({
+          stream: streamLib,
+          O,
+          app: { initial: () => ({ count: 0, increment: 1 }), acceptors }
+        })
         .then(({ states }) => {
           t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
           t.end();
@@ -77,7 +83,7 @@ const patchinkoTest = (O, streamLib, label) => {
     });
 
     t.test(label + " / services and actions", t => {
-      const actions = update => ({
+      const Actions = update => ({
         increment: amount => update({ count: O(x => x + amount) })
       });
 
@@ -96,7 +102,7 @@ const patchinkoTest = (O, streamLib, label) => {
       ];
 
       meiosis.patchinko
-        .setup(streamLib, O, { initial: () => ({ count: 0 }), services, actions })
+        .setup({ stream: streamLib, O, app: { initial: () => ({ count: 0 }), services, Actions } })
         .then(({ update, states, actions }) => {
           t.ok(typeof actions.increment === "function", "actions");
 
@@ -122,29 +128,31 @@ const patchinkoTest = (O, streamLib, label) => {
         }
       ];
 
-      meiosis.patchinko.setup(streamLib, O, { services }).then(({ update, states }) => {
-        let ticks = 0;
-        states.map(() => ticks++);
+      meiosis.patchinko
+        .setup({ stream: streamLib, O, app: { services } })
+        .then(({ update, states }) => {
+          let ticks = 0;
+          states.map(() => ticks++);
 
-        update({ count: 1 });
+          update({ count: 1 });
 
-        t.equal(ticks, 2, "number of ticks");
-        t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-        t.end();
-      });
+          t.equal(ticks, 2, "number of ticks");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
     });
   });
 };
 
 patchinkoTest(Oc, flyd, "patchinko-constant + flyd");
 patchinkoTest(Oi, flyd, "patchinko-immutable + flyd");
-patchinkoTest(Oc, stream, "patchinko-constant + mithril-stream");
-patchinkoTest(Oc, stream, "patchinko-immutable + mithril-stream");
+patchinkoTest(Oc, Stream, "patchinko-constant + mithril-stream");
+patchinkoTest(Oc, Stream, "patchinko-immutable + mithril-stream");
 
 const functionPatchTest = (streamLib, label) => {
   test("functionPatch setup", t => {
     t.test(label + " / minimal", t => {
-      meiosis.functionPatches.setup(streamLib).then(({ update, states }) => {
+      meiosis.functionPatches.setup({ stream: streamLib }).then(({ update, states }) => {
         t.deepEqual(states(), {}, "initial state");
 
         update(() => ({ duck: { sound: "quack" } }));
@@ -158,7 +166,7 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / initial state", t => {
       meiosis.functionPatches
-        .setup(streamLib, { initial: () => ({ duck: "yellow" }) })
+        .setup({ stream: streamLib, app: { initial: () => ({ duck: "yellow" }) } })
         .then(({ states }) => {
           t.deepEqual(states(), { duck: "yellow" }, "initial state");
           t.end();
@@ -171,10 +179,12 @@ const functionPatchTest = (streamLib, label) => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
         });
 
-      meiosis.functionPatches.setup(streamLib, { initial: initialState }).then(({ states }) => {
-        t.deepEqual(states(), { duck: "yellow" }, "initial state");
-        t.end();
-      });
+      meiosis.functionPatches
+        .setup({ stream: streamLib, app: { initial: initialState } })
+        .then(({ states }) => {
+          t.deepEqual(states(), { duck: "yellow" }, "initial state");
+          t.end();
+        });
     });
 
     t.test(label + " / acceptors", t => {
@@ -190,7 +200,7 @@ const functionPatchTest = (streamLib, label) => {
       ];
 
       meiosis.functionPatches
-        .setup(streamLib, { initial: () => ({ count: 0 }), acceptors })
+        .setup({ stream: streamLib, app: { initial: () => ({ count: 0 }), acceptors } })
         .then(({ update, states }) => {
           update(R.assoc("increment", 1));
           update(R.assoc("increment", 10));
@@ -210,15 +220,18 @@ const functionPatchTest = (streamLib, label) => {
       ];
 
       meiosis.functionPatches
-        .setup(streamLib, { initial: () => ({ count: 0, increment: 1 }), acceptors })
+        .setup({
+          stream: streamLib,
+          app: { initial: () => ({ count: 0, increment: 1 }), acceptors }
+        })
         .then(({ states }) => {
           t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
           t.end();
         });
     });
 
-    t.test(label + " / services and actions", t => {
-      const actions = update => ({
+    t.test(label + " / services and Actions", t => {
+      const Actions = update => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
@@ -237,7 +250,7 @@ const functionPatchTest = (streamLib, label) => {
       ];
 
       meiosis.functionPatches
-        .setup(streamLib, { initial: () => ({ count: 0 }), services, actions })
+        .setup({ stream: streamLib, app: { initial: () => ({ count: 0 }), services, Actions } })
         .then(({ update, states, actions }) => {
           t.ok(typeof actions.increment === "function", "actions");
 
@@ -263,19 +276,55 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches.setup(streamLib, { services }).then(({ update, states }) => {
-        let ticks = 0;
-        states.map(() => ticks++);
+      meiosis.functionPatches
+        .setup({ stream: streamLib, app: { services } })
+        .then(({ update, states }) => {
+          let ticks = 0;
+          states.map(() => ticks++);
 
-        update(R.assoc("count", 1));
+          update(R.assoc("count", 1));
 
-        t.equal(ticks, 2, "number of ticks");
-        t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-        t.end();
-      });
+          t.equal(ticks, 2, "number of ticks");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
     });
   });
 };
 
 functionPatchTest(flyd, "functionPatch + flyd");
-functionPatchTest(stream, "functionPatch + mithril-stream");
+functionPatchTest(Stream, "functionPatch + mithril-stream");
+
+const commonTest = (streamLib, label) => {
+  test("common setup", t => {
+    t.test(label + " / optional acceptor function", t => {
+      meiosis.common
+        .setup({ stream: streamLib, accumulator: (x, f) => f(x) })
+        .then(({ update, states }) => {
+          update(R.assoc("count", 1));
+
+          t.deepEqual(states(), { count: 1 }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / required acceptor function", t => {
+      const I = x => x;
+
+      try {
+        meiosis.common
+          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
+          .then(() => {
+            t.fail("An error should have been thrown because no acceptor function was specified.");
+            t.end();
+          });
+      } catch (err) {
+        t.pass("Error was thrown as it should.");
+        t.end();
+      }
+    });
+  });
+};
+
+commonTest(flyd, "common + flyd");
+commonTest(Stream, "common + mithril-stream");
