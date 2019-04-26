@@ -2,7 +2,7 @@ import O from "patchinko/constant";
 
 import { Route, navigateTo } from "../routes";
 
-export const actions = update => ({
+export const Actions = update => ({
   username: value => update({ login: O({ username: value }) }),
   password: value => update({ login: O({ password: value }) }),
 

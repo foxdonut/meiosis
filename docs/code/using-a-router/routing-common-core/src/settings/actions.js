@@ -1,6 +1,6 @@
 import { Route, navigateTo } from "../routes";
 
-export const actions = update => ({
+export const Actions = update => ({
   logout: () =>
     update(
       Object.assign(

@@ -1,7 +1,7 @@
 import { accept } from "./accept";
-import { actions } from "./actions";
+import { Actions } from "./actions";
 
 export const settings = {
   accept,
-  actions
+  Actions
 };

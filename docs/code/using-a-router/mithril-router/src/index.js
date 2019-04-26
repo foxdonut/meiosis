@@ -1,12 +1,12 @@
 import m from "mithril";
-import stream from "mithril/stream";
+import Stream from "mithril/stream";
 import O from "patchinko/constant";
 import meiosis from "meiosis-helpers";
 
 import { app, App } from "./app";
 import { createRoutes } from "./router";
 
-meiosis.patchinko.setup(stream, O, app).then(({ states, actions }) => {
+meiosis.patchinko.setup({ stream: Stream, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",

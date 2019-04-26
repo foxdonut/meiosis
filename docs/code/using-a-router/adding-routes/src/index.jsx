@@ -6,8 +6,10 @@ import meiosis from "meiosis-helpers";
 
 import { app, App } from "./app";
 import { Route } from "routing-common/src/routes";
+import { routeConfig } from "./router";
+import { createRouter } from "./router/util";
 
-meiosis.patchinko.setup(flyd, O, app).then(({ states, actions }) => {
+meiosis.patchinko.setup({ stream: flyd, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",
@@ -18,8 +20,13 @@ meiosis.patchinko.setup(flyd, O, app).then(({ states, actions }) => {
     ]
   });
 
-  render(<App states={states} actions={actions} />, document.getElementById("app"));
+  const router = createRouter({
+    routeConfig,
+    navigateTo: actions.navigateTo,
+    defaultRoute: [Route.Home()]
+  });
 
-  // Initial navigation
-  actions.navigateTo([Route.Home()]);
+  render(<App states={states} actions={actions} router={router} />, document.getElementById("app"));
+
+  states.map(router.locationBarSync);
 });

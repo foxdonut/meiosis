@@ -7,7 +7,7 @@ import meiosis from "meiosis-helpers";
 import { app, App } from "./app";
 import { Route } from "routing-common/src/routes";
 
-meiosis.patchinko.setup(flyd, O, app).then(({ states, actions }) => {
+meiosis.patchinko.setup({ stream: flyd, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",

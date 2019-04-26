@@ -21,8 +21,8 @@ export const app = {
     beverage: null
   }),
 
-  actions: update =>
-    Object.assign({}, routes.actions(update), login.actions(update), settings.actions(update)),
+  Actions: update =>
+    Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),
 
   acceptors: [settings.accept, login.accept, routes.accept],
 

@@ -1,4 +1,4 @@
-import { actions } from "./actions";
+import { Actions } from "./actions";
 import { accept } from "./accept";
 
 export const Route = [
@@ -47,6 +47,6 @@ export const siblingRoute = (route, routes) => route.routes.slice(0, route.index
 export { navigateTo } from "./actions";
 
 export const routes = {
-  actions,
+  Actions,
   accept
 };

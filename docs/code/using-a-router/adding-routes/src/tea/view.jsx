@@ -5,7 +5,7 @@ import { Route, childRoute, nextRoute } from "routing-common/src/routes";
 
 export class Tea extends Component {
   render() {
-    const { state, actions, route } = this.props;
+    const { state, actions, router, route } = this.props;
 
     return (
       <div>
@@ -14,12 +14,7 @@ export class Tea extends Component {
           {state.teas ? (
             state.teas.map(tea => (
               <li key={tea.id}>
-                <a
-                  href="javascript://"
-                  onClick={() =>
-                    actions.navigateTo(childRoute(route, [Route.TeaDetails({ id: tea.id })]))
-                  }
-                >
+                <a href={router.toPath(childRoute(route, [Route.TeaDetails({ id: tea.id })]))}>
                   {tea.title}
                 </a>
               </li>
@@ -29,7 +24,7 @@ export class Tea extends Component {
           )}
         </ul>
         {route.child.id === "TeaDetails" && (
-          <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
+          <TeaDetails state={state} actions={actions} router={router} route={nextRoute(route)} />
         )}
       </div>
     );
