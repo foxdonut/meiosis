@@ -9,7 +9,7 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
 export const app = {
-  initial: () => ({
+  Initial: () => ({
     route: {
       current: [Route.Loading()],
       previous: []

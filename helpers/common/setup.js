@@ -7,7 +7,7 @@
  * The returned stream must have a `map` method.
  * @param {accumulator} the accumulator function.
  * @param {acceptor} the acceptor reduce function.
- * @param {app.initial} (optional) a function that creates the initial state. This function can return
+ * @param {app.Initial} (optional) a function that creates the initial state. This function can return
  * a result * or a Promise. If not specified, the initial state will be `{}`.
  * @param {app.Actions} (optional) a function that creates actions, of the form `update => actions`.
  * @param {app.acceptors} (optional) an array of `accept` functions, each of which should be
@@ -20,9 +20,9 @@
  */
 export const setup = ({ stream, accumulator, acceptor, app }) => {
   app = app || {};
-  let { initial, acceptors, services, Actions } = app;
+  let { Initial, acceptors, services, Actions } = app;
 
-  initial = initial || (() => ({}));
+  Initial = Initial || (() => ({}));
   acceptors = acceptors || [];
   services = services || [];
 
@@ -38,7 +38,7 @@ export const setup = ({ stream, accumulator, acceptor, app }) => {
   const scan = stream.scan;
 
   return Promise.resolve()
-    .then(initial)
+    .then(Initial)
     .then(initialState => {
       const update = createStream();
 
