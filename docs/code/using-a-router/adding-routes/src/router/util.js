@@ -1,9 +1,8 @@
 // This code will be moved to a reusable helper
-import pathToRegexp from "path-to-regexp";
+import createRouteMatcher from "feather-route-matcher";
 
-const I = x => x;
-
-const getConfig = config => (typeof config === "string" ? [config, {}] : config);
+const getConfig = config =>
+  config == null ? ["/", {}] : typeof config === "string" ? [config, {}] : config;
 
 const pick = (obj, props) =>
   props.reduce((result, prop) => {
@@ -11,60 +10,65 @@ const pick = (obj, props) =>
     return result;
   }, {});
 
-const convert = (result, pathParams, routeFn) => {
-  const rest = result.slice(1);
-  const params = pathParams.reduce((acc, key, index) => {
-    acc[key] = rest[index];
-    return acc;
-  }, {});
-  return routeFn(params);
+const findPathParams = path => {
+  const match = path.match(/:[^/]*/g);
+
+  if (match) {
+    return match.map(param => param.substring(1));
+  } else {
+    return [];
+  }
 };
 
-// Returns [ fn(url) => route ]
-const createRouteExecs = (routeConfig = {}, path = "", fn = () => [], acc = []) =>
-  Object.entries(routeConfig).reduce((result, [id, config]) => {
-    const [configPath, children] = getConfig(config);
+const setParams = (path, params) =>
+  findPathParams(path).reduce((result, pathParam) => {
+    const value = params[pathParam];
+    const key = ":" + pathParam;
+    const idx = result.indexOf(key);
+    return result.substring(0, idx) + value + result.substring(idx + key.length);
+  }, path);
 
-    const localPath = path + configPath;
-    const keys = [];
-    const re = pathToRegexp(localPath, keys);
-    const pathParams = keys.map(key => key.name);
-    const routeFn = params => fn(params).concat({ id, params: pick(params, pathParams) });
-    const exec = url => {
-      const found = re.exec(url);
-      return found && convert(found, pathParams, routeFn);
-    };
-    result.push(exec);
-    createRouteExecs(children, localPath, routeFn, result);
-    return result;
-  }, acc);
-
-const convertToPath = (routeConfig, route) => {
+const convertToPath = (routeConfig, routes) => {
   let path = "";
   let lookup = routeConfig;
 
-  route.forEach(route => {
+  routes.forEach(route => {
     const [configPath, children] = getConfig(lookup[route.id]);
-    path += pathToRegexp.compile(configPath)(route.params);
+    path += setParams(configPath, route.params);
     lookup = children;
   });
 
   return path;
 };
 
-const getPath = () => document.location.hash || "#/";
-const setPath = path => window.history.pushState({}, "", path);
+// Returns { "/path": fn(params) => [route] }
+const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc = {}) =>
+  Object.entries(routeConfig).reduce((result, [id, config]) => {
+    const [configPath, children] = getConfig(config);
 
-export const createRouter = ({ routeConfig, navigateTo, defaultRoute }) => {
-  const routeExecs = createRouteExecs(routeConfig);
+    const localPath = path + configPath;
+    const pathParams = findPathParams(localPath);
+    const routeFn = params => fn(params).concat({ id, params: pick(params, pathParams) });
+    result[localPath] = routeFn;
+    createRouteMap(children, localPath, routeFn, result);
+    return result;
+  }, acc);
+
+const getPath = () => document.location.hash || "#/";
+export const setPath = path => window.history.pushState({}, "", path);
+
+export const createRouter = ({ routeConfig, defaultRoute }) => {
+  const routeMap = createRouteMap(routeConfig);
+  const routeMatcher = createRouteMatcher(routeMap);
 
   const parsePath = path => {
-    const result = routeExecs
-      .map(exec => exec(path))
-      .filter(I)
-      .slice(-1)[0];
+    const match = routeMatcher(path);
 
-    return result || defaultRoute;
+    if (match) {
+      return match.page(match.params);
+    } else {
+      return defaultRoute;
+    }
   };
 
   const toPath = route => "#" + convertToPath(routeConfig, route);
@@ -80,11 +84,13 @@ export const createRouter = ({ routeConfig, navigateTo, defaultRoute }) => {
   };
 
   // Listen to location changes and call navigateTo()
-  const parsePathAndNavigate = () => navigateTo(parsePath(getPath().substring(1)));
-  window.onpopstate = parsePathAndNavigate;
+  const start = ({ navigateTo }) => {
+    const parsePathAndNavigate = () => navigateTo(parsePath(getPath().substring(1)));
+    window.onpopstate = parsePathAndNavigate;
 
-  // Initial navigation
-  parsePathAndNavigate();
+    // Initial navigation
+    parsePathAndNavigate();
+  };
 
-  return { parsePath, toPath, locationBarSync };
+  return { toPath, locationBarSync, start };
 };

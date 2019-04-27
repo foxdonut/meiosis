@@ -1,0 +1,1 @@
+export { TeaDetails } from "./view";

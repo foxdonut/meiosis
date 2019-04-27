@@ -1,5 +1,5 @@
 {
-  "name": "adding-routes",
+  "name": "programmatic-links",
   "version": "1.0.0",
   "description": "meiosis docs example",
   "main": "src/index.jsx",
@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "feather-route-matcher": "^3.0.0",
     "flyd": "^0.2.8",
     "meiosis-helpers": "file:../../../../helpers/meiosis-helpers-0.1.0.tgz",
     "patchinko": "^4.1.0",
+    "path-to-regexp": "^3.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "routing-common": "../routing-common-core"

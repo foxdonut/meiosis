@@ -1,6 +1,3 @@
-import { createRouter } from "./util";
-import { Route } from "routing-common/src/routes";
-
 const beverageRoutes = {
   Beverages: "",
   Beverage: [
@@ -11,7 +8,7 @@ const beverageRoutes = {
   ]
 };
 
-const routeConfig = {
+export const routeConfig = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",
@@ -22,12 +19,6 @@ const routeConfig = {
     }
   ],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer", beverageRoutes]
+  Beer: ["/beer", beverageRoutes],
+  Invalid: "/:404..."
 };
-
-export const router = createRouter({
-  routeConfig,
-  defaultRoute: [Route.Home()]
-});
-
-export const toPath = router.toPath;

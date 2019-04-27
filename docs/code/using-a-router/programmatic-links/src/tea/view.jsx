@@ -2,7 +2,6 @@ import React, { Component } from "react";
 
 import { TeaDetails } from "../teaDetails";
 import { Route, childRoute, nextRoute } from "routing-common/src/routes";
-import { toPath } from "../router";
 
 export class Tea extends Component {
   render() {
@@ -15,7 +14,7 @@ export class Tea extends Component {
           {state.teas ? (
             state.teas.map(tea => (
               <li key={tea.id}>
-                <a href={toPath(childRoute(route, [Route.TeaDetails({ id: tea.id })]))}>
+                <a href={router.toPath(childRoute(route, [Route.TeaDetails({ id: tea.id })]))}>
                   {tea.title}
                 </a>
               </li>
