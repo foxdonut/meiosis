@@ -59,6 +59,8 @@ export const setPath = path => window.history.pushState({}, "", path);
 
 export const createRouter = ({ routeConfig, defaultRoute }) => {
   const routeMap = createRouteMap(routeConfig);
+
+  // vv This is the only router-library-specific code
   const routeMatcher = createRouteMatcher(routeMap);
 
   const parsePath = path => {
@@ -70,6 +72,7 @@ export const createRouter = ({ routeConfig, defaultRoute }) => {
       return defaultRoute;
     }
   };
+  // ^^ This is the only router-library-specific code
 
   const toPath = route => "#" + convertToPath(routeConfig, route);
 
