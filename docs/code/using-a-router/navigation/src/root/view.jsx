@@ -7,7 +7,8 @@ import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
-import { Route, initRoute } from "routing-common/src/routes";
+import { Route } from "routing-common/src/routes";
+import { initRoute } from "meiosis-routing/state";
 
 const componentMap = {
   Loading: () => <div>Loading, please wait...</div>,

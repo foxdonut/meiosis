@@ -1,6 +1,5 @@
 import React from "react";
-
-import { parentRoute } from "routing-common/src/routes";
+import { parentRoute } from "meiosis-routing/state";
 
 export const TeaDetails = ({ state, actions, route }) => (
   <div>

@@ -1,7 +1,7 @@
 import O from "patchinko/constant";
+import { findRoute } from "meiosis-routing/state";
 
 import { teaMap } from "./data";
-import { findRoute } from "../routes";
 
 export const service = ({ state, update }) => {
   const arrive = findRoute(state.route.arrive, "TeaDetails");

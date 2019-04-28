@@ -12,7 +12,8 @@ module.exports = {
     extensions: [".js", ".jsx"],
     // This is so that routing-common can find peerDependencies
     alias: {
-      "patchinko": path.resolve("./node_modules/patchinko")
+      "meiosis-routing": path.resolve("./node_modules/meiosis-routing"),
+      patchinko: path.resolve("./node_modules/patchinko")
     }
   },
   module: {

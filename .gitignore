@@ -38,5 +38,6 @@ tutorial/dist
 docs/build
 docs/dist
 docs/code/**/build
+helpers/routing/dist
 helpers/setup/dist
 *.tgz

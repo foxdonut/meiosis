@@ -1,7 +1,8 @@
 import React, { Component } from "react";
+import { childRoute, nextRoute } from "meiosis-routing/state";
 
 import { TeaDetails } from "../teaDetails";
-import { Route, childRoute, nextRoute } from "routing-common/src/routes";
+import { Route } from "routing-common/src/routes";
 
 export class Tea extends Component {
   render() {

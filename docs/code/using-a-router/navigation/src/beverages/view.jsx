@@ -1,6 +1,7 @@
 import React from "react";
+import { siblingRoute } from "meiosis-routing/state";
 
-import { Route, siblingRoute } from "routing-common/src/routes";
+import { Route } from "routing-common/src/routes";
 
 export const Beverages = ({ state, actions, route, beveragesId }) =>
   state[beveragesId] && (

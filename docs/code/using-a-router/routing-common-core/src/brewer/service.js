@@ -1,6 +1,5 @@
 import O from "patchinko/constant";
-
-import { findRoute } from "../routes";
+import { findRoute } from "meiosis-routing/state";
 
 export const service = ({ state, update }) => {
   const arrive = findRoute(state.route.arrive, "Brewer");

@@ -1,6 +1,7 @@
 import React from "react";
+import { childRoute, siblingRoute, nextRoute } from "meiosis-routing/state";
 
-import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/routes";
+import { Route } from "routing-common/src/routes";
 import { Brewer } from "../brewer";
 
 const componentMap = {

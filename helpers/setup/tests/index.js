@@ -6,7 +6,7 @@ const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
 const R = require("ramda");
 
-const meiosis = require("../dist/meiosis-helpers");
+const meiosis = require("../dist/meiosis-setup");
 
 const patchinkoTest = (O, streamLib, label) => {
   test("patchinko setup", t => {

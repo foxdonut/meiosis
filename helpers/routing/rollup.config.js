@@ -7,7 +7,7 @@ export default [
   {
     input: "./index.js",
     output: {
-      file: "dist/meiosis-setup.js",
+      file: "dist/meiosis-routing.js",
       name: "Meiosis",
       format: "umd"
     },
@@ -22,7 +22,7 @@ export default [
   {
     input: "./index.js",
     output: {
-      file: "dist/meiosis-setup.min.js",
+      file: "dist/meiosis-routing.min.js",
       name: "Meiosis",
       format: "umd"
     },

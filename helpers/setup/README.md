@@ -1,4 +1,4 @@
-# meiosis-helpers
+# meiosis-setup
 
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to
 popular demand and for your convenience, here are some reusable snippets of code that help
@@ -9,13 +9,13 @@ setup and use Meiosis.
 Using `npm`:
 
 ```
-npm i meiosis-helpers
+npm i meiosis-setup
 ```
 
 Using a `script` tag:
 
 ```
-<script src="https://unpkg.com/meiosis-helpers"></script>
+<script src="https://unpkg.com/meiosis-setup"></script>
 ```
 
 Using the `script` tag exposes a `Meiosis` global, under which `patchinko.setup`,
@@ -41,7 +41,7 @@ stream library; see [Using another stream library](#other_stream_library), below
 If you are using [Patchinko](https://github.com/barneycarroll/patchinko), use `patchinko.setup`:
 
 ```javascript
-import { setup } from "meiosis-helpers/patchinko/setup";
+import meiosis from "meiosis-setup";
 
 import O from "patchinko/constant";
 // or
@@ -55,9 +55,10 @@ import Stream from "mithril/stream";
 
 const app = {};
 
-setup({ stream: Stream, O, app }).then(({ update, models, states, actions }) => {
-  // setup your view here
-})
+meiosis.patchinko.setup({ stream: Stream, O, app })
+  .then(({ update, models, states, actions }) => {
+    // setup your view here
+  })
 ```
 
 ### Function Patch Setup
@@ -67,7 +68,7 @@ If you are using
 `functionPatches.setup`:
 
 ```javascript
-import { setup } from "meiosis-helpers/functionPatches/setup";
+import meiosis from "meiosis-setup";
 
 import Stream from "mithril/stream";
 // or
@@ -75,9 +76,10 @@ import Stream from "mithril/stream";
 
 const app = {};
 
-setup({ stream: Stream, app }).then(({ update, models, states, actions }) => {
-  // setup your view here
-})
+meiosis.functionPatches.setup({ stream: Stream, app })
+  .then(({ update, models, states, actions }) => {
+    // setup your view here
+  })
 ```
 
 ### Common Setup
@@ -106,7 +108,7 @@ the state to return the updated state.
 Here is how you would use `common.setup` with [Immer](https://github.com/immerjs/immer):
 
 ```javascript
-import { setup } from "meiosis-helpers/common/setup";
+import meiosis from "meiosis-setup";
 
 import produce from "immer";
 
@@ -118,9 +120,10 @@ const acceptor = (state, patch) => produce(state, fn(state));
 
 const app = {};
 
-setup({ stream: Stream, accumulator: produce, acceptor, app }).then(({ update, models, states, actions }) => {
-  // setup your view here
-})
+meiosis.common.setup({ stream: Stream, accumulator: produce, acceptor, app })
+  .then(({ update, models, states, actions }) => {
+    // setup your view here
+  })
 ```
 
 ### App Initial State, Actions, Acceptors, and Services
@@ -141,7 +144,7 @@ latest state, the `update` stream, and the `actions`. Service functions trigger
 updates by calling `update` and/or `actions.f(...)`, either synchronously
 and/or asynchronously. If not specified, `services` is `[]`.
 
-### Example
+### Examples
 
 Coming soon.
 
@@ -155,6 +158,6 @@ called, emits a value onto the stream; and the function must have a `map` method
 
 ----
 
-_meiosis-helpers is developed by [foxdonut](https://github.com/foxdonut)
+_meiosis-setup is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
 

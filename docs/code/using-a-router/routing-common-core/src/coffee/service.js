@@ -1,5 +1,6 @@
+import { findRoute } from "meiosis-routing/state";
+
 import { coffees } from "../beverage/data";
-import { findRoute } from "../routes";
 
 export const service = ({ state, update }) => {
   if (findRoute(state.route.arrive, "Coffee")) {

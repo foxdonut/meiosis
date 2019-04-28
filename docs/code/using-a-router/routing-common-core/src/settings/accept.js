@@ -1,4 +1,6 @@
-import { Route, findRoute, navigateTo } from "../routes";
+import { findRoute } from "meiosis-routing/state";
+
+import { Route, navigateTo } from "../routes";
 
 export const accept = state => {
   if (findRoute(state.route.current, "Settings") && !state.user) {

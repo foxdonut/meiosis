@@ -1,4 +1,6 @@
-import { findRoute, navigateTo } from "../routes";
+import { findRoute } from "meiosis-routing/state";
+
+import { navigateTo } from "../routes";
 
 export const accept = state => {
   const currentLogin = findRoute(state.route.current, "Login");
