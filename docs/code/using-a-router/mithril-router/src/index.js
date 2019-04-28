@@ -1,7 +1,7 @@
 import m from "mithril";
 import Stream from "mithril/stream";
 import O from "patchinko/constant";
-import meiosis from "meiosis-helpers";
+import meiosis from "meiosis-setup";
 
 import { app, App } from "./app";
 import { createRoutes } from "./router";

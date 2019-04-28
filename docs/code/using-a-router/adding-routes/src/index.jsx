@@ -2,7 +2,7 @@ import React from "react";
 import { render } from "react-dom";
 import flyd from "flyd";
 import O from "patchinko/constant";
-import meiosis from "meiosis-helpers";
+import meiosis from "meiosis-setup";
 
 import { app, App } from "./app";
 import { router } from "./router";

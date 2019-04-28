@@ -1,8 +1,8 @@
 {
-  "name": "meiosis-helpers",
+  "name": "meiosis-setup",
   "version": "0.1.0",
-  "description": "Meiosis Helpers",
-  "main": "dist/meiosis-helpers.js",
+  "description": "Meiosis Helpers - setup",
+  "main": "dist/meiosis-setup.js",
   "scripts": {
     "start": "rollup -c",
     "watch": "rollup -c -w",

@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-helpers": "file:../../../../helpers/meiosis-helpers-0.1.0.tgz",
+    "meiosis-setup": "file:../../../../helpers/setup/meiosis-setup-0.1.0.tgz",
     "mithril": "^2.0.0-rc.4",
     "patchinko": "^4.1.0",
     "path-to-regexp": "^3.0.0",

@@ -38,4 +38,5 @@ tutorial/dist
 docs/build
 docs/dist
 docs/code/**/build
-helpers/dist
+helpers/setup/dist
+*.tgz
