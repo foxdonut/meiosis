@@ -1,6 +1,7 @@
 const test = require("tape");
 
 const routing = require("../dist/meiosis-routing");
+const createRouteMatcher = require("feather-route-matcher");
 
 const {
   createRoutes,
@@ -14,6 +15,14 @@ const {
   childRoute,
   siblingRoute
 } = routing.state;
+
+const {
+  findPathParams,
+  setParams,
+  convertToPath,
+  createRouteMap,
+  createRouter
+} = routing.pathUtils;
 
 const Route = createRoutes(["Home", "Login", "User", "Profile", "About"]);
 
@@ -134,6 +143,118 @@ test("state", t => {
 
     t.deepEqual(siblingRoute(next, Route.About()), [Route.Home(), Route.About()], "sibling route");
     t.deepEqual(siblingRoute(route, Route.About()), [Route.About()], "sibling route");
+
+    t.end();
+  });
+});
+
+test("pathUtils", t => {
+  const routeConfig = {
+    Home: "/",
+    About: "/about",
+    User: [
+      "/user/:id",
+      {
+        Profile: "/profile"
+      }
+    ]
+  };
+
+  t.test("findPathParams", t => {
+    t.deepEqual(findPathParams("/home"), [], "findPathParams empty");
+    t.deepEqual(findPathParams("/user/:id"), ["id"], "findPathParams one");
+    t.deepEqual(
+      findPathParams("/user/:id/setting/:setting"),
+      ["id", "setting"],
+      "findPathParams two"
+    );
+
+    t.end();
+  });
+
+  t.test("setParams", t => {
+    t.deepEqual(setParams("/home", {}), "/home", "setParams none");
+    t.deepEqual(setParams("/user/:id", { id: 42 }), "/user/42", "setParams one");
+    t.deepEqual(
+      setParams("/user/:id/setting/:setting", { id: 42, setting: "email" }),
+      "/user/42/setting/email",
+      "setParams two"
+    );
+
+    t.end();
+  });
+
+  t.test("convertToPath", t => {
+    t.equal(convertToPath(routeConfig, [Route.Home()]), "/", "convertToPath");
+    t.equal(convertToPath(routeConfig, [Route.User({ id: 42 })]), "/user/42", "convertToPath");
+
+    t.equal(
+      convertToPath(routeConfig, [Route.User({ id: 42 }), Route.Profile()]),
+      "/user/42/profile",
+      "convertToPath"
+    );
+
+    t.end();
+  });
+
+  t.test("createRouteMap", t => {
+    const routeMap = createRouteMap(routeConfig);
+
+    t.deepEqual(routeMap["/"](), [Route.Home()], "createRouteMap");
+    t.deepEqual(routeMap["/user/:id"]({ id: 42 }), [Route.User({ id: 42 })], "createRouteMap");
+
+    t.deepEqual(
+      routeMap["/user/:id/profile"]({ id: 42 }),
+      [Route.User({ id: 42 }), Route.Profile()],
+      "createRouteMap"
+    );
+
+    t.end();
+  });
+
+  t.test("createRouter", t => {
+    t.plan(3);
+
+    const createParsePath = (routeMap, defaultRoute) => {
+      const routeMatcher = createRouteMatcher(routeMap);
+
+      const parsePath = path => {
+        const match = routeMatcher(path);
+
+        if (match) {
+          return match.page(match.params);
+        } else {
+          return defaultRoute;
+        }
+      };
+      return parsePath;
+    };
+
+    const getPath = () => "#/user/43";
+    const setPath = path => {
+      t.equal(path, "#/about");
+    };
+    const addLocationChangeListener = () => null;
+
+    const router1 = createRouter({
+      createParsePath,
+      routeConfig,
+      getPath,
+      setPath,
+      addLocationChangeListener
+    });
+
+    t.equal(router1.toPath([Route.User({ id: 42 })]), "#/user/42", "toPath");
+
+    t.deepEqual(
+      router1.parsePath("/user/42/profile"),
+      [Route.User({ id: "42" }), Route.Profile({})],
+      "parsePath"
+    );
+
+    router1.locationBarSync([Route.About()]);
+
+    router1.start({ navigateTo: () => null });
 
     t.end();
   });
