@@ -20,23 +20,28 @@ const shallowEqual = (obj1, obj2) => {
   return false;
 };
 
-export const findRouteWithParams = (routes, routeWithParams) =>
-  routes.find(
-    route => route.id === routeWithParams.id && shallowEqual(route.params, routeWithParams.params)
+export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
+  route.find(
+    routeSegment =>
+      routeSegment.id === routeSegmentWithParams.id &&
+      shallowEqual(routeSegment.params, routeSegmentWithParams.params)
   );
 
 export const diffRoute = (from, to) =>
-  from.reduce((result, route) => result.concat(findRouteWithParams(to, route) ? [] : route), []);
+  from.reduce(
+    (result, route) => result.concat(findRouteSegmentWithParams(to, route) ? [] : route),
+    []
+  );
 
-export const createRoutes = routes =>
-  routes.reduce((result, id) => {
+export const createRouteSegments = routeNames =>
+  routeNames.reduce((result, id) => {
     result[id] = params => ({ id, params: params == null ? {} : params });
     return result;
   }, {});
 
-export const findRoute = (routes, id) => {
+export const findRouteSegment = (route, id) => {
   id = id.id || id;
-  return routes.find(route => route.id === id);
+  return route.find(routeSegment => routeSegment.id === id);
 };
 
 export const routeTransition = (from, to) => ({
@@ -44,25 +49,13 @@ export const routeTransition = (from, to) => ({
   arrive: diffRoute(to, from)
 });
 
-export const initRoute = routes => ({
-  routes,
-  index: 0,
-  local: routes[0] || {},
-  child: routes[1] || {}
+export const Routing = (route = [], index = 0) => ({
+  route,
+  index,
+  localSegment: route[index] || {},
+  childSegment: route[index + 1] || {},
+  next: () => Routing(route, index + 1),
+  parentRoute: () => route.slice(0, index),
+  childRoute: child => route.slice(0, index + 1).concat(child),
+  siblingRoute: sibling => route.slice(0, index).concat(sibling)
 });
-
-export const nextRoute = route => {
-  const index = route.index + 1;
-  return {
-    routes: route.routes,
-    index,
-    local: route.routes[index] || {},
-    child: route.routes[index + 1] || {}
-  };
-};
-
-export const parentRoute = route => route.routes.slice(0, route.index);
-
-export const childRoute = (route, routes) => route.routes.slice(0, route.index + 1).concat(routes);
-
-export const siblingRoute = (route, routes) => route.routes.slice(0, route.index).concat(routes);

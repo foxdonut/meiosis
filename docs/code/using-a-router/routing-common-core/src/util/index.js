@@ -11,3 +11,9 @@ export const preventDefault = evt => {
   evt.preventDefault();
   return evt;
 };
+
+export const whenPresent = (obj, fn) => {
+  if (obj != null) {
+    return fn(obj);
+  }
+};

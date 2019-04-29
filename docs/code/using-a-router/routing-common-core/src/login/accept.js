@@ -1,10 +1,10 @@
-import { findRoute } from "meiosis-routing/state";
+import { findRouteSegment } from "meiosis-routing/state";
 
 import { navigateTo } from "../routes";
 
 export const accept = state => {
-  const currentLogin = findRoute(state.route.current, "Login");
-  const previousLogin = findRoute(state.route.previous, "Login");
+  const currentLogin = findRouteSegment(state.route.current, "Login");
+  const previousLogin = findRouteSegment(state.route.previous, "Login");
 
   if (
     !currentLogin &&

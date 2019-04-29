@@ -4,8 +4,8 @@ import { pipe, preventDefault } from "routing-common/src/util";
 
 export class Login extends Component {
   render() {
-    const { state, actions, route } = this.props;
-    const { message, returnTo } = route.local.params;
+    const { state, actions, routing } = this.props;
+    const { message, returnTo } = routing.localSegment.params;
 
     return (
       <div>

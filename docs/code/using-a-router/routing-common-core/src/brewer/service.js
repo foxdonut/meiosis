@@ -1,17 +1,16 @@
 import O from "patchinko/constant";
-import { findRoute } from "meiosis-routing/state";
+import { findRouteSegment } from "meiosis-routing/state";
+
+import { whenPresent } from "../util";
 
 export const service = ({ state, update }) => {
-  const arrive = findRoute(state.route.arrive, "Brewer");
-
-  if (arrive) {
+  whenPresent(findRouteSegment(state.route.arrive, "Brewer"), arrive => {
     const id = arrive.params.id;
     update({ brewer: { [id]: `Brewer of beverage ${id}` } });
-  } else {
-    const leave = findRoute(state.route.leave, "Brewer");
-    if (leave) {
-      const id = leave.params.id;
-      update({ brewer: { [id]: O } });
-    }
-  }
+  });
+
+  whenPresent(findRouteSegment(state.route.leave, "Brewer"), leave => {
+    const id = leave.params.id;
+    update({ brewer: { [id]: O } });
+  });
 };

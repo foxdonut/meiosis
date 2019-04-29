@@ -4,16 +4,12 @@ const routing = require("../dist/meiosis-routing");
 const createRouteMatcher = require("feather-route-matcher");
 
 const {
-  createRoutes,
-  findRoute,
-  findRouteWithParams,
+  createRouteSegments,
+  findRouteSegment,
+  findRouteSegmentWithParams,
   diffRoute,
   routeTransition,
-  initRoute,
-  nextRoute,
-  parentRoute,
-  childRoute,
-  siblingRoute
+  Routing
 } = routing.state;
 
 const {
@@ -24,38 +20,48 @@ const {
   createRouter
 } = routing.pathUtils;
 
-const Route = createRoutes(["Home", "Login", "User", "Profile", "About"]);
+const Route = createRouteSegments(["Home", "Login", "User", "Profile", "About"]);
 
 test("state", t => {
-  t.test("createRoutes", t => {
-    t.deepEqual(Route.Home(), { id: "Home", params: {} }, "routing object");
+  t.test("createRouteSegments", t => {
+    t.deepEqual(Route.Home(), { id: "Home", params: {} }, "route segment");
     t.deepEqual(
       Route.Login({ returnTo: "Home" }),
       { id: "Login", params: { returnTo: "Home" } },
-      "routing object with params"
+      "route segment with params"
     );
     t.end();
   });
 
-  t.test("findRoute", t => {
+  t.test("findSegmentRoute", t => {
     const route = [Route.User({ id: 42 }), Route.Profile()];
 
-    t.deepEqual(findRoute(route, "Profile"), { id: "Profile", params: {} }, "found route");
-    t.deepEqual(findRoute(route, Route.User()), { id: "User", params: { id: 42 } }, "found route");
-    t.ok(findRoute(route, Route.About()) == null, "should be no found route");
+    t.deepEqual(findRouteSegment(route, "Profile"), { id: "Profile", params: {} }, "found route");
+
+    t.deepEqual(
+      findRouteSegment(route, Route.User()),
+      { id: "User", params: { id: 42 } },
+      "found route segment"
+    );
+
+    t.ok(findRouteSegment(route, Route.About()) == null, "should be no found route");
 
     t.end();
   });
 
-  t.test("findRouteWithParams", t => {
+  t.test("findRouteSegmentWithParams", t => {
     const route = [Route.User({ id: 42 }), Route.Profile()];
 
     t.deepEqual(
-      findRouteWithParams(route, Route.User({ id: 42 })),
+      findRouteSegmentWithParams(route, Route.User({ id: 42 })),
       Route.User({ id: 42 }),
-      "found route with params"
+      "found route segment with params"
     );
-    t.ok(findRouteWithParams(route, Route.User({ id: 43 })) == null, "should be no found route");
+
+    t.ok(
+      findRouteSegmentWithParams(route, Route.User({ id: 43 })) == null,
+      "should be no found route segment"
+    );
 
     t.end();
   });
@@ -88,48 +94,48 @@ test("state", t => {
     t.end();
   });
 
-  t.test("initRoute", t => {
-    const route = initRoute([Route.User({ id: 42 }), Route.Profile()]);
+  t.test("Routing", t => {
+    const routing = Routing([Route.User({ id: 42 }), Route.Profile()]);
 
-    t.deepEqual(route.local, Route.User({ id: 42 }), "local route");
-    t.deepEqual(route.child, Route.Profile(), "route child");
-    t.deepEqual(initRoute([Route.Home()]).child, {}, "no route child");
+    t.deepEqual(routing.localSegment, Route.User({ id: 42 }), "routing local segment");
+    t.deepEqual(routing.childSegment, Route.Profile(), "routing child segment");
+    t.deepEqual(Routing([Route.Home()]).childSegment, {}, "no child segment");
 
     t.end();
   });
 
-  t.test("nextRoute", t => {
-    const route = initRoute([Route.Home(), Route.User({ id: 42 }), Route.Profile()]);
-    const next = nextRoute(route);
+  t.test("routing.next", t => {
+    const routing = Routing([Route.Home(), Route.User({ id: 42 }), Route.Profile()]);
+    const next = routing.next();
 
-    t.deepEqual(next.local, Route.User({ id: 42 }), "next local route");
-    t.deepEqual(next.child, Route.Profile(), "next route child");
-    t.deepEqual(nextRoute(next).child, {}, "no next route child");
+    t.deepEqual(next.localSegment, Route.User({ id: 42 }), "next local segment");
+    t.deepEqual(next.childSegment, Route.Profile(), "next child segment");
+    t.deepEqual(next.next().childSegment, {}, "no next child segment");
 
     t.end();
   });
 
   t.test("parentRoute", t => {
-    const route = initRoute([Route.Home(), Route.User({ id: 42 })]);
-    const next = nextRoute(route);
+    const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
+    const next = routing.next();
 
-    t.deepEqual(parentRoute(next), [Route.Home()], "parent route");
+    t.deepEqual(next.parentRoute(), [Route.Home()], "parent route");
 
     t.end();
   });
 
   t.test("childRoute", t => {
-    const route = initRoute([Route.Home(), Route.User({ id: 42 })]);
-    const next = nextRoute(route);
+    const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
+    const next = routing.next();
 
     t.deepEqual(
-      childRoute(next, Route.Profile()),
+      next.childRoute(Route.Profile()),
       [Route.Home(), Route.User({ id: 42 }), Route.Profile()],
       "child route"
     );
 
     t.deepEqual(
-      childRoute(route, Route.User({ id: 43 })),
+      routing.childRoute(Route.User({ id: 43 })),
       [Route.Home(), Route.User({ id: 43 })],
       "child route"
     );
@@ -138,11 +144,11 @@ test("state", t => {
   });
 
   t.test("siblingRoute", t => {
-    const route = initRoute([Route.Home(), Route.User({ id: 42 })]);
-    const next = nextRoute(route);
+    const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
+    const next = routing.next();
 
-    t.deepEqual(siblingRoute(next, Route.About()), [Route.Home(), Route.About()], "sibling route");
-    t.deepEqual(siblingRoute(route, Route.About()), [Route.About()], "sibling route");
+    t.deepEqual(next.siblingRoute(Route.About()), [Route.Home(), Route.About()], "sibling route");
+    t.deepEqual(routing.siblingRoute(Route.About()), [Route.About()], "sibling route");
 
     t.end();
   });

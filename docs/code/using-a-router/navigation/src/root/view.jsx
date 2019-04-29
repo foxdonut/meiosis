@@ -8,7 +8,7 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 
 import { Route } from "routing-common/src/routes";
-import { initRoute } from "meiosis-routing/state";
+import { Routing } from "meiosis-routing/state";
 
 const componentMap = {
   Loading: () => <div>Loading, please wait...</div>,
@@ -24,8 +24,8 @@ export class Root extends Component {
   render() {
     const { state, actions } = this.props;
 
-    const route = initRoute(state.route.current);
-    const Component = componentMap[route.local.id];
+    const routing = Routing(state.route.current);
+    const Component = componentMap[routing.localSegment.id];
     const isActive = tab => (tab === Component ? "active" : "");
 
     return (
@@ -70,7 +70,7 @@ export class Root extends Component {
             </li>
           </ul>
         </nav>
-        <Component state={state} actions={actions} route={route} />
+        <Component state={state} actions={actions} routing={routing} />
         {/* Show or hide the Please Wait modal. See public/css/style.css */}
         <div style={{ visibility: state.pleaseWait ? "visible" : "hidden" }}>
           <div className="modal">

@@ -1,9 +1,9 @@
-import { findRoute } from "meiosis-routing/state";
+import { findRouteSegment } from "meiosis-routing/state";
 
 import { beers } from "../beverage/data";
 
 export const service = ({ state, update }) => {
-  if (findRoute(state.route.arrive, "Beer")) {
+  if (findRouteSegment(state.route.arrive, "Beer")) {
     update({ pleaseWait: true });
 
     setTimeout(
@@ -14,7 +14,7 @@ export const service = ({ state, update }) => {
         }),
       1000
     );
-  } else if (findRoute(state.route.leave, "Beer")) {
+  } else if (findRouteSegment(state.route.leave, "Beer")) {
     update({ beers: null });
   }
 };

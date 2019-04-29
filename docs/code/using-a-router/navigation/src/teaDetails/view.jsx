@@ -1,10 +1,9 @@
 import React from "react";
-import { parentRoute } from "meiosis-routing/state";
 
-export const TeaDetails = ({ state, actions, route }) => (
+export const TeaDetails = ({ state, actions, routing }) => (
   <div>
-    <div>{state.tea[route.local.params.id]}</div>
-    <a href="javascript://" onClick={() => actions.navigateTo(parentRoute(route))}>
+    <div>{state.tea[routing.localSegment.params.id]}</div>
+    <a href="javascript://" onClick={() => actions.navigateTo(routing.parentRoute())}>
       Back to list
     </a>
   </div>

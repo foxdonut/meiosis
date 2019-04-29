@@ -1,9 +1,9 @@
-import { createRoutes } from "meiosis-routing/state";
+import { createRouteSegments } from "meiosis-routing/state";
 
 import { Actions } from "./actions";
 import { accept } from "./accept";
 
-export const Route = createRoutes([
+export const Route = createRouteSegments([
   "Loading",
   "Home",
   "Login",

@@ -1,9 +1,8 @@
 import React from "react";
-import { siblingRoute } from "meiosis-routing/state";
 
 import { Route } from "routing-common/src/routes";
 
-export const Beverages = ({ state, actions, route, beveragesId }) =>
+export const Beverages = ({ state, actions, routing, beveragesId }) =>
   state[beveragesId] && (
     <ul>
       {state[beveragesId].map(beverage => (
@@ -11,7 +10,7 @@ export const Beverages = ({ state, actions, route, beveragesId }) =>
           <a
             href="javascript://"
             onClick={() =>
-              actions.navigateTo(siblingRoute(route, [Route.Beverage({ id: beverage.id })]))
+              actions.navigateTo(routing.siblingRoute([Route.Beverage({ id: beverage.id })]))
             }
           >
             {beverage.title}

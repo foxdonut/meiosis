@@ -1,5 +1,4 @@
 import React from "react";
-import { nextRoute } from "meiosis-routing/state";
 
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
@@ -9,13 +8,13 @@ const componentMap = {
   Beverage
 };
 
-export const Beer = ({ state, actions, route }) => {
-  const Component = componentMap[route.child.id];
+export const Beer = ({ state, actions, routing }) => {
+  const Component = componentMap[routing.childSegment.id];
 
   return (
     <div>
       <div>Beer Page</div>
-      <Component state={state} actions={actions} route={nextRoute(route)} beveragesId="beers" />
+      <Component state={state} actions={actions} routing={routing.next()} beveragesId="beers" />
     </div>
   );
 };

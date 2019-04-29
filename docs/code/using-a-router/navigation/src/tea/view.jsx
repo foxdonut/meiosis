@@ -1,12 +1,11 @@
 import React, { Component } from "react";
-import { childRoute, nextRoute } from "meiosis-routing/state";
 
 import { TeaDetails } from "../teaDetails";
 import { Route } from "routing-common/src/routes";
 
 export class Tea extends Component {
   render() {
-    const { state, actions, route } = this.props;
+    const { state, actions, routing } = this.props;
 
     return (
       <div>
@@ -18,7 +17,7 @@ export class Tea extends Component {
                 <a
                   href="javascript://"
                   onClick={() =>
-                    actions.navigateTo(childRoute(route, [Route.TeaDetails({ id: tea.id })]))
+                    actions.navigateTo(routing.childRoute([Route.TeaDetails({ id: tea.id })]))
                   }
                 >
                   {tea.title}
@@ -29,8 +28,8 @@ export class Tea extends Component {
             <li>Loading...</li>
           )}
         </ul>
-        {route.child.id === "TeaDetails" && (
-          <TeaDetails state={state} actions={actions} route={nextRoute(route)} />
+        {routing.childSegment.id === "TeaDetails" && (
+          <TeaDetails state={state} actions={actions} routing={routing.next()} />
         )}
       </div>
     );
