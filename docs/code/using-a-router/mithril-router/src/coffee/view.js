@@ -1,6 +1,5 @@
 import m from "mithril";
 
-import { nextRoute } from "routing-common/src/routes";
 import { Beverages } from "../beverages";
 import { Beverage } from "../beverage";
 
@@ -10,8 +9,8 @@ const componentMap = {
 };
 
 export const Coffee = {
-  view: ({ attrs: { state, actions, route } }) => {
-    const Component = componentMap[route.child.id];
+  view: ({ attrs: { state, actions, routing } }) => {
+    const Component = componentMap[routing.childSegment.id];
 
     return m(
       "div",
@@ -19,7 +18,7 @@ export const Coffee = {
       m(Component, {
         state,
         actions,
-        route: nextRoute(route),
+        routing: routing.next(),
         beveragesId: "coffees"
       })
     );

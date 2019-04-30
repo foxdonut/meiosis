@@ -3,8 +3,8 @@ import m from "mithril";
 import { pipe, preventDefault } from "routing-common/src/util";
 
 export const Login = {
-  view: ({ attrs: { state, actions, route } }) => {
-    const { message, returnTo } = route.local.params;
+  view: ({ attrs: { state, actions, routing } }) => {
+    const { message, returnTo } = routing.localSegment.params;
 
     return m(
       "div",

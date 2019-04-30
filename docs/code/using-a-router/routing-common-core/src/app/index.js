@@ -8,17 +8,12 @@ import { beer } from "../beer";
 import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
-export const app = {
+export const createApp = (initialRoute = [Route.Home()]) => ({
   Initial: () => ({
     route: {
-      current: [Route.Loading()],
+      current: initialRoute,
       previous: []
-    },
-    teas: null,
-    tea: null,
-    coffees: null,
-    beers: null,
-    beverage: null
+    }
   }),
 
   Actions: update =>
@@ -35,4 +30,4 @@ export const app = {
     beverage.service,
     brewer.service
   ]
-};
+});

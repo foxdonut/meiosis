@@ -4,8 +4,10 @@ import flyd from "flyd";
 import O from "patchinko/constant";
 import meiosis from "meiosis-setup";
 
-import { app, App } from "./app";
+import { createApp, App } from "./app";
 import { Route } from "routing-common/src/routes";
+
+const app = createApp();
 
 meiosis.patchinko.setup({ stream: flyd, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.

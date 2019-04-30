@@ -4,7 +4,6 @@ import { Actions } from "./actions";
 import { accept } from "./accept";
 
 export const Route = createRouteSegments([
-  "Loading",
   "Home",
   "Login",
   "Settings",

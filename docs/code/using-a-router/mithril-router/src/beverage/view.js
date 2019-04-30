@@ -1,7 +1,7 @@
 import m from "mithril";
 
-import { Route, childRoute, siblingRoute, nextRoute } from "routing-common/src/routes";
-import { toPath } from "../router";
+import { Route } from "routing-common/src/routes";
+import { router } from "../router";
 import { Brewer } from "../brewer";
 
 const componentMap = {
@@ -9,16 +9,22 @@ const componentMap = {
 };
 
 export const Beverage = {
-  view: ({ attrs: { state, actions, route } }) => {
-    const Component = componentMap[route.child.id];
-    const id = route.local.params.id;
+  view: ({ attrs: { state, actions, routing } }) => {
+    const Component = componentMap[routing.childSegment.id];
+    const id = routing.localSegment.params.id;
 
     return m(
       "div",
       m("div", state.beverage[id]),
-      m("div", m("a", { href: toPath(childRoute(route, [Route.Brewer({ id })])) }, "Brewer")),
-      Component && m(Component, { state, actions, route: nextRoute(route) }),
-      m("div", m("a", { href: toPath(siblingRoute(route, [Route.Beverages()])) }, "Back to list"))
+      m(
+        "div",
+        m("a", { href: router.toPath(routing.childRoute([Route.Brewer({ id })])) }, "Brewer")
+      ),
+      Component && m(Component, { state, actions, routing: routing.next() }),
+      m(
+        "div",
+        m("a", { href: router.toPath(routing.siblingRoute([Route.Beverages()])) }, "Back to list")
+      )
     );
   }
 };

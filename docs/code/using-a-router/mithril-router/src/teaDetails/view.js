@@ -1,13 +1,12 @@
 import m from "mithril";
 
-import { parentRoute } from "routing-common/src/routes";
-import { toPath } from "../router";
+import { router } from "../router";
 
 export const TeaDetails = {
-  view: ({ attrs: { state, route } }) =>
+  view: ({ attrs: { state, routing } }) =>
     m(
       "div",
-      m("div", state.tea[route.local.params.id]),
-      m("a", { href: toPath(parentRoute(route)) }, "Back to list")
+      m("div", state.tea[routing.localSegment.params.id]),
+      m("a", { href: router.toPath(routing.parentRoute()) }, "Back to list")
     )
 };

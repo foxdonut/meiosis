@@ -1,10 +1,10 @@
 import m from "mithril";
 
-import { Route, siblingRoute } from "routing-common/src/routes";
-import { toPath } from "../router";
+import { Route } from "routing-common/src/routes";
+import { router } from "../router";
 
 export const Beverages = {
-  view: ({ attrs: { state, route, beveragesId } }) =>
+  view: ({ attrs: { state, routing, beveragesId } }) =>
     state[beveragesId] &&
     m(
       "ul",
@@ -14,7 +14,7 @@ export const Beverages = {
           { key: beverage.id },
           m(
             "a",
-            { href: toPath(siblingRoute(route, [Route.Beverage({ id: beverage.id })])) },
+            { href: router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })])) },
             beverage.title
           )
         )

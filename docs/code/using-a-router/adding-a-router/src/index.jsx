@@ -1,14 +1,15 @@
-import m from "mithril";
-import Stream from "mithril/stream";
+import React from "react";
+import { render } from "react-dom";
+import flyd from "flyd";
 import O from "patchinko/constant";
 import meiosis from "meiosis-setup";
 
 import { createApp, App } from "./app";
 import { router } from "./router";
 
-const app = createApp();
+const app = createApp(router.initialRoute);
 
-meiosis.patchinko.setup({ stream: Stream, O, app }).then(({ states, actions }) => {
+meiosis.patchinko.setup({ stream: flyd, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",
@@ -19,8 +20,9 @@ meiosis.patchinko.setup({ stream: Stream, O, app }).then(({ states, actions }) =
     ]
   });
 
-  m.route(document.getElementById("app"), "/", router.MithrilRoutes({ states, actions, App }));
+  render(<App states={states} actions={actions} />, document.getElementById("app"));
 
-  states.map(() => m.redraw());
+  router.start({ navigateTo: actions.navigateTo });
+
   states.map(state => router.locationBarSync(state.route.current));
 });

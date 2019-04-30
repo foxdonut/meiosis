@@ -3,13 +3,13 @@ var path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.js",
+  entry: "./src/index.jsx",
   output: {
     path: path.join(__dirname, "build"),
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".js"],
+    extensions: [".js", ".jsx"],
     // This is so that routing-common can find peerDependencies
     alias: {
       "meiosis-routing": path.resolve("./node_modules/meiosis-routing"),
@@ -19,7 +19,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader"

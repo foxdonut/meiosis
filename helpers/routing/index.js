@@ -1,7 +1,7 @@
 import * as state from "./state";
-import * as pathUtils from "./pathUtils";
+import * as routerHelper from "./routerHelper";
 
 export default {
   state,
-  pathUtils
+  routerHelper
 };

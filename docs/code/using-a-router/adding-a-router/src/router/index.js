@@ -22,8 +22,7 @@ const routeConfig = {
     }
   ],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer", beverageRoutes],
-  Invalid: "/:404..."
+  Beer: ["/beer", beverageRoutes]
 };
 
 export const router = Router({

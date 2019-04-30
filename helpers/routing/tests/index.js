@@ -18,7 +18,7 @@ const {
   convertToPath,
   createRouteMap,
   createRouter
-} = routing.pathUtils;
+} = routing.routerHelper;
 
 const Route = createRouteSegments(["Home", "Login", "User", "Profile", "About"]);
 
@@ -154,7 +154,7 @@ test("state", t => {
   });
 });
 
-test("pathUtils", t => {
+test("routerHelper", t => {
   const routeConfig = {
     Home: "/",
     About: "/about",
@@ -219,7 +219,7 @@ test("pathUtils", t => {
   });
 
   t.test("createRouter", t => {
-    t.plan(3);
+    t.plan(5);
 
     const createParsePath = (routeMap, defaultRoute) => {
       const routeMatcher = createRouteMatcher(routeMap);
@@ -250,17 +250,26 @@ test("pathUtils", t => {
       addLocationChangeListener
     });
 
+    t.deepEqual(router1.initialRoute, [Route.User({ id: "43" })], "initial route");
+
     t.equal(router1.toPath([Route.User({ id: 42 })]), "#/user/42", "toPath");
 
     t.deepEqual(
-      router1.parsePath("/user/42/profile"),
+      router1.parsePath("#/user/42/profile"),
       [Route.User({ id: "42" }), Route.Profile({})],
       "parsePath"
     );
 
     router1.locationBarSync([Route.About()]);
-
     router1.start({ navigateTo: () => null });
+
+    const router2 = createRouter({ routeConfig });
+
+    t.deepEqual(
+      router2.routeMap["/user/:id/profile"]({ id: 42 }),
+      [Route.User({ id: 42 }), Route.Profile()],
+      "router.routeMap"
+    );
 
     t.end();
   });

@@ -1,8 +1,8 @@
 {
-  "name": "mithril-router",
+  "name": "adding-a-router",
   "version": "1.0.0",
   "description": "meiosis docs example",
-  "main": "src/index.js",
+  "main": "src/index.jsx",
   "scripts": {
     "start": "webpack",
     "watch": "webpack --progress --colors --watch"
@@ -24,17 +24,22 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
+    "feather-route-matcher": "^3.0.0",
+    "flyd": "^0.2.8",
     "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-0.1.0.tgz",
     "meiosis-setup": "file:../../../../helpers/setup/meiosis-setup-0.1.0.tgz",
-    "mithril": "^2.0.0-rc.4",
     "patchinko": "^4.1.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "routing-common": "../routing-common-core"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
     "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.12.4",
     "meiosis-tracer": "^2.0.3",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0"

@@ -1,2 +1,2 @@
-export { app } from "routing-common/src/app";
+export { createApp } from "routing-common/src/app";
 export { App } from "./view";
