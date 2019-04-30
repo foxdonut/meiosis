@@ -1,5 +1,5 @@
 import createRouteMatcher from "feather-route-matcher";
-import { createRouter } from "meiosis-routing/routerHelper";
+import { createRouter } from "meiosis-routing/router-helper";
 
 const createParsePath = (routeMap, defaultRoute) => {
   const routeMatcher = createRouteMatcher(routeMap);

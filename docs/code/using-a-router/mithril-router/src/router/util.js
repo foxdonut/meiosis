@@ -1,5 +1,5 @@
 import m from "mithril";
-import { createRouter } from "meiosis-routing/routerHelper";
+import { createRouter } from "meiosis-routing/router-helper";
 
 export const Router = ({ routeConfig, defaultRoute }) => {
   const router = createRouter({ routeConfig, defaultRoute, prefix: "#!" });
