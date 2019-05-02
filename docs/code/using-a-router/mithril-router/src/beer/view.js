@@ -11,10 +11,12 @@ const componentMap = {
 export const Beer = {
   view: ({ attrs: { state, actions, routing } }) => {
     const Component = componentMap[routing.childSegment.id];
+    const type = routing.localSegment.params.type;
 
     return m(
       "div",
       m("div", "Beer Page"),
+      type ? m("div", "Type: ", type) : null,
       m(Component, {
         state,
         actions,

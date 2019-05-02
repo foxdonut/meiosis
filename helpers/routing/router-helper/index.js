@@ -1,12 +1,19 @@
-export const findPathParams = path => {
-  const match = path.match(/:[^/]*/g);
+const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+const getQuery = path => {
+  const idx = path.indexOf("?");
+  return idx >= 0 ? path.substring(idx + 1) : "";
+};
 
-  if (match) {
-    return match.map(param => param.substring(1));
+const extractMatches = matches => {
+  if (matches) {
+    return matches.map(param => param.substring(1));
   } else {
     return [];
   }
 };
+
+export const findPathParams = path => extractMatches(path.match(/:[^/?]*/g));
+export const findQueryParams = path => extractMatches(path.match(/\?[^?]*/g));
 
 export const setParams = (path, params) =>
   findPathParams(path).reduce((result, pathParam) => {
@@ -14,38 +21,48 @@ export const setParams = (path, params) =>
     const key = ":" + pathParam;
     const idx = result.indexOf(key);
     return result.substring(0, idx) + value + result.substring(idx + key.length);
-  }, path);
+  }, getPathWithoutQuery(path));
 
 const getConfig = config =>
   config == null ? ["/", {}] : typeof config === "string" ? [config, {}] : config;
 
-export const convertToPath = (routeConfig, routes) => {
+const pick = (obj, props) =>
+  props.reduce((result, prop) => {
+    if (obj[prop] != null) {
+      result[prop] = obj[prop];
+    }
+    return result;
+  }, {});
+
+export const convertToPath = (routeConfig, routes, qsStringify) => {
   let path = "";
   let lookup = routeConfig;
+  let query = {};
 
   routes.forEach(route => {
     const [configPath, children] = getConfig(lookup[route.id]);
     path += setParams(configPath, route.params);
     lookup = children;
+
+    const queryParams = findQueryParams(configPath);
+    query = Object.assign(query, pick(route.params, queryParams));
   });
+
+  if (Object.keys(query).length > 0 && typeof qsStringify === "function") {
+    path += "?" + qsStringify(query);
+  }
 
   return path;
 };
-
-const pick = (obj, props) =>
-  props.reduce((result, prop) => {
-    result[prop] = obj[prop];
-    return result;
-  }, {});
 
 // Returns { "/path": fn(params) => [route] }
 export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc = {}) =>
   Object.entries(routeConfig).reduce((result, [id, config]) => {
     const [configPath, children] = getConfig(config);
 
-    const localPath = path + configPath;
-    const pathParams = findPathParams(configPath);
-    const routeFn = params => fn(params).concat({ id, params: pick(params, pathParams) });
+    const routeParams = findPathParams(configPath).concat(findQueryParams(configPath));
+    const localPath = path + getPathWithoutQuery(configPath);
+    const routeFn = params => fn(params).concat({ id, params: pick(params, routeParams) });
     result[localPath] = routeFn;
     createRouteMap(children, localPath, routeFn, result);
     return result;
@@ -53,6 +70,7 @@ export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc =
 
 export const createRouter = ({
   createParsePath,
+  queryString,
   routeConfig,
   defaultRoute,
   prefix = "#",
@@ -63,6 +81,8 @@ export const createRouter = ({
   getPath = getPath || (() => document.location.hash || prefix + "/");
   setPath = setPath || (path => window.history.pushState({}, "", path));
 
+  queryString = queryString || {};
+
   addLocationChangeListener =
     addLocationChangeListener ||
     (listener => {
@@ -71,9 +91,19 @@ export const createRouter = ({
 
   const routeMap = createRouteMap(routeConfig);
   const parsePathFn = createParsePath ? createParsePath(routeMap, defaultRoute) : null;
-  const parsePath = parsePathFn ? path => parsePathFn(path.substring(prefix.length)) : null;
 
-  const toPath = route => prefix + convertToPath(routeConfig, route);
+  const parsePath = parsePathFn
+    ? pathWithPrefix => {
+        const path = pathWithPrefix.substring(prefix.length);
+        const query = getQuery(path);
+        const queryParams =
+          query.length === 0 || !queryString.parse ? {} : queryString.parse(query);
+
+        return parsePathFn(getPathWithoutQuery(path), queryParams);
+      }
+    : null;
+
+  const toPath = route => prefix + convertToPath(routeConfig, route, queryString.stringify);
 
   // Function to keep the location bar in sync
   const locationBarSync = route => {

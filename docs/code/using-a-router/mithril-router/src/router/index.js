@@ -1,30 +1,5 @@
 import { Router } from "./util";
-import { Route } from "routing-common/src/routes";
-
-const beverageRoutes = {
-  Beverages: "",
-  Beverage: [
-    "/:id",
-    {
-      Brewer: "/brewer"
-    }
-  ]
-};
-
-const routeConfig = {
-  Home: "/",
-  Login: "/login",
-  Settings: "/settings",
-  Tea: [
-    "/tea",
-    {
-      TeaDetails: "/:id"
-    }
-  ],
-  Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer", beverageRoutes],
-  Invalid: "/:404..."
-};
+import { Route, routeConfig } from "routing-common/src/routes";
 
 export const router = Router({
   routeConfig,

@@ -2,6 +2,7 @@ const test = require("tape");
 
 const routing = require("../dist/meiosis-routing");
 const createRouteMatcher = require("feather-route-matcher");
+const queryString = require("query-string");
 
 const {
   createRouteSegments,
@@ -14,13 +15,22 @@ const {
 
 const {
   findPathParams,
+  findQueryParams,
   setParams,
   convertToPath,
   createRouteMap,
   createRouter
 } = routing.routerHelper;
 
-const Route = createRouteSegments(["Home", "Login", "User", "Profile", "About"]);
+const Route = createRouteSegments([
+  "Home",
+  "Login",
+  "User",
+  "Profile",
+  "About",
+  "Search",
+  "Details"
+]);
 
 test("state", t => {
   t.test("createRouteSegments", t => {
@@ -155,7 +165,7 @@ test("state", t => {
 });
 
 test("routerHelper", t => {
-  const routeConfig = {
+  const routeConfig1 = {
     Home: "/",
     About: "/about",
     User: [
@@ -166,20 +176,40 @@ test("routerHelper", t => {
     ]
   };
 
+  const routeConfig2 = {
+    Search: ["/search/:id?page?sort", { Details: "/details/:type?filter" }]
+  };
+
   t.test("findPathParams", t => {
     t.deepEqual(findPathParams("/home"), [], "findPathParams empty");
     t.deepEqual(findPathParams("/user/:id"), ["id"], "findPathParams one");
+
     t.deepEqual(
       findPathParams("/user/:id/setting/:setting"),
       ["id", "setting"],
       "findPathParams two"
     );
 
+    t.deepEqual(findPathParams("/user/:id?page"), ["id"], "findPathParams with queryParams");
+
+    t.end();
+  });
+
+  test("findQueryParams", t => {
+    t.deepEqual(findQueryParams("/home"), [], "findQueryParams empty");
+    t.deepEqual(findQueryParams("/user?id"), ["id"], "findQueryParams one");
+
+    t.deepEqual(
+      findQueryParams("/user/:id?setting?page"),
+      ["setting", "page"],
+      "findQueryParams two"
+    );
+
     t.end();
   });
 
   t.test("setParams", t => {
-    t.deepEqual(setParams("/home", {}), "/home", "setParams none");
+    t.deepEqual(setParams("/home", { id: 42 }), "/home", "setParams none");
     t.deepEqual(setParams("/user/:id", { id: 42 }), "/user/42", "setParams one");
     t.deepEqual(
       setParams("/user/:id/setting/:setting", { id: 42, setting: "email" }),
@@ -190,12 +220,22 @@ test("routerHelper", t => {
     t.end();
   });
 
+  t.test("setParams with queryString", t => {
+    t.deepEqual(
+      setParams("/search/:id?page", { id: 42, page: 2 }),
+      "/search/42",
+      "setParams with queryString"
+    );
+
+    t.end();
+  });
+
   t.test("convertToPath", t => {
-    t.equal(convertToPath(routeConfig, [Route.Home()]), "/", "convertToPath");
-    t.equal(convertToPath(routeConfig, [Route.User({ id: 42 })]), "/user/42", "convertToPath");
+    t.equal(convertToPath(routeConfig1, [Route.Home()]), "/", "convertToPath");
+    t.equal(convertToPath(routeConfig1, [Route.User({ id: 42 })]), "/user/42", "convertToPath");
 
     t.equal(
-      convertToPath(routeConfig, [Route.User({ id: 42 }), Route.Profile()]),
+      convertToPath(routeConfig1, [Route.User({ id: 42 }), Route.Profile()]),
       "/user/42/profile",
       "convertToPath"
     );
@@ -203,8 +243,31 @@ test("routerHelper", t => {
     t.end();
   });
 
+  t.test("convertToPath with queryString", t => {
+    t.deepEqual(
+      convertToPath(routeConfig2, [Route.Search({ id: 42, page: 2 })], queryString.stringify),
+      "/search/42?page=2",
+      "convertToPath with queryString"
+    );
+
+    t.deepEqual(
+      convertToPath(
+        routeConfig2,
+        [
+          Route.Search({ id: 42, page: 2, sort: "asc" }),
+          Route.Details({ type: "author", filter: "recent" })
+        ],
+        queryString.stringify
+      ),
+      "/search/42/details/author?filter=recent&page=2&sort=asc",
+      "convertToPath with queryString"
+    );
+
+    t.end();
+  });
+
   t.test("createRouteMap", t => {
-    const routeMap = createRouteMap(routeConfig);
+    const routeMap = createRouteMap(routeConfig1);
 
     t.deepEqual(routeMap["/"](), [Route.Home()], "createRouteMap");
     t.deepEqual(routeMap["/user/:id"]({ id: 42 }), [Route.User({ id: 42 })], "createRouteMap");
@@ -218,17 +281,44 @@ test("routerHelper", t => {
     t.end();
   });
 
+  t.test("createRouteMap with queryString", t => {
+    const routeMap = createRouteMap(routeConfig2);
+
+    t.deepEqual(
+      routeMap["/search/:id"]({ id: 42, page: 2 }),
+      [Route.Search({ id: 42, page: 2 })],
+      "createRouteMap with queryString"
+    );
+
+    t.deepEqual(
+      routeMap["/search/:id/details/:type"]({
+        id: 42,
+        page: 2,
+        type: "author",
+        sort: "asc",
+        filter: "recent"
+      }),
+      [
+        Route.Search({ id: 42, page: 2, sort: "asc" }),
+        Route.Details({ type: "author", filter: "recent" })
+      ],
+      "createRouteMap with queryString"
+    );
+
+    t.end();
+  });
+
   t.test("createRouter", t => {
-    t.plan(5);
+    t.plan(6);
 
     const createParsePath = (routeMap, defaultRoute) => {
       const routeMatcher = createRouteMatcher(routeMap);
 
-      const parsePath = path => {
+      const parsePath = (path, queryParams) => {
         const match = routeMatcher(path);
 
         if (match) {
-          return match.page(match.params);
+          return match.page(Object.assign({}, match.params, queryParams));
         } else {
           return defaultRoute;
         }
@@ -242,33 +332,50 @@ test("routerHelper", t => {
     };
     const addLocationChangeListener = () => null;
 
-    const router1 = createRouter({
+    const router1a = createRouter({
       createParsePath,
-      routeConfig,
+      routeConfig: routeConfig1,
       getPath,
       setPath,
       addLocationChangeListener
     });
 
-    t.deepEqual(router1.initialRoute, [Route.User({ id: "43" })], "initial route");
+    t.deepEqual(router1a.initialRoute, [Route.User({ id: "43" })], "initial route");
 
-    t.equal(router1.toPath([Route.User({ id: 42 })]), "#/user/42", "toPath");
+    t.equal(router1a.toPath([Route.User({ id: 42 })]), "#/user/42", "toPath");
 
     t.deepEqual(
-      router1.parsePath("#/user/42/profile"),
+      router1a.parsePath("#/user/42/profile"),
       [Route.User({ id: "42" }), Route.Profile({})],
       "parsePath"
     );
 
-    router1.locationBarSync([Route.About()]);
-    router1.start({ navigateTo: () => null });
+    router1a.locationBarSync([Route.About()]);
+    router1a.start({ navigateTo: () => null });
 
-    const router2 = createRouter({ routeConfig });
+    const router1b = createRouter({ routeConfig: routeConfig1 });
 
     t.deepEqual(
-      router2.routeMap["/user/:id/profile"]({ id: 42 }),
+      router1b.routeMap["/user/:id/profile"]({ id: 42 }),
       [Route.User({ id: 42 }), Route.Profile()],
       "router.routeMap"
+    );
+
+    const router2a = createRouter({
+      createParsePath,
+      queryString,
+      routeConfig: routeConfig2,
+      getPath,
+      setPath
+    });
+
+    t.deepEqual(
+      router2a.parsePath("#/search/42/details/author?filter=recent&page=2&sort=asc"),
+      [
+        Route.Search({ id: "42", page: "2", sort: "asc" }),
+        Route.Details({ type: "author", filter: "recent" })
+      ],
+      "parsePath with queryString"
     );
 
     t.end();

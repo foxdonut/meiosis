@@ -29,6 +29,7 @@
     "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-0.1.0.tgz",
     "meiosis-setup": "file:../../../../helpers/setup/meiosis-setup-0.1.0.tgz",
     "patchinko": "^4.1.0",
+    "query-string": "^6.5.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "routing-common": "../routing-common-core"
