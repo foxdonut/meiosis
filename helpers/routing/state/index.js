@@ -1,30 +1,10 @@
-const shallowEqual = (obj1, obj2) => {
-  if (obj1 === obj2) {
-    return true;
-  }
-  if (obj1 == null || obj2 == null) {
-    return false;
-  }
-
-  const keys = Object.keys(obj1);
-
-  if (keys.length === Object.keys(obj2).length) {
-    for (let i = 0, t = keys.length; i < t; i++) {
-      const key = keys[i];
-      if (obj1[key] !== obj2[key]) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return false;
-};
+import fastDeepEqual from "fast-deep-equal";
 
 export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
   route.find(
     routeSegment =>
       routeSegment.id === routeSegmentWithParams.id &&
-      shallowEqual(routeSegment.params, routeSegmentWithParams.params)
+      fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
   );
 
 export const diffRoute = (from, to) =>

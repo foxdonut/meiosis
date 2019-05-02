@@ -41,5 +41,8 @@
     "tap-spec": "^5.0.0",
     "tape": "^4.10.1",
     "url-mapper": "^2.0.0"
+  },
+  "dependencies": {
+    "fast-deep-equal": "^2.0.1"
   }
 }

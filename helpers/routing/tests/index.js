@@ -73,6 +73,15 @@ test("state", t => {
       "should be no found route segment"
     );
 
+    t.deepEqual(
+      findRouteSegmentWithParams(
+        [Route.User({ data: { id: 42 } })],
+        Route.User({ data: { id: 42 } })
+      ),
+      Route.User({ data: { id: 42 } }),
+      "found route segment with nested params"
+    );
+
     t.end();
   });
 
@@ -83,6 +92,18 @@ test("state", t => {
       diffRoute([Route.User({ id: 42 })], [Route.User({ id: 43 })]),
       [Route.User({ id: 42 })],
       "diff route"
+    );
+
+    t.deepEqual(
+      diffRoute([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })]),
+      [Route.User({ data: { id: 42 } })],
+      "diff route with nested params"
+    );
+
+    t.deepEqual(
+      diffRoute([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 42 } })]),
+      [],
+      "no diff route with nested params"
     );
 
     t.end();
@@ -99,6 +120,18 @@ test("state", t => {
       routeTransition([Route.User({ id: 42 })], [Route.User({ id: 43 })]),
       { leave: [Route.User({ id: 42 })], arrive: [Route.User({ id: 43 })] },
       "route transition"
+    );
+
+    t.deepEqual(
+      routeTransition([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })]),
+      { leave: [Route.User({ data: { id: 42 } })], arrive: [Route.User({ data: { id: 43 } })] },
+      "route transition with nested params"
+    );
+
+    t.deepEqual(
+      routeTransition([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 42 } })]),
+      { leave: [], arrive: [] },
+      "no route transition with nested params"
     );
 
     t.end();
