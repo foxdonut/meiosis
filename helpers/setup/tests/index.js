@@ -146,6 +146,8 @@ patchinkoTest(Oc, flyd, "patchinko-constant + flyd");
 patchinkoTest(Oi, flyd, "patchinko-immutable + flyd");
 patchinkoTest(Oc, Stream, "patchinko-constant + mithril-stream");
 patchinkoTest(Oc, Stream, "patchinko-immutable + mithril-stream");
+patchinkoTest(Oc, meiosis.simpleStream, "patchinko-constant + Meiosis simple-stream");
+patchinkoTest(Oc, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
 
 const functionPatchTest = (streamLib, label) => {
   test("functionPatch setup", t => {
@@ -290,6 +292,7 @@ const functionPatchTest = (streamLib, label) => {
 
 functionPatchTest(flyd, "functionPatch + flyd");
 functionPatchTest(Stream, "functionPatch + mithril-stream");
+functionPatchTest(meiosis.simpleStream, "functionPatch + Meiosis simple-stream");
 
 const commonTest = (streamLib, label) => {
   test("common setup", t => {
@@ -324,3 +327,4 @@ const commonTest = (streamLib, label) => {
 
 commonTest(flyd, "common + flyd");
 commonTest(Stream, "common + mithril-stream");
+commonTest(meiosis.simpleStream, "common + Meiosis simple-stream");
