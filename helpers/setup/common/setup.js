@@ -6,7 +6,7 @@
  * The function or object must also have a `scan` property.
  * The returned stream must have a `map` method.
  * @param {accumulator} the accumulator function.
- * @param {acceptor} the acceptor reduce function.
+ * @param {combinator} the patch combinator function.
  * @param {app.Initial} (optional) a function that creates the initial state. This function can return
  * a result * or a Promise. If not specified, the initial state will be `{}`.
  * @param {app.Actions} (optional) a function that creates actions, of the form `update => actions`.
@@ -18,24 +18,33 @@
  * @returns a Promise that resolves to { update, models, accepted, states, actions }
  * all of which are streams, except for `actions` which is the created actions.
  */
-export const setup = ({ stream, accumulator, acceptor, app }) => {
+export const setup = ({ stream, accumulator, combinator, app }) => {
   app = app || {};
   let { Initial, acceptors, services, Actions } = app;
-
   Initial = Initial || (() => ({}));
   acceptors = acceptors || [];
   services = services || [];
 
-  if (!acceptor) {
-    if (acceptors.length > 0) {
-      throw new Error("There are acceptors in app, but no acceptor function was specified.");
-    } else {
-      acceptor = x => x;
-    }
+  if (!stream) {
+    throw new Error("No stream library was specified.");
   }
+  if (!accumulator) {
+    throw new Error("No accumulator function was specified.");
+  }
+  if (!combinator && acceptors.length > 0) {
+    throw new Error("No combinator function was specified.");
+  }
+
+  const accept = combinator
+    ? model => {
+        const patches = acceptors.map(acceptor => acceptor(model));
+        return accumulator(model, combinator(patches));
+      }
+    : x => x;
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
+  const hasServices = services.length > 0;
 
   return Promise.resolve()
     .then(Initial)
@@ -43,54 +52,69 @@ export const setup = ({ stream, accumulator, acceptor, app }) => {
       const update = createStream();
 
       const models = scan(
-        (model, patch) => acceptors.reduce(acceptor, accumulator(model, patch)),
-        acceptors.reduce(acceptor, initialState),
+        (model, patch) => accept(accumulator(model, patch)),
+        accept(initialState),
         update
       );
 
       let buffered = false,
-        buffer = [],
-        loops = 0;
-
-      const bufferedUpdate = patch => {
-        if (buffered) {
-          buffer.push(patch);
-        } else {
-          update(patch);
-        }
-      };
-
-      const states = createStream();
-
-      const actions = (Actions || (() => ({})))(bufferedUpdate);
-
-      models.map(state => {
-        // For synchronous updates, prevent re-calling all services,
-        // and only issue a state change when services have finished.
-        buffered = true;
         buffer = [];
 
-        services.map(service => service({ state, update: bufferedUpdate, actions }));
+      const bufferedUpdate = hasServices
+        ? patch => {
+            if (buffered) {
+              buffer.push(patch);
+            } else {
+              update(patch);
+            }
+          }
+        : update;
 
-        // Updates are buffered so that every service works on the same state
-        // instead of on a state that was changed by a previous service.
-        if (buffer.length > 0) {
-          loops = buffer.length + 1;
-          buffer.forEach(update);
-        } else if (loops === 0) {
-          loops = 1;
-        }
+      const states = hasServices ? createStream() : models;
+      const actions = (Actions || (() => ({})))(bufferedUpdate);
 
-        buffered = false;
-        loops--;
+      if (hasServices) {
+        models.map(state => {
+          /*
+          For synchronous updates, prevent re-calling all services by accumulating
+          updates into a buffer.
 
-        if (loops === 0) {
-          states(models());
-        }
-      });
+          Updates being buffered also ensures that every service works on the same state,
+          instead of on a state that was changed by a previous service.
+          */
+          buffered = true;
+          buffer = [];
+
+          services.forEach(service => service({ state, update: bufferedUpdate, actions }));
+
+          /*
+          When services have issued updates, combine them into a single update. This prevents
+          services being called multiple times; but services *do* get called again when at least
+          one service has issued an update. This enables one service to trigger another service.
+
+          For synchronous service updates, a state change is emitted only when services have
+          "settled", i.e. have issued no more updates. This reduces the number of state changes.
+
+          The combination of updates into a single update works *only* if a combinator was
+          provided. Otherwise, multiple updates are issued. This gives the caller the option of
+          not providing a combinator, and being OK with multiple update/service calls.
+          */
+          if (buffer.length > 0) {
+            if (combinator) {
+              update(combinator(buffer));
+            } else {
+              buffer.forEach(update);
+            }
+          } else {
+            states(models());
+          }
+
+          buffered = false;
+        });
+      }
 
       return {
-        update: bufferedUpdate,
+        update,
         models,
         states,
         actions

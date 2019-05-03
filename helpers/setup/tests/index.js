@@ -87,7 +87,7 @@ const patchinkoTest = (O, streamLib, label) => {
 
       const services = [
         ({ state, actions }) => {
-          /* update from one service should not affect state seen by the other */
+          // update from one service should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
@@ -139,6 +139,36 @@ const patchinkoTest = (O, streamLib, label) => {
           t.end();
         });
     });
+
+    t.test(label + " / synchronous service updates are combined into one", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          serviceCalls++;
+          if (state.count === 1) {
+            update({ count: 2 });
+            update({ service1: true });
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update({ service2: true });
+          }
+        }
+      ];
+
+      meiosis.patchinko
+        .setup({ stream: streamLib, O, app: { services } })
+        .then(({ update, states }) => {
+          update({ count: 1 });
+
+          // Service calls: 1) initial, 2) update call, 3) combined service updates into one
+          t.equal(serviceCalls, 3, "number of service calls");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
   });
 };
 
@@ -150,6 +180,8 @@ patchinkoTest(Oc, meiosis.simpleStream, "patchinko-constant + Meiosis simple-str
 patchinkoTest(Oc, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
 
 const functionPatchTest = (streamLib, label) => {
+  label = "functionPatch + " + label;
+
   test("functionPatch setup", t => {
     t.test(label + " / minimal", t => {
       meiosis.functionPatches.setup({ stream: streamLib }).then(({ update, states }) => {
@@ -235,7 +267,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const services = [
         ({ state, actions }) => {
-          /* update from one service should not affect state seen by the other */
+          // update from one service should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
@@ -287,40 +319,152 @@ const functionPatchTest = (streamLib, label) => {
           t.end();
         });
     });
-  });
-};
 
-functionPatchTest(flyd, "functionPatch + flyd");
-functionPatchTest(Stream, "functionPatch + mithril-stream");
-functionPatchTest(meiosis.simpleStream, "functionPatch + Meiosis simple-stream");
+    t.test(label + " / synchronous service updates are combined into one", t => {
+      let serviceCalls = 0;
 
-const commonTest = (streamLib, label) => {
-  test("common setup", t => {
-    t.test(label + " / optional acceptor function", t => {
-      meiosis.common
-        .setup({ stream: streamLib, accumulator: (x, f) => f(x) })
+      const services = [
+        ({ state, update }) => {
+          serviceCalls++;
+          if (state.count === 1) {
+            update(R.assoc("count", 2));
+            update(R.assoc("service1", true));
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(R.assoc("service2", true));
+          }
+        }
+      ];
+
+      meiosis.functionPatches
+        .setup({ stream: streamLib, app: { services } })
         .then(({ update, states }) => {
           update(R.assoc("count", 1));
 
-          t.deepEqual(states(), { count: 1 }, "resulting state");
+          // Service calls: 1) initial, 2) update call, 3) combined service updates into one
+          t.equal(serviceCalls, 3, "number of service calls");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
           t.end();
         });
     });
+  });
+};
 
-    t.test(label + " / required acceptor function", t => {
+functionPatchTest(flyd, "flyd");
+functionPatchTest(Stream, "mithril-stream");
+functionPatchTest(meiosis.simpleStream, "Meiosis simple-stream");
+
+const commonTest = (streamLib, label) => {
+  test("common setup", t => {
+    t.test(label + " / required accumulator function", t => {
       const I = x => x;
 
       try {
         meiosis.common
-          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
+          .setup({ stream: streamLib, combinator: x => x, app: { acceptors: [() => I] } })
           .then(() => {
-            t.fail("An error should have been thrown because no acceptor function was specified.");
+            t.fail("An error should have been thrown for missing accumulator function.");
             t.end();
           });
       } catch (err) {
         t.pass("Error was thrown as it should.");
         t.end();
       }
+    });
+
+    t.test(label + " / required combinator function", t => {
+      const I = x => x;
+
+      try {
+        meiosis.common
+          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
+          .then(() => {
+            t.fail("An error should have been thrown for missing combinator function.");
+            t.end();
+          });
+      } catch (err) {
+        t.pass("Error was thrown as it should.");
+        t.end();
+      }
+    });
+
+    t.test(label + " / basic patchinko setup with no acceptors/services", t => {
+      const Actions = update => ({
+        increment: amount => update({ count: Oc(x => x + amount) })
+      });
+
+      meiosis.common
+        .setup({
+          stream: streamLib,
+          accumulator: Oc,
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          t.ok(typeof actions.increment === "function", "actions");
+
+          actions.increment(2);
+
+          t.deepEqual(states(), { count: 2 }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / basic functionPatch setup with no acceptors/services", t => {
+      const Actions = update => ({
+        increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
+      });
+
+      meiosis.common
+        .setup({
+          stream: streamLib,
+          accumulator: (x, f) => f(x),
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          t.ok(typeof actions.increment === "function", "actions");
+
+          actions.increment(2);
+
+          t.deepEqual(states(), { count: 2 }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / setup with services but no combinator", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          serviceCalls++;
+          if (state.count === 1) {
+            update(R.assoc("count", 2));
+            update(R.assoc("service1", true));
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(R.assoc("service2", true));
+          }
+        }
+      ];
+
+      meiosis.common
+        .setup({
+          stream: streamLib,
+          accumulator: (x, f) => f(x),
+          app: { Initial: () => ({ count: 0 }), services }
+        })
+        .then(({ states, update }) => {
+          update(R.assoc("count", 1));
+
+          // Because no combinator was provided, services are called multiple times
+          // Service calls: 1) initial, 2) update call, 3, 4, 5) multiple service updates
+          t.equal(serviceCalls, 5, "number of service calls");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
     });
   });
 };

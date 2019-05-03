@@ -20,4 +20,16 @@ import { setup as commonSetup } from "../common/setup";
  * all of which are streams, except for `actions` which is the created actions.
  */
 export const setup = ({ stream, O, app }) =>
-  commonSetup({ stream, accumulator: O, acceptor: (x, f) => O(x, f(x)), app });
+  commonSetup({
+    stream,
+    accumulator: (model, patch) => {
+      if (typeof patch === "function") {
+        return patch(model);
+      } else {
+        return O(model, patch);
+      }
+    },
+    // Can't use patches.reduce(O, model) because O would get called as O(model, patch, index)
+    combinator: patches => model => patches.reduce((m, p) => O(m, p), model),
+    app
+  });

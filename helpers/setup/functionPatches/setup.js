@@ -1,5 +1,7 @@
 import { setup as commonSetup } from "../common/setup";
 
+const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
+
 /**
  * Helper to setup the Meiosis pattern.
  *
@@ -19,4 +21,4 @@ import { setup as commonSetup } from "../common/setup";
  * all of which are streams, except for `actions` which is the created actions.
  */
 export const setup = ({ stream, app }) =>
-  commonSetup({ stream, accumulator: (x, f) => f(x), acceptor: (x, f) => f(x)(x), app });
+  commonSetup({ stream, accumulator: (x, f) => f(x), combinator: compose, app });
