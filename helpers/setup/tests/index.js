@@ -169,6 +169,29 @@ const patchinkoTest = (O, streamLib, label) => {
           t.end();
         });
     });
+
+    t.test(label + " / services are not called in an infinite loop", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            serviceCalls++;
+            update({ service: true });
+          }
+        }
+      ];
+
+      meiosis.patchinko
+        .setup({ stream: streamLib, O, app: { services } })
+        .then(({ update, states }) => {
+          update({ count: 1 });
+
+          t.equal(serviceCalls, 1, "number of service calls");
+          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+          t.end();
+        });
+    });
   });
 };
 
@@ -346,6 +369,29 @@ const functionPatchTest = (streamLib, label) => {
           // Service calls: 1) initial, 2) update call
           t.equal(serviceCalls, 2, "number of service calls");
           t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / services are not called in an infinite loop", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            serviceCalls++;
+            update(R.assoc("service", true));
+          }
+        }
+      ];
+
+      meiosis.functionPatches
+        .setup({ stream: streamLib, app: { services } })
+        .then(({ update, states }) => {
+          update(R.assoc("count", 1));
+
+          t.equal(serviceCalls, 1, "number of service calls");
+          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
           t.end();
         });
     });
