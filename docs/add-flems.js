@@ -13,7 +13,8 @@ var linkMap = {
   "meiosis-tracer": "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
   "mithril": "https://unpkg.com/mithril@2.0.0-rc.3",
   "mithril-stream": "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
-  "patchinko": "https://unpkg.com/patchinko@4.1.0/explicit.js",
+  "patchinko": "https://unpkg.com/patchinko@4.1.0/constant.js",
+  "patchinko-i": "https://unpkg.com/patchinko@4.1.0/immutable.js",
   "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   "react": "https://unpkg.com/react@16.7.0/umd/react.development.js",
   "react-dom": "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"

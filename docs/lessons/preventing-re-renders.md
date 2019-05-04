@@ -25,37 +25,27 @@ To prevent re-renders of a component, we determine whether a component's state h
 need to produce **new object instances** when updating the state, instead of mutating the
 existing object.
 
-We can do this with Patchinko's `PS` function, passing `{}` as the first argument. This produces
-a new object instance instead of mutating the state. Here, we are assigning the new instance
-back to the `[id]` property:
+We can do this with Patchinko's immutable `O` function. This produces a new object instance instead
+of mutating the state. Here, we are assigning the new instance back to the `[id]` property:
 
 ```js
 actions: update => ({
-  editEntryValue: (id, value) => update({ [id]: PS({}, { value }) })
+  editEntryValue: (id, value) => update({ [id]: O({ value }) })
 })
 ```
 
-For patches that use `S`, we can use `P({}, ...)` when returning the result in order to create
-a new object instance. For example:
+This also works patches that use `O(fn)` when returning the result in order to create a new object
+instance. For example:
 
 ```js
 changeUnits: id => evt => {
   evt.preventDefault();
-  update({ [id]: S(state => {
+  update({ [id]: O(state => {
     const newUnits = state.units === "C" ? "F" : "C";
     const newValue = convert(state.value, newUnits);
-    return P({}, state, { units: newUnits, value: newValue });
+    return O(state, { units: newUnits, value: newValue });
   }) });
 }
-```
-
-Finally, we need to change the accumulator function from `P` to
-`(state, patch) => P({}, state, patch)`. Again, this is to ensure we are creating new object
-instances instead of mutating the existing state object.
-
-```js
-const states = m.stream.scan((state, patch) => P({}, state, patch),
-  app.initialState(), update);
 ```
 
 We are now ready to prevent re-renders. Continue reading for the React version, or
@@ -91,7 +81,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`,
 when you interact with that component in the user interface. Other components do not get
 re-rendered.
 
-@flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,patchinko 800 70
+@flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,patchinko-i 800 70
 
 <a name="mithril_prevent_re_render"></a>
 ### [Mithril version](#mithril_prevent_re_render)
@@ -125,7 +115,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`,
 when you interact with that component in the user interface. Other components do not get
 re-rendered.
 
-@flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko 800 70
+@flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-i 800 70
 
 [Table of Contents](toc.html)
 
