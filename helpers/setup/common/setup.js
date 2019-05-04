@@ -31,7 +31,7 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");
   }
-  if (!combinator && acceptors.length > 0) {
+  if (!combinator && (acceptors.length > 0 || services.length > 0)) {
     throw new Error("No combinator function was specified.");
   }
 
@@ -58,7 +58,8 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
       );
 
       let buffered = false,
-        buffer = [];
+        buffer = [],
+        serviceUpdate = false;
 
       const bufferedUpdate = hasServices
         ? patch => {
@@ -75,41 +76,27 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
 
       if (hasServices) {
         models.map(state => {
-          /*
-          For synchronous updates, prevent re-calling all services by accumulating
-          updates into a buffer.
+          // If the call comes from a service update, we just want to emit the resulting state.
+          if (serviceUpdate) {
+            serviceUpdate = false;
+            buffered = false;
+            states(state);
+          } else {
+            buffered = true;
+            buffer = [];
 
-          Updates being buffered also ensures that every service works on the same state,
-          instead of on a state that was changed by a previous service.
-          */
-          buffered = true;
-          buffer = [];
+            services.forEach(service => service({ state, update: bufferedUpdate, actions }));
 
-          services.forEach(service => service({ state, update: bufferedUpdate, actions }));
-
-          /*
-          When services have issued updates, combine them into a single update. This prevents
-          services being called multiple times; but services *do* get called again when at least
-          one service has issued an update. This enables one service to trigger another service.
-
-          For synchronous service updates, a state change is emitted only when services have
-          "settled", i.e. have issued no more updates. This reduces the number of state changes.
-
-          The combination of updates into a single update works *only* if a combinator was
-          provided. Otherwise, multiple updates are issued. This gives the caller the option of
-          not providing a combinator, and being OK with multiple update/service calls.
-          */
-          if (buffer.length > 0) {
-            if (combinator) {
+            if (buffer.length > 0) {
+              // Services produced patches, issue an update and emit the resulting state.
+              serviceUpdate = true;
               update(combinator(buffer));
             } else {
-              buffer.forEach(update);
+              // No service updates, just emit the resulting state.
+              buffered = false;
+              states(state);
             }
-          } else {
-            states(models());
           }
-
-          buffered = false;
         });
       }
 

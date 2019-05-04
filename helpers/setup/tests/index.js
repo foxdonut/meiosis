@@ -115,7 +115,7 @@ const patchinkoTest = (O, streamLib, label) => {
       const services = [
         ({ state, update }) => {
           if (state.count === 1) {
-            update({ count: 2 });
+            update({ count: O(x => x + 1) });
             update({ service1: true });
           }
         },
@@ -147,7 +147,7 @@ const patchinkoTest = (O, streamLib, label) => {
         ({ state, update }) => {
           serviceCalls++;
           if (state.count === 1) {
-            update({ count: 2 });
+            update({ count: O(x => x + 1) });
             update({ service1: true });
           }
         },
@@ -163,8 +163,8 @@ const patchinkoTest = (O, streamLib, label) => {
         .then(({ update, states }) => {
           update({ count: 1 });
 
-          // Service calls: 1) initial, 2) update call, 3) combined service updates into one
-          t.equal(serviceCalls, 3, "number of service calls");
+          // Service calls: 1) initial, 2) update call
+          t.equal(serviceCalls, 2, "number of service calls");
           t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
           t.end();
         });
@@ -343,8 +343,8 @@ const functionPatchTest = (streamLib, label) => {
         .then(({ update, states }) => {
           update(R.assoc("count", 1));
 
-          // Service calls: 1) initial, 2) update call, 3) combined service updates into one
-          t.equal(serviceCalls, 3, "number of service calls");
+          // Service calls: 1) initial, 2) update call
+          t.equal(serviceCalls, 2, "number of service calls");
           t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
           t.end();
         });
@@ -374,12 +374,28 @@ const commonTest = (streamLib, label) => {
       }
     });
 
-    t.test(label + " / required combinator function", t => {
+    t.test(label + " / acceptors require combinator function", t => {
       const I = x => x;
 
       try {
         meiosis.common
           .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
+          .then(() => {
+            t.fail("An error should have been thrown for missing combinator function.");
+            t.end();
+          });
+      } catch (err) {
+        t.pass("Error was thrown as it should.");
+        t.end();
+      }
+    });
+
+    t.test(label + " / services require combinator function", t => {
+      const I = x => x;
+
+      try {
+        meiosis.common
+          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { services: [() => I] } })
           .then(() => {
             t.fail("An error should have been thrown for missing combinator function.");
             t.end();
@@ -428,41 +444,6 @@ const commonTest = (streamLib, label) => {
           actions.increment(2);
 
           t.deepEqual(states(), { count: 2 }, "resulting state");
-          t.end();
-        });
-    });
-
-    t.test(label + " / setup with services but no combinator", t => {
-      let serviceCalls = 0;
-
-      const services = [
-        ({ state, update }) => {
-          serviceCalls++;
-          if (state.count === 1) {
-            update(R.assoc("count", 2));
-            update(R.assoc("service1", true));
-          }
-        },
-        ({ state, update }) => {
-          if (state.count === 1) {
-            update(R.assoc("service2", true));
-          }
-        }
-      ];
-
-      meiosis.common
-        .setup({
-          stream: streamLib,
-          accumulator: (x, f) => f(x),
-          app: { Initial: () => ({ count: 0 }), services }
-        })
-        .then(({ states, update }) => {
-          update(R.assoc("count", 1));
-
-          // Because no combinator was provided, services are called multiple times
-          // Service calls: 1) initial, 2) update call, 3, 4, 5) multiple service updates
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
           t.end();
         });
     });
