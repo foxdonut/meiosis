@@ -1,4 +1,4 @@
-/*global flyd, P, PS, S*/
+/*global flyd, O*/
 var convert = function(value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
@@ -16,14 +16,14 @@ var temperature = {
     return {
       increment: function(amount) {
         update({
-          temperature: PS({
-            value: S(x => x + amount)
+          temperature: O({
+            value: O(x => x + amount)
           })
         });
       },
       changeUnits: function() {
         update({
-          temperature: S(state => {
+          temperature: O(state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
@@ -38,7 +38,7 @@ var temperature = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(P, temperature.initialState, update);
+var states = flyd.scan(O, temperature.initialState, update);
 
 var actions = temperature.actions(update);
 states.map(function(state) {

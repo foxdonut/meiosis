@@ -1,4 +1,4 @@
-/*global flyd, P, S, PS*/
+/*global flyd, O*/
 var conditions = {
   initialState: {
     conditions: {
@@ -9,10 +9,10 @@ var conditions = {
   actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: PS({ precipitations: value }) });
+        update({ conditions: O({ precipitations: value }) });
       },
       changeSky: function(value) {
-        update({ conditions: PS({ sky: value }) });
+        update({ conditions: O({ sky: value }) });
       }
     };
   }
@@ -35,12 +35,12 @@ var temperature = {
     return {
       increment: function(amount) {
         update({
-          temperature: PS({ value: S(x => x + amount) })
+          temperature: O({ value: O(x => x + amount) })
         });
       },
       changeUnits: function() {
         update({
-          temperature: S(state => {
+          temperature: O(state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
@@ -55,13 +55,13 @@ var temperature = {
 };
 
 var app = {
-  initialState: P(
+  initialState: O(
     {},
     conditions.initialState,
     temperature.initialState
   ),
   actions: function(update) {
-    return P(
+    return O(
       {},
       conditions.actions(update),
       temperature.actions(update)
@@ -70,7 +70,7 @@ var app = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(P, app.initialState, update);
+var states = flyd.scan(O, app.initialState, update);
 
 var actions = app.actions(update);
 states.map(function(state) {

@@ -1,4 +1,4 @@
-/*global P, S, PS, D*/
+/*global O*/
 
 var target = {
   air: { value: 22, units: "C" },

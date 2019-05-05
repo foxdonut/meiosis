@@ -54,39 +54,38 @@ update({ value: 72, units: "F" })
 How to we write an accumulator function that handles these object patches to update the
 state?
 
-Patchinko comes with a function, `P` (for "Patch") that takes a target object as its first
+Patchinko comes with a function, `O`, that takes a target object as its first
 parameter, and patch objects in the remainder of the parameters. It patches the target object
 by copying over the properties from the patch objects onto the target object:
 
 ```javascript
-P({ value: 22, units: "C" }, { value: 23 })
+O({ value: 22, units: "C" }, { value: 23 })
 // result:
 { value: 23, units: "C" }
 
-P({ value: 23, units: "C" }, { comfortable: true })
+O({ value: 23, units: "C" }, { comfortable: true })
 // result:
 { value: 23, units: "C", comfortable: true }
 ```
 
-If you find that this looks like `Object.assign`, you are correct: `P` does the equivalent.
-However, `P` has more capabilities when combined with Patchinko's other functions:
-`S`, `PS`, and `D`.
+If you find that this looks like `Object.assign`, you are correct: `O` does the equivalent.
+However, `O` has more capabilities when called in different ways.
 
 <a name="patching_based_on_current"></a>
-### [Patching based on the current value: `S`](#patching_based_on_current)
+### [Patching based on the current value: `O(fn)`](#patching_based_on_current)
 
-Within a patch, you can include calls to other Patchinko functions. One of those is `S` (Scope).
-`S` allows us to use the current value of the target object to determine the updated value.
+Within a patch, you can include more calls to `O`. One way allows us to use the current value of
+the target object to determine the updated value.
 
-We pass a **function** to `S()`. Patchinko passes the value of that property to the function, and
+We pass a **function** to `O()`. Patchinko passes the value of that property to the function, and
 assigns the function's return value back to that property.
 
 This makes it easy for us to update a value using the previous value. For example, say that
 we want to increment the temperature value by 1. We need the previous value to compute the updated
-value. We can pass a function to `S()`:
+value. We can pass a function to `O()`:
 
 ```js
-P({ value: 22, units: "C" }, { value: S(x => x + 1) }) // The function receives 22
+O({ value: 22, units: "C" }, { value: O(x => x + 1) }) // The function receives 22
 // result:
 { value: 23, units: "C" }
 ```
@@ -98,14 +97,14 @@ function(x) {
 }
 ```
 
-By passing `S()` for the `value` property, Patchinko passes the previous value of that property
-to the function that we indicate in our call to `S()`. Our function receives `22`, adds `1` and
+By passing `O(fn)` for the `value` property, Patchinko passes the previous value of that property
+to the function that we indicate in our call to `O()`. Our function receives `22`, adds `1` and
 returns `23`, which Patchinko assigns back to the `value` property.
 
 <a name="deep_patching"></a>
-### [Deep Patching: `PS`](#deep_patching)
+### [Deep Patching: `O(obj)`](#deep_patching)
 
-When we pass plain objects to `P`, it acts like `Object.assign` and does a _shallow_ merge.
+When we pass plain objects to `O`, it acts like `Object.assign` and does a _shallow_ merge.
 If our target object is:
 
 ```javascript
@@ -117,7 +116,7 @@ If our target object is:
 And we want to change the `air` `value` to `25` by calling:
 
 ```javascript
-P(
+O(
   { air:   { value: 22, units: "C" },
     water: { value: 84, units: "F" }
   },
@@ -136,17 +135,17 @@ We get this result:
 We lost the `units`! This is because properties are merged only at the first level, just like
 with `Object.assign`. Beyond that, properties are overwritten.
 
-This is where Patchinko's `PS()` function comes in.
+This is where nested calls to `O(obj)` come in.
 
-To use it, we call `PS` with a single object. This is the equivalent of `P` _for that property_.
+To use it, we call `O` with a single object. This is the equivalent of `O` _for that property_.
 We can merge properties deeper than the first level without losing the rest:
 
 ```javascript
-P(
+O(
   { air:   { value: 22, units: "C" },
     water: { value: 84, units: "F" }
   },
-  { air: PS({ value: 25 }) } // notice PS() here
+  { air: O({ value: 25 }) } // notice O() here
 )
 // result:
 { air:   { value: 25, units: "C" }, // now we didn't lose the units!
@@ -154,7 +153,7 @@ P(
 }
 ```
 
-By having `{ air: PS({ value: 25 }) }`, Patchinko does `P(target.air, { value: 25 })` and assigns
+By having `{ air: O({ value: 25 }) }`, Patchinko does `O(target.air, { value: 25 })` and assigns
 the result back to the `air` property. The equivalent with `Object.assign` would be:
 
 ```javascript
@@ -166,17 +165,17 @@ const target =
 Object.assign(target, { air: Object.assign(target.air, { value: 25 }) })
 ```
 
-But of course in a more concise manner. Moreover, we can use `PS()` in this fashion for any
+But of course in a more concise manner. Moreover, we can use `O()` in this fashion for any
 number of levels deep within our objects.
 
-`PS` and `S` can also be used together:
+`O(obj)` and `O(fn)` can also be used together:
 
 ```javascript
-P(
+O(
   { air:   { value: 22, units: "C" },
     water: { value: 84, units: "F" }
   },
-  { air:  PS({ value: S(x => x + 8) }) } // PS to merge air, S to update value
+  { air:  O({ value: O(x => x + 8) }) } // first O to merge air, second O to update value
 )
 // result:
 { air:   { value: 30, units: "C" }, // we increased the value by 8, and didn't lose the units
@@ -185,30 +184,29 @@ P(
 ```
 
 <a name="deleting_a_property"></a>
-### [Deleting a property: `D`](#deleting_a_property)
+### [Deleting a property: `O`](#deleting_a_property)
 
-Finally, Patchinko provides `D` to delete a property. To use it, we just have to specify `D`
-as the value for the property that we wish to delete:
+Finally, we can use `O` as a property **value** when we wish to delete that property:
 
 ```js
-P(
+O(
   { air:   { value: 22, units: "C" },
     water: { value: 84, units: "F" }
   },
-  { air:  D }
+  { air: O }
 )
 // result:
 { water: { value: 84, units: "F" } }
 ```
 
-Note that if we want to delete a property past the first level, we still need to use `PS`:
+Note that if we want to delete a property past the first level, we still need to use `O(obj)`:
 
 ```js
-P(
+O(
   { air:   { value: 22, units: "C" },
     water: { value: 84, units: "F" }
   },
-  { air: PS({ value: D }) }
+  { air: O({ value: O }) }
 )
 // result:
 { air:   { units: "C" },
@@ -235,23 +233,22 @@ opposite of what it was
 
 @flems code/05-meiosis-with-patchinko-01-solution.js patchinko 800 hidden
 
-> **Alternative: Using the Overloaded version of Patchinko**
+> **Alternative: Using the Explicit version of Patchinko**
 >
 > We are using the
-[explicit](https://github.com/barneycarroll/patchinko#explicit) version of Patchinko, which
-provides `P`, `S`, `PS`, and `D`.
+[overloaded / constant](https://github.com/barneycarroll/patchinko#overloaded) version of
+Patchinko, which provides `O`.
 >
 > If you prefer, you can also use the
-[overloaded](https://github.com/barneycarroll/patchinko#overloaded) version, which provides
-a single function, `O`, that uses what you pass to the function to determine whether to do the
-equivalent of `P`, `S`, `PS`, or `D`.
+[explicit](https://github.com/barneycarroll/patchinkexplicit#overloaded) version, which provides
+`P`, `S`, `PS`, or `D`.
 >
 > In a nutshell:
 >
-> - With multiple arguments: `O(target, patch)`, does the same as `P`
-> - With a single **function** argument: `O(x => y)` does the same as `S`
-> - With a single **object** argument:`O({..})` does the same as `PS`
-> - With no arguments, as the value of a property: `O` does the same as `D`.
+> - `P` does the same as `O` with multiple arguments: `O(target, patch)`
+> - `S` does the same as `O` with a single **function** argument: `O(x => y)`
+> - `PS` does the same as `O` with a single **object** argument: `O({..})`
+> - `D` does the same as `O` with no arguments, as the value of a property.
 
 <a name="using_patchinko_with_meiosis"></a>
 ### [Using Patchinko with Meiosis](#using_patchinko_with_meiosis)
@@ -264,8 +261,8 @@ For example, to increment the temperature value:
 ```js
 increment: function(amount) {
   update({
-    temperature: PS({
-      value: S(x => x + amount)
+    temperature: O({
+      value: O(x => x + amount)
     })
   });
 }
@@ -273,11 +270,11 @@ increment: function(amount) {
 
 Now we need to use these object patches in the accumulator function. Remember that the
 accumulator gets the current state and the incoming patch as parameters, and must return the
-updated state. We can use `P`:
+updated state. We can use `O`:
 
 ```js
 var states = flyd.scan(function(state, patch) {
-  return P(state, patch);
+  return O(state, patch);
 }, temperature.initialState, update);
 ```
 
@@ -285,15 +282,15 @@ Notice that the accumulator function that we are passing is:
 
 ```js
 function(state, patch) {
-  return P(state, patch);
+  return O(state, patch);
 }
 ```
 
-We have a function that takes (state, patch) and calls `P` with (state, patch). But `P` already
+We have a function that takes (state, patch) and calls `O` with (state, patch). But `O` already
 does what we want, so we can pass it directly:
 
 ```js
-var states = flyd.scan(P, temperature.initialState, update);
+var states = flyd.scan(O, temperature.initialState, update);
 ```
 
 Putting it all together, we have:

@@ -1,4 +1,4 @@
-/*global m, P, S, PS*/
+/*global m, O*/
 var get = function(object, path) {
   return path.reduce(function(obj, prop) {
     return obj == null ? null : obj[prop];
@@ -11,7 +11,7 @@ var updatePath = function(update, path) {
       [path[0]]: path
         .slice(1)
         .reduceRight(function(result, key) {
-          return PS({ [key]: result });
+          return O({ [key]: result });
         }, patch)
     });
   };
@@ -31,10 +31,10 @@ var conditions = {
   },
   actions: {
     togglePrecipitations: function(value) {
-      return PS({ precipitations: value });
+      return O({ precipitations: value });
     },
     changeSky: function(value) {
-      return PS({ sky: value });
+      return O({ sky: value });
     }
   }
 };
@@ -106,10 +106,10 @@ var temperature = {
   },
   actions: {
     increment: function(amount) {
-      return PS({ value: S(x => x + amount) });
+      return O({ value: O(x => x + amount) });
     },
     changeUnits: function() {
-      return S(state => {
+      return O(state => {
         var value = state.value;
         var newUnits = state.units === "C" ? "F" : "C";
         var newValue = convert(value, newUnits);
@@ -204,7 +204,7 @@ var App = {
 };
 
 var update = m.stream();
-var states = m.stream.scan(P, app.initialState, update);
+var states = m.stream.scan(O, app.initialState, update);
 
 m.mount(document.getElementById("app"), {
   view: () => m(App, { root: { state: states(), update } })

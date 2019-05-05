@@ -1,4 +1,4 @@
-/*global preact, flyd, P, S, PS*/
+/*global preact, flyd, O*/
 /** @jsx preact.h */
 var conditions = {
   initialState: {
@@ -10,10 +10,10 @@ var conditions = {
   actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: PS({ precipitations: value }) });
+        update({ conditions: O({ precipitations: value }) });
       },
       changeSky: function(value) {
-        update({ conditions: PS({ sky: value }) });
+        update({ conditions: O({ sky: value }) });
       }
     };
   }
@@ -92,11 +92,11 @@ var temperature = {
   actions: function(update) {
     return {
       increment: function(id, amount) {
-        update({ [id]: PS({ value: S(x => x + amount) }) });
+        update({ [id]: O({ value: O(x => x + amount) }) });
       },
       changeUnits: function(id) {
         update({
-          [id]: S(state => {
+          [id]: O(state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
@@ -177,7 +177,7 @@ class App extends preact.Component {
 }
 
 var update = flyd.stream();
-var states = flyd.scan(P, app.initialState, update);
+var states = flyd.scan(O, app.initialState, update);
 
 var actions = app.actions(update);
 preact.render(

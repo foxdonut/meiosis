@@ -1,9 +1,9 @@
-/* global React, ReactDOM, flyd, P, PS */
+/* global React, ReactDOM, flyd, O */
 
 // -- Utility code
 
-const pipe = (...fns) => input => fns.reduce((value, fn) =>
-  fn(value), input);
+const pipe = (...fns) => input =>
+  fns.reduce((value, fn) => fn(value), input);
 
 const preventDefault = evt => {
   evt.preventDefault();
@@ -24,13 +24,20 @@ const app = {
     navigateTo: pageId => update({ pageId }),
     login: user => update({ user, pageId: "HomePage" }),
     username: value =>
-      update({ login: PS({ username: value })}),
+      update({ login: O({ username: value }) }),
     password: value =>
-      update({ login: PS({ password: value })}),
+      update({ login: O({ password: value }) }),
     logout: () =>
-      update({ user: null, data: null, pageId: "HomePage" }),
-    loadData: () => setTimeout(() =>
-      update({ data: "The data has been loaded." }), 1500)
+      update({
+        user: null,
+        data: null,
+        pageId: "HomePage"
+      }),
+    loadData: () =>
+      setTimeout(
+        () => update({ data: "The data has been loaded." }),
+        1500
+      )
   })
 };
 
@@ -50,16 +57,14 @@ class DataPage extends React.Component {
   render() {
     const { state } = this.props;
     return (
-      <div>
-        {state.data || "Loading, please wait..."}
-      </div>
+      <div>{state.data || "Loading, please wait..."}</div>
     );
   }
 }
 
 class SettingsPage extends React.Component {
   render() {
-    return (<div>Settings page.</div>);
+    return <div>Settings page.</div>;
   }
 }
 
@@ -71,22 +76,37 @@ class LoginPage extends React.Component {
         <div>Login</div>
         <form className="navbar-form">
           <div className="form-group">
-            <input type="text" className="form-control"
+            <input
+              type="text"
+              className="form-control"
               placeholder="username"
               value={state.login.username}
               onChange={evt =>
-                actions.username(evt.target.value)}/>
+                actions.username(evt.target.value)
+              }
+            />
           </div>
           <div className="form-group">
-            <input type="password" className="form-control"
+            <input
+              type="password"
+              className="form-control"
               placeholder="password"
               value={state.login.password}
               onChange={evt =>
-                actions.password(evt.target.value)}/>
+                actions.password(evt.target.value)
+              }
+            />
           </div>
-          <button type="submit" className="btn btn-primary"
-            onClick={pipe(preventDefault,
-              () => actions.login(state.login))}>Login</button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            onClick={pipe(
+              preventDefault,
+              () => actions.login(state.login)
+            )}
+          >
+            Login
+          </button>
         </form>
       </div>
     );
@@ -104,50 +124,77 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.navigateTo = pageId =>
-      pipe(preventDefault,
-        () => this.props.actions.navigateTo(pageId));
+      pipe(
+        preventDefault,
+        () => this.props.actions.navigateTo(pageId)
+      );
     this.state = this.props.states();
   }
 
   componentDidMount() {
     const setState = this.setState.bind(this);
-    this.props.states.map(state => { setState(state); });
+    this.props.states.map(state => {
+      setState(state);
+    });
   }
 
   render() {
     const state = this.state;
     const { actions } = this.props;
-    const active = pageId => state.pageId === pageId
-      ? " active" : "";
+    const active = pageId =>
+      state.pageId === pageId ? " active" : "";
     const Component = pages[state.pageId];
 
     return (
       <div>
         <ul className="tab">
           <li className={"tab-item" + active("HomePage")}>
-            <a href="#"
-              onClick={this.navigateTo("HomePage")}>Home</a>
+            <a
+              href="#"
+              onClick={this.navigateTo("HomePage")}
+            >
+              Home
+            </a>
           </li>
-          <li className={"tab-item" + active("SettingsPage")}>
-            <a href="#"
+          <li
+            className={"tab-item" + active("SettingsPage")}
+          >
+            <a
+              href="#"
               onClick={this.navigateTo("SettingsPage")}
-            >Settings</a>
+            >
+              Settings
+            </a>
           </li>
           <li className={"tab-item" + active("LoginPage")}>
-            <a href="#"
-              onClick={this.navigateTo("LoginPage")}>Login</a>
+            <a
+              href="#"
+              onClick={this.navigateTo("LoginPage")}
+            >
+              Login
+            </a>
           </li>
           <li className="tab-item">
-            <a href="#"
-              onClick={pipe(preventDefault,
-                () => actions.logout())}>Logout</a>
+            <a
+              href="#"
+              onClick={pipe(
+                preventDefault,
+                () => actions.logout()
+              )}
+            >
+              Logout
+            </a>
           </li>
           <li className={"tab-item" + active("DataPage")}>
-            <a href="#"
-              onClick={this.navigateTo("DataPage")}>Data</a>
+            <a
+              href="#"
+              onClick={this.navigateTo("DataPage")}
+            >
+              Data
+            </a>
           </li>
         </ul>
-        <Component state={state} actions={actions}/>
+        <Component state={state} actions={actions} />
       </div>
     );
   }
@@ -157,6 +204,8 @@ class App extends React.Component {
 
 const update = flyd.stream();
 const actions = app.actions(update);
-const states = flyd.scan(P, app.initialState(), update);
-ReactDOM.render(<App states={states} actions={actions}/>,
-  document.getElementById("app"));
+const states = flyd.scan(O, app.initialState(), update);
+ReactDOM.render(
+  <App states={states} actions={actions} />,
+  document.getElementById("app")
+);
