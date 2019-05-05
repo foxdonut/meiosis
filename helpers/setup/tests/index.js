@@ -48,7 +48,9 @@ const patchinkoTest = (O, streamLib, label) => {
       const acceptors = [
         state => (state.increment > 0 && state.increment < 10 ? { count: O(x => x + 1) } : null),
         state => (state.increment <= 0 || state.increment >= 10 ? { increment: O } : null),
-        state => (state.invalid ? { invalid: O } : null)
+        state => (state.invalid ? { invalid: O } : null),
+        state => (state.sequence ? { sequenced: true } : null),
+        state => (state.sequenced ? { received: true } : null)
       ];
 
       meiosis.patchinko
@@ -57,8 +59,13 @@ const patchinkoTest = (O, streamLib, label) => {
           update({ increment: 1 });
           update({ increment: 10 });
           update({ invalid: true });
+          update({ sequence: true });
 
-          t.deepEqual(states(), { count: 1 }, "resulting state");
+          t.deepEqual(
+            states(),
+            { count: 1, sequence: true, sequenced: true, received: true },
+            "resulting state"
+          );
           t.end();
         });
     });
@@ -248,8 +255,9 @@ const functionPatchTest = (streamLib, label) => {
           state.increment > 0 && state.increment < 10 ? R.over(R.lensProp("count"), R.add(1)) : I,
 
         state => (state.increment <= 0 || state.increment >= 10 ? R.dissoc("increment") : I),
-
-        state => (state.invalid ? R.dissoc("invalid") : I)
+        state => (state.invalid ? R.dissoc("invalid") : I),
+        state => (state.sequence ? R.assoc("sequenced", true) : I),
+        state => (state.sequenced ? R.assoc("received", true) : I)
       ];
 
       meiosis.functionPatches
@@ -258,8 +266,13 @@ const functionPatchTest = (streamLib, label) => {
           update(R.assoc("increment", 1));
           update(R.assoc("increment", 10));
           update(R.assoc("invalid", true));
+          update(R.assoc("sequence", true));
 
-          t.deepEqual(states(), { count: 1 }, "resulting state");
+          t.deepEqual(
+            states(),
+            { count: 1, sequence: true, sequenced: true, received: true },
+            "resulting state"
+          );
           t.end();
         });
     });
@@ -420,18 +433,18 @@ const commonTest = (streamLib, label) => {
       }
     });
 
-    t.test(label + " / acceptors require combinator function", t => {
+    t.test(label + " / acceptors do not require combinator function", t => {
       const I = x => x;
 
       try {
         meiosis.common
           .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
           .then(() => {
-            t.fail("An error should have been thrown for missing combinator function.");
+            t.pass("Acceptors without combinator works.");
             t.end();
           });
       } catch (err) {
-        t.pass("Error was thrown as it should.");
+        t.fail("No error should be thrown for acceptors without combinator.");
         t.end();
       }
     });

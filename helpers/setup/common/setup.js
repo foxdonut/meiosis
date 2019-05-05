@@ -31,16 +31,14 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");
   }
-  if (!combinator && (acceptors.length > 0 || services.length > 0)) {
+  if (!combinator && services.length > 0) {
     throw new Error("No combinator function was specified.");
   }
 
-  const accept = combinator
-    ? model => {
-        const patches = acceptors.map(acceptor => acceptor(model));
-        return accumulator(model, combinator(patches));
-      }
-    : x => x;
+  const accept =
+    acceptors.length > 0
+      ? model => acceptors.reduce((mdl, acceptor) => accumulator(mdl, acceptor(mdl)), model)
+      : x => x;
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
