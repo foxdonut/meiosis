@@ -1,7 +1,7 @@
 /* global b, m, R */
 
 const I = x => x;
-const o = (f, g) => x => f(g(x));
+const o = (f, g) => (...args) => f(g(...args));
 const K = x => () => x;
 
 const humanList = s => xs =>
@@ -101,11 +101,10 @@ const StatsService = {
       .map(K(0))
       .reduce(R.merge, {});
   },
-  computed: R.pipe(
+  accept: R.pipe(
     x => x.boxes,
     R.countBy(I),
-    R.objOf("stats"),
-    R.mergeDeepLeft
+    R.assoc("stats")
   )
 };
 
@@ -117,7 +116,7 @@ const LocalStorageService = {
       .concat({ boxes: [] })
       .shift();
   },
-  service(state, _update) {
+  service: ({ state }) => {
     T(
       state,
       R.pipe(
@@ -134,7 +133,7 @@ const DescriptionService = {
       description: ""
     };
   },
-  computed: R.pipe(
+  accept: R.pipe(
     x => x.stats,
     R.toPairs,
     R.groupBy(R.last),
@@ -144,8 +143,7 @@ const DescriptionService = {
     R.map(R.join(" ")),
     humanList("and"),
     x => x + ".",
-    R.objOf("description"),
-    R.mergeDeepLeft
+    R.assoc("description")
   )
 };
 
@@ -155,9 +153,9 @@ const initial = [
   DescriptionService.initial
 ];
 
-const computes = [
-  StatsService.computed,
-  DescriptionService.computed
+const acceptors = [
+  StatsService.accept,
+  DescriptionService.accept
 ];
 
 const services = [LocalStorageService.service];
@@ -174,16 +172,22 @@ const initialState = () => {
   );
 };
 
-const computed = state =>
-  computes.reduce((x, f) => f(x)(x), state);
+const accept = state =>
+  acceptors.reduce(
+    (updatedState, acceptor) =>
+      T(updatedState, acceptor(updatedState)),
+    state
+  );
 
 const update = m.stream();
-const states = m.stream
-  .scan(T, initialState(), update)
-  .map(computed);
+const states = m.stream.scan(
+  o(accept, T),
+  accept(initialState()),
+  update
+);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));
 
 states.map(state =>
-  services.forEach(service => service(state, update))
+  services.forEach(service => service({ state, update }))
 );

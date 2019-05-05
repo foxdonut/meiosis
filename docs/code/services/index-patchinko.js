@@ -1,7 +1,7 @@
 /* global b, m, R, O */
 
 const I = x => x;
-const o = (f, g) => x => f(g(x));
+const o = (f, g) => (...args) => f(g(...args));
 const K = x => () => x;
 
 const humanList = s => xs =>
@@ -103,14 +103,11 @@ const StatsService = {
       .map(K(0))
       .reduce(R.merge, {});
   },
-  service: ({ update }) =>
-    update(
-      R.pipe(
-        x => x.boxes,
-        R.countBy(I),
-        R.objOf("stats")
-      )
-    )
+  accept: R.pipe(
+    x => x.boxes,
+    R.countBy(I),
+    R.objOf("stats")
+  )
 };
 
 const LocalStorageService = {
@@ -138,21 +135,18 @@ const DescriptionService = {
       description: ""
     };
   },
-  service: ({ update }) =>
-    update(
-      R.pipe(
-        x => x.stats,
-        R.toPairs,
-        R.groupBy(R.last),
-        R.map(R.map(R.head)),
-        R.map(humanList("and")),
-        R.toPairs,
-        R.map(R.join(" ")),
-        humanList("and"),
-        x => x + ".",
-        R.objOf("description")
-      )
-    )
+  accept: R.pipe(
+    x => x.stats,
+    R.toPairs,
+    R.groupBy(R.last),
+    R.map(R.map(R.head)),
+    R.map(humanList("and")),
+    R.toPairs,
+    R.map(R.join(" ")),
+    humanList("and"),
+    x => x + ".",
+    R.objOf("description")
+  )
 };
 
 const initial = [
@@ -160,11 +154,13 @@ const initial = [
   StatsService.initial,
   DescriptionService.initial
 ];
-const services = [
-  StatsService.service,
-  DescriptionService.service,
-  LocalStorageService.service
+
+const acceptors = [
+  StatsService.accept,
+  DescriptionService.accept
 ];
+
+const services = [LocalStorageService.service];
 
 const initialState = () => {
   const state = {
@@ -178,8 +174,19 @@ const initialState = () => {
   );
 };
 
+const accept = state =>
+  acceptors.reduce(
+    (updatedState, acceptor) =>
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
+
 const update = m.stream();
-const states = m.stream.scan(O, initialState(), update);
+const states = m.stream.scan(
+  o(accept, O),
+  accept(initialState()),
+  update
+);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));
 

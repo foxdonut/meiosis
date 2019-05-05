@@ -1,3 +1,5 @@
+const B = (f, g) => (...args) => f(g(...args));
+
 /**
  * Helper to setup the Meiosis pattern.
  *
@@ -49,11 +51,7 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
     .then(initialState => {
       const update = createStream();
 
-      const models = scan(
-        (model, patch) => accept(accumulator(model, patch)),
-        accept(initialState),
-        update
-      );
+      const models = scan(B(accept, accumulator), accept(initialState), update);
 
       let buffered = false,
         buffer = [],
