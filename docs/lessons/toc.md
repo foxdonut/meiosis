@@ -7,6 +7,7 @@ please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
 - [Services and Computed Properties](services.html)
+- [Optimizing Services](optimizing-services.html)
 - [SAM Pattern](sam-pattern.html)
 - [Using a Router](using-a-router.html) (coming soon)
 - [Unit Testing](unit-testing.html) (coming soon)

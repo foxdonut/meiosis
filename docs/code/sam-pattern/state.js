@@ -2,6 +2,7 @@
 
 // -- Utility code
 
+const compose = (f, g) => (...args) => f(g(...args));
 const pipe = (...fns) => input =>
   fns.reduce((value, fn) => fn(value), input);
 
@@ -12,20 +13,32 @@ const preventDefault = evt => {
 
 // -- Application code
 
-const prepareLogin = model => {
-  if (model.pageId === "LoginPage" && !model.login) {
+const settingsCheckLogin = state => {
+  if (
+    state.pageId === "SettingsPage" &&
+    state.user == null
+  ) {
+    return {
+      pageId: "LoginPage",
+      returnTo: "SettingsPage"
+    };
+  }
+};
+
+const prepareLogin = state => {
+  if (state.pageId === "LoginPage" && !state.login) {
     return { login: { username: "", password: "" } };
-  } else if (model.pageId !== "LoginPage" && model.login) {
+  } else if (state.pageId !== "LoginPage" && state.login) {
     return { login: null };
   }
 };
 
-const checkReturnTo = model => {
-  if (model.user && model.returnTo) {
-    return { pageId: model.returnTo, returnTo: null };
+const checkReturnTo = state => {
+  if (state.user && state.returnTo) {
+    return { pageId: state.returnTo, returnTo: null };
   } else if (
-    model.pageId !== "LoginPage" &&
-    model.returnTo
+    state.pageId !== "LoginPage" &&
+    state.returnTo
   ) {
     return { returnTo: null };
   }
@@ -39,43 +52,30 @@ const app = {
       password: ""
     }
   }),
-  actions: present => ({
-    navigateTo: pageId => present({ pageId }),
-    login: user => present({ user, pageId: "HomePage" }),
+  actions: update => ({
+    navigateTo: pageId => update({ pageId }),
+    login: user => update({ user, pageId: "HomePage" }),
     username: value =>
-      present({ login: O({ username: value }) }),
+      update({ login: O({ username: value }) }),
     password: value =>
-      present({ login: O({ password: value }) }),
+      update({ login: O({ password: value }) }),
     logout: () =>
-      present({
+      update({
         user: null,
         data: null,
         pageId: "HomePage"
       }),
     loadData: () =>
       setTimeout(
-        () =>
-          present({ data: "The data has been loaded." }),
+        () => update({ data: "The data has been loaded." }),
         1500
       )
   }),
-  acceptor: (model, proposal) => {
-    if (
-      proposal.pageId === "SettingsPage" &&
-      model.user == null
-    ) {
-      return O(model, {
-        pageId: "LoginPage",
-        returnTo: "SettingsPage"
-      });
-    }
-    return O(model, proposal);
-  },
-  state: model =>
-    [prepareLogin, checkReturnTo].reduce(
-      (x, f) => O(x, f(x)),
-      model
-    )
+  acceptors: [
+    settingsCheckLogin,
+    prepareLogin,
+    checkReturnTo
+  ]
 };
 
 // -- Pages
@@ -239,11 +239,24 @@ class App extends React.Component {
 
 // -- Meiosis pattern setup code
 
-const present = flyd.stream();
-const actions = app.actions(present);
-const states = flyd
-  .scan(app.acceptor, app.initialState(), present)
-  .map(app.state);
+const update = flyd.stream();
+const actions = app.actions(update);
+
+const accept = state =>
+  app.acceptors.reduce(
+    (updatedState, acceptor) =>
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
+
+const states = flyd.scan(
+  compose(
+    accept,
+    O
+  ),
+  accept(app.initialState()),
+  update
+);
 ReactDOM.render(
   <App states={states} actions={actions} />,
   document.getElementById("app")

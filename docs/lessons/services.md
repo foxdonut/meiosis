@@ -134,23 +134,34 @@ The complete example is below.
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish.
 
-<a name="using_computed_and_services"></a>
-### [Using Computed State and Services](#using_computed_and_services)
+<a name="using_accepted_and_services"></a>
+### [Using Accepted State and Services](#using_accepted_and_services)
 
-An alternative to emitting patches from services is to define _computed_ state as a function
-that receives the current state as a parameter and returns a patch. Then, these computed
-functions can be combined together with `reduce` to produce a single computed function that
-receives the current state and produces an updated state containing the computed properties.
+An alternative to emitting patches from services is to define an _accept_ function that receives
+the current state as a parameter and returns the accepted state.
 
-Computed state runs _synchronously_. For asynchronous changes, we define a `service` function
-that receives the current state and the `update` stream, and decides whether to call `update()`.
+> The term `accept` comes from the [SAM Pattern](https://sam.js.org), which we will look at in
+[the next section](sam-pattern.html). In Meiosis, `accept` is similar but not identical to
+`accept` in SAM.
+
+Each service can define an `accept` function which takes the current state and returns a patch
+to make any necessary changes and updates to the state. Then, these functions are combined
+together to produce a single `accept` function that receives the current state and produces
+the accepted state.
+
+Acceptors run _synchronously_ and _in order_. Thus, an acceptor can depend on the changes made
+by a previous acceptor.
+
+For asynchronous changes, we define a `service` function that receives the current state and the
+`update` stream, and decides whether to call `update()`.
+
 Our service structure is thus:
 
 ```javascript
 {
   initial: state => initialState,
-  computed: state => patch,
-  service: (state, update) => { /* call update() based on state */ }
+  accept: state => patch,
+  service: ({ state, update }) => { /* call update() based on state */ }
 }
 ```
 
@@ -159,19 +170,19 @@ Our service structure is thus:
 In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we
 looked at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
 
-To use Patchinko, we emit patches as objects instead of functions, and we use `P`
+To use Patchinko, we emit patches as objects instead of functions, and we use `O`
 as our accumulator:
 
 ```javascript
-const states = m.stream.scan( P, initialState(), update );
+const states = m.stream.scan( O, initialState(), update );
 ```
 
-Instead of a `start` function, we'll use a `computed` function to which we'll pass the latest
-state from the Meiosis `states` stream. The `computed` function returns a patch:
+Instead of a `start` function, we'll use an `accept` function to which we'll pass the latest
+state from the Meiosis `states` stream. The `accept` function returns a patch:
 
 ```javascript
 {
-  computed: state => patch
+  accept: state => patch
 }
 ```
 
@@ -181,45 +192,58 @@ take a state and return a patch.
 We'll assemble the `computed` functions into an array:
 
 ```javascript
-const computes = [ f1, f2, f3 ];
+const acceptors = [ acceptor1, acceptor2, acceptor3 ];
 ```
 
-Each function `f` takes the state and returns a patch to update the state. Thus calling `f(state)`
-gives us a patch. To apply the patch, we call `P(state, f(state))`. Finally, to combine the array
-of functions into a single function, we can use `reduce`:
+Each function `acceptor`  function takes the state and returns a patch to update the state. Thus
+calling `acceptor(state)` gives us a patch. To apply the patch, we call
+`O(state, acceptor(state))`. Finally, to combine the array of functions into a single function,
+we can use `reduce`:
 
 ```javascript
-// Top-level computed function
-const computed = state =>
-  computes.reduce((x, f) => P(x, f(x)), state);
+// Top-level accept function
+const accept = state =>
+  acceptors.reduce(
+    (updatedState, acceptor) =>
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
 ```
 
-This gives us a single top-level `computed` function that takes the state, calls all computed
-functions, and produces the updated state. We can just `map` this computed function to our
-stream of states:
+This gives us a single top-level `accept` function that takes the state, calls all acceptor
+functions, and produces the updated state. We can use function composition to call `accept`
+after calling `O` in the accumulator function of `scan`. Note that we also call `accept` on
+the initial state.
 
 ```javascript
-const states = m.stream.scan( P, initialState(), update )
-  .map(computed);
+const states = m.stream.scan(
+  o(accept, O),
+  accept(initialState()),
+  update
+);
 ```
+
+Above, `o(accept, O)` is the equivalent of `(state, patch) => accept(O(state, patch))`.
 
 Computed functions are for _synchronous_ calculations based on the state. For asynchronous
 changes, such as loading data from a server, we'll separately define _services_ as functions
 that receive the current state and the `update` stream, and call `update` as they see fit:
 
 ```javascript
-service: (state, update) => {
+service: ({ state, update }) => {
   // determine whether to call update() based on state
 }
 ```
 
 As in the previous section, we have to be careful about infinite loops. Indeed, when the
-service calls `update()`, the service will be triggered again.
+service calls `update()`, the service will be triggered again. Later, we will look at how we
+can optimize services to avoid calling them again after they issue updates, and thus not
+have to worry about infinite loops.
 
 In this example, the `LocalStorageService` doesn't call `update`, so it's not an issue:
 
 ```javascript
-service(state, _update) {
+service: ({ state }) => {
   T(
     state,
     R.pipe(
@@ -229,11 +253,6 @@ service(state, _update) {
   );
 }
 ```
-
-You can see another example of services in the
-[Next-Action-Predicate section of the SAM Pattern](sam-pattern.html#next_action_predicate).
-There, the function has a condition which ensures not to keep calling `update()` in an
-infinite loop.
 
 After assembling service functions into an array, wiring them up is simply a matter of
 calling them every time the state changes:
@@ -270,37 +289,44 @@ Our services have the same structure as before, namely:
 ```javascript
 {
   initial: state => initialState,
-  computed: state => patch,
-  service: (state, update) => { /* call update() based on state */ }
+  accept: state => patch,
+  service: ({ state, update }) => { /* call update() based on state */ }
 }
 ```
 
 The only difference is that `patch` is now a function instead of an object.
 
-Again we have an array of functions for computed state:
+Again we have an array of functions for accepted state:
 
 ```javascript
-const computes = [ f1, f2, f3 ];
+const acceptors = [ acceptor1, acceptor2, acceptor3 ];
 ```
 
-But now each function `f` takes the state and returns a **function** patch to update the model.
-When we call `f(state)`, we get a function. To apply the patch, we just call the function:
-`f(state)(state)`. Finally, we use `reduce` to write our top-level `service` function:
+But now each function takes the state and returns a **function** patch to update the model.
+Instead of `O`, our function that applies a patch is `T`:
 
 ```javascript
 // Top-level computed function
-const computed = state =>
-  computes.reduce((x, f) => f(x)(x), state);
+const accept = state =>
+  acceptors.reduce(
+    (updatedState, acceptor) =>
+      T(updatedState, acceptor(updatedState)),
+    state
+  );
 ```
 
-As before, we `map` our service function to the `states` stream, and use the `states` stream
-to render the view:
+As before, we compose `accept` into our `scan` accumulator, and also call `accept` on
+the initial state:
 
 ```javascript
-const states = m.stream.scan( T, initialState(), update )
-  .map(service);
-states.map(view(update)).map(v => m.render(element, v));
+const states = m.stream.scan(
+  o(accept, T),
+  accept(initialState()),
+  update
+);
 ```
+
+The rest of the setup is the same as before.
 
 Have a look at the complete example below.
 

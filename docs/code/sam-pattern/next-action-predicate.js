@@ -2,6 +2,7 @@
 
 // -- Utility code
 
+const compose = (f, g) => (...args) => f(g(...args));
 const pipe = (...fns) => input =>
   fns.reduce((value, fn) => fn(value), input);
 
@@ -11,6 +12,18 @@ const preventDefault = evt => {
 };
 
 // -- Application code
+
+const settingsCheckLogin = state => {
+  if (
+    state.pageId === "SettingsPage" &&
+    state.user == null
+  ) {
+    return {
+      pageId: "LoginPage",
+      returnTo: "SettingsPage"
+    };
+  }
+};
 
 const prepareLogin = model => {
   if (model.pageId === "LoginPage" && !model.login) {
@@ -59,29 +72,18 @@ const app = {
         1500
       )
   }),
-  acceptor: (model, proposal) => {
-    if (
-      proposal.pageId === "SettingsPage" &&
-      model.user == null
-    ) {
-      return O(model, {
-        pageId: "LoginPage",
-        returnTo: "SettingsPage"
-      });
+  acceptors: [
+    settingsCheckLogin,
+    prepareLogin,
+    checkReturnTo
+  ],
+  services: [
+    ({ state, actions }) => {
+      if (state.pageId === "DataPage" && !state.data) {
+        actions.loadData();
+      }
     }
-    return O(model, proposal);
-  },
-  state: model =>
-    [prepareLogin, checkReturnTo].reduce(
-      (x, f) => O(x, f(x)),
-      model
-    ),
-
-  nap: actions => state => {
-    if (state.pageId === "DataPage" && !state.data) {
-      actions.loadData();
-    }
-  }
+  ]
 };
 
 // -- Pages
@@ -245,13 +247,30 @@ class App extends React.Component {
 
 // -- Meiosis pattern setup code
 
-const present = flyd.stream();
-const actions = app.actions(present);
-const states = flyd
-  .scan(app.acceptor, app.initialState(), present)
-  .map(app.state);
-states.map(app.nap(actions));
+const update = flyd.stream();
+const actions = app.actions(update);
+
+const accept = state =>
+  app.acceptors.reduce(
+    (updatedState, acceptor) =>
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
+
+const states = flyd.scan(
+  compose(
+    accept,
+    O
+  ),
+  accept(app.initialState()),
+  update
+);
 ReactDOM.render(
   <App states={states} actions={actions} />,
   document.getElementById("app")
+);
+states.map(state =>
+  app.services.forEach(service =>
+    service({ state, update, actions })
+  )
 );
