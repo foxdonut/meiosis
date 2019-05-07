@@ -6,13 +6,15 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
+  Initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: "C"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function(amount) {
         update({
@@ -38,9 +40,9 @@ var temperature = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(O, temperature.initialState, update);
+var states = flyd.scan(O, temperature.Initial(), update);
 
-var actions = temperature.actions(update);
+var actions = temperature.Actions(update);
 states.map(function(state) {
   document.write(
     "<pre>" + JSON.stringify(state, null, 2) + "</pre>"

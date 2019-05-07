@@ -34,19 +34,21 @@ For the conditions, we have:
 
 ```js
 var conditions = {
-  initialState: {
-    conditions: {
-      precipitations: false,
-      sky: "Sunny"
-    }
+  Initial: function() {
+    return {
+      conditions: {
+        precipitations: false,
+        sky: "Sunny"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: PS({ precipitations: value }) });
+        update({ conditions: O({ precipitations: value }) });
       },
       changeSky: function(value) {
-        update({ conditions: PS({ sky: value }) });
+        update({ conditions: O({ sky: value }) });
       }
     };
   }
@@ -57,20 +59,22 @@ For the temperature, we have essentially the same code as we previously had.
 
 ```js
 var temperature = {
-  initialState: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
+  Initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: "C"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function(amount) {
-        update({ temperature: PS({ value: S(x => x + amount) }) });
+        update({ temperature: O({ value: O(x => x + amount) }) });
       },
       changeUnits: function() {
         update({
-          temperature: S(state => {
+          temperature: O(state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
@@ -90,14 +94,16 @@ code by combining the initial state and the actions of the components.
 
 ```js
 var app = {
-  initialState: P({},
-    conditions.initialState,
-    temperature.initialState
+  Initial: function() {
+    return O({},
+      conditions.Initial(),
+      temperature.Initial()
+    );
   ),
-  actions: function(update) {
-    return P({},
-      conditions.actions(update),
-      temperature.actions(update)
+  Actions: function(update) {
+    return O({},
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };
@@ -122,33 +128,18 @@ Continuing the previous example, let's say we want to have two instances of the 
 component: one for the air temperature and one for the water temperature. We want to use the
 `air` and `water` properties in the application state.
 
-First, we'll change `initialState` to a function so that we get a separate instance for
-each temperature component:
-
-```js
-var temperature = {
-  initialState: function() {
-    return {
-      value: 22,
-      units: "C"
-    };
-  },
-  // ...
-};
-```
-
-Next, we'll change the actions to accept an `id` parameter. Then, we use the `id` when issuing
+We'll change the actions to accept an `id` parameter. Then, we use the `id` when issuing
 updates, so that we dyamically update the `id` property of the state:
 
 ```js
-actions: function(update) {
+Actions: function(update) {
   return {
     increment: function(id, amount) {
-      update({ [id]: PS({ value: S(x => x + amount) }) });
+      update({ [id]: O({ value: O(x => x + amount) }) });
     },
     changeUnits: function(id) {
       update({
-        [id]: S(state => {
+        [id]: O(state => {
           var value = state.value;
           var newUnits = state.units === "C" ? "F" : "C";
           var newValue = convert(value, newUnits);
@@ -164,22 +155,22 @@ actions: function(update) {
 
 Notice the `{ [id]: ... }` syntax which creates an object with a dynamic `id` property.
 
-Finally, we create the initial state with two instances of `temperature`, one with `air`
-and one with `water`. The `actions` are created the same as before. Indeed, we just need
+Now, we create the initial state with two instances of `temperature`, one with `air`
+and one with `water`. The actions are created the same as before. Indeed, we just need
 one instance of the temperature actions; it's the `id` that we pass to the actions that
 indicates which instance to act upon.
 
 ```js
 var app = {
-  initialState: P({},
-    conditions.initialState,
-    { air: temperature.initialState() },
-    { water: temperature.initialState() }
+  Initial: O({},
+    conditions.Initial(),
+    { air: temperature.Initial() },
+    { water: temperature.Initial() }
   ),
-  actions: function(update) {
-    return P({},
-      conditions.actions(update),
-      temperature.actions(update)
+  Actions: function(update) {
+    return O({},
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };

@@ -4,10 +4,10 @@ const checkIfStateChanged = (next, prev) =>
   prev.attrs.state[prev.attrs.id];
 
 const entryNumber = {
-  initialState: () => ({
+  Initial: () => ({
     value: ""
   }),
-  actions: update => ({
+  Actions: update => ({
     editEntryValue: (id, value) =>
       update({ [id]: O({ value }) })
   })
@@ -36,10 +36,10 @@ const EntryNumber = {
 };
 
 const entryDate = {
-  initialState: () => ({
+  Initial: () => ({
     value: ""
   }),
-  actions: update => ({
+  Actions: update => ({
     editDateValue: (id, value) =>
       update({ [id]: O({ value }) })
   })
@@ -76,12 +76,12 @@ const convert = (value, to) =>
   );
 
 const temperature = {
-  initialState: label => ({
+  Initial: label => ({
     label,
     value: 20,
     units: "C"
   }),
-  actions: update => ({
+  Actions: update => ({
     increment: (id, amount) => evt => {
       evt.preventDefault();
       update({
@@ -156,14 +156,14 @@ const displayTemperature = temperature =>
   temperature.units;
 
 const app = {
-  initialState: () => ({
+  Initial: () => ({
     saved: "",
-    entry: entryNumber.initialState(),
-    date: entryDate.initialState(),
-    air: temperature.initialState("Air"),
-    water: temperature.initialState("Water")
+    entry: entryNumber.Initial(),
+    date: entryDate.Initial(),
+    air: temperature.Initial("Air"),
+    water: temperature.Initial("Water")
   }),
-  actions: update =>
+  Actions: update =>
     O(
       {
         save: state => evt => {
@@ -185,9 +185,9 @@ const app = {
           });
         }
       },
-      entryNumber.actions(update),
-      entryDate.actions(update),
-      temperature.actions(update)
+      entryNumber.Actions(update),
+      entryDate.Actions(update),
+      temperature.Actions(update)
     )
 };
 
@@ -212,8 +212,8 @@ const App = {
 };
 
 const update = m.stream();
-const states = m.stream.scan(O, app.initialState(), update);
-const actions = app.actions(update);
+const states = m.stream.scan(O, app.Initial(), update);
+const actions = app.Actions(update);
 
 m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), actions })

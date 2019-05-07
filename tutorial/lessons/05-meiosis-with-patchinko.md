@@ -275,7 +275,7 @@ updated state. We can use `O`:
 ```js
 var states = flyd.scan(function(state, patch) {
   return O(state, patch);
-}, temperature.initialState, update);
+}, temperature.Initial(), update);
 ```
 
 Notice that the accumulator function that we are passing is:
@@ -290,7 +290,7 @@ We have a function that takes (state, patch) and calls `O` with (state, patch). 
 does what we want, so we can pass it directly:
 
 ```js
-var states = flyd.scan(O, temperature.initialState, update);
+var states = flyd.scan(O, temperature.Initial(), update);
 ```
 
 Putting it all together, we have:

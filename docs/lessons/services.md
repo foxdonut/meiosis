@@ -37,19 +37,14 @@ final initial state:
 const services = [ /* ... */ ];
 
 const initialState = () => {
-  const state =
-    { boxes: []
-      , colors:
-      [ "red"
-        , "purple"
-        , "blue"
-      ]
-    };
-  return Object.assign({},
+  const state = {
+    boxes: [],
+    colors: ["red", "purple", "blue"]
+  };
+  return Object.assign(
+    {},
     state,
-    services
-      .map(s => s.initial(state))
-      .reduce(R.merge, {})
+    services.map(s => s.initial(state)).reduce(R.merge, {})
   );
 };
 ```
@@ -68,6 +63,11 @@ When a service emits a patch onto its stream, it is passed on to the `update` st
 James shared an example where you have colored boxes that you can click on to add them to a list.
 The boxes are displayed one next to the other, with a description of how many boxes of each color
 are in the list. You can remove a box from the list by clicking on it.
+
+> Note that the example code is somewhat different that the "Meiosis style". There are some nifty
+functional programming at play here, and you can learn some nice techniques from this code. But
+if you are having some trouble understanding, please know that the code in the next section uses
+a style that is closer to what we have been using so far.
 
 In the example, there are three services:
 
@@ -137,7 +137,7 @@ wish.
 <a name="using_accepted_and_services"></a>
 ### [Using Accepted State and Services](#using_accepted_and_services)
 
-An alternative to emitting patches from services is to define an _accept_ function that receives
+In Meiosis, instead of emitting patches from services, we define an _accept_ function that receives
 the current state as a parameter and returns the accepted state.
 
 > The term `accept` comes from the [SAM Pattern](https://sam.js.org), which we will look at in

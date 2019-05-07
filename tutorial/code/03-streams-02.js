@@ -1,9 +1,11 @@
 /*global flyd*/
 var app = {
-  initialState: {
-    value: 0
+  Initial: function() {
+    return {
+      value: 0
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function() {
         update(1);
@@ -21,11 +23,11 @@ var states = flyd.scan(
     state.value = state.value + increment;
     return state;
   },
-  app.initialState,
+  app.Initial(),
   update
 );
 
-var actions = app.actions(update);
+var actions = app.Actions(update);
 states.map(function(state) {
   document.write("<pre>" + JSON.stringify(state) + "</pre>");
 });

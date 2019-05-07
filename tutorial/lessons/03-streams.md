@@ -172,21 +172,27 @@ Now that have we streams, `map`, and `scan`, we can use them to manage our appli
 Previously, we had:
 
 ```js
-var initialState = {
-  value: 0
-};
+function Initial() {
+  return {
+    value: 0
+  };
+}
 
-var actions = {
-  increment: function() {
-    initialState.value = initialState.value + 1;
-  }
-};
+var initialState = Initial();
+
+function Actions() {
+  return {
+    increment: function() {
+      initialState.value = initialState.value + 1;
+    }
+  };
+}
 ```
 
 We can incorporate streams to manage the flow of data:
 
-- We create an `update` stream, and pass it to `actions`.
-- To update the state, `actions` passes a value onto the `update` stream, indicating a state
+- We create an `update` stream, and pass it to `Actions`.
+- To update the state, an action passes a value onto the `update` stream, indicating a state
 change. We'll call this a **patch**. In our example, the patches are numbers by which to
 increment the value of the counter.
 - Using `scan`, we create a stream of states, starting with the initial state and incrementing
@@ -197,10 +203,12 @@ Here are our changes:
 
 ```js
 var app = {
-  initialState: {
-    value: 0
+  Initial: function() {
+    return {
+      value: 0
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function() {
         update(1);
@@ -216,9 +224,9 @@ var update = flyd.stream();
 var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
-}, app.initialState, update);
+}, app.Initial(), update);
 
-var actions = app.actions(update);
+var actions = app.Actions(update);
 states.map(function(state) {
   document.write("<pre>" + JSON.stringify(state) + "</pre>");
 });

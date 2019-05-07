@@ -18,7 +18,7 @@ In this section, we'll wire this up to [React](https://reactjs.org/).
 Remember that we had an `actions` object and a `states` stream:
 
 ```js
-var actions = app.actions(update);
+var actions = app.Actions(update);
 states.map(function(state) {
   document.write("<pre>" + JSON.stringify(state, null, 2) + "</pre>");
 });

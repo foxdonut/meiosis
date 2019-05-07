@@ -81,14 +81,14 @@ updated state. Since the incoming patches are functions, we just need to call th
 ```js
 var states = flyd.scan(function(state, patch) {
   return patch(state);
-}, temperature.initialState, update);
+}, temperature.Initial(), update);
 ```
 
 Using the ES6 arrow function syntax, this would be:
 
 ```js
 var states = flyd.scan((state, patch) => patch(state),
-  temperature.initialState, update);
+  temperature.Initial(), update);
 ```
 
 Either way, it's a simple way to create the stream of states.

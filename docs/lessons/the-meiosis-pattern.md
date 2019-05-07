@@ -24,8 +24,8 @@ Here is the code to set up the Meiosis Pattern:
 
 ```js
 const app = {
-  initialState: () => ...,
-  actions: update => {
+  Initial: () => ...,
+  Actions: update => {
     return ...
   }
 };
@@ -33,12 +33,12 @@ const app = {
 const update = flyd.stream();
 
 // Using Patchinko:
-const states = flyd.scan(P, app.initialState(), update);
+const states = flyd.scan(P, app.Initial(), update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) => f(x), app.initialState(), update);
+const states = flyd.scan((x, f) => f(x), app.Initial(), update);
 
-const actions = app.actions(update);
+const actions = app.Actions(update);
 ```
 
 Then, pass `state` and `actions` to views.

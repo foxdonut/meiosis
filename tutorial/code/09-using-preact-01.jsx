@@ -1,13 +1,15 @@
 /*global preact, flyd, O*/
 /** @jsx preact.h */
 var conditions = {
-  initialState: {
-    conditions: {
-      precipitations: false,
-      sky: "Sunny"
-    }
+  Initial: function() {
+    return {
+      conditions: {
+        precipitations: false,
+        sky: "Sunny"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
         update({ conditions: O({ precipitations: value }) });
@@ -82,14 +84,14 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: function(label) {
+  Initial: function(label) {
     return {
       label,
       value: 22,
       units: "C"
     };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function(id, amount) {
         update({ [id]: O({ value: O(x => x + amount) }) });
@@ -136,17 +138,19 @@ class Temperature extends preact.Component {
 }
 
 var app = {
-  initialState: Object.assign(
-    {},
-    conditions.initialState,
-    { air: temperature.initialState("Air") },
-    { water: temperature.initialState("Water") }
-  ),
-  actions: function(update) {
+  Initial: function() {
     return Object.assign(
       {},
-      conditions.actions(update),
-      temperature.actions(update)
+      conditions.Initial(),
+      { air: temperature.Initial("Air") },
+      { water: temperature.Initial("Water") }
+    );
+  },
+  Actions: function(update) {
+    return Object.assign(
+      {},
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };
@@ -177,9 +181,9 @@ class App extends preact.Component {
 }
 
 var update = flyd.stream();
-var states = flyd.scan(O, app.initialState, update);
+var states = flyd.scan(O, app.Initial(), update);
+var actions = app.Actions(update);
 
-var actions = app.actions(update);
 preact.render(
   <App states={states} actions={actions} />,
   document.getElementById("app")

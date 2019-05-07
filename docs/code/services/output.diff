@@ -1,0 +1,73 @@
+--- index-patchinko.js	2019-05-06 08:33:48.000000000 -0400
++++ index-functions.js	2019-05-06 08:33:48.000000000 -0400
+@@ -1,4 +1,4 @@
+-/* global b, m, R, O */
++/* global b, m, R */
+ 
+ const I = x => x;
+ const o = (f, g) => (...args) => f(g(...args));
+@@ -15,7 +15,7 @@
+ 
+ const pipe = xs => xs.reduceRight(o, I);
+ const $ = {
+-  prop: k => f => o => O(o, { [k]: f(o[k]) }),
++  prop: k => f => o => Object.assign(o, { [k]: f(o[k]) }),
+   get: lens => o => {
+     var y;
+     lens(x => (y = x))(o);
+@@ -29,10 +29,8 @@
+ 
+ const Action = {
+   addBox: x =>
+-    pipe([K(x), x => ({ boxes: O(xs => xs.concat(x)) })]),
+-  removeBox: i => ({
+-    boxes: O(xs => xs.filter((x, j) => i != j))
+-  })
++    pipe([K(x), x => xs => xs.concat(x), $boxes]),
++  removeBox: i => $boxes(xs => xs.filter((x, j) => i != j))
+ };
+ 
+ const view = update => state =>
+@@ -106,7 +104,7 @@
+   accept: R.pipe(
+     x => x.boxes,
+     R.countBy(I),
+-    R.objOf("stats")
++    R.assoc("stats")
+   )
+ };
+ 
+@@ -145,7 +143,7 @@
+     R.map(R.join(" ")),
+     humanList("and"),
+     x => x + ".",
+-    R.objOf("description")
++    R.assoc("description")
+   )
+ };
+ 
+@@ -167,7 +165,7 @@
+     boxes: [],
+     colors: ["red", "purple", "blue"]
+   };
+-  return O(
++  return Object.assign(
+     {},
+     state,
+     initial.map(fn => fn(state)).reduce(R.merge, {})
+@@ -177,13 +175,13 @@
+ const accept = state =>
+   acceptors.reduce(
+     (updatedState, acceptor) =>
+-      O(updatedState, acceptor(updatedState)),
++      T(updatedState, acceptor(updatedState)),
+     state
+   );
+ 
+ const update = m.stream();
+ const states = m.stream.scan(
+-  o(accept, O),
++  o(accept, T),
+   accept(initialState()),
+   update
+ );

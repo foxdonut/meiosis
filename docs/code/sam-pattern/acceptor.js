@@ -14,14 +14,14 @@ const preventDefault = evt => {
 // -- Application code
 
 const app = {
-  initialState: () => ({
+  Initial: () => ({
     pageId: "HomePage",
     login: {
       username: "",
       password: ""
     }
   }),
-  actions: update => ({
+  Actions: update => ({
     navigateTo: pageId => update({ pageId }),
     login: user => update({ user, pageId: "HomePage" }),
     username: value =>
@@ -217,7 +217,7 @@ class App extends React.Component {
 // -- Meiosis pattern setup code
 
 const update = flyd.stream();
-const actions = app.actions(update);
+const actions = app.Actions(update);
 
 const accept = state =>
   app.acceptors.reduce(
@@ -231,7 +231,7 @@ const states = flyd.scan(
     accept,
     O
   ),
-  accept(app.initialState()),
+  accept(app.Initial()),
   update
 );
 ReactDOM.render(

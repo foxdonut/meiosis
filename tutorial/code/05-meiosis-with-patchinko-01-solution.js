@@ -1,4 +1,4 @@
-/*global P, S, PS, D*/
+/*global O*/
 
 var target = {
   air: { value: 22, units: "C" },
@@ -8,14 +8,14 @@ var target = {
 };
 
 // Change `water` to `{ value: 84, units: "F" }`
-console.log(P(target, { water: { value: 84, units: "F" } }));
+console.log(O(target, { water: { value: 84, units: "F" } }));
 
 // Toggle the `comfortable` property with a function that changes the value to the
 // opposite of what it was
-console.log(P(target, { comfortable: S(x => !x) }));
+console.log(O(target, { comfortable: O(x => !x) }));
 
 // Change the `air` value to `20` without losing the units.
-console.log(P(target, { air: PS({ value: 20 }) }));
+console.log(O(target, { air: O({ value: 20 }) }));
 
 // Delete the `invalid` property
-console.log(P(target, { invalid: D }));
+console.log(O(target, { invalid: O }));

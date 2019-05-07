@@ -1,12 +1,14 @@
 /*global flyd, O*/
 var conditions = {
-  initialState: {
-    conditions: {
-      precipitations: false,
-      sky: "Sunny"
-    }
+  Initial: function() {
+    return {
+      conditions: {
+        precipitations: false,
+        sky: "Sunny"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
         update({ conditions: O({ precipitations: value }) });
@@ -25,13 +27,15 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
+  Initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: "C"
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function(amount) {
         update({
@@ -55,24 +59,22 @@ var temperature = {
 };
 
 var app = {
-  initialState: O(
-    {},
-    conditions.initialState,
-    temperature.initialState
-  ),
-  actions: function(update) {
+  Initial: function() {
+    return O({}, conditions.Initial(), temperature.Initial());
+  },
+  Actions: function(update) {
     return O(
       {},
-      conditions.actions(update),
-      temperature.actions(update)
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };
 
 var update = flyd.stream();
-var states = flyd.scan(O, app.initialState, update);
+var states = flyd.scan(O, app.Initial(), update);
 
-var actions = app.actions(update);
+var actions = app.Actions(update);
 states.map(function(state) {
   document.write(
     "<pre>" + JSON.stringify(state, null, 2) + "</pre>"

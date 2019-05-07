@@ -1,45 +1,26 @@
 /*global m, O*/
-var get = function(object, path) {
-  return path.reduce(function(obj, prop) {
-    return obj == null ? null : obj[prop];
-  }, object);
-};
-
-var updatePath = function(update, path) {
-  return function(patch) {
-    update({
-      [path[0]]: path
-        .slice(1)
-        .reduceRight(function(result, key) {
-          return O({ [key]: result });
-        }, patch)
-    });
-  };
-};
-
-var lens = function({ state, update }, path) {
-  return {
-    state: get(state, path),
-    update: updatePath(update, path)
-  };
-};
-
 var conditions = {
-  initialState: {
-    precipitations: false,
-    sky: "Sunny"
+  Initial: function() {
+    return {
+      conditions: {
+        precipitations: false,
+        sky: "Sunny"
+      }
+    };
   },
-  actions: {
-    togglePrecipitations: function(value) {
-      return O({ precipitations: value });
-    },
-    changeSky: function(value) {
-      return O({ sky: value });
-    }
+  Actions: function(update) {
+    return {
+      togglePrecipitations: function(value) {
+        update({ conditions: O({ precipitations: value }) });
+      },
+      changeSky: function(value) {
+        update({ conditions: O({ sky: value }) });
+      }
+    };
   }
 };
 
-var skyOption = function({ local, value, label }) {
+var skyOption = function({ state, actions, value, label }) {
   return m(
     "label",
     m("input", {
@@ -47,41 +28,44 @@ var skyOption = function({ local, value, label }) {
       id: value,
       name: "sky",
       value,
-      checked: local.state.sky === value,
-      onchange: evt =>
-        local.update(
-          conditions.actions.changeSky(evt.target.value)
-        )
+      checked: state.conditions.sky === value,
+      onchange: evt => actions.changeSky(evt.target.value)
     }),
     label
   );
 };
 
 var Conditions = {
-  view: function(vnode) {
-    var { local } = vnode.attrs;
+  view: function({ attrs: { state, actions } }) {
     return m(
       "div",
       m(
         "label",
         m("input", {
           type: "checkbox",
-          checked: local.state.precipitations,
+          checked: state.conditions.precipitations,
           onchange: evt =>
-            local.update(
-              conditions.actions.togglePrecipitations(
-                evt.target.checked
-              )
-            )
+            actions.togglePrecipitations(evt.target.checked)
         }),
         "Precipitations"
       ),
       m(
         "div",
-        skyOption({ local, value: "SUNNY", label: "Sunny" }),
-        skyOption({ local, value: "CLOUDY", label: "Cloudy" }),
         skyOption({
-          local,
+          state,
+          actions,
+          value: "SUNNY",
+          label: "Sunny"
+        }),
+        skyOption({
+          state,
+          actions,
+          value: "CLOUDY",
+          label: "Cloudy"
+        }),
+        skyOption({
+          state,
+          actions,
           value: "MIX",
           label: "Mix of sun/clouds"
         })
@@ -97,56 +81,53 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  initialState: function(label) {
+  Initial: function(label) {
     return {
       label,
       value: 22,
       units: "C"
     };
   },
-  actions: {
-    increment: function(amount) {
-      return O({ value: O(x => x + amount) });
-    },
-    changeUnits: function() {
-      return O(state => {
-        var value = state.value;
-        var newUnits = state.units === "C" ? "F" : "C";
-        var newValue = convert(value, newUnits);
-        state.value = newValue;
-        state.units = newUnits;
-        return state;
-      });
-    }
+  Actions: function(update) {
+    return {
+      increment: function(id, amount) {
+        update({ [id]: O({ value: O(x => x + amount) }) });
+      },
+      changeUnits: function(id) {
+        update({
+          [id]: O(state => {
+            var value = state.value;
+            var newUnits = state.units === "C" ? "F" : "C";
+            var newValue = convert(value, newUnits);
+            state.value = newValue;
+            state.units = newUnits;
+            return state;
+          })
+        });
+      }
+    };
   }
 };
 
 var Temperature = {
-  view: function(vnode) {
-    var { local } = vnode.attrs;
+  view: function({ attrs: { state, id, actions } }) {
     return m(
       "div",
-      local.state.label,
+      state[id].label,
       " Temperature: ",
-      local.state.value,
+      state[id].value,
       m.trust("&deg;"),
-      local.state.units,
+      state[id].units,
       m(
         "div",
         m(
           "button",
-          {
-            onclick: () =>
-              local.update(temperature.actions.increment(1))
-          },
+          { onclick: () => actions.increment(id, 1) },
           "Increment"
         ),
         m(
           "button",
-          {
-            onclick: () =>
-              local.update(temperature.actions.increment(-1))
-          },
+          { onclick: () => actions.increment(id, -1) },
           "Decrement"
         )
       ),
@@ -154,10 +135,7 @@ var Temperature = {
         "div",
         m(
           "button",
-          {
-            onclick: () =>
-              local.update(temperature.actions.changeUnits())
-          },
+          { onclick: () => actions.changeUnits(id) },
           "Change Units"
         )
       )
@@ -166,46 +144,39 @@ var Temperature = {
 };
 
 var app = {
-  initialState: Object.assign(
-    {},
-    { conditions: conditions.initialState },
-    {
-      temperature: {
-        air: temperature.initialState("Air"),
-        water: temperature.initialState("Water")
-      }
-    }
-  )
+  Initial: function() {
+    return Object.assign(
+      {},
+      conditions.Initial(),
+      { air: temperature.Initial("Air") },
+      { water: temperature.Initial("Water") }
+    );
+  },
+  Actions: function(update) {
+    return Object.assign(
+      {},
+      conditions.Actions(update),
+      temperature.Actions(update)
+    );
+  }
 };
 
 var App = {
-  view: function(vnode) {
-    var { root } = vnode.attrs;
+  view: function({ attrs: { state, actions } }) {
     return m(
       "div",
-      m(Conditions, {
-        root,
-        local: lens(root, ["conditions"])
-      }),
-
-      m(Temperature, {
-        root,
-        local: lens(root, ["temperature", "air"])
-      }),
-
-      m(Temperature, {
-        root,
-        local: lens(root, ["temperature", "water"])
-      }),
-
-      m("pre", JSON.stringify(root.state, null, 4))
+      m(Conditions, { state, actions }),
+      m(Temperature, { state, id: "air", actions }),
+      m(Temperature, { state, id: "water", actions }),
+      m("pre", JSON.stringify(state, null, 4))
     );
   }
 };
 
 var update = m.stream();
-var states = m.stream.scan(O, app.initialState, update);
+var states = m.stream.scan(O, app.Initial(), update);
+var actions = app.Actions(update);
 
 m.mount(document.getElementById("app"), {
-  view: () => m(App, { root: { state: states(), update } })
+  view: () => m(App, { state: states(), actions })
 });

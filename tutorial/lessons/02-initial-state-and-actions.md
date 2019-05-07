@@ -12,30 +12,40 @@ object, and simple ways to update the state.
 Let's imagine a simple counter example. Our initial state might be:
 
 ```js
-var initialState = {
-  value: 0
-};
+function Initial() {
+  return {
+    value: 0
+  };
+}
 ```
 
-A plain JavaScript object with a `value` property indicating the value of the counter.
+That is, a function that returns a plain JavaScript object with a `value` property indicating
+the value of the counter.
 
 Now, we want to create an action that increments the counter.
 
 <a name="increment_action"></a>
 ### [Increment Action](#increment_action)
 
-We'll create an `actions` object with an `increment` function that increments the counter.
+We'll write an `Actions` function that returns object with an `increment` function that
+increments the counter.
 
 ```javascript
-var initialState = {
-  value: 0
-};
+function Initial() {
+  return {
+    value: 0
+  };
+}
 
-var actions = {
-  increment: function() {
-    initialState.value = initialState.value + 1;
-  }
-};
+var initialState = Initial();
+
+function Actions() {
+  return {
+    increment: function() {
+      initialState.value = initialState.value + 1;
+    }
+  };
+}
 ```
 
 So we already have an initial state, and an actions object to update the state. However, this
