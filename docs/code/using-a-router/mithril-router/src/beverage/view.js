@@ -16,10 +16,7 @@ export const Beverage = {
     return m(
       "div",
       m("div", state.beverage[id]),
-      m(
-        "div",
-        m("a", { href: router.toPath(routing.childRoute([Route.Brewer({ id })])) }, "Brewer")
-      ),
+      m("div", m("a", { href: router.toPath(routing.childRoute([Route.Brewer()])) }, "Brewer")),
       Component && m(Component, { state, actions, routing: routing.next() }),
       m(
         "div",

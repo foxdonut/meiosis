@@ -29,7 +29,9 @@ const Route = createRouteSegments([
   "Profile",
   "About",
   "Search",
-  "Details"
+  "Details",
+  "Beverage",
+  "Brewer"
 ]);
 
 test("state", t => {
@@ -213,6 +215,15 @@ test("routerHelper", t => {
     Search: ["/search/:id?page?sort", { Details: "/details/:type?filter" }]
   };
 
+  const routeConfig3 = {
+    Beverage: [
+      "/beverage/:id",
+      {
+        Brewer: ["/brewer", ["id"]]
+      }
+    ]
+  };
+
   t.test("findPathParams", t => {
     t.deepEqual(findPathParams("/home"), [], "findPathParams empty");
     t.deepEqual(findPathParams("/user/:id"), ["id"], "findPathParams one");
@@ -299,6 +310,23 @@ test("routerHelper", t => {
     t.end();
   });
 
+  t.test("convertToPath with parent params", t => {
+    t.deepEqual(
+      convertToPath(routeConfig3, [Route.Beverage({ id: 42 }), Route.Brewer()]),
+      "/beverage/42/brewer",
+      "convertToPath with parent params"
+    );
+
+    // Only the id from Beverage should be considered.
+    t.deepEqual(
+      convertToPath(routeConfig3, [Route.Beverage({ id: 42 }), Route.Brewer({ id: 43 })]),
+      "/beverage/42/brewer",
+      "convertToPath with parent params"
+    );
+
+    t.end();
+  });
+
   t.test("createRouteMap", t => {
     const routeMap = createRouteMap(routeConfig1);
 
@@ -341,8 +369,20 @@ test("routerHelper", t => {
     t.end();
   });
 
+  t.test("createRouteMap with parent params", t => {
+    const routeMap = createRouteMap(routeConfig3);
+
+    t.deepEqual(
+      routeMap["/beverage/:id/brewer"]({ id: 42 }),
+      [Route.Beverage({ id: 42 }), Route.Brewer({ id: 42 })],
+      "createRouteMap with parent params"
+    );
+
+    t.end();
+  });
+
   t.test("createRouter", t => {
-    t.plan(6);
+    t.plan(7);
 
     const createParsePath = (routeMap, defaultRoute) => {
       const routeMatcher = createRouteMatcher(routeMap);
@@ -394,7 +434,7 @@ test("routerHelper", t => {
       "router.routeMap"
     );
 
-    const router2a = createRouter({
+    const router2 = createRouter({
       createParsePath,
       queryString,
       routeConfig: routeConfig2,
@@ -403,12 +443,25 @@ test("routerHelper", t => {
     });
 
     t.deepEqual(
-      router2a.parsePath("#/search/42/details/author?filter=recent&page=2&sort=asc"),
+      router2.parsePath("#/search/42/details/author?filter=recent&page=2&sort=asc"),
       [
         Route.Search({ id: "42", page: "2", sort: "asc" }),
         Route.Details({ type: "author", filter: "recent" })
       ],
       "parsePath with queryString"
+    );
+
+    const router3 = createRouter({
+      createParsePath,
+      routeConfig: routeConfig3,
+      getPath,
+      setPath
+    });
+
+    t.deepEqual(
+      router3.parsePath("#/beverage/42/brewer"),
+      [Route.Beverage({ id: "42" }), Route.Brewer({ id: "42" })],
+      "parsePath with parent params"
     );
 
     t.end();

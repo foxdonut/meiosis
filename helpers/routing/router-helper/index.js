@@ -24,7 +24,15 @@ export const setParams = (path, params) =>
   }, getPathWithoutQuery(path));
 
 const getConfig = config =>
-  config == null ? ["/", {}] : typeof config === "string" ? [config, {}] : config;
+  config == null
+    ? ["/", [], {}]
+    : typeof config === "string"
+    ? [config, [], {}]
+    : config.length === 2
+    ? Array.isArray(config[1])
+      ? [config[0], config[1], {}]
+      : [config[0], [], config[1]]
+    : config;
 
 const pick = (obj, props) =>
   props.reduce((result, prop) => {
@@ -40,7 +48,7 @@ export const convertToPath = (routeConfig, routes, qsStringify) => {
   let query = {};
 
   routes.forEach(route => {
-    const [configPath, children] = getConfig(lookup[route.id]);
+    const [configPath, _parentParams, children] = getConfig(lookup[route.id]);
     path += setParams(configPath, route.params);
     lookup = children;
 
@@ -58,9 +66,12 @@ export const convertToPath = (routeConfig, routes, qsStringify) => {
 // Returns { "/path": fn(params) => [route] }
 export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc = {}) =>
   Object.entries(routeConfig).reduce((result, [id, config]) => {
-    const [configPath, children] = getConfig(config);
+    const [configPath, parentParams, children] = getConfig(config);
 
-    const routeParams = findPathParams(configPath).concat(findQueryParams(configPath));
+    const routeParams = findPathParams(configPath)
+      .concat(findQueryParams(configPath))
+      .concat(parentParams);
+
     const localPath = path + getPathWithoutQuery(configPath);
     const routeFn = params => fn(params).concat({ id, params: pick(params, routeParams) });
     result[localPath] = routeFn;

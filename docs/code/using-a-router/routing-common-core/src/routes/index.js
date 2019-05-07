@@ -21,7 +21,7 @@ const beverageRoutes = {
   Beverage: [
     "/:id",
     {
-      Brewer: "/brewer"
+      Brewer: ["/brewer", ["id"]]
     }
   ]
 };

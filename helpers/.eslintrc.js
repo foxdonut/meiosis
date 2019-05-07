@@ -20,7 +20,8 @@ module.exports = {
       "error",
       {
         "args": "after-used",
-        "argsIgnorePattern": "^_"
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
       }
     ],
     "prettier/prettier": [

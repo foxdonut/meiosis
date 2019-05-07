@@ -16,7 +16,7 @@ export const Beverage = ({ state, actions, routing }) => {
     <div>
       <div>{state.beverage[id]}</div>
       <div>
-        <a href={router.toPath(routing.childRoute([Route.Brewer({ id })]))}>Brewer</a>
+        <a href={router.toPath(routing.childRoute([Route.Brewer()]))}>Brewer</a>
       </div>
       {Component && <Component state={state} actions={actions} routing={routing.next()} />}
       <div>
