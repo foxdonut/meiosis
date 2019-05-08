@@ -67,21 +67,6 @@ class HomePage extends React.Component {
   }
 }
 
-class DataPage extends React.Component {
-  render() {
-    const { state } = this.props;
-    return (
-      <div>{state.data || "Loading, please wait..."}</div>
-    );
-  }
-}
-
-class SettingsPage extends React.Component {
-  render() {
-    return <div>Settings page.</div>;
-  }
-}
-
 class LoginPage extends React.Component {
   render() {
     const { state } = this.props;
@@ -127,11 +112,38 @@ class LoginPage extends React.Component {
   }
 }
 
+class SettingsPage extends React.Component {
+  render() {
+    return (
+      <div>
+        <div>Settings page.</div>
+        <div>
+          <button
+            className="btn btn-primary"
+            onClick={() => actions.logout()}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+class DataPage extends React.Component {
+  render() {
+    const { state } = this.props;
+    return (
+      <div>{state.data || "Loading, please wait..."}</div>
+    );
+  }
+}
+
 const pages = {
   HomePage,
-  DataPage,
+  LoginPage,
   SettingsPage,
-  LoginPage
+  DataPage
 };
 
 class App extends React.Component {
@@ -170,16 +182,6 @@ class App extends React.Component {
               Home
             </a>
           </li>
-          <li
-            className={"tab-item" + active("SettingsPage")}
-          >
-            <a
-              href="#"
-              onClick={this.navigateTo("SettingsPage")}
-            >
-              Settings
-            </a>
-          </li>
           <li className={"tab-item" + active("LoginPage")}>
             <a
               href="#"
@@ -188,15 +190,14 @@ class App extends React.Component {
               Login
             </a>
           </li>
-          <li className="tab-item">
+          <li
+            className={"tab-item" + active("SettingsPage")}
+          >
             <a
               href="#"
-              onClick={pipe(
-                preventDefault,
-                () => actions.logout()
-              )}
+              onClick={this.navigateTo("SettingsPage")}
             >
-              Logout
+              Settings
             </a>
           </li>
           <li className={"tab-item" + active("DataPage")}>
