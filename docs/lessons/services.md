@@ -89,9 +89,9 @@ const StatsService = {
       .reduce(R.merge, {});
   },
   start(state) {
-    return dropRepeats( state.map( x => x.boxes ) )
-      .map( R.countBy(I) )
-      .map( R.assoc("stats") );
+    return dropRepeats(state.map(x => x.boxes))
+      .map(R.countBy(I))
+      .map(R.assoc("stats"));
   }
 };
 ```
@@ -120,7 +120,7 @@ The example uses function patches. Here is the setup for the Meiosis pattern:
 ```javascript
 const update = m.stream();
 const T = (x, f) => f(x);
-const state = m.stream.scan( T, initialState(), update );
+const state = m.stream.scan(T, initialState(), update);
 const element = document.getElementById("app");
 states.map(view(update)).map(v => m.render(element, v));
 ```
@@ -137,29 +137,34 @@ wish.
 <a name="using_accepted_and_services"></a>
 ### [Using Accepted State and Services](#using_accepted_and_services)
 
-In Meiosis, instead of emitting patches from services, we define an _accept_ function that receives
-the current state as a parameter and returns the accepted state.
+In Meiosis, instead of emitting patches from services, we define state management objects that
+can have either one (or both) of these:
+
+- an `accept` function
+- a `service` function
 
 > The term `accept` comes from the [SAM Pattern](https://sam.js.org), which we will look at in
-[the next section](sam-pattern.html). In Meiosis, `accept` is similar but not identical to
+[the SAM Pattern section](sam-pattern.html). In Meiosis, `accept` is similar but not identical to
 `accept` in SAM.
 
-Each service can define an `accept` function which takes the current state and returns a patch
-to make any necessary changes and updates to the state. Then, these functions are combined
+An `accept` function gets the current state as a parameter and returns a patch to make any
+necessary changes and updates to the state. Then, all accept functions are combined
 together to produce a single `accept` function that receives the current state and produces
 the accepted state.
 
-Acceptors run _synchronously_ and _in order_. Thus, an acceptor can depend on the changes made
-by a previous acceptor.
+Accept functions, or _acceptors_, run **synchronously** and **in order**. Thus, an acceptor can
+depend on the changes made by a previous acceptor.
 
 For asynchronous changes, we define a `service` function that receives the current state and the
-`update` stream, and decides whether to call `update()`.
+`update` stream, and decides whether to call `update`. Services can call `update` synchronously,
+as well.
 
-Our service structure is thus:
+Our component structure is thus:
 
 ```javascript
 {
-  initial: state => initialState,
+  Initial: () => initialState,
+  Actions: update => actions,
   accept: state => patch,
   service: ({ state, update }) => { /* call update() based on state */ }
 }
@@ -170,38 +175,53 @@ Our service structure is thus:
 In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we
 looked at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
 
-To use Patchinko, we emit patches as objects instead of functions, and we use `O`
-as our accumulator:
+To use Patchinko, we emit patches as objects and we use `O` as our accumulator:
 
 ```javascript
-const states = m.stream.scan( O, initialState(), update );
+const states = m.stream.scan(O, Initial(), update);
 ```
 
-Instead of a `start` function, we'll use an `accept` function to which we'll pass the latest
-state from the Meiosis `states` stream. The `accept` function returns a patch:
+Remember that previously, we had a stats service and a description service:
+
+- `StatsService`: produces an object that indicates how many boxes of each color.
+- `DescriptionService`: produces the text description of how many boxes of each color are in
+the list.
+
+These become acceptors:
 
 ```javascript
-{
-  accept: state => patch
-}
+const stats = {
+  accept: R.pipe(
+    x => x.boxes,
+    R.countBy(I),
+    R.objOf("stats")
+  )
+};
+
+const description = {
+  accept: R.pipe(
+    x => x.stats,
+    R.toPairs,
+    R.groupBy(R.last),
+    R.map(R.map(R.head)),
+    R.map(humanList("and")),
+    R.toPairs,
+    R.map(R.join(" ")),
+    humanList("and"),
+    x => x + ".",
+    R.objOf("description")
+  )
+};
 ```
 
-Before, we took a **stream** of states and we returned a **stream** of patches; now, we just
-take a state and return a patch.
-
-We'll assemble the `computed` functions into an array:
-
-```javascript
-const acceptors = [ acceptor1, acceptor2, acceptor3 ];
-```
-
-Each function `acceptor`  function takes the state and returns a patch to update the state. Thus
-calling `acceptor(state)` gives us a patch. To apply the patch, we call
-`O(state, acceptor(state))`. Finally, to combine the array of functions into a single function,
-we can use `reduce`:
+Each accept function takes the state and returns a patch. Let's assemble the functions into
+a top-level `accept` function that takes the state and returns the updated state. We can use
+`reduce` on the array of `accept` functions, calling each function and applying the patch
+on the state with `O`:
 
 ```javascript
-// Top-level accept function
+const acceptors = [stats.accept, description.accept];
+
 const accept = state =>
   acceptors.reduce(
     (updatedState, acceptor) =>
@@ -213,21 +233,24 @@ const accept = state =>
 This gives us a single top-level `accept` function that takes the state, calls all acceptor
 functions, and produces the updated state. We can use function composition to call `accept`
 after calling `O` in the accumulator function of `scan`. Note that we also call `accept` on
-the initial state.
+the initial state:
 
 ```javascript
 const states = m.stream.scan(
-  o(accept, O),
-  accept(initialState()),
+  compose(
+    accept,
+    O
+  ),
+  accept(app.Initial()),
   update
 );
 ```
 
-Above, `o(accept, O)` is the equivalent of `(state, patch) => accept(O(state, patch))`.
+Above, `compose(accept, O)` is the equivalent of `(state, patch) => accept(O(state, patch))`.
 
-Computed functions are for _synchronous_ calculations based on the state. For asynchronous
-changes, such as loading data from a server, we'll separately define _services_ as functions
-that receive the current state and the `update` stream, and call `update` as they see fit:
+For asynchronous changes, such as loading data from a server, we'll separately define `service`
+functions that receive the current state and the `update` stream, and call `update` as they see
+fit.
 
 ```javascript
 service: ({ state, update }) => {
@@ -240,32 +263,33 @@ service calls `update()`, the service will be triggered again. Later, we will lo
 can optimize services to avoid calling them again after they issue updates, and thus not
 have to worry about infinite loops.
 
-In this example, the `LocalStorageService` doesn't call `update`, so it's not an issue:
+In this example, the `storage.service` function doesn't call `update`, so it's not an issue.
 
 ```javascript
-service: ({ state }) => {
-  T(
-    state,
-    R.pipe(
-      R.pick(["boxes"]),
-      x => localStorage.setItem("v1", JSON.stringify(x))
-    )
-  );
-}
+const storage = {
+  Initial: () => {
+    const stored = localStorage.getItem("v1");
+    return stored ? JSON.parse(stored) : {};
+  },
+
+  service: ({ state }) => {
+    localStorage.setItem(
+      "v1",
+      JSON.stringify({ boxes: state.boxes })
+    );
+  }
+};
 ```
 
 After assembling service functions into an array, wiring them up is simply a matter of
 calling them every time the state changes:
 
 ```javascript
+const services = [storage.service];
+
 states.map(state =>
-  services.forEach(service => service(state, update)));
-```
-
-Finally, as before we use our `states` stream to render the view:
-
-```javascript
-states.map(view(update)).map(v => m.render(element, v));
+  services.forEach(service => service({ state, update }))
+);
 ```
 
 You will find the complete example below.
@@ -281,47 +305,35 @@ and we wire up Meiosis like this:
 ```javascript
 const T = (x, f) => f(x);
 const update = m.stream();
-const states = m.stream.scan( T, initialState(), update );
+const states = m.stream.scan(T, initialState(), update);
 ```
 
-Our services have the same structure as before, namely:
+Our acceptors and services have the same structure as before, except that patches are
+functions instead of objects. When we call an `acceptor` function, we get back a
+function. To apply the patch, we just call the returned function:
 
 ```javascript
-{
-  initial: state => initialState,
-  accept: state => patch,
-  service: ({ state, update }) => { /* call update() based on state */ }
-}
-```
+const acceptors = [stats.accept, description.accept];
 
-The only difference is that `patch` is now a function instead of an object.
-
-Again we have an array of functions for accepted state:
-
-```javascript
-const acceptors = [ acceptor1, acceptor2, acceptor3 ];
-```
-
-But now each function takes the state and returns a **function** patch to update the model.
-Instead of `O`, our function that applies a patch is `T`:
-
-```javascript
-// Top-level computed function
 const accept = state =>
   acceptors.reduce(
     (updatedState, acceptor) =>
-      T(updatedState, acceptor(updatedState)),
+      acceptor(updatedState)(updatedState),
     state
   );
 ```
 
 As before, we compose `accept` into our `scan` accumulator, and also call `accept` on
-the initial state:
+the initial state. The only difference is that we use `T` instead of `O` to apply a
+patch -- `T = (x, f) => f(x)`.
 
 ```javascript
 const states = m.stream.scan(
-  o(accept, T),
-  accept(initialState()),
+  compose(
+    accept,
+    T
+  ),
+  accept(app.Initial()),
   update
 );
 ```

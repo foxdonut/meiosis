@@ -21,20 +21,6 @@ const stats = {
   )
 };
 
-const storage = {
-  Initial: () => {
-    const stored = localStorage.getItem("v1");
-    return stored ? JSON.parse(stored) : {};
-  },
-
-  service: ({ state }) => {
-    localStorage.setItem(
-      "v1",
-      JSON.stringify({ boxes: state.boxes })
-    );
-  }
-};
-
 const description = {
   accept: R.pipe(
     x => x.stats,
@@ -48,6 +34,20 @@ const description = {
     x => x + ".",
     R.assoc("description")
   )
+};
+
+const storage = {
+  Initial: () => {
+    const stored = localStorage.getItem("v1");
+    return stored ? JSON.parse(stored) : {};
+  },
+
+  service: ({ state }) => {
+    localStorage.setItem(
+      "v1",
+      JSON.stringify({ boxes: state.boxes })
+    );
+  }
 };
 
 const app = {
