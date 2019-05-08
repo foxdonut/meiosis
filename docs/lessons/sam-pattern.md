@@ -66,12 +66,13 @@ Let's look at an example. Say we have navigation between different pages. Clicki
 of the navigation bar shows the corresponding page. To navigate, we have actions that update
 the model to indicate the current page. The view uses the model to render the corresponding page.
 
-The example is below. Notice how you can go to different pages; _Logout_ sends you back to _Home_;
-and the _Data_ page has no data to show, so it displays a _Loading, please wait..._ message.
+The example is below. Notice how you can go to different pages; From the _Settings_ page,
+clicking on _Logout_ sends you back to _Home_; and the _Data_ page has no data to show, so it
+just displays a _Loading, please wait..._ message.
 
 @flems code/sam-pattern/navigation-example.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
 
-Let's see how we can apply the SAM pattern.
+Let's see how we can use Meiosis in a similar way as the SAM pattern.
 
 <a name="using_present"></a>
 ### [Using `update` as `present`](#using_present)
@@ -81,8 +82,8 @@ and how to update the model. The `update` stream from Meiosis can be used as a `
 for actions.
 
 ```javascript
-const present = flyd.stream();
-const actions = app.actions(present);
+const update = flyd.stream();
+const actions = app.actions(update);
 const states = flyd.scan(P, app.initialState(), update);
 ```
 
@@ -128,8 +129,8 @@ Now our setup is:
 
 ```javascript
 const acceptor = (model, proposal) => { /* ... */ };
-const present = flyd.stream();
-const actions = app.actions(present);
+const update = flyd.stream();
+const actions = app.actions(update);
 const states = flyd.scan(P, app.initialState(), update);
 ```
 
@@ -194,9 +195,9 @@ state: model => [
 Now our setup is:
 
 ```javascript
-const present = flyd.stream();
-const actions = app.actions(present);
-const states = flyd.scan(app.acceptor, app.initialState(), present)
+const update = flyd.stream();
+const actions = app.actions(update);
+const states = flyd.scan(app.acceptor, app.initialState(), update)
   .map(app.state);
 ```
 
@@ -228,9 +229,9 @@ nap: actions => state => {
 Our setup becomes:
 
 ```javascript
-const present = flyd.stream();
-const actions = app.actions(present);
-const states = flyd.scan(app.acceptor, app.initialState(), present)
+const update = flyd.stream();
+const actions = app.actions(update);
+const states = flyd.scan(app.acceptor, app.initialState(), update)
   .map(app.state);
 states.map(app.nap(actions));
 ```
@@ -243,9 +244,6 @@ of the application state.
 Try it out:
 
 @flems code/sam-pattern/next-action-predicate.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
-
-With `present`, `acceptor`, `state`, and `nap`, we have used Meiosis as a foundation and
-implemented SAM.
 
 [Table of Contents](toc.html)
 

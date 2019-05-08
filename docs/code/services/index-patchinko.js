@@ -1,7 +1,6 @@
 /* global b, m, R, O */
 
 const I = x => x;
-const compose = (f, g) => (...args) => f(g(...args));
 
 const humanList = s => xs =>
   xs.length > 1
@@ -140,10 +139,7 @@ const accept = state =>
 const update = m.stream();
 const actions = app.Actions(update);
 const states = m.stream.scan(
-  compose(
-    accept,
-    O
-  ),
+  (state, patch) => accept(O(state, patch)),
   accept(app.Initial()),
   update
 );

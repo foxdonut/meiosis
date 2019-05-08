@@ -2,10 +2,10 @@
 
 [Table of Contents](toc.html)
 
-## Services and Computed Properties
+## Services and Accepted State
 
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll
-look at James' version using streams, and another version using a separate computed state function
+look at James' version using streams, and another version using a separate accepted state function
 and a service trigger. For the latter, we'll use two variants, one with
 [Barney Carroll](https://barneycarroll.com)'s
 [Patchinko](https://github.com/barneycarroll/patchinko), and one with function patches.
@@ -231,22 +231,16 @@ const accept = state =>
 ```
 
 This gives us a single top-level `accept` function that takes the state, calls all acceptor
-functions, and produces the updated state. We can use function composition to call `accept`
-after calling `O` in the accumulator function of `scan`. Note that we also call `accept` on
-the initial state:
+functions, and produces the updated state. We call `accept` after calling `O` in the
+accumulator function of `scan`. Note that we also call `accept` on the initial state:
 
 ```javascript
 const states = m.stream.scan(
-  compose(
-    accept,
-    O
-  ),
+  (state, patch) => accept(O(state, patch)),
   accept(app.Initial()),
   update
 );
 ```
-
-Above, `compose(accept, O)` is the equivalent of `(state, patch) => accept(O(state, patch))`.
 
 For asynchronous changes, such as loading data from a server, we'll separately define `service`
 functions that receive the current state and the `update` stream, and call `update` as they see
@@ -323,16 +317,13 @@ const accept = state =>
   );
 ```
 
-As before, we compose `accept` into our `scan` accumulator, and also call `accept` on
+As before, we call `accept` in our `scan` accumulator, and also call `accept` on
 the initial state. The only difference is that we use `T` instead of `O` to apply a
 patch -- `T = (x, f) => f(x)`.
 
 ```javascript
 const states = m.stream.scan(
-  compose(
-    accept,
-    T
-  ),
+  (state, patch) => accept(T(state, patch)),
   accept(app.Initial()),
   update
 );
