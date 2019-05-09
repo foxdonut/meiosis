@@ -2,7 +2,6 @@
 
 // -- Utility code
 
-const compose = (f, g) => (...args) => f(g(...args));
 const pipe = (...fns) => input =>
   fns.reduce((value, fn) => fn(value), input);
 
@@ -251,10 +250,7 @@ const accept = state =>
   );
 
 const states = flyd.scan(
-  compose(
-    accept,
-    O
-  ),
+  (state, patch) => accept(O(state, patch)),
   accept(app.Initial()),
   update
 );

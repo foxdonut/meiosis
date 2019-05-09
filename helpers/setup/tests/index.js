@@ -422,7 +422,7 @@ const commonTest = (streamLib, label) => {
 
       try {
         meiosis.common
-          .setup({ stream: streamLib, combinator: x => x, app: { acceptors: [() => I] } })
+          .setup({ stream: streamLib, combine: x => x, app: { acceptors: [() => I] } })
           .then(() => {
             t.fail("An error should have been thrown for missing accumulator function.");
             t.end();
@@ -433,30 +433,30 @@ const commonTest = (streamLib, label) => {
       }
     });
 
-    t.test(label + " / acceptors do not require combinator function", t => {
+    t.test(label + " / acceptors do not require a combine function", t => {
       const I = x => x;
 
       try {
         meiosis.common
           .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
           .then(() => {
-            t.pass("Acceptors without combinator works.");
+            t.pass("Acceptors without combine function works.");
             t.end();
           });
       } catch (err) {
-        t.fail("No error should be thrown for acceptors without combinator.");
+        t.fail("No error should be thrown for acceptors without combine function.");
         t.end();
       }
     });
 
-    t.test(label + " / services require combinator function", t => {
+    t.test(label + " / services require combine function", t => {
       const I = x => x;
 
       try {
         meiosis.common
           .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { services: [() => I] } })
           .then(() => {
-            t.fail("An error should have been thrown for missing combinator function.");
+            t.fail("An error should have been thrown for missing combine function.");
             t.end();
           });
       } catch (err) {

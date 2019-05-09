@@ -2,7 +2,6 @@
 
 // -- Utility code
 
-const compose = (f, g) => (...args) => f(g(...args));
 const pipe = (...fns) => input =>
   fns.reduce((value, fn) => fn(value), input);
 
@@ -25,20 +24,20 @@ const settingsCheckLogin = state => {
   }
 };
 
-const prepareLogin = model => {
-  if (model.pageId === "LoginPage" && !model.login) {
+const prepareLogin = state => {
+  if (state.pageId === "LoginPage" && !state.login) {
     return { login: { username: "", password: "" } };
-  } else if (model.pageId !== "LoginPage" && model.login) {
+  } else if (state.pageId !== "LoginPage" && state.login) {
     return { login: null };
   }
 };
 
-const checkReturnTo = model => {
-  if (model.user && model.returnTo) {
-    return { pageId: model.returnTo, returnTo: null };
+const checkReturnTo = state => {
+  if (state.user && state.returnTo) {
+    return { pageId: state.returnTo, returnTo: null };
   } else if (
-    model.pageId !== "LoginPage" &&
-    model.returnTo
+    state.pageId !== "LoginPage" &&
+    state.returnTo
   ) {
     return { returnTo: null };
   }
@@ -52,23 +51,22 @@ const app = {
       password: ""
     }
   }),
-  Actions: present => ({
-    navigateTo: pageId => present({ pageId }),
-    login: user => present({ user, pageId: "HomePage" }),
+  Actions: update => ({
+    navigateTo: pageId => update({ pageId }),
+    login: user => update({ user, pageId: "HomePage" }),
     username: value =>
-      present({ login: O({ username: value }) }),
+      update({ login: O({ username: value }) }),
     password: value =>
-      present({ login: O({ password: value }) }),
+      update({ login: O({ password: value }) }),
     logout: () =>
-      present({
+      update({
         user: null,
         data: null,
         pageId: "HomePage"
       }),
     loadData: () =>
       setTimeout(
-        () =>
-          present({ data: "The data has been loaded." }),
+        () => update({ data: "The data has been loaded." }),
         1500
       )
   }),
@@ -259,10 +257,7 @@ const accept = state =>
   );
 
 const states = flyd.scan(
-  compose(
-    accept,
-    O
-  ),
+  (state, patch) => accept(O(state, patch)),
   accept(app.Initial()),
   update
 );

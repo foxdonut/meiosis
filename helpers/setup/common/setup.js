@@ -8,7 +8,7 @@ const B = (f, g) => (...args) => f(g(...args));
  * The function or object must also have a `scan` property.
  * The returned stream must have a `map` method.
  * @param {accumulator} the accumulator function.
- * @param {combinator} the patch combinator function.
+ * @param {combine} the function that combines patches into one.
  * @param {app.Initial} (optional) a function that creates the initial state. This function can return
  * a result * or a Promise. If not specified, the initial state will be `{}`.
  * @param {app.Actions} (optional) a function that creates actions, of the form `update => actions`.
@@ -20,7 +20,7 @@ const B = (f, g) => (...args) => f(g(...args));
  * @returns a Promise that resolves to { update, models, accepted, states, actions }
  * all of which are streams, except for `actions` which is the created actions.
  */
-export const setup = ({ stream, accumulator, combinator, app }) => {
+export const setup = ({ stream, accumulator, combine, app }) => {
   app = app || {};
   let { Initial, acceptors, services, Actions } = app;
   Initial = Initial || (() => ({}));
@@ -33,8 +33,8 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");
   }
-  if (!combinator && services.length > 0) {
-    throw new Error("No combinator function was specified.");
+  if (!combine && services.length > 0) {
+    throw new Error("No combine function was specified.");
   }
 
   const accept =
@@ -86,7 +86,7 @@ export const setup = ({ stream, accumulator, combinator, app }) => {
             if (buffer.length > 0) {
               // Services produced patches, issue an update and emit the resulting state.
               serviceUpdate = true;
-              update(combinator(buffer));
+              update(combine(buffer));
             } else {
               // No service updates, just emit the resulting state.
               buffered = false;

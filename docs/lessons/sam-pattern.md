@@ -18,16 +18,19 @@ to automatically trigger another Action.
 
 You can find more details and explanations on the [SAM web site](https://sam.js.org).
 
-As you can see, the basis of Meiosis is similar to SAM. The SAM State corresponds to
-Computed properties, and the Next-Action-Predicate corresponds to services, as we saw in
-[Using Computed State and Services](#using_computed_and_services).
+As you can see, while not identical, Meiosis is similar to SAM:
 
-SAM goes one step further with the concept of _presenting_ values and _accepting_ or
-_rejecting_ them. This is essentially the _accumulator_ function of Meiosis, but it does
-not automatically apply incoming patches.
+- single source of truth (model/state)
+- `update` presents patches, which are merged in with an accumulator function
+- the _accepted state_, as we saw in [Services and Accepted State](services.html)
+- the view is a function of the application state
+- _services_, which we also saw in [Services and Accepted State](services.html),
 
-Let's see how we can use the Meiosis pattern as a foundation and augment it to add these
-concepts of the SAM pattern.
+The main difference is that in SAM, actions present _proposals_ to the Model, which can accept
+or reject them. Thus you need to be able to _inspect_ proposals. In Meiosis, _patches_ are
+merged into the state with `scan` and the accumulator function. So instead of inspecting
+proposals, the acceptors inspect the state and return patches to make any necessary changes
+and produce the accepted state.
 
 <a name="meiosis_pattern"></a>
 ### [Meiosis Pattern](#meiosis_pattern)
@@ -36,43 +39,47 @@ Remember the fundamental Meiosis Pattern:
 
 ```javascript
 const update = flyd.stream();
-const states = flyd.scan(P, app.initialState(), update);
+const states = flyd.scan(O, app.initialState(), update);
 ```
 
 Actions send patches in the form of objects or functions to the `update` stream. Using `scan`
 and an accumulator function, we produce a stream of states. We can then use the view library
 of our choice, passing the current state and the actions to the view.
 
-In [Using Computed State and Services](#using_computed_and_services), we added `computed`
+In [Services and Accepted State](services.html), we added `accept`
 and `services`:
 
 ```javascript
-const computed = state =>
-  computes.reduce((x, f) => P(x, f(x)), state);
+const accept = state =>
+  app.acceptors.reduce(
+    (updatedState, acceptor) =>
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
 
-const states = flyd.scan(P, app.initialState(), update)
-  .map(computed);
+const states = flyd.scan(O, app.initialState(), update);
 
 states.map(state =>
-  services.forEach(service => service(state, update)));
+  app.services.forEach(service =>
+    service({ state, update, actions })
+  )
+);
 ```
 
-Let's look at how we can use Meiosis as a basis to implement the SAM pattern.
+Let's look at how we can use Meiosis similarly to SAM.
 
 <a name="navigation_example"></a>
 ### [A Navigation Example](#navigation_example)
 
-Let's look at an example. Say we have navigation between different pages. Clicking on a section
-of the navigation bar shows the corresponding page. To navigate, we have actions that update
-the model to indicate the current page. The view uses the model to render the corresponding page.
+Say we have navigation between different pages. Clicking on a section of the navigation bar shows
+the corresponding page. To navigate, we have actions that update the state to indicate the current
+page. The view uses the state to render the corresponding page.
 
 The example is below. Notice how you can go to different pages; From the _Settings_ page,
 clicking on _Logout_ sends you back to _Home_; and the _Data_ page has no data to show, so it
 just displays a _Loading, please wait..._ message.
 
 @flems code/sam-pattern/navigation-example.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
-
-Let's see how we can use Meiosis in a similar way as the SAM pattern.
 
 <a name="using_present"></a>
 ### [Using `update` as `present`](#using_present)

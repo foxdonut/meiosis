@@ -30,6 +30,6 @@ export const setup = ({ stream, O, app }) =>
       }
     },
     // Can't use patches.reduce(O, model) because O would get called as O(model, patch, index)
-    combinator: patches => model => patches.reduce((m, p) => O(m, p), model),
+    combine: patches => model => patches.reduce((m, p) => O(m, p), model),
     app
   });

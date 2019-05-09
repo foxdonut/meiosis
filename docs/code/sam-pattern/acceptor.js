@@ -2,7 +2,6 @@
 
 // -- Utility code
 
-const compose = (f, g) => (...args) => f(g(...args));
 const pipe = (...fns) => input =>
   fns.reduce((value, fn) => fn(value), input);
 
@@ -12,6 +11,18 @@ const preventDefault = evt => {
 };
 
 // -- Application code
+
+const settingsCheckLogin = state => {
+  if (
+    state.pageId === "SettingsPage" &&
+    state.user == null
+  ) {
+    return {
+      pageId: "LoginPage",
+      returnTo: "SettingsPage"
+    };
+  }
+};
 
 const app = {
   Initial: () => ({
@@ -40,19 +51,7 @@ const app = {
         1500
       )
   }),
-  acceptors: [
-    state => {
-      if (
-        state.pageId === "SettingsPage" &&
-        state.user == null
-      ) {
-        return {
-          pageId: "LoginPage",
-          returnTo: "SettingsPage"
-        };
-      }
-    }
-  ]
+  acceptors: [settingsCheckLogin]
 };
 
 // -- Pages
@@ -228,10 +227,7 @@ const accept = state =>
   );
 
 const states = flyd.scan(
-  compose(
-    accept,
-    O
-  ),
+  (state, patch) => accept(O(state, patch)),
   accept(app.Initial()),
   update
 );

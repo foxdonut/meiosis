@@ -21,4 +21,4 @@ const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
  * all of which are streams, except for `actions` which is the created actions.
  */
 export const setup = ({ stream, app }) =>
-  commonSetup({ stream, accumulator: (x, f) => f(x), combinator: compose, app });
+  commonSetup({ stream, accumulator: (x, f) => f(x), combine: compose, app });
