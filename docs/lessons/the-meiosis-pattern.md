@@ -7,6 +7,10 @@
 > IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern,
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
+> Helper functions! Meiosis is a pattern that you can set up yourself, but by popular demand
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) is now available
+for your convenience.
+
 This is a quick summary of the Meiosis Pattern:
 
 - Separate state management code from view code.

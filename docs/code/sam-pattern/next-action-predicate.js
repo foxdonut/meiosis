@@ -43,6 +43,12 @@ const checkReturnTo = state => {
   }
 };
 
+const dataService = ({ state, actions }) => {
+  if (state.pageId === "DataPage" && !state.data) {
+    actions.loadData();
+  }
+};
+
 const app = {
   Initial: () => ({
     pageId: "HomePage",
@@ -75,13 +81,7 @@ const app = {
     prepareLogin,
     checkReturnTo
   ],
-  services: [
-    ({ state, actions }) => {
-      if (state.pageId === "DataPage" && !state.data) {
-        actions.loadData();
-      }
-    }
-  ]
+  services: [dataService]
 };
 
 // -- Pages
