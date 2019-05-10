@@ -18,8 +18,14 @@ Using a `script` tag:
 <script src="https://unpkg.com/meiosis-setup"></script>
 ```
 
-Using the `script` tag exposes a `Meiosis` global, under which `patchinko.setup`,
-`functionPatches.setup`, `common.setup`, etc. are provided.
+Using the `script` tag exposes a `Meiosis` global, under which the helper functions are
+provided:
+
+- `patchinko.setup`
+- `functionPatches.setup`
+- `common.setup`
+- `simpleStream.stream`
+- `simpleStream.scan`
 
 ## Setup
 
@@ -155,6 +161,10 @@ You can use another stream library, as long as you provide either a function tha
 or an object with a `stream` property for that function. In either case, there must also be a `scan`
 property on the function or object. Finally, the created stream must be a function that, when
 called, emits a value onto the stream; and the function must have a `map` method.
+
+### API
+
+[API documentation](api.md)
 
 ----
 
