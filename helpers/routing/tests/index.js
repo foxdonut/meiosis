@@ -3,6 +3,7 @@ const test = require("tape");
 const routing = require("../dist/meiosis-routing");
 const createRouteMatcher = require("feather-route-matcher");
 const queryString = require("query-string");
+const Mapper = require("url-mapper");
 
 const {
   createRouteSegments,
@@ -19,7 +20,9 @@ const {
   setParams,
   convertToPath,
   createRouteMap,
-  createRouter
+  createRouter,
+  createFeatherRouter,
+  createUrlMapperRouter
 } = routing.routerHelper;
 
 const Route = createRouteSegments([
@@ -57,6 +60,7 @@ test("state", t => {
     );
 
     t.ok(findRouteSegment(route, Route.About()) == null, "should be no found route");
+    t.ok(findRouteSegment(null, Route.About()) == null, "should tolerate null route");
 
     t.end();
   });
@@ -73,6 +77,11 @@ test("state", t => {
     t.ok(
       findRouteSegmentWithParams(route, Route.User({ id: 43 })) == null,
       "should be no found route segment"
+    );
+
+    t.ok(
+      findRouteSegmentWithParams(null, Route.User({ id: 43 })) == null,
+      "should tolerate null route"
     );
 
     t.deepEqual(
@@ -96,6 +105,14 @@ test("state", t => {
       "diff route"
     );
 
+    t.deepEqual(diffRoute(null, [Route.User({ id: 43 })]), [], "diff route with null target");
+
+    t.deepEqual(
+      diffRoute([Route.User({ id: 43 })], null),
+      [Route.User({ id: 43 })],
+      "diff route with null source"
+    );
+
     t.deepEqual(
       diffRoute([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })]),
       [Route.User({ data: { id: 42 } })],
@@ -113,26 +130,52 @@ test("state", t => {
 
   t.test("routeTransition", t => {
     t.deepEqual(
-      routeTransition([Route.Home()], [Route.About()]),
-      { leave: [Route.Home()], arrive: [Route.About()] },
+      routeTransition({ previous: [Route.Home()], current: [Route.About()] }),
+      {
+        previous: [Route.About()],
+        current: [Route.About()],
+        leave: [Route.Home()],
+        arrive: [Route.About()]
+      },
       "route transition"
     );
 
     t.deepEqual(
-      routeTransition([Route.User({ id: 42 })], [Route.User({ id: 43 })]),
-      { leave: [Route.User({ id: 42 })], arrive: [Route.User({ id: 43 })] },
+      routeTransition({ previous: [Route.User({ id: 42 })], current: [Route.User({ id: 43 })] }),
+      {
+        previous: [Route.User({ id: 43 })],
+        current: [Route.User({ id: 43 })],
+        leave: [Route.User({ id: 42 })],
+        arrive: [Route.User({ id: 43 })]
+      },
       "route transition"
     );
 
     t.deepEqual(
-      routeTransition([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })]),
-      { leave: [Route.User({ data: { id: 42 } })], arrive: [Route.User({ data: { id: 43 } })] },
+      routeTransition({
+        previous: [Route.User({ data: { id: 42 } })],
+        current: [Route.User({ data: { id: 43 } })]
+      }),
+      {
+        previous: [Route.User({ data: { id: 43 } })],
+        current: [Route.User({ data: { id: 43 } })],
+        leave: [Route.User({ data: { id: 42 } })],
+        arrive: [Route.User({ data: { id: 43 } })]
+      },
       "route transition with nested params"
     );
 
     t.deepEqual(
-      routeTransition([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 42 } })]),
-      { leave: [], arrive: [] },
+      routeTransition({
+        previous: [Route.User({ data: { id: 42 } })],
+        current: [Route.User({ data: { id: 42 } })]
+      }),
+      {
+        previous: [Route.User({ data: { id: 42 } })],
+        current: [Route.User({ data: { id: 42 } })],
+        leave: [],
+        arrive: []
+      },
       "no route transition with nested params"
     );
 
@@ -384,29 +427,14 @@ test("routerHelper", t => {
   t.test("createRouter", t => {
     t.plan(7);
 
-    const createParsePath = (routeMap, defaultRoute) => {
-      const routeMatcher = createRouteMatcher(routeMap);
-
-      const parsePath = (path, queryParams) => {
-        const match = routeMatcher(path);
-
-        if (match) {
-          return match.page(Object.assign({}, match.params, queryParams));
-        } else {
-          return defaultRoute;
-        }
-      };
-      return parsePath;
-    };
-
     const getPath = () => "#/user/43";
     const setPath = path => {
       t.equal(path, "#/about");
     };
     const addLocationChangeListener = () => null;
 
-    const router1a = createRouter({
-      createParsePath,
+    const router1a = createFeatherRouter({
+      createRouteMatcher,
       routeConfig: routeConfig1,
       getPath,
       setPath,
@@ -434,8 +462,8 @@ test("routerHelper", t => {
       "router.routeMap"
     );
 
-    const router2 = createRouter({
-      createParsePath,
+    const router2 = createFeatherRouter({
+      createRouteMatcher,
       queryString,
       routeConfig: routeConfig2,
       getPath,
@@ -451,8 +479,8 @@ test("routerHelper", t => {
       "parsePath with queryString"
     );
 
-    const router3 = createRouter({
-      createParsePath,
+    const router3 = createUrlMapperRouter({
+      Mapper,
       routeConfig: routeConfig3,
       getPath,
       setPath

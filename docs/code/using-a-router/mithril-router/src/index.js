@@ -6,7 +6,7 @@ import meiosis from "meiosis-setup";
 import { createApp, App } from "./app";
 import { router } from "./router";
 
-const app = createApp();
+const app = createApp(router.initialRoute, router.locationBarSync);
 
 meiosis.patchinko.setup({ stream: Stream, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
@@ -22,5 +22,4 @@ meiosis.patchinko.setup({ stream: Stream, O, app }).then(({ states, actions }) =
   m.route(document.getElementById("app"), "/", router.MithrilRoutes({ states, actions, App }));
 
   states.map(() => m.redraw());
-  states.map(state => router.locationBarSync(state.route.current));
 });

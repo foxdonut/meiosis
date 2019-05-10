@@ -134,3 +134,100 @@ export const createRouter = ({
 
   return { initialRoute, locationBarSync, parsePath, routeMap, start, toPath };
 };
+
+export const createFeatherRouter = ({
+  createRouteMatcher,
+  queryString,
+  routeConfig,
+  defaultRoute,
+  prefix = "#",
+  getPath,
+  setPath,
+  addLocationChangeListener
+}) => {
+  const createParsePath = (routeMap, defaultRoute) => {
+    const routeMatcher = createRouteMatcher(routeMap);
+
+    const parsePath = (path, queryParams) => {
+      const match = routeMatcher(path);
+
+      if (match) {
+        return match.page(Object.assign({}, match.params, queryParams));
+      } else {
+        return defaultRoute;
+      }
+    };
+    return parsePath;
+  };
+
+  return createRouter({
+    createParsePath,
+    queryString,
+    routeConfig,
+    defaultRoute,
+    prefix,
+    getPath,
+    setPath,
+    addLocationChangeListener
+  });
+};
+
+export const createUrlMapperRouter = ({
+  Mapper,
+  queryString,
+  routeConfig,
+  defaultRoute,
+  prefix = "#",
+  getPath,
+  setPath,
+  addLocationChangeListener
+}) => {
+  const createParsePath = (routeMap, defaultRoute) => {
+    const urlMapper = Mapper();
+
+    const parsePath = (path, queryParams) => {
+      const matchedRoute = urlMapper.map(path, routeMap);
+
+      if (matchedRoute) {
+        return matchedRoute.match(Object.assign({}, matchedRoute.values, queryParams));
+      } else {
+        return defaultRoute;
+      }
+    };
+    return parsePath;
+  };
+
+  return createRouter({
+    createParsePath,
+    queryString,
+    routeConfig,
+    defaultRoute,
+    prefix,
+    getPath,
+    setPath,
+    addLocationChangeListener
+  });
+};
+
+export const createMithrilRouter = ({
+  m,
+  routeConfig,
+  defaultRoute,
+  prefix = "#!",
+  getPath,
+  setPath
+}) => {
+  const queryString = { stringify: m.buildQueryString };
+  const router = createRouter({ queryString, routeConfig, defaultRoute, prefix, getPath, setPath });
+
+  router.MithrilRoutes = ({ states, actions, App }) =>
+    Object.entries(router.routeMap).reduce((result, [path, fn]) => {
+      result[path] = {
+        onmatch: params => actions.navigateTo(fn(params)),
+        render: () => m(App, { state: states(), actions })
+      };
+      return result;
+    }, {});
+
+  return router;
+};

@@ -8,12 +8,9 @@ import { beer } from "../beer";
 import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
-export const createApp = (initialRoute = [Route.Home()]) => ({
+export const createApp = (initialRoute, locationBarSync = () => null) => ({
   Initial: () => ({
-    route: {
-      current: initialRoute,
-      previous: []
-    }
+    route: { current: initialRoute || [Route.Home()] }
   }),
 
   Actions: update =>
@@ -28,6 +25,7 @@ export const createApp = (initialRoute = [Route.Home()]) => ({
     coffee.service,
     beer.service,
     beverage.service,
-    brewer.service
+    brewer.service,
+    ({ state }) => locationBarSync(state.route.current)
   ]
 });

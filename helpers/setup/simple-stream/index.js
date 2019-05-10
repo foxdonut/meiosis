@@ -23,9 +23,8 @@ export const stream = initial => {
       for (const i in mapFunctions) {
         mapFunctions[i](value);
       }
-    } else {
-      return latestValue;
     }
+    return latestValue;
   };
   createdStream.map = mapFunction => {
     let newInitial = undefined;

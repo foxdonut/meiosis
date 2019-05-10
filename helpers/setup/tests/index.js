@@ -512,3 +512,10 @@ const commonTest = (streamLib, label) => {
 commonTest(flyd, "common + flyd");
 commonTest(Stream, "common + mithril-stream");
 commonTest(meiosis.simpleStream, "common + Meiosis simple-stream");
+
+test("simpleStream", t => {
+  const s1 = meiosis.simpleStream.stream();
+  const result = s1(42);
+  t.equal(result, 42, "emitting value onto stream should return the value");
+  t.end();
+});

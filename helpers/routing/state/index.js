@@ -1,14 +1,16 @@
 import fastDeepEqual from "fast-deep-equal";
 
+const defaultEmpty = route => (Array.isArray(route) ? route : []);
+
 export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
-  route.find(
+  defaultEmpty(route).find(
     routeSegment =>
       routeSegment.id === routeSegmentWithParams.id &&
       fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
   );
 
 export const diffRoute = (from, to) =>
-  from.reduce(
+  defaultEmpty(from).reduce(
     (result, route) => result.concat(findRouteSegmentWithParams(to, route) ? [] : route),
     []
   );
@@ -21,12 +23,14 @@ export const createRouteSegments = routeNames =>
 
 export const findRouteSegment = (route, id) => {
   id = id.id || id;
-  return route.find(routeSegment => routeSegment.id === id);
+  return defaultEmpty(route).find(routeSegment => routeSegment.id === id);
 };
 
-export const routeTransition = (from, to) => ({
-  leave: diffRoute(from, to),
-  arrive: diffRoute(to, from)
+export const routeTransition = ({ previous, current }) => ({
+  previous: current,
+  current: current,
+  leave: diffRoute(previous, current),
+  arrive: diffRoute(current, previous)
 });
 
 export const Routing = (route = [], index = 0) => ({
