@@ -5,6 +5,7 @@ const Stream = require("mithril/stream");
 const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
 const R = require("ramda");
+const { produce } = require("immer");
 
 const meiosis = require("../dist/meiosis-setup");
 
@@ -202,12 +203,12 @@ const patchinkoTest = (O, streamLib, label) => {
   });
 };
 
+patchinkoTest(Oc, meiosis.simpleStream, "patchinko-constant + Meiosis simple-stream");
+patchinkoTest(Oc, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
 patchinkoTest(Oc, flyd, "patchinko-constant + flyd");
 patchinkoTest(Oi, flyd, "patchinko-immutable + flyd");
 patchinkoTest(Oc, Stream, "patchinko-constant + mithril-stream");
 patchinkoTest(Oc, Stream, "patchinko-immutable + mithril-stream");
-patchinkoTest(Oc, meiosis.simpleStream, "patchinko-constant + Meiosis simple-stream");
-patchinkoTest(Oc, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
 
 const functionPatchTest = (streamLib, label) => {
   label = "functionPatch + " + label;
@@ -411,9 +412,286 @@ const functionPatchTest = (streamLib, label) => {
   });
 };
 
+functionPatchTest(meiosis.simpleStream, "Meiosis simple-stream");
 functionPatchTest(flyd, "flyd");
 functionPatchTest(Stream, "mithril-stream");
-functionPatchTest(meiosis.simpleStream, "Meiosis simple-stream");
+
+const immerTest = (streamLib, label) => {
+  label = "immer + " + label;
+
+  test("immer setup", t => {
+    t.test(label + " / minimal", t => {
+      meiosis.immer.setup({ stream: streamLib, produce }).then(({ update, states }) => {
+        t.deepEqual(states(), {}, "initial state");
+
+        update(state => {
+          state.duck = { sound: "quack" };
+        });
+        update(state => {
+          state.duck.color = "yellow";
+        });
+
+        t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+
+        t.end();
+      });
+    });
+
+    t.test(label + " / initial state", t => {
+      meiosis.immer
+        .setup({ stream: streamLib, produce, app: { Initial: () => ({ duck: "yellow" }) } })
+        .then(({ states }) => {
+          t.deepEqual(states(), { duck: "yellow" }, "initial state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / initial state promise", t => {
+      const Initial = () =>
+        new Promise(resolve => {
+          setTimeout(() => resolve({ duck: "yellow" }), 10);
+        });
+
+      meiosis.immer.setup({ stream: streamLib, produce, app: { Initial } }).then(({ states }) => {
+        t.deepEqual(states(), { duck: "yellow" }, "initial state");
+        t.end();
+      });
+    });
+
+    t.test(label + " / acceptors", t => {
+      const I = x => x;
+
+      const acceptors = [
+        state =>
+          state.increment > 0 && state.increment < 10
+            ? draft => {
+                draft.count++;
+              }
+            : I,
+        state =>
+          state.increment <= 0 || state.increment >= 10
+            ? draft => {
+                delete draft.increment;
+              }
+            : I,
+        state =>
+          state.invalid
+            ? draft => {
+                delete draft.invalid;
+              }
+            : I,
+        state =>
+          state.sequence
+            ? draft => {
+                draft.sequenced = true;
+              }
+            : I,
+        state =>
+          state.sequenced
+            ? draft => {
+                draft.received = true;
+              }
+            : I
+      ];
+
+      meiosis.immer
+        .setup({ stream: streamLib, produce, app: { Initial: () => ({ count: 0 }), acceptors } })
+        .then(({ update, states }) => {
+          update(state => {
+            state.increment = 1;
+          });
+          update(state => {
+            state.increment = 10;
+          });
+          update(state => {
+            state.invalid = true;
+          });
+          update(state => {
+            state.sequence = true;
+          });
+
+          t.deepEqual(
+            states(),
+            { count: 1, sequence: true, sequenced: true, received: true },
+            "resulting state"
+          );
+          t.end();
+        });
+    });
+
+    t.test(label + " / acceptors run on initial state", t => {
+      const I = x => x;
+
+      const acceptors = [
+        state =>
+          state.increment > 0 && state.increment < 10
+            ? draft => {
+                draft.count++;
+              }
+            : I
+      ];
+
+      meiosis.immer
+        .setup({
+          stream: streamLib,
+          produce,
+          app: { Initial: () => ({ count: 0, increment: 1 }), acceptors }
+        })
+        .then(({ states }) => {
+          t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / services and Actions", t => {
+      const Actions = update => ({
+        increment: amount =>
+          update(state => {
+            state.count += amount;
+          })
+      });
+
+      const services = [
+        ({ state, actions }) => {
+          // update from one service should not affect state seen by the other
+          if (state.count === 1) {
+            actions.increment(1);
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(draft => {
+              draft.service = true;
+            });
+          }
+        }
+      ];
+
+      meiosis.immer
+        .setup({
+          stream: streamLib,
+          produce,
+          app: { Initial: () => ({ count: 0 }), services, Actions }
+        })
+        .then(({ update, states, actions }) => {
+          t.ok(typeof actions.increment === "function", "actions");
+
+          update(state => {
+            state.count = 1;
+          });
+
+          t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / service calls are combined into a single state update", t => {
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(draft => {
+              draft.count = 2;
+            });
+            update(draft => {
+              draft.service1 = true;
+            });
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(draft => {
+              draft.service2 = true;
+            });
+          }
+        }
+      ];
+
+      meiosis.immer
+        .setup({ stream: streamLib, produce, app: { services } })
+        .then(({ update, states }) => {
+          let ticks = 0;
+          states.map(() => ticks++);
+
+          update(state => {
+            state.count = 1;
+          });
+
+          t.equal(ticks, 2, "number of ticks");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / synchronous service updates are combined into one", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          serviceCalls++;
+          if (state.count === 1) {
+            update(draft => {
+              draft.count = 2;
+            });
+            update(draft => {
+              draft.service1 = true;
+            });
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update(draft => {
+              draft.service2 = true;
+            });
+          }
+        }
+      ];
+
+      meiosis.immer
+        .setup({ stream: streamLib, produce, app: { services } })
+        .then(({ update, states }) => {
+          update(state => {
+            state.count = 1;
+          });
+
+          // Service calls: 1) initial, 2) update call
+          t.equal(serviceCalls, 2, "number of service calls");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / services are not called in an infinite loop", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            serviceCalls++;
+            update(draft => {
+              draft.service = true;
+            });
+          }
+        }
+      ];
+
+      meiosis.immer
+        .setup({ stream: streamLib, produce, app: { services } })
+        .then(({ update, states }) => {
+          update(state => {
+            state.count = 1;
+          });
+
+          t.equal(serviceCalls, 1, "number of service calls");
+          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+          t.end();
+        });
+    });
+  });
+};
+
+immerTest(meiosis.simpleStream, "Meiosis simple-stream");
+immerTest(flyd, "flyd");
+immerTest(Stream, "mithril-stream");
 
 const commonTest = (streamLib, label) => {
   test("common setup", t => {
@@ -509,9 +787,9 @@ const commonTest = (streamLib, label) => {
   });
 };
 
+commonTest(meiosis.simpleStream, "common + Meiosis simple-stream");
 commonTest(flyd, "common + flyd");
 commonTest(Stream, "common + mithril-stream");
-commonTest(meiosis.simpleStream, "common + Meiosis simple-stream");
 
 test("simpleStream", t => {
   const s1 = meiosis.simpleStream.stream();

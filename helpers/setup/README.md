@@ -23,6 +23,7 @@ provided:
 
 - `patchinko.setup`
 - `functionPatches.setup`
+- `immer.setup`
 - `common.setup`
 - `simpleStream.stream`
 - `simpleStream.scan`
@@ -48,6 +49,11 @@ If you are using [Patchinko](https://github.com/barneycarroll/patchinko), use `p
 
 ```javascript
 import meiosis from "meiosis-setup";
+import simpleStream from "meiosis-setup/simpleStream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
 
 import O from "patchinko/constant";
 // or
@@ -55,13 +61,9 @@ import O from "patchinko/constant";
 // or
 // import P from "patchinko/explicit";
 
-import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
 const app = {};
 
-meiosis.patchinko.setup({ stream: Stream, O, app })
+meiosis.patchinko.setup({ stream: simpleStream, O, app })
   .then(({ update, models, states, actions }) => {
     // setup your view here
   })
@@ -75,14 +77,37 @@ If you are using
 
 ```javascript
 import meiosis from "meiosis-setup";
-
-import Stream from "mithril/stream";
+import simpleStream from "meiosis-setup/simpleStream";
+// or
+// import Stream from "mithril/stream";
 // or
 // import flyd from "flyd";
 
 const app = {};
 
-meiosis.functionPatches.setup({ stream: Stream, app })
+meiosis.functionPatches.setup({ stream: simpleStream, app })
+  .then(({ update, models, states, actions }) => {
+    // setup your view here
+  })
+```
+
+### Immer Setup
+
+If you are using [Immer](https://github.com/immerjs/immer), use `immer.setup`:
+
+```javascript
+import meiosis from "meiosis-setup";
+import simpleStream from "meiosis-setup/simpleStream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
+
+import produce from "immer";
+
+const app = {};
+
+meiosis.immer.setup({ stream: simpleStream, produce, app })
   .then(({ update, models, states, actions }) => {
     // setup your view here
   })
@@ -100,37 +125,8 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
 
-- `acceptor` (optional): `f(state, fn) => updatedState`. This function gets the latest state and
-a function. Calling that function with `state` produces a patch, which should then be applied to
-the state to return the updated state.
+    With Immer, the `accumulator` is `produce`.
 
-    For example, with Patchinko, the `acceptor` is `(state, fn) => O(state, fn(state))`.
-
-    With Function Patches, the `acceptor` is `(state, fn) => fn(state)(state)`.
-
-    **Note** that you **only** have to specify an acceptor function if you have `acceptors`
-    in your `app`.
-
-Here is how you would use `common.setup` with [Immer](https://github.com/immerjs/immer):
-
-```javascript
-import meiosis from "meiosis-setup";
-
-import produce from "immer";
-
-import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-const acceptor = (state, patch) => produce(state, fn(state));
-
-const app = {};
-
-meiosis.common.setup({ stream: Stream, accumulator: produce, acceptor, app })
-  .then(({ update, models, states, actions }) => {
-    // setup your view here
-  })
-```
 
 ### App Initial State, Actions, Acceptors, and Services
 
