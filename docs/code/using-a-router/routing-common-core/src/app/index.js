@@ -13,8 +13,13 @@ export const createApp = initialRoute => ({
     route: { current: initialRoute || [Route.Home()] }
   }),
 
-  Actions: update =>
-    Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),
+  Actions: ({ update, combine }) =>
+    Object.assign(
+      {},
+      routes.Actions({ update, combine }),
+      login.Actions({ update, combine }),
+      settings.Actions({ update, combine })
+    ),
 
   acceptors: [settings.accept, login.accept, routes.accept],
 

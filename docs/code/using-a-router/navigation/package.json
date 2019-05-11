@@ -26,7 +26,7 @@
   "dependencies": {
     "flyd": "^0.2.8",
     "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-0.1.0.tgz",
-    "meiosis-setup": "file:../../../../helpers/setup/meiosis-setup-0.1.0.tgz",
+    "meiosis-setup": "^1.0.0",
     "patchinko": "^4.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
