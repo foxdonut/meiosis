@@ -43,6 +43,15 @@ For the stream library, you can use `Meiosis.simpleStream`,
 out-of-the-box. You can also use another stream library; see
 [Using another stream library](#other_stream_library), below.
 
+### Combine
+
+For convience, the `combine` function is provided to `Actions`, i.e. `({ update, combine })`.
+You can use `combine([patches])` in actions to combine multiple patches into one, thus reducing
+the number of updates, state changes, and view refreshes.
+
+Acceptors must return a single patch, but you can also return an array of patches in which case
+it will automatically be `combine`d into one.
+
 ### Patchinko Setup
 
 If you are using [Patchinko](https://github.com/barneycarroll/patchinko), use `patchinko.setup`:
@@ -121,11 +130,13 @@ In the `app` object that you provide to `setup`, you can optionally provide the 
 or return a `Promise`. If not provided, the initial state is `{}`.
 - `Actions`: a function that receives `({ update, combine })` and returns an object with actions.
 The created actions are returned by `setup`, and also passed to `services`.
-For convenience, `combine` is provided to combine an array of patches into one.
 If not provided, the created actions are `{}`.
-- `acceptors`: an array of "accept" functions that get called with `({ state, combine })`.
+For convience, the `combine` function is provided to combine multiple patches into one, thus
+reducing the number of updates, state changes, and view refreshes.
+- `acceptors`: an array of "accept" functions that get called with `(state)`.
 These functions are called in order and should return a patch to modify the state as needed.
-For convenience, `combine` is provided to combine an array of patches into one.
+You can also return an array of patches, which will automatically be `combine`d into a single
+patch.
 - `services`: an array of functions that get called with `({ state, update, actions })`. Services
 can issue updates by calling `update` or by calling actions. Services can call `update`
 synchronously or asynchrously. Multiple synchronous calls to `update` are automatically combined
@@ -156,11 +167,6 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     With Immer,
     `combine: patches => model => { patches.forEach(patch => patch(model)); }`
-
-
-### Examples
-
-Coming soon.
 
 <a name="other_stream_library"></a>
 ### Using another stream library

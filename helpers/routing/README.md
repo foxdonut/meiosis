@@ -45,6 +45,6 @@ const Route = createRoutes([
 
 ----
 
-_meiosis-helpers is developed by [foxdonut](https://github.com/foxdonut)
+_meiosis-routing is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
 

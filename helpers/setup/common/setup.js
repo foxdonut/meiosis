@@ -6,11 +6,25 @@
  * This function can return a result or a `Promise`. If not specified, the initial state will
  * be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
- * `update => actions`.
+ * `({ update, combine }) => actions`.
  * @property {Array<Function>} [acceptors=[]] - an array of acceptor functions, each of which
- * should be `state => patch`.
+ * should be `state => patch` or `state => [patch]`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
  * should be `({ state, update, actions }) => void`.
+ */
+
+/**
+ * Stream library. This works with `meiosis.simpleStream`, `flyd`, * `m.stream`, or anything
+ * for which you provide either a function or an object with a `stream` function to create a stream.
+ * The function or object must also have a `scan` property.
+ * The returned stream must have a `map` method.
+ *
+ * @typedef {Object|Function} StreamLib
+ * @param {*} [value] - the stream's initial value.
+ * @property {Function} stream - the function to create a stream, if the stream library itself is
+ * not a function.
+ * @property {Function} scan - the stream library's `scan` function.
+ * @return {simpleStream} - the created stream.
  */
 
 const B = (f, g) => (...args) => f(g(...args));
@@ -27,7 +41,7 @@ const B = (f, g) => (...args) => f(g(...args));
  * function to create a stream. The function or object must also have a `scan` property.
  * The returned stream must have a `map` method.
  * @param {Function} accumulator - the accumulator function.
- * @param {Function} combine - the function that combines patches into one.
+ * @param {Function} combine - the function that combines an array of patches into one.
  * @param {app} app - the app, with optional properties.
  *
  * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
@@ -50,9 +64,12 @@ export const setup = ({ stream, accumulator, combine, app }) => {
     throw new Error("No combine function was specified.");
   }
 
+  const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
+
   const accept =
     acceptors.length > 0
-      ? model => acceptors.reduce((mdl, acceptor) => accumulator(mdl, acceptor(mdl)), model)
+      ? model =>
+          acceptors.reduce((mdl, acceptor) => accumulator(mdl, singlePatch(acceptor(mdl))), model)
       : x => x;
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
@@ -81,7 +98,7 @@ export const setup = ({ stream, accumulator, combine, app }) => {
         : update;
 
       const states = hasServices ? createStream() : models;
-      const actions = (Actions || (() => ({})))(bufferedUpdate);
+      const actions = (Actions || (() => ({})))({ update: bufferedUpdate, combine });
 
       if (hasServices) {
         models.map(state => {

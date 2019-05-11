@@ -49,7 +49,7 @@ const patchinkoTest = (O, streamLib, label) => {
       const acceptors = [
         state => (state.increment > 0 && state.increment < 10 ? { count: O(x => x + 1) } : null),
         state => (state.increment <= 0 || state.increment >= 10 ? { increment: O } : null),
-        state => (state.invalid ? { invalid: O } : null),
+        state => (state.invalid ? [{ invalid: O }, { combined: true }] : null),
         state => (state.sequence ? { sequenced: true } : null),
         state => (state.sequenced ? { received: true } : null)
       ];
@@ -64,7 +64,7 @@ const patchinkoTest = (O, streamLib, label) => {
 
           t.deepEqual(
             states(),
-            { count: 1, sequence: true, sequenced: true, received: true },
+            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
             "resulting state"
           );
           t.end();
@@ -89,7 +89,7 @@ const patchinkoTest = (O, streamLib, label) => {
     });
 
     t.test(label + " / services and actions", t => {
-      const Actions = update => ({
+      const Actions = ({ update }) => ({
         increment: amount => update({ count: O(x => x + amount) })
       });
 
@@ -115,6 +115,25 @@ const patchinkoTest = (O, streamLib, label) => {
           update({ count: 1 });
 
           t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / actions can use combine", t => {
+      const Actions = ({ update, combine }) => ({
+        increment: amount => update(combine([{ count: O(x => x + amount) }, { combined: true }]))
+      });
+
+      meiosis.patchinko
+        .setup({
+          stream: streamLib,
+          O,
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          actions.increment(1);
+
+          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
           t.end();
         });
     });
@@ -256,7 +275,7 @@ const functionPatchTest = (streamLib, label) => {
           state.increment > 0 && state.increment < 10 ? R.over(R.lensProp("count"), R.add(1)) : I,
 
         state => (state.increment <= 0 || state.increment >= 10 ? R.dissoc("increment") : I),
-        state => (state.invalid ? R.dissoc("invalid") : I),
+        state => (state.invalid ? [R.dissoc("invalid"), R.assoc("combined", true)] : I),
         state => (state.sequence ? R.assoc("sequenced", true) : I),
         state => (state.sequenced ? R.assoc("received", true) : I)
       ];
@@ -271,7 +290,7 @@ const functionPatchTest = (streamLib, label) => {
 
           t.deepEqual(
             states(),
-            { count: 1, sequence: true, sequenced: true, received: true },
+            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
             "resulting state"
           );
           t.end();
@@ -298,7 +317,7 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / services and Actions", t => {
-      const Actions = update => ({
+      const Actions = ({ update }) => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
@@ -324,6 +343,25 @@ const functionPatchTest = (streamLib, label) => {
           update(R.assoc("count", 1));
 
           t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / actions can use combine", t => {
+      const Actions = ({ update, combine }) => ({
+        increment: amount =>
+          update(combine([R.over(R.lensProp("count"), R.add(amount)), R.assoc("combined", true)]))
+      });
+
+      meiosis.functionPatches
+        .setup({
+          stream: streamLib,
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          actions.increment(1);
+
+          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
           t.end();
         });
     });
@@ -476,9 +514,14 @@ const immerTest = (streamLib, label) => {
             : I,
         state =>
           state.invalid
-            ? draft => {
-                delete draft.invalid;
-              }
+            ? [
+                draft => {
+                  delete draft.invalid;
+                },
+                draft => {
+                  draft.combined = true;
+                }
+              ]
             : I,
         state =>
           state.sequence
@@ -512,7 +555,7 @@ const immerTest = (streamLib, label) => {
 
           t.deepEqual(
             states(),
-            { count: 1, sequence: true, sequenced: true, received: true },
+            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
             "resulting state"
           );
           t.end();
@@ -544,7 +587,7 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / services and Actions", t => {
-      const Actions = update => ({
+      const Actions = ({ update }) => ({
         increment: amount =>
           update(state => {
             state.count += amount;
@@ -581,6 +624,35 @@ const immerTest = (streamLib, label) => {
           });
 
           t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / actions can use combine", t => {
+      const Actions = ({ update, combine }) => ({
+        increment: amount =>
+          update(
+            combine([
+              state => {
+                state.count += amount;
+              },
+              state => {
+                state.combined = true;
+              }
+            ])
+          )
+      });
+
+      meiosis.immer
+        .setup({
+          stream: streamLib,
+          produce,
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          actions.increment(1);
+
+          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
           t.end();
         });
     });
@@ -744,7 +816,7 @@ const commonTest = (streamLib, label) => {
     });
 
     t.test(label + " / basic patchinko setup with no acceptors/services", t => {
-      const Actions = update => ({
+      const Actions = ({ update }) => ({
         increment: amount => update({ count: Oc(x => x + amount) })
       });
 
@@ -765,7 +837,7 @@ const commonTest = (streamLib, label) => {
     });
 
     t.test(label + " / basic functionPatch setup with no acceptors/services", t => {
-      const Actions = update => ({
+      const Actions = ({ update }) => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
