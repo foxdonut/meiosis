@@ -16,6 +16,11 @@
 <p>IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern,
 please see the <a href="https://meiosis.js.org/tutorial/toc.html">Meiosis Tutorial</a>.</p>
 </blockquote>
+<blockquote>
+<p><strong>Helper functions!</strong> Meiosis is a pattern that you can set up yourself, but by popular demand
+<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup">meiosis-setup</a> is now available
+for your convenience.</p>
+</blockquote>
 <p>This is a quick summary of the Meiosis Pattern:</p>
 <ul>
 <li>Separate state management code from view code.</li>
@@ -31,8 +36,8 @@ or your own patches.</li>
 </ul>
 <p>Here is the code to set up the Meiosis Pattern:</p>
 <pre><code class="language-js">const app = {
-  initialState: () =&gt; ...,
-  actions: update =&gt; {
+  Initial: () =&gt; ...,
+  Actions: update =&gt; {
     return ...
   }
 };
@@ -40,32 +45,46 @@ or your own patches.</li>
 const update = flyd.stream();
 
 // Using Patchinko:
-const states = flyd.scan(P, app.initialState(), update);
+const states = flyd.scan(P, app.Initial(), update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);
+const states = flyd.scan((x, f) =&gt; f(x), app.Initial(), update);
 
-const actions = app.actions(update);</code></pre>
+const actions = app.Actions(update);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
-<p>Optionally, add <a href="#using_computed_and_services">Computed State and Services</a>:</p>
+<p>Optionally, add <a href="services.html">Services and Accepted State</a>:</p>
 <pre><code class="language-javascript">// Using Patchinko:
-const computed = state =&gt;
-  computes.reduce((x, f) =&gt; P(x, f(x)), state);
+const accept = state =&gt;
+  acceptors.reduce(
+    (updatedState, acceptor) =&gt;
+      O(updatedState, acceptor(updatedState)),
+    state
+  );
 
-const states = flyd.scan(P, app.initialState(), update)
-  .map(computed);
-
+const states = m.stream.scan(
+  (state, patch) =&gt; accept(O(state, patch)),
+  accept(app.Initial()),
+  update
+);
 states.map(state =&gt;
-  services.forEach(service =&gt; service(state, update)));
+  services.forEach(service =&gt; service({ state, update })));
 
 // Using Function Patches:
-const computed = state =&gt;
-  computes.reduce((x, f) =&gt; f(x)(x), state);
+const accept = state =&gt;
+  acceptors.reduce(
+    (updatedState, acceptor) =&gt;
+      acceptor(updatedState)(updatedState),
+    state
+  );
 
-const states = flyd.scan((x, f) =&gt; f(x), app.initialState(), update);
+const states = m.stream.scan(
+  (state, patch) =&gt; accept(T(state, patch)),
+  accept(app.Initial()),
+  update
+);
 
 states.map(state =&gt;
-  services.forEach(service =&gt; service(state, update)));</code></pre>
+  services.forEach(service =&gt; service({ state, update })));</code></pre>
 <p><a name="using_mithril"></a></p>
 <h3><a href="#using_mithril">Using Mithril</a></h3><pre><code class="language-js">const App = {
   view: function({ attrs: { state, actions } }) {

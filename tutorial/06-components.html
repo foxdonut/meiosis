@@ -33,39 +33,43 @@ At the top-level app, we&#39;ll assemble these together into the complete initia
 of actions.</p>
 <p>For the conditions, we have:</p>
 <pre><code class="language-js">var conditions = {
-  initialState: {
-    conditions: {
-      precipitations: false,
-      sky: &quot;Sunny&quot;
-    }
+  Initial: function() {
+    return {
+      conditions: {
+        precipitations: false,
+        sky: &quot;Sunny&quot;
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: PS({ precipitations: value }) });
+        update({ conditions: O({ precipitations: value }) });
       },
       changeSky: function(value) {
-        update({ conditions: PS({ sky: value }) });
+        update({ conditions: O({ sky: value }) });
       }
     };
   }
 };</code></pre>
 <p>For the temperature, we have essentially the same code as we previously had.</p>
 <pre><code class="language-js">var temperature = {
-  initialState: {
-    temperature: {
-      value: 22,
-      units: &quot;C&quot;
-    }
+  Initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: &quot;C&quot;
+      }
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function(amount) {
-        update({ temperature: PS({ value: S(x =&gt; x + amount) }) });
+        update({ temperature: O({ value: O(x =&gt; x + amount) }) });
       },
       changeUnits: function() {
         update({
-          temperature: S(state =&gt; {
+          temperature: O(state =&gt; {
             var value = state.value;
             var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
             var newValue = convert(value, newUnits);
@@ -81,14 +85,16 @@ of actions.</p>
 <p>Then, to assemble the components into the top-level app, we put together the state management
 code by combining the initial state and the actions of the components.</p>
 <pre><code class="language-js">var app = {
-  initialState: P({},
-    conditions.initialState,
-    temperature.initialState
+  Initial: function() {
+    return O({},
+      conditions.Initial(),
+      temperature.Initial()
+    );
   ),
-  actions: function(update) {
-    return P({},
-      conditions.actions(update),
-      temperature.actions(update)
+  Actions: function(update) {
+    return O({},
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };</code></pre>
@@ -96,8 +102,8 @@ code by combining the initial state and the actions of the components.</p>
 <div id="flems1" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "06-components-01.js", content: "/*global flyd, P, S, PS*/\nvar conditions = {\n  initialState: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: PS({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: PS({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n  );\n};\n\nvar temperature = {\n  initialState: {\n    temperature: {\n      value: 22,\n      units: \"C\"\n    }\n  },\n  actions: function(update) {\n    return {\n      increment: function(amount) {\n        update({ temperature: PS({ value: S(x => x + amount) }) });\n      },\n      changeUnits: function() {\n        update({\n          temperature: S(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initialState: P({},\n    conditions.initialState,\n    temperature.initialState\n  ),\n  actions: function(update) {\n    return P({},\n      conditions.actions(update),\n      temperature.actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(P, app.initialState, update);\n\nvar actions = app.actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\");\n});\n"}],
-      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/explicit.js"}],
+      files: [{name: "06-components-01.js", content: "/*global flyd, O*/\nvar conditions = {\n  Initial: function() {\n    return {\n      conditions: {\n        precipitations: false,\n        sky: \"Sunny\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: O({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: O({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      temperature: {\n        value: 22,\n        units: \"C\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(amount) {\n        update({\n          temperature: O({ value: O(x => x + amount) })\n        });\n      },\n      changeUnits: function() {\n        update({\n          temperature: O(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  Initial: function() {\n    return O({}, conditions.Initial(), temperature.Initial());\n  },\n  Actions: function(update) {\n    return O(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(O, app.Initial(), update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/constant.js"}],
       middle: 75
     })
   </script>
@@ -113,27 +119,16 @@ property in the component, the ID is used when reading and updating state.</p>
 <p>Continuing the previous example, let&#39;s say we want to have two instances of the <code>temperature</code>
 component: one for the air temperature and one for the water temperature. We want to use the
 <code>air</code> and <code>water</code> properties in the application state.</p>
-<p>First, we&#39;ll change <code>initialState</code> to a function so that we get a separate instance for
-each temperature component:</p>
-<pre><code class="language-js">var temperature = {
-  initialState: function() {
-    return {
-      value: 22,
-      units: &quot;C&quot;
-    };
-  },
-  // ...
-};</code></pre>
-<p>Next, we&#39;ll change the actions to accept an <code>id</code> parameter. Then, we use the <code>id</code> when issuing
+<p>We&#39;ll change the actions to accept an <code>id</code> parameter. Then, we use the <code>id</code> when issuing
 updates, so that we dyamically update the <code>id</code> property of the state:</p>
-<pre><code class="language-js">actions: function(update) {
+<pre><code class="language-js">Actions: function(update) {
   return {
     increment: function(id, amount) {
-      update({ [id]: PS({ value: S(x =&gt; x + amount) }) });
+      update({ [id]: O({ value: O(x =&gt; x + amount) }) });
     },
     changeUnits: function(id) {
       update({
-        [id]: S(state =&gt; {
+        [id]: O(state =&gt; {
           var value = state.value;
           var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
           var newValue = convert(value, newUnits);
@@ -146,20 +141,20 @@ updates, so that we dyamically update the <code>id</code> property of the state:
   };
 }</code></pre>
 <p>Notice the <code>{ [id]: ... }</code> syntax which creates an object with a dynamic <code>id</code> property.</p>
-<p>Finally, we create the initial state with two instances of <code>temperature</code>, one with <code>air</code>
-and one with <code>water</code>. The <code>actions</code> are created the same as before. Indeed, we just need
+<p>Now, we create the initial state with two instances of <code>temperature</code>, one with <code>air</code>
+and one with <code>water</code>. The actions are created the same as before. Indeed, we just need
 one instance of the temperature actions; it&#39;s the <code>id</code> that we pass to the actions that
 indicates which instance to act upon.</p>
 <pre><code class="language-js">var app = {
-  initialState: P({},
-    conditions.initialState,
-    { air: temperature.initialState() },
-    { water: temperature.initialState() }
+  Initial: O({},
+    conditions.Initial(),
+    { air: temperature.Initial() },
+    { water: temperature.Initial() }
   ),
-  actions: function(update) {
-    return P({},
-      conditions.actions(update),
-      temperature.actions(update)
+  Actions: function(update) {
+    return O({},
+      conditions.Actions(update),
+      temperature.Actions(update)
     );
   }
 };</code></pre>
@@ -167,8 +162,8 @@ indicates which instance to act upon.</p>
 <div id="flems2" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems2, {
-      files: [{name: "06-components-02.js", content: "/*global flyd, P, S, PS*/\nvar conditions = {\n  initialState: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: PS({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: PS({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    (to === \"C\") ? ((value - 32) / 9 * 5) : (value * 9 / 5 + 32)\n  );\n};\n\nvar temperature = {\n  initialState: function() {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: PS({ value: S(x => x + amount) }) });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: S(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initialState: P({},\n    conditions.initialState,\n    { air: temperature.initialState() },\n    { water: temperature.initialState() }\n  ),\n  actions: function(update) {\n    return P({},\n      conditions.actions(update),\n      temperature.actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(P, app.initialState, update);\n\nvar actions = app.actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\");\n});\n"}],
-      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/explicit.js"}],
+      files: [{name: "06-components-02.js", content: "/*global flyd, O*/\nvar conditions = {\n  Initial: function() {\n    return {\n      conditions: {\n        precipitations: false,\n        sky: \"Sunny\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: O({ precipitations: value }) });\n      },\n      changeSky: function(value) {\n        update({ conditions: O({ sky: value }) });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: O({ value: O(x => x + amount) }) });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: O(state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          })\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  Initial: function() {\n    return O(\n      {},\n      conditions.Initial(),\n      { air: temperature.Initial() },\n      { water: temperature.Initial() }\n    );\n  },\n  Actions: function(update) {\n    return O(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(O, app.Initial(), update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/constant.js"}],
       middle: 75
     })
   </script>

@@ -142,19 +142,25 @@ below:</p>
 <p><a name="using_scan"></a></p>
 <h3><a href="#using_scan">Using <code>scan</code></a></h3><p>Now that have we streams, <code>map</code>, and <code>scan</code>, we can use them to manage our application state.
 Previously, we had:</p>
-<pre><code class="language-js">var initialState = {
-  value: 0
-};
+<pre><code class="language-js">function Initial() {
+  return {
+    value: 0
+  };
+}
 
-var actions = {
-  increment: function() {
-    initialState.value = initialState.value + 1;
-  }
-};</code></pre>
+var initialState = Initial();
+
+function Actions() {
+  return {
+    increment: function() {
+      initialState.value = initialState.value + 1;
+    }
+  };
+}</code></pre>
 <p>We can incorporate streams to manage the flow of data:</p>
 <ul>
-<li>We create an <code>update</code> stream, and pass it to <code>actions</code>.</li>
-<li>To update the state, <code>actions</code> passes a value onto the <code>update</code> stream, indicating a state
+<li>We create an <code>update</code> stream, and pass it to <code>Actions</code>.</li>
+<li>To update the state, an action passes a value onto the <code>update</code> stream, indicating a state
 change. We&#39;ll call this a <strong>patch</strong>. In our example, the patches are numbers by which to
 increment the value of the counter.</li>
 <li>Using <code>scan</code>, we create a stream of states, starting with the initial state and incrementing
@@ -163,10 +169,12 @@ the counter by the values coming in on the <code>update</code> stream.</li>
 </ul>
 <p>Here are our changes:</p>
 <pre><code class="language-js">var app = {
-  initialState: {
-    value: 0
+  Initial: function() {
+    return {
+      value: 0
+    };
   },
-  actions: function(update) {
+  Actions: function(update) {
     return {
       increment: function() {
         update(1);
@@ -182,9 +190,9 @@ var update = flyd.stream();
 var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
-}, app.initialState, update);
+}, app.Initial(), update);
 
-var actions = app.actions(update);
+var actions = app.Actions(update);
 states.map(function(state) {
   document.write(&quot;&lt;pre&gt;&quot; + JSON.stringify(state) + &quot;&lt;/pre&gt;&quot;);
 });</code></pre>
@@ -196,7 +204,7 @@ onto the <code>update</code> stream.</p>
 <div id="flems3" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems3, {
-      files: [{name: "03-streams-02.js", content: "/*global flyd*/\nvar app = {\n  initialState: {\n    value: 0\n  },\n  actions: function(update) {\n    return {\n      increment: function() {\n        update(1);\n      },\n      decrement: function() {\n        update(-1);\n      }\n    };\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(function(state, increment) {\n  state.value = state.value + increment;\n  return state;\n}, app.initialState, update);\n\nvar actions = app.actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state) + \"</pre>\");\n});\n"}],
+      files: [{name: "03-streams-02.js", content: "/*global flyd*/\nvar app = {\n  Initial: function() {\n    return {\n      value: 0\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function() {\n        update(1);\n      },\n      decrement: function() {\n        update(-1);\n      }\n    };\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(\n  function(state, increment) {\n    state.value = state.value + increment;\n    return state;\n  },\n  app.Initial(),\n  update\n);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\"<pre>\" + JSON.stringify(state) + \"</pre>\");\n});\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"}],
       middle: 75
     })

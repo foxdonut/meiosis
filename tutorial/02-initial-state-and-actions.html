@@ -17,22 +17,32 @@
 <h2>02 - Initial State and Actions</h2><p>Meiosis is a pattern for managing application state. The idea is to have a top-level state
 object, and simple ways to update the state.</p>
 <p>Let&#39;s imagine a simple counter example. Our initial state might be:</p>
-<pre><code class="language-js">var initialState = {
-  value: 0
-};</code></pre>
-<p>A plain JavaScript object with a <code>value</code> property indicating the value of the counter.</p>
+<pre><code class="language-js">function Initial() {
+  return {
+    value: 0
+  };
+}</code></pre>
+<p>That is, a function that returns a plain JavaScript object with a <code>value</code> property indicating
+the value of the counter.</p>
 <p>Now, we want to create an action that increments the counter.</p>
 <p><a name="increment_action"></a></p>
-<h3><a href="#increment_action">Increment Action</a></h3><p>We&#39;ll create an <code>actions</code> object with an <code>increment</code> function that increments the counter.</p>
-<pre><code class="language-javascript">var initialState = {
-  value: 0
-};
+<h3><a href="#increment_action">Increment Action</a></h3><p>We&#39;ll write an <code>Actions</code> function that returns object with an <code>increment</code> function that
+increments the counter.</p>
+<pre><code class="language-javascript">function Initial() {
+  return {
+    value: 0
+  };
+}
 
-var actions = {
-  increment: function() {
-    initialState.value = initialState.value + 1;
-  }
-};</code></pre>
+var initialState = Initial();
+
+function Actions() {
+  return {
+    increment: function() {
+      initialState.value = initialState.value + 1;
+    }
+  };
+}</code></pre>
 <p>So we already have an initial state, and an actions object to update the state. However, this
 approach is somewhat lacking: we are directly modifying a global variable. This forces the need
 for the actions to have a reference to the global variable. Moreover, it gives us no control over
