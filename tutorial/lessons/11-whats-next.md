@@ -6,6 +6,9 @@
 
 This concludes the Meiosis tutorial. Where do you go from here?
 
+- If you'd like to use helper functions instead of setting up the Meiosis pattern yourself,
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup)
+is available for your convenience.
 - You will find more articles in the [Documentation](https://meiosis.js.org/docs/toc.html).
 - See also more [Examples](https://meiosis.js.org/examples.html).
 - The [Meiosis Tracer](https://meiosis.js.org/tracer) is a time-travel development tool.
