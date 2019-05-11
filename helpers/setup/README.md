@@ -30,18 +30,18 @@ provided:
 
 ## Setup
 
-The `setup` function sets up the Meiosis pattern using the stream library, accumulator function,
-acceptor function (optional), and application that you provide. The application in turn defines
-the initial state function, the actions, the array of acceptors, and the array of services, all
-of which are optional.
+The `setup` function sets up the Meiosis pattern using the stream library and application that
+you provide. In the application, you can define the `Initial` function, the `Actions`, the array
+of acceptors, and the array of services, _all of which are optional_.
 
-Because the initial state function may return a `Promise`, the `setup` function also returns a
+Because the `Initial` function may return a `Promise`, the `setup` function also returns a
 `Promise` which provides the `update`, `models`, and `states` streams, as well as the created
 `actions`.
 
-For the stream library, both [Flyd](https://github.com/paldepind/flyd) and
-[Mithril-Stream](https://mithril.js.org/stream.html) work out-of-the-box. You can use another
-stream library; see [Using another stream library](#other_stream_library), below.
+For the stream library, you can use `Meiosis.simpleStream`,
+[Flyd](https://github.com/paldepind/flyd), or [Mithril-Stream](https://mithril.js.org/stream.html)
+out-of-the-box. You can also use another stream library; see
+[Using another stream library](#other_stream_library), below.
 
 ### Patchinko Setup
 
@@ -113,10 +113,28 @@ meiosis.immer.setup({ stream: simpleStream, produce, app })
   })
 ```
 
+### Application
+
+In the `app` object that you provide to `setup`, you can optionally provide the following:
+
+- `Initial`: a function that returns the initial state. This function can return immediately
+or return a `Promise`. If not provided, the initial state is `{}`.
+- `Actions`: a function that receives `({ update, combine })` and returns an object with actions.
+The created actions are returned by `setup`, and also passed to `services`.
+For convenience, `combine` is provided to combine an array of patches into one.
+If not provided, the created actions are `{}`.
+- `acceptors`: an array of "accept" functions that get called with `({ state, combine })`.
+These functions are called in order and should return a patch to modify the state as needed.
+For convenience, `combine` is provided to combine an array of patches into one.
+- `services`: an array of functions that get called with `({ state, update, actions })`. Services
+can issue updates by calling `update` or by calling actions. Services can call `update`
+synchronously or asynchrously. Multiple synchronous calls to `update` are automatically combined
+into a single update.
+
 ### Common Setup
 
 You can use a setup other than Patchinko or Function Patches with `common.setup`. All you need to
-do is specify the `accumulator` function and, optionally, the `acceptor` function:
+do is specify the `accumulator` function and, optionally, the `combine` function:
 
 - `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
 patch (the patch being in whatever form you decide to use), and returns the updated state.
@@ -127,24 +145,18 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     With Immer, the `accumulator` is `produce`.
 
+- `combine`: required only if `app.services` are present. The `combine` function is of the form
+`([patches]) => patch`, combining an array of patches into a single patch.
 
-### App Initial State, Actions, Acceptors, and Services
+    For example, with Patchinko,
+    `combine: patches => model => patches.reduce((m, p) => O(m, p), model)`
 
-As you saw in the examples above, everything you specify in your `app` is optional.
-You can specify:
+    With Function Patches, `combine` is function composition:
+    `combine = fns => args => fns.reduceRight((arg, fn) => fn(arg), args)`
 
-- `initial`: a **function** that returns the initial state. This can return immediately
-or return a `Promise`. If not specified, the initial state is `{}`.
-- `Actions`: a function that receives `update` and returns the actions. If not
-specified, the created actions are `{}`.
-- `acceptors`: an array of functions, each of which is `f(state) => patch`. These
-functions get called in sequence. The patches that they return are applied to the
-state to produce the updated state. If not specified, `acceptors` is `[]`.
-- `services`: an array of functions, each of which is
-`f({ state, update, actions }) => <void>`. These functions get called with the
-latest state, the `update` stream, and the `actions`. Service functions trigger
-updates by calling `update` and/or `actions.f(...)`, either synchronously
-and/or asynchronously. If not specified, `services` is `[]`.
+    With Immer,
+    `combine: patches => model => { patches.forEach(patch => patch(model)); }`
+
 
 ### Examples
 
@@ -160,7 +172,7 @@ called, emits a value onto the stream; and the function must have a `map` method
 
 ### API
 
-[API documentation](api.md)
+[API documentation is here.](api.md)
 
 ----
 

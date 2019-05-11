@@ -1,7 +1,7 @@
 /**
  * A simple stream.
  *
- * @typedef {Function} Stream
+ * @typedef {Function} simpleStream
  * @param {*} [value] - emits a value onto the stream. When not specified, returns the
  * stream's latest value.
  * @property {Function} map - creates a new stream for which the values from the original stream
@@ -12,7 +12,7 @@
  * Creates a stream.
  * @function meiosis.simpleStream.stream
  * @param {*} [initial] - the stream's initial value.
- * @returns {Stream} the created stream.
+ * @returns {simpleStream} the created stream.
  */
 export const stream = initial => {
   const mapFunctions = [];
@@ -52,9 +52,9 @@ export const stream = initial => {
  * @param {Function} accumulator - a two-parameter function, the result of which is emitted
  * onto the returned stream.
  * @param {*} initial - the initial value for the returned stream.
- * @param {Stream} sourceStream - the source stream from which values are processed by the
+ * @param {simpleStream} sourceStream - the source stream from which values are processed by the
  * accumulator function.
- * @returns {Stream} the created stream.
+ * @returns {simpleStream} the created stream.
  */
 export const scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);

@@ -1,7 +1,23 @@
+/**
+ * Application object.
+ *
+ * @typedef {Object} app
+ * @property {Function} [Initial=()=>({})] -  a function that creates the initial state.
+ * This function can return a result or a `Promise`. If not specified, the initial state will
+ * be `{}`.
+ * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
+ * `update => actions`.
+ * @property {Array<Function>} [acceptors=[]] - an array of acceptor functions, each of which
+ * should be `state => patch`.
+ * @property {Array<Function>} [services=[]] - an array of service functions, each of which
+ * should be `({ state, update, actions }) => void`.
+ */
+
 const B = (f, g) => (...args) => f(g(...args));
 
 /**
- * Helper to setup the Meiosis pattern.
+ * Base helper to setup the Meiosis pattern. If you are using Patchinko, Function Patches,
+ * or Immer, use their respective `setup` function instead.
  *
  * @async
  * @function meiosis.common.setup
@@ -12,16 +28,7 @@ const B = (f, g) => (...args) => f(g(...args));
  * The returned stream must have a `map` method.
  * @param {Function} accumulator - the accumulator function.
  * @param {Function} combine - the function that combines patches into one.
- * @param {Object} app - the app, with the optional properties below.
- * @param {Function} [app.Initial=()=>({})] -  a function that creates the initial state.
- * This function can return a result or a Promise. If not specified, the initial state will
- * be `{}`.
- * @param {Function} [app.Actions=()=>({})] - a function that creates actions, of the form
- * `update => actions`.
- * @param {Array<Function>} [app.acceptors=[]] - an array of acceptor functions, each of which
- * should be `state => patch`.
- * @param {Array<Function>} [app.services=[]] - an array of service functions, each of which
- * should be `({ state, update, actions }) => void`.
+ * @param {app} app - the app, with optional properties.
  *
  * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
  * all of which are streams, except for `actions` which is the created actions.

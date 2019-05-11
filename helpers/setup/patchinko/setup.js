@@ -11,16 +11,7 @@ import { setup as commonSetup } from "../common/setup";
  * function to create a stream. The function or object must also have a `scan` property.
  * The returned stream must have a `map` method.
  * @param {Function} O - the Patchinko function.
- * @param {Object} app - the app, with the optional properties below.
- * @param {Function} [app.Initial=()=>({})] -  a function that creates the initial state.
- * This function can return a result or a Promise. If not specified, the initial state will
- * be `{}`.
- * @param {Function} [app.Actions=()=>({})] - a function that creates actions, of the form
- * `update => actions`.
- * @param {Array<Function>} [app.acceptors=[]] - an array of acceptor functions, each of which
- * should be `state => patch`.
- * @param {Array<Function>} [app.services=[]] - an array of service functions, each of which
- * should be `({ state, update, actions }) => void`.
+ * @param {app} app - the app, with optional properties.
  *
  * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
  * all of which are streams, except for `actions` which is the created actions.
