@@ -1,3 +1,8 @@
+/**
+ * A Route is an array of Route segments.
+ *
+ * @typedef {Array} Route
+ */
 import fastDeepEqual from "fast-deep-equal";
 
 const defaultEmpty = route => (Array.isArray(route) ? route : []);
@@ -33,6 +38,12 @@ export const routeTransition = ({ previous, current }) => ({
   arrive: diffRoute(current, previous)
 });
 
+/**
+ * @function Routing
+ *
+ * @param {Route} route
+ * @param {number} index
+ */
 export const Routing = (route = [], index = 0) => ({
   route,
   index,

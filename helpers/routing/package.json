@@ -1,12 +1,13 @@
 {
   "name": "meiosis-routing",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Meiosis Helpers - routing",
   "main": "dist/meiosis-routing.js",
   "scripts": {
     "start": "rollup -c",
     "watch": "rollup -c -w",
-    "test": "npm start && tape 'tests/**/*.js' | tap-spec"
+    "test": "npm start && tape 'tests/**/*.js' | tap-spec",
+    "docs": "documentation build index.js -f md -o api.md"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "buble": "^0.19.7",
+    "documentation": "^11.0.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-prettier": "^3.0.1",

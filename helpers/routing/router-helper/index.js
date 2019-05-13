@@ -1,4 +1,38 @@
+/**
+ * Configuration object.
+ *
+ * @typedef {Object} BaseConfig
+ * @property {Object} routeConfig - the route config
+ * @property {Route} defaultRoute - the default route
+ * @property {string} [prefix="#!"] - the URL path prefix
+ */
+
+/**
+ * Feather router configuration object.
+ *
+ * @typedef {Object} FeatherConfig
+ * @augments BaseConfig
+ * @property {Function} createRouteMatcher - the Feather route matcher function.
+ */
+
+/**
+ * URL-Mapper router configuration object.
+ *
+ * @typedef {Object} UrlMapperConfig
+ * @augments BaseConfig
+ * @property {Function} Mapper - the URL Mapper function.
+ */
+
+/**
+ * Mithril router configuration object.
+ *
+ * @typedef {Object} MithrilConfig
+ * @augments BaseConfig
+ * @property {Mithril} m - the Mithril instance.
+ */
+
 const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
 const getQuery = path => {
   const idx = path.indexOf("?");
   return idx >= 0 ? path.substring(idx + 1) : "";
@@ -135,6 +169,9 @@ export const createRouter = ({
   return { initialRoute, locationBarSync, parsePath, routeMap, start, toPath };
 };
 
+/**
+ * @param {FeatherConfig} config
+ */
 export const createFeatherRouter = ({
   createRouteMatcher,
   queryString,
@@ -172,6 +209,9 @@ export const createFeatherRouter = ({
   });
 };
 
+/**
+ * @param {UrlMapperConfig} config
+ */
 export const createUrlMapperRouter = ({
   Mapper,
   queryString,
@@ -209,6 +249,9 @@ export const createUrlMapperRouter = ({
   });
 };
 
+/**
+ * @param {MithrilConfig} config
+ */
 export const createMithrilRouter = ({
   m,
   routeConfig,
