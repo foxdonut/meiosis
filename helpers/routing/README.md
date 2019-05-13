@@ -14,6 +14,30 @@ Out-of-the-box support is provided for these router libraries:
 
 You can also plug in another router library of your choice.
 
+## Benefits!
+
+Meiosis Routing gives you _programmable routes_ which you manage in application state, with the
+following benefits:
+
+Using the Meiosis Routing strategy gives you the following benefits:
+
+- Simple route configuration
+- Parent and child routes and reusable child routes
+- No hardcoded paths in links
+- Relative navigation: navigate to a parent, sibling, or child route
+- Redirect to a route after an action
+- Authenticate / authorize before going to a route
+- Load data (synchronously or asynchronously) when arriving at a route
+- Clean up state when leaving a route
+- Trigger arriving and leaving a route based on route and query parameters
+- Prevent leaving a route to e.g. warn user of unsaved data
+
+Because routing is managed in application state, you don't need a complex router with support for
+all of the above. The actual router is just a thin layer that matches URLs to routes. You can use
+one of the routers mentioned above, or plug in your own.
+[feather-route-matcher](https://github.com/henrikjoreteg/feather-route-matcher) is a nice example
+of how you only need a lightweight router library.
+
 ## Installation
 
 Using `npm`:
