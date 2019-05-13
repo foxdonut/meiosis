@@ -97,7 +97,7 @@ export const setup = ({ stream, accumulator, combine, app }) => {
           }
         : update;
 
-      const states = hasServices ? createStream() : models;
+      const states = hasServices ? createStream(models()) : models;
       const actions = (Actions || (() => ({})))({ update: bufferedUpdate, combine });
 
       if (hasServices) {
@@ -105,13 +105,13 @@ export const setup = ({ stream, accumulator, combine, app }) => {
           // If the call comes from a service update, we just want to emit the resulting state.
           if (serviceUpdate) {
             serviceUpdate = false;
-            buffered = false;
             states(state);
           } else {
             buffered = true;
             buffer = [];
 
             services.forEach(service => service({ state, update: bufferedUpdate, actions }));
+            buffered = false;
 
             if (buffer.length > 0) {
               // Services produced patches, issue an update and emit the resulting state.
@@ -119,7 +119,6 @@ export const setup = ({ stream, accumulator, combine, app }) => {
               update(combine(buffer));
             } else {
               // No service updates, just emit the resulting state.
-              buffered = false;
               states(state);
             }
           }

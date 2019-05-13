@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "react-dom";
-import flyd from "flyd";
+import simpleStream from "meiosis-setup/simple-stream";
 import O from "patchinko/constant";
 import meiosis from "meiosis-setup";
 
@@ -9,7 +9,7 @@ import { router } from "./router";
 
 const app = createApp(router.initialRoute);
 
-meiosis.patchinko.setup({ stream: flyd, O, app }).then(({ states, actions }) => {
+meiosis.patchinko.setup({ stream: simpleStream, O, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",

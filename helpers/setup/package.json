@@ -1,6 +1,6 @@
 {
   "name": "meiosis-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Meiosis Helpers - setup",
   "main": "dist/meiosis-setup.js",
   "scripts": {

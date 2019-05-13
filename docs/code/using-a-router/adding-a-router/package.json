@@ -25,9 +25,8 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "feather-route-matcher": "^3.0.0",
-    "flyd": "^0.2.8",
-    "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-0.1.0.tgz",
-    "meiosis-setup": "^1.0.0",
+    "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-1.0.0.tgz",
+    "meiosis-setup": "^1.0.1",
     "patchinko": "^4.1.0",
     "qs": "^6.7.0",
     "query-string": "^6.5.0",
