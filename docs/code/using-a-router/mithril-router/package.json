@@ -25,7 +25,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-1.0.0.tgz",
-    "meiosis-setup": "^1.0.1",
+    "meiosis-setup": "^1.1.0",
     "mithril": "^2.0.0-rc.4",
     "patchinko": "^4.1.0",
     "routing-common": "../routing-common-core"
