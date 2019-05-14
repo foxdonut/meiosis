@@ -4,6 +4,11 @@ const flyd = require("flyd");
 const Stream = require("mithril/stream");
 const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
+// eslint-disable-next-line no-global-assign
+window = {};
+require("mergerino");
+const merge = window.mergerino;
+const { SUB, DEL } = merge;
 const R = require("ramda");
 const { produce } = require("immer");
 
@@ -223,11 +228,232 @@ const patchinkoTest = (O, streamLib, label) => {
 };
 
 patchinkoTest(Oc, meiosis.simpleStream, "patchinko-constant + Meiosis simple-stream");
-patchinkoTest(Oc, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
+patchinkoTest(Oi, meiosis.simpleStream, "patchinko-immutable + Meiosis simple-stream");
 patchinkoTest(Oc, flyd, "patchinko-constant + flyd");
 patchinkoTest(Oi, flyd, "patchinko-immutable + flyd");
 patchinkoTest(Oc, Stream, "patchinko-constant + mithril-stream");
-patchinkoTest(Oc, Stream, "patchinko-immutable + mithril-stream");
+patchinkoTest(Oi, Stream, "patchinko-immutable + mithril-stream");
+
+const mergerinoTest = (merge, streamLib, label) => {
+  test("mergerino setup", t => {
+    t.test(label + " / minimal", t => {
+      meiosis.mergerino.setup({ stream: streamLib, merge }).then(({ update, states }) => {
+        t.deepEqual(states(), {}, "initial state");
+
+        update({ duck: { sound: "quack" } });
+        update({ duck: { color: "yellow" } });
+
+        t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+
+        t.end();
+      });
+    });
+
+    t.test(label + " / initial state", t => {
+      meiosis.mergerino
+        .setup({ stream: streamLib, merge, app: { Initial: () => ({ duck: "yellow" }) } })
+        .then(({ states }) => {
+          t.deepEqual(states(), { duck: "yellow" }, "initial state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / initial state promise", t => {
+      const Initial = () =>
+        new Promise(resolve => {
+          setTimeout(() => resolve({ duck: "yellow" }), 10);
+        });
+
+      meiosis.mergerino.setup({ stream: streamLib, merge, app: { Initial } }).then(({ states }) => {
+        t.deepEqual(states(), { duck: "yellow" }, "initial state");
+        t.end();
+      });
+    });
+
+    t.test(label + " / acceptors", t => {
+      const acceptors = [
+        state => (state.increment > 0 && state.increment < 10 ? { count: SUB(x => x + 1) } : null),
+        state => (state.increment <= 0 || state.increment >= 10 ? { increment: DEL } : null),
+        state => (state.invalid ? [{ invalid: DEL }, { combined: true }] : null),
+        state => (state.sequence ? { sequenced: true } : null),
+        state => (state.sequenced ? { received: true } : null)
+      ];
+
+      meiosis.mergerino
+        .setup({ stream: streamLib, merge, app: { Initial: () => ({ count: 0 }), acceptors } })
+        .then(({ update, states }) => {
+          update({ increment: 1 });
+          update({ increment: 10 });
+          update({ invalid: true });
+          update({ sequence: true });
+
+          t.deepEqual(
+            states(),
+            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
+            "resulting state"
+          );
+          t.end();
+        });
+    });
+
+    t.test(label + " / acceptors run on initial state", t => {
+      const acceptors = [
+        state => (state.increment > 0 && state.increment < 10 ? { count: SUB(x => x + 1) } : null)
+      ];
+
+      meiosis.mergerino
+        .setup({
+          stream: streamLib,
+          merge,
+          app: { Initial: () => ({ count: 0, increment: 1 }), acceptors }
+        })
+        .then(({ states }) => {
+          t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / services and actions", t => {
+      const Actions = ({ update }) => ({
+        increment: amount => update({ count: SUB(x => x + amount) })
+      });
+
+      const services = [
+        ({ state, actions }) => {
+          // update from one service should not affect state seen by the other
+          if (state.count === 1) {
+            actions.increment(1);
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update({ service: true });
+          }
+        }
+      ];
+
+      meiosis.mergerino
+        .setup({
+          stream: streamLib,
+          merge,
+          app: { Initial: () => ({ count: 0 }), services, Actions }
+        })
+        .then(({ update, states, actions }) => {
+          t.ok(typeof actions.increment === "function", "actions");
+
+          update({ count: 1 });
+
+          t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / actions can use combine", t => {
+      const Actions = ({ update, combine }) => ({
+        increment: amount => update(combine([{ count: SUB(x => x + amount) }, { combined: true }]))
+      });
+
+      meiosis.mergerino
+        .setup({
+          stream: streamLib,
+          merge,
+          app: { Initial: () => ({ count: 0 }), Actions }
+        })
+        .then(({ states, actions }) => {
+          actions.increment(1);
+
+          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
+          t.end();
+        });
+    });
+
+    t.test(label + " / service calls are combined into a single state update", t => {
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update({ count: SUB(x => x + 1) });
+            update({ service1: true });
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update({ service2: true });
+          }
+        }
+      ];
+
+      meiosis.mergerino
+        .setup({ stream: streamLib, merge, app: { services } })
+        .then(({ update, states }) => {
+          let ticks = 0;
+          states.map(() => ticks++);
+
+          update({ count: 1 });
+
+          t.equal(ticks, 2, "number of ticks");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / synchronous service updates are combined into one", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          serviceCalls++;
+          if (state.count === 1) {
+            update({ count: SUB(x => x + 1) });
+            update({ service1: true });
+          }
+        },
+        ({ state, update }) => {
+          if (state.count === 1) {
+            update({ service2: true });
+          }
+        }
+      ];
+
+      meiosis.mergerino
+        .setup({ stream: streamLib, merge, app: { services } })
+        .then(({ update, states }) => {
+          update({ count: 1 });
+
+          // Service calls: 1) initial, 2) update call
+          t.equal(serviceCalls, 2, "number of service calls");
+          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+          t.end();
+        });
+    });
+
+    t.test(label + " / services are not called in an infinite loop", t => {
+      let serviceCalls = 0;
+
+      const services = [
+        ({ state, update }) => {
+          if (state.count === 1) {
+            serviceCalls++;
+            update({ service: true });
+          }
+        }
+      ];
+
+      meiosis.mergerino
+        .setup({ stream: streamLib, merge, app: { services } })
+        .then(({ update, states }) => {
+          update({ count: 1 });
+
+          t.equal(serviceCalls, 1, "number of service calls");
+          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+          t.end();
+        });
+    });
+  });
+};
+
+mergerinoTest(merge, meiosis.simpleStream, "mergerino + Meiosis simple-stream");
+mergerinoTest(merge, flyd, "mergerino + flyd");
+mergerinoTest(merge, Stream, "mergerino + mithril-stream");
 
 const functionPatchTest = (streamLib, label) => {
   label = "functionPatch + " + label;
@@ -815,7 +1041,7 @@ const commonTest = (streamLib, label) => {
       }
     });
 
-    t.test(label + " / basic patchinko setup with no acceptors/services", t => {
+    t.test(label + " / basic common setup with no acceptors/services", t => {
       const Actions = ({ update }) => ({
         increment: amount => update({ count: Oc(x => x + amount) })
       });

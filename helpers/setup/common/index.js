@@ -47,7 +47,7 @@ const B = (f, g) => (...args) => f(g(...args));
  * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
  * all of which are streams, except for `actions` which is the created actions.
  */
-export const setup = ({ stream, accumulator, combine, app }) => {
+export default ({ stream, accumulator, combine, app }) => {
   app = app || {};
   let { Initial, acceptors, services, Actions } = app;
   Initial = Initial || (() => ({}));

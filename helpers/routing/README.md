@@ -22,8 +22,8 @@ following benefits:
 Using the Meiosis Routing strategy gives you the following benefits:
 
 - Simple route configuration
-- Parent and child routes and reusable child routes
 - No hardcoded paths in links
+- Parent and child routes, and reusable child routes
 - Relative navigation: navigate to a parent, sibling, or child route
 - Redirect to a route after an action
 - Authenticate / authorize before going to a route
@@ -98,6 +98,12 @@ const Route = createRoutes([
 ### `createUrlMapperRouter`
 
 ### `createMithrilRouter`
+
+## Credits
+
+Many thanks to [Stephan Thon](https://github.com/smuemd) for experimenting with early versions,
+testing and reporting bugs, and providing feedback and suggestions. Your help is very valuable
+and much appreciated!
 
 ----
 

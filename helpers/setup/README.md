@@ -22,6 +22,7 @@ Using the `script` tag exposes a `Meiosis` global, under which the helper functi
 provided:
 
 - `patchinko.setup`
+- `mergerino.setup`
 - `functionPatches.setup`
 - `immer.setup`
 - `common.setup`
@@ -54,10 +55,10 @@ it will automatically be `combine`d into one.
 
 ### Patchinko Setup
 
-If you are using [Patchinko](https://github.com/barneycarroll/patchinko), use `patchinko.setup`:
+To use [Patchinko](https://github.com/barneycarroll/patchinko):
 
 ```javascript
-import meiosis from "meiosis-setup";
+import meiosisPatchinko from "meiosis-setup/patchinko";
 import simpleStream from "meiosis-setup/simpleStream";
 // or
 // import Stream from "mithril/stream";
@@ -72,7 +73,29 @@ import O from "patchinko/constant";
 
 const app = {};
 
-meiosis.patchinko.setup({ stream: simpleStream, O, app })
+meiosisPatchinko({ stream: simpleStream, O, app })
+  .then(({ update, models, states, actions }) => {
+    // setup your view here
+  })
+```
+
+### Mergerino Setup
+
+To use [Mergerino](https://github.com/fuzetsu/mergerino):
+
+```javascript
+import meiosisMergerino from "meiosis-setup/mergerino";
+import simpleStream from "meiosis-setup/simpleStream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
+
+import merge from "mergerino";
+
+const app = {};
+
+meiosisMergerino({ stream: simpleStream, merge, app })
   .then(({ update, models, states, actions }) => {
     // setup your view here
   })
@@ -80,12 +103,11 @@ meiosis.patchinko.setup({ stream: simpleStream, O, app })
 
 ### Function Patch Setup
 
-If you are using
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), use
-`functionPatches.setup`:
+To use
+[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html):
 
 ```javascript
-import meiosis from "meiosis-setup";
+import meiosisFunctionPatches from "meiosis-setup/functionPatches";
 import simpleStream from "meiosis-setup/simpleStream";
 // or
 // import Stream from "mithril/stream";
@@ -94,7 +116,7 @@ import simpleStream from "meiosis-setup/simpleStream";
 
 const app = {};
 
-meiosis.functionPatches.setup({ stream: simpleStream, app })
+meiosisFunctionPatches({ stream: simpleStream, app })
   .then(({ update, models, states, actions }) => {
     // setup your view here
   })
@@ -102,10 +124,10 @@ meiosis.functionPatches.setup({ stream: simpleStream, app })
 
 ### Immer Setup
 
-If you are using [Immer](https://github.com/immerjs/immer), use `immer.setup`:
+To use [Immer](https://github.com/immerjs/immer):
 
 ```javascript
-import meiosis from "meiosis-setup";
+import meiosisImmer from "meiosis-setup/immer";
 import simpleStream from "meiosis-setup/simpleStream";
 // or
 // import Stream from "mithril/stream";
@@ -116,7 +138,7 @@ import produce from "immer";
 
 const app = {};
 
-meiosis.immer.setup({ stream: simpleStream, produce, app })
+meiosisImmer({ stream: simpleStream, produce, app })
   .then(({ update, models, states, actions }) => {
     // setup your view here
   })
@@ -144,13 +166,15 @@ into a single update.
 
 ### Common Setup
 
-You can use a setup other than Patchinko or Function Patches with `common.setup`. All you need to
+For a setup other than the supported libraries, you can use `meiosis-setup/common`. All you need to
 do is specify the `accumulator` function and, optionally, the `combine` function:
 
 - `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
 patch (the patch being in whatever form you decide to use), and returns the updated state.
 
     For example, with Patchinko, the `accumulator` is `O`.
+
+    With Mergerino, the `accumulator` is `merge`.
 
     With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
 
@@ -161,6 +185,9 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     For example, with Patchinko,
     `combine: patches => model => patches.reduce((m, p) => O(m, p), model)`
+
+    With Mergerino:
+    `combine: patches => model => patches.reduce((m, p) => merge(m, p), model)`
 
     With Function Patches, `combine` is function composition:
     `combine = fns => args => fns.reduceRight((arg, fn) => fn(arg), args)`

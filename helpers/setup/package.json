@@ -1,6 +1,6 @@
 {
   "name": "meiosis-setup",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Meiosis Helpers - setup",
   "main": "dist/meiosis-setup.js",
   "scripts": {
@@ -34,9 +34,10 @@
     "eslint-plugin-react": "^7.13.0",
     "flyd": "^0.2.8",
     "immer": "^3.1.1",
+    "mergerino": "0.0.3",
     "mithril": "^1.1.6",
     "patchinko": "^4.1.0",
-    "prettier": "1.17.0",
+    "prettier": "1.17.1",
     "ramda": "^0.26.1",
     "rollup": "^1.11.3",
     "rollup-plugin-buble": "^0.19.6",

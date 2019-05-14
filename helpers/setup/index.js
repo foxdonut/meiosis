@@ -1,7 +1,8 @@
-import { setup as commonSetup } from "./common/setup";
-import { setup as patchinkoSetup } from "./patchinko/setup";
-import { setup as functionPatchesSetup } from "./functionPatches/setup";
-import { setup as immerSetup } from "./immer/setup";
+import commonSetup from "./common";
+import patchinkoSetup from "./patchinko";
+import mergerinoSetup from "./mergerino";
+import functionPatchesSetup from "./functionPatches";
+import immerSetup from "./immer";
 import simpleStream from "./simple-stream";
 
 export default {
@@ -10,6 +11,9 @@ export default {
   },
   patchinko: {
     setup: patchinkoSetup
+  },
+  mergerino: {
+    setup: mergerinoSetup
   },
   functionPatches: {
     setup: functionPatchesSetup
