@@ -207,6 +207,12 @@ called, emits a value onto the stream; and the function must have a `map` method
 
 [API documentation is here.](api.md)
 
+## Credits
+
+Many thanks to [Stephan Thon](https://github.com/smuemd),
+[Daniel Loomer](https://github.com/fuzetsu), and [Barney Carroll](https://github.com/barneycarroll)
+for your contributions, feedback, and suggestions. They are much appreciated!
+
 ----
 
 _meiosis-setup is developed by [foxdonut](https://github.com/foxdonut)

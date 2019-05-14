@@ -26,7 +26,6 @@ export default ({ stream, O, app }) =>
         return O(model, patch);
       }
     },
-    // Can't use patches.reduce(O, model) because O would get called as O(model, patch, index)
-    combine: patches => model => patches.reduce((m, p) => O(m, p), model),
+    combine: patches => model => O(model, ...patches),
     app
   });

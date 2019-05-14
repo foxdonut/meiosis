@@ -20,7 +20,6 @@ export default ({ stream, merge, app }) =>
   commonSetup({
     stream,
     accumulator: merge,
-    // Can't use patches.reduce(merge, model) because merge would get called as merge(model, patch, index)
-    combine: patches => model => patches.reduce((m, p) => merge(m, p), model),
+    combine: patches => model => merge(model, ...patches),
     app
   });
