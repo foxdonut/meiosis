@@ -60,44 +60,7 @@ provided:
 
 ## Using `meiosis-routing`
 
-### Create Your Route Segments
-
-### Create Your Route Config
-
-###
-
-## state
-
-The `state` section of `meiosis-routing` provides some functions to manage the routing state.
-
-### `createRouteSegments`
-
-The `createRoutes` function is a convenience for creating objects with the `{ id, params }`
-structure. Instead of writing `{ id: "Profile", params: { user: "Duck", } }`, you can write
-`Route.Profile({ user: "duck" })`.
-
-To use it, call `createRoutes` with an array of strings for the routes of your application:
-
-```javascript
-const Route = createRoutes([
-  "Home",
-  "Login",
-  "About",
-  // ...
-]);
-```
-
-### `findRouteSegment`
-
-### `Routing`
-
-## routerHelper
-
-### `createFeatherRouter`
-
-### `createUrlMapperRouter`
-
-### `createMithrilRouter`
+Documentation is forthcoming.
 
 ## Credits
 
