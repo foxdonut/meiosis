@@ -1,7 +1,5 @@
 import m from "mithril";
 
-import { pipe, preventDefault } from "routing-common/src/util";
-
 export const Login = {
   view: ({ attrs: { state, actions, routing } }) => {
     const { message, returnTo } = routing.localSegment.params;
@@ -33,11 +31,7 @@ export const Login = {
         m(
           "button.btn.btn-primary",
           {
-            type: "submit",
-            onclick: pipe(
-              preventDefault,
-              () => actions.login(state.login.username, returnTo)
-            )
+            onclick: () => actions.login(state.login.username, returnTo)
           },
           "Login"
         )

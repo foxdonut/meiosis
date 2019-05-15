@@ -2,11 +2,14 @@ import React from "react";
 import { render } from "react-dom";
 import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
+import meiosisReact from "meiosis-setup/react";
 import meiosisMergerino from "meiosis-setup/mergerino";
 
-import { createApp, App } from "./app";
+import { createApp } from "./app";
+import { Root } from "./root";
 import { router } from "./router";
 
+const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
 
 meiosisMergerino({ stream: simpleStream, merge, app }).then(({ states, actions }) => {

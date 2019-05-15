@@ -21,19 +21,25 @@ The goals of Meiosis Routing are:
 - Trigger arriving and leaving a route based on route and query parameters
 - Prevent leaving a route to e.g. warn user of unsaved data
 
-Let's go through Meiosis Routing step by step.
+Let's learn Meiosis Routing step by step.
+
+### Routing Example
+
+@flems code/routing/components-01.js,code/routing/navigation-01.js,app.html,public/css/spectre.css [] 700 60 navigation-01.js
+
+### Navigation
+
+@flems code/routing/routes-02.js,code/routing/components-02.js,code/routing/navigation-02.js,app.html,public/css/spectre.css [] 700 60 navigation-02.js
 
 ### Route Segments
 
-### Routing Manager
-
-### Navigation
+@flems code/routing/routes-03.js,code/routing/components-03.js,code/routing/navigation-03.js,app.html,public/css/spectre.css [] 700 60 navigation-03.js
 
 ### Transitions
 
 ### Services
 
-
+### Adding A Router
 
 [Table of Contents](toc.html)
 

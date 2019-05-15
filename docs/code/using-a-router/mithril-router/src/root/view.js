@@ -12,7 +12,6 @@ import { Route } from "routing-common/src/routes";
 import { router } from "../router";
 
 const componentMap = {
-  Loading: { view: () => m("div", "Loading, please wait...") },
   Home: Home,
   Login: Login,
   Settings: Settings,

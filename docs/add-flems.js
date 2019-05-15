@@ -4,26 +4,37 @@ var fromDir = process.argv[2];
 var toDir = process.argv[3];
 
 var linkMap = {
-  "bss": "https://unpkg.com/bss@1.3.0/bss.js",
-  "datepicker": "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
-  "flyd": "https://unpkg.com/flyd@0.2.8/flyd.js",
-  "jquery": "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
-  "lodash": "https://unpkg.com/lodash@4.17.10",
-  "lodash-fp": "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
-  "meiosis-tracer": "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
-  "mithril": "https://unpkg.com/mithril@2.0.0-rc.3",
-  "mithril-stream": "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
-  "patchinko": "https://unpkg.com/patchinko@4.1.0/constant.js",
-  "patchinko-i": "https://unpkg.com/patchinko@4.1.0/immutable.js",
-  "ramda": "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
-  "react": "https://unpkg.com/react@16.7.0/umd/react.development.js",
-  "react-dom": "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"
+  bss: "https://unpkg.com/bss@1.3.0/bss.js",
+  datepicker:
+    "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
+  flyd: "https://unpkg.com/flyd@0.2.8/flyd.js",
+  jquery: "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
+  lodash: "https://unpkg.com/lodash@4.17.10",
+  "lodash-fp":
+    "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
+  "meiosis-tracer":
+    "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
+  mithril: "https://unpkg.com/mithril@2.0.0-rc.3",
+  "mithril-stream":
+    "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
+  patchinko:
+    "https://unpkg.com/patchinko@4.1.0/constant.js",
+  "patchinko-i":
+    "https://unpkg.com/patchinko@4.1.0/immutable.js",
+  ramda: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
+  react:
+    "https://unpkg.com/react@16.7.0/umd/react.development.js",
+  "react-dom":
+    "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"
 };
 
 var filenames = fs.readdirSync(fromDir);
 
 filenames.forEach(source => {
-  var input = fs.readFileSync(fromDir + "/" + source, "ascii");
+  var input = fs.readFileSync(
+    fromDir + "/" + source,
+    "ascii"
+  );
   var lines = input.split("\n");
   var flemNumber = 1;
 
@@ -39,24 +50,31 @@ filenames.forEach(source => {
         if (asIndex >= 0) {
           filename = longfilename.substring(0, asIndex);
           shortname = longfilename.substring(asIndex + 4);
-        }
-        else {
+        } else {
           filename = longfilename;
-          shortname = longfilename.substring(longfilename.lastIndexOf("/") + 1);
+          shortname = longfilename.substring(
+            longfilename.lastIndexOf("/") + 1
+          );
         }
-        var file = JSON.stringify(fs.readFileSync(filename, "ascii"));
+        var file = JSON.stringify(
+          fs.readFileSync(filename, "ascii")
+        );
         var compiler = "";
         if (shortname.endsWith("jsx")) {
-          shortname = shortname.substring(0, shortname.length - 1);
+          shortname = shortname.substring(
+            0,
+            shortname.length - 1
+          );
         }
         if (shortname.endsWith("js")) {
-          compiler = ", compiler: \"babel\"";
+          compiler = ', compiler: "babel"';
         }
         return `{name: "${shortname}", content: ${file}${compiler}}`;
       });
       var fileString = "[" + fileContents.join(",") + "]";
 
-      var links = parts.length > 2 ? parts[2].split(",") : [];
+      var links =
+        parts.length > 2 ? parts[2].split(",") : [];
       if (links.length === 1 && links[0] === "[]") {
         links = [];
       }
@@ -68,7 +86,7 @@ filenames.forEach(source => {
 
       var style = "";
       if (parts.length > 3) {
-        style = " style=\"height:" + parts[3] + "px\"";
+        style = ' style="height:' + parts[3] + 'px"';
       }
       var middle = "75";
       if (parts.length > 4) {
