@@ -8,10 +8,13 @@
     "url": "git+https://github.com/foxdonut/meiosis.git"
   },
   "keywords": [
-    "example",
     "meiosis",
+    "mithril",
     "react",
-    "router"
+    "router",
+    "routing",
+    "state",
+    "state management"
   ],
   "author": "foxdonut",
   "license": "MIT",
@@ -21,6 +24,6 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "peerDependencies": {
     "meiosis-routing": "*",
-    "patchinko": "4.x"
+    "mergerino": "*"
   }
 }

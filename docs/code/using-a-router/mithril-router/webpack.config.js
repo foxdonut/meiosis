@@ -13,7 +13,7 @@ module.exports = {
     // This is so that routing-common can find peerDependencies
     alias: {
       "meiosis-routing": path.resolve("./node_modules/meiosis-routing"),
-      patchinko: path.resolve("./node_modules/patchinko")
+      mergerino: path.resolve("./node_modules/mergerino")
     }
   },
   module: {

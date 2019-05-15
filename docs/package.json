@@ -7,7 +7,7 @@
     "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
     "build": "harp compile build dist",
     "postbuild": "cp css/* images/*.png images/*.gif dist",
-    "onchange": "onchange app.css app.html 'common/*' 'css/*' 'lessons/*' 'code/**' -- npm run build",
+    "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'lessons/*' 'code/**' -- npm run build",
     "start": "static-server -p ${PORT:-9000}",
     "reload": "reload -w code,dist -e html,css,js,jsx -p ${PORT:-9000}"
   },

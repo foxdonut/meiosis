@@ -1,10 +1,8 @@
-import O from "patchinko/constant";
-
 import { Route, navigateTo } from "../routes";
 
 export const Actions = ({ update }) => ({
-  username: value => update({ login: O({ username: value }) }),
-  password: value => update({ login: O({ password: value }) }),
+  username: value => update({ login: { username: value } }),
+  password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
     update(

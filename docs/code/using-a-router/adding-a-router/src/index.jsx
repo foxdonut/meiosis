@@ -1,15 +1,15 @@
 import React from "react";
 import { render } from "react-dom";
 import simpleStream from "meiosis-setup/simple-stream";
-import O from "patchinko/constant";
-import meiosisPatchinko from "meiosis-setup/patchinko";
+import merge from "mergerino";
+import meiosisMergerino from "meiosis-setup/mergerino";
 
 import { createApp, App } from "./app";
 import { router } from "./router";
 
 const app = createApp(router.initialRoute);
 
-meiosisPatchinko({ stream: simpleStream, O, app }).then(({ states, actions }) => {
+meiosisMergerino({ stream: simpleStream, merge, app }).then(({ states, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",

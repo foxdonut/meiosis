@@ -12,10 +12,12 @@
     "url": "git+https://github.com/foxdonut/meiosis.git"
   },
   "keywords": [
-    "example",
     "meiosis",
     "react",
-    "router"
+    "router",
+    "routing",
+    "state",
+    "state management"
   ],
   "author": "foxdonut",
   "license": "MIT",
@@ -27,7 +29,7 @@
     "feather-route-matcher": "^3.0.0",
     "meiosis-routing": "file:../../../../helpers/routing/meiosis-routing-1.0.0.tgz",
     "meiosis-setup": "^1.1.0",
-    "patchinko": "^4.1.0",
+    "mergerino": "0.0.3",
     "qs": "^6.7.0",
     "query-string": "^6.5.0",
     "react": "^16.8.6",

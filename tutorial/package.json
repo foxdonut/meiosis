@@ -7,7 +7,7 @@
     "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
     "build": "harp compile build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "cp css/* images/*.svg images/*.png dist",
-    "onchange": "onchange app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/*' -- npm run build",
+    "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/*' -- npm run build",
     "start": "static-server -p ${PORT:-9000}",
     "reload": "reload -w dist,code -e html,css,js,jsx -p ${PORT:-9000}"
   },
