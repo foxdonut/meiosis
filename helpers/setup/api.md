@@ -17,30 +17,34 @@
     -   [Parameters][13]
 -   [meiosis.immer.setup][14]
     -   [Parameters][15]
--   [simpleStream][16]
+-   [meiosis.preact.setup][16]
     -   [Parameters][17]
-    -   [Properties][18]
--   [meiosis.simpleStream.stream][19]
-    -   [Parameters][20]
--   [meiosis.simpleStream.scan][21]
-    -   [Parameters][22]
+-   [meiosis.react.setup][18]
+    -   [Parameters][19]
+-   [simpleStream][20]
+    -   [Parameters][21]
+    -   [Properties][22]
+-   [meiosis.simpleStream.stream][23]
+    -   [Parameters][24]
+-   [meiosis.simpleStream.scan][25]
+    -   [Parameters][26]
 
 ## app
 
 Application object.
 
-Type: [Object][23]
+Type: [Object][27]
 
 ### Properties
 
--   `Initial` **[Function][24]?**  a function that creates the initial state.
+-   `Initial` **[Function][28]?**  a function that creates the initial state.
     This function can return a result or a `Promise`. If not specified, the initial state will
     be `{}`.
--   `Actions` **[Function][24]?** a function that creates actions, of the form
+-   `Actions` **[Function][28]?** a function that creates actions, of the form
     `({ update, combine }) => actions`.
--   `acceptors` **[Array][25]&lt;[Function][24]>?** an array of acceptor functions, each of which
+-   `acceptors` **[Array][29]&lt;[Function][28]>?** an array of acceptor functions, each of which
     should be `state => patch` or `state => [patch]`.
--   `services` **[Array][25]&lt;[Function][24]>?** an array of service functions, each of which
+-   `services` **[Array][29]&lt;[Function][28]>?** an array of service functions, each of which
     should be `({ state, update, actions }) => void`.
 
 ## StreamLib
@@ -50,7 +54,7 @@ for which you provide either a function or an object with a `stream` function to
 The function or object must also have a `scan` property.
 The returned stream must have a `map` method.
 
-Type: ([Object][23] \| [Function][24])
+Type: ([Object][27] \| [Function][28])
 
 ### Parameters
 
@@ -58,11 +62,11 @@ Type: ([Object][23] \| [Function][24])
 
 ### Properties
 
--   `stream` **[Function][24]** the function to create a stream, if the stream library itself is
+-   `stream` **[Function][28]** the function to create a stream, if the stream library itself is
     not a function.
--   `scan` **[Function][24]** the stream library's `scan` function.
+-   `scan` **[Function][28]** the stream library's `scan` function.
 
-Returns **[simpleStream][26]** the created stream.
+Returns **[simpleStream][30]** the created stream.
 
 ## meiosis.common.setup
 
@@ -71,15 +75,15 @@ or Immer, use their respective `setup` function instead.
 
 ### Parameters
 
--   `stream` **[StreamLib][27]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][31]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `accumulator` **[Function][24]** the accumulator function.
--   `combine` **[Function][24]** the function that combines an array of patches into one.
--   `app` **[app][28]** the app, with optional properties.
+-   `accumulator` **[Function][28]** the accumulator function.
+-   `combine` **[Function][28]** the function that combines an array of patches into one.
+-   `app` **[app][32]** the app, with optional properties.
 
-Returns **[Promise][29]** a Promise that resolves to `{ update, models, states, actions }`
+Returns **[Promise][33]** a Promise that resolves to `{ update, models, states, actions }`
 all of which are streams, except for `actions` which is the created actions.
 
 ## meiosis.patchinko.setup
@@ -88,14 +92,14 @@ Helper to setup the Meiosis pattern.
 
 ### Parameters
 
--   `stream` **[StreamLib][27]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][31]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `O` **[Function][24]** the Patchinko function.
--   `app` **[app][28]** the app, with optional properties.
+-   `O` **[Function][28]** the Patchinko function.
+-   `app` **[app][32]** the app, with optional properties.
 
-Returns **[Promise][29]** a Promise that resolves to `{ update, models, states, actions }`
+Returns **[Promise][33]** a Promise that resolves to `{ update, models, states, actions }`
 all of which are streams, except for `actions` which is the created actions.
 
 ## meiosis.mergerino.setup
@@ -104,14 +108,14 @@ Helper to setup the Meiosis pattern.
 
 ### Parameters
 
--   `stream` **[StreamLib][27]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][31]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `merge` **[Function][24]** the Mergerino `merge` function.
--   `app` **[app][28]** the app, with optional properties.
+-   `merge` **[Function][28]** the Mergerino `merge` function.
+-   `app` **[app][32]** the app, with optional properties.
 
-Returns **[Promise][29]** a Promise that resolves to `{ update, models, states, actions }`
+Returns **[Promise][33]** a Promise that resolves to `{ update, models, states, actions }`
 all of which are streams, except for `actions` which is the created actions.
 
 ## meiosis.functionPatches.setup
@@ -120,13 +124,13 @@ Helper to setup the Meiosis pattern.
 
 ### Parameters
 
--   `stream` **[StreamLib][27]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][31]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `app` **[app][28]** the app, with optional properties.
+-   `app` **[app][32]** the app, with optional properties.
 
-Returns **[Promise][29]** a Promise that resolves to `{ update, models, states, actions }`
+Returns **[Promise][33]** a Promise that resolves to `{ update, models, states, actions }`
 all of which are streams, except for `actions` which is the created actions.
 
 ## meiosis.immer.setup
@@ -135,21 +139,43 @@ Helper to setup the Meiosis pattern.
 
 ### Parameters
 
--   `stream` **[StreamLib][27]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][31]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `produce` **[Function][24]** the Immer `produce` function.
--   `app` **[app][28]** the app, with optional properties.
+-   `produce` **[Function][28]** the Immer `produce` function.
+-   `app` **[app][32]** the app, with optional properties.
 
-Returns **[Promise][29]** a Promise that resolves to `{ update, models, states, actions }`
+Returns **[Promise][33]** a Promise that resolves to `{ update, models, states, actions }`
 all of which are streams, except for `actions` which is the created actions.
+
+## meiosis.preact.setup
+
+Helper to setup the Meiosis pattern.
+
+### Parameters
+
+-   `preact` **preact** the Preact instance.
+-   `Root` **preact.Component** your Root component, which receives `state` and `actions`.
+
+Returns **preact.Component** the top-level component to which you pass `states` and `actions`.
+
+## meiosis.react.setup
+
+Helper to setup the Meiosis pattern.
+
+### Parameters
+
+-   `React` **React** the React instance.
+-   `Root` **React.Component**  your Root component, which receives `state` and `actions`.
+
+Returns **React.Component** the top-level component to which you pass `states` and `actions`.
 
 ## simpleStream
 
 A simple stream.
 
-Type: [Function][24]
+Type: [Function][28]
 
 ### Parameters
 
@@ -158,7 +184,7 @@ Type: [Function][24]
 
 ### Properties
 
--   `map` **[Function][24]** creates a new stream for which the values from the original stream
+-   `map` **[Function][28]** creates a new stream for which the values from the original stream
     are processed by the passed-in function and emitted onto the new stream.
 
 ## meiosis.simpleStream.stream
@@ -169,7 +195,7 @@ Creates a stream.
 
 -   `initial` **any?** the stream's initial value.
 
-Returns **[simpleStream][26]** the created stream.
+Returns **[simpleStream][30]** the created stream.
 
 ## meiosis.simpleStream.scan
 
@@ -179,13 +205,13 @@ result and the source stream value.
 
 ### Parameters
 
--   `accumulator` **[Function][24]** a two-parameter function, the result of which is emitted
+-   `accumulator` **[Function][28]** a two-parameter function, the result of which is emitted
     onto the returned stream.
 -   `initial` **any** the initial value for the returned stream.
--   `sourceStream` **[simpleStream][26]** the source stream from which values are processed by the
+-   `sourceStream` **[simpleStream][30]** the source stream from which values are processed by the
     accumulator function.
 
-Returns **[simpleStream][26]** the created stream.
+Returns **[simpleStream][30]** the created stream.
 
 [1]: #app
 
@@ -217,30 +243,38 @@ Returns **[simpleStream][26]** the created stream.
 
 [15]: #parameters-5
 
-[16]: #simplestream
+[16]: #meiosispreactsetup
 
 [17]: #parameters-6
 
-[18]: #properties-2
+[18]: #meiosisreactsetup
 
-[19]: #meiosissimplestreamstream
+[19]: #parameters-7
 
-[20]: #parameters-7
+[20]: #simplestream
 
-[21]: #meiosissimplestreamscan
+[21]: #parameters-8
 
-[22]: #parameters-8
+[22]: #properties-2
 
-[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[23]: #meiosissimplestreamstream
 
-[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[24]: #parameters-9
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[25]: #meiosissimplestreamscan
 
-[26]: #simplestream
+[26]: #parameters-10
 
-[27]: #streamlib
+[27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[28]: #app
+[28]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+[30]: #simplestream
+
+[31]: #streamlib
+
+[32]: #app
+
+[33]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise

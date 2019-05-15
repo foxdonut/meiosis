@@ -3,6 +3,8 @@ import patchinkoSetup from "./patchinko";
 import mergerinoSetup from "./mergerino";
 import functionPatchesSetup from "./functionPatches";
 import immerSetup from "./immer";
+import preactSetup from "./preact";
+import reactSetup from "./react";
 import simpleStream from "./simple-stream";
 
 export default {
@@ -20,6 +22,12 @@ export default {
   },
   immer: {
     setup: immerSetup
+  },
+  preact: {
+    setup: preactSetup
+  },
+  react: {
+    setup: reactSetup
   },
   simpleStream
 };

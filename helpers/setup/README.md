@@ -26,6 +26,8 @@ provided:
 - `functionPatches.setup`
 - `immer.setup`
 - `common.setup`
+- `preact.setup`
+- `react.setup`
 - `simpleStream.stream`
 - `simpleStream.scan`
 
@@ -202,6 +204,32 @@ You can use another stream library, as long as you provide either a function tha
 or an object with a `stream` property for that function. In either case, there must also be a `scan`
 property on the function or object. Finally, the created stream must be a function that, when
 called, emits a value onto the stream; and the function must have a `map` method.
+
+### React Setup
+
+To create the top-level `App` component with [React](https://reactjs.org), use:
+
+```javascript
+import React from "react";
+import reactSetup from "meiosis-setup/react";
+
+const Root = /* your root component */
+
+const App = reactSetup({ React, Root });
+```
+
+### Preact Setup
+
+To create the top-level `App` component with [Preact](https://preactjs.com), use:
+
+```javascript
+import preact from "preact";
+import preactSetup from "meiosis-setup/preact";
+
+const Root = /* your root component */
+
+const App = preactSetup({ React, Root });
+```
 
 ### API
 
