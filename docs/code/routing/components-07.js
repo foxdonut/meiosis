@@ -228,9 +228,7 @@ export const Beer = {
     return (
       <div>
         <div>Beer Page</div>
-        {type && type.name ? (
-          <div>Type: {type.name}</div>
-        ) : null}
+        {type ? <div>Type: {type}</div> : null}
         <Component
           state={state}
           actions={actions}
