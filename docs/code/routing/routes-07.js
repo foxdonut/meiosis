@@ -1,7 +1,6 @@
+import m from "mithril@2.0.0-rc.4";
 import { createRouteSegments } from "meiosis-routing/state";
-
-import { Actions } from "./actions";
-import { accept } from "./accept";
+import { createMithrilRouter } from "meiosis-routing/router-helper";
 
 export const Route = createRouteSegments([
   "Home",
@@ -15,6 +14,10 @@ export const Route = createRouteSegments([
   "Beverage",
   "Brewer"
 ]);
+
+export const navTo = route => ({
+  route: { current: route }
+});
 
 const beverageRoutes = {
   Beverages: "",
@@ -30,9 +33,8 @@ export const routeConfig = {
   Beer: ["/beer?type", beverageRoutes]
 };
 
-export { navigateTo } from "./actions";
-
-export const routes = {
-  Actions,
-  accept
-};
+export const router = createMithrilRouter({
+  m,
+  routeConfig,
+  defaultRoute: [Route.Home()]
+});

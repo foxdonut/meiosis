@@ -1,4 +1,4 @@
-import { createRouteSegments } from "meiosis-routing@0.2.0/state";
+import { createRouteSegments } from "meiosis-routing/state";
 
 export const Route = createRouteSegments([
   "Home",
@@ -8,3 +8,7 @@ export const Route = createRouteSegments([
   "Coffee",
   "Beer"
 ]);
+
+export const navTo = route => ({
+  route: { current: route }
+});

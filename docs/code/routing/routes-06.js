@@ -1,7 +1,7 @@
 import { createRouteSegments } from "meiosis-routing/state";
-
-import { Actions } from "./actions";
-import { accept } from "./accept";
+import { createFeatherRouter } from "meiosis-routing/router-helper";
+import createRouteMatcher from "https://meiosis.js.org/lib/feather-route-matcher.js";
+import queryString from "https://meiosis.js.org/lib/query-string.js";
 
 export const Route = createRouteSegments([
   "Home",
@@ -15,6 +15,10 @@ export const Route = createRouteSegments([
   "Beverage",
   "Brewer"
 ]);
+
+export const navTo = route => ({
+  route: { current: route }
+});
 
 const beverageRoutes = {
   Beverages: "",
@@ -30,9 +34,9 @@ export const routeConfig = {
   Beer: ["/beer?type", beverageRoutes]
 };
 
-export { navigateTo } from "./actions";
-
-export const routes = {
-  Actions,
-  accept
-};
+export const router = createFeatherRouter({
+  createRouteMatcher,
+  queryString,
+  routeConfig,
+  defaultRoute: [Route.Home()]
+});

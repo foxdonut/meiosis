@@ -1,7 +1,7 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
 import merge from "mergerino@0.0.3";
-import meiosis from "meiosis-setup@1.2.1";
+import meiosis from "meiosis-setup";
 
 import { Home } from "./components-01";
 

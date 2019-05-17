@@ -55,7 +55,7 @@ export const Root = {
       m(
         "div",
         { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
-        m("div.modal", m("div.box", m("div", "Loading, please wait...")))
+        m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
       )
     );
   }

@@ -69,8 +69,8 @@ export const Root = ({ state, actions }) => {
       <Component state={state} actions={actions} routing={routing} />
       {/* Show or hide the Please Wait modal. See public/css/style.css */}
       <div style={{ visibility: state.pleaseWait ? "visible" : "hidden" }}>
-        <div className="modal">
-          <div className="box">
+        <div className="simpleModal">
+          <div className="simpleBox">
             <div>Loading, please wait...</div>
           </div>
         </div>

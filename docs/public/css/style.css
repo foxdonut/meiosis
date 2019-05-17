@@ -34,7 +34,7 @@ h4 {
   bottom: 0;
   height: 40px;
 }
-.modal {
+.simpleModal {
   position: fixed;
   top: 0;
   left: 0;
@@ -45,7 +45,7 @@ h4 {
   justify-content: center;
   align-items: center;
 }
-.box {
+.simpleBox {
   padding: 30px;
   background: white;
   text-align: center;

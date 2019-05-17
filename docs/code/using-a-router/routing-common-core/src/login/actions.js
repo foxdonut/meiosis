@@ -1,16 +1,9 @@
 import { Route, navigateTo } from "../routes";
 
-export const Actions = ({ update }) => ({
+export const Actions = ({ update, combine }) => ({
   username: value => update({ login: { username: value } }),
   password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
-    update(
-      Object.assign(
-        {
-          user: username
-        },
-        navigateTo([returnTo || Route.Home()])
-      )
-    )
+    update(combine([{ user: username }, navigateTo([returnTo || Route.Home()])]))
 });

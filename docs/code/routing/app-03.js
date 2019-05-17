@@ -1,9 +1,10 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
 import merge from "mergerino@0.0.3";
-import meiosis from "meiosis-setup@1.2.1";
+import meiosis from "meiosis-setup";
+import { Routing } from "meiosis-routing/state";
 
-import { Route } from "./routes-02";
+import { Route, navTo } from "./routes-03";
 
 import {
   Home,
@@ -12,7 +13,7 @@ import {
   Tea,
   Coffee,
   Beer
-} from "./components-02";
+} from "./components-03";
 
 const componentMap = {
   Home,
@@ -24,7 +25,8 @@ const componentMap = {
 };
 
 const Root = ({ state, actions }) => {
-  const Component = componentMap[state.route.id];
+  const routing = Routing(state.route.current);
+  const Component = componentMap[routing.localSegment.id];
   const isActive = tab =>
     tab === Component ? " active" : "";
 
@@ -34,7 +36,9 @@ const Root = ({ state, actions }) => {
         <li className={"nav-item" + isActive(Home)}>
           <a
             href="#"
-            onClick={() => actions.navigateTo(Route.Home())}
+            onClick={() =>
+              actions.navigateTo([Route.Home()])
+            }
           >
             Home
           </a>
@@ -43,7 +47,7 @@ const Root = ({ state, actions }) => {
           <a
             href="#"
             onClick={() =>
-              actions.navigateTo(Route.Login())
+              actions.navigateTo([Route.Login()])
             }
           >
             Login
@@ -53,7 +57,7 @@ const Root = ({ state, actions }) => {
           <a
             href="#"
             onClick={() =>
-              actions.navigateTo(Route.Settings())
+              actions.navigateTo([Route.Settings()])
             }
           >
             Settings
@@ -62,7 +66,9 @@ const Root = ({ state, actions }) => {
         <li className={"nav-item" + isActive(Tea)}>
           <a
             href="#"
-            onClick={() => actions.navigateTo(Route.Tea())}
+            onClick={() =>
+              actions.navigateTo([Route.Tea()])
+            }
           >
             Tea
           </a>
@@ -71,7 +77,10 @@ const Root = ({ state, actions }) => {
           <a
             href="#"
             onClick={() =>
-              actions.navigateTo(Route.Coffee())
+              actions.navigateTo([
+                Route.Coffee(),
+                Route.Beverages()
+              ])
             }
           >
             Coffee
@@ -80,7 +89,12 @@ const Root = ({ state, actions }) => {
         <li className={"nav-item" + isActive(Beer)}>
           <a
             href="#"
-            onClick={() => actions.navigateTo(Route.Beer())}
+            onClick={() =>
+              actions.navigateTo([
+                Route.Beer(),
+                Route.Beverages()
+              ])
+            }
           >
             Beer
           </a>
@@ -89,7 +103,11 @@ const Root = ({ state, actions }) => {
       <hr />
 
       <div style={{ paddingLeft: ".4rem" }}>
-        <Component state={state} actions={actions} />
+        <Component
+          state={state}
+          actions={actions}
+          routing={routing}
+        />
       </div>
     </div>
   );
@@ -98,10 +116,10 @@ const Root = ({ state, actions }) => {
 const App = meiosis.preact.setup({ preact, Root });
 const app = {
   Initial: () => ({
-    route: Route.Home()
+    route: [Route.Home()]
   }),
   Actions: ({ update }) => ({
-    navigateTo: route => update({ route })
+    navigateTo: route => update(navTo(route))
   })
 };
 
@@ -113,4 +131,11 @@ meiosis.mergerino
       <App states={states} actions={actions} />,
       document.getElementById("app")
     );
+
+    states.map(state => {
+      if (document.getElementById("consoleLog").checked) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(state));
+      }
+    });
   });

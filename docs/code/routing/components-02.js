@@ -1,5 +1,5 @@
 /** @jsx preact.h */
-import preact from "preact@8.4.2";
+import preact from "preact@8.4.2/dist/preact.mjs";
 
 export const Home = ({ state }) => (
   <div>

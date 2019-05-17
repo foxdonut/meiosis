@@ -1,10 +1,10 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
 import merge from "mergerino@0.0.3";
-import meiosis from "meiosis-setup@1.2.1";
+import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
-import { Route } from "./routes-03";
+import { Route, navTo } from "./routes-05";
 
 import {
   Home,
@@ -13,7 +13,23 @@ import {
   Tea,
   Coffee,
   Beer
-} from "./components-03";
+} from "./components-05";
+
+import {
+  loginAccept,
+  settingsAccept,
+  routeAccept
+} from "./acceptors-05";
+
+import {
+  teaService,
+  teaDetailService,
+  coffeeService,
+  beerService,
+  beverageService,
+  brewerService,
+  loginService
+} from "./services-05";
 
 const componentMap = {
   Home,
@@ -25,7 +41,7 @@ const componentMap = {
 };
 
 const Root = ({ state, actions }) => {
-  const routing = Routing(state.route);
+  const routing = Routing(state.route.current);
   const Component = componentMap[routing.localSegment.id];
   const isActive = tab =>
     tab === Component ? " active" : "";
@@ -109,18 +125,63 @@ const Root = ({ state, actions }) => {
           routing={routing}
         />
       </div>
+
+      {/* Show or hide the Please Wait modal.
+          See public/css/style.css */}
+      <div
+        style={{
+          visibility: state.pleaseWait
+            ? "visible"
+            : "hidden"
+        }}
+      >
+        <div className="simpleModal">
+          <div className="simpleBox">
+            <div>Loading, please wait...</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
 const App = meiosis.preact.setup({ preact, Root });
+
 const app = {
   Initial: () => ({
-    route: [Route.Home()]
+    route: { current: [Route.Home()] }
   }),
-  Actions: ({ update }) => ({
-    navigateTo: route => update({ route })
-  })
+  Actions: ({ update, combine }) => ({
+    navigateTo: route => update(navTo(route)),
+
+    username: value =>
+      update({ login: { username: value } }),
+    password: value =>
+      update({ login: { password: value } }),
+
+    login: (username, returnTo) =>
+      update(
+        combine([
+          { user: username },
+          navTo([returnTo || Route.Home()])
+        ])
+      ),
+
+    logout: () =>
+      update(
+        combine([{ user: null }, navTo([Route.Home()])])
+      )
+  }),
+  acceptors: [loginAccept, settingsAccept, routeAccept],
+  services: [
+    teaService,
+    teaDetailService,
+    coffeeService,
+    beerService,
+    beverageService,
+    brewerService,
+    loginService
+  ]
 };
 
 meiosis.mergerino
@@ -131,4 +192,11 @@ meiosis.mergerino
       <App states={states} actions={actions} />,
       document.getElementById("app")
     );
+
+    states.map(state => {
+      if (document.getElementById("consoleLog").checked) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(state));
+      }
+    });
   });
