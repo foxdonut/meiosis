@@ -125,21 +125,22 @@ const Beverage = ({ state, actions, routing }) => {
   return (
     <div>
       <div>{state.beverage[id]}</div>
-      <div>
-        <a
-          href={router.toPath(
-            routing.childRoute([Route.Brewer({ id })])
-          )}
-        >
-          Brewer Details
-        </a>
-      </div>
-      {Component && (
+      {(Component && (
         <Component
           state={state}
           actions={actions}
           routing={routing.next()}
         />
+      )) || (
+        <div>
+          <a
+            href={router.toPath(
+              routing.childRoute([Route.Brewer({ id })])
+            )}
+          >
+            Brewer Details
+          </a>
+        </div>
       )}
       <div>
         <a

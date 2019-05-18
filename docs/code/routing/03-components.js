@@ -100,24 +100,25 @@ const Beverage = ({ state, actions, routing }) => {
   return (
     <div>
       <div>Beverage Details</div>
-      <div>
-        <a
-          href="#"
-          onClick={() =>
-            actions.navigateTo(
-              routing.childRoute([Route.Brewer()])
-            )
-          }
-        >
-          Brewer Details
-        </a>
-      </div>
-      {Component && (
+      {(Component && (
         <Component
           state={state}
           actions={actions}
           routing={routing.next()}
         />
+      )) || (
+        <div>
+          <a
+            href="#"
+            onClick={() =>
+              actions.navigateTo(
+                routing.childRoute([Route.Brewer()])
+              )
+            }
+          >
+            Brewer Details
+          </a>
+        </div>
       )}
       <div>
         <a
