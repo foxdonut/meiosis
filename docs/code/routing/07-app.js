@@ -1,7 +1,7 @@
 /** @jsx m */
 import m from "mithril@2.0.0-rc.4";
 import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
-import merge from "mergerino@0.0.3";
+import merge from "mergerino@0.0.4";
 import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
@@ -135,9 +135,7 @@ const App = {
 };
 
 const app = {
-  Initial: () => ({
-    route: { current: [Route.Home()] }
-  }),
+  Initial: () => navTo(Route.Home()),
   Actions: ({ update, combine }) => ({
     navigateTo: route => update(navTo(route)),
 

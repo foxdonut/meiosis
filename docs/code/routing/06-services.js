@@ -1,4 +1,4 @@
-import { DEL } from "mergerino@0.0.3";
+import { DEL } from "mergerino@0.0.4";
 import { findRouteSegment } from "meiosis-routing/state";
 
 const whenPresent = (obj, fn) => {
@@ -9,12 +9,12 @@ const whenPresent = (obj, fn) => {
 
 const teas = [
   {
-    id: "c1",
+    id: "t1",
     title: "Tea 1",
     description: "Description of Tea 1"
   },
   {
-    id: "c2",
+    id: "t2",
     title: "Tea 2",
     description: "Description of Tea 2"
   }

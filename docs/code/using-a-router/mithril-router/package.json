@@ -28,7 +28,7 @@
   "dependencies": {
     "meiosis-routing": "^0.2.0",
     "meiosis-setup": "^1.2.1",
-    "mergerino": "0.0.3",
+    "mergerino": "0.0.4",
     "mithril": "^2.0.0-rc.4",
     "routing-common": "../routing-common-core"
   },
