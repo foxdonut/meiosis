@@ -127,7 +127,7 @@ const Root = ({ state, actions }) => {
 const App = meiosis.preact.setup({ preact, Root });
 
 const app = {
-  Initial: () => navTo(Route.Home()),
+  Initial: () => navTo([Route.Home()]),
   Actions: ({ update, combine }) => ({
     navigateTo: route => update(navTo(route)),
 

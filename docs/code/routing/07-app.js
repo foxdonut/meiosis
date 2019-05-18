@@ -135,7 +135,7 @@ const App = {
 };
 
 const app = {
-  Initial: () => navTo(Route.Home()),
+  Initial: () => navTo([Route.Home()]),
   Actions: ({ update, combine }) => ({
     navigateTo: route => update(navTo(route)),
 
