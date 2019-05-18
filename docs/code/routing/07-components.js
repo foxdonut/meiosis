@@ -1,7 +1,7 @@
 /** @jsx m */
 import m from "mithril@2.0.0-rc.4";
 
-import { Route, router } from "./routes-07";
+import { Route, router } from "./07-routes";
 
 export const Home = {
   view: ({ attrs: { state } }) => (

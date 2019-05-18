@@ -4,9 +4,9 @@
 
 ## Services and Accepted State
 
-[James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll
-look at James' version using streams, and another version using a separate accepted state function
-and a service trigger. For the latter, we'll use two variants, one with
+[James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll look
+at James' version using streams, and another version using a separate accepted state function and a
+service trigger. For the latter, we'll use two variants, one with
 [Barney Carroll](https://barneycarroll.com)'s
 [Patchinko](https://github.com/barneycarroll/patchinko), and one with function patches.
 
@@ -65,9 +65,9 @@ The boxes are displayed one next to the other, with a description of how many bo
 are in the list. You can remove a box from the list by clicking on it.
 
 > Note that the example code is somewhat different that the "Meiosis style". There are some nifty
-functional programming at play here, and you can learn some nice techniques from this code. But
-if you are having some trouble understanding, please know that the code in the next section uses
-a style that is closer to what we have been using so far.
+functional programming at play here, and you can learn some nice techniques from this code. But if
+you are having some trouble understanding, please know that the code in the next section uses a
+style that is closer to what we have been using so far.
 
 In the example, there are three services:
 
@@ -77,8 +77,8 @@ notice that the box list remains even after reloading the page.
 - `DescriptionService`: produces the text description of how many boxes of each color are in
 the list.
 
-Each service has an `initial` and `start` function. For example, the `StatsService` initializes
-its state with `0` for every box color, and computes the number of instances of each color:
+Each service has an `initial` and `start` function. For example, the `StatsService` initializes its
+state with `0` for every box color, and computes the number of instances of each color:
 
 ```javascript
 const StatsService = {
@@ -96,10 +96,10 @@ const StatsService = {
 };
 ```
 
-Notice the call to `dropRepeats`. This is necessary because the stream of patches produced
-by the service is fed back into the Meiosis `update` stream. This in turn produces an updated
-state, which triggers the service again. To avoid an infinite loop, `dropRepeats` does not
-emit a value when it is the same as the previous one:
+Notice the call to `dropRepeats`. This is necessary because the stream of patches produced by the
+service is fed back into the Meiosis `update` stream. This in turn produces an updated state, which
+triggers the service again. To avoid an infinite loop, `dropRepeats` does not emit a value when it
+is the same as the previous one:
 
 ```javascript
 function dropRepeats(s) {
@@ -137,8 +137,8 @@ wish.
 <a name="using_accepted_and_services"></a>
 ### [Using Accepted State and Services](#using_accepted_and_services)
 
-In Meiosis, instead of emitting patches from services, we define state management objects that
-can have either one (or both) of these:
+In Meiosis, instead of emitting patches from services, we define state management objects that can
+have either one (or both) of these:
 
 - an `accept` function
 - a `service` function
@@ -147,17 +147,16 @@ can have either one (or both) of these:
 [the SAM Pattern section](sam-pattern.html). In Meiosis, `accept` is similar but not identical to
 `accept` in SAM.
 
-An `accept` function gets the current state as a parameter and returns a patch to make any
-necessary changes and updates to the state. Then, all accept functions are combined
-together to produce a single `accept` function that receives the current state and produces
-the accepted state.
+An `accept` function gets the current state as a parameter and returns a patch to make any necessary
+changes and updates to the state. Then, all accept functions are combined together to produce a
+single `accept` function that receives the current state and produces the accepted state.
 
 Accept functions, or _acceptors_, run **synchronously** and **in order**. Thus, an acceptor can
 depend on the changes made by a previous acceptor.
 
 For asynchronous changes, we define a `service` function that receives the current state and the
-`update` stream, and decides whether to call `update`. Services can call `update` synchronously,
-as well.
+`update` stream, and decides whether to call `update`. Services can call `update` synchronously, as
+well.
 
 Our component structure is thus:
 
@@ -172,8 +171,8 @@ Our component structure is thus:
 
 #### With Patchinko
 
-In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we
-looked at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
+In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we looked
+at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
 
 To use Patchinko, we emit patches as objects and we use `O` as our accumulator:
 
@@ -214,10 +213,10 @@ const description = {
 };
 ```
 
-Each accept function takes the state and returns a patch. Let's assemble the functions into
-a top-level `accept` function that takes the state and returns the updated state. We can use
-`reduce` on the array of `accept` functions, calling each function and applying the patch
-on the state with `O`:
+Each accept function takes the state and returns a patch. Let's assemble the functions into a
+top-level `accept` function that takes the state and returns the updated state. We can use `reduce`
+on the array of `accept` functions, calling each function and applying the patch on the state with
+`O`:
 
 ```javascript
 const acceptors = [stats.accept, description.accept];
@@ -231,8 +230,8 @@ const accept = state =>
 ```
 
 This gives us a single top-level `accept` function that takes the state, calls all acceptor
-functions, and produces the updated state. We call `accept` after calling `O` in the
-accumulator function of `scan`. Note that we also call `accept` on the initial state:
+functions, and produces the updated state. We call `accept` after calling `O` in the accumulator
+function of `scan`. Note that we also call `accept` on the initial state:
 
 ```javascript
 const states = m.stream.scan(
@@ -243,8 +242,7 @@ const states = m.stream.scan(
 ```
 
 For asynchronous changes, such as loading data from a server, we'll separately define `service`
-functions that receive the current state and the `update` stream, and call `update` as they see
-fit.
+functions that receive the current state and the `update` stream, and call `update` as they see fit.
 
 ```javascript
 service: ({ state, update }) => {
@@ -252,10 +250,10 @@ service: ({ state, update }) => {
 }
 ```
 
-As in the previous section, we have to be careful about infinite loops. Indeed, when the
-service calls `update()`, the service will be triggered again. Later, we will look at how we
-can optimize services to avoid calling them again after they issue updates, and thus not
-have to worry about infinite loops.
+As in the previous section, we have to be careful about infinite loops. Indeed, when the service
+calls `update()`, the service will be triggered again. Later, we will look at how we can optimize
+services to avoid calling them again after they issue updates, and thus not have to worry about
+infinite loops.
 
 In this example, the `storage.service` function doesn't call `update`, so it's not an issue.
 
@@ -275,8 +273,8 @@ const storage = {
 };
 ```
 
-After assembling service functions into an array, wiring them up is simply a matter of
-calling them every time the state changes:
+After assembling service functions into an array, wiring them up is simply a matter of calling them
+every time the state changes:
 
 ```javascript
 const services = [storage.service];
@@ -293,8 +291,8 @@ You will find the complete example below.
 #### With Function Patches
 
 We can also use this approach with function patches instead of Patchinko. Remember that with
-function patches, we produce functions `f(state) => updatedState` instead of object patches,
-and we wire up Meiosis like this:
+function patches, we produce functions `f(state) => updatedState` instead of object patches, and we
+wire up Meiosis like this:
 
 ```javascript
 const T = (x, f) => f(x);
@@ -302,9 +300,9 @@ const update = m.stream();
 const states = m.stream.scan(T, initialState(), update);
 ```
 
-Our acceptors and services have the same structure as before, except that patches are
-functions instead of objects. When we call an `acceptor` function, we get back a
-function. To apply the patch, we just call the returned function:
+Our acceptors and services have the same structure as before, except that patches are functions
+instead of objects. When we call an `acceptor` function, we get back a function. To apply the patch,
+we just call the returned function:
 
 ```javascript
 const acceptors = [stats.accept, description.accept];
@@ -317,9 +315,8 @@ const accept = state =>
   );
 ```
 
-As before, we call `accept` in our `scan` accumulator, and also call `accept` on
-the initial state. The only difference is that we use `T` instead of `O` to apply a
-patch -- `T = (x, f) => f(x)`.
+As before, we call `accept` in our `scan` accumulator, and also call `accept` on the initial state.
+The only difference is that we use `T` instead of `O` to apply a patch -- `T = (x, f) => f(x)`.
 
 ```javascript
 const states = m.stream.scan(
@@ -339,8 +336,8 @@ Have a look at the complete example below.
 ### [Conclusion](#conclusion)
 
 We can wire up services in different ways, and use them for computed properties, state
-synchronization, and other purposes. Please note, however, that not everything belongs in
-a service, so it's important to avoid getting carried away.
+synchronization, and other purposes. Please note, however, that not everything belongs in a service,
+so it's important to avoid getting carried away.
 
 [Table of Contents](toc.html)
 

@@ -3,30 +3,34 @@ import preact from "preact@8.4.2/dist/preact.mjs";
 import merge from "mergerino@0.0.3";
 import meiosis from "meiosis-setup";
 
-import { Home } from "./components-01";
+import { Home } from "./01-components";
 
 const Root = ({ state, actions }) => (
-  <div>
-    <ul className="nav">
-      <li className="nav-item active">
-        <a href="#">Home</a>
-      </li>
-      <li className="nav-item">
-        <a href="#">Login</a>
-      </li>
-      <li className="nav-item">
-        <a href="#">Settings</a>
-      </li>
-      <li className="nav-item">
-        <a href="#">Tea</a>
-      </li>
-      <li className="nav-item">
-        <a href="#">Coffee</a>
-      </li>
-      <li className="nav-item">
-        <a href="#">Beer</a>
-      </li>
-    </ul>
+  <div className="container">
+    <div className="columns">
+      <div className="column col-6">
+        <div>
+          <a href="#">Home</a>
+        </div>
+        <div>
+          <a href="#">Login</a>
+        </div>
+        <div>
+          <a href="#">Settings</a>
+        </div>
+      </div>
+      <div className="column col-6">
+        <div>
+          <a href="#">Tea</a>
+        </div>
+        <div>
+          <a href="#">Coffee</a>
+        </div>
+        <div>
+          <a href="#">Beer</a>
+        </div>
+      </div>
+    </div>
     <hr />
 
     <div style={{ paddingLeft: ".4rem" }}>

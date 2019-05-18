@@ -1,7 +1,7 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
 
-import { Route } from "./routes-04";
+import { Route, router } from "./06-routes";
 
 export const Home = ({ state }) => (
   <div>
@@ -12,9 +12,12 @@ export const Home = ({ state }) => (
   </div>
 );
 
-export const Login = () => {
+export const Login = ({ state, actions, routing }) => {
+  const { message, returnTo } = routing.localSegment.params;
+
   return (
     <div>
+      {message ? <div>{message}</div> : null}
       <div>Login</div>
       <form className="form">
         <div className="form-group">
@@ -22,6 +25,10 @@ export const Login = () => {
             type="text"
             className="form-control"
             placeholder="username"
+            value={state.login.username}
+            onInput={evt =>
+              actions.username(evt.target.value)
+            }
           />
         </div>
         <div className="form-group">
@@ -29,30 +36,41 @@ export const Login = () => {
             type="password"
             className="form-control"
             placeholder="password"
+            value={state.login.password}
+            onInput={evt =>
+              actions.password(evt.target.value)
+            }
           />
         </div>
-        <button className="btn btn-primary">Login</button>
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            actions.login(state.login.username, returnTo)
+          }
+        >
+          Login
+        </button>
       </form>
     </div>
   );
 };
 
-export const Settings = () => (
+export const Settings = ({ actions }) => (
   <div>
     <div>Settings Page</div>
-    <button className="btn btn-error">Logout</button>
+    <button
+      className="btn btn-error"
+      onClick={() => actions.logout()}
+    >
+      Logout
+    </button>
   </div>
 );
 
-const TeaDetails = ({ state, actions, routing }) => (
+const TeaDetails = ({ state, routing }) => (
   <div>
     <div>{state.tea[routing.localSegment.params.id]}</div>
-    <a
-      href="#"
-      onClick={() =>
-        actions.navigateTo(routing.parentRoute())
-      }
-    >
+    <a href={router.toPath(routing.parentRoute())}>
       Back to list
     </a>
   </div>
@@ -66,14 +84,11 @@ export const Tea = ({ state, actions, routing }) => (
         state.teas.map(tea => (
           <li key={tea.id}>
             <a
-              href="#"
-              onClick={() =>
-                actions.navigateTo(
-                  routing.childRoute([
-                    Route.TeaDetails({ id: tea.id })
-                  ])
-                )
-              }
+              href={router.toPath(
+                routing.childRoute([
+                  Route.TeaDetails({ id: tea.id })
+                ])
+              )}
             >
               {tea.title}
             </a>
@@ -112,12 +127,9 @@ const Beverage = ({ state, actions, routing }) => {
       <div>{state.beverage[id]}</div>
       <div>
         <a
-          href="#"
-          onClick={() =>
-            actions.navigateTo(
-              routing.childRoute([Route.Brewer({ id })])
-            )
-          }
+          href={router.toPath(
+            routing.childRoute([Route.Brewer({ id })])
+          )}
         >
           Brewer Details
         </a>
@@ -131,12 +143,9 @@ const Beverage = ({ state, actions, routing }) => {
       )}
       <div>
         <a
-          href="#"
-          onClick={() =>
-            actions.navigateTo(
-              routing.siblingRoute([Route.Beverages()])
-            )
-          }
+          href={router.toPath(
+            routing.siblingRoute([Route.Beverages()])
+          )}
         >
           Back to list
         </a>
@@ -145,25 +154,17 @@ const Beverage = ({ state, actions, routing }) => {
   );
 };
 
-const Beverages = ({
-  state,
-  actions,
-  routing,
-  beveragesId
-}) =>
+const Beverages = ({ state, routing, beveragesId }) =>
   (state[beveragesId] && (
     <ul>
       {state[beveragesId].map(beverage => (
         <li key={beverage.id}>
           <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo(
-                routing.siblingRoute([
-                  Route.Beverage({ id: beverage.id })
-                ])
-              )
-            }
+            href={router.toPath(
+              routing.siblingRoute([
+                Route.Beverage({ id: beverage.id })
+              ])
+            )}
           >
             {beverage.title}
           </a>
@@ -196,10 +197,12 @@ export const Coffee = ({ state, actions, routing }) => {
 
 export const Beer = ({ state, actions, routing }) => {
   const Component = componentMap[routing.childSegment.id];
+  const type = routing.localSegment.params.type;
 
   return (
     <div>
       <div>Beer Page</div>
+      {type ? <div>Type: {type}</div> : null}
       <Component
         state={state}
         actions={actions}

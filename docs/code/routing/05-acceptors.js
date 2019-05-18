@@ -3,7 +3,7 @@ import {
   routeTransition
 } from "meiosis-routing/state";
 
-import { Route, navTo } from "./routes-07";
+import { Route, navTo } from "./05-routes";
 
 export const loginAccept = state => {
   const currentLogin = findRouteSegment(

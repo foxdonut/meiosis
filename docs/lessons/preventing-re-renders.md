@@ -8,22 +8,22 @@
 of your application is indeed causing a performance problem that impacts the user experience.
 
 Producing a virtual DOM node and re-rendering by the engine is generally fast, especially relative
-to everything else that is going on in a web application: database access, network requests, and
-so on. **Avoid premature optimization!**
+to everything else that is going on in a web application: database access, network requests, and so
+on. **Avoid premature optimization!**
 
-Also consider the UI: if a table with thousands of rows of data is responsible for slowing down
-your application, ask yourself whether users want to look at all that data at once on the page.
-Perhaps pagination would be more appropriate? Or, think about whether adding some filters will help
-users narrow down what they are looking for.
+Also consider the UI: if a table with thousands of rows of data is responsible for slowing down your
+application, ask yourself whether users want to look at all that data at once on the page. Perhaps
+pagination would be more appropriate? Or, think about whether adding some filters will help users
+narrow down what they are looking for.
 
 If you still need to prevent re-rendering, read on.
 
 <a name="producing_new_object_instances"></a>
 ### [Producing New Object Instances](#producing_new_object_instances)
 
-To prevent re-renders of a component, we determine whether a component's state has changed. We
-need to produce **new object instances** when updating the state, instead of mutating the
-existing object.
+To prevent re-renders of a component, we determine whether a component's state has changed. We need
+to produce **new object instances** when updating the state, instead of mutating the existing
+object.
 
 We can do this with Patchinko's immutable `O` function. This produces a new object instance instead
 of mutating the state. Here, we are assigning the new instance back to the `[id]` property:
@@ -59,10 +59,9 @@ We can use React's
 lifecycle method to prevent a component from re-rendering when the state has not changed. For
 this to work, we need to compare the component's next state to the current state.
 
-The next props get passed as a parameter to the `shouldComponentUpdate` method. From them we
-can extract the `state` and use the `id` to get the component's state. Then, we compare to
-the current state using `this.props`. We return `true` or `false` depending on whether or
-not they are the same:
+The next props get passed as a parameter to the `shouldComponentUpdate` method. From them we can
+extract the `state` and use the `id` to get the component's state. Then, we compare to the current
+state using `this.props`. We return `true` or `false` depending on whether or not they are the same:
 
 ```js
 shouldComponentUpdate(nextProps) {
@@ -72,14 +71,13 @@ shouldComponentUpdate(nextProps) {
 ```
 
 This will prevent the component's `render()` method from being called when the state has not
-changed. We can prove this to ourselves by adding `console.log` statements in the `render()`
-methods of the components, and check the console output to confirm that components are only
-re-rendered when their state has changed.
+changed. We can prove this to ourselves by adding `console.log` statements in the `render()` methods
+of the components, and check the console output to confirm that components are only re-rendered when
+their state has changed.
 
-Verify this in the example below. Notice that `render Entry`, `render Date`,
-`render Temperature Air`, and `render Temperature Water` appear in the console output **only**
-when you interact with that component in the user interface. Other components do not get
-re-rendered.
+Verify this in the example below. Notice that `render Entry`, `render Date`, `render Temperature
+Air`, and `render Temperature Water` appear in the console output **only** when you interact with
+that component in the user interface. Other components do not get re-rendered.
 
 @flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,patchinko-i 800 70
 
@@ -105,15 +103,14 @@ Then, we add the `onbeforeupdate` lifecycle method to the component:
 onbeforeupdate: checkIfStateChanged
 ```
 
-This will prevent the component's `view()` method from being called when the state has not
-changed. We can prove this to ourselves by adding `console.log` statements in the `view()`
-methods of the components, and check the console output to confirm that components are only
-re-rendered when their state has changed.
+This will prevent the component's `view()` method from being called when the state has not changed.
+We can prove this to ourselves by adding `console.log` statements in the `view()` methods of the
+components, and check the console output to confirm that components are only re-rendered when their
+state has changed.
 
-Verify this in the example below. Notice that `render Entry`, `render Date`,
-`render Temperature Air`, and `render Temperature Water` appear in the console output **only**
-when you interact with that component in the user interface. Other components do not get
-re-rendered.
+Verify this in the example below. Notice that `render Entry`, `render Date`, `render Temperature
+Air`, and `render Temperature Water` appear in the console output **only** when you interact with
+that component in the user interface. Other components do not get re-rendered.
 
 @flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-i 800 70
 

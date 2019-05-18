@@ -1,10 +1,11 @@
 /** @jsx m */
 import m from "mithril@2.0.0-rc.4";
+import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
 import merge from "mergerino@0.0.3";
 import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
-import { Route, navTo, router } from "./routes-07";
+import { Route, navTo, router } from "./07-routes";
 
 import {
   Home,
@@ -13,13 +14,13 @@ import {
   Tea,
   Coffee,
   Beer
-} from "./components-07";
+} from "./07-components";
 
 import {
   loginAccept,
   settingsAccept,
   routeAccept
-} from "./acceptors-07";
+} from "./07-acceptors";
 
 import {
   teaService,
@@ -29,7 +30,7 @@ import {
   beverageService,
   brewerService,
   loginService
-} from "./services-07";
+} from "./07-services";
 
 const componentMap = {
   Home,
@@ -44,49 +45,60 @@ const Root = {
   view: ({ attrs: { state, actions } }) => {
     const routing = Routing(state.route.current);
     const Component = componentMap[routing.localSegment.id];
-    const isActive = tab =>
-      tab === Component ? " active" : "";
+    const isActive = tab => tab === Component;
 
     return (
-      <div>
-        <ul className="nav">
-          <li className={"nav-item" + isActive(Home)}>
-            <a href={router.toPath([Route.Home()])}>Home</a>
-          </li>
-          <li className={"nav-item" + isActive(Login)}>
-            <a href={router.toPath([Route.Login()])}>
-              Login
-            </a>
-          </li>
-          <li className={"nav-item" + isActive(Settings)}>
-            <a href={router.toPath([Route.Settings()])}>
-              Settings
-            </a>
-          </li>
-          <li className={"nav-item" + isActive(Tea)}>
-            <a href={router.toPath([Route.Tea()])}>Tea</a>
-          </li>
-          <li className={"nav-item" + isActive(Coffee)}>
-            <a
-              href={router.toPath([
-                Route.Coffee(),
-                Route.Beverages()
-              ])}
-            >
-              Coffee
-            </a>
-          </li>
-          <li className={"nav-item" + isActive(Beer)}>
-            <a
-              href={router.toPath([
-                Route.Beer(),
-                Route.Beverages()
-              ])}
-            >
-              Beer
-            </a>
-          </li>
-        </ul>
+      <div className="container">
+        <div className="columns">
+          <div className="column col-6">
+            <div>
+              {isActive(Home) && <span>&rarr;</span>}
+              <a href={router.toPath([Route.Home()])}>
+                Home
+              </a>
+            </div>
+            <div>
+              {isActive(Login) && <span>&rarr;</span>}
+              <a href={router.toPath([Route.Login()])}>
+                Login
+              </a>
+            </div>
+            <div>
+              {isActive(Settings) && <span>&rarr;</span>}
+              <a href={router.toPath([Route.Settings()])}>
+                Settings
+              </a>
+            </div>
+          </div>
+          <div className="column col-6">
+            <div>
+              {isActive(Tea) && <span>&rarr;</span>}
+              <a href={router.toPath([Route.Tea()])}>Tea</a>
+            </div>
+            <div>
+              {isActive(Coffee) && <span>&rarr;</span>}
+              <a
+                href={router.toPath([
+                  Route.Coffee(),
+                  Route.Beverages()
+                ])}
+              >
+                Coffee
+              </a>
+            </div>
+            <div>
+              {isActive(Beer) && <span>&rarr;</span>}
+              <a
+                href={router.toPath([
+                  Route.Beer({ type: "ale" }),
+                  Route.Beverages()
+                ])}
+              >
+                Beer
+              </a>
+            </div>
+          </div>
+        </div>
         <hr />
 
         <div style={{ paddingLeft: ".4rem" }}>
@@ -160,7 +172,7 @@ const app = {
 };
 
 meiosis.mergerino
-  .setup({ stream: meiosis.simpleStream, merge, app })
+  .setup({ stream: Stream, merge, app })
   .then(({ states, actions }) => {
     m.route(
       document.getElementById("app"),

@@ -4,8 +4,8 @@
 
 ## The Meiosis Pattern Cheatsheet
 
-> IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern,
-please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
+> IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern, please see the
+[Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 > **Helper functions!** Meiosis is a pattern that you can set up yourself, but by popular demand
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) is now available
@@ -20,8 +20,8 @@ This is a quick summary of the Meiosis Pattern:
 patches, [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html),
 or your own patches.
 - Create an `actions` object of functions that issue patches onto the `update` stream.
-- Create a `states` stream by using `scan` on the `update` stream with the initial state and
-`P` for Patchinko or `(x, f) => f(x)` for function patches.
+- Create a `states` stream by using `scan` on the `update` stream with the initial state and `P` for
+Patchinko or `(x, f) => f(x)` for function patches.
 - Pass `state` and `actions` to views (see below for details.)
 
 Here is the code to set up the Meiosis Pattern:
@@ -125,8 +125,8 @@ ReactDOM.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
 ```
 
-This setup initally calls `render()` twice. If this is problematic in your application,
-we can use a `skippedFirst` flag:
+This setup initally calls `render()` twice. If this is problematic in your application, we can use a
+`skippedFirst` flag:
 
 ```js
 class App extends React.Component {

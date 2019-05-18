@@ -4,7 +4,7 @@ import merge from "mergerino@0.0.3";
 import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
-import { Route, navTo } from "./routes-05";
+import { Route, navTo, router } from "./06-routes";
 
 import {
   Home,
@@ -13,13 +13,13 @@ import {
   Tea,
   Coffee,
   Beer
-} from "./components-05";
+} from "./06-components";
 
 import {
   loginAccept,
   settingsAccept,
   routeAccept
-} from "./acceptors-05";
+} from "./06-acceptors";
 
 import {
   teaService,
@@ -29,7 +29,7 @@ import {
   beverageService,
   brewerService,
   loginService
-} from "./services-05";
+} from "./06-services";
 
 const componentMap = {
   Home,
@@ -43,79 +43,58 @@ const componentMap = {
 const Root = ({ state, actions }) => {
   const routing = Routing(state.route.current);
   const Component = componentMap[routing.localSegment.id];
-  const isActive = tab =>
-    tab === Component ? " active" : "";
+  const isActive = tab => tab === Component;
 
   return (
-    <div>
-      <ul className="nav">
-        <li className={"nav-item" + isActive(Home)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([Route.Home()])
-            }
-          >
-            Home
-          </a>
-        </li>
-        <li className={"nav-item" + isActive(Login)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([Route.Login()])
-            }
-          >
-            Login
-          </a>
-        </li>
-        <li className={"nav-item" + isActive(Settings)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([Route.Settings()])
-            }
-          >
-            Settings
-          </a>
-        </li>
-        <li className={"nav-item" + isActive(Tea)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([Route.Tea()])
-            }
-          >
-            Tea
-          </a>
-        </li>
-        <li className={"nav-item" + isActive(Coffee)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([
+    <div className="container">
+      <div className="columns">
+        <div className="column col-6">
+          <div>
+            {isActive(Home) && <span>&rarr;</span>}
+            <a href={router.toPath([Route.Home()])}>Home</a>
+          </div>
+          <div>
+            {isActive(Login) && <span>&rarr;</span>}
+            <a href={router.toPath([Route.Login()])}>
+              Login
+            </a>
+          </div>
+          <div>
+            {isActive(Settings) && <span>&rarr;</span>}
+            <a href={router.toPath([Route.Settings()])}>
+              Settings
+            </a>
+          </div>
+        </div>
+        <div className="column col-6">
+          <div>
+            {isActive(Tea) && <span>&rarr;</span>}
+            <a href={router.toPath([Route.Tea()])}>Tea</a>
+          </div>
+          <div>
+            {isActive(Coffee) && <span>&rarr;</span>}
+            <a
+              href={router.toPath([
                 Route.Coffee(),
                 Route.Beverages()
-              ])
-            }
-          >
-            Coffee
-          </a>
-        </li>
-        <li className={"nav-item" + isActive(Beer)}>
-          <a
-            href="#"
-            onClick={() =>
-              actions.navigateTo([
-                Route.Beer(),
+              ])}
+            >
+              Coffee
+            </a>
+          </div>
+          <div>
+            {isActive(Beer) && <span>&rarr;</span>}
+            <a
+              href={router.toPath([
+                Route.Beer({ type: "lager" }),
                 Route.Beverages()
-              ])
-            }
-          >
-            Beer
-          </a>
-        </li>
-      </ul>
+              ])}
+            >
+              Beer
+            </a>
+          </div>
+        </div>
+      </div>
       <hr />
 
       <div style={{ paddingLeft: ".4rem" }}>
@@ -193,10 +172,28 @@ meiosis.mergerino
       document.getElementById("app")
     );
 
+    router.start({ navigateTo: actions.navigateTo });
+
+    states.map(state =>
+      router.locationBarSync(state.route.current)
+    );
+
+    const locationValue = document.getElementById(
+      "locationValue"
+    );
+
     states.map(state => {
       if (document.getElementById("consoleLog").checked) {
         // eslint-disable-next-line no-console
         console.log(JSON.stringify(state));
       }
+
+      locationValue.value = location.hash;
     });
+
+    document
+      .getElementById("setLocation")
+      .addEventListener("click", () => {
+        location.hash = locationValue.value;
+      });
   });

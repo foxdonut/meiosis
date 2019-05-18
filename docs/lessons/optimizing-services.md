@@ -12,9 +12,9 @@ Services, which we used in [Services and Accepted State](services.html) as well 
 - Since a service gets called again after `update`, we have to be careful to avoid infinite
 loops.
 
-These issues are not necessarily problematic. Multiple updates, service triggers, and view
-refreshes can be very fast and not cause performance problems. We avoid infinite loops by
-managing conditions under which services call `update`.
+These issues are not necessarily problematic. Multiple updates, service triggers, and view refreshes
+can be very fast and not cause performance problems. We avoid infinite loops by managing conditions
+under which services call `update`.
 
 Nevertheless, if we have a little more code in the setup, we can enjoy these benefits:
 
@@ -63,15 +63,14 @@ ReactDOM.render(
 );
 ```
 
-In the example below, we have an `accept` function that sets the `leave` and `arrive` properties
-on the state, indicating when we leave from and arrive to a page. Services can use this information
-to load or unload its page data.
+In the example below, we have an `accept` function that sets the `leave` and `arrive` properties on
+the state, indicating when we leave from and arrive to a page. Services can use this information to
+load or unload its page data.
 
 We have two pages that use this, Data and About. Services load and unload the `data` and `about`
 properties for their respective pages.
 
-To see how many state changes are happening, a counter and a state change are logged to the
-console.
+To see how many state changes are happening, a counter and a state change are logged to the console.
 
 Try it out below. When you go from the Data page to the About page, there are 4 state changes:
 
@@ -104,8 +103,8 @@ With Function Patches, combining updates into one is simply function composition
 const combine = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
 ```
 
-Next, we'll set up a buffered update function. When the `buffered` flag is `true`, updates are
-saved into a buffer.
+Next, we'll set up a buffered update function. When the `buffered` flag is `true`, updates are saved
+into a buffer.
 
 ```javascript
 // -- Buffered updates
@@ -153,8 +152,8 @@ these are combined into a single update
 
 @flems code/optimizing-services/buffered-combined-updates.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
 
-We can do one better: combine the initial state change with the service updates into a single
-state change, and not call services again after they have emitted their updates.
+We can do one better: combine the initial state change with the service updates into a single state
+change, and not call services again after they have emitted their updates.
 
 <a name="single_state_change"></a>
 ### Single State Change/View Refresh, No Infinite Loops
@@ -178,9 +177,9 @@ let buffered = false,
   serviceUpdate = false;
 ```
 
-Finally, we'll use the indicator to control when we emit a state change onto the `states`
-stream. We'll only do so when there is a service update, or when services have no updates.
-Moreover, when there is a service update, we are not calling services again.
+Finally, we'll use the indicator to control when we emit a state change onto the `states` stream.
+We'll only do so when there is a service update, or when services have no updates. Moreover, when
+there is a service update, we are not calling services again.
 
 ```javascript
 models.map(state => {

@@ -5,8 +5,8 @@
 ## Routing
 
 The [meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing) package
-provides helper functions to manage routing in your state management code and to plug in a
-router to handle parsing URL paths.
+provides helper functions to manage routing in your state management code and to plug in a router to
+handle parsing URL paths.
 
 The goals of Meiosis Routing are:
 
@@ -23,34 +23,87 @@ The goals of Meiosis Routing are:
 
 Let's learn Meiosis Routing step by step.
 
+<a name="section_contents"></a>
+## Section Contents
+
+- [Routing Example](#routing_example)
+- [Navigation](#navigation)
+- [Route Segments](#route_segments)
+- [Transitions](#transitions)
+- [Guarding Routes](#guarding_routes)
+- [Adding a Router](#adding_a_router)
+- [Mithril Router](#mithril_router)
+
+<a name="routing_example"></a>
 ### Routing Example
 
-@flems code/routing/components-01.js,code/routing/app-01.js,routing.html,public/css/spectre.css [] 700 60 app-01.js
+To learn about routing, we'll use the example below. We have a simple app with different pages.
+Clicking on the links at the top of the page will navigate to the corresponding page. Right now, we
+have our components ready to go but the links don't work yet. Have a look to get familiar with the
+example.
 
+@flems code/routing/01-components.js,code/routing/01-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 01-app.js
+
+[Section Contents](#section_contents)
+
+<a name="navigation"></a>
 ### Navigation
 
-@flems code/routing/routes-02.js,code/routing/components-02.js,code/routing/app-02.js,routing.html,public/css/spectre.css [] 700 60 app-02.js
+Let's make the links navigate to the corresponding page. To represent which page we're on, we'll use
+a plain object with an `id` property and a `params` property for any parameters we'd like to make
+available to the page:
 
+```javascript
+{ id: "Home", params: {} }
+{ id: "Login", params: {} }
+// and so on
+```
+
+We'll put this in the application state under `route.current`:
+
+```javascript
+{ route:
+  { current: { id: "Home", params:{} } }
+}
+```
+
+@flems code/routing/02-routes.js,code/routing/02-components.js,code/routing/02-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 02-app.js
+
+[Section Contents](#section_contents)
+
+<a name="route_segments"></a>
 ### Route Segments
 
-@flems code/routing/routes-03.js,code/routing/components-03.js,code/routing/app-03.js,routing.html,public/css/spectre.css [] 700 60 app-03.js
+@flems code/routing/03-routes.js,code/routing/03-components.js,code/routing/03-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 03-app.js
 
+[Section Contents](#section_contents)
+
+<a name="transitions"></a>
 ### Transitions
 
-@flems code/routing/routes-04.js,code/routing/components-04.js,code/routing/acceptors-04.js,code/routing/services-04.js,code/routing/app-04.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 app-04.js
+@flems code/routing/04-routes.js,code/routing/04-components.js,code/routing/04-acceptors.js,code/routing/04-services.js,code/routing/04-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 04-app.js
 
+[Section Contents](#section_contents)
+
+<a name="guarding_routes"></a>
 ### Guarding Routes
 
-@flems code/routing/routes-05.js,code/routing/components-05.js,code/routing/acceptors-05.js,code/routing/services-05.js,code/routing/app-05.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 app-05.js
+@flems code/routing/05-routes.js,code/routing/05-components.js,code/routing/05-acceptors.js,code/routing/05-services.js,code/routing/05-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 05-app.js
 
-### Adding A Router
+[Section Contents](#section_contents)
 
-@flems code/routing/routes-06.js,code/routing/components-06.js,code/routing/acceptors-06.js,code/routing/services-06.js,code/routing/app-06.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 app-06.js
+<a name="adding_a_router"></a>
+### Adding a Router
 
+@flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-acceptors.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 06-app.js
+
+[Section Contents](#section_contents)
+
+<a name="mithril_router"></a>
 ### Mithril Router
 
-Mithril is a framework with what I call a "sweet spot" because it includes just enough of what
-we need to develop web applications:
+Mithril is a framework with what I call a "sweet spot" because it includes just enough of what we
+need to develop web applications:
 
 - hyperscript or JSX virtual DOM
 - streams
@@ -58,7 +111,9 @@ we need to develop web applications:
 - router
 - query string handling
 
-@flems code/routing/routes-07.js,code/routing/components-07.js,code/routing/acceptors-07.js,code/routing/services-07.js,code/routing/app-07.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 app-07.js
+@flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-acceptors.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 07-app.js
+
+[Section Contents](#section_contents)
 
 [Table of Contents](toc.html)
 
