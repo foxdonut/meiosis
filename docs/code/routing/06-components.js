@@ -68,49 +68,64 @@ export const Settings = ({ actions }) => (
 );
 
 const TeaDetails = ({ state, routing }) => (
-  <div>
+  <span>
     <div>{state.tea[routing.localSegment.params.id]}</div>
-    <a href={router.toPath(routing.parentRoute())}>
-      Back to list
-    </a>
-  </div>
+    <div>
+      <a href={router.toPath(routing.parentRoute())}>
+        Close
+      </a>
+    </div>
+  </span>
 );
 
 export const Tea = ({ state, actions, routing }) => (
   <div>
     <div>Tea Page</div>
-    <ul>
-      {state.teas ? (
-        state.teas.map(tea => (
-          <li key={tea.id}>
-            <a
-              href={router.toPath(
-                routing.childRoute([
-                  Route.TeaDetails({ id: tea.id })
-                ])
-              )}
-            >
-              {tea.title}
-            </a>
-          </li>
-        ))
-      ) : (
-        <li>Loading...</li>
-      )}
-    </ul>
-    {routing.childSegment.id === "TeaDetails" && (
-      <TeaDetails
-        state={state}
-        actions={actions}
-        routing={routing.next()}
-      />
-    )}
+    <div className="columns">
+      <div className="column col-6">
+        {state.teas ? (
+          state.teas.map(tea => (
+            <div key={tea.id}>
+              <a
+                href={router.toPath(
+                  routing.childRoute([
+                    Route.TeaDetails({ id: tea.id })
+                  ])
+                )}
+              >
+                {tea.title}
+              </a>
+            </div>
+          ))
+        ) : (
+          <div>Loading...</div>
+        )}
+      </div>
+      <div className="column col-6">
+        {routing.childSegment.id === "TeaDetails" && (
+          <TeaDetails
+            state={state}
+            actions={actions}
+            routing={routing.next()}
+          />
+        )}
+      </div>
+    </div>
   </div>
 );
 
 const Brewer = ({ state, routing }) => {
   const id = routing.localSegment.params.id;
-  return <div>{state.brewer[id]}</div>;
+  return (
+    <span>
+      <div>{state.brewer[id]}</div>
+      <div>
+        <a href={router.toPath(routing.parentRoute())}>
+          Close
+        </a>
+      </div>
+    </span>
+  );
 };
 
 const beverageComponentMap = {
@@ -123,55 +138,62 @@ const Beverage = ({ state, actions, routing }) => {
   const id = routing.localSegment.params.id;
 
   return (
-    <div>
-      <div>{state.beverage[id]}</div>
-      {(Component && (
-        <Component
-          state={state}
-          actions={actions}
-          routing={routing.next()}
-        />
-      )) || (
+    <div className="columns">
+      <div className="column col-6">
+        <div>{state.beverage[id]}</div>
         <div>
           <a
             href={router.toPath(
-              routing.childRoute([Route.Brewer({ id })])
+              routing.siblingRoute([Route.Beverages()])
             )}
           >
-            Brewer Details
+            Back to list
           </a>
         </div>
-      )}
-      <div>
-        <a
-          href={router.toPath(
-            routing.siblingRoute([Route.Beverages()])
-          )}
-        >
-          Back to list
-        </a>
+        {!Component && (
+          <div>
+            <a
+              href={router.toPath(
+                routing.childRoute([Route.Brewer({ id })])
+              )}
+            >
+              Brewer
+            </a>
+          </div>
+        )}
       </div>
+      {Component && (
+        <div className="column col-6">
+          <Component
+            state={state}
+            actions={actions}
+            routing={routing.next()}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 const Beverages = ({ state, routing, beveragesId }) =>
   (state[beveragesId] && (
-    <ul>
-      {state[beveragesId].map(beverage => (
-        <li key={beverage.id}>
-          <a
-            href={router.toPath(
-              routing.siblingRoute([
-                Route.Beverage({ id: beverage.id })
-              ])
-            )}
-          >
-            {beverage.title}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div className="columns">
+      <div className="column col-6">
+        {state[beveragesId].map(beverage => (
+          <div key={beverage.id}>
+            <a
+              href={router.toPath(
+                routing.siblingRoute([
+                  Route.Beverage({ id: beverage.id })
+                ])
+              )}
+            >
+              {beverage.title}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
   )) ||
   null;
 

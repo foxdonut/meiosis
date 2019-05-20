@@ -11,12 +11,12 @@ const teas = [
   {
     id: "t1",
     title: "Tea 1",
-    description: "Description of Tea 1"
+    description: "Desc. of Tea 1"
   },
   {
     id: "t2",
     title: "Tea 2",
-    description: "Description of Tea 2"
+    description: "Desc. of Tea 2"
   }
 ];
 
@@ -29,22 +29,22 @@ const beverages = [
   {
     id: "c1",
     title: "Coffee 1",
-    description: "Description of Coffee 1"
+    description: "Desc. of Coffee 1"
   },
   {
     id: "c2",
     title: "Coffee 2",
-    description: "Description of Coffee 2"
+    description: "Desc. of Coffee 2"
   },
   {
     id: "b1",
     title: "Beer 1",
-    description: "Description of Beer 1"
+    description: "Desc. of Beer 1"
   },
   {
     id: "b2",
     title: "Beer 2",
-    description: "Description of Beer 2"
+    description: "Desc. of Beer 2"
   }
 ];
 
@@ -146,7 +146,7 @@ export const brewerService = ({ state, update }) => {
     arrive => {
       const id = arrive.params.id;
       update({
-        brewer: { [id]: `Brewer of beverage ${id}` }
+        brewer: { [id]: `Brewer of ${id}` }
       });
     }
   );

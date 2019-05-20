@@ -45,48 +45,86 @@ export const Settings = () => (
 );
 
 const TeaDetails = ({ actions, routing }) => (
-  <div>
-    <div>Details</div>
-    <a
-      href="#"
-      onClick={() =>
-        actions.navigateTo(routing.parentRoute())
-      }
-    >
-      Back to list
-    </a>
-  </div>
+  <span>
+    <div>
+      Description of Tea {routing.localSegment.params.id}
+    </div>
+    <div>
+      <a
+        href="#"
+        onClick={() =>
+          actions.navigateTo(routing.parentRoute())
+        }
+      >
+        Close
+      </a>
+    </div>
+  </span>
 );
 
 export const Tea = ({ state, actions, routing }) => (
   <div>
     <div>Tea Page</div>
-    <ul>
-      <li>
-        <a
-          href="#"
-          onClick={() =>
-            actions.navigateTo(
-              routing.childRoute([Route.TeaDetails()])
-            )
-          }
-        >
-          Details
-        </a>
-      </li>
-    </ul>
-    {routing.childSegment.id === "TeaDetails" && (
-      <TeaDetails
-        state={state}
-        actions={actions}
-        routing={routing.next()}
-      />
-    )}
+    <div className="columns">
+      <div className="column col-6">
+        <div>
+          <a
+            href="#"
+            onClick={() =>
+              actions.navigateTo(
+                routing.childRoute([
+                  Route.TeaDetails({ id: 1 })
+                ])
+              )
+            }
+          >
+            Tea 1
+          </a>
+        </div>
+        <div>
+          <a
+            href="#"
+            onClick={() =>
+              actions.navigateTo(
+                routing.childRoute([
+                  Route.TeaDetails({ id: 2 })
+                ])
+              )
+            }
+          >
+            Tea 2
+          </a>
+        </div>
+      </div>
+      <div className="column col-6">
+        {routing.childSegment.id === "TeaDetails" && (
+          <TeaDetails
+            state={state}
+            actions={actions}
+            routing={routing.next()}
+          />
+        )}
+      </div>
+    </div>
   </div>
 );
 
-const Brewer = () => {
-  return <div>Brewer</div>;
+const Brewer = ({ actions, routing }) => {
+  return (
+    <span>
+      <div>Brewer Details</div>
+      <div>
+        <a
+          href="#"
+          onClick={() =>
+            actions.navigateTo(routing.parentRoute())
+          }
+        >
+          Close
+        </a>
+      </div>
+    </span>
+  );
 };
 
 const beverageComponentMap = {
@@ -98,56 +136,81 @@ const Beverage = ({ state, actions, routing }) => {
     beverageComponentMap[routing.childSegment.id];
 
   return (
-    <div>
-      <div>Beverage Details</div>
-      {(Component && (
-        <Component
-          state={state}
-          actions={actions}
-          routing={routing.next()}
-        />
-      )) || (
+    <div className="columns">
+      <div className="column col-6">
+        <div>Beverage Details</div>
         <div>
           <a
             href="#"
             onClick={() =>
               actions.navigateTo(
-                routing.childRoute([Route.Brewer()])
+                routing.siblingRoute([Route.Beverages()])
               )
             }
           >
-            Brewer Details
+            Back to list
           </a>
         </div>
-      )}
-      <div>
-        <a
-          href="#"
-          onClick={() =>
-            actions.navigateTo(
-              routing.siblingRoute([Route.Beverages()])
-            )
-          }
-        >
-          Back to list
-        </a>
+        {!Component && (
+          <div>
+            <a
+              href="#"
+              onClick={() =>
+                actions.navigateTo(
+                  routing.childRoute([Route.Brewer()])
+                )
+              }
+            >
+              Brewer
+            </a>
+          </div>
+        )}
       </div>
+      {Component && (
+        <div className="column col-6">
+          <Component
+            state={state}
+            actions={actions}
+            routing={routing.next()}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 const Beverages = ({ actions, routing }) => (
-  <div>
-    <a
-      href="#"
-      onClick={() =>
-        actions.navigateTo(
-          routing.siblingRoute([Route.Beverage()])
-        )
-      }
-    >
-      Beverage Details
-    </a>
+  <div className="columns">
+    <div className="column col-6">
+      <div>
+        <a
+          href="#"
+          onClick={() =>
+            actions.navigateTo(
+              routing.siblingRoute([
+                Route.Beverage({ id: 1 })
+              ])
+            )
+          }
+        >
+          Beverage 1
+        </a>
+      </div>
+      <div>
+        <a
+          href="#"
+          onClick={() =>
+            actions.navigateTo(
+              routing.siblingRoute([
+                Route.Beverage({ id: 2 })
+              ])
+            )
+          }
+        >
+          Beverage 2
+        </a>
+      </div>
+    </div>
   </div>
 );
 
