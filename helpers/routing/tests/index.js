@@ -11,6 +11,7 @@ const {
   findRouteSegmentWithParams,
   diffRoute,
   routeTransition,
+  whenPresent,
   Routing
 } = routing.state;
 
@@ -178,6 +179,15 @@ test("state", t => {
       },
       "no route transition with nested params"
     );
+
+    t.end();
+  });
+
+  t.test("whenPresent", t => {
+    const duck = { sound: "quack", color: "yellow" };
+
+    t.equal(whenPresent(duck.sound, sound => sound.toUpperCase()), "QUACK", "whenPresent true");
+    t.equal(whenPresent(duck.other, () => "fail"), null, "whenPresent false");
 
     t.end();
   });

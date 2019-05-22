@@ -80,6 +80,8 @@ export const routeTransition = ({ previous, current }) => ({
   arrive: diffRoute(current, previous)
 });
 
+export const whenPresent = (obj, fn) => (obj != null ? fn(obj) : null);
+
 /**
  * @function Routing
  *
