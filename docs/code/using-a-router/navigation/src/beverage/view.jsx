@@ -18,7 +18,7 @@ export const Beverage = ({ state, actions, routing }) => {
         <div>
           <a
             href="javascript://"
-            onClick={() => actions.navigateTo(routing.siblingRoute([Route.Beverages()]))}
+            onClick={() => actions.navigateTo(routing.siblingRoute(Route.Beverages()))}
           >
             Back to list
           </a>
@@ -27,7 +27,7 @@ export const Beverage = ({ state, actions, routing }) => {
           <div>
             <a
               href="javascript://"
-              onClick={() => actions.navigateTo(routing.childRoute([Route.Brewer({ id })]))}
+              onClick={() => actions.navigateTo(routing.childRoute(Route.Brewer({ id })))}
             >
               Brewer
             </a>

@@ -72,9 +72,9 @@ export const Tea = ({ state, actions, routing }) => (
                 href="#"
                 onClick={() =>
                   actions.navigateTo(
-                    routing.childRoute([
+                    routing.childRoute(
                       Route.TeaDetails({ id: tea.id })
-                    ])
+                    )
                   )
                 }
               >
@@ -136,7 +136,7 @@ const Beverage = ({ state, actions, routing }) => {
             href="#"
             onClick={() =>
               actions.navigateTo(
-                routing.siblingRoute([Route.Beverages()])
+                routing.siblingRoute(Route.Beverages())
               )
             }
           >
@@ -149,7 +149,7 @@ const Beverage = ({ state, actions, routing }) => {
               href="#"
               onClick={() =>
                 actions.navigateTo(
-                  routing.childRoute([Route.Brewer({ id })])
+                  routing.childRoute(Route.Brewer({ id }))
                 )
               }
             >
@@ -186,9 +186,9 @@ const Beverages = ({
               href="#"
               onClick={() =>
                 actions.navigateTo(
-                  routing.siblingRoute([
+                  routing.siblingRoute(
                     Route.Beverage({ id: beverage.id })
-                  ])
+                  )
                 )
               }
             >

@@ -9,7 +9,7 @@ export const Beverages = ({ state, routing, beveragesId }) =>
       <div className="col-md-6">
         {state[beveragesId].map(beverage => (
           <div key={beverage.id}>
-            <a href={router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })]))}>
+            <a href={router.toPath(routing.siblingRoute(Route.Beverage({ id: beverage.id })))}>
               {beverage.title}
             </a>
           </div>

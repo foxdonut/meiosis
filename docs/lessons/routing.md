@@ -4,6 +4,8 @@
 
 ## Routing
 
+> **PLEASE NOTE** that this is work-in-progress.
+
 The [meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing) package
 provides helper functions to manage routing in your state management code and to plug in a router to
 handle parsing URL paths.
@@ -27,8 +29,8 @@ Let's learn Meiosis Routing step by step.
 ## Section Contents
 
 - [Routing Example](#routing_example)
-- [Navigation](#navigation)
-- [Route Segments](#route_segments)
+- [Route Segments and Navigation](#navigation)
+- [Using `Routing`](#routing)
 - [Transitions](#transitions)
 - [Guarding Routes](#guarding_routes)
 - [Adding a Router](#adding_a_router)
@@ -48,7 +50,7 @@ they don't work yet and we'll use them later.
 [Section Contents](#section_contents)
 
 <a name="navigation"></a>
-### Navigation
+### Route Segments and Navigation
 
 Let's make the links navigate to the corresponding page. To represent which page we're on, we'll use
 a plain object with an `id` property and a `params` property for any parameters we'd like to make
@@ -83,6 +85,8 @@ const app = {
   })
 };
 ```
+
+#### Creating Route Segments
 
 To conveniently create a route segment, we can use `meiosis-routing`'s `createRouteSegments`
 function. We pass an array of strings with the ids of our route segments, and we get back an object
@@ -124,6 +128,8 @@ const app = {
 };
 ```
 
+#### Mapping Route Segments to Components
+
 To display the component that corresponds to a route id, we have a simple component map that
 associates the id to the component:
 
@@ -154,6 +160,8 @@ const Root = ({ state, actions }) => {
 };
 ```
 
+#### Navigating Between Pages
+
 To navigate between pages, we have the `navigateTo` action which we created earlier. So, navigating
 to a page is just a matter of calling the action:
 
@@ -179,8 +187,8 @@ component which we display. In the next section, we'll look at how we can have m
 
 [Section Contents](#section_contents)
 
-<a name="route_segments"></a>
-### Route Segments
+<a name="routing"></a>
+### Using `Routing`
 
 In the previous example, we had a single route segment identifying the page that we display. We can
 improve this by having a route to be **an array of route segments** instead of a single segment.
@@ -215,6 +223,8 @@ export const Route = createRouteSegments([
   "Brewer"
 ]);
 ```
+
+#### A Route is an Array
 
 As explained above, we're changing our route representation to be an array. So our initial route
 becomes:
@@ -252,6 +262,8 @@ When navigating to the page, we'll show the list of beverages, so the actions be
 </a>
 ```
 
+#### Using `meiosis-routing`'s `Routing`
+
 So now the route is an array of route segments. When we are at the top-level view, the first
 segment determines which component to display. Then, within that component, the next segment
 determines which component to display, and so on. We need a way to keep track of "where we
@@ -277,7 +289,7 @@ const Root = ({ state, actions }) => {
 };
 ```
 
-Now you have a `routing` instance with these helper properties and methods:
+Now we have a `routing` instance with these helper properties and methods:
 
 - `routing.localSegment` - returns the route segment for the local route.
 - `routing.childSegment` - returns the route segment for the child route.
@@ -287,12 +299,178 @@ Now you have a `routing` instance with these helper properties and methods:
 replaced with the passed in route, which can be a single segment or an array of segments
 - `routing.childRoute(route)` - same as `siblingRoute`, but without removing the last child.
 
+In the Root component we use the `routing` instance to get the component for the local route
+segment. We also pass `routing` down to the component:
+
+```javascript
+const Root = ({ state, actions }) => {
+  const routing = Routing(state.route.current);
+  const Component = componentMap[routing.localSegment.id];
+
+  return (
+    // ...
+    <Component state={state} actions={actions} routing={routing} />
+    // ...
+  );
+};
+```
+
+Each component can use `routing` to get information about its route segment and the route segment of
+its child, as well as to get a parent, sibling, or child route.
+
+On the Tea page, we display the list of teas. If the user clicks on an item in the list, we also
+display the description of that item. Thus the `routing` for the Tea page either has a
+`childSegment`, or it does not. We can use this to decide whether to display the `TeaDetails`
+component:
+
+```javascript
+{routing.childSegment.id === "TeaDetails" && (
+  <TeaDetails state={state} actions={actions} routing={routing.next()} />
+)}
+```
+
+Notice that we pass `routing.next()` down to the child component, so that we move the routing to the
+next segment in the array. The child component can then use `routing` to get the local segment,
+child segment, parent route, etc. and get the correct values relative to its segment.
+
+In the `Tea` component, we use `routing.childRoute` to navigate down to the Tea Details:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(
+      routing.childRoute(Route.TeaDetails({ id: 1 }))
+    )
+  }
+>
+  Tea 1
+</a>
+```
+
+Notice how we can pass the `id` in the `TeaDetails` route segment to indicate the id of the selected
+tea.
+
+Then in the `TeaDetails` component, we can use `routing.parentRoute` to navigate back up:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(routing.parentRoute())
+  }
+>
+  Close
+</a>
+```
+
+The Coffee and Beer pages display either the list of beverages (`Beverages`), or the details of the
+beverage that the user clicked on (`Beverage`), so we can use a simple lookup to determine which
+component to display:
+
+```javascript
+const componentMap = {
+  Beverages,
+  Beverage
+};
+
+export const Coffee = ({ state, actions, routing }) => {
+  const Component = componentMap[routing.childSegment.id];
+
+  return (
+    <div>
+      <div>Coffee Page</div>
+      <Component state={state} actions={actions} routing={routing.next()} />
+    </div>
+  );
+};
+```
+
+In the `Beverages` component, when clicking on an item, we want to display the details of that item
+_instead_ of the list of beverages. We can use `routing.siblingRoute`:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(
+      routing.siblingRoute(Route.Beverage({ id: 1 }))
+    )
+  }
+>
+  Beverage 1
+</a>
+```
+
+Similarly in the `Beverage` component we also use `routing.siblingRoute` to navigate back to the
+list of beverages:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(routing.siblingRoute(Route.Beverages()))
+  }
+>
+  Back to list
+</a>
+```
+
+To navigate further down to the details of the brewer, we use `routing.childRoute`:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(routing.childRoute(Route.Brewer()))
+  }
+>
+  Brewer
+</a>
+```
+
+And in the `Brewer` component, we can close the brewer details with `routing.parentRoute`:
+
+```javascript
+<a
+  href="#"
+  onClick={() =>
+    actions.navigateTo(routing.parentRoute())
+  }
+>
+  Close
+</a>
+```
+
+#### Advantages of `Routing`
+
+As you can see, `routing` makes navigation simple. We can use `parentRoute`, `siblingRoute`, and
+`childRoute` to navigate relatively to the component. This works independently of how many children
+there are in the route: the _Back to list_ link in the `Beverage` works the same way whether or not
+there is a `Brewer` child route.
+
+Finally, this routing strategy allows us to _reuse_ a series of routes: both the Coffee and Beer
+pages reuse the same `Beverages`, `Beverage`, and `Brewer` components and route segments.
+
+Try the full example below, navigate within the Tea, Coffee, and Beer pages, and observe the state
+in the console log. Browse the code to see how the pieces fit together.
+
 @flems code/routing/03-routes.js,code/routing/03-components.js,code/routing/03-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 03-app.js
 
 [Section Contents](#section_contents)
 
 <a name="transitions"></a>
 ### Transitions
+
+We now have some pretty good navigation going on. Next, we want to handle route _transitions_: run
+some code when _arriving_ at a route, such as load some data for the page, and when _leaving_ a
+route, to unload data and clean up the state for example.
+
+#### Acceptors
+
+#### Services
+
+
 
 @flems code/routing/04-routes.js,code/routing/04-components.js,code/routing/04-acceptors.js,code/routing/04-services.js,code/routing/04-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 04-app.js
 

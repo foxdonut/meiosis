@@ -21,7 +21,7 @@ export const Tea = {
                   m(
                     "a",
                     {
-                      href: router.toPath(routing.childRoute([Route.TeaDetails({ id: tea.id })]))
+                      href: router.toPath(routing.childRoute(Route.TeaDetails({ id: tea.id })))
                     },
                     tea.title
                   )

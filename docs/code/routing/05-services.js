@@ -1,11 +1,8 @@
 import { DEL } from "mergerino@0.0.4";
-import { findRouteSegment } from "meiosis-routing/state";
-
-const whenPresent = (obj, fn) => {
-  if (obj != null) {
-    return fn(obj);
-  }
-};
+import {
+  findRouteSegment,
+  whenPresent
+} from "meiosis-routing/state";
 
 const teas = [
   {

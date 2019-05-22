@@ -14,7 +14,7 @@ export const Tea = ({ state, actions, routing }) => (
               <a
                 href="javascript://"
                 onClick={() =>
-                  actions.navigateTo(routing.childRoute([Route.TeaDetails({ id: tea.id })]))
+                  actions.navigateTo(routing.childRoute(Route.TeaDetails({ id: tea.id })))
                 }
               >
                 {tea.title}

@@ -12,7 +12,7 @@ export const Tea = ({ state, actions, routing }) => (
         {state.teas ? (
           state.teas.map(tea => (
             <div key={tea.id}>
-              <a href={router.toPath(routing.childRoute([Route.TeaDetails({ id: tea.id })]))}>
+              <a href={router.toPath(routing.childRoute(Route.TeaDetails({ id: tea.id })))}>
                 {tea.title}
               </a>
             </div>

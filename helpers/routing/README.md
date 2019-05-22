@@ -1,5 +1,7 @@
 # meiosis-routing
 
+**PLEASE NOTE** that this is work-in-progress.
+
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to
 popular demand and for your convenience, here are some reusable snippets of code that help
 setup and use Meiosis. This module provides support for routing in two modules:

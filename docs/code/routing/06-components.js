@@ -88,9 +88,9 @@ export const Tea = ({ state, actions, routing }) => (
             <div key={tea.id}>
               <a
                 href={router.toPath(
-                  routing.childRoute([
+                  routing.childRoute(
                     Route.TeaDetails({ id: tea.id })
-                  ])
+                  )
                 )}
               >
                 {tea.title}
@@ -144,7 +144,7 @@ const Beverage = ({ state, actions, routing }) => {
         <div>
           <a
             href={router.toPath(
-              routing.siblingRoute([Route.Beverages()])
+              routing.siblingRoute(Route.Beverages())
             )}
           >
             Back to list
@@ -154,7 +154,7 @@ const Beverage = ({ state, actions, routing }) => {
           <div>
             <a
               href={router.toPath(
-                routing.childRoute([Route.Brewer({ id })])
+                routing.childRoute(Route.Brewer({ id }))
               )}
             >
               Brewer
@@ -183,9 +183,9 @@ const Beverages = ({ state, routing, beveragesId }) =>
           <div key={beverage.id}>
             <a
               href={router.toPath(
-                routing.siblingRoute([
+                routing.siblingRoute(
                   Route.Beverage({ id: beverage.id })
-                ])
+                )
               )}
             >
               {beverage.title}

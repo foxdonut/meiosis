@@ -16,7 +16,7 @@ export const Beverages = {
             { key: beverage.id },
             m(
               "a",
-              { href: router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })])) },
+              { href: router.toPath(routing.siblingRoute(Route.Beverage({ id: beverage.id }))) },
               beverage.title
             )
           )

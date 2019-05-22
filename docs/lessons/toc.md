@@ -9,7 +9,7 @@ please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 - [Services and Computed Properties](services.html)
 - [SAM Pattern](sam-pattern.html)
 - [Optimizing Services](optimizing-services.html)
-- [Routing](routing.html)
+- [Routing](routing.html) (work-in-progress)
 - [Unit Testing](unit-testing.html) (coming soon)
 - [Preventing Re-renders](preventing-re-renders.html)
 

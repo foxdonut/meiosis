@@ -1,8 +1,7 @@
 import { DEL } from "mergerino";
-import { findRouteSegment } from "meiosis-routing/state";
+import { findRouteSegment, whenPresent } from "meiosis-routing/state";
 
 import { beverageMap } from "./data";
-import { whenPresent } from "../util";
 
 export const service = ({ state, update }) => {
   whenPresent(findRouteSegment(state.route.arrive, "Beverage"), arrive => {
