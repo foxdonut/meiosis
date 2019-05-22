@@ -189,13 +189,103 @@ Multiple route segments give us the ability to have "deep" routes, where you not
 page but also navigate within that page. For example:
 
 - On the Tea page, we have a list of items. We can click on an item to display details about that
-  item, below the list.
+  item, to the right of the list. Then we can hide the details with the _Close_ link.
 - On the Coffee page, we also have a list of items. Clicking on an item displays details _instead_
-  of the list. From there, we can click on "Back to list", or we can go further down by clicking on
-  "Brewer Details".
+  of the list. From there, we can click on _Back to list_, or we can go further by clicking on
+  _Brewer_, which displays the brewer details to the right. As with the Tea page, the _Close_ link
+  hides the details.
 - The Beer page works the same way as the Coffee page, except that it is for a list of beers. Here
   we want _reusable_ components and routes that work with Coffees and Beers, which we'll call
   Beverages.
+
+We'll start by adding the `TeaDetails`, `Beverages`, `Beverage`, and `Brewer` route segments, so
+that we now have:
+
+```javascript
+export const Route = createRouteSegments([
+  "Home",
+  "Login",
+  "Settings",
+  "Tea",
+  "TeaDetails",
+  "Coffee",
+  "Beer",
+  "Beverages",
+  "Beverage",
+  "Brewer"
+]);
+```
+
+As explained above, we're changing our route representation to be an array. So our initial route
+becomes:
+
+```javascript
+const app = {
+  Initial: () => navTo([Route.Home()]),
+  // ...
+};
+```
+
+We'll also change the actions that navigate, passing an array to `actions.navigateTo`:
+
+```javascript
+actions.navigateTo([Route.Home()])
+actions.navigateTo([Route.Login()])
+// and so on
+```
+
+Now, on the Coffee and the Beer pages, we'll have the list of beverages **or** the details of a
+single beverage. These are represented by `Route.Beverages` and `Route.Beverage`, respectively.
+When navigating to the page, we'll show the list of beverages, so the actions become:
+
+```javascript
+<a href="#"
+  onClick={() => actions.navigateTo([ Route.Coffee(), Route.Beverages() ])}
+>
+  Coffee
+</a>
+
+<a href="#"
+  onClick={() => actions.navigateTo([ Route.Beer(), Route.Beverages() ])}
+>
+  Beer
+</a>
+```
+
+So now the route is an array of route segments. When we are at the top-level view, the first
+segment determines which component to display. Then, within that component, the next segment
+determines which component to display, and so on. We need a way to keep track of "where we
+are at" in the array of route segments.
+
+Moreover, the route array opens up the possibility to navigate to:
+
+- a parent route
+- a sibling route
+- a child route
+
+without having to mess with paths.
+
+To make all of that simple, `meiosis-routing` provides helper functions. First, you construct a
+_routing_ object with `Routing`, passing in the current route from the state:
+
+```javascript
+import { Routing } from "meiosis-routing/state";
+
+const Root = ({ state, actions }) => {
+  const routing = Routing(state.route.current);
+  // ...
+};
+```
+
+Now you have a `routing` instance with these helper properties and methods:
+
+- `routing.localSegment` - returns the route segment for the local route.
+- `routing.childSegment` - returns the route segment for the child route.
+- `routing.next()` - creates a `routing` instance, changing to the next route in the array.
+- `routing.parentRoute()` - returns the route array for the parent route.
+- `routing.siblingRoute(route)` - returns the route array for a route with the last child
+replaced with the passed in route, which can be a single segment or an array of segments
+- `routing.childRoute(route)` - same as `siblingRoute`, but without removing the last child.
 
 @flems code/routing/03-routes.js,code/routing/03-components.js,code/routing/03-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 03-app.js
 

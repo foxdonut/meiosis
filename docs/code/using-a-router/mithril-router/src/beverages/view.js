@@ -7,15 +7,18 @@ export const Beverages = {
   view: ({ attrs: { state, routing, beveragesId } }) =>
     state[beveragesId] &&
     m(
-      "ul",
-      state[beveragesId].map(beverage =>
-        m(
-          "li",
-          { key: beverage.id },
+      ".row",
+      m(
+        ".col-md-6",
+        state[beveragesId].map(beverage =>
           m(
-            "a",
-            { href: router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })])) },
-            beverage.title
+            "div",
+            { key: beverage.id },
+            m(
+              "a",
+              { href: router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })])) },
+              beverage.title
+            )
           )
         )
       )

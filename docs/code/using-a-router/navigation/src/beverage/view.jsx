@@ -12,25 +12,33 @@ export const Beverage = ({ state, actions, routing }) => {
   const id = routing.localSegment.params.id;
 
   return (
-    <div>
-      <div>{state.beverage[id]}</div>
-      <div>
-        <a
-          href="javascript://"
-          onClick={() => actions.navigateTo(routing.childRoute([Route.Brewer({ id })]))}
-        >
-          Brewer
-        </a>
+    <div className="row">
+      <div className="col-md-6">
+        <div>{state.beverage[id]}</div>
+        <div>
+          <a
+            href="javascript://"
+            onClick={() => actions.navigateTo(routing.siblingRoute([Route.Beverages()]))}
+          >
+            Back to list
+          </a>
+        </div>
+        {!Component && (
+          <div>
+            <a
+              href="javascript://"
+              onClick={() => actions.navigateTo(routing.childRoute([Route.Brewer({ id })]))}
+            >
+              Brewer
+            </a>
+          </div>
+        )}
       </div>
-      {Component && <Component state={state} actions={actions} routing={routing.next()} />}
-      <div>
-        <a
-          href="javascript://"
-          onClick={() => actions.navigateTo(routing.siblingRoute([Route.Beverages()]))}
-        >
-          Back to list
-        </a>
-      </div>
+      {Component && (
+        <div className="col-md-6">
+          <Component state={state} actions={actions} routing={routing.next()} />
+        </div>
+      )}
     </div>
   );
 };

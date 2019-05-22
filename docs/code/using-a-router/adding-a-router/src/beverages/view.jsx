@@ -5,14 +5,16 @@ import { router } from "../router";
 
 export const Beverages = ({ state, routing, beveragesId }) =>
   (state[beveragesId] && (
-    <ul>
-      {state[beveragesId].map(beverage => (
-        <li key={beverage.id}>
-          <a href={router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })]))}>
-            {beverage.title}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div className="row">
+      <div className="col-md-6">
+        {state[beveragesId].map(beverage => (
+          <div key={beverage.id}>
+            <a href={router.toPath(routing.siblingRoute([Route.Beverage({ id: beverage.id })]))}>
+              {beverage.title}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
   )) ||
   null;

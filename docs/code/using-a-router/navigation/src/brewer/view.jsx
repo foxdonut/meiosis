@@ -1,7 +1,16 @@
 import React from "react";
 
-export const Brewer = ({ state, routing }) => {
+export const Brewer = ({ state, actions, routing }) => {
   const id = routing.localSegment.params.id;
 
-  return <div>{state.brewer[id]}</div>;
+  return (
+    <div>
+      <div>{state.brewer[id]}</div>
+      <div>
+        <a href="javascript://" onClick={() => actions.navigateTo(routing.parentRoute())}>
+          Close
+        </a>
+      </div>
+    </div>
+  );
 };

@@ -10,25 +10,30 @@ export const Tea = {
       "div",
       m("div", "Tea Page"),
       m(
-        "ul",
-        state.teas
-          ? state.teas.map(tea =>
-              m(
-                "li",
-                { key: tea.id },
+        ".row",
+        m(
+          ".col-md-6",
+          state.teas
+            ? state.teas.map(tea =>
                 m(
-                  "a",
-                  {
-                    href: router.toPath(routing.childRoute([Route.TeaDetails({ id: tea.id })]))
-                  },
-                  tea.title
+                  "div",
+                  { key: tea.id },
+                  m(
+                    "a",
+                    {
+                      href: router.toPath(routing.childRoute([Route.TeaDetails({ id: tea.id })]))
+                    },
+                    tea.title
+                  )
                 )
               )
-            )
-          : m("li", "Loading...")
-      ),
-
-      routing.childSegment.id === "TeaDetails" &&
-        m(TeaDetails, { state, actions, routing: routing.next() })
+            : m("div", "Loading...")
+        ),
+        m(
+          ".col-md-6",
+          routing.childSegment.id === "TeaDetails" &&
+            m(TeaDetails, { state, actions, routing: routing.next() })
+        )
+      )
     )
 };

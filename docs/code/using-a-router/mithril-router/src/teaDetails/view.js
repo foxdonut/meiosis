@@ -7,6 +7,6 @@ export const TeaDetails = {
     m(
       "div",
       m("div", state.tea[routing.localSegment.params.id]),
-      m("a", { href: router.toPath(routing.parentRoute()) }, "Back to list")
+      m("div", m("a", { href: router.toPath(routing.parentRoute()) }, "Close"))
     )
 };
