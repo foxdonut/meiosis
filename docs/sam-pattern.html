@@ -33,22 +33,22 @@ to automatically trigger another Action.</li>
 <li>the view is a function of the application state</li>
 <li><em>services</em>, which we also saw in <a href="services.html">Services and Accepted State</a>.</li>
 </ul>
-<p>The main difference is that in SAM, actions present <em>proposals</em> to the Model, which can accept
-or reject them. Thus you need to be able to <em>inspect</em> proposals. In Meiosis, <em>patches</em> are
-merged into the state with <code>scan</code> and the accumulator function. So instead of inspecting
-proposals, the acceptors inspect the state and return patches to make any necessary changes
-and produce the accepted state.</p>
-<p>Acceptors also play the same role as SAM&#39;s State, since they can transform the state for the
-view to consume.</p>
+<p>The main difference is that in SAM, actions present <em>proposals</em> to the Model, which can accept or
+reject them. Thus you need to be able to <em>inspect</em> proposals. In Meiosis, <em>patches</em> are merged into
+the state with <code>scan</code> and the accumulator function. So instead of inspecting proposals, the
+acceptors inspect the state and return patches to make any necessary changes and produce the
+accepted state.</p>
+<p>Acceptors also play the same role as SAM&#39;s State, since they can transform the state for the view to
+consume.</p>
 <p>Services are triggered when the state changes and can issue updates; they correspond to SAM&#39;s
 Next-Action-Predicate.</p>
 <p><a name="meiosis_pattern"></a></p>
 <h3><a href="#meiosis_pattern">Meiosis Pattern Recap</a></h3><p>Remember the fundamental Meiosis Pattern:</p>
 <pre><code class="language-javascript">const update = flyd.stream();
 const states = flyd.scan(O, app.initialState(), update);</code></pre>
-<p>Actions send patches in the form of objects or functions to the <code>update</code> stream. Using <code>scan</code>
-and the accumulator function, we produce a stream of states. We can then use the view library
-of our choice, passing the current state and the actions to the view.</p>
+<p>Actions send patches in the form of objects or functions to the <code>update</code> stream. Using <code>scan</code> and
+the accumulator function, we produce a stream of states. We can then use the view library of our
+choice, passing the current state and the actions to the view.</p>
 <p>In <a href="services.html">Services and Accepted State</a>, we added <code>accept</code>
 and <code>services</code>:</p>
 <pre><code class="language-javascript">const accept = state =&gt;
@@ -69,9 +69,9 @@ states.map(state =&gt;
 <h3><a href="#navigation_example">A Navigation Example</a></h3><p>Say we have navigation between different pages. Clicking on a section of the navigation bar shows
 the corresponding page. To navigate, we have actions that update the state to indicate the current
 page. The view uses the state to render the corresponding page.</p>
-<p>The example is below. Notice how you can go to different pages; From the <em>Settings</em> page,
-clicking on <em>Logout</em> sends you back to <em>Home</em>; and the <em>Data</em> page has no data to show, so it
-just displays a <em>Loading, please wait...</em> message.</p>
+<p>The example is below. Notice how you can go to different pages; From the <em>Settings</em> page, clicking
+on <em>Logout</em> sends you back to <em>Home</em>; and the <em>Data</em> page has no data to show, so it just displays a
+<em>Loading, please wait...</em> message.</p>
   <div id="flems1" class="flemscode" style="height:700px"></div>
 
   <script>
@@ -86,16 +86,15 @@ just displays a <em>Loading, please wait...</em> message.</p>
 
 
 <p><a name="acceptor"></a></p>
-<h3><a href="#acceptor">Accepted State</a></h3><p>SAM has the concept of an <em>acceptor</em> function in the model which receives the values presented
-by actions and updates the model accordingly. In Meiosis, acceptors are combined into a
-top-level <code>accept</code> function that transforms the state into the <em>accepted</em> state, preparing it
-for the view.</p>
+<h3><a href="#acceptor">Accepted State</a></h3><p>SAM has the concept of an <em>acceptor</em> function in the model which receives the values presented by
+actions and updates the model accordingly. In Meiosis, acceptors are combined into a top-level
+<code>accept</code> function that transforms the state into the <em>accepted</em> state, preparing it for the view.</p>
 <p>In SAM, the Model needs to be able to inspect proposals. In Meiosis, patches are applied to the
 state and then passed to acceptors. Thus we don&#39;t require to have &quot;inspectable&quot; patches -- this
 wouldn&#39;t work with function patches, for example -- because acceptors run on the state.</p>
-<p>In the code below, an action updates the state to navigate to the Settings page. But if the
-user is not logged in -- the <code>user</code> is not in the state -- the acceptor changes the state to
-navigate to the Login page instead:</p>
+<p>In the code below, an action updates the state to navigate to the Settings page. But if the user is
+not logged in -- the <code>user</code> is not in the state -- the acceptor changes the state to navigate to the
+Login page instead:</p>
 <pre><code class="language-javascript">const settingsCheckLogin = state =&gt; {
   if (
     state.pageId === &quot;SettingsPage&quot; &amp;&amp;
@@ -147,10 +146,9 @@ when navigating away from the login page:</p>
     return { login: null };
   }
 };</code></pre>
-<p>As a convenience, if the user clicks on <em>Settings</em> without logging in, we want to return to
-the <em>Settings</em> page after they have logged in, since that is where they were trying to go.
-We can use a <code>returnTo</code> property to indicate this, and make sure we clear it out after
-using it:</p>
+<p>As a convenience, if the user clicks on <em>Settings</em> without logging in, we want to return to the
+<em>Settings</em> page after they have logged in, since that is where they were trying to go. We can use a
+<code>returnTo</code> property to indicate this, and make sure we clear it out after using it:</p>
 <pre><code class="language-javascript">const checkReturnTo = state =&gt; {
   if (state.user &amp;&amp; state.returnTo) {
     return { pageId: state.returnTo, returnTo: null };
@@ -171,8 +169,8 @@ using it:</p>
   ]
 };</code></pre>
 <p>Try it out below. Now you are sent to the <em>Settings</em> page after logging in, if you had previously
-attempted to go to <em>Settings</em>. Also notice that if you go back to the <code>Login</code> page, the form is
-now cleared out.</p>
+attempted to go to <em>Settings</em>. Also notice that if you go back to the <code>Login</code> page, the form is now
+cleared out.</p>
   <div id="flems3" class="flemscode" style="height:700px"></div>
 
   <script>
@@ -187,13 +185,13 @@ now cleared out.</p>
 
 
 <p><a name="next_action_predicate"></a></p>
-<h3><a href="#next_action_predicate">Next-Action-Predicate</a></h3><p>The final part of the SAM pattern is the Next-Action-Predicate (nap). This is a function that
-looks at the application state and decides whether to automatically trigger another action
-(the next action).</p>
-<p>Meiosis services have the same functionality. Let&#39;s use this to load the data on the <em>Data</em> page.
-We want the action to complete -- navigating to the <em>Data</em> page and showing the <em>please wait</em>
-message -- but then if there is no data in the application state, we want to automatically trigger
-the action that loads the data:</p>
+<h3><a href="#next_action_predicate">Next-Action-Predicate</a></h3><p>The final part of the SAM pattern is the Next-Action-Predicate (nap). This is a function that looks
+at the application state and decides whether to automatically trigger another action (the next
+action).</p>
+<p>Meiosis services have the same functionality. Let&#39;s use this to load the data on the <em>Data</em> page. We
+want the action to complete -- navigating to the <em>Data</em> page and showing the <em>please wait</em> message
+-- but then if there is no data in the application state, we want to automatically trigger the
+action that loads the data:</p>
 <pre><code class="language-javascript">const dataService = ({ state, actions }) =&gt; {
   if (state.pageId === &quot;DataPage&quot; &amp;&amp; !state.data) {
     actions.loadData();
@@ -205,9 +203,9 @@ const app = {
   services: [dataService]
 };</code></pre>
 <p>Now if you go to the <em>Data</em> page, you will see the <em>please wait</em> message for a couple of seconds,
-and then a message saying <em>The data has been loaded.</em> If you navigate away and then come back to
-the <em>Data</em> page, the data is still there. But if you click on <em>Logout</em>, the data is cleared out
-of the application state.</p>
+and then a message saying <em>The data has been loaded.</em> If you navigate away and then come back to the
+<em>Data</em> page, the data is still there. But if you click on <em>Logout</em>, the data is cleared out of the
+application state.</p>
 <p>Try it out:</p>
   <div id="flems4" class="flemscode" style="height:700px"></div>
 

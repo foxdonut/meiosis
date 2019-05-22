@@ -20,9 +20,9 @@
 <li>Since a service gets called again after <code>update</code>, we have to be careful to avoid infinite
 loops.</li>
 </ul>
-<p>These issues are not necessarily problematic. Multiple updates, service triggers, and view
-refreshes can be very fast and not cause performance problems. We avoid infinite loops by
-managing conditions under which services call <code>update</code>.</p>
+<p>These issues are not necessarily problematic. Multiple updates, service triggers, and view refreshes
+can be very fast and not cause performance problems. We avoid infinite loops by managing conditions
+under which services call <code>update</code>.</p>
 <p>Nevertheless, if we have a little more code in the setup, we can enjoy these benefits:</p>
 <ul>
 <li>The freedom to call <code>update</code> as many times as necessary, knowing that all service updates
@@ -66,13 +66,12 @@ ReactDOM.render(
   &lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;)
 );</code></pre>
-<p>In the example below, we have an <code>accept</code> function that sets the <code>leave</code> and <code>arrive</code> properties
-on the state, indicating when we leave from and arrive to a page. Services can use this information
-to load or unload its page data.</p>
+<p>In the example below, we have an <code>accept</code> function that sets the <code>leave</code> and <code>arrive</code> properties on
+the state, indicating when we leave from and arrive to a page. Services can use this information to
+load or unload its page data.</p>
 <p>We have two pages that use this, Data and About. Services load and unload the <code>data</code> and <code>about</code>
 properties for their respective pages.</p>
-<p>To see how many state changes are happening, a counter and a state change are logged to the
-console.</p>
+<p>To see how many state changes are happening, a counter and a state change are logged to the console.</p>
 <p>Try it out below. When you go from the Data page to the About page, there are 4 state changes:</p>
 <ol>
 <li>the <code>pageId</code> changes</li>
@@ -103,8 +102,8 @@ into a single patch. With Patchinko, we can do this:</p>
 <p>The patch is a function takes the model and applies all the patches.</p>
 <p>With Function Patches, combining updates into one is simply function composition:</p>
 <pre><code class="language-javascript">const combine = fns =&gt; args =&gt; fns.reduceRight((arg, fn) =&gt; fn(arg), args);</code></pre>
-<p>Next, we&#39;ll set up a buffered update function. When the <code>buffered</code> flag is <code>true</code>, updates are
-saved into a buffer.</p>
+<p>Next, we&#39;ll set up a buffered update function. When the <code>buffered</code> flag is <code>true</code>, updates are saved
+into a buffer.</p>
 <pre><code class="language-javascript">// -- Buffered updates
 
 let buffered = false,
@@ -155,8 +154,8 @@ these are combined into a single update</li>
   </script>
 
 
-<p>We can do one better: combine the initial state change with the service updates into a single
-state change, and not call services again after they have emitted their updates.</p>
+<p>We can do one better: combine the initial state change with the service updates into a single state
+change, and not call services again after they have emitted their updates.</p>
 <p><a name="single_state_change"></a></p>
 <h3>Single State Change/View Refresh, No Infinite Loops</h3><p>To combine the initial state change and service updates into a single state change, and to avoid
 calling services again after they have issued their updates, we&#39;ll change the <code>states</code> stream to
@@ -169,9 +168,9 @@ const states = flyd.stream();</code></pre>
   buffer = [];
   buffer = [],
   serviceUpdate = false;</code></pre>
-<p>Finally, we&#39;ll use the indicator to control when we emit a state change onto the <code>states</code>
-stream. We&#39;ll only do so when there is a service update, or when services have no updates.
-Moreover, when there is a service update, we are not calling services again.</p>
+<p>Finally, we&#39;ll use the indicator to control when we emit a state change onto the <code>states</code> stream.
+We&#39;ll only do so when there is a service update, or when services have no updates. Moreover, when
+there is a service update, we are not calling services again.</p>
 <pre><code class="language-javascript">models.map(state =&gt; {
   // If the call comes from a service update, we just want to emit the resulting state.
   if (serviceUpdate) {

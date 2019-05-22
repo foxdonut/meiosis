@@ -13,8 +13,8 @@
     <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
     <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>The Meiosis Pattern Cheatsheet</h2><blockquote>
-<p>IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern,
-please see the <a href="https://meiosis.js.org/tutorial/toc.html">Meiosis Tutorial</a>.</p>
+<p>IMPORTANT NOTE: For a complete explanation of the Meiosis Pattern, please see the
+<a href="https://meiosis.js.org/tutorial/toc.html">Meiosis Tutorial</a>.</p>
 </blockquote>
 <blockquote>
 <p><strong>Helper functions!</strong> Meiosis is a pattern that you can set up yourself, but by popular demand
@@ -30,8 +30,8 @@ for your convenience.</p>
 patches, <a href="http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html">Function Patches</a>,
 or your own patches.</li>
 <li>Create an <code>actions</code> object of functions that issue patches onto the <code>update</code> stream.</li>
-<li>Create a <code>states</code> stream by using <code>scan</code> on the <code>update</code> stream with the initial state and
-<code>P</code> for Patchinko or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
+<li>Create a <code>states</code> stream by using <code>scan</code> on the <code>update</code> stream with the initial state and <code>P</code> for
+Patchinko or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
 <li>Pass <code>state</code> and <code>actions</code> to views (see below for details.)</li>
 </ul>
 <p>Here is the code to set up the Meiosis Pattern:</p>
@@ -116,8 +116,8 @@ m.mount(document.getElementById(&quot;app&quot;), {
 
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
-<p>This setup initally calls <code>render()</code> twice. If this is problematic in your application,
-we can use a <code>skippedFirst</code> flag:</p>
+<p>This setup initally calls <code>render()</code> twice. If this is problematic in your application, we can use a
+<code>skippedFirst</code> flag:</p>
 <pre><code class="language-js">class App extends React.Component {
   constructor(props) {
     super(props);
