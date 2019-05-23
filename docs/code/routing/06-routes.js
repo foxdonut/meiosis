@@ -13,7 +13,8 @@ export const Route = createRouteSegments([
   "Beer",
   "Beverages",
   "Beverage",
-  "Brewer"
+  "Brewer",
+  "NotFound"
 ]);
 
 export const navTo = route => ({
@@ -38,5 +39,5 @@ export const router = createFeatherRouter({
   createRouteMatcher,
   queryString,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: [Route.NotFound()]
 });

@@ -12,7 +12,8 @@ import {
   Settings,
   Tea,
   Coffee,
-  Beer
+  Beer,
+  NotFound
 } from "./06-components";
 
 import {
@@ -37,7 +38,8 @@ const componentMap = {
   Settings,
   Tea,
   Coffee,
-  Beer
+  Beer,
+  NotFound
 };
 
 const Root = ({ state, actions }) => {

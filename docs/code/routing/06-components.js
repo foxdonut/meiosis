@@ -235,3 +235,5 @@ export const Beer = ({ state, actions, routing }) => {
     </div>
   );
 };
+
+export const NotFound = () => <div>Page Not Found</div>;

@@ -12,7 +12,8 @@ export const Route = createRouteSegments([
   "Beer",
   "Beverages",
   "Beverage",
-  "Brewer"
+  "Brewer",
+  "NotFound"
 ]);
 
 export const navTo = route => ({
@@ -30,11 +31,12 @@ export const routeConfig = {
   Settings: "/settings",
   Tea: ["/tea", { TeaDetails: "/:id" }],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer?type", beverageRoutes]
+  Beer: ["/beer?type", beverageRoutes],
+  NotFound: "/:404..."
 };
 
 export const router = createMithrilRouter({
   m,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: [Route.NotFound()]
 });

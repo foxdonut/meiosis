@@ -17,7 +17,8 @@ const componentMap = {
   Settings,
   Tea,
   Coffee,
-  Beer
+  Beer,
+  NotFound: () => <div>Page Not Found</div>
 };
 
 export const Root = ({ state, actions }) => {

@@ -5,5 +5,5 @@ import { Route, routeConfig } from "routing-common/src/routes";
 export const router = createMithrilRouter({
   m,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: [Route.NotFound()]
 });

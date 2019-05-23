@@ -13,7 +13,7 @@ export const router = createFeatherRouter({
   createRouteMatcher,
   queryString: qs,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: [Route.NotFound()]
 });
 
 /*

@@ -18,7 +18,7 @@ const componentMap = {
   Tea: Tea,
   Coffee: Coffee,
   Beer: Beer,
-  Invalid: { view: () => m("div", "Oops, page not found.") }
+  NotFound: { view: () => m("div", "Page Not Found") }
 };
 
 export const Root = {

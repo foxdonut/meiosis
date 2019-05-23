@@ -262,3 +262,7 @@ export const Beer = {
     );
   }
 };
+
+export const NotFound = {
+  view: () => <div>Page Not Found</div>
+};
