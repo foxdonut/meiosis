@@ -51,7 +51,7 @@ export const findQueryParams = path => extractMatches(path.match(/\?[^?]*/g));
 
 export const setParams = (path, params) =>
   findPathParams(path).reduce((result, pathParam) => {
-    const value = params[pathParam];
+    const value = params[pathParam] || "";
     const key = ":" + pathParam;
     const idx = result.indexOf(key);
     return result.substring(0, idx) + value + result.substring(idx + key.length);

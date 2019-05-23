@@ -35,8 +35,38 @@ const Route = createRouteSegments([
   "Search",
   "Details",
   "Beverage",
-  "Brewer"
+  "Brewer",
+  "Invalid"
 ]);
+
+const routeConfig1 = {
+  Home: "/",
+  About: "/about",
+  User: [
+    "/user/:id",
+    {
+      Profile: "/profile"
+    }
+  ]
+};
+
+const routeConfig2 = {
+  Search: ["/search/:id?page?sort", { Details: "/details/:type?filter" }]
+};
+
+const routeConfig3 = {
+  Beverage: [
+    "/beverage/:id",
+    {
+      Brewer: ["/brewer", ["id"]]
+    }
+  ]
+};
+
+const routeConfig4 = {
+  Home: "/",
+  Invalid: "/:404..."
+};
 
 test("state", t => {
   t.test("createRouteSegments", t => {
@@ -253,30 +283,6 @@ test("state", t => {
 });
 
 test("routerHelper", t => {
-  const routeConfig1 = {
-    Home: "/",
-    About: "/about",
-    User: [
-      "/user/:id",
-      {
-        Profile: "/profile"
-      }
-    ]
-  };
-
-  const routeConfig2 = {
-    Search: ["/search/:id?page?sort", { Details: "/details/:type?filter" }]
-  };
-
-  const routeConfig3 = {
-    Beverage: [
-      "/beverage/:id",
-      {
-        Brewer: ["/brewer", ["id"]]
-      }
-    ]
-  };
-
   t.test("findPathParams", t => {
     t.deepEqual(findPathParams("/home"), [], "findPathParams empty");
     t.deepEqual(findPathParams("/user/:id"), ["id"], "findPathParams one");
@@ -375,6 +381,16 @@ test("routerHelper", t => {
       convertToPath(routeConfig3, [Route.Beverage({ id: 42 }), Route.Brewer({ id: 43 })]),
       "/beverage/42/brewer",
       "convertToPath with parent params"
+    );
+
+    t.end();
+  });
+
+  t.test("convertToPath with Mithril catchall route", t => {
+    t.deepEqual(
+      convertToPath(routeConfig4, [Route.Invalid({ 404: "invalid" })]),
+      "/",
+      "convertToPath with Mithril catchall route"
     );
 
     t.end();
