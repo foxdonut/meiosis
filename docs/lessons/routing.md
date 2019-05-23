@@ -45,6 +45,10 @@ have our components ready to go but the links don't work yet. Have a look at the
 familiar with the example. Don't worry about the "Show state in console log" and the "Location",
 they don't work yet and we'll use them later.
 
+> Note that we're using
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) to wire up the
+Meiosis pattern.
+
 @flems code/routing/01-components.js,code/routing/01-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 01-app.js
 
 [Section Contents](#section_contents)
@@ -466,11 +470,234 @@ We now have some pretty good navigation going on. Next, we want to handle route 
 some code when _arriving_ at a route, such as load some data for the page, and when _leaving_ a
 route, to unload data and clean up the state for example.
 
-#### Acceptors
+#### Transition State
 
-#### Services
+The first thing we'll do is indicate, in the application state, which route we are leaving and at
+which route we are arriving when navigating. When the state changes but no navigation occurs, both
+will be empty.
+
+The `routeTransition` function from `meiosis-routing` takes a `route` object (which contains the
+`current` route) and returns the object with additional properties: `previous`, `leave`, and
+`arrive`. The function uses `previous` to compare with `current` and determine `leave` and `arrive`.
+
+To use `routeTransition`, we need to wire it up as an `accept` function. Refer to
+[Using Accepted State and Services](http://meiosis.js.org/docs/services.html#using_accepted_and_services)
+for a refresher on acceptors, and see the
+[Application](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#application) section for
+information on how to specify acceptors with `meiosis-setup`.
+
+Writing an `accept` function for `routeTransition` and wiring it up as an acceptor is simple:
+
+```javascript
+import { routeTransition } from "meiosis-routing/state";
+
+export const routeAccept = state => ({
+  route: routeTransition(state.route)
+});
+
+// ...
+
+const app = {
+  // ...
+  acceptors: [routeAccept],
+  // ...
+};
+```
+
+Now, when we navigate from one page to another, such as from `Home` to `Tea`, we'll have this in
+the application state:
+
+```javascript
+{
+  route: {
+    current: [{ id: "Tea", params:{} }],
+    previous: [{ id: "Tea", params:{} }],
+    leave: [{ id: "Home", params: {} }],
+    arrive: [{ id: "Tea", params: {} }]
+  }
+}
+```
+
+We can use `route.leave` to unload data, clean up the application state and so on, and
+`route.arrive` to load data for a page, prepare the state, etc. For these tasks we can use
+_services_.
 
 
+#### Using the Transition State in Services
+
+We've seen how [Services](http://meiosis.js.org/docs/services.html#using_accepted_and_services)
+are functions that run on state changes. Since we're using [meiosis-setup], we just have to specify
+a `services` array in our `app` object with the service functions that we want to execute.
+
+Let's pretend we are loading the list of teas asynchronously. To keep the example simple, we'll just
+use hardcoded data:
+
+```javascript
+const teas = [
+  {
+    id: "t1",
+    title: "Tea 1",
+    description: "Desc. of Tea 1"
+  },
+  {
+    id: "t2",
+    title: "Tea 2",
+    description: "Desc. of Tea 2"
+  }
+];
+```
+
+We want to "load" the list when we arrive at the Tea page, and clean up the application state when
+we leave. We know we've arrived or left depending on the presence of a `Tea` route segment anywhere
+in the `arrive` or `leave` array. For convenience, `meiosis-routing` provides the `findRouteSegment`
+which returns the route segment that matches an id, or `null` if there is no match. We only need to
+specify the id. The params don't matter, but they _will_ be returned in the matched route segment so
+that we can use them as necessary.
+
+> If you need to search for a route segment that also matches specific params, `meiosis-routing`
+also provides `findRouteSegmentWithParams` for that purpose.
+
+Here is the `teaService`:
+
+```javascript
+export const teaService = ({ state, update }) => {
+  if (findRouteSegment(state.route.arrive, "Tea")) {
+    setTimeout(() => {
+      update({ teas });
+    }, 500);
+  } else if (findRouteSegment(state.route.leave, "Tea")) {
+    update({ teas: null });
+  }
+};
+```
+
+If we find the `Tea` route segment in `arrive`, we simulate loading data asynchronously with
+`setTimeout` and set the `teas` in the application state. If we find `Tea` in `leave`, then we clean
+up the application state by setting `teas` to `null`.
+
+> Note that we're just using the `"Tea"` id with `findRouteSegment`. If you prefer, you can also use
+`Route.Tea()`:
+```javascript
+if (findRouteSegment(state.route.arrive, Route.Tea())) {
+  // ...
+}
+```
+
+We wire up the service in our `app` object:
+
+```javascript
+const app = {
+  // ...
+  acceptors: [routeAccept],
+  services: [teaService]
+  // ...
+};
+```
+
+Now when we arrive at the `Tea` page, the `teas` will not yet be loaded into the application state
+since we simulated a 500 ms delay. We can display a "Loading..." message until the `teas` are
+available:
+
+```javascript
+{state.teas ? (
+  state.teas.map(tea => (
+    <div key={tea.id}>
+      {/* ... */}
+    </div>
+  ))
+) : (
+  <div>Loading...</div>
+)}
+```
+
+This will display "Loading..." and then the list of teas when they have been loaded.
+
+#### State Transition with `params`
+
+Above, we didn't have any `params` in the `Tea` route segment. We either arrive or leave the page.
+However we can also have route transitions with `params` and _both_ arrive _and_ leave the same
+route segment, each with different `params`.
+
+Consider displaying the details for a tea when the user clicks on a link. Again we want to load the
+details when they arrive, and reset when they leave. The list of teas remains visible on the left,
+and the details are displayed on the right.
+
+Now think about what happens when the user clicks on the "Tea 1" link, followed by a click on the
+"Tea 2" link. In that case, we are _leaving_ the `TeaDetails` route segment with
+`{ params: { id: "t1" } }`, _and_ at the same time we are _arriving_ at `TeaDetails` with
+`{ params: { id: "t2" } }`.
+
+While in `teaService` we had an `if ... else`, for the `teaDetailService` we need to check `leave`
+even if a match was found in `arrive`, because both could match at the same time. We can use the
+matched route segment's params to determine the `id` of the tea to load and/or unload:
+
+```javascript
+import { DEL } from "mergerino@0.0.4";
+import { whenPresent } from "meiosis-routing/state";
+// See below for an explanation of whenPresent.
+
+// teaMap is a simple id->tea lookup object.
+
+export const teaDetailService = ({ state, update }) => {
+  whenPresent(
+    findRouteSegment(state.route.arrive, "TeaDetails"),
+    arrive => {
+      const id = arrive.params.id;
+      const description = teaMap[id].description;
+      update({ tea: { [id]: description } });
+    }
+  );
+
+  whenPresent(
+    findRouteSegment(state.route.leave, "TeaDetails"),
+    leave => {
+      const id = leave.params.id;
+      update({ tea: { [id]: DEL } });
+    }
+  );
+};
+```
+
+> `whenPresent` is this convenience function:
+```javascript
+export const whenPresent = (obj, fn) => (obj != null ? fn(obj) : null);
+```
+It saves you from having to assign the result of a function call to a `const` just to check it for
+null, so that instead of:
+```javascript
+const obj = someFunctionCall();
+if (obj != null) {
+  // use obj
+}
+```
+You can write:
+```javascript
+whenPresent(someFunctionCall(), obj => {
+  // use obj
+});
+```
+Using `whenPresent` is completely optional and only a matter of preference.
+
+Now we can click on Tea 1 and then on Tea 2, and only the selected tea will be loaded into the
+application state; we won't be accumulating state as we click on different links.
+
+The Coffee and Beer pages work in the same way. Services load and unload data for the list of items,
+the details of an item, and the details of an item's brewer.
+
+#### Benefits of Route Transitions
+
+As you have seen, using route transitions allows us fine control over leaving and arriving. Because
+our routes are arrays of route segments, we can pinpoint specific details about the route
+transitions that occur:
+
+- When we arrive at the Tea, Coffee, or Beer page, we load the data for the page.
+- When we navigate _within_ one of those pages, we _only_ load the data for the details of the item
+to which we are navigating. Notice that the top-level list is _not_ loaded again as we navigate
+within the page.
+- We can load and unload data for route segments with specific `params`. With route transitions it's
+possible to leave _and_ arrive route segments with the same id but different params.
+
+Below is the complete example.
 
 @flems code/routing/04-routes.js,code/routing/04-components.js,code/routing/04-acceptors.js,code/routing/04-services.js,code/routing/04-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 04-app.js
 
