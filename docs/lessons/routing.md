@@ -706,12 +706,169 @@ Below is the complete example.
 <a name="guarding_routes"></a>
 ### Guarding Routes
 
+Sometimes you want to prevent users from accessing certain pages if they are not logged in. You
+would normally hide the link from the page, but that does not prevent them from manually typing in a
+link.
+
+#### Preventing Access to a Page
+
+For demonstration purposes, the _Settings_ link always appears in our example, but let's pretend
+that users must be logged in to access that page. When the user clicks on the link, we want to
+redirect them to the Login page and display the message: "Please login."
+
+Remember that _acceptors_ are functions that produce the accepted state. We've already added one
+`accept` function to compute route transitions. We can write an `accept` function for the Settings
+page which checks whether the user is logged in, and _changes_ the route to the Login page if they
+are not. As a bonus, we want to automatically send the user back to the Settings page after they log
+in, since that is where they were trying to go.
+
+```javascript
+import { findRouteSegment } from "meiosis-routing/state";
+import { Route, navTo } from "./05-routes";
+
+export const settingsAccept = state => {
+  if (
+    findRouteSegment(state.route.current, "Settings") &&
+    !state.user
+  ) {
+    return navTo([
+      Route.Login({ message: "Please login.", returnTo: Route.Settings() })
+    ]);
+  }
+};
+```
+
+To redirect, the function returns a patch that, using `navTo`, changes the route to the Login page.
+Notice that we are including the `message` and `returnTo` params so that the Login page can display
+the message and return to the Settings page after logging in.
+
+Acceptors run in order, and we want to alter the route before the transition gets computed. So it's
+important to have this acceptor function run **before** the route transition acceptor:
+
+```javascript
+const app = {
+  // ...
+  acceptors: [settingsAccept, routeAccept],
+  // ...
+};
+```
+
+Now if we navigate to Settings without logging in, we'll be redirected to the Login. We can display
+the message by retrieving it from the route params. We can also get the `returnTo` value so that we
+can automatically send the user back to the Settings page after they log in.
+
+```javascript
+export const Login = ({ state, actions, routing }) => {
+  const { message, returnTo } = routing.localSegment.params;
+
+  return (
+    <div>
+      {message ? <div>{message}</div> : null}
+      <div>Login</div>
+      <form className="form">
+        {/* ... */}
+        <button
+          className="btn btn-primary"
+          onClick={() => actions.login(state.login.username, returnTo)}>
+          Login
+        </button>
+      </form>
+    </div>
+  );
+};
+```
+
+The `login` action sets the `user` in the state and sends the user to the `returnTo` page if there
+is one, otherwise to the `Home` page:
+
+```javascript
+login: (username, returnTo) =>
+  update(
+    combine([
+      { user: username },
+      navTo([returnTo || Route.Home()])
+    ])
+  )
+```
+
+The Settings page now requires the user to log in before accessing the page.
+
+#### Warning Before Leaving a Page
+
+We can also guard against leaving a page, say to warn user that they will lose changes they've made
+on the page if they proceed. Let's try that with the Login page. If the user has entered anything in
+the `username` or `password` field and then navigate away from the page, we'll warn them and give
+them a chance to cancel the navigation and stay on the Login page.
+
+To achieve this, we'll write another `accept` function. Remember that acceptors having to do with
+manipulating navigation must come _before_ the route transition acceptor. As such, we don't have
+access to `arrive` and `leave` information. However, we do have `previous` and `current`. If `Login`
+is in `previous` but not in `current`, the user is navigating away from the Login page. If they were
+in the process of logging in, the state contains something in `username` and/or `password`. We'll
+use `confirm` to ask the user if they want to continue:
+
+```javascript
+export const loginAccept = state => {
+  const currentLogin = findRouteSegment(
+    state.route.current,
+    "Login"
+  );
+  const previousLogin = findRouteSegment(
+    state.route.previous,
+    "Login"
+  );
+
+  if (
+    !currentLogin &&
+    previousLogin &&
+    !state.user &&
+    (state.login.username || state.login.password) &&
+    !confirm("You have unsaved data. Continue?")
+  ) {
+    return navTo([previousLogin]);
+  }
+};
+```
+
+If they decide to cancel, we change the route to the `Login` route segment that we found in
+`previous`, thus preserving its state. This way, `returnTo` will continue to work after they log in.
+
+Finally we just need to add `loginAccept` to the list of `acceptors`:
+
+```javascript
+const app = {
+  // ...
+  acceptors: [loginAccept, settingsAccept, routeAccept],
+  // ...
+};
+```
+
+You can try out the complete example below.
+
 @flems code/routing/05-routes.js,code/routing/05-components.js,code/routing/05-acceptors.js,code/routing/05-services.js,code/routing/05-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 05-app.js
+
+#### Advantages of State-Managed Routing
+
+Up until now, everything we've done with routing and navigation has been managed by functions that
+work with the application state. This is a good thing! We do not depend on a particular router
+library and its features to be able to programmatically navigate between pages, handle route
+transitions, have reusable child routes, prevent access, and so on.
+
+This gives us the advantage of needing only a simple router library to manage URL paths. We will add
+a router in the next section.
 
 [Section Contents](#section_contents)
 
 <a name="adding_a_router"></a>
 ### Adding a Router
+
+- routeConfig
+- createFeatherRouter, createRouteMatcher, queryString
+- NotFound page
+- router.toPath
+- router.start
+- states.map router.locationBarSync
+- query params
 
 @flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-acceptors.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 06-app.js
 
@@ -728,6 +885,12 @@ need to develop web applications:
 - AJAX request handling
 - router
 - query string handling
+
+createMithrilRouter
+
+not found route
+
+m.route instead of router.start
 
 @flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-acceptors.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 07-app.js
 
