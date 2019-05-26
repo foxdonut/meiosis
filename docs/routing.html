@@ -691,7 +691,87 @@ transitions, have reusable child routes, prevent access, and so on.</p>
 a router in the next section.</p>
 <p><a href="#section_contents">Section Contents</a></p>
 <p><a name="adding_a_router"></a></p>
-<h3>Adding a Router</h3><ul>
+<h3>Adding a Router</h3><p>Everything works in our routing example. The only thing we don&#39;t have is a set of route <em>paths</em> that
+match our routes. Having paths means:</p>
+<ul>
+<li>we can put them in our links as <code>href</code></li>
+<li>users can bookmark links, open them in new tabs, and so on</li>
+<li>users can use the browser&#39;s <em>back</em> and <em>forward</em> buttons to navigate</li>
+<li>users can go <em>directly</em> to a page by pasting a link.</li>
+</ul>
+<p>We&#39;d like to add paths <em>without</em> hardcoding them everywhere in our application. We want to
+<em>continue</em> using our programmatic routes such as <code>[Route.Beer(), Route.Beverages()]</code> and
+<code>routing.parentRoute()</code>. Finally, we also want to set the route in an action, acceptor, or service,
+and have the corresponding path show up in the browser&#39;s location bar.</p>
+<p>We can achieve all of this with <code>meiosis-routing</code> and a simple router library of your choice.</p>
+<h4>Route Configuration</h4><p>First thing we&#39;ll do is write a <em>route configuration</em>. This is a plain object that associates paths
+to route segment ids:</p>
+<pre><code class="language-javascript">export const routeConfig = {
+  Home: &quot;/&quot;,
+  Login: &quot;/login&quot;,
+  Settings: &quot;/settings&quot;,
+  // ...
+};</code></pre>
+<p>This associates <code>/</code> to <code>[Route.Home()]</code>, <code>/login</code> to <code>[Route.Login()]</code>, and so on.</p>
+<p>What about route parameters? It&#39;s very common practice to use <code>:</code> to indicate parameters in paths,
+such as <code>/tea/:id</code>, so that&#39;s what <code>meiosis-routing</code> uses.</p>
+<p>The other part of the story is that are routes are arrays with possibly multiple segments. You&#39;ve
+seen how this gives us reusable subroutes and parent/sibling/child routes. We can configure paths
+with multiple route segments by using an array. The first element in the array is the path, and the
+second is a nested route configuration object:</p>
+<pre><code class="language-javascript">export const routeConfig = {
+  // ...
+  Tea: [&quot;/tea&quot;, { TeaDetails: &quot;/:id&quot; }],
+  // ...
+};</code></pre>
+<p>This associates:</p>
+<ul>
+<li><code>/tea</code> to <code>[Route.Tea()]</code></li>
+<li><code>/tea/:id</code> to <code>[Route.Tea(), Route.TeaDetails({ id })]</code>.</li>
+</ul>
+<p>We can configure nested routes like this for as many levels as we need. We can also reuse a nested
+route configuration. For the Coffee and Beer pages, we want the same nested routes for <code>[Beverages]</code>
+and <code>[Beverage, Brewer]</code>. We can create a route configuration and reuse it:</p>
+<pre><code class="language-javascript">const beverageRoutes = {
+  Beverages: &quot;&quot;,
+  Beverage: [&quot;/:id&quot;, { Brewer: &quot;/brewer&quot; }]
+};
+
+export const routeConfig = {
+  Home: &quot;/&quot;,
+  Login: &quot;/login&quot;,
+  Settings: &quot;/settings&quot;,
+  Tea: [&quot;/tea&quot;, { TeaDetails: &quot;/:id&quot; }],
+  Coffee: [&quot;/coffee&quot;, beverageRoutes],
+  Beer: [&quot;/beer&quot;, beverageRoutes]
+};</code></pre>
+<pre><code class="language-javascript">const beverageRoutes = {
+  Beverages: &quot;&quot;,
+  Beverage: [&quot;/:id&quot;, { Brewer: [&quot;/brewer&quot;, [&quot;id&quot;]] }]
+};
+
+export const routeConfig = {
+  Home: &quot;/&quot;,
+  Login: &quot;/login&quot;,
+  Settings: &quot;/settings&quot;,
+  Tea: [&quot;/tea&quot;, { TeaDetails: &quot;/:id&quot; }],
+  Coffee: [&quot;/coffee&quot;, beverageRoutes],
+  Beer: [&quot;/beer&quot;, beverageRoutes]
+};</code></pre>
+<ul>
+<li><code>/</code> &rarr; <code>[Route.Home()]</code></li>
+<li><code>/login</code> &rarr; <code>[Route.Login()]</code></li>
+<li><code>/settings</code> &rarr; <code>[Route.Settings()]</code></li>
+<li><code>/tea</code> &rarr; <code>[Route.Tea()]</code></li>
+<li><code>/tea/:id</code> &rarr; <code>[Route.Tea(), Route.TeaDetails({ id })]</code></li>
+<li><code>/coffee</code> &rarr; <code>[Route.Coffee(), Route.Beverages()]</code></li>
+<li><code>/coffee/:id</code> &rarr; <code>[Route.Coffee(), Route.Beverage({ id })]</code></li>
+<li><code>/coffee/:id/brewer</code> &rarr; <code>[Route.Coffee(), Route.Beverage({ id }), Brewer({ id })]</code></li>
+<li><code>/beer</code> &rarr; <code>[Route.Beer(), Route.Beverages()]</code></li>
+<li><code>/beer/:id</code> &rarr; <code>[Route.Beer(), Route.Beverage({ id })]</code></li>
+<li><code>/beer/:id/brewer</code> &rarr; <code>[Route.Beer(), Route.Beverage({ id }), Brewer({ id })]</code></li>
+</ul>
+<h4>Query String Parameters</h4><ul>
 <li>routeConfig</li>
 <li>createFeatherRouter, createRouteMatcher, queryString</li>
 <li>NotFound page</li>
