@@ -896,10 +896,11 @@ This associates `/` to `[Route.Home()]`, `/login` to `[Route.Login()]`, and so o
 What about route parameters? It's very common practice to use `:` to indicate parameters in paths,
 such as `/tea/:id`, so that's what `meiosis-routing` uses.
 
-The other part of the story is that are routes are arrays with possibly multiple segments. You've
-seen how this gives us reusable subroutes and parent/sibling/child routes. We can configure paths
-with multiple route segments by using an array. The first element in the array is the path, and the
-second is a nested route configuration object:
+The other part of the story is that routes are arrays that can have multiple segments. You've seen
+how this gives us reusable subroutes and parent/sibling/child routes.
+
+We can configure paths with multiple route segments by using an array. The first element in the
+array is the path, and the second is a nested route configuration object:
 
 ```javascript
 export const routeConfig = {
@@ -914,7 +915,7 @@ This associates:
 - `/tea` to `[Route.Tea()]`
 - `/tea/:id` to `[Route.Tea(), Route.TeaDetails({ id })]`.
 
-We can configure nested routes like this for as many levels as we need. We can also reuse a nested
+We can configure nested routes like this for as many segments as we need. We can also reuse a nested
 route configuration. For the Coffee and Beer pages, we want the same nested routes for `[Beverages]`
 and `[Beverage, Brewer]`. We can create a route configuration and reuse it:
 
@@ -934,6 +935,53 @@ export const routeConfig = {
 };
 ```
 
+Notice how we can reuse `beverageRoutes` under `Coffee` and `Beer`.
+
+There is one last bit of configuration that we can do in a route config. When we used the `Brewer`
+route segment, we passed the `id` that came from the parent `Beverage` route segment:
+
+```javascript
+const Beverage = ({ state, actions, routing }) => {
+  const id = routing.localSegment.params.id;
+
+  return (
+    // ...
+    <a
+      href="#"
+      onClick={() => actions.navigateTo(
+        routing.childRoute(Route.Brewer({ id }))
+      )}
+    >
+      Brewer
+    </a>
+  );
+};
+```
+
+But, in the route configuration that we have above, the `id` will _not_ be passed down to `Brewer`
+because the `:id` parameter is for the `Beverage` segment.
+
+To fix this, we specify parameters that a route segment should receive from parent segments as an
+array after the path, like this:
+
+```javascript
+Beverage: ["/:id", { Brewer: ["/brewer", ["id"]] }]
+```
+
+To summarize, in the route configuation, we have these options to associate to the id of a route
+segment:
+
+- Just the path: `Login: "/"`
+- An array with the path and an array of parameters to receive from the parent:
+`Brewer: ["/brewer", ["id"]]`
+- An array with the path and a nested route configuration:
+`Tea: ["/tea", { TeaDetails: "/:id" }]`
+- An array with the path, an array of parameters to receive from the parent, and a nested route
+configuration:
+`Brewer: ["brewer", ["id"], { ... }]`
+
+Here is our final route configuration:
+
 ```javascript
 const beverageRoutes = {
   Beverages: "",
@@ -950,6 +998,8 @@ export const routeConfig = {
 };
 ```
 
+This gives us the following path &rarr; route mappings:
+
 - `/` &rarr; `[Route.Home()]`
 - `/login` &rarr; `[Route.Login()]`
 - `/settings` &rarr; `[Route.Settings()]`
@@ -962,9 +1012,158 @@ export const routeConfig = {
 - `/beer/:id` &rarr; `[Route.Beer(), Route.Beverage({ id })]`
 - `/beer/:id/brewer` &rarr; `[Route.Beer(), Route.Beverage({ id }), Brewer({ id })]`
 
+#### Using a Router Library
+
+To parse paths and associate them to routes, we'll use a router library. You have seen that we've
+already done all the work of routing, navigation, route transitions, guarding routes, etc. So all
+we really need is a simple router library that will parse paths. There are many to choose from;
+`meiosis-routing` comes with out-of-the-box support for these:
+
+- [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
+- [url-mapper](https://github.com/cerebral/url-mapper)
+- [Mithril Router](https://mithril.js.org/route.html) (discussed in the next section)
+
+You can also plug in a different library. This is outside the scope of this tutorial, but you can
+read the details here (link forthcoming.)
+
+In this tutorial we'll use `feature-route-matcher`. To create a router, `meiosis-routing` provides
+`createFeatureRouter` to which we pass the `createRouteMatcher` function from
+`feather-route-matcher`, our `routeConfig`, and a `defaultRoute`:
+
+```javascript
+import createRouteMatcher from "feather-route-matcher";
+import { createFeatherRouter } from "meiosis-routing/router-helper";
+
+const beverageRoutes = {
+  Beverages: "",
+  Beverage: ["/:id", { Brewer: ["/brewer", ["id"]] }]
+};
+
+const routeConfig = {
+  Home: "/",
+  Login: "/login",
+  Settings: "/settings",
+  Tea: ["/tea", { TeaDetails: "/:id" }],
+  Coffee: ["/coffee", beverageRoutes],
+  Beer: ["/beer?type", beverageRoutes]
+};
+
+export const router = createFeatherRouter({
+  createRouteMatcher,
+  routeConfig,
+  defaultRoute: [Route.NotFound()]
+});
+```
+
+Notice that we have `Route.NotFound()` as the default route. Before we added paths, navigation was
+completely "internal" to the application, managed by actions. Now that the user can enter a path,
+it's possible that they enter something invalid. The default route is used when no match is found,
+and we have a simple "Page Not Found" message for that case. We can add that by adding `"NotFound"`
+to our route segments, creating a `NotFound` component, and adding it to our component map:
+
+```javascript
+export const Route = createRouteSegments([
+  // ...,
+  "NotFound"
+]);
+
+export const NotFound = () => <div>Page Not Found</div>;
+
+const componentMap = {
+  // ...,
+  NotFound
+};
+```
+
+So now we have a `router` with these properties and functions:
+
+- `initialRoute`
+- `start`
+- `toPath`
+- `locationBarSync`
+
+Let's look at them in more detail.
+
+#### Initial Route
+
+As the name implies, `router.initialRoute` gives us the initial route so that we can put it in the
+app's initial state. Before, we just initialized the route ourselves, but now that we are adding
+support for paths, the initial route is what the user has entered in the browser's location bar.
+
+We're not using it in this example because it is embedded inside the page. But normally we'd
+simply replace:
+
+```javascript
+Initial: () => navTo([Route.Home()])
+```
+
+with:
+
+```javascript
+Initial: () => navTo(router.initialRoute)
+```
+
+We do have a "Location" text field to simulate the location bar, but it is initially blank and we
+just initialize the route to the Home page.
+
+#### Starting the Router
+
+Once we've created the router, we need to "start" it so that it triggers route changes when the path
+in the location bar changes via a link, when the user enters a different path, presses the browser's
+Back button, and so on. We need to pass a `navigateTo` property to the `start` function to tell the
+router how to signal a route change. In our application, this is `actions.navigateTo`:
+
+```javascript
+router.start({ navigateTo: actions.navigateTo });
+```
+
+The router will call `actions.navigateTo` and pass the route whenever the route changes.
+
+#### Using `toPath`
+
+Now that we have a router, we can use paths in the `href` attributes of our links instead of `"#"`
+with `onclick={...}`. Users will be able to bookmark links, open links in new tabs, and see the
+path in the browser's location bar.
+
+To avoid hardcoding paths, we can use `router.toPath`, passing the same array of route segments that
+we pass to `actions.navigateTo`. We can change our links from:
+
+```javascript
+<a
+  href="#"
+  onClick={() => actions.navigateTo([Route.Settings()])}
+>
+  Settings
+</a>
+
+<a
+  href="#"
+  onClick={() => actions.navigateTo(routing.childRoute(Route.Brewer({ id })))}
+>
+  Brewer
+</a>
+```
+
+to:
+
+```javascript
+<a href={router.toPath([Route.Settings()])}>Settings</a>
+
+// We don't have to pass the id to Route.Brewer because we already have it
+// configured to inherit from the parent route in our route configuration.
+<a
+  href={router.toPath(routing.childRoute(Route.Brewer()))}
+>
+  Brewer
+</a>
+```
+
+That's pretty nice, wouldn't you say?
+
+#### Keeping the Location Bar in Sync
+
 #### Query String Parameters
 
-- routeConfig
 - createFeatherRouter, createRouteMatcher, queryString
 - NotFound page
 - router.toPath

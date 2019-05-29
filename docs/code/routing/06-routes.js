@@ -26,7 +26,7 @@ const beverageRoutes = {
   Beverage: ["/:id", { Brewer: ["/brewer", ["id"]] }]
 };
 
-export const routeConfig = {
+const routeConfig = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",

@@ -174,7 +174,7 @@ const Beverage = {
             <div>
               <a
                 href={router.toPath(
-                  routing.childRoute(Route.Brewer({ id }))
+                  routing.childRoute(Route.Brewer())
                 )}
               >
                 Brewer
