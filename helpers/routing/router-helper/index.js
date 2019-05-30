@@ -47,7 +47,7 @@ const extractMatches = matches => {
 };
 
 export const findPathParams = path => extractMatches(path.match(/:[^/?]*/g));
-export const findQueryParams = path => extractMatches(path.match(/\?[^?]*/g));
+export const findQueryParams = path => extractMatches(path.match(/[?&][^?&]*/g));
 
 export const setParams = (path, params) =>
   findPathParams(path).reduce((result, pathParam) => {

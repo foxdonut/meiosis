@@ -305,7 +305,19 @@ test("routerHelper", t => {
     t.deepEqual(
       findQueryParams("/user/:id?setting?page"),
       ["setting", "page"],
-      "findQueryParams two"
+      "findQueryParams two with ? ?"
+    );
+
+    t.deepEqual(
+      findQueryParams("/user/:id?setting&page"),
+      ["setting", "page"],
+      "findQueryParams two with ? &"
+    );
+
+    t.deepEqual(
+      findQueryParams("/user/:id&setting&page"),
+      ["setting", "page"],
+      "findQueryParams two with & &"
     );
 
     t.end();
