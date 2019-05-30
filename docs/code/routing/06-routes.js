@@ -32,7 +32,7 @@ const routeConfig = {
   Settings: "/settings",
   Tea: ["/tea", { TeaDetails: "/:id" }],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer?type", beverageRoutes]
+  Beer: ["/beer?type&country", beverageRoutes]
 };
 
 export const router = createFeatherRouter({

@@ -4,8 +4,6 @@
 
 ## Routing
 
-> **PLEASE NOTE** that this is work-in-progress.
-
 The [meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing) package
 provides helper functions to manage routing in your state management code and to plug in a router to
 handle parsing URL paths.
@@ -1045,7 +1043,7 @@ const routeConfig = {
   Settings: "/settings",
   Tea: ["/tea", { TeaDetails: "/:id" }],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer?type", beverageRoutes]
+  Beer: ["/beer", beverageRoutes]
 };
 
 export const router = createFeatherRouter({
@@ -1176,15 +1174,93 @@ This will keep the location bar in sync.
 
 #### Query String Parameters
 
+Besides `:` in paths, another way to have parameters in routes is with the query string. This is
+appended to the end of the path in the browser's location bar in the form of
+`?parameter1=value1&parameter2=value2`. (The format may vary depending on the query string library
+that you choose.)
+
+With `meiosis-routing` you can assign parameters from the query string to route segments by using
+`?` and/or `&` in the path. For example, on the Beer page, let's say we want to optionally have the
+type and country of the beer. We write the path as:
+
+```javascript
+Beer: ["/beer?type&country", beverageRoutes]
+```
+
+Now, if present in the query string, the `type` and `country` parameters are available in the route
+segment:
+
+```javascript
+export const Beer = ({ state, actions, routing }) => {
+  const { type, country } = routing.localSegment.params;
+  // ...
+};
+```
+
+Just like path parameters, changes in query string parameters will trigger `leave` and `arrive`
+changes for the route segment.
+
+> Note: The `?param1&param2&param3` notation feels close to the format of the query string, but know
+that you can use any combination of `?` and/or `&` on the path, as you prefer. So these paths all
+work the same:
+```javascript
+Beer: ["/beer?type?country", beverageRoutes]
+Beer: ["/beer&type&country", beverageRoutes]
+Beer: ["/beer&type?country", beverageRoutes]
+```
+
+To parse and stringify the query string, we need to plug in a library. The only requirement for
+`meiosis-routing` is that the library must have the `parse` and `stringify` functions; if they do
+not, you can just wrap the library into an object with those functions, which in turn call the
+library's equivalents.
+
+Again, there are several options; examples of libraries that work well are:
+
+- [query-string](https://github.com/sindresorhus/query-string)
+- [qs](https://github.com/ljharb/qs)
+- [urlon](https://github.com/cerebral/urlon)
+- [Mithril](https://mithril.js.org/parseQueryString.html) (discussed in the next section)
+
+To use a query string library, we specify it as `queryString` when we call `createFeatherRouter`:
+
+```javascript
+import createRouteMatcher from "feather-route-matcher";
+import queryString from "query-string";
+
+export const Route = createRouteSegments([...]);
+
+const routeConfig = {...};
+
+export const router = createFeatherRouter({
+  createRouteMatcher,
+  queryString,
+  routeConfig,
+  defaultRoute: [Route.NotFound()]
+});
+```
+
+Because `queryString` has `parse` and `stringify`, we don't need to do anything else.
+
+#### Complete Example
+
+We've completed our routing example! You will find the full source below. Since the example is
+embedded into the page, there is no browser location bar. You can use the "Location" text field to
+simulate, by changing the path and pressing the Go button. Also notice that the location bar stays
+in sync as you navigate.
+
 @flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-acceptors.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 06-app.js
+
+> Note: while the examples here are embedded into the page, "full" examples that you can run locally
+are available [here](https://github.com/foxdonut/meiosis/tree/master/docs/code/routing-full). Follow
+[these instructions](https://github.com/foxdonut/meiosis/tree/master/docs) to run all the examples.
 
 [Section Contents](#section_contents)
 
 <a name="mithril_router"></a>
 ### Mithril Router
 
-Mithril is a framework with what I call a "sweet spot" because it includes just enough of what we
-need to develop web applications:
+[Mithril](https://mithril.js.org) is a framework with what I call a "sweet spot" because it includes
+just enough of what we need to develop web applications:
 
 - hyperscript or JSX virtual DOM
 - streams
@@ -1192,11 +1268,43 @@ need to develop web applications:
 - router
 - query string handling
 
-createMithrilRouter
+Because of this, `meiosis-routing` includes special support for
+[Mithril Router](https://mithril.js.org/route.html) by providing `createMithrilRouter`.
 
-not found route
+To use it, we only need to provide Mithril's `m` and our `routeConfig`:
 
-m.route instead of router.start
+```javascript
+export const router = createMithrilRouter({
+  m,
+  routeConfig
+});
+```
+
+Because Mithril Router works a little differently, we need to add our `NotFound` route to the route
+configuration instead of using `defaultRoute`. Mithril's notation for a "catch-all" route is
+`":someName..."`, typically `":404..."`, so we add that at the end of our `routeConfig`:
+
+```javascript
+const routeConfig = {
+  // ...,
+  NotFound: "/:404..."
+};
+```
+
+Finally, again because of differences in how Mithril Router works, we don't use `router.start`.
+Instead, we let Mithril handle routing by calling `m.route`. The `router` that we created contains a
+`MithrilRoutes` function that constructs a routing configuration that Mithril understands. To use
+it, we need to pass our `states` stream, our `actions` object, and our top-level `App` component:
+
+```javascript
+m.route(
+  document.getElementById("app"),
+  "/",
+  router.MithrilRoutes({ states, actions, App })
+);
+```
+
+The complete example is shown below.
 
 @flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-acceptors.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 07-app.js
 

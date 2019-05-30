@@ -31,12 +31,11 @@ const routeConfig = {
   Settings: "/settings",
   Tea: ["/tea", { TeaDetails: "/:id" }],
   Coffee: ["/coffee", beverageRoutes],
-  Beer: ["/beer?type", beverageRoutes],
+  Beer: ["/beer?type&country", beverageRoutes],
   NotFound: "/:404..."
 };
 
 export const router = createMithrilRouter({
   m,
-  routeConfig,
-  defaultRoute: [Route.NotFound()]
+  routeConfig
 });
