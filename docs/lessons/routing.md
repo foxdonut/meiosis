@@ -1151,9 +1151,7 @@ to:
 
 // We don't have to pass the id to Route.Brewer because we already have it
 // configured to inherit from the parent route in our route configuration.
-<a
-  href={router.toPath(routing.childRoute(Route.Brewer()))}
->
+<a href={router.toPath(routing.childRoute(Route.Brewer()))}>
   Brewer
 </a>
 ```
@@ -1162,14 +1160,21 @@ That's pretty nice, wouldn't you say?
 
 #### Keeping the Location Bar in Sync
 
-#### Query String Parameters
+When the user clicks on a link with a path in `href`, or uses the browser's Back and Forward
+buttons, the location bar changes _first_ and then the router triggers a route change. But when we
+make a route change _programatically_ by calling `actions.navigateTo` or changing the route in the
+state, the location bar won't automatically display the corresponding path.
 
-- createFeatherRouter, createRouteMatcher, queryString
-- NotFound page
-- router.toPath
-- router.start
-- states.map router.locationBarSync
-- query params
+We can use `route.locationBarSync`, calling it when the state changes and passing the current route:
+
+```javascript
+states.map(state =>
+  router.locationBarSync(state.route.current)
+);
+```
+This will keep the location bar in sync.
+
+#### Query String Parameters
 
 @flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-acceptors.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css [] 700 60 06-app.js
 
