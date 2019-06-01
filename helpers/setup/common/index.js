@@ -6,7 +6,7 @@
  * This function can return a result or a `Promise`. If not specified, the initial state will
  * be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
- * `({ update, combine }) => actions`.
+ * `update => actions`.
  * @property {Array<Function>} [acceptors=[]] - an array of acceptor functions, each of which
  * should be `state => patch` or `state => [patch]`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
@@ -60,7 +60,7 @@ export default ({ stream, accumulator, combine, app }) => {
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");
   }
-  if (!combine && services.length > 0) {
+  if (!combine) {
     throw new Error("No combine function was specified.");
   }
 

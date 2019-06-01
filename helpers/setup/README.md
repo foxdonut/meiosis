@@ -46,15 +46,6 @@ For the stream library, you can use `Meiosis.simpleStream`,
 out-of-the-box. You can also use another stream library; see
 [Using another stream library](#other_stream_library), below.
 
-### Combine
-
-For convience, the `combine` function is provided to `Actions`, i.e. `({ update, combine })`.
-You can use `combine([patches])` in actions to combine multiple patches into one, thus reducing
-the number of updates, state changes, and view refreshes.
-
-Acceptors must return a single patch, but you can also return an array of patches in which case
-it will automatically be `combine`d into one.
-
 ### Patchinko Setup
 
 To use [Patchinko](https://github.com/barneycarroll/patchinko):
@@ -152,11 +143,11 @@ In the `app` object that you provide to `setup`, you can optionally provide the 
 
 - `Initial`: a function that returns the initial state. This function can return immediately
 or return a `Promise`. If not provided, the initial state is `{}`.
-- `Actions`: a function that receives `({ update, combine })` and returns an object with actions.
+- `Actions`: a function that receives `(update)` and returns an object with actions.
 The created actions are returned by `setup`, and also passed to `services`.
 If not provided, the created actions are `{}`.
-For convience, the `combine` function is provided to combine multiple patches into one, thus
-reducing the number of updates, state changes, and view refreshes.
+For convience, actions can pass arrays of patches to `update` to combine multiple patches into one,
+thus reducing the number of updates, state changes, and view refreshes.
 - `acceptors`: an array of "accept" functions that get called with `(state)`.
 These functions are called in order and should return a patch to modify the state as needed.
 You can also return an array of patches, which will automatically be `combine`d into a single
@@ -182,14 +173,14 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     With Immer, the `accumulator` is `produce`.
 
-- `combine`: required only if `app.services` are present. The `combine` function is of the form
-`([patches]) => patch`, combining an array of patches into a single patch.
+- `combine`: the `combine` function is of the form `([patches]) => patch`, combining an array of
+patches into a single patch.
 
     For example, with Patchinko,
-    `combine: patches => model => patches.reduce((m, p) => O(m, p), model)`
+    `combine: patches => model => O(model, ...patches)`
 
     With Mergerino:
-    `combine: patches => model => patches.reduce((m, p) => merge(m, p), model)`
+    `combine: patches => patches``
 
     With Function Patches, `combine` is function composition:
     `combine = fns => args => fns.reduceRight((arg, fn) => fn(arg), args)`

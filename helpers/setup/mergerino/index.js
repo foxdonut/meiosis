@@ -20,6 +20,6 @@ export default ({ stream, merge, app }) =>
   commonSetup({
     stream,
     accumulator: merge,
-    combine: patches => model => merge(model, ...patches),
+    combine: patches => patches,
     app
   });

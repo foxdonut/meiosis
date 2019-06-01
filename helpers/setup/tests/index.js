@@ -4,13 +4,11 @@ const flyd = require("flyd");
 const Stream = require("mithril/stream");
 const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
-// eslint-disable-next-line no-global-assign
-window = {};
-require("mergerino");
-const merge = window.mergerino;
-const { SUB, DEL } = merge;
+const merge = require("mergerino");
+const { SUB, DEL } = require("mergerino");
 const R = require("ramda");
 const { produce } = require("immer");
+const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
 
 const meiosis = require("../dist/meiosis-setup");
 
@@ -1009,22 +1007,6 @@ const commonTest = (streamLib, label) => {
       }
     });
 
-    t.test(label + " / acceptors do not require a combine function", t => {
-      const I = x => x;
-
-      try {
-        meiosis.common
-          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: { acceptors: [() => I] } })
-          .then(() => {
-            t.pass("Acceptors without combine function works.");
-            t.end();
-          });
-      } catch (err) {
-        t.fail("No error should be thrown for acceptors without combine function.");
-        t.end();
-      }
-    });
-
     t.test(label + " / services require combine function", t => {
       const I = x => x;
 
@@ -1043,13 +1025,14 @@ const commonTest = (streamLib, label) => {
 
     t.test(label + " / basic common setup with no acceptors/services", t => {
       const Actions = ({ update }) => ({
-        increment: amount => update({ count: Oc(x => x + amount) })
+        increment: amount => update({ count: SUB(x => x + amount) })
       });
 
       meiosis.common
         .setup({
           stream: streamLib,
-          accumulator: Oc,
+          accumulator: merge,
+          combine: patches => patches,
           app: { Initial: () => ({ count: 0 }), Actions }
         })
         .then(({ states, actions }) => {
@@ -1071,6 +1054,7 @@ const commonTest = (streamLib, label) => {
         .setup({
           stream: streamLib,
           accumulator: (x, f) => f(x),
+          combine: compose,
           app: { Initial: () => ({ count: 0 }), Actions }
         })
         .then(({ states, actions }) => {
