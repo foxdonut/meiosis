@@ -11,13 +11,8 @@ import { brewer } from "../brewer";
 export const createApp = initialRoute => ({
   Initial: () => navigateTo(initialRoute || [Route.Home()]),
 
-  Actions: ({ update, combine }) =>
-    Object.assign(
-      {},
-      routes.Actions({ update, combine }),
-      login.Actions({ update, combine }),
-      settings.Actions({ update, combine })
-    ),
+  Actions: update =>
+    Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),
 
   acceptors: [settings.accept, login.accept, routes.accept],
 

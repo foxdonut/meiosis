@@ -1,4 +1,4 @@
-import { DEL } from "mergerino@0.0.4";
+import { DEL } from "mergerino@0.2.0";
 import {
   findRouteSegment,
   whenPresent

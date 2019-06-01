@@ -194,8 +194,7 @@ const bufferedUpdate = patch => {
 
 const actions = app.Actions(bufferedUpdate);
 
-const combine = patches => model =>
-  patches.reduce((m, p) => O(m, p), model);
+const combine = patches => model => O(model, ...patches);
 
 models.map(state => {
   // If the call comes from a service update, we just want to emit the resulting state.
@@ -230,5 +229,6 @@ ReactDOM.render(
 let counter = 0;
 states.map(state => {
   counter++;
+  // eslint-disable-next-line no-console
   console.log(counter, JSON.stringify(state, null, 2));
 });

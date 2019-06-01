@@ -1,6 +1,6 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
-import merge from "mergerino@0.0.4";
+import merge from "mergerino@0.2.0";
 import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
@@ -158,7 +158,7 @@ const App = meiosis.preact.setup({ preact, Root });
 
 const app = {
   Initial: () => navTo([Route.Home()]),
-  Actions: ({ update, combine }) => ({
+  Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
     username: value =>
@@ -167,17 +167,13 @@ const app = {
       update({ login: { password: value } }),
 
     login: (username, returnTo) =>
-      update(
-        combine([
-          { user: username },
-          navTo([returnTo || Route.Home()])
-        ])
-      ),
+      update([
+        { user: username },
+        navTo([returnTo || Route.Home()])
+      ]),
 
     logout: () =>
-      update(
-        combine([{ user: null }, navTo([Route.Home()])])
-      )
+      update([{ user: null }, navTo([Route.Home()])])
   }),
   acceptors: [loginAccept, settingsAccept, routeAccept],
   services: [

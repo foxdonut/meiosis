@@ -91,8 +91,7 @@ To combine updates into one, we need a function that takes an array of patches a
 into a single patch. With Patchinko, we can do this:
 
 ```javascript
-const combine = patches => model =>
-  patches.reduce((m, p) => O(m, p), model);
+const combine = patches => model => O(model, ...patches);
 ```
 
 The patch is a function takes the model and applies all the patches.

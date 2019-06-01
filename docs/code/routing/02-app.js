@@ -1,6 +1,6 @@
 /** @jsx preact.h */
 import preact from "preact@8.4.2/dist/preact.mjs";
-import merge from "mergerino@0.0.4";
+import merge from "mergerino@0.2.0";
 import meiosis from "meiosis-setup";
 
 import { Route, navTo } from "./02-routes";
@@ -113,7 +113,7 @@ const Root = ({ state, actions }) => {
 const App = meiosis.preact.setup({ preact, Root });
 const app = {
   Initial: () => navTo(Route.Home()),
-  Actions: ({ update }) => ({
+  Actions: update => ({
     navigateTo: route => update(navTo(route))
   })
 };

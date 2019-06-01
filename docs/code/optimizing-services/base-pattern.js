@@ -180,5 +180,6 @@ ReactDOM.render(
 
 let counter = 0;
 states.map(state => {
+  // eslint-disable-next-line no-console
   console.log(++counter, JSON.stringify(state, null, 2));
 });

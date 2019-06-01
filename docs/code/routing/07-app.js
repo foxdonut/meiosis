@@ -1,7 +1,7 @@
 /** @jsx m */
 import m from "mithril@2.0.0-rc.4";
 import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
-import merge from "mergerino@0.0.4";
+import merge from "mergerino@0.2.0";
 import meiosis from "meiosis-setup";
 import { Routing } from "meiosis-routing/state";
 
@@ -138,7 +138,7 @@ const App = {
 
 const app = {
   Initial: () => navTo([Route.Home()]),
-  Actions: ({ update, combine }) => ({
+  Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
     username: value =>
@@ -147,17 +147,13 @@ const app = {
       update({ login: { password: value } }),
 
     login: (username, returnTo) =>
-      update(
-        combine([
-          { user: username },
-          navTo([returnTo || Route.Home()])
-        ])
-      ),
+      update([
+        { user: username },
+        navTo([returnTo || Route.Home()])
+      ]),
 
     logout: () =>
-      update(
-        combine([{ user: null }, navTo([Route.Home()])])
-      )
+      update([{ user: null }, navTo([Route.Home()])])
   }),
   acceptors: [loginAccept, settingsAccept, routeAccept],
   services: [

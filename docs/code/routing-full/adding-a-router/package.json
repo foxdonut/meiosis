@@ -28,8 +28,8 @@
   "dependencies": {
     "feather-route-matcher": "^3.0.0",
     "meiosis-routing": "^0.5.0",
-    "meiosis-setup": "^1.2.1",
-    "mergerino": "0.0.4",
+    "meiosis-setup": "^2.0.0",
+    "mergerino": "0.2.0",
     "qs": "^6.7.0",
     "query-string": "^6.5.0",
     "react": "^16.8.6",
