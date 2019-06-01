@@ -27,8 +27,6 @@
  * @return {simpleStream} - the created stream.
  */
 
-const B = (f, g) => (...args) => f(g(...args));
-
 /**
  * Base helper to setup the Meiosis pattern. If you are using Patchinko, Function Patches,
  * or Immer, use their respective `setup` function instead.
@@ -81,7 +79,11 @@ export default ({ stream, accumulator, combine, app }) => {
     .then(initialState => {
       const update = createStream();
 
-      const models = scan(B(accept, accumulator), accept(initialState), update);
+      const models = scan(
+        (model, patch) => accept(accumulator(model, singlePatch(patch))),
+        accept(initialState),
+        update
+      );
 
       let buffered = false,
         buffer = [],
@@ -98,7 +100,7 @@ export default ({ stream, accumulator, combine, app }) => {
         : update;
 
       const states = hasServices ? createStream(models()) : models;
-      const actions = (Actions || (() => ({})))({ update: bufferedUpdate, combine });
+      const actions = (Actions || (() => ({})))(bufferedUpdate);
 
       if (hasServices) {
         models.map(state => {

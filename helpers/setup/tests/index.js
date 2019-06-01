@@ -92,7 +92,7 @@ const patchinkoTest = (O, streamLib, label) => {
     });
 
     t.test(label + " / services and actions", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount => update({ count: O(x => x + amount) })
       });
 
@@ -122,9 +122,9 @@ const patchinkoTest = (O, streamLib, label) => {
         });
     });
 
-    t.test(label + " / actions can use combine", t => {
-      const Actions = ({ update, combine }) => ({
-        increment: amount => update(combine([{ count: O(x => x + amount) }, { combined: true }]))
+    t.test(label + " / actions can pass an array to update", t => {
+      const Actions = update => ({
+        increment: amount => update([{ count: O(x => x + amount) }, { combined: true }])
       });
 
       meiosis.patchinko
@@ -312,7 +312,7 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / services and actions", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount => update({ count: SUB(x => x + amount) })
       });
 
@@ -347,8 +347,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / actions can use combine", t => {
-      const Actions = ({ update, combine }) => ({
-        increment: amount => update(combine([{ count: SUB(x => x + amount) }, { combined: true }]))
+      const Actions = update => ({
+        increment: amount => update([{ count: SUB(x => x + amount) }, { combined: true }])
       });
 
       meiosis.mergerino
@@ -541,7 +541,7 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / services and Actions", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
@@ -571,10 +571,10 @@ const functionPatchTest = (streamLib, label) => {
         });
     });
 
-    t.test(label + " / actions can use combine", t => {
-      const Actions = ({ update, combine }) => ({
+    t.test(label + " / actions can pass arrays to update", t => {
+      const Actions = update => ({
         increment: amount =>
-          update(combine([R.over(R.lensProp("count"), R.add(amount)), R.assoc("combined", true)]))
+          update([R.over(R.lensProp("count"), R.add(amount)), R.assoc("combined", true)])
       });
 
       meiosis.functionPatches
@@ -811,7 +811,7 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / services and Actions", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount =>
           update(state => {
             state.count += amount;
@@ -852,19 +852,17 @@ const immerTest = (streamLib, label) => {
         });
     });
 
-    t.test(label + " / actions can use combine", t => {
-      const Actions = ({ update, combine }) => ({
+    t.test(label + " / actions can pass an array to update", t => {
+      const Actions = update => ({
         increment: amount =>
-          update(
-            combine([
-              state => {
-                state.count += amount;
-              },
-              state => {
-                state.combined = true;
-              }
-            ])
-          )
+          update([
+            state => {
+              state.count += amount;
+            },
+            state => {
+              state.combined = true;
+            }
+          ])
       });
 
       meiosis.immer
@@ -1024,7 +1022,7 @@ const commonTest = (streamLib, label) => {
     });
 
     t.test(label + " / basic common setup with no acceptors/services", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount => update({ count: SUB(x => x + amount) })
       });
 
@@ -1046,7 +1044,7 @@ const commonTest = (streamLib, label) => {
     });
 
     t.test(label + " / basic functionPatch setup with no acceptors/services", t => {
-      const Actions = ({ update }) => ({
+      const Actions = update => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
