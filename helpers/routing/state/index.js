@@ -1,7 +1,28 @@
 /**
- * A Route is an array of Route segments.
+ * A Route is a route segment.
  *
- * @typedef {Array} Route
+ * @typedef {Object} Route
+ */
+
+/**
+ * A route is an array of Route segments.
+ *
+ * @typedef {Array<Route>} route
+ */
+
+/**
+ * A routing is an object with navigation methods.
+ *
+ * @typedef {Object} routing
+ *
+ * @property {route} route
+ * @property {number} index
+ * @property {Route} localSegment
+ * @property {Route} childSegment
+ * @property {Function} next: () => Routing(route, index + 1),
+ * @property {Function} parentRoute: () => route.slice(0, index),
+ * @property {Function} childRoute: child => route.slice(0, index + 1).concat(child),
+ * @property {Function} siblingRoute: sibling => route.slice(0, index).concat(sibling)
  */
 
 // fastDeepEqual credit: https://github.com/epoberezkin/fast-deep-equal
@@ -83,10 +104,12 @@ export const routeTransition = ({ previous, current }) => ({
 export const whenPresent = (obj, fn) => (obj != null ? fn(obj) : null);
 
 /**
- * @function Routing
+ * @constructor Routing
  *
- * @param {Route} route
+ * @param {route} route
  * @param {number} index
+ *
+ * @returns {routing} - a routing object
  */
 export const Routing = (route = [], index = 0) => ({
   route,

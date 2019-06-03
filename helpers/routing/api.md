@@ -3,35 +3,63 @@
 ### Table of Contents
 
 -   [Route][1]
--   [Routing][2]
-    -   [Parameters][3]
--   [BaseConfig][4]
-    -   [Properties][5]
--   [FeatherConfig][6]
-    -   [Properties][7]
--   [UrlMapperConfig][8]
-    -   [Properties][9]
--   [MithrilConfig][10]
-    -   [Properties][11]
--   [createFeatherRouter][12]
-    -   [Parameters][13]
--   [createUrlMapperRouter][14]
-    -   [Parameters][15]
--   [createMithrilRouter][16]
-    -   [Parameters][17]
+-   [routing][2]
+    -   [Properties][3]
+-   [route][4]
+-   [Routing][5]
+    -   [Parameters][6]
+-   [BaseConfig][7]
+    -   [Properties][8]
+-   [FeatherConfig][9]
+    -   [Properties][10]
+-   [UrlMapperConfig][11]
+    -   [Properties][12]
+-   [MithrilConfig][13]
+    -   [Properties][14]
+-   [createFeatherRouter][15]
+    -   [Parameters][16]
+-   [createUrlMapperRouter][17]
+    -   [Parameters][18]
+-   [createMithrilRouter][19]
+    -   [Parameters][20]
 
 ## Route
 
-A Route is an array of Route segments.
+A Route is a route segment.
 
-Type: [Array][18]
+Type: [Object][21]
+
+## routing
+
+A routing is an object with navigation methods.
+
+Type: [Object][21]
+
+### Properties
+
+-   `route` **[route][22]** 
+-   `index` **[number][23]** 
+-   `localSegment` **[Route][22]** 
+-   `childSegment` **[Route][22]** 
+-   `next` **[Function][24]** : () => Routing(route, index + 1),
+-   `parentRoute` **[Function][24]** : () => route.slice(0, index),
+-   `childRoute` **[Function][24]** : child => route.slice(0, index + 1).concat(child),
+-   `siblingRoute` **[Function][24]** : sibling => route.slice(0, index).concat(sibling)
+
+## route
+
+A route is an array of Route segments.
+
+Type: [Array][25]&lt;[Route][22]>
 
 ## Routing
 
 ### Parameters
 
--   `route` **[Route][19]** 
--   `index` **[number][20]** 
+-   `route` **[route][22]** 
+-   `index` **[number][23]** 
+
+Returns **[routing][26]** a routing object
 
 ## BaseConfig
 
@@ -42,8 +70,8 @@ Type: [Object][21]
 ### Properties
 
 -   `routeConfig` **[Object][21]** the route config
--   `defaultRoute` **[Route][19]** the default route
--   `prefix` **[string][22]?** the URL path prefix
+-   `defaultRoute` **[Route][22]** the default route
+-   `prefix` **[string][27]?** the URL path prefix
 
 ## FeatherConfig
 
@@ -55,7 +83,7 @@ Type: [Object][21]
 
 ### Properties
 
--   `createRouteMatcher` **[Function][23]** the Feather route matcher function.
+-   `createRouteMatcher` **[Function][24]** the Feather route matcher function.
 
 ## UrlMapperConfig
 
@@ -67,7 +95,7 @@ Type: [Object][21]
 
 ### Properties
 
--   `Mapper` **[Function][23]** the URL Mapper function.
+-   `Mapper` **[Function][24]** the URL Mapper function.
 
 ## MithrilConfig
 
@@ -85,7 +113,7 @@ Type: [Object][21]
 
 ### Parameters
 
--   `config` **[FeatherConfig][24]** 
+-   `config` **[FeatherConfig][28]** 
     -   `config.createRouteMatcher`  
     -   `config.queryString`  
     -   `config.routeConfig`  
@@ -99,7 +127,7 @@ Type: [Object][21]
 
 ### Parameters
 
--   `config` **[UrlMapperConfig][25]** 
+-   `config` **[UrlMapperConfig][29]** 
     -   `config.Mapper`  
     -   `config.queryString`  
     -   `config.routeConfig`  
@@ -113,7 +141,7 @@ Type: [Object][21]
 
 ### Parameters
 
--   `config` **[MithrilConfig][26]** 
+-   `config` **[MithrilConfig][30]** 
     -   `config.m`  
     -   `config.routeConfig`  
     -   `config.defaultRoute`  
@@ -125,50 +153,58 @@ Type: [Object][21]
 
 [2]: #routing
 
-[3]: #parameters
+[3]: #properties
 
-[4]: #baseconfig
+[4]: #route-1
 
-[5]: #properties
+[5]: #routing-1
 
-[6]: #featherconfig
+[6]: #parameters
 
-[7]: #properties-1
+[7]: #baseconfig
 
-[8]: #urlmapperconfig
+[8]: #properties-1
 
-[9]: #properties-2
+[9]: #featherconfig
 
-[10]: #mithrilconfig
+[10]: #properties-2
 
-[11]: #properties-3
+[11]: #urlmapperconfig
 
-[12]: #createfeatherrouter
+[12]: #properties-3
 
-[13]: #parameters-1
+[13]: #mithrilconfig
 
-[14]: #createurlmapperrouter
+[14]: #properties-4
 
-[15]: #parameters-2
+[15]: #createfeatherrouter
 
-[16]: #createmithrilrouter
+[16]: #parameters-1
 
-[17]: #parameters-3
+[17]: #createurlmapperrouter
 
-[18]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[18]: #parameters-2
 
-[19]: #route
+[19]: #createmithrilrouter
 
-[20]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+[20]: #parameters-3
 
 [21]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[22]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[22]: #route
 
-[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-[24]: #featherconfig
+[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[25]: #urlmapperconfig
+[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[26]: #mithrilconfig
+[26]: #routing
+
+[27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[28]: #featherconfig
+
+[29]: #urlmapperconfig
+
+[30]: #mithrilconfig
