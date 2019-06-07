@@ -1023,7 +1023,7 @@ we really need is a simple router library that will parse paths. There are many 
 
 You can also plug in a different library. This is outside the scope of this tutorial, but you can
 read the details
-[here](https://github.com/foxdonut/meiosis/blob/master/helpers/routing/api.md#createrouter)
+[here](https://github.com/foxdonut/meiosis/blob/master/helpers/routing/api.md#createrouter).
 
 In this tutorial we'll use `feature-route-matcher`. To create a router, `meiosis-routing` provides
 `createFeatureRouter` to which we pass the `createRouteMatcher` function from
