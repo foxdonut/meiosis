@@ -237,14 +237,14 @@ First, we create a route configuration. This is a plain object with `id`&rarr;`c
 where `id` is the id of the route segment, and `config` can either be:
 
 - a string: the route path
-- an array: [ path, (optional) array of parameters from the parent, nested route config ]
+- an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
 
 For example:
 
 ```javascript
 const routeConfig = {
   Home: "/",
-  User: ["/user:name", {
+  User: ["/user/:name", {
     Profile: "/profile",
     Preferences: ["/preferences", ["name"]]
   }]
@@ -267,7 +267,7 @@ out-of-the-box. Let's use `feather-route-matcher`:
 import createRouteMatcher from "feather-route-matcher";
 import { createFeatherRouter } from "meiosis-routing/router-helper";
 
-const routeConfig = { ... }
+const routeConfig = { ... };
 
 const router = createFeatherRouter({
   createRouteMatcher,
@@ -345,11 +345,11 @@ Then, we specify query string parameters in our route configuration using `?` an
 ```javascript
 const routeConfig = {
   Home: "/",
-  User: ["/user:name?param1", {
+  User: ["/user/:name?param1", {
     Profile: "/profile?param2&param3",
     Preferences: ["/preferences", ["name"]]
   }]
-}
+};
 ```
 
 The parameters will be available in our route segments just like path parameters.
@@ -399,10 +399,12 @@ function loadDataForUser(state) {
 }
 ```
 
-### More Detailed Tutorial
+### For More Details
 
 As mentioned above, you will find a more in-depth tutorial in the
 [Meiosis Routing documentation](https://meiosis.js.org/docs/routing.html).
+
+More details are also available in the [API documentation](api.md).
 
 ## Credits
 

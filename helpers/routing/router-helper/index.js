@@ -4,35 +4,69 @@
  */
 
 /**
- * Configuration object.
+ * Route configuration. This is an Object for which the properties are the ids of the route
+ * segments, and the values are either:
  *
- * @typedef {Object} BaseConfig
- * @property {Object} routeConfig - the route config
- * @property {route} defaultRoute - the default route
- * @property {string} [prefix="#!"] - the URL path prefix
- * @property {function} [getPath]
- * @property {function} [setPath]
- * @property {function} [addLocationChangeListener]
+ * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
+ *   for query string parameters.
+ * - an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
+ *
+ * @typedef {Object} RouteConfig
+ *
+ * @example
+ *
+ * const routeConfig = {
+ *   Home: "/",
+ *   User: ["/user/:name?param1", {
+ *     Profile: "/profile?param2&param3",
+ *     Preferences: ["/preferences", ["name"]]
+ *   }]
+ * };
  */
 
 /**
- * Generic router configuration object.
+ * Base router configuration.
  *
- * @typedef {BaseConfig} RouterConfig
- * @param {function} createParsePath - function that parses a path using a router library
+ * @typedef {Object} BaseConfig
+ *
+ * @property {RouteConfig} routeConfig - the route config
+ * @property {string} [prefix="#"] - the URL path prefix. Defaults to `"#"`.
+ * @property {function} [getPath] - the function to get the path from the browser's location bar.
+ * Defaults to `(() => document.location.hash || prefix + "/")`.
+ * @property {function} [setPath] - the function to set the path on the browser's location bar.
+ * Defaults to `(path => window.history.pushState({}, "", path))`.
+ */
+
+/**
+ * Common router configuration.
+ *
+ * @typedef {BaseConfig} CommonConfig
+ *
+ * @property {route} [defaultRoute] - the default route
+ * @property {function} [addLocationChangeListener] - the function to add the location change
+ * listener. Defaults to `window.onpopstate = listener`.
+ */
+
+/**
+ * Generic router configuration.
+ *
+ * @typedef {CommonConfig} RouterConfig
+ *
+ * @property {function} createParsePath - function that parses a path using a router library.
  */
 
 /**
  * Feather router configuration object.
  *
- * @typedef {BaseConfig} FeatherConfig
- * @property {function} createRouteMatcher - the Feather route matcher function.
+ * @typedef {CommonConfig} FeatherConfig
+ *
+ * @property {function} createRouteMatcher - the Feather Route Matcher function.
  */
 
 /**
  * URL-Mapper router configuration object.
  *
- * @typedef {BaseConfig} UrlMapperConfig
+ * @typedef {CommonConfig} UrlMapperConfig
  * @property {Function} Mapper - the URL Mapper function.
  */
 
@@ -40,6 +74,7 @@
  * Mithril router configuration object.
  *
  * @typedef {BaseConfig} MithrilConfig
+ *
  * @property {Mithril} m - the Mithril instance.
  */
 
@@ -126,15 +161,15 @@ export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc =
   }, acc);
 
 /**
- *
+ * Generic function to create a router from a router library of your choice.
  * @param {RouterConfig} config
  */
 export const createRouter = ({
   createParsePath,
-  queryString,
   routeConfig,
   defaultRoute,
   prefix = "#",
+  queryString,
   getPath,
   setPath,
   addLocationChangeListener
@@ -186,14 +221,33 @@ export const createRouter = ({
 };
 
 /**
+ * Creates a router using
+ * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher).
+ *
  * @param {FeatherConfig} config
+ *
+ * @example
+ *
+ * import createRouteMatcher from "feather-route-matcher";
+ * import queryString from "query-string"; // only if using query strings
+ *
+ * const Route = createRouteSegments([...]);
+ *
+ * const routeConfig = { ... };
+ *
+ * const router = createFeatherRouter({
+ *   createRouteMatcher,
+ *   routeConfig,
+ *   defaultRoute: [Route.Home()],
+ *   queryString // only if using query strings
+ * });
  */
 export const createFeatherRouter = ({
   createRouteMatcher,
-  queryString,
   routeConfig,
   defaultRoute,
   prefix = "#",
+  queryString,
   getPath,
   setPath,
   addLocationChangeListener
@@ -226,14 +280,33 @@ export const createFeatherRouter = ({
 };
 
 /**
+ * Creates a router using
+ * [url-mapper](https://github.com/cerebral/url-mapper).
+ *
  * @param {UrlMapperConfig} config
+ *
+ * @example
+ *
+ * import Mapper from "url-mapper";
+ * import urlon from "urlon"; // only if using query strings
+ *
+ * const Route = createRouteSegments([...]);
+ *
+ * const routeConfig = { ... };
+ *
+ * const router = createUrlMapperRouter({
+ *   Mapper,
+ *   routeConfig,
+ *   defaultRoute: [Route.Home()],
+ *   queryString: urlon // only if using query strings
+ * });
  */
 export const createUrlMapperRouter = ({
   Mapper,
-  queryString,
   routeConfig,
   defaultRoute,
   prefix = "#",
+  queryString,
   getPath,
   setPath,
   addLocationChangeListener
@@ -266,18 +339,28 @@ export const createUrlMapperRouter = ({
 };
 
 /**
+ * Creates a router using
+ * [Mithril Router](https://mithril.js.org/route.html).
+ *
  * @param {MithrilConfig} config
+ *
+ * @example
+ *
+ * import m from "mithril";
+ * // Note: query strings are built-in to Mithril
+ *
+ * const Route = createRouteSegments([...]);
+ *
+ * const routeConfig = { ... };
+ *
+ * const router = createMithrilRouter({
+ *   m,
+ *   routeConfig
+ * });
  */
-export const createMithrilRouter = ({
-  m,
-  routeConfig,
-  defaultRoute,
-  prefix = "#!",
-  getPath,
-  setPath
-}) => {
+export const createMithrilRouter = ({ m, routeConfig, prefix = "#!", getPath, setPath }) => {
   const queryString = { stringify: m.buildQueryString };
-  const router = createRouter({ queryString, routeConfig, defaultRoute, prefix, getPath, setPath });
+  const router = createRouter({ queryString, routeConfig, prefix, getPath, setPath });
 
   router.MithrilRoutes = ({ states, actions, App }) =>
     Object.entries(router.routeMap).reduce((result, [path, fn]) => {

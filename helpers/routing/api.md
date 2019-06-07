@@ -23,24 +23,31 @@
 -   [Routing][19]
     -   [Parameters][20]
 -   [router-helper][21]
--   [BaseConfig][22]
-    -   [Properties][23]
--   [RouterConfig][24]
-    -   [Parameters][25]
--   [FeatherConfig][26]
+-   [RouteConfig][22]
+    -   [Examples][23]
+-   [BaseConfig][24]
+    -   [Properties][25]
+-   [CommonConfig][26]
     -   [Properties][27]
--   [UrlMapperConfig][28]
+-   [RouterConfig][28]
     -   [Properties][29]
--   [MithrilConfig][30]
+-   [FeatherConfig][30]
     -   [Properties][31]
--   [createRouter][32]
-    -   [Parameters][33]
--   [createFeatherRouter][34]
-    -   [Parameters][35]
--   [createUrlMapperRouter][36]
+-   [UrlMapperConfig][32]
+    -   [Properties][33]
+-   [MithrilConfig][34]
+    -   [Properties][35]
+-   [createRouter][36]
     -   [Parameters][37]
--   [createMithrilRouter][38]
+-   [createFeatherRouter][38]
     -   [Parameters][39]
+    -   [Examples][40]
+-   [createUrlMapperRouter][41]
+    -   [Parameters][42]
+    -   [Examples][43]
+-   [createMithrilRouter][44]
+    -   [Parameters][45]
+    -   [Examples][46]
 
 ## state
 
@@ -50,22 +57,22 @@
 
 A route is an array of Route segments.
 
-Type: [Array][40]&lt;[Route][41]>
+Type: [Array][47]&lt;[Route][48]>
 
 ## routing
 
 A routing is an object with navigation methods.
 
-Type: [Object][42]
+Type: [Object][49]
 
 ### Properties
 
--   `localSegment` **[Route][41]** 
--   `childSegment` **[Route][41]** 
--   `next` **function (): [routing][43]** returns the next routing instance
--   `parentRoute` **function (): [route][41]** returns the parent route
--   `childRoute` **function ([route][41]): [route][41]** returns a child route
--   `siblingRoute` **function ([route][41]): [route][41]** returns a sibling route
+-   `localSegment` **[Route][48]** 
+-   `childSegment` **[Route][48]** 
+-   `next` **function (): [routing][50]** returns the next routing instance
+-   `parentRoute` **function (): [route][48]** returns the parent route
+-   `childRoute` **function ([route][48]): [route][48]** returns a child route
+-   `siblingRoute` **function ([route][48]): [route][48]** returns a sibling route
 
 ### Examples
 
@@ -80,12 +87,12 @@ routing.childRoute([Route.User(), Route.Details()];
 
 A Route is a route segment.
 
-Type: [Object][42]
+Type: [Object][49]
 
 ### Properties
 
--   `id` **[string][44]** 
--   `params` **[Object][42]** 
+-   `id` **[string][51]** 
+-   `params` **[Object][49]** 
 
 ## createRouteSegments
 
@@ -93,7 +100,7 @@ Creates a `Route` with functions to create Route segments.
 
 ### Parameters
 
--   `routeNames` **[Array][40]&lt;[string][44]>** the list of route names.
+-   `routeNames` **[Array][47]&lt;[string][51]>** the list of route names.
 
 ### Examples
 
@@ -107,7 +114,7 @@ Route.User({ name: "duck" })
 // { id: "User", params: { name: "duck" } }
 ```
 
-Returns **[Constructor][45]&lt;[Route][41]>** the `Route` with constructor functions.
+Returns **[Constructor][52]&lt;[Route][48]>** the `Route` with constructor functions.
 
 ## findRouteSegmentWithParams
 
@@ -115,10 +122,10 @@ Looks for a Route segment, with matching params, in a route.
 
 ### Parameters
 
--   `route` **[route][41]** 
--   `routeSegmentWithParams` **[Route][41]** 
+-   `route` **[route][48]** 
+-   `routeSegmentWithParams` **[Route][48]** 
 
-Returns **[Route][41]** the matching Route segment, or `undefined` if `route` is empty or the Route
+Returns **[Route][48]** the matching Route segment, or `undefined` if `route` is empty or the Route
 segment was not found.
 
 ## findRouteSegment
@@ -127,10 +134,10 @@ Looks for a Route segment, regardless of the params, in a route.
 
 ### Parameters
 
--   `route` **[route][41]** 
--   `id` **[string][44]** 
+-   `route` **[route][48]** 
+-   `id` **[string][51]** 
 
-Returns **[Route][41]** the matching Route segment, or `undefined` if `route` is empty or a Route
+Returns **[Route][48]** the matching Route segment, or `undefined` if `route` is empty or a Route
 segment with the given id was not found.
 
 ## routeTransition
@@ -140,11 +147,11 @@ the route that we are leaving, and the route to which we are arriving, respectiv
 
 ### Parameters
 
--   `state` **[Object][42]** the route state
+-   `state` **[Object][49]** the route state
     -   `state.previous`  
     -   `state.current`  
 
-Returns **[Object][42]** an object with `previous`, `current`, `leave`, and `arrive` properties.
+Returns **[Object][49]** an object with `previous`, `current`, `leave`, and `arrive` properties.
 
 ## whenPresent
 
@@ -161,65 +168,100 @@ Returns **any** the result of calling `fn(value)`, or `null` if `value` is absen
 
 ### Parameters
 
--   `route` **[route][41]** 
--   `index` **[number][46]** 
+-   `route` **[route][48]** 
+-   `index` **[number][53]** 
 
-Returns **[routing][43]** a routing object
+Returns **[routing][50]** a routing object
 
 ## router-helper
 
 `meiosis-routing/router-helper`
 
+## RouteConfig
+
+Route configuration. This is an Object for which the properties are the ids of the route
+segments, and the values are either:
+
+-   a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
+    for query string parameters.
+-   an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
+
+Type: [Object][49]
+
+### Examples
+
+```javascript
+const routeConfig = {
+  Home: "/",
+  User: ["/user/:name?param1", {
+    Profile: "/profile?param2&param3",
+    Preferences: ["/preferences", ["name"]]
+  }]
+};
+```
+
 ## BaseConfig
 
-Configuration object.
+Base router configuration.
 
-Type: [Object][42]
+Type: [Object][49]
 
 ### Properties
 
--   `routeConfig` **[Object][42]** the route config
--   `defaultRoute` **[route][41]** the default route
--   `prefix` **[string][44]?** the URL path prefix
--   `getPath` **[function][47]?** 
--   `setPath` **[function][47]?** 
--   `addLocationChangeListener` **[function][47]?** 
+-   `routeConfig` **[RouteConfig][54]** the route config
+-   `prefix` **[string][51]?** the URL path prefix. Defaults to `"#"`.
+-   `getPath` **[function][55]?** the function to get the path from the browser's location bar.
+    Defaults to `(() => document.location.hash || prefix + "/")`.
+-   `setPath` **[function][55]?** the function to set the path on the browser's location bar.
+    Defaults to `(path => window.history.pushState({}, "", path))`.
+
+## CommonConfig
+
+Common router configuration.
+
+Type: [BaseConfig][56]
+
+### Properties
+
+-   `defaultRoute` **[route][48]?** the default route
+-   `addLocationChangeListener` **[function][55]?** the function to add the location change
+    listener. Defaults to `window.onpopstate = listener`.
 
 ## RouterConfig
 
-Generic router configuration object.
+Generic router configuration.
 
-Type: [BaseConfig][48]
+Type: [CommonConfig][57]
 
-### Parameters
+### Properties
 
--   `createParsePath` **[function][47]** function that parses a path using a router library
+-   `createParsePath` **[function][55]** function that parses a path using a router library.
 
 ## FeatherConfig
 
 Feather router configuration object.
 
-Type: [BaseConfig][48]
+Type: [CommonConfig][57]
 
 ### Properties
 
--   `createRouteMatcher` **[function][47]** the Feather route matcher function.
+-   `createRouteMatcher` **[function][55]** the Feather Route Matcher function.
 
 ## UrlMapperConfig
 
 URL-Mapper router configuration object.
 
-Type: [BaseConfig][48]
+Type: [CommonConfig][57]
 
 ### Properties
 
--   `Mapper` **[Function][47]** the URL Mapper function.
+-   `Mapper` **[Function][55]** the URL Mapper function.
 
 ## MithrilConfig
 
 Mithril router configuration object.
 
-Type: [BaseConfig][48]
+Type: [BaseConfig][56]
 
 ### Properties
 
@@ -227,57 +269,119 @@ Type: [BaseConfig][48]
 
 ## createRouter
 
+Generic function to create a router from a router library of your choice.
+
 ### Parameters
 
--   `config` **[RouterConfig][49]** 
+-   `config` **[RouterConfig][58]** 
     -   `config.createParsePath`  
-    -   `config.queryString`  
     -   `config.routeConfig`  
     -   `config.defaultRoute`  
     -   `config.prefix`   (optional, default `"#"`)
+    -   `config.queryString`  
     -   `config.getPath`  
     -   `config.setPath`  
     -   `config.addLocationChangeListener`  
 
 ## createFeatherRouter
 
+Creates a router using
+[feather-route-matcher][59].
+
 ### Parameters
 
--   `config` **[FeatherConfig][50]** 
+-   `config` **[FeatherConfig][60]** 
     -   `config.createRouteMatcher`  
-    -   `config.queryString`  
     -   `config.routeConfig`  
     -   `config.defaultRoute`  
     -   `config.prefix`   (optional, default `"#"`)
+    -   `config.queryString`  
     -   `config.getPath`  
     -   `config.setPath`  
     -   `config.addLocationChangeListener`  
+
+### Examples
+
+```javascript
+import createRouteMatcher from "feather-route-matcher";
+import queryString from "query-string"; // only if using query strings
+
+const Route = createRouteSegments([...]);
+
+const routeConfig = { ... };
+
+const router = createFeatherRouter({
+  createRouteMatcher,
+  routeConfig,
+  defaultRoute: [Route.Home()],
+  queryString // only if using query strings
+});
+```
 
 ## createUrlMapperRouter
 
+Creates a router using
+[url-mapper][61].
+
 ### Parameters
 
--   `config` **[UrlMapperConfig][51]** 
+-   `config` **[UrlMapperConfig][62]** 
     -   `config.Mapper`  
-    -   `config.queryString`  
     -   `config.routeConfig`  
     -   `config.defaultRoute`  
     -   `config.prefix`   (optional, default `"#"`)
+    -   `config.queryString`  
     -   `config.getPath`  
     -   `config.setPath`  
     -   `config.addLocationChangeListener`  
 
+### Examples
+
+```javascript
+import Mapper from "url-mapper";
+import urlon from "urlon"; // only if using query strings
+
+const Route = createRouteSegments([...]);
+
+const routeConfig = { ... };
+
+const router = createUrlMapperRouter({
+  Mapper,
+  routeConfig,
+  defaultRoute: [Route.Home()],
+  queryString: urlon // only if using query strings
+});
+```
+
 ## createMithrilRouter
+
+Creates a router using
+[Mithril Router][63].
 
 ### Parameters
 
--   `config` **[MithrilConfig][52]** 
+-   `config` **[MithrilConfig][64]** 
     -   `config.m`  
     -   `config.routeConfig`  
-    -   `config.defaultRoute`  
     -   `config.prefix`   (optional, default `"#!"`)
     -   `config.getPath`  
     -   `config.setPath`  
+
+### Examples
+
+```javascript
+import m from "mithril";
+// Note: query strings are built-in to Mithril
+
+const Route = createRouteSegments([...]);
+
+const routeConfig = { ... };
+
+const router = createMithrilRouter({
+  m,
+  routeConfig
+});
+```
 
 [1]: #state
 
@@ -321,64 +425,88 @@ Type: [BaseConfig][48]
 
 [21]: #router-helper
 
-[22]: #baseconfig
+[22]: #routeconfig
 
-[23]: #properties-2
+[23]: #examples-2
 
-[24]: #routerconfig
+[24]: #baseconfig
 
-[25]: #parameters-6
+[25]: #properties-2
 
-[26]: #featherconfig
+[26]: #commonconfig
 
 [27]: #properties-3
 
-[28]: #urlmapperconfig
+[28]: #routerconfig
 
 [29]: #properties-4
 
-[30]: #mithrilconfig
+[30]: #featherconfig
 
 [31]: #properties-5
 
-[32]: #createrouter
+[32]: #urlmapperconfig
 
-[33]: #parameters-7
+[33]: #properties-6
 
-[34]: #createfeatherrouter
+[34]: #mithrilconfig
 
-[35]: #parameters-8
+[35]: #properties-7
 
-[36]: #createurlmapperrouter
+[36]: #createrouter
 
-[37]: #parameters-9
+[37]: #parameters-6
 
-[38]: #createmithrilrouter
+[38]: #createfeatherrouter
 
-[39]: #parameters-10
+[39]: #parameters-7
 
-[40]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[40]: #examples-3
 
-[41]: #route
+[41]: #createurlmapperrouter
 
-[42]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[42]: #parameters-8
 
-[43]: #routing
+[43]: #examples-4
 
-[44]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[44]: #createmithrilrouter
 
-[45]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/constructor
+[45]: #parameters-9
 
-[46]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+[46]: #examples-5
 
-[47]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[47]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[48]: #baseconfig
+[48]: #route
 
-[49]: #routerconfig
+[49]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[50]: #featherconfig
+[50]: #routing
 
-[51]: #urlmapperconfig
+[51]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[52]: #mithrilconfig
+[52]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/constructor
+
+[53]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+
+[54]: #routeconfig
+
+[55]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+
+[56]: #baseconfig
+
+[57]: #commonconfig
+
+[58]: #routerconfig
+
+[59]: https://github.com/HenrikJoreteg/feather-route-matcher
+
+[60]: #featherconfig
+
+[61]: https://github.com/cerebral/url-mapper
+
+[62]: #urlmapperconfig
+
+[63]: https://mithril.js.org/route.html
+
+[64]: #mithrilconfig

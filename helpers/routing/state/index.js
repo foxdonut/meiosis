@@ -7,6 +7,7 @@
  * A Route is a route segment.
  *
  * @typedef {Object} Route
+ *
  * @property {string} id
  * @property {Object} params
  */
