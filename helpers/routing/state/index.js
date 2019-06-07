@@ -1,7 +1,14 @@
 /**
+ * `meiosis-routing/state`
+ * @module state
+ */
+
+/**
  * A Route is a route segment.
  *
  * @typedef {Object} Route
+ * @property {string} id
+ * @property {Object} params
  */
 
 /**
@@ -15,14 +22,19 @@
  *
  * @typedef {Object} routing
  *
- * @property {route} route
- * @property {number} index
  * @property {Route} localSegment
  * @property {Route} childSegment
- * @property {Function} next: () => Routing(route, index + 1),
- * @property {Function} parentRoute: () => route.slice(0, index),
- * @property {Function} childRoute: child => route.slice(0, index + 1).concat(child),
- * @property {Function} siblingRoute: sibling => route.slice(0, index).concat(sibling)
+ * @property {function():routing} next returns the next routing instance
+ * @property {function():route} parentRoute returns the parent route
+ * @property {function(route):route} childRoute returns a child route
+ * @property {function(route):route} siblingRoute returns a sibling route
+ *
+ * @example
+ *
+ * href={routing.parentRoute()}
+ *
+ * routing.childRoute(Route.Child());
+ * routing.childRoute([Route.User(), Route.Details()];
  */
 
 // fastDeepEqual credit: https://github.com/epoberezkin/fast-deep-equal
@@ -70,6 +82,34 @@ const fastDeepEqual = (a, b) => {
 
 const defaultEmpty = route => (Array.isArray(route) ? route : []);
 
+/**
+ * Creates a `Route` with functions to create Route segments.
+ * @param {Array<string>} routeNames - the list of route names.
+ * @returns {Constructor<Route>} - the `Route` with constructor functions.
+ *
+ * @example
+ *
+ * const Route = createRouteSegments(["Home", "User"]);
+ *
+ * Route.Home()
+ * // { id: "Home", params: {} }
+ *
+ * Route.User({ name: "duck" })
+ * // { id: "User", params: { name: "duck" } }
+ */
+export const createRouteSegments = routeNames =>
+  routeNames.reduce((result, id) => {
+    result[id] = params => ({ id, params: params == null ? {} : params });
+    return result;
+  }, {});
+
+/**
+ * Looks for a Route segment, with matching params, in a route.
+ * @param {route} route
+ * @param {Route} routeSegmentWithParams
+ * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or the Route
+ * segment was not found.
+ */
 export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
   defaultEmpty(route).find(
     routeSegment =>
@@ -77,23 +117,30 @@ export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
       fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
   );
 
+/**
+ * Looks for a Route segment, regardless of the params, in a route.
+ * @param {route} route
+ * @param {string} id
+ * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or a Route
+ * segment with the given id was not found.
+ */
+export const findRouteSegment = (route, id) => {
+  id = id.id || id;
+  return defaultEmpty(route).find(routeSegment => routeSegment.id === id);
+};
+
 export const diffRoute = (from, to) =>
   defaultEmpty(from).reduce(
     (result, route) => result.concat(findRouteSegmentWithParams(to, route) ? [] : route),
     []
   );
 
-export const createRouteSegments = routeNames =>
-  routeNames.reduce((result, id) => {
-    result[id] = params => ({ id, params: params == null ? {} : params });
-    return result;
-  }, {});
-
-export const findRouteSegment = (route, id) => {
-  id = id.id || id;
-  return defaultEmpty(route).find(routeSegment => routeSegment.id === id);
-};
-
+/**
+ * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
+ * the route that we are leaving, and the route to which we are arriving, respectively.
+ * @param {Object} state the route state
+ * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
+ */
 export const routeTransition = ({ previous, current }) => ({
   previous: current,
   current: current,
@@ -101,7 +148,13 @@ export const routeTransition = ({ previous, current }) => ({
   arrive: diffRoute(current, previous)
 });
 
-export const whenPresent = (obj, fn) => (obj != null ? fn(obj) : null);
+/**
+ * Calls a function with a value only if the value is not `null` or `undefined`.
+ * @param {*} value the value to check
+ * @param {function(value)} fn the function to call if `value` is present
+ * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
+ */
+export const whenPresent = (value, fn) => (value != null ? fn(value) : null);
 
 /**
  * @constructor Routing

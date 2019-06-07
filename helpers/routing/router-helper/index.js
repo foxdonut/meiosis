@@ -1,33 +1,45 @@
 /**
+ * `meiosis-routing/router-helper`
+ * @module router-helper
+ */
+
+/**
  * Configuration object.
  *
  * @typedef {Object} BaseConfig
  * @property {Object} routeConfig - the route config
- * @property {Route} defaultRoute - the default route
+ * @property {route} defaultRoute - the default route
  * @property {string} [prefix="#!"] - the URL path prefix
+ * @property {function} [getPath]
+ * @property {function} [setPath]
+ * @property {function} [addLocationChangeListener]
+ */
+
+/**
+ * Generic router configuration object.
+ *
+ * @typedef {BaseConfig} RouterConfig
+ * @param {function} createParsePath - function that parses a path using a router library
  */
 
 /**
  * Feather router configuration object.
  *
- * @typedef {Object} FeatherConfig
- * @augments BaseConfig
- * @property {Function} createRouteMatcher - the Feather route matcher function.
+ * @typedef {BaseConfig} FeatherConfig
+ * @property {function} createRouteMatcher - the Feather route matcher function.
  */
 
 /**
  * URL-Mapper router configuration object.
  *
- * @typedef {Object} UrlMapperConfig
- * @augments BaseConfig
+ * @typedef {BaseConfig} UrlMapperConfig
  * @property {Function} Mapper - the URL Mapper function.
  */
 
 /**
  * Mithril router configuration object.
  *
- * @typedef {Object} MithrilConfig
- * @augments BaseConfig
+ * @typedef {BaseConfig} MithrilConfig
  * @property {Mithril} m - the Mithril instance.
  */
 
@@ -113,6 +125,10 @@ export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc =
     return result;
   }, acc);
 
+/**
+ *
+ * @param {RouterConfig} config
+ */
 export const createRouter = ({
   createParsePath,
   queryString,

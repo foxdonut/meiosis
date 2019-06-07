@@ -631,7 +631,7 @@ matched route segment's params to determine the `id` of the tea to load and/or u
 
 ```javascript
 import { DEL } from "mergerino@0.0.4";
-import { whenPresent } from "meiosis-routing/state";
+import { findRouteSegment, whenPresent } from "meiosis-routing/state";
 // See below for an explanation of whenPresent.
 
 // teaMap is a simple id->tea lookup object.
@@ -1022,7 +1022,8 @@ we really need is a simple router library that will parse paths. There are many 
 - [Mithril Router](https://mithril.js.org/route.html) (discussed in the next section)
 
 You can also plug in a different library. This is outside the scope of this tutorial, but you can
-read the details here (link forthcoming.)
+read the details
+[here](https://github.com/foxdonut/meiosis/blob/master/helpers/routing/api.md#createrouter)
 
 In this tutorial we'll use `feature-route-matcher`. To create a router, `meiosis-routing` provides
 `createFeatureRouter` to which we pass the `createRouteMatcher` function from
