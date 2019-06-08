@@ -150,6 +150,8 @@ export const routeTransition = ({ previous, current }) => ({
 });
 
 /**
+ * `function whenPresent(value, fn): any`
+ *
  * Calls a function with a value only if the value is not `null` or `undefined`.
  * @param {*} value the value to check
  * @param {function(value)} fn the function to call if `value` is present

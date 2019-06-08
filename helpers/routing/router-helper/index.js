@@ -48,11 +48,35 @@
  */
 
 /**
+ * `function parsePath(path, queryParams): route`
+ *
+ * Function that parses a path and returns a route.
+ *
+ * @typedef {function} parsePath
+ *
+ * @param {string} path - the path to parse.
+ * @param {Object} queryParams - an object with the query string parameters, if any are present.
+ * @returns {route} the route obtained from the path and parameters.
+ */
+
+/**
+ * `function createParsePath(routeMap, defaultRoute): parsePath`
+ *
+ * Function that creates a function to parse a path.
+ *
+ * @typedef {function} createParsePath
+ *
+ * @param {Object} routeMap - an object with key-value pairs.
+ * @param {route} defaultRoute - the default route.
+ * @returns {parsePath} the function that parses a path.
+ */
+
+/**
  * Generic router configuration.
  *
  * @typedef {CommonConfig} RouterConfig
  *
- * @property {function} createParsePath - function that parses a path using a router library.
+ * @property {createParsePath} createParsePath - function that parses a path using a router library.
  */
 
 /**
@@ -162,7 +186,38 @@ export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc =
 
 /**
  * Generic function to create a router from a router library of your choice.
+ *
+ * To use this function, write a `createXYZRouter` function that in turn calls `createRouter`.
+ * All config parameters except for `createParsePath` are normally passed-thru from
+ * `createXYZRouter` to `createRouter`, unless you want to define specific implementations of
+ * `getPath`, `setPath`, and/or `addLocationChangeListener`.
+ *
+ * The key parse is `createParsePath`. This is where you define how to plug in to the router
+ * library of your choice.
+ *
+ * `function createParsePath(routeMap, defaultRoute)` receives a `routeMap` which is an object
+ * with
+ *
  * @param {RouterConfig} config
+ * @returns {Object} router
+ *
+ * @example
+ *
+ * // Example of a createParsePath function with feather-route-matcher
+ * const createParsePath = (routeMap, defaultRoute) => {
+ *   const routeMatcher = createRouteMatcher(routeMap);
+ *
+ *   const parsePath = (path, queryParams) => {
+ *     const match = routeMatcher(path);
+ *
+ *     if (match) {
+ *       return match.page(Object.assign({}, match.params, queryParams));
+ *     } else {
+ *       return defaultRoute;
+ *     }
+ *   };
+ *   return parsePath;
+ * };
  */
 export const createRouter = ({
   createParsePath,
