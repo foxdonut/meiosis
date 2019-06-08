@@ -4,10 +4,14 @@
   "description": "Meiosis Helpers - routing",
   "main": "dist/meiosis-routing.js",
   "scripts": {
-    "start": "rollup -c",
-    "watch": "rollup -c -w",
-    "test": "npm start && tape 'tests/**/*.js' | tap-spec",
-    "docs": "documentation build --watch index.js -f md -o api.md"
+    "start": "",
+    "watch": "",
+    "checktypes": "tsc --noEmit",
+    "checktypesw": "npm run checktypes -- --watch",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "npm run build:types && npm run build:js",
+    "test": "npm start && tape 'tests/**/*.js' | tap-spec"
   },
   "repository": {
     "type": "git",
@@ -26,22 +30,23 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "buble": "^0.19.7",
-    "documentation": "^11.0.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-typescript": "^7.3.3",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.13.0",
     "feather-route-matcher": "^3.0.0",
     "prettier": "1.17.1",
     "query-string": "^6.5.0",
-    "rollup": "^1.12.3",
-    "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-uglify": "^6.0.2",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.1",
-    "url-mapper": "^2.0.0"
+    "typescript": "^3.5.1",
+    "url-mapper": "^2.0.0",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3"
   }
 }
