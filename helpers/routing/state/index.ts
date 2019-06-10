@@ -5,18 +5,18 @@
 
 /**
  * A Route is a route segment.
- *
- * @typedef {Object} Route
- *
- * @property {string} id
- * @property {Object} params
  */
+export type Route = {
+  id: string;
+  params: Object;
+};
+
+type RouteParamFn = (params: Object | null) => Route;
 
 /**
  * A route is an array of Route segments.
- *
- * @typedef {Array<Route>} route
  */
+export type route = Route[];
 
 /**
  * A routing is an object with navigation methods.
@@ -81,7 +81,7 @@ const fastDeepEqual = (a, b) => {
   return a !== a && b !== b;
 };
 
-const defaultEmpty = route => (Array.isArray(route) ? route : []);
+const defaultEmpty = (route: route | null): route => (Array.isArray(route) ? route : []);
 
 /**
  * Creates a `Route` with functions to create Route segments.
@@ -98,9 +98,9 @@ const defaultEmpty = route => (Array.isArray(route) ? route : []);
  * Route.User({ name: "duck" })
  * // { id: "User", params: { name: "duck" } }
  */
-export const createRouteSegments = routeNames =>
+export const createRouteSegments = (routeNames: string[]): Record<string, RouteParamFn> =>
   routeNames.reduce((result, id) => {
-    result[id] = params => ({ id, params: params == null ? {} : params });
+    result[id] = (params: Object) => ({ id, params: params == null ? {} : params });
     return result;
   }, {});
 
@@ -111,12 +111,13 @@ export const createRouteSegments = routeNames =>
  * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or the Route
  * segment was not found.
  */
-export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
-  defaultEmpty(route).find(
-    routeSegment =>
-      routeSegment.id === routeSegmentWithParams.id &&
-      fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
-  );
+export const findRouteSegmentWithParams =
+  (route: route, routeSegmentWithParams: Route): Route | undefined =>
+    defaultEmpty(route).find(
+      routeSegment =>
+        routeSegment.id === routeSegmentWithParams.id &&
+        fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
+    );
 
 /**
  * Looks for a Route segment, regardless of the params, in a route.
@@ -125,15 +126,17 @@ export const findRouteSegmentWithParams = (route, routeSegmentWithParams) =>
  * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or a Route
  * segment with the given id was not found.
  */
-export const findRouteSegment = (route, id) => {
-  id = id.id || id;
-  return defaultEmpty(route).find(routeSegment => routeSegment.id === id);
+export const findRouteSegment = (route: route, id: Route): Route | undefined => {
+  const findId = id.id || id;
+  return defaultEmpty(route).find(routeSegment => routeSegment.id === findId);
 };
 
-export const diffRoute = (from, to) =>
+export const diffRoute = (from: route, to: route): route =>
   defaultEmpty(from).reduce(
-    (result, route) => result.concat(findRouteSegmentWithParams(to, route) ? [] : route),
-    []
+    (result, route) => result.concat(
+      findRouteSegmentWithParams(to, route) === undefined ? [] : route
+    ),
+    [] as route
   );
 
 /**
@@ -157,7 +160,8 @@ export const routeTransition = ({ previous, current }) => ({
  * @param {function(value)} fn the function to call if `value` is present
  * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
  */
-export const whenPresent = (value, fn) => (value != null ? fn(value) : null);
+export const whenPresent = (value: any, fn: (x: any) => any) =>
+  (value != null ? fn(value) : null);
 
 /**
  * @constructor Routing
@@ -167,7 +171,7 @@ export const whenPresent = (value, fn) => (value != null ? fn(value) : null);
  *
  * @returns {routing} - a routing object
  */
-export const Routing = (route = [], index = 0) => ({
+export const Routing = (route: route = [], index = 0) => ({
   route,
   index,
   localSegment: route[index] || {},

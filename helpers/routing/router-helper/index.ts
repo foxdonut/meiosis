@@ -3,6 +3,12 @@
  * @module router-helper
  */
 
+import { route } from "../state";
+
+export type NestedRouteConfig =
+  [string, RouteConfig] |
+  [string, string[], RouteConfig];
+
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
  * segments, and the values are either:
@@ -10,8 +16,6 @@
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
  * - an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
- *
- * @typedef {Object} RouteConfig
  *
  * @example
  *
@@ -23,6 +27,9 @@
  *   }]
  * };
  */
+export interface RouteConfig {
+  [id: string]: string | NestedRouteConfig;
+}
 
 /**
  * Base router configuration.
@@ -36,6 +43,12 @@
  * @property {function} [setPath] - the function to set the path on the browser's location bar.
  * Defaults to `(path => window.history.pushState({}, "", path))`.
  */
+export interface BaseConfig {
+  routeConfig: RouteConfig;
+  prefix?: string;
+  getPath?: () => string;
+  setPath: (path: string) => void;
+}
 
 /**
  * Common router configuration.
@@ -46,6 +59,10 @@
  * @property {function} [addLocationChangeListener] - the function to add the location change
  * listener. Defaults to `window.onpopstate = listener`.
  */
+export interface CommonConfig extends BaseConfig {
+  defaultRoute?: route;
+  addLocationChangeListener?: any;
+}
 
 /**
  * `function parsePath(path, queryParams): route`
@@ -58,6 +75,7 @@
  * @param {Object} queryParams - an object with the query string parameters, if any are present.
  * @returns {route} the route obtained from the path and parameters.
  */
+export type parsePath = (path: string, queryParams: Object) => route;
 
 /**
  * `function createParsePath(routeMap, defaultRoute): parsePath`
@@ -70,6 +88,7 @@
  * @param {route} defaultRoute - the default route.
  * @returns {parsePath} the function that parses a path.
  */
+export type createParsePath = (routeMap: RouteMap, defaultRoute?: route) => parsePath;
 
 /**
  * Generic router configuration.
@@ -78,6 +97,9 @@
  *
  * @property {createParsePath} createParsePath - function that parses a path using a router library.
  */
+export interface RouterConfig extends CommonConfig {
+  createParsePath: createParsePath;
+}
 
 /**
  * Feather router configuration object.
@@ -86,6 +108,9 @@
  *
  * @property {function} createRouteMatcher - the Feather Route Matcher function.
  */
+export interface FeatherConfig extends CommonConfig {
+  createRouteMatcher: any;
+}
 
 /**
  * URL-Mapper router configuration object.
@@ -93,6 +118,9 @@
  * @typedef {CommonConfig} UrlMapperConfig
  * @property {Function} Mapper - the URL Mapper function.
  */
+export interface UrlMapperConfig extends CommonConfig {
+  Mapper: any;
+}
 
 /**
  * Mithril router configuration object.
@@ -102,9 +130,9 @@
  * @property {Mithril} m - the Mithril instance.
  */
 
-const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+const getPathWithoutQuery = (path: string): string => path.replace(/\?.*/, "");
 
-const getQuery = path => {
+const getQuery = (path: string): string => {
   const idx = path.indexOf("?");
   return idx >= 0 ? path.substring(idx + 1) : "";
 };
@@ -117,10 +145,10 @@ const extractMatches = matches => {
   }
 };
 
-export const findPathParams = path => extractMatches(path.match(/:[^/?]*/g));
-export const findQueryParams = path => extractMatches(path.match(/[?&][^?&]*/g));
+export const findPathParams = (path: string): string[] => extractMatches(path.match(/:[^/?]*/g));
+export const findQueryParams = (path: string): string[] => extractMatches(path.match(/[?&][^?&]*/g));
 
-export const setParams = (path, params) =>
+export const setParams = (path: string, params: Object): string =>
   findPathParams(path).reduce((result, pathParam) => {
     const value = params[pathParam] || "";
     const key = ":" + pathParam;
@@ -169,7 +197,7 @@ export const convertToPath = (routeConfig, routes, qsStringify) => {
 };
 
 // Returns { "/path": fn(params) => [route] }
-export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc = {}) =>
+export const createRouteMap = (routeConfig = {}, path = "", fn = (_) => [], acc = {}): RouteMap =>
   Object.entries(routeConfig).reduce((result, [id, config]) => {
     const [configPath, parentParams, children] = getConfig(config);
 
@@ -183,6 +211,19 @@ export const createRouteMap = (routeConfig = {}, path = "", fn = () => [], acc =
     createRouteMap(children, localPath, routeFn, result);
     return result;
   }, acc);
+
+export interface Router {
+  initialRoute: route;
+  locationBarSync: (route: route) => void;
+  parsePath: (path: string) => route;
+  routeMap: RouteMap;
+  start: (x: any) => void;
+  toPath: (route: route) => string;
+}
+
+export type RouteMap = {
+  [path: string]: (params: Object) => route
+};
 
 /**
  * Generic function to create a router from a router library of your choice.
@@ -252,7 +293,7 @@ export const createRouter = ({
 
         return parsePathFn(getPathWithoutQuery(path), queryParams);
       }
-    : null;
+    : () => [];
 
   const toPath = route => prefix + convertToPath(routeConfig, route, queryString.stringify);
 
