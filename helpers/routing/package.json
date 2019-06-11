@@ -6,12 +6,13 @@
   "scripts": {
     "start": "",
     "watch": "",
-    "checktypes": "tsc --noEmit",
-    "checktypesw": "npm run checktypes -- --watch",
+    "check:types": "tsc --noEmit",
+    "check:watch": "npm run check:types -- --watch",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:js",
-    "test": "npm start && tape 'tests/**/*.js' | tap-spec"
+    "test": "npm start && tape 'tests/**/*.js' | tap-spec",
+    "docs": "typedoc --excludeNotExported --out docs/ index.ts state router-helper"
   },
   "repository": {
     "type": "git",
@@ -44,6 +45,7 @@
     "query-string": "^6.5.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.1",
+    "typedoc": "^0.14.2",
     "typescript": "^3.5.1",
     "url-mapper": "^2.0.0",
     "webpack": "^4.33.0",
