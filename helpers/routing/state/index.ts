@@ -4,27 +4,27 @@
  */
 
 /**
- * A Route is a route segment.
+ * A route segment.
  */
-export type Route = {
+export type RouteSegment = {
   id: string;
   params: Object;
 };
 
-type RouteParamFn = (params: Object | null) => Route;
+type RouteParamFn = (params: Object | null) => RouteSegment;
 
 /**
- * A route is an array of Route segments.
+ * A Route is an array of route segments.
  */
-export type route = Route[];
+export type Route = RouteSegment[];
 
 /**
  * A routing is an object with navigation methods.
  *
  * @typedef {Object} routing
  *
- * @property {Route} localSegment
- * @property {Route} childSegment
+ * @property {RouteSegment} localSegment
+ * @property {RouteSegment} childSegment
  * @property {function():routing} next returns the next routing instance
  * @property {function():route} parentRoute returns the parent route
  * @property {function(route):route} childRoute returns a child route
@@ -81,12 +81,12 @@ const fastDeepEqual = (a, b) => {
   return a !== a && b !== b;
 };
 
-const defaultEmpty = (route: route | null): route => (Array.isArray(route) ? route : []);
+const defaultEmpty = (route: Route | null): Route => (Array.isArray(route) ? route : []);
 
 /**
- * Creates a `Route` with functions to create Route segments.
+ * Creates a `Route` helper with functions to create route segments.
  * @param {Array<string>} routeNames - the list of route names.
- * @returns {Constructor<Route>} - the `Route` with constructor functions.
+ * @returns {Constructor<RouteSegment>} - the `Route` with constructor functions.
  *
  * @example
  *
@@ -105,14 +105,14 @@ export const createRouteSegments = (routeNames: string[]): Record<string, RouteP
   }, {});
 
 /**
- * Looks for a Route segment, with matching params, in a route.
- * @param {route} route
- * @param {Route} routeSegmentWithParams
- * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or the Route
- * segment was not found.
+ * Looks for a route segment, with matching params, in a route.
+ * @param {Route} route
+ * @param {RouteSegment} routeSegmentWithParams
+ * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or the
+ * Route segment was not found.
  */
 export const findRouteSegmentWithParams =
-  (route: route, routeSegmentWithParams: Route): Route | undefined =>
+  (route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined =>
     defaultEmpty(route).find(
       routeSegment =>
         routeSegment.id === routeSegmentWithParams.id &&
@@ -121,22 +121,22 @@ export const findRouteSegmentWithParams =
 
 /**
  * Looks for a Route segment, regardless of the params, in a route.
- * @param {route} route
+ * @param {Route} route
  * @param {string} id
- * @returns {Route} - the matching Route segment, or `undefined` if `route` is empty or a Route
- * segment with the given id was not found.
+ * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or a
+ * route segment with the given id was not found.
  */
-export const findRouteSegment = (route: route, id: Route): Route | undefined => {
+export const findRouteSegment = (route: Route, id: RouteSegment): RouteSegment | undefined => {
   const findId = id.id || id;
   return defaultEmpty(route).find(routeSegment => routeSegment.id === findId);
 };
 
-export const diffRoute = (from: route, to: route): route =>
+export const diffRoute = (from: Route, to: Route): Route =>
   defaultEmpty(from).reduce(
     (result, route) => result.concat(
       findRouteSegmentWithParams(to, route) === undefined ? [] : route
     ),
-    [] as route
+    [] as Route
   );
 
 /**
@@ -166,12 +166,12 @@ export const whenPresent = (value: any, fn: (x: any) => any) =>
 /**
  * @constructor Routing
  *
- * @param {route} route
+ * @param {Route} route
  * @param {number} index
  *
  * @returns {routing} - a routing object
  */
-export const Routing = (route: route = [], index = 0) => ({
+export const Routing = (route: Route = [], index = 0) => ({
   route,
   index,
   localSegment: route[index] || {},

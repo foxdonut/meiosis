@@ -9,7 +9,7 @@
     "check:types": "tsc --noEmit",
     "check:watch": "npm run check:types -- --watch",
     "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build:js": "babel index.ts state/index.ts router-helper/index.ts --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "build": "npm run build:types && npm run build:js",
     "test": "npm start && tape 'tests/**/*.js' | tap-spec",
     "docs": "typedoc --excludeNotExported --out docs/ index.ts state router-helper"

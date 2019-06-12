@@ -3,7 +3,7 @@
  * @module router-helper
  */
 
-import { route } from "../state";
+import { Route } from "../state";
 
 export type NestedRouteConfig =
   [string, RouteConfig] |
@@ -45,7 +45,7 @@ export interface RouteConfig {
  * @param {Object} queryParams - an object with the query string parameters, if any are present.
  * @returns {route} the route obtained from the path and parameters.
  */
-export type parsePath = (path: string, queryParams: Object) => route;
+export type parsePath = (path: string, queryParams: Object) => Route;
 
 /**
  * `function createParsePath(routeMap, defaultRoute): parsePath`
@@ -55,17 +55,17 @@ export type parsePath = (path: string, queryParams: Object) => route;
  * @typedef {function} createParsePath
  *
  * @param {Object} routeMap - an object with key-value pairs.
- * @param {route} defaultRoute - the default route.
+ * @param {Route} defaultRoute - the default route.
  * @returns {parsePath} the function that parses a path.
  */
-export type createParsePath = (routeMap: RouteMap, defaultRoute?: route) => parsePath;
+export type createParsePath = (routeMap: RouteMap, defaultRoute?: Route) => parsePath;
 
 /**
  * Router configuration.
  *
  * @property {RouteConfig} routeConfig - the route config
  * @property {string} [prefix="#"] - the URL path prefix. Defaults to `"#"`.
- * @property {route} [defaultRoute] - the default route
+ * @property {Route} [defaultRoute] - the default route
  * @property {createParsePath} createParsePath - function that parses a path using a router library.
  * @property {function} [getPath] - the function to get the path from the browser's location bar.
  * Defaults to `(() => document.location.hash || prefix + "/")`.
@@ -80,7 +80,7 @@ export type createParsePath = (routeMap: RouteMap, defaultRoute?: route) => pars
 export interface RouterConfig {
   routeConfig: RouteConfig;
   prefix?: string;
-  defaultRoute?: route;
+  defaultRoute?: Route;
   createParsePath?: createParsePath;
   queryString?: any; // FIXME
   getPath?: () => string;
@@ -164,7 +164,7 @@ export function convertToPath(routeConfig, routes, qsStringify) {
 }
 
 // Returns { "/path": fn(params) => [route] }
-export function createRouteMap(routeConfig = {}, path = "", fn: (params: Object) => route = (_) => [], acc = {}): RouteMap {
+export function createRouteMap(routeConfig = {}, path = "", fn: (params: Object) => Route = (_) => [], acc = {}): RouteMap {
   return Object.entries(routeConfig).reduce((result, [id, config]) => {
     const [configPath, parentParams, children] = getConfig(config);
 
@@ -181,17 +181,17 @@ export function createRouteMap(routeConfig = {}, path = "", fn: (params: Object)
 }
 
 export interface Router {
-  initialRoute?: route;
-  locationBarSync: (route: route) => void;
-  parsePath: (path: string) => route;
+  initialRoute?: Route;
+  locationBarSync: (route: Route) => void;
+  parsePath: (path: string) => Route;
   routeMap: RouteMap;
   start: (x: any) => void;
-  toPath: (route: route) => string;
+  toPath: (route: Route) => string;
   MithrilRoutes?: any; // FIXME
 }
 
 export type RouteMap = {
-  [path: string]: (params: Object) => route
+  [path: string]: (params: Object) => Route
 };
 
 /**
