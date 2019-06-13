@@ -90,8 +90,8 @@ test("state", t => {
       "found route segment"
     );
 
-    t.ok(findRouteSegment(route, Route.About()) == null, "should be no found route");
-    t.ok(findRouteSegment(null, Route.About()) == null, "should tolerate null route");
+    t.ok(findRouteSegment(route, Route.About()) === undefined, "should be: no route found");
+    t.ok(findRouteSegment(null, Route.About()) === undefined, "should tolerate null route");
 
     t.end();
   });
@@ -106,12 +106,12 @@ test("state", t => {
     );
 
     t.ok(
-      findRouteSegmentWithParams(route, Route.User({ id: 43 })) == null,
-      "should be no found route segment"
+      findRouteSegmentWithParams(route, Route.User({ id: 43 })) === undefined,
+      "should be: no route segment found"
     );
 
     t.ok(
-      findRouteSegmentWithParams(null, Route.User({ id: 43 })) == null,
+      findRouteSegmentWithParams(null, Route.User({ id: 43 })) === undefined,
       "should tolerate null route"
     );
 
@@ -492,7 +492,7 @@ test("routerHelper", t => {
     router1a.locationBarSync([Route.About()]);
     router1a.start({ navigateTo: () => null });
 
-    const router1b = createRouter({ routeConfig: routeConfig1 });
+    const router1b = createRouter({ routeConfig: routeConfig1, getPath });
 
     t.deepEqual(
       router1b.routeMap["/user/:id/profile"]({ id: 42 }),

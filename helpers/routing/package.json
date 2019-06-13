@@ -4,14 +4,12 @@
   "description": "Meiosis Helpers - routing",
   "main": "dist/meiosis-routing.js",
   "scripts": {
-    "start": "",
-    "watch": "",
-    "check:types": "tsc --noEmit",
-    "check:watch": "npm run check:types -- --watch",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "babel index.ts state/index.ts router-helper/index.ts --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "build": "npm run build:types && npm run build:js",
-    "test": "npm start && tape 'tests/**/*.js' | tap-spec",
+    "check": "tsc --noEmit",
+    "watch": "npm run check -- --watch",
+    "lib": "tsc --emitDeclarationOnly",
+    "build": "rollup -c",
+    "start": "npm run lib && npm run build",
+    "test": "npm run build && tape 'tests/**/*.js' | tap-spec",
     "docs": "typedoc --excludeNotExported --out docs/ index.ts state router-helper"
   },
   "repository": {
@@ -43,12 +41,14 @@
     "feather-route-matcher": "^3.0.0",
     "prettier": "1.17.1",
     "query-string": "^6.5.0",
+    "rollup": "^1.15.1",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.0.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.1",
     "typedoc": "^0.14.2",
     "typescript": "^3.5.1",
-    "url-mapper": "^2.0.0",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.3"
+    "url-mapper": "^2.0.0"
   }
 }

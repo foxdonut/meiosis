@@ -98,11 +98,12 @@ const defaultEmpty = (route: Route | null): Route => (Array.isArray(route) ? rou
  * Route.User({ name: "duck" })
  * // { id: "User", params: { name: "duck" } }
  */
-export const createRouteSegments = (routeNames: string[]): Record<string, RouteParamFn> =>
-  routeNames.reduce((result, id) => {
+export function createRouteSegments(routeNames: string[]): Record<string, RouteParamFn> {
+  return routeNames.reduce((result, id) => {
     result[id] = (params: Object) => ({ id, params: params == null ? {} : params });
     return result;
   }, {});
+}
 
 /**
  * Looks for a route segment, with matching params, in a route.
@@ -111,13 +112,13 @@ export const createRouteSegments = (routeNames: string[]): Record<string, RouteP
  * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or the
  * Route segment was not found.
  */
-export const findRouteSegmentWithParams =
-  (route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined =>
-    defaultEmpty(route).find(
-      routeSegment =>
-        routeSegment.id === routeSegmentWithParams.id &&
-        fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
-    );
+export function findRouteSegmentWithParams(route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined {
+  return defaultEmpty(route).find(
+    routeSegment =>
+      routeSegment.id === routeSegmentWithParams.id &&
+      fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
+  );
+}
 
 /**
  * Looks for a Route segment, regardless of the params, in a route.
@@ -126,18 +127,21 @@ export const findRouteSegmentWithParams =
  * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or a
  * route segment with the given id was not found.
  */
-export const findRouteSegment = (route: Route, id: RouteSegment): RouteSegment | undefined => {
+export function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined {
   const findId = id.id || id;
   return defaultEmpty(route).find(routeSegment => routeSegment.id === findId);
-};
+}
 
-export const diffRoute = (from: Route, to: Route): Route =>
-  defaultEmpty(from).reduce(
+export function diffRoute(from: Route, to: Route): Route {
+  const init: Route = [];
+
+  return defaultEmpty(from).reduce(
     (result, route) => result.concat(
-      findRouteSegmentWithParams(to, route) === undefined ? [] : route
+      findRouteSegmentWithParams(to, route) === undefined ? route : []
     ),
-    [] as Route
+    init
   );
+}
 
 /**
  * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
@@ -145,12 +149,14 @@ export const diffRoute = (from: Route, to: Route): Route =>
  * @param {Object} state the route state
  * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
-export const routeTransition = ({ previous, current }) => ({
-  previous: current,
-  current: current,
-  leave: diffRoute(previous, current),
-  arrive: diffRoute(current, previous)
-});
+export function routeTransition({ previous, current }) {
+  return {
+    previous: current,
+    current: current,
+    leave: diffRoute(previous, current),
+    arrive: diffRoute(current, previous)
+  };
+}
 
 /**
  * `function whenPresent(value, fn): any`
@@ -160,8 +166,9 @@ export const routeTransition = ({ previous, current }) => ({
  * @param {function(value)} fn the function to call if `value` is present
  * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
  */
-export const whenPresent = (value: any, fn: (x: any) => any) =>
-  (value != null ? fn(value) : null);
+export function whenPresent(value: any, fn: (x: any) => any): any {
+  return (value != null ? fn(value) : null);
+}
 
 /**
  * @constructor Routing
@@ -171,13 +178,15 @@ export const whenPresent = (value: any, fn: (x: any) => any) =>
  *
  * @returns {routing} - a routing object
  */
-export const Routing = (route: Route = [], index = 0) => ({
-  route,
-  index,
-  localSegment: route[index] || {},
-  childSegment: route[index + 1] || {},
-  next: () => Routing(route, index + 1),
-  parentRoute: () => route.slice(0, index),
-  childRoute: child => route.slice(0, index + 1).concat(child),
-  siblingRoute: sibling => route.slice(0, index).concat(sibling)
-});
+export function Routing(route: Route = [], index = 0) {
+  return {
+    route,
+    index,
+    localSegment: route[index] || {},
+    childSegment: route[index + 1] || {},
+    next: () => Routing(route, index + 1),
+    parentRoute: () => route.slice(0, index),
+    childRoute: child => route.slice(0, index + 1).concat(child),
+    siblingRoute: sibling => route.slice(0, index).concat(sibling)
+  };
+}
