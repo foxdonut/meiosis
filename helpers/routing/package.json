@@ -40,6 +40,7 @@
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-react": "^7.13.0",
     "feather-route-matcher": "^3.0.0",
     "prettier": "1.17.1",
     "query-string": "^6.5.0",

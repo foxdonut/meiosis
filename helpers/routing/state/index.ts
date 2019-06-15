@@ -11,12 +11,30 @@ export interface RouteSegment {
   params: Record<string, any>;
 }
 
-type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
+export type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
 
 /**
  * A Route is an array of route segments.
  */
 export type Route = RouteSegment[];
+
+export interface RouteTransition {
+  previous: Route;
+  current: Route;
+  leave: Route;
+  arrive: Route;
+}
+
+export interface RoutingObject {
+  route: Route;
+  index: number;
+  localSegment: RouteSegment;
+  childSegment: RouteSegment;
+  next: () => RoutingObject;
+  parentRoute: () => Route;
+  childRoute: (child: Route) => Route;
+  siblingRoute: (sibling: Route) => Route;
+}
 
 /**
  * A routing is an object with navigation methods.
@@ -135,14 +153,14 @@ export function findRouteSegmentWithParams(
  */
 export function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined {
   const findId = id.id || id;
-  return defaultEmpty(route).find(routeSegment => routeSegment.id === findId);
+  return defaultEmpty(route).find((routeSegment): boolean => routeSegment.id === findId);
 }
 
 export function diffRoute(from: Route, to: Route): Route {
   const init: Route = [];
 
   return defaultEmpty(from).reduce(
-    (result, route) =>
+    (result, route): Route =>
       result.concat(findRouteSegmentWithParams(to, route) === undefined ? route : []),
     init
   );
@@ -154,7 +172,7 @@ export function diffRoute(from: Route, to: Route): Route {
  * @param {Object} state the route state
  * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
-export function routeTransition({ previous, current }) {
+export function routeTransition({ previous, current }): RouteTransition {
   return {
     previous: current,
     current: current,
@@ -183,15 +201,15 @@ export function whenPresent(value: any, fn: (x: any) => any): any {
  *
  * @returns {routing} - a routing object
  */
-export function Routing(route: Route = [], index = 0) {
+export function Routing(route: Route = [], index = 0): RoutingObject {
   return {
     route,
     index,
     localSegment: route[index] || {},
     childSegment: route[index + 1] || {},
-    next: () => Routing(route, index + 1),
-    parentRoute: () => route.slice(0, index),
-    childRoute: child => route.slice(0, index + 1).concat(child),
-    siblingRoute: sibling => route.slice(0, index).concat(sibling)
+    next: (): RoutingObject => Routing(route, index + 1),
+    parentRoute: (): Route => route.slice(0, index),
+    childRoute: (child: Route): Route => route.slice(0, index + 1).concat(child),
+    siblingRoute: (sibling: Route): Route => route.slice(0, index).concat(sibling)
   };
 }
