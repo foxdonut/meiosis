@@ -5,9 +5,7 @@
 
 import { Route } from "../state";
 
-export type NestedRouteConfig =
-  [string, RouteConfig] |
-  [string, string[], RouteConfig];
+export type NestedRouteConfig = [string, RouteConfig] | [string, string[], RouteConfig];
 
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
@@ -45,7 +43,7 @@ export interface RouteConfig {
  * @param {Object} queryParams - an object with the query string parameters, if any are present.
  * @returns {route} the route obtained from the path and parameters.
  */
-export type parsePath = (path: string, queryParams: Object) => Route;
+export type parsePath = (path: string, queryParams: Record<string, any>) => Route;
 
 /**
  * `function createParsePath(routeMap, defaultRoute): parsePath`
@@ -83,12 +81,28 @@ export interface RouterConfig {
   defaultRoute?: Route;
   createParsePath?: createParsePath;
   queryString?: any; // FIXME
-  getPath?: () => string;
+  getPath: () => string;
   setPath: (path: string) => void;
   addLocationChangeListener?: any;
   createRouteMatcher?: any;
   Mapper?: any;
   m?: any;
+}
+
+export type RouteFn = (params: Record<string, any>) => Route;
+
+export interface RouteMap {
+  [path: string]: RouteFn;
+}
+
+export interface Router {
+  initialRoute?: Route;
+  locationBarSync: (route: Route) => void;
+  parsePath: (path: string) => Route;
+  routeMap: RouteMap;
+  start: (x: any) => void;
+  toPath: (route: Route) => string;
+  MithrilRoutes?: any; // FIXME
 }
 
 const getPathWithoutQuery = (path: string): string => path.replace(/\?.*/, "");
@@ -98,9 +112,9 @@ const getQuery = (path: string): string => {
   return idx >= 0 ? path.substring(idx + 1) : "";
 };
 
-const extractMatches = matches => {
+const extractMatches = (matches): string[] => {
   if (matches) {
-    return matches.map(param => param.substring(1));
+    return matches.map((param): string => param.substring(1));
   } else {
     return [];
   }
@@ -114,8 +128,8 @@ export function findQueryParams(path: string): string[] {
   return extractMatches(path.match(/[?&][^?&]*/g));
 }
 
-export function setParams(path: string, params: Object): string {
-  return findPathParams(path).reduce((result, pathParam) => {
+export function setParams(path: string, params: Record<string, any>): string {
+  return findPathParams(path).reduce((result, pathParam): string => {
     const value = params[pathParam] || "";
     const key = ":" + pathParam;
     const idx = result.indexOf(key);
@@ -123,7 +137,7 @@ export function setParams(path: string, params: Object): string {
   }, getPathWithoutQuery(path));
 }
 
-const getConfig = config =>
+const getConfig = (config): any[] =>
   config == null
     ? ["/", [], {}]
     : typeof config === "string"
@@ -134,27 +148,29 @@ const getConfig = config =>
       : [config[0], [], config[1]]
     : config;
 
-const pick = (obj, props) =>
-  props.reduce((result, prop) => {
+const pick = (obj, props): object =>
+  props.reduce((result, prop): object => {
     if (obj[prop] != null) {
       result[prop] = obj[prop];
     }
     return result;
   }, {});
 
-export function convertToPath(routeConfig, routes, qsStringify) {
+export function convertToPath(routeConfig, routes, qsStringify): string {
   let path = "";
   let lookup = routeConfig;
   let query = {};
 
-  routes.forEach(route => {
-    const [configPath, _parentParams, children] = getConfig(lookup[route.id]);
-    path += setParams(configPath, route.params);
-    lookup = children;
+  routes.forEach(
+    (route): void => {
+      const [configPath, _parentParams, children] = getConfig(lookup[route.id]);
+      path += setParams(configPath, route.params);
+      lookup = children;
 
-    const queryParams = findQueryParams(configPath);
-    query = Object.assign(query, pick(route.params, queryParams));
-  });
+      const queryParams = findQueryParams(configPath);
+      query = Object.assign(query, pick(route.params, queryParams));
+    }
+  );
 
   if (Object.keys(query).length > 0 && typeof qsStringify === "function") {
     path += "?" + qsStringify(query);
@@ -164,8 +180,13 @@ export function convertToPath(routeConfig, routes, qsStringify) {
 }
 
 // Returns { "/path": fn(params) => [route] }
-export function createRouteMap(routeConfig = {}, path = "", fn: (params: Object) => Route = (_) => [], acc = {}): RouteMap {
-  return Object.entries(routeConfig).reduce((result, [id, config]) => {
+export function createRouteMap(
+  routeConfig = {},
+  path = "",
+  fn: (params: Record<string, any>) => Route = (_none): Route => [],
+  acc = {}
+): RouteMap {
+  return Object.entries(routeConfig).reduce((result, [id, config]): RouteMap => {
     const [configPath, parentParams, children] = getConfig(config);
 
     const routeParams = findPathParams(configPath)
@@ -173,26 +194,16 @@ export function createRouteMap(routeConfig = {}, path = "", fn: (params: Object)
       .concat(parentParams);
 
     const localPath = path + getPathWithoutQuery(configPath);
-    const routeFn = params => fn(params).concat({ id, params: pick(params, routeParams) });
+
+    const routeFn: RouteFn = (params): Route =>
+      fn(params).concat({ id, params: pick(params, routeParams) });
     result[localPath] = routeFn;
+
     createRouteMap(children, localPath, routeFn, result);
+
     return result;
   }, acc);
 }
-
-export interface Router {
-  initialRoute?: Route;
-  locationBarSync: (route: Route) => void;
-  parsePath: (path: string) => Route;
-  routeMap: RouteMap;
-  start: (x: any) => void;
-  toPath: (route: Route) => string;
-  MithrilRoutes?: any; // FIXME
-}
-
-export type RouteMap = {
-  [path: string]: (params: Object) => Route
-};
 
 /**
  * Generic function to create a router from a router library of your choice.
@@ -242,14 +253,18 @@ export function createRouter({
   setPath,
   addLocationChangeListener
 }: RouterConfig): Router {
-  const fGetPath = (getPath === undefined) ? (() => document.location.hash || prefix + "/") : getPath;
-  setPath = setPath || (path => window.history.pushState({}, "", path));
+  getPath = getPath === undefined ? (): string => document.location.hash || prefix + "/" : getPath;
+
+  setPath =
+    setPath === undefined
+      ? (path: string): void => window.history.pushState({}, "", path)
+      : setPath;
 
   queryString = queryString || {};
 
   addLocationChangeListener =
     addLocationChangeListener ||
-    (listener => {
+    ((listener): void => {
       window.onpopstate = listener;
     });
 
@@ -257,7 +272,7 @@ export function createRouter({
   const parsePathFn = createParsePath ? createParsePath(routeMap, defaultRoute) : null;
 
   const parsePath = parsePathFn
-    ? pathWithPrefix => {
+    ? (pathWithPrefix: string): Route => {
         const path = pathWithPrefix.substring(prefix.length);
         const query = getQuery(path);
         const queryParams =
@@ -265,25 +280,26 @@ export function createRouter({
 
         return parsePathFn(getPathWithoutQuery(path), queryParams);
       }
-    : () => [];
+    : (): Route => [];
 
-  const toPath = route => prefix + convertToPath(routeConfig, route, queryString.stringify);
+  const toPath = (route: Route): string =>
+    prefix + convertToPath(routeConfig, route, queryString.stringify);
 
   // Function to keep the location bar in sync
-  const locationBarSync = route => {
+  const locationBarSync = (route: Route): void => {
     const path = toPath(route);
-    if (fGetPath() !== path) {
+    if (getPath() !== path) {
       setPath(path);
     }
   };
 
   // Listen to location changes and call navigateTo()
-  const start = ({ navigateTo }) => {
-    const parsePathAndNavigate = () => navigateTo(parsePath(fGetPath()));
+  const start = ({ navigateTo }): void => {
+    const parsePathAndNavigate = (): void => navigateTo(parsePath(getPath()));
     addLocationChangeListener(parsePathAndNavigate);
   };
 
-  const initialRoute = parsePath ? parsePath(fGetPath()) : undefined;
+  const initialRoute = parsePath ? parsePath(getPath()) : undefined;
 
   return { initialRoute, locationBarSync, parsePath, routeMap, start, toPath };
 }
@@ -322,11 +338,11 @@ export function createFeatherRouter({
   getPath,
   setPath,
   addLocationChangeListener
-}) {
-  const createParsePath = (routeMap, defaultRoute) => {
+}): Router {
+  const createParsePath = (routeMap, defaultRoute): parsePath => {
     const routeMatcher = createRouteMatcher(routeMap);
 
-    const parsePath = (path, queryParams) => {
+    const parsePath = (path, queryParams): Route => {
       const match = routeMatcher(path);
 
       if (match) {
@@ -384,11 +400,11 @@ export function createUrlMapperRouter({
   getPath,
   setPath,
   addLocationChangeListener
-}) {
-  const createParsePath = (routeMap, defaultRoute) => {
+}): Router {
+  const createParsePath = (routeMap, defaultRoute): parsePath => {
     const urlMapper = Mapper();
 
-    const parsePath = (path, queryParams) => {
+    const parsePath = (path, queryParams): Route => {
       const matchedRoute = urlMapper.map(path, routeMap);
 
       if (matchedRoute) {
@@ -434,15 +450,15 @@ export function createUrlMapperRouter({
  * });
  * ```
  */
-export function createMithrilRouter({ m, routeConfig, prefix = "#!", getPath, setPath }) {
+export function createMithrilRouter({ m, routeConfig, prefix = "#!", getPath, setPath }): Router {
   const queryString = { stringify: m.buildQueryString };
   const router = createRouter({ queryString, routeConfig, prefix, getPath, setPath });
 
-  router.MithrilRoutes = ({ states, actions, App }) =>
-    Object.entries(router.routeMap).reduce((result, [path, fn]) => {
+  router.MithrilRoutes = ({ states, actions, App }): Record<string, object> =>
+    Object.entries(router.routeMap).reduce((result, [path, fn]): Record<string, object> => {
       result[path] = {
-        onmatch: params => actions.navigateTo(fn(params)),
-        render: () => m(App, { state: states(), actions })
+        onmatch: (params): void => actions.navigateTo(fn(params)),
+        render: (): void => m(App, { state: states(), actions })
       };
       return result;
     }, {});

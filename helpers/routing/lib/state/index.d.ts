@@ -29,7 +29,7 @@ export declare type Route = RouteSegment[];
  * Route.User({ name: "duck" })
  * // { id: "User", params: { name: "duck" } }
  */
-export declare const createRouteSegments: (routeNames: string[]) => Record<string, RouteParamFn>;
+export declare function createRouteSegments(routeNames: string[]): Record<string, RouteParamFn>;
 /**
  * Looks for a route segment, with matching params, in a route.
  * @param {Route} route
@@ -37,7 +37,7 @@ export declare const createRouteSegments: (routeNames: string[]) => Record<strin
  * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or the
  * Route segment was not found.
  */
-export declare const findRouteSegmentWithParams: (route: RouteSegment[], routeSegmentWithParams: RouteSegment) => RouteSegment | undefined;
+export declare function findRouteSegmentWithParams(route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined;
 /**
  * Looks for a Route segment, regardless of the params, in a route.
  * @param {Route} route
@@ -45,18 +45,18 @@ export declare const findRouteSegmentWithParams: (route: RouteSegment[], routeSe
  * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or a
  * route segment with the given id was not found.
  */
-export declare const findRouteSegment: (route: RouteSegment[], id: RouteSegment) => RouteSegment | undefined;
-export declare const diffRoute: (from: RouteSegment[], to: RouteSegment[]) => RouteSegment[];
+export declare function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined;
+export declare function diffRoute(from: Route, to: Route): Route;
 /**
  * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
  * the route that we are leaving, and the route to which we are arriving, respectively.
  * @param {Object} state the route state
  * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
-export declare const routeTransition: ({ previous, current }: {
+export declare function routeTransition({ previous, current }: {
     previous: any;
     current: any;
-}) => {
+}): {
     previous: any;
     current: any;
     leave: RouteSegment[];
@@ -70,7 +70,7 @@ export declare const routeTransition: ({ previous, current }: {
  * @param {function(value)} fn the function to call if `value` is present
  * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
  */
-export declare const whenPresent: (value: any, fn: (x: any) => any) => any;
+export declare function whenPresent(value: any, fn: (x: any) => any): any;
 /**
  * @constructor Routing
  *
@@ -79,7 +79,7 @@ export declare const whenPresent: (value: any, fn: (x: any) => any) => any;
  *
  * @returns {routing} - a routing object
  */
-export declare const Routing: (route?: RouteSegment[], index?: number) => {
+export declare function Routing(route?: Route, index?: number): {
     route: RouteSegment[];
     index: number;
     localSegment: RouteSegment;

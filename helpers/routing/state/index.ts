@@ -6,12 +6,12 @@
 /**
  * A route segment.
  */
-export type RouteSegment = {
+export interface RouteSegment {
   id: string;
-  params: Object;
-};
+  params: Record<string, any>;
+}
 
-type RouteParamFn = (params: Object | null) => RouteSegment;
+type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
 
 /**
  * A Route is an array of route segments.
@@ -45,7 +45,7 @@ const isArray = Array.isArray;
 const keyList = Object.keys;
 const hasProp = Object.prototype.hasOwnProperty;
 
-const fastDeepEqual = (a, b) => {
+const fastDeepEqual = (a, b): boolean => {
   if (a === b) return true;
 
   if (a && b && typeof a == "object" && typeof b == "object") {
@@ -99,8 +99,11 @@ const defaultEmpty = (route: Route | null): Route => (Array.isArray(route) ? rou
  * // { id: "User", params: { name: "duck" } }
  */
 export function createRouteSegments(routeNames: string[]): Record<string, RouteParamFn> {
-  return routeNames.reduce((result, id) => {
-    result[id] = (params: Object) => ({ id, params: params == null ? {} : params });
+  return routeNames.reduce((result, id): Record<string, RouteParamFn> => {
+    result[id] = (params: Record<string, any>): RouteSegment => ({
+      id,
+      params: params == null ? {} : params
+    });
     return result;
   }, {});
 }
@@ -112,9 +115,12 @@ export function createRouteSegments(routeNames: string[]): Record<string, RouteP
  * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or the
  * Route segment was not found.
  */
-export function findRouteSegmentWithParams(route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined {
+export function findRouteSegmentWithParams(
+  route: Route,
+  routeSegmentWithParams: RouteSegment
+): RouteSegment | undefined {
   return defaultEmpty(route).find(
-    routeSegment =>
+    (routeSegment: RouteSegment): boolean =>
       routeSegment.id === routeSegmentWithParams.id &&
       fastDeepEqual(routeSegment.params, routeSegmentWithParams.params)
   );
@@ -136,9 +142,8 @@ export function diffRoute(from: Route, to: Route): Route {
   const init: Route = [];
 
   return defaultEmpty(from).reduce(
-    (result, route) => result.concat(
-      findRouteSegmentWithParams(to, route) === undefined ? route : []
-    ),
+    (result, route) =>
+      result.concat(findRouteSegmentWithParams(to, route) === undefined ? route : []),
     init
   );
 }
@@ -167,7 +172,7 @@ export function routeTransition({ previous, current }) {
  * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
  */
 export function whenPresent(value: any, fn: (x: any) => any): any {
-  return (value != null ? fn(value) : null);
+  return value != null ? fn(value) : null;
 }
 
 /**
