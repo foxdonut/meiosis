@@ -39,7 +39,7 @@ export interface RouteConfig {
  * @param {Object} queryParams - an object with the query string parameters, if any are present.
  * @returns {route} the route obtained from the path and parameters.
  */
-export declare type parsePath = (path: string, queryParams: Object) => Route;
+export declare type parsePath = (path: string, queryParams: Record<string, any>) => Route;
 /**
  * `function createParsePath(routeMap, defaultRoute): parsePath`
  *
@@ -75,18 +75,17 @@ export interface RouterConfig {
     defaultRoute?: Route;
     createParsePath?: createParsePath;
     queryString?: any;
-    getPath?: () => string;
+    getPath: () => string;
     setPath: (path: string) => void;
     addLocationChangeListener?: any;
     createRouteMatcher?: any;
     Mapper?: any;
     m?: any;
 }
-export declare function findPathParams(path: string): string[];
-export declare function findQueryParams(path: string): string[];
-export declare function setParams(path: string, params: Object): string;
-export declare function convertToPath(routeConfig: any, routes: any, qsStringify: any): string;
-export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (params: Object) => Route, acc?: {}): RouteMap;
+export declare type RouteFn = (params: Record<string, any>) => Route;
+export interface RouteMap {
+    [path: string]: RouteFn;
+}
 export interface Router {
     initialRoute?: Route;
     locationBarSync: (route: Route) => void;
@@ -96,9 +95,11 @@ export interface Router {
     toPath: (route: Route) => string;
     MithrilRoutes?: any;
 }
-export declare type RouteMap = {
-    [path: string]: (params: Object) => Route;
-};
+export declare function findPathParams(path: string): string[];
+export declare function findQueryParams(path: string): string[];
+export declare function setParams(path: string, params: Record<string, any>): string;
+export declare function convertToPath(routeConfig: any, routes: any, qsStringify: any): string;
+export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (params: Record<string, any>) => Route, acc?: {}): RouteMap;
 /**
  * Generic function to create a router from a router library of your choice.
  *

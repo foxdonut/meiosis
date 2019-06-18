@@ -5,15 +5,33 @@
 /**
  * A route segment.
  */
-export declare type RouteSegment = {
+export interface RouteSegment {
     id: string;
-    params: Object;
-};
-declare type RouteParamFn = (params: Object | null) => RouteSegment;
+    params: Record<string, any>;
+}
+export declare type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
 /**
  * A Route is an array of route segments.
  */
 export declare type Route = RouteSegment[];
+export interface RouteState {
+    previous: Route;
+    current: Route;
+}
+export interface RouteTransition extends RouteState {
+    leave: Route;
+    arrive: Route;
+}
+export interface RoutingObject {
+    route: Route;
+    index: number;
+    localSegment: RouteSegment;
+    childSegment: RouteSegment;
+    next: () => RoutingObject;
+    parentRoute: () => Route;
+    childRoute: (child: Route) => Route;
+    siblingRoute: (sibling: Route) => Route;
+}
 /**
  * Creates a `Route` helper with functions to create route segments.
  * @param {Array<string>} routeNames - the list of route names.
@@ -53,15 +71,7 @@ export declare function diffRoute(from: Route, to: Route): Route;
  * @param {Object} state the route state
  * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
-export declare function routeTransition({ previous, current }: {
-    previous: any;
-    current: any;
-}): {
-    previous: any;
-    current: any;
-    leave: RouteSegment[];
-    arrive: RouteSegment[];
-};
+export declare function routeTransition({ previous, current }: RouteState): RouteTransition;
 /**
  * `function whenPresent(value, fn): any`
  *
@@ -79,14 +89,4 @@ export declare function whenPresent(value: any, fn: (x: any) => any): any;
  *
  * @returns {routing} - a routing object
  */
-export declare function Routing(route?: Route, index?: number): {
-    route: RouteSegment[];
-    index: number;
-    localSegment: RouteSegment;
-    childSegment: RouteSegment;
-    next: () => any;
-    parentRoute: () => RouteSegment[];
-    childRoute: (child: any) => RouteSegment[];
-    siblingRoute: (sibling: any) => RouteSegment[];
-};
-export {};
+export declare function Routing(route?: Route, index?: number): RoutingObject;

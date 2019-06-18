@@ -18,9 +18,12 @@ export type RouteParamFn = (params: Record<string, object> | null) => RouteSegme
  */
 export type Route = RouteSegment[];
 
-export interface RouteTransition {
+export interface RouteState {
   previous: Route;
   current: Route;
+}
+
+export interface RouteTransition extends RouteState {
   leave: Route;
   arrive: Route;
 }
@@ -172,7 +175,9 @@ export function diffRoute(from: Route, to: Route): Route {
  * @param {Object} state the route state
  * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
-export function routeTransition({ previous, current }): RouteTransition {
+export function routeTransition(routeState: RouteState): RouteTransition {
+  const { previous, current } = routeState;
+
   return {
     previous: current,
     current: current,
