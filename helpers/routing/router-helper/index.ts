@@ -1,11 +1,14 @@
 /**
  * `meiosis-routing/router-helper`
- * @module router-helper
+ * @module routerHelper
  */
 
-import { Route } from "../state";
-
+/**
+ * Nested route configuration.
+ */
 export type NestedRouteConfig = [string, RouteConfig] | [string, string[], RouteConfig];
+
+import { Route } from "../state";
 
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
@@ -13,7 +16,7 @@ export type NestedRouteConfig = [string, RouteConfig] | [string, string[], Route
  *
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
- * - an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
+ * - an array: [[NestedRouteConfig]]
  *
  * @example
  *

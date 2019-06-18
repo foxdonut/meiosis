@@ -18,11 +18,18 @@ export type RouteParamFn = (params: Record<string, object> | null) => RouteSegme
  */
 export type Route = RouteSegment[];
 
+/**
+ * The route state.
+ */
 export interface RouteState {
   previous: Route;
   current: Route;
 }
 
+/**
+ * The route transition indicates the [[Route]] that the user is leaving and to which they are
+ * arriving.
+ */
 export interface RouteTransition extends RouteState {
   leave: Route;
   arrive: Route;
