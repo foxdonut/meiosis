@@ -1,5 +1,8 @@
 /**
  * `meiosis-routing/state`
+ *
+ * The `state` module contains functions for managing routes in the application state.
+ *
  * @module state
  */
 
@@ -11,6 +14,9 @@ export interface RouteSegment {
   params: Record<string, any>;
 }
 
+/**
+ * A function that creates a [[RouteSegment]] with optional params.
+ */
 export type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
 
 /**
@@ -35,36 +41,36 @@ export interface RouteTransition extends RouteState {
   arrive: Route;
 }
 
+/**
+ * Routing instance with navigation objects and functions.
+ */
 export interface RoutingObject {
+  /** the current [[Route]]. */
   route: Route;
+
+  /** the route index, used internally. */
   index: number;
+
+  /** the [[RouteSegment]] for the local route. */
   localSegment: RouteSegment;
+
+  /** the [[RouteSegment]] for the child route. */
   childSegment: RouteSegment;
+
+  /** returns the [[RoutingObject]] for the next child. */
   next: () => RoutingObject;
+
+  /** returns the parent [[Route]]. */
   parentRoute: () => Route;
+
+  /** returns the [[Route]] for the current route plus the given child route. */
   childRoute: (child: Route) => Route;
+
+  /** returns the [[Route]] for the current route plus the given sibling route. */
   siblingRoute: (sibling: Route) => Route;
 }
 
-/**
- * A routing is an object with navigation methods.
- *
- * @typedef {Object} routing
- *
- * @property {RouteSegment} localSegment
- * @property {RouteSegment} childSegment
- * @property {function():routing} next returns the next routing instance
- * @property {function():route} parentRoute returns the parent route
- * @property {function(route):route} childRoute returns a child route
- * @property {function(route):route} siblingRoute returns a sibling route
- *
- * @example
- *
- * href={routing.parentRoute()}
- *
- * routing.childRoute(Route.Child());
- * routing.childRoute([Route.User(), Route.Details()];
- */
+////////
 
 // fastDeepEqual credit: https://github.com/epoberezkin/fast-deep-equal
 // This version does not handle Date and RegExp, because we shouldn't have those types when
@@ -113,10 +119,13 @@ const defaultEmpty = (route: Route | null): Route => (Array.isArray(route) ? rou
 
 /**
  * Creates a `Route` helper with functions to create route segments.
- * @param {Array<string>} routeNames - the list of route names.
- * @returns {Constructor<RouteSegment>} - the `Route` with constructor functions.
+ *
+ * @param routeNames the list of route names.
+ * @returns a `Route` object with constructor functions.
  *
  * @example
+ *
+ * ```
  *
  * const Route = createRouteSegments(["Home", "User"]);
  *
@@ -125,6 +134,7 @@ const defaultEmpty = (route: Route | null): Route => (Array.isArray(route) ? rou
  *
  * Route.User({ name: "duck" })
  * // { id: "User", params: { name: "duck" } }
+ * ```
  */
 export function createRouteSegments(routeNames: string[]): Record<string, RouteParamFn> {
   return routeNames.reduce((result, id): Record<string, RouteParamFn> => {
@@ -138,10 +148,11 @@ export function createRouteSegments(routeNames: string[]): Record<string, RouteP
 
 /**
  * Looks for a route segment, with matching params, in a route.
- * @param {Route} route
- * @param {RouteSegment} routeSegmentWithParams
- * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or the
- * Route segment was not found.
+ *
+ * @param route the route to search.
+ * @param routeSegmentWithParams the route segment to search for in the route.
+ * @returns the matching Route segment, or `undefined` if `route` is empty or the route segment
+ * was not found.
  */
 export function findRouteSegmentWithParams(
   route: Route,
@@ -156,16 +167,25 @@ export function findRouteSegmentWithParams(
 
 /**
  * Looks for a Route segment, regardless of the params, in a route.
- * @param {Route} route
- * @param {string} id
- * @returns {RouteSegment} - the matching Route segment, or `undefined` if `route` is empty or a
- * route segment with the given id was not found.
+ *
+ * @param route the route to search.
+ * @param id the route segment, or just the id of the route segment, to search for in the route.
+ * @returns the matching Route segment, or `undefined` if `route` is empty or a route segment with
+ * the given id was not found.
  */
 export function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined {
   const findId = id.id || id;
   return defaultEmpty(route).find((routeSegment): boolean => routeSegment.id === findId);
 }
 
+/**
+ * Calculates the difference between two routes.
+ *
+ * @param from
+ * @param to
+ * @returns the route representing the segments that are in the `from` route but not in the `to`
+ * route.
+ */
 export function diffRoute(from: Route, to: Route): Route {
   const init: Route = [];
 
@@ -179,8 +199,9 @@ export function diffRoute(from: Route, to: Route): Route {
 /**
  * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
  * the route that we are leaving, and the route to which we are arriving, respectively.
- * @param {Object} state the route state
- * @returns {Object} an object with `previous`, `current`, `leave`, and `arrive` properties.
+ *
+ * @param state the route state.
+ * @returns an object with `previous`, `current`, `leave`, and `arrive` properties.
  */
 export function routeTransition(routeState: RouteState): RouteTransition {
   const { previous, current } = routeState;
@@ -194,24 +215,57 @@ export function routeTransition(routeState: RouteState): RouteTransition {
 }
 
 /**
- * `function whenPresent(value, fn): any`
- *
  * Calls a function with a value only if the value is not `null` or `undefined`.
- * @param {*} value the value to check
- * @param {function(value)} fn the function to call if `value` is present
- * @returns {*} - the result of calling `fn(value)`, or `null` if `value` is absent.
+ *
+ * @param value the value to check.
+ * @param fn the function to call if `value` is present.
+ * @returns the result of calling `fn(value)`, or `null` if `value` is absent.
  */
 export function whenPresent(value: any, fn: (x: any) => any): any {
   return value != null ? fn(value) : null;
 }
 
 /**
- * @constructor Routing
+ * @constructor [[RoutingObject]]
  *
- * @param {Route} route
- * @param {number} index
+ * @param route the current route, for example `state.route.current`.
+ * @param index the route segment index. This is used internally and you should not specify a value
+ * for this parameter.
  *
- * @returns {routing} - a routing object
+ * @example
+ *
+ * ```
+ *
+ * // in root component
+ * const Root = ({ state }) => {
+ *   const routing = Routing(state.route.current);
+ *   const Component = componentMap[routing.localSegment.id];
+ *
+ *   return (
+ *     <div>
+ *       <Component // other props... // routing={routing} />
+ *     </div>
+ *   );
+ * };
+ *
+ * // in child component
+ * const Child = ({ state, routing }) => {
+ *   const Component = componentMap[routing.childSegment.id];
+ *   const params = routing.localSegment.params;
+ *
+ *   return (
+ *     <div>
+ *       <a href={router.toPath(routing.parentRoute())}>...</a>
+ *       <a href={router.toPath(routing.childRoute(Route.Child()))}>...</a>
+ *       <a href={router.toPath(
+ *         routing.siblingRoute([Route.Sibling(), Route.Details()])
+ *       )}>...</a>
+ *
+ *       <Component // other props... // routing={routing.next()} />
+ *     </div>
+ *   );
+ * };
+ * ```
  */
 export function Routing(route: Route = [], index = 0): RoutingObject {
   return {
