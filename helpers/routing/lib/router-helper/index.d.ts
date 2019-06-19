@@ -1,16 +1,23 @@
 /**
  * `meiosis-routing/router-helper`
- * @module router-helper
+ *
+ * The `router-helper` module contains functions for creating a router by plugging in a router
+ * library.
+ *
+ * @module routerHelper
  */
-import { Route } from "../state";
+/**
+ * Nested route configuration.
+ */
 export declare type NestedRouteConfig = [string, RouteConfig] | [string, string[], RouteConfig];
+import { Route } from "../state";
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
  * segments, and the values are either:
  *
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
- * - an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
+ * - an array: [[NestedRouteConfig]]
  *
  * @example
  *
@@ -29,63 +36,67 @@ export interface RouteConfig {
     [id: string]: string | NestedRouteConfig;
 }
 /**
- * `function parsePath(path, queryParams): route`
- *
  * Function that parses a path and returns a route.
  *
- * @typedef {function} parsePath
- *
- * @param {string} path - the path to parse.
- * @param {Object} queryParams - an object with the query string parameters, if any are present.
- * @returns {route} the route obtained from the path and parameters.
+ * @param path the path to parse.
+ * @param queryParams an object with the query string parameters, if any are present.
+ * @returns the route obtained from the path and parameters.
  */
 export declare type parsePath = (path: string, queryParams: Record<string, any>) => Route;
 /**
- * `function createParsePath(routeMap, defaultRoute): parsePath`
- *
  * Function that creates a function to parse a path.
  *
- * @typedef {function} createParsePath
- *
- * @param {Object} routeMap - an object with key-value pairs.
- * @param {Route} defaultRoute - the default route.
- * @returns {parsePath} the function that parses a path.
+ * @param routeMap an object with key-value pairs.
+ * @param defaultRoute the default route.
+ * @returns the function that parses a path.
  */
 export declare type createParsePath = (routeMap: RouteMap, defaultRoute?: Route) => parsePath;
 /**
  * Router configuration.
- *
- * @property {RouteConfig} routeConfig - the route config
- * @property {string} [prefix="#"] - the URL path prefix. Defaults to `"#"`.
- * @property {Route} [defaultRoute] - the default route
- * @property {createParsePath} createParsePath - function that parses a path using a router library.
- * @property {function} [getPath] - the function to get the path from the browser's location bar.
- * Defaults to `(() => document.location.hash || prefix + "/")`.
- * @property {function} [setPath] - the function to set the path on the browser's location bar.
- * Defaults to `(path => window.history.pushState({}, "", path))`.
- * @property {function} [addLocationChangeListener] - the function to add the location change
- * listener. Defaults to `window.onpopstate = listener`.
- * @property {function} createRouteMatcher - the Feather Route Matcher function.
- * @property {Function} Mapper - the URL Mapper function.
- * @property {Mithril} m - the Mithril instance.
  */
 export interface RouterConfig {
+    /** The route config. */
     routeConfig: RouteConfig;
+    /** The URL path prefix. Defaults to `"#"`. */
     prefix?: string;
+    /** The default route. */
     defaultRoute?: Route;
+    /** Function that parses a path using a router library. */
     createParsePath?: createParsePath;
     queryString?: any;
+    /**
+     * The function to get the path from the browser's location bar.
+     * Defaults to `(() => document.location.hash || prefix + "/")`.
+     */
     getPath: () => string;
+    /**
+     * The function to set the path on the browser's location bar.
+     * Defaults to `(path => window.history.pushState({}, "", path))`.
+     */
     setPath: (path: string) => void;
+    /**
+     * The function to add the location change listener. Defaults to `window.onpopstate = listener`.
+     */
     addLocationChangeListener?: any;
+    /**
+     * The [Feather Route Matcher](https://github.com/henrikjoreteg/feather-route-matcher)
+     * function.
+     */
     createRouteMatcher?: any;
+    /** The [URL Mapper](https://github.com/cerebral/url-mapper) function. */
     Mapper?: any;
+    /** The [Mithril](https://mithril.js.org) instance. */
     m?: any;
 }
+/** Represents a function that takes params and produces a [[Route]]. */
 export declare type RouteFn = (params: Record<string, any>) => Route;
+/** Object that maps paths to route functions. */
 export interface RouteMap {
     [path: string]: RouteFn;
 }
+/**
+ * Represents a router, which provides properties and functions to manage route paths.
+ */
 export interface Router {
     initialRoute?: Route;
     locationBarSync: (route: Route) => void;
@@ -114,8 +125,8 @@ export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (pa
  * `function createParsePath(routeMap, defaultRoute)` receives a `routeMap` which is an object
  * with
  *
- * @param {RouterConfig} config
- * @returns {Object} router
+ * @param config
+ * @returns the created router.
  *
  * @example
  *
@@ -138,12 +149,12 @@ export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (pa
  * };
  * ```
  */
-export declare function createRouter({ createParsePath, routeConfig, defaultRoute, prefix, queryString, getPath, setPath, addLocationChangeListener }: RouterConfig): Router;
+export declare function createRouter(config: RouterConfig): Router;
 /**
  * Creates a router using
  * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher).
  *
- * @param {FeatherConfig} config
+ * @param config
  *
  * @example
  *
@@ -164,21 +175,12 @@ export declare function createRouter({ createParsePath, routeConfig, defaultRout
  * });
  * ```
  */
-export declare function createFeatherRouter({ createRouteMatcher, routeConfig, defaultRoute, prefix, queryString, getPath, setPath, addLocationChangeListener }: {
-    createRouteMatcher: any;
-    routeConfig: any;
-    defaultRoute: any;
-    prefix?: string | undefined;
-    queryString: any;
-    getPath: any;
-    setPath: any;
-    addLocationChangeListener: any;
-}): Router;
+export declare function createFeatherRouter(config: RouterConfig): Router;
 /**
  * Creates a router using
  * [url-mapper](https://github.com/cerebral/url-mapper).
  *
- * @param {UrlMapperConfig} config
+ * @param config
  *
  * @example
  *
@@ -199,20 +201,11 @@ export declare function createFeatherRouter({ createRouteMatcher, routeConfig, d
  * });
  * ```
  */
-export declare function createUrlMapperRouter({ Mapper, routeConfig, defaultRoute, prefix, queryString, getPath, setPath, addLocationChangeListener }: {
-    Mapper: any;
-    routeConfig: any;
-    defaultRoute: any;
-    prefix?: string | undefined;
-    queryString: any;
-    getPath: any;
-    setPath: any;
-    addLocationChangeListener: any;
-}): Router;
+export declare function createUrlMapperRouter(config: RouterConfig): Router;
 /**
  * Creates a router using [Mithril Router](https://mithril.js.org/route.html).
  *
- * @param {MithrilConfig} config
+ * @param config
  *
  * @example
  *
@@ -231,10 +224,4 @@ export declare function createUrlMapperRouter({ Mapper, routeConfig, defaultRout
  * });
  * ```
  */
-export declare function createMithrilRouter({ m, routeConfig, prefix, getPath, setPath }: {
-    m: any;
-    routeConfig: any;
-    prefix?: string | undefined;
-    getPath: any;
-    setPath: any;
-}): Router;
+export declare function createMithrilRouter(config: RouterConfig): Router;

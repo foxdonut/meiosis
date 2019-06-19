@@ -1,8 +1,16 @@
 {
   "name": "meiosis-routing",
   "version": "1.0.0",
-  "description": "Meiosis Helpers - routing",
+  "description": "Meiosis Helpers - Routing",
   "main": "dist/meiosis-routing.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "dist",
+    "index.ts",
+    "lib",
+    "router-helper",
+    "state"
+  ],
   "scripts": {
     "check": "tsc --noEmit",
     "watch": "npm run check -- --watch",
