@@ -6,10 +6,6 @@
  *
  * @module routerHelper
  */
-/**
- * Nested route configuration.
- */
-export declare type NestedRouteConfig = [string, RouteConfig] | [string, string[], RouteConfig];
 import { Route } from "../state";
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
@@ -17,7 +13,7 @@ import { Route } from "../state";
  *
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
- * - an array: [[NestedRouteConfig]]
+ * - an array: `[path, nestedConfig]` or `[path, inheritArray, nestedConfig]`.
  *
  * @example
  *
@@ -33,7 +29,7 @@ import { Route } from "../state";
  * ```
  */
 export interface RouteConfig {
-    [id: string]: string | NestedRouteConfig;
+    [id: string]: any;
 }
 /**
  * Function that parses a path and returns a route.
@@ -68,12 +64,12 @@ export interface RouterConfig {
      * The function to get the path from the browser's location bar.
      * Defaults to `(() => document.location.hash || prefix + "/")`.
      */
-    getPath: () => string;
+    getPath?: () => string;
     /**
      * The function to set the path on the browser's location bar.
      * Defaults to `(path => window.history.pushState({}, "", path))`.
      */
-    setPath: (path: string) => void;
+    setPath?: (path: string) => void;
     /**
      * The function to add the location change listener. Defaults to `window.onpopstate = listener`.
      */
@@ -89,7 +85,7 @@ export interface RouterConfig {
     m?: any;
 }
 /** Represents a function that takes params and produces a [[Route]]. */
-export declare type RouteFn = (params: Record<string, any>) => Route;
+export declare type RouteFn = (params?: Record<string, any>) => Route;
 /** Object that maps paths to route functions. */
 export interface RouteMap {
     [path: string]: RouteFn;
@@ -109,8 +105,8 @@ export interface Router {
 export declare function findPathParams(path: string): string[];
 export declare function findQueryParams(path: string): string[];
 export declare function setParams(path: string, params: Record<string, any>): string;
-export declare function convertToPath(routeConfig: any, routes: any, qsStringify: any): string;
-export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (params: Record<string, any>) => Route, acc?: {}): RouteMap;
+export declare function convertToPath(routeConfig: any, routes: any, qsStringify?: any): string;
+export declare function createRouteMap(routeConfig?: {}, path?: string, fn?: (params?: Record<string, any>) => Route, acc?: {}): RouteMap;
 /**
  * Generic function to create a router from a router library of your choice.
  *

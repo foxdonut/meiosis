@@ -52,9 +52,9 @@ export interface RoutingObject {
     /** returns the parent [[Route]]. */
     parentRoute: () => Route;
     /** returns the [[Route]] for the current route plus the given child route. */
-    childRoute: (child: Route) => Route;
+    childRoute: (child: Route | RouteSegment) => Route;
     /** returns the [[Route]] for the current route plus the given sibling route. */
-    siblingRoute: (sibling: Route) => Route;
+    siblingRoute: (sibling: Route | RouteSegment) => Route;
 }
 /**
  * Creates a `Route` helper with functions to create route segments.
@@ -84,7 +84,7 @@ export declare function createRouteSegments(routeNames: string[]): Record<string
  * @returns the matching Route segment, or `undefined` if `route` is empty or the route segment
  * was not found.
  */
-export declare function findRouteSegmentWithParams(route: Route, routeSegmentWithParams: RouteSegment): RouteSegment | undefined;
+export declare function findRouteSegmentWithParams(route: Route | null, routeSegmentWithParams: RouteSegment): RouteSegment | undefined;
 /**
  * Looks for a Route segment, regardless of the params, in a route.
  *
@@ -102,7 +102,7 @@ export declare function findRouteSegment(route: Route | null, id: RouteSegment |
  * @returns the route representing the segments that are in the `from` route but not in the `to`
  * route.
  */
-export declare function diffRoute(from: Route, to: Route): Route;
+export declare function diffRoute(from: Route | null, to: Route | null): Route;
 /**
  * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
  * the route that we are leaving, and the route to which we are arriving, respectively.
