@@ -15,7 +15,7 @@ export interface RouteSegment {
 /**
  * A function that creates a [[RouteSegment]] with optional params.
  */
-export declare type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
+export declare type RouteParamFn = (params?: Record<string, any>) => RouteSegment;
 /**
  * A Route is an array of route segments.
  */
@@ -93,7 +93,7 @@ export declare function findRouteSegmentWithParams(route: Route, routeSegmentWit
  * @returns the matching Route segment, or `undefined` if `route` is empty or a route segment with
  * the given id was not found.
  */
-export declare function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined;
+export declare function findRouteSegment(route: Route | null, id: RouteSegment | string): RouteSegment | undefined;
 /**
  * Calculates the difference between two routes.
  *

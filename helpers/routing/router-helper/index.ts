@@ -7,11 +7,6 @@
  * @module routerHelper
  */
 
-/**
- * Nested route configuration.
- */
-export type NestedRouteConfig = [string, RouteConfig] | [string, string[], RouteConfig];
-
 import { Route } from "../state";
 
 /**
@@ -20,7 +15,7 @@ import { Route } from "../state";
  *
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
- * - an array: [[NestedRouteConfig]]
+ * - an array: `[path, nestedConfig]` or `[path, inheritArray, nestedConfig]`.
  *
  * @example
  *
@@ -36,7 +31,7 @@ import { Route } from "../state";
  * ```
  */
 export interface RouteConfig {
-  [id: string]: string | NestedRouteConfig;
+  [id: string]: any;
 }
 
 /**
@@ -79,13 +74,13 @@ export interface RouterConfig {
    * The function to get the path from the browser's location bar.
    * Defaults to `(() => document.location.hash || prefix + "/")`.
    */
-  getPath: () => string;
+  getPath?: () => string;
 
   /**
    * The function to set the path on the browser's location bar.
    * Defaults to `(path => window.history.pushState({}, "", path))`.
    */
-  setPath: (path: string) => void;
+  setPath?: (path: string) => void;
 
   /**
    * The function to add the location change listener. Defaults to `window.onpopstate = listener`.
@@ -106,7 +101,7 @@ export interface RouterConfig {
 }
 
 /** Represents a function that takes params and produces a [[Route]]. */
-export type RouteFn = (params: Record<string, any>) => Route;
+export type RouteFn = (params?: Record<string, any>) => Route;
 
 /** Object that maps paths to route functions. */
 export interface RouteMap {
@@ -179,7 +174,7 @@ const pick = (obj, props): object =>
     return result;
   }, {});
 
-export function convertToPath(routeConfig, routes, qsStringify): string {
+export function convertToPath(routeConfig, routes, qsStringify?): string {
   let path = "";
   let lookup = routeConfig;
   let query = {};
@@ -206,7 +201,7 @@ export function convertToPath(routeConfig, routes, qsStringify): string {
 export function createRouteMap(
   routeConfig = {},
   path = "",
-  fn: (params: Record<string, any>) => Route = (_none): Route => [],
+  fn: (params?: Record<string, any>) => Route = (_none): Route => [],
   acc = {}
 ): RouteMap {
   return Object.entries(routeConfig).reduce((result, [id, config]): RouteMap => {
@@ -218,7 +213,7 @@ export function createRouteMap(
 
     const localPath = path + getPathWithoutQuery(configPath);
 
-    const routeFn: RouteFn = (params): Route =>
+    const routeFn: RouteFn = (params?: Record<string, any>): Route =>
       fn(params).concat({ id, params: pick(params, routeParams) });
     result[localPath] = routeFn;
 

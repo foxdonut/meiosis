@@ -7,6 +7,12 @@ module.exports = {
   "parserOptions": {
     "ecmaVersion": 2018
   },
+  "plugins": [
+    "jest"
+  ],
+  "env": {
+    "jest/globals": true
+  },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": [

@@ -17,7 +17,7 @@ export interface RouteSegment {
 /**
  * A function that creates a [[RouteSegment]] with optional params.
  */
-export type RouteParamFn = (params: Record<string, object> | null) => RouteSegment;
+export type RouteParamFn = (params?: Record<string, any>) => RouteSegment;
 
 /**
  * A Route is an array of route segments.
@@ -64,10 +64,10 @@ export interface RoutingObject {
   parentRoute: () => Route;
 
   /** returns the [[Route]] for the current route plus the given child route. */
-  childRoute: (child: Route) => Route;
+  childRoute: (child: Route | RouteSegment) => Route;
 
   /** returns the [[Route]] for the current route plus the given sibling route. */
-  siblingRoute: (sibling: Route) => Route;
+  siblingRoute: (sibling: Route | RouteSegment) => Route;
 }
 
 ////////
@@ -155,7 +155,7 @@ export function createRouteSegments(routeNames: string[]): Record<string, RouteP
  * was not found.
  */
 export function findRouteSegmentWithParams(
-  route: Route,
+  route: Route | null,
   routeSegmentWithParams: RouteSegment
 ): RouteSegment | undefined {
   return defaultEmpty(route).find(
@@ -173,8 +173,11 @@ export function findRouteSegmentWithParams(
  * @returns the matching Route segment, or `undefined` if `route` is empty or a route segment with
  * the given id was not found.
  */
-export function findRouteSegment(route: Route, id: RouteSegment): RouteSegment | undefined {
-  const findId = id.id || id;
+export function findRouteSegment(
+  route: Route | null,
+  id: RouteSegment | string
+): RouteSegment | undefined {
+  const findId = (id as RouteSegment).id || id;
   return defaultEmpty(route).find((routeSegment): boolean => routeSegment.id === findId);
 }
 
@@ -186,7 +189,7 @@ export function findRouteSegment(route: Route, id: RouteSegment): RouteSegment |
  * @returns the route representing the segments that are in the `from` route but not in the `to`
  * route.
  */
-export function diffRoute(from: Route, to: Route): Route {
+export function diffRoute(from: Route | null, to: Route | null): Route {
   const init: Route = [];
 
   return defaultEmpty(from).reduce(
@@ -275,7 +278,7 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
     childSegment: route[index + 1] || {},
     next: (): RoutingObject => Routing(route, index + 1),
     parentRoute: (): Route => route.slice(0, index),
-    childRoute: (child: Route): Route => route.slice(0, index + 1).concat(child),
-    siblingRoute: (sibling: Route): Route => route.slice(0, index).concat(sibling)
+    childRoute: (child: Route | RouteSegment): Route => route.slice(0, index + 1).concat(child),
+    siblingRoute: (sibling: Route | RouteSegment): Route => route.slice(0, index).concat(sibling)
   };
 }

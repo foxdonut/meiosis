@@ -63,6 +63,7 @@
   "include": [
     "index.ts",
     "router-helper",
-    "state"
+    "state",
+    "tests"
   ]
 }
