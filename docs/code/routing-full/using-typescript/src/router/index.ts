@@ -8,5 +8,5 @@ export const router = createFeatherRouter({
   createRouteMatcher,
   queryString,
   routeConfig,
-  defaultRoute: [Route.NotFound()]
+  defaultRoute: [Route.Home()]
 });

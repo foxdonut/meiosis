@@ -4,7 +4,7 @@ import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
 import meiosisReact from "meiosis-setup/react";
 import meiosisMergerino from "meiosis-setup/mergerino";
-import meiosisTracer from "meiosis-tracer";
+import * as meiosisTracer from "meiosis-tracer";
 
 import { createApp } from "./app";
 import { Root } from "./root";

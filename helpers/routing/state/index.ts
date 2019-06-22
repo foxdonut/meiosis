@@ -274,8 +274,8 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
   return {
     route,
     index,
-    localSegment: route[index] || {},
-    childSegment: route[index + 1] || {},
+    localSegment: route[index] === undefined ? { id: "", params: {} } : route[index],
+    childSegment: route[index + 1] === undefined ? { id: "", params: {} } : route[index + 1],
     next: (): RoutingObject => Routing(route, index + 1),
     parentRoute: (): Route => route.slice(0, index),
     childRoute: (child: Route | RouteSegment): Route => route.slice(0, index + 1).concat(child),
