@@ -12,7 +12,7 @@
     "build": "rollup -c && cp -r src/* dist/",
     "start": "npm run lib && npm run build && cat package.json|grep -v private>dist/package.json",
     "test": "jest --config jestconfig.json",
-    "docs": "typedoc --excludeNotExported --out docs/ index.ts state router-helper",
+    "docs": "typedoc --excludeNotExported --out docs/ src",
     "onchange": "onchange -i index.ts 'state/*' 'router-helper/*' -- npm run docs"
   },
   "repository": {

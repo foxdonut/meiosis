@@ -7,8 +7,6 @@
  * @module routerHelper
  */
 
-import { Route } from "../state";
-
 /**
  * Route configuration. This is an Object for which the properties are the ids of the route
  * segments, and the values are either:
@@ -33,6 +31,8 @@ import { Route } from "../state";
 export interface RouteConfig {
   [id: string]: any;
 }
+
+import { Route } from "../state";
 
 /**
  * Function that parses a path and returns a route.

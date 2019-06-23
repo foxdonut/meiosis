@@ -404,7 +404,8 @@ function loadDataForUser(state) {
 As mentioned above, you will find a more in-depth tutorial in the
 [Meiosis Routing documentation](https://meiosis.js.org/docs/routing.html).
 
-More details are also available in the [API documentation](api.md).
+More details are also available in the
+[API documentation](https://meiosis.js.org/meiosis-routing/modules/_index_.html).
 
 ## Credits
 
