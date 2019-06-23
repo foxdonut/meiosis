@@ -4,7 +4,7 @@
       "sourceMap": true,
       "noImplicitAny": false,
       "module": "commonjs",
-      "target": "esnext",
+      "target": "es5",
       "jsx": "react"
   },
   "include": [

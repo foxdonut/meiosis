@@ -10,7 +10,7 @@ import {
   routeTransition,
   whenPresent,
   Routing
-} from "../state";
+} from "../src/state";
 
 import {
   findPathParams,
@@ -21,7 +21,7 @@ import {
   createRouter,
   createFeatherRouter,
   createUrlMapperRouter
-} from "../router-helper";
+} from "../src/router-helper";
 
 const Route = createRouteSegments([
   "Home",
@@ -229,7 +229,7 @@ describe("state", (): void => {
       expect(routing.childSegment).toEqual(Route.Profile());
     });
     test("no child segment", (): void => {
-      expect(Routing([Route.Home()]).childSegment).toEqual({});
+      expect(Routing([Route.Home()]).childSegment).toEqual({ id: "", params: {} });
     });
   });
 
@@ -244,7 +244,7 @@ describe("state", (): void => {
       expect(next.childSegment).toEqual(Route.Profile());
     });
     test("no next child segment", (): void => {
-      expect(next.next().childSegment).toEqual({});
+      expect(next.next().childSegment).toEqual({ id: "", params: {} });
     });
   });
 

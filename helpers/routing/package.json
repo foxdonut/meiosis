@@ -3,19 +3,15 @@
   "version": "1.0.0",
   "description": "Meiosis Helpers - Routing",
   "main": "dist/meiosis-routing.js",
-  "types": "lib/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "index.ts",
-    "lib",
-    "router-helper",
-    "state"
+    "dist"
   ],
   "scripts": {
     "check": "tsc --noEmit",
     "watch": "npm run check -- --watch",
-    "lib": "tsc --emitDeclarationOnly",
-    "build": "rollup -c",
+    "lib": "tsc",
+    "build": "rollup -c && cp -r src/* dist/",
     "start": "npm run lib && npm run build",
     "test": "jest --config jestconfig.json",
     "docs": "typedoc --excludeNotExported --out docs/ index.ts state router-helper",

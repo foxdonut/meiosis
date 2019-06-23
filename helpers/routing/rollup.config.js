@@ -6,13 +6,9 @@ const extensions = [".js", ".ts"];
 const name = "Meiosis";
 
 export default {
-  input: "./index.ts",
+  input: "./src/index.ts",
 
-  plugins: [
-    resolve({ extensions }),
-    commonjs(),
-    babel({ extensions, include: ["index.ts", "state/index.ts", "router-helper/index.ts"] })
-  ],
+  plugins: [resolve({ extensions }), commonjs(), babel({ extensions, include: ["src/**"] })],
 
   output: [
     {

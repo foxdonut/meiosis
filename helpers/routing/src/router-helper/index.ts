@@ -116,7 +116,7 @@ export interface Router {
   locationBarSync: (route: Route) => void;
   parsePath: (path: string) => Route;
   routeMap: RouteMap;
-  start: (x: any) => void;
+  start: (callback: { navigateTo: (path: string) => void }) => void;
   toPath: (route: Route) => string;
   MithrilRoutes?: any; // FIXME
 }
