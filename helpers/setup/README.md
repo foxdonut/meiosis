@@ -52,7 +52,7 @@ To use [Patchinko](https://github.com/barneycarroll/patchinko):
 
 ```javascript
 import meiosisPatchinko from "meiosis-setup/patchinko";
-import simpleStream from "meiosis-setup/simpleStream";
+import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
 // or
@@ -78,7 +78,7 @@ To use [Mergerino](https://github.com/fuzetsu/mergerino):
 
 ```javascript
 import meiosisMergerino from "meiosis-setup/mergerino";
-import simpleStream from "meiosis-setup/simpleStream";
+import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
 // or
@@ -101,7 +101,7 @@ To use
 
 ```javascript
 import meiosisFunctionPatches from "meiosis-setup/functionPatches";
-import simpleStream from "meiosis-setup/simpleStream";
+import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
 // or
@@ -121,7 +121,7 @@ To use [Immer](https://github.com/immerjs/immer):
 
 ```javascript
 import meiosisImmer from "meiosis-setup/immer";
-import simpleStream from "meiosis-setup/simpleStream";
+import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
 // or
