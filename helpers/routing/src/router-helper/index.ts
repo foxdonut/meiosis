@@ -32,7 +32,7 @@ export interface RouteConfig {
   [id: string]: any;
 }
 
-import { Route } from "../state";
+import { Route, RouteSegment } from "../state";
 
 /**
  * Function that parses a path and returns a route.
@@ -68,7 +68,7 @@ export interface RouterConfig {
   /** Function that parses a path using a router library. */
   createParsePath?: createParsePath;
 
-  queryString?: any; // FIXME
+  queryString?: any;
 
   /**
    * The function to get the path from the browser's location bar.
@@ -117,8 +117,8 @@ export interface Router {
   parsePath: (path: string) => Route;
   routeMap: RouteMap;
   start: (callback: { navigateTo: (path: string) => void }) => void;
-  toPath: (route: Route) => string;
-  MithrilRoutes?: any; // FIXME
+  toPath: (route: Route | RouteSegment) => string;
+  MithrilRoutes?: any;
 }
 
 ////////
@@ -174,10 +174,12 @@ const pick = (obj, props): object =>
     return result;
   }, {});
 
-export function convertToPath(routeConfig, routes, qsStringify?): string {
+export function convertToPath(routeConfig, routeOrRoutes, qsStringify?): string {
   let path = "";
   let lookup = routeConfig;
   let query = {};
+  const routes: Route = Array.isArray(routeOrRoutes) ? routeOrRoutes :
+    [routeOrRoutes];
 
   routes.forEach(
     (route): void => {
@@ -298,7 +300,7 @@ export function createRouter(config: RouterConfig): Router {
       }
     : (): Route => [];
 
-  const toPath = (route: Route): string =>
+  const toPath = (route: Route | RouteSegment): string =>
     prefix + convertToPath(routeConfig, route, queryString.stringify);
 
   // Function to keep the location bar in sync

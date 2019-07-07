@@ -466,6 +466,7 @@ describe("routeHelper", (): void => {
       expect(router1a.initialRoute).toEqual([Route.User({ id: "43" })]);
 
       expect(router1a.toPath([Route.User({ id: 42 })])).toEqual("#/user/42");
+      expect(router1a.toPath(Route.User({ id: 42 }))).toEqual("#/user/42");
 
       expect(router1a.parsePath("#/user/42/profile")).toEqual([
         Route.User({ id: "42" }),
