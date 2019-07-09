@@ -282,3 +282,22 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
     siblingRoute: (sibling: Route | RouteSegment): Route => route.slice(0, index).concat(sibling)
   };
 }
+
+/**
+ * Convenience function which puts the given route into an object of the form
+ * `{ route: { current: route } }`.
+ */
+export function navigateTo(route: Route | RouteSegment): any {
+  return ({ route: { current: Array.isArray(route) ? route : [route] } });;
+}
+
+export function Actions(update: (any) => void): any {
+  return ({
+    navigateTo: (route: Route | RouteSegment) => update(navigateTo(route))
+  });
+}
+
+export function accept(state: any): any {
+  return ({ route: routeTransition(state.route) });
+}
+

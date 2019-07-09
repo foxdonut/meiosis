@@ -3,12 +3,15 @@ import queryString from "query-string";
 import Mapper from "url-mapper";
 
 import {
+  accept,
   createRouteSegments,
   findRouteSegment,
   findRouteSegmentWithParams,
   diffRoute,
+  navigateTo,
   routeTransition,
   whenPresent,
+  Actions,
   Routing
 } from "../src/state";
 
@@ -286,6 +289,41 @@ describe("state", (): void => {
     });
     test("routing sibling route", (): void => {
       expect(routing.siblingRoute(Route.About())).toEqual([Route.About()]);
+    });
+  });
+
+  describe("Actions and navigateTo", (): void => {
+    test("navigateTo [route]", (): void => {
+      expect(navigateTo([Route.Home()])).toEqual({ route: { current: [Route.Home()] } });
+    });
+
+    test("navigateTo route", (): void => {
+      expect(navigateTo(Route.Login())).toEqual({ route: { current: [Route.Login()] } });
+    });
+    
+    test("Actions navigateTo", (): void => {
+      let received = null;
+
+      const update = rcvd => { received = rcvd; }
+
+      const actions = Actions(update);
+
+      actions.navigateTo([Route.Home()]);
+      expect(received).toEqual({ route: { current: [Route.Home()] } });
+
+      actions.navigateTo(Route.Login());
+      expect(received).toEqual({ route: { current: [Route.Login()] } });
+    });
+  });
+
+  describe("accept", (): void => {
+    test("route transition", (): void => {
+      expect(accept({ route: { previous: [Route.Home()], current: [Route.About()] } })).toEqual({ route: {
+        previous: [Route.About()],
+        current: [Route.About()],
+        leave: [Route.Home()],
+        arrive: [Route.About()]
+      } });
     });
   });
 });
