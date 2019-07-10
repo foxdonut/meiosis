@@ -87,6 +87,10 @@ const app = {
     navigateTo: route =&gt; update(navTo(route))
   })
 };</code></pre>
+<blockquote>
+<p>Note that for convenience, <code>meiosis-routing/state</code> provides these functions as <code>navigateTo</code> and
+<code>Actions</code>.</p>
+</blockquote>
 <h4>Creating Route Segments</h4><p>To conveniently create a route segment, we can use <code>meiosis-routing</code>&#39;s <code>createRouteSegments</code>
 function. We pass an array of strings with the ids of our route segments, and we get back an object
 with properties that match the ids.</p>
@@ -400,6 +404,9 @@ const app = {
   acceptors: [routeAccept],
   // ...
 };</code></pre>
+<blockquote>
+<p>For convenience, <code>meiosis-routing/state</code> provides this function as <code>accept</code>.</p>
+</blockquote>
 <p>Now, when we navigate from one page to another, such as from <code>Home</code> to <code>Tea</code>, we&#39;ll have this in
 the application state:</p>
 <pre><code class="language-javascript">{
