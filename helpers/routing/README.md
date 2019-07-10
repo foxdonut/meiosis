@@ -170,6 +170,7 @@ To navigate to a route, we can use a simple action that updates the state's `rou
 property:
 
 ```javascript
+// You can also import { navigateTo, Actions } from "meiosis-routing/state"
 const navigateTo = route => ({
   route: { current: route }
 });
@@ -367,6 +368,7 @@ reducer, and so on.
 As an accept function, it looks like this:
 
 ```javascript
+// You can also import { accept } from "meiosis-routing/state"
 const routeAccept = state => ({ route: routeTransition(state.route) });
 ```
 

@@ -31,16 +31,16 @@ export const Root = ({ state, actions }) => {
       <nav className="navbar navbar-default">
         <ul className="nav navbar-nav">
           <li className={isActive(Home)}>
-            <a href={router.toPath([Route.Home()])}>Home</a>
+            <a href={router.toPath(Route.Home())}>Home</a>
           </li>
           <li className={isActive(Login)}>
-            <a href={router.toPath([Route.Login()])}>Login</a>
+            <a href={router.toPath(Route.Login())}>Login</a>
           </li>
           <li className={isActive(Settings)}>
-            <a href={router.toPath([Route.Settings()])}>Settings</a>
+            <a href={router.toPath(Route.Settings())}>Settings</a>
           </li>
           <li className={isActive(Tea)}>
-            <a href={router.toPath([Route.Tea()])}>Tea</a>
+            <a href={router.toPath(Route.Tea())}>Tea</a>
           </li>
           <li className={isActive(Coffee)}>
             <a href={router.toPath([Route.Coffee(), Route.Beverages()])}>Coffee</a>

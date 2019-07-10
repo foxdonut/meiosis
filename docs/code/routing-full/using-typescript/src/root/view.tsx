@@ -22,10 +22,10 @@ export const Root = ({ state, actions }) => {
       <nav className="navbar navbar-default">
         <ul className="nav navbar-nav">
           <li className={isActive(Home)}>
-            <a href={router.toPath([Route.Home()])}>Home</a>
+            <a href={router.toPath(Route.Home())}>Home</a>
           </li>
           <li className={isActive(Tea)}>
-            <a href={router.toPath([Route.Tea()])}>Tea</a>
+            <a href={router.toPath(Route.Tea())}>Tea</a>
           </li>
         </ul>
       </nav>

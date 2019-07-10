@@ -291,12 +291,19 @@ export function navigateTo(route: Route | RouteSegment): any {
   return ({ route: { current: Array.isArray(route) ? route : [route] } });;
 }
 
+/**
+ * Convenience function which creates a `navigateTo` action.
+ */
 export function Actions(update: (any) => void): any {
   return ({
     navigateTo: (route: Route | RouteSegment) => update(navigateTo(route))
   });
 }
 
+/**
+ * Convenience function which returns a patch of the form
+ * `{ route: routeTransition(state.route) })`.
+ */
 export function accept(state: any): any {
   return ({ route: routeTransition(state.route) });
 }

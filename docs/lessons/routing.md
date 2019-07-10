@@ -88,6 +88,9 @@ const app = {
 };
 ```
 
+> Note that for convenience, `meiosis-routing/state` provides these functions as `navigateTo` and
+`Actions`.
+
 #### Creating Route Segments
 
 To conveniently create a route segment, we can use `meiosis-routing`'s `createRouteSegments`
@@ -501,6 +504,8 @@ const app = {
   // ...
 };
 ```
+
+> For convenience, `meiosis-routing/state` provides this function as `accept`.
 
 Now, when we navigate from one page to another, such as from `Home` to `Tea`, we'll have this in
 the application state:

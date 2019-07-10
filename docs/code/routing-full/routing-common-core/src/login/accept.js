@@ -13,6 +13,6 @@ export const accept = state => {
     (state.login.username || state.login.password) &&
     !confirm("You have unsaved data. Continue?")
   ) {
-    return navigateTo([previousLogin]);
+    return navigateTo(previousLogin);
   }
 };

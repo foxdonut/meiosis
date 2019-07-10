@@ -29,22 +29,22 @@ export const Root = ({ state, actions }) => {
       <nav className="navbar navbar-default">
         <ul className="nav navbar-nav">
           <li className={isActive(Home)}>
-            <a href="javascript://" onClick={() => actions.navigateTo([Route.Home()])}>
+            <a href="javascript://" onClick={() => actions.navigateTo(Route.Home())}>
               Home
             </a>
           </li>
           <li className={isActive(Login)}>
-            <a href="javascript://" onClick={() => actions.navigateTo([Route.Login()])}>
+            <a href="javascript://" onClick={() => actions.navigateTo(Route.Login())}>
               Login
             </a>
           </li>
           <li className={isActive(Settings)}>
-            <a href="javascript://" onClick={() => actions.navigateTo([Route.Settings()])}>
+            <a href="javascript://" onClick={() => actions.navigateTo(Route.Settings())}>
               Settings
             </a>
           </li>
           <li className={isActive(Tea)}>
-            <a href="javascript://" onClick={() => actions.navigateTo([Route.Tea()])}>
+            <a href="javascript://" onClick={() => actions.navigateTo(Route.Tea())}>
               Tea
             </a>
           </li>

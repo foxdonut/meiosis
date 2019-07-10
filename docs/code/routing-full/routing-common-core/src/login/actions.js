@@ -5,5 +5,5 @@ export const Actions = update => ({
   password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
-    update([{ user: username }, navigateTo([returnTo || Route.Home()])])
+    update([{ user: username }, navigateTo(returnTo || Route.Home())])
 });

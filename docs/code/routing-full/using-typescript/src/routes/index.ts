@@ -1,8 +1,7 @@
-import { createRouteSegments } from "meiosis-routing/state";
+import { Actions, accept, createRouteSegments } from "meiosis-routing/state";
 import { RouteConfig } from "meiosis-routing/router-helper";
 
-import { Actions } from "./actions";
-import { accept } from "./accept";
+export { navigateTo } from "meiosis-routing/state";
 
 export const Route = createRouteSegments(["Home", "Tea", "TeaDetails"]);
 
@@ -19,8 +18,6 @@ export const routeConfig: RouteConfig = {
   Coffee: ["/coffee", beverageRoutes],
   Beer: ["/beer?type&country", beverageRoutes]
 };
-
-export { navigateTo } from "./actions";
 
 export const routes = {
   Actions,
