@@ -148,7 +148,7 @@ export function findQueryParams(path: string): string[] {
 
 export function setParams(path: string, params: Record<string, any>): string {
   return findPathParams(path).reduce((result, pathParam): string => {
-    const value = params[pathParam] || "";
+    const value = encodeURI(params[pathParam] || "");
     const key = ":" + pathParam;
     const idx = result.indexOf(key);
     return result.substring(0, idx) + value + result.substring(idx + key.length);
@@ -355,7 +355,13 @@ export function createFeatherRouter(config: RouterConfig): Router {
       const match = routeMatcher(path);
 
       if (match) {
-        return match.page(Object.assign({}, match.params, queryParams));
+        const params = Object.keys(match.params || {}).reduce(
+          (result: any, key: string): any => {
+            result[key] = decodeURI(match.params[key]);
+            return result;
+          }, {});
+
+        return match.page(Object.assign({}, params, queryParams));
       } else {
         return defaultRoute;
       }

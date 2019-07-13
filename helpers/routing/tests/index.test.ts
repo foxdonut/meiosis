@@ -384,6 +384,12 @@ describe("routeHelper", (): void => {
       );
     });
 
+    test("setParams encoded", (): void => {
+      expect(setParams("/profile/:username", { username: "Fox Donut" })).toEqual(
+        "/profile/Fox%20Donut"
+      );
+    });
+
     test("setParams with queryString", (): void => {
       expect(setParams("/search/:id?page", { id: 42, page: 2 })).toEqual("/search/42");
     });
@@ -511,6 +517,12 @@ describe("routeHelper", (): void => {
         Route.Profile({})
       ]);
 
+      expect(router1a.toPath(Route.User({ id: "Fox Donut" }))).toEqual("#/user/Fox%20Donut");
+
+      expect(router1a.parsePath("#/user/Fox%20Donut")).toEqual([
+        Route.User({ id: "Fox Donut" })
+      ]);
+
       router1a.locationBarSync([Route.About()]);
       router1a.start({ navigateTo: (): void => {} });
     });
@@ -552,6 +564,10 @@ describe("routeHelper", (): void => {
       expect(router3.parsePath("#/beverage/42/brewer")).toEqual([
         Route.Beverage({ id: "42" }),
         Route.Brewer({ id: "42" })
+      ]);
+
+      expect(router3.parsePath("#/beverage/Lager%20Or%20Ale")).toEqual([
+        Route.Beverage({ id: "Lager Or Ale" })
       ]);
     });
   });
