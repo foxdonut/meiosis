@@ -50,7 +50,7 @@ Using a `script` tag:
 <script src="https://unpkg.com/meiosis-routing"></script>
 ```
 
-Using the `script` tag exposes a `Meiosis` global, under which the helper functions are
+Using the `script` tag exposes a `MeiosisRouting` global, under which the helper functions are
 provided:
 
 - `state.*`
