@@ -1,8 +1,11 @@
+/* global MeiosisRouting */
+
 import { DEL } from "mergerino@0.2.0";
-import {
+
+const {
   findRouteSegment,
   whenPresent
-} from "meiosis-routing/state";
+} = MeiosisRouting.state;
 
 const teas = [
   {

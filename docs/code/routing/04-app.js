@@ -1,10 +1,11 @@
 /** @jsx preact.h */
+/* global Meiosis, MeiosisRouting */
 import preact from "preact@8.4.2/dist/preact.mjs";
 import merge from "mergerino@0.2.0";
-import meiosis from "meiosis-setup";
-import { Routing } from "meiosis-routing/state";
 
 import { Route, navTo } from "./04-routes";
+
+const { Routing } = MeiosisRouting.state;
 
 import {
   Home,
@@ -149,7 +150,7 @@ const Root = ({ state, actions }) => {
   );
 };
 
-const App = meiosis.preact.setup({ preact, Root });
+const App = Meiosis.preact.setup({ preact, Root });
 
 const app = {
   Initial: () => navTo([Route.Home()]),
@@ -167,8 +168,8 @@ const app = {
   ]
 };
 
-meiosis.mergerino
-  .setup({ stream: meiosis.simpleStream, merge, app })
+Meiosis.mergerino
+  .setup({ stream: Meiosis.simpleStream, merge, app })
   .then(({ states, actions }) => {
     // eslint-disable-next-line react/no-deprecated
     preact.render(

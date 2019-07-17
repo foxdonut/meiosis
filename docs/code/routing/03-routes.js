@@ -1,4 +1,6 @@
-import { createRouteSegments } from "meiosis-routing/state";
+/* global MeiosisRouting */
+
+const { createRouteSegments } = MeiosisRouting.state;
 
 export const Route = createRouteSegments([
   "Home",
