@@ -3,7 +3,7 @@ import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
 
 const extensions = [".js", ".ts"];
-const name = "Meiosis";
+const name = "MeiosisRouting";
 
 export default {
   input: "./src/index.ts",
