@@ -101,7 +101,7 @@
 				<h2 id="installation">Installation</h2>
 				<p>Using <code>npm</code>:</p>
 				<pre><code>npm <span class="hljs-selector-tag">i</span> meiosis-routing</code></pre><p>Using a <code>script</code> tag:</p>
-				<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/meiosis-routing"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre><p>Using the <code>script</code> tag exposes a <code>Meiosis</code> global, under which the helper functions are
+				<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/meiosis-routing"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre><p>Using the <code>script</code> tag exposes a <code>MeiosisRouting</code> global, under which the helper functions are
 				provided:</p>
 				<ul>
 					<li><code>state.*</code></li>
@@ -196,7 +196,8 @@ Route.Home()
 };</span></code></pre>
 				<p>To navigate to a route, we can use a simple action that updates the state&#39;s <code>route.current</code>
 				property:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> navigateTo = <span class="hljs-function"><span class="hljs-params">route</span> =&gt;</span> ({
+				<pre><code class="language-javascript"><span class="hljs-comment">// You can also import { navigateTo, Actions } from "meiosis-routing/state"</span>
+<span class="hljs-keyword">const</span> navigateTo = <span class="hljs-function"><span class="hljs-params">route</span> =&gt;</span> ({
   <span class="hljs-attr">route</span>: { <span class="hljs-attr">current</span>: route }
 });
 
@@ -353,7 +354,8 @@ Route.Home()
 					<a href="http://meiosis.js.org/docs/services.html#using_accepted_and_services">accept function</a>, in a Redux
 				reducer, and so on.</p>
 				<p>As an accept function, it looks like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> routeAccept = <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({ <span class="hljs-attr">route</span>: routeTransition(state.route) });</code></pre>
+				<pre><code class="language-javascript"><span class="hljs-comment">// You can also import { accept } from "meiosis-routing/state"</span>
+<span class="hljs-keyword">const</span> routeAccept = <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({ <span class="hljs-attr">route</span>: routeTransition(state.route) });</code></pre>
 				<p>With this, <code>state.route</code> will contain <code>leave</code> and <code>arrive</code> properties with the routes that we left
 					and arrived to. We can then use the convenience functions that <code>meiosis-routing</code> provides,
 					<code>findRouteSegment</code> and <code>whenPresent</code>, to perform any actions we want when leaving from or arriving
