@@ -12,6 +12,10 @@ var linkMap = {
   lodash: "https://unpkg.com/lodash@4.17.10",
   "lodash-fp":
     "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
+  "meiosis-routing":
+    "https://unpkg.com/meiosis-routing@1.7.0/meiosis-routing.js",
+  "meiosis-setup":
+    "https://unpkg.com/meiosis-setup@2.0.0/dist/meiosis-setup.js",
   "meiosis-tracer":
     "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
   mithril: "https://unpkg.com/mithril@2.0.0-rc.3",

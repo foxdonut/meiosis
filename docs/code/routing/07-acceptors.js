@@ -1,7 +1,8 @@
-import {
+/* global MeiosisRouting */
+const {
   findRouteSegment,
   routeTransition
-} from "meiosis-routing/state";
+} = MeiosisRouting.state;
 
 import { Route, navTo } from "./07-routes";
 

@@ -1,11 +1,12 @@
 /** @jsx m */
+/* global Meiosis, MeiosisRouting */
 import m from "mithril@2.0.0-rc.4";
 import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
 import merge from "mergerino@0.2.0";
-import meiosis from "meiosis-setup";
-import { Routing } from "meiosis-routing/state";
 
 import { Route, navTo, router } from "./07-routes";
+
+const { Routing } = MeiosisRouting.state;
 
 import {
   Home,
@@ -167,7 +168,7 @@ const app = {
   ]
 };
 
-meiosis.mergerino
+Meiosis.mergerino
   .setup({ stream: Stream, merge, app })
   .then(({ states, actions }) => {
     m.route(

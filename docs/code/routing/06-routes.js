@@ -1,5 +1,8 @@
-import { createRouteSegments } from "meiosis-routing/state";
-import { createFeatherRouter } from "meiosis-routing/router-helper";
+/* global MeiosisRouting */
+
+const { createRouteSegments } = MeiosisRouting.state;
+const { createFeatherRouter } = MeiosisRouting.routerHelper;
+
 import createRouteMatcher from "https://meiosis.js.org/lib/feather-route-matcher.js";
 import queryString from "https://meiosis.js.org/lib/query-string.js";
 

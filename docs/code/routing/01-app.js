@@ -1,7 +1,7 @@
 /** @jsx preact.h */
+/* global Meiosis */
 import preact from "preact@8.4.2/dist/preact.mjs";
-import merge from "mergerino@0.2.0";
-import meiosis from "meiosis-setup";
+import merge from "mergerino@0.2.1";
 
 import { Home } from "./01-components";
 
@@ -39,11 +39,11 @@ const Root = ({ state, actions }) => (
   </div>
 );
 
-const App = meiosis.preact.setup({ preact, Root });
+const App = Meiosis.preact.setup({ preact, Root });
 const app = {};
 
-meiosis.mergerino
-  .setup({ stream: meiosis.simpleStream, merge, app })
+Meiosis.mergerino
+  .setup({ stream: Meiosis.simpleStream, merge, app })
   .then(({ states, actions }) => {
     // eslint-disable-next-line react/no-deprecated
     preact.render(

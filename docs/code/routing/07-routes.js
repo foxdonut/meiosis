@@ -1,6 +1,8 @@
+/* global MeiosisRouting */
 import m from "mithril@2.0.0-rc.4";
-import { createRouteSegments } from "meiosis-routing/state";
-import { createMithrilRouter } from "meiosis-routing/router-helper";
+
+const { createRouteSegments } = MeiosisRouting.state;
+const { createMithrilRouter } = MeiosisRouting.routerHelper;
 
 export const Route = createRouteSegments([
   "Home",
