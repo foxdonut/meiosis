@@ -68,6 +68,9 @@ export interface RoutingObject {
 
   /** returns the [[Route]] for the current route plus the given sibling route. */
   siblingRoute: (sibling: Route | RouteSegment) => Route;
+
+  /** returns the same route with the given params. */
+  sameRoute: (params: Record<string, any>) => Route;
 }
 
 ////////
@@ -279,7 +282,12 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
     next: (): RoutingObject => Routing(route, index + 1),
     parentRoute: (): Route => route.slice(0, index),
     childRoute: (child: Route | RouteSegment): Route => route.slice(0, index + 1).concat(child),
-    siblingRoute: (sibling: Route | RouteSegment): Route => route.slice(0, index).concat(sibling)
+    siblingRoute: (sibling: Route | RouteSegment): Route => route.slice(0, index).concat(sibling),
+    sameRoute: (params: Record<string, any>): Route =>
+      route
+        .slice(0, index)
+        .concat({ id: route[index].id, params })
+        .concat(route.slice(index + 1))
   };
 }
 
@@ -288,16 +296,16 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
  * `{ route: { current: route } }`.
  */
 export function navigateTo(route: Route | RouteSegment): any {
-  return ({ route: { current: Array.isArray(route) ? route : [route] } });;
+  return { route: { current: Array.isArray(route) ? route : [route] } };
 }
 
 /**
  * Convenience function which creates a `navigateTo` action.
  */
 export function Actions(update: (any) => void): any {
-  return ({
+  return {
     navigateTo: (route: Route | RouteSegment) => update(navigateTo(route))
-  });
+  };
 }
 
 /**
@@ -305,6 +313,5 @@ export function Actions(update: (any) => void): any {
  * `{ route: routeTransition(state.route) })`.
  */
 export function accept(state: any): any {
-  return ({ route: routeTransition(state.route) });
+  return { route: routeTransition(state.route) };
 }
-

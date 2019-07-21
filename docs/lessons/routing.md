@@ -13,7 +13,7 @@ The goals of Meiosis Routing are:
 - Simple route configuration
 - No hardcoded paths in links
 - Parent and child routes, and reusable child routes
-- Relative navigation: navigate to a parent, sibling, or child route
+- Relative navigation: navigate to a parent, sibling, same, or child route
 - Redirect to a route after an action
 - Authenticate / authorize before going to a route
 - Load data (synchronously or asynchronously) when arriving at a route
@@ -279,6 +279,7 @@ Moreover, the route array opens up the possibility to navigate to:
 - a parent route
 - a sibling route
 - a child route
+- the same route with different parameters
 
 without having to mess with paths.
 
@@ -301,8 +302,9 @@ Now we have a `routing` instance with these helper properties and methods:
 - `routing.next()` - creates a `routing` instance, changing to the next route in the array.
 - `routing.parentRoute()` - returns the route array for the parent route.
 - `routing.siblingRoute(route)` - returns the route array for a route with the last child
-replaced with the passed in route, which can be a single segment or an array of segments
+replaced with the passed in route, which can be a single segment or an array of segments.
 - `routing.childRoute(route)` - same as `siblingRoute`, but without removing the last child.
+- `routing.sameRoute(params)` - same route but with different parameters
 
 In the Root component we use the `routing` instance to get the component for the local route
 segment. We also pass `routing` down to the component:
@@ -321,7 +323,7 @@ const Root = ({ state, actions }) => {
 ```
 
 Each component can use `routing` to get information about its route segment and the route segment of
-its child, as well as to get a parent, sibling, or child route.
+its child, as well as to get a parent, sibling, same, or child route.
 
 On the Tea page, we display the list of teas. If the user clicks on an item in the list, we also
 display the description of that item. Thus the `routing` for the Tea page either has a

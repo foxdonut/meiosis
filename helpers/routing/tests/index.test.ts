@@ -264,18 +264,18 @@ describe("state", (): void => {
     const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
     const next = routing.next();
 
+    test("routing child route", (): void => {
+      expect(routing.childRoute(Route.User({ id: 43 }))).toEqual([
+        Route.Home(),
+        Route.User({ id: 43 })
+      ]);
+    });
+
     test("next child route", (): void => {
       expect(next.childRoute(Route.Profile())).toEqual([
         Route.Home(),
         Route.User({ id: 42 }),
         Route.Profile()
-      ]);
-    });
-
-    test("routing child route", (): void => {
-      expect(routing.childRoute(Route.User({ id: 43 }))).toEqual([
-        Route.Home(),
-        Route.User({ id: 43 })
       ]);
     });
   });
@@ -284,11 +284,54 @@ describe("state", (): void => {
     const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
     const next = routing.next();
 
+    test("routing sibling route", (): void => {
+      expect(routing.siblingRoute(Route.About())).toEqual([Route.About()]);
+    });
     test("next sibling route", (): void => {
       expect(next.siblingRoute(Route.About())).toEqual([Route.Home(), Route.About()]);
     });
-    test("routing sibling route", (): void => {
-      expect(routing.siblingRoute(Route.About())).toEqual([Route.About()]);
+  });
+
+  describe("sameRoute one", (): void => {
+    const routing = Routing([Route.Home()]);
+
+    test("routing same route", (): void => {
+      expect(routing.sameRoute({ id: 43 })).toEqual([Route.Home({ id: 43 })]);
+    });
+  });
+
+  describe("sameRoute two", (): void => {
+    const routing = Routing([Route.Home(), Route.User({ id: 42 })]);
+    const next = routing.next();
+
+    test("routing same route", (): void => {
+      expect(routing.sameRoute({ id: 43 })).toEqual([
+        Route.Home({ id: 43 }),
+        Route.User({ id: 42 })
+      ]);
+    });
+    test("next same route", (): void => {
+      expect(next.sameRoute({ id: 43 })).toEqual([Route.Home(), Route.User({ id: 43 })]);
+    });
+  });
+
+  describe("sameRoute three", (): void => {
+    const routing = Routing([Route.Home(), Route.User({ id: 42 }), Route.Profile()]);
+    const next = routing.next();
+
+    test("routing same route", (): void => {
+      expect(routing.sameRoute({ id: 43 })).toEqual([
+        Route.Home({ id: 43 }),
+        Route.User({ id: 42 }),
+        Route.Profile()
+      ]);
+    });
+    test("next same route", (): void => {
+      expect(next.sameRoute({ id: 43 })).toEqual([
+        Route.Home(),
+        Route.User({ id: 43 }),
+        Route.Profile()
+      ]);
     });
   });
 
@@ -300,11 +343,13 @@ describe("state", (): void => {
     test("navigateTo route", (): void => {
       expect(navigateTo(Route.Login())).toEqual({ route: { current: [Route.Login()] } });
     });
-    
+
     test("Actions navigateTo", (): void => {
       let received = null;
 
-      const update = rcvd => { received = rcvd; }
+      const update = rcvd => {
+        received = rcvd;
+      };
 
       const actions = Actions(update);
 
@@ -318,12 +363,14 @@ describe("state", (): void => {
 
   describe("accept", (): void => {
     test("route transition", (): void => {
-      expect(accept({ route: { previous: [Route.Home()], current: [Route.About()] } })).toEqual({ route: {
-        previous: [Route.About()],
-        current: [Route.About()],
-        leave: [Route.Home()],
-        arrive: [Route.About()]
-      } });
+      expect(accept({ route: { previous: [Route.Home()], current: [Route.About()] } })).toEqual({
+        route: {
+          previous: [Route.About()],
+          current: [Route.About()],
+          leave: [Route.Home()],
+          arrive: [Route.About()]
+        }
+      });
     });
   });
 });
@@ -519,9 +566,7 @@ describe("routeHelper", (): void => {
 
       expect(router1a.toPath(Route.User({ id: "Fox Donut" }))).toEqual("#/user/Fox%20Donut");
 
-      expect(router1a.parsePath("#/user/Fox%20Donut")).toEqual([
-        Route.User({ id: "Fox Donut" })
-      ]);
+      expect(router1a.parsePath("#/user/Fox%20Donut")).toEqual([Route.User({ id: "Fox Donut" })]);
 
       router1a.locationBarSync([Route.About()]);
       router1a.start({ navigateTo: (): void => {} });

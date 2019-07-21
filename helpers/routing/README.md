@@ -23,6 +23,7 @@ following benefits:
 - No hardcoded paths in links
 - Parent and child routes, and reusable child routes
 - Relative navigation: navigate to a parent, sibling, or child route
+- Navigate to the same route but with different parameters
 - Redirect to a route after an action
 - Authenticate / authorize before going to a route
 - Load data (synchronously or asynchronously) when arriving at a route
@@ -73,7 +74,7 @@ Meiosis Routing is based on the idea of _route segments_, which are plain object
 
 Using an array of route segments opens up some nice possibilities:
 
-- Navigating to parent, sibling, or child route
+- Navigating to same, parent, sibling, or child route
 - Creating reusable child routes
 - Managing pages and transitions independently of route paths
 
@@ -112,12 +113,13 @@ We'll store the current route in the application state, under `route.current`:
 Next, from our top-level component, we'll create an instance of `Routing`, passing in the current
 route. The `routing` instance we get has these properties and functions:
 
-- `localSegment: Route`
-- `childSegment: Route`
+- `localSegment: RouteSegment`
+- `childSegment: RouteSegment`
 - `next(): routing`
-- `parentRoute(): route`
-- `childRoute(route): route`
-- `siblingRoute(route): route`
+- `parentRoute(): Route`
+- `childRoute(route): Route`
+- `siblingRoute(route): Route`
+- `sameRoute(params): Route`
 
 We can now render the top-level component according to the `localSegment` id. We can use a simple
 `string`&rarr;`Component` map to look up the corresponding component:
@@ -189,7 +191,7 @@ const actions = Actions(update);
 </a>
 ```
 
-We can also navigate to a parent route, child route, and sibling route:
+We can also navigate to a parent route, child route, sibling route, and same route:
 
 ```jsx
 // Say we are in [Route.User({ name }), Route.Profile()].
@@ -212,6 +214,14 @@ We can also navigate to a parent route, child route, and sibling route:
 // This navigates to [Route.User({ name }), Route.Preferences({ name })]
 <a href="#" onClick={() => actions.navigateTo(
   routing.siblingRoute(Route.Preferences({ name }))
+)}>
+  Preferences
+</a>
+
+// Say we are in [Route.User({ name: "name1" })].
+// This navigates to [Route.User({ name: "name2" })]
+<a href="#" onClick={() => actions.navigateTo(
+  routing.sameRoute({ name: "name2" }))
 )}>
   Preferences
 </a>
@@ -312,6 +322,12 @@ links. Instead, we can use `router.toPath()` in `href`:
 // since it is a parameter that is inherited from the parent route segment.
 <a href={router.toPath(routing.siblingRoute(Route.Preferences()))}>
   Preferences
+</a>
+
+// Say we are in [Route.User({ name: "name1" })].
+// This navigates to [Route.User({ name: "name2" })]
+<a href={router.toPath(routing.sameRoute({ name: "name2" }))}>
+  Profile
 </a>
 ```
 
