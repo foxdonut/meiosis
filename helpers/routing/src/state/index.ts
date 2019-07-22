@@ -304,7 +304,7 @@ export function navigateTo(route: Route | RouteSegment): any {
  */
 export function Actions(update: (any) => void): any {
   return {
-    navigateTo: (route: Route | RouteSegment) => update(navigateTo(route))
+    navigateTo: (route: Route | RouteSegment): void => update(navigateTo(route))
   };
 }
 

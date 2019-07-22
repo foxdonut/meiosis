@@ -347,7 +347,7 @@ describe("state", (): void => {
     test("Actions navigateTo", (): void => {
       let received = null;
 
-      const update = rcvd => {
+      const update = (rcvd: any): void => {
         received = rcvd;
       };
 

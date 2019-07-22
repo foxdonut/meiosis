@@ -178,19 +178,16 @@ export function convertToPath(routeConfig, routeOrRoutes, qsStringify?): string 
   let path = "";
   let lookup = routeConfig;
   let query = {};
-  const routes: Route = Array.isArray(routeOrRoutes) ? routeOrRoutes :
-    [routeOrRoutes];
+  const routes: Route = Array.isArray(routeOrRoutes) ? routeOrRoutes : [routeOrRoutes];
 
-  routes.forEach(
-    (route): void => {
-      const [configPath, _parentParams, children] = getConfig(lookup[route.id]);
-      path += setParams(configPath, route.params);
-      lookup = children;
+  routes.forEach((route): void => {
+    const [configPath, _parentParams, children] = getConfig(lookup[route.id]);
+    path += setParams(configPath, route.params);
+    lookup = children;
 
-      const queryParams = findQueryParams(configPath);
-      query = Object.assign(query, pick(route.params, queryParams));
-    }
-  );
+    const queryParams = findQueryParams(configPath);
+    query = Object.assign(query, pick(route.params, queryParams));
+  });
 
   if (Object.keys(query).length > 0 && typeof qsStringify === "function") {
     path += "?" + qsStringify(query);
@@ -355,11 +352,10 @@ export function createFeatherRouter(config: RouterConfig): Router {
       const match = routeMatcher(path);
 
       if (match) {
-        const params = Object.keys(match.params || {}).reduce(
-          (result: any, key: string): any => {
-            result[key] = decodeURI(match.params[key]);
-            return result;
-          }, {});
+        const params = Object.keys(match.params || {}).reduce((result: any, key: string): any => {
+          result[key] = decodeURI(match.params[key]);
+          return result;
+        }, {});
 
         return match.page(Object.assign({}, params, queryParams));
       } else {
