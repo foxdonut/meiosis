@@ -29,7 +29,7 @@
     "@types/react": "^16.8.22",
     "@types/react-dom": "^16.8.4",
     "feather-route-matcher": "^3.1.0",
-    "meiosis-routing": "^1.7.0",
+    "meiosis-routing": "^1.8.0",
     "meiosis-setup": "^2.0.0",
     "mergerino": "0.2.1",
     "query-string": "^6.8.0",
