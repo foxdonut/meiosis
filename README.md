@@ -74,11 +74,6 @@ I am very grateful to Christian! I also find Christian's other projects very int
 (but not limited to) [Cerebral](http://cerebraljs.com) and
 [function-tree](https://github.com/cerebral/cerebral/tree/master/packages/function-tree#readme).
 
-- The [SAM pattern](http://sam.js.org/) by
-[Jean-Jacques Dubray](http://www.ebpml.org/about). There are some very sound principles to the SAM
-pattern, and I very much appreciate discussing and learning from Jean-Jacques as he is always gracious
-and willing to share his knowledge and experience.
-
 - [Simon Friis Vindum](https://twitter.com/paldepind), creator of
 [Flyd](https://github.com/paldepind/flyd),
 [Snabbdom](https://github.com/snabbdom/snabbdom), and others. I use Flyd as a stream library for Meiosis.

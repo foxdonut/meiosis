@@ -143,10 +143,6 @@ have either one (or both) of these:
 - an `accept` function
 - a `service` function
 
-> The term `accept` comes from the [SAM Pattern](https://sam.js.org), which we will look at in
-[the SAM Pattern section](sam-pattern.html). In Meiosis, `accept` is similar but not identical to
-`accept` in SAM.
-
 An `accept` function gets the current state as a parameter and returns a patch to make any necessary
 changes and updates to the state. Then, all accept functions are combined together to produce a
 single `accept` function that receives the current state and produces the accepted state.

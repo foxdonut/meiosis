@@ -1,0 +1,25 @@
+{
+  "name": "meiosis",
+  "version": "2.0.0",
+  "description": "meiosis pattern",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "meiosis",
+    "pattern",
+    "reactive",
+    "react",
+    "state",
+    "state management",
+    "stream",
+    "virtual dom"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme"
+}

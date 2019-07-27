@@ -4,8 +4,8 @@
 
 ## Optimizing Services
 
-Services, which we used in [Services and Accepted State](services.html) as well as in the
-[SAM Pattern](sam-pattern.html), are working fine, but could be improved:
+Services, which we used in [Services and Accepted State](services.html), are working fine, but
+could be improved:
 
 - Every time a service calls `update`, itself and all other services are triggered again;
 - State changes are emitted for every call to `update`, refreshing the view each time;
