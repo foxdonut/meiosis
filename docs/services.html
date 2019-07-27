@@ -124,11 +124,6 @@ have either one (or both) of these:</p>
 <li>an <code>accept</code> function</li>
 <li>a <code>service</code> function</li>
 </ul>
-<blockquote>
-<p>The term <code>accept</code> comes from the <a href="https://sam.js.org">SAM Pattern</a>, which we will look at in
-<a href="sam-pattern.html">the SAM Pattern section</a>. In Meiosis, <code>accept</code> is similar but not identical to
-<code>accept</code> in SAM.</p>
-</blockquote>
 <p>An <code>accept</code> function gets the current state as a parameter and returns a patch to make any necessary
 changes and updates to the state. Then, all accept functions are combined together to produce a
 single <code>accept</code> function that receives the current state and produces the accepted state.</p>
