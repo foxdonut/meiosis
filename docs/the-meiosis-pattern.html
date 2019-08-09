@@ -26,12 +26,13 @@ for your convenience.</p>
 <li>Separate state management code from view code.</li>
 <li>Start with an initial state.</li>
 <li>Create an <code>update</code> stream of <strong>patches</strong>.</li>
-<li>Patches can be <a href="http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html">Patchinko</a>
-patches, <a href="http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html">Function Patches</a>,
+<li>Patches can be
+<a href="https://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html">Mergerino</a> patches,
+<a href="https://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html">Function Patches</a>,
 or your own patches.</li>
 <li>Create an <code>actions</code> object of functions that issue patches onto the <code>update</code> stream.</li>
-<li>Create a <code>states</code> stream by using <code>scan</code> on the <code>update</code> stream with the initial state and <code>P</code> for
-Patchinko or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
+<li>Create a <code>states</code> stream by using <code>scan</code> on the <code>update</code> stream with the initial state, and
+<code>merge</code> for Mergerino, or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
 <li>Pass <code>state</code> and <code>actions</code> to views (see below for details.)</li>
 </ul>
 <p>Here is the code to set up the Meiosis Pattern:</p>
@@ -44,8 +45,8 @@ Patchinko or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
 
 const update = flyd.stream();
 
-// Using Patchinko:
-const states = flyd.scan(P, app.Initial(), update);
+// Using Mergerino:
+const states = flyd.scan(merge, app.Initial(), update);
 
 // Using Function Patches:
 const states = flyd.scan((x, f) =&gt; f(x), app.Initial(), update);
@@ -53,16 +54,16 @@ const states = flyd.scan((x, f) =&gt; f(x), app.Initial(), update);
 const actions = app.Actions(update);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
 <p>Optionally, add <a href="services.html">Services and Accepted State</a>:</p>
-<pre><code class="language-javascript">// Using Patchinko:
+<pre><code class="language-javascript">// Using Mergerino:
 const accept = state =&gt;
   acceptors.reduce(
     (updatedState, acceptor) =&gt;
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
 const states = m.stream.scan(
-  (state, patch) =&gt; accept(O(state, patch)),
+  (state, patch) =&gt; accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );
@@ -171,12 +172,12 @@ states.map(state =&gt; render(App(state, actions), element));</code></pre>
 pass an <code>id</code> along with <code>state</code> and <code>actions</code> to views. Use <code>state[id]</code> to read the component&#39;s
 state, pass the <code>id</code> to <code>actions</code>, and use the <code>id</code> in actions to issue patches that update the
 corresponding state property.</p>
-<p>See the <a href="http://meiosis.js.org/tutorial/06-components.html">Components</a> section of the Meiosis
+<p>See the <a href="https://meiosis.js.org/tutorial/06-components.html">Components</a> section of the Meiosis
 Tutorial for a complete explanation.</p>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>
 <p><a href="https://meiosis.js.org">Meiosis</a> is developed by
-<a href="http://twitter.com/foxdonut00">@foxdonut00</a> /
+<a href="https://twitter.com/foxdonut00">@foxdonut00</a> /
 <a href="https://github.com/foxdonut">foxdonut</a>
 and is released under the MIT license.</p>
   </body>

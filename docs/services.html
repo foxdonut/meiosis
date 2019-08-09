@@ -15,8 +15,8 @@
 <h2>Services and Accepted State</h2><p><a href="https://james-forbes.com">James Forbes</a> shared his idea of <em>Services</em>. In this section, we&#39;ll look
 at James&#39; version using streams, and another version using a separate accepted state function and a
 service trigger. For the latter, we&#39;ll use two variants, one with
-<a href="https://barneycarroll.com">Barney Carroll</a>&#39;s
-<a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, and one with function patches.</p>
+<a href="https://github.com/fuzetsu">Daniel Loomer</a>&#39;s
+<a href="https://github.com/fuzetsu/mergerino">Mergerino</a>, and one with function patches.</p>
 <p>James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
 retrieve state from local storage, and trigger other actions.</p>
@@ -139,10 +139,10 @@ well.</p>
   accept: state =&gt; patch,
   service: ({ state, update }) =&gt; { /* call update() based on state */ }
 }</code></pre>
-<h4>With Patchinko</h4><p>In this section, we&#39;ll use <a href="https://github.com/barneycarroll/patchinko">Patchinko</a>, which we looked
-at in the <a href="http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html">tutorial</a>.</p>
-<p>To use Patchinko, we emit patches as objects and we use <code>O</code> as our accumulator:</p>
-<pre><code class="language-javascript">const states = m.stream.scan(O, Initial(), update);</code></pre>
+<h4>With Mergerino</h4><p>In this section, we&#39;ll use <a href="https://github.com/fuzetsu/mergerino">Mergerino</a>, which we looked at in
+the <a href="http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html">tutorial</a>.</p>
+<p>To use Mergerino, we emit patches as objects and we use <code>merge</code> as our accumulator:</p>
+<pre><code class="language-javascript">const states = m.stream.scan(merge, Initial(), update);</code></pre>
 <p>Remember that previously, we had a stats service and a description service:</p>
 <ul>
 <li><code>StatsService</code>: produces an object that indicates how many boxes of each color.</li>
@@ -175,20 +175,20 @@ const description = {
 <p>Each accept function takes the state and returns a patch. Let&#39;s assemble the functions into a
 top-level <code>accept</code> function that takes the state and returns the updated state. We can use <code>reduce</code>
 on the array of <code>accept</code> functions, calling each function and applying the patch on the state with
-<code>O</code>:</p>
+<code>merge</code>:</p>
 <pre><code class="language-javascript">const acceptors = [stats.accept, description.accept];
 
 const accept = state =&gt;
   acceptors.reduce(
     (updatedState, acceptor) =&gt;
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );</code></pre>
 <p>This gives us a single top-level <code>accept</code> function that takes the state, calls all acceptor
-functions, and produces the updated state. We call <code>accept</code> after calling <code>O</code> in the accumulator
+functions, and produces the updated state. We call <code>accept</code> after calling <code>merge</code> in the accumulator
 function of <code>scan</code>. Note that we also call <code>accept</code> on the initial state:</p>
 <pre><code class="language-javascript">const states = m.stream.scan(
-  (state, patch) =&gt; accept(O(state, patch)),
+  (state, patch) =&gt; accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );</code></pre>
@@ -227,8 +227,8 @@ states.map(state =&gt;
 
   <script>
     window.Flems(flems2, {
-      files: [{name: "index-patchinko.js", content: "/* global b, m, R, O */\n\nconst I = x => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0, -1).join(\", \") +\n      \" \" +\n      s +\n      \" \" +\n      xs.slice(-1)\n    : xs.join(\"\");\n\nconst stats = {\n  accept: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.objOf(\"stats\")\n  )\n};\n\nconst description = {\n  accept: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\")\n  )\n};\n\nconst storage = {\n  Initial: () => {\n    const stored = localStorage.getItem(\"v1\");\n    return stored ? JSON.parse(stored) : {};\n  },\n\n  service: ({ state }) => {\n    localStorage.setItem(\n      \"v1\",\n      JSON.stringify({ boxes: state.boxes })\n    );\n  }\n};\n\nconst app = {\n  Initial: () =>\n    O(\n      {\n        boxes: [],\n        colors: [\"red\", \"purple\", \"blue\"]\n      },\n      storage.Initial()\n    ),\n\n  Actions: update => ({\n    addBox: x => update({ boxes: O(xs => xs.concat(x)) }),\n    removeBox: i =>\n      update({\n        boxes: O(xs => xs.filter((x, j) => i != j))\n      })\n  })\n};\n\nconst App = {\n  view: ({ attrs: { state, actions } }) =>\n    m(\n      \".app\" + b.d(\"grid\").ff(\"Helvetica\"),\n      m(\n        \"nav.header\" +\n          b\n            .d(\"flex\")\n            .jc(\"space-between\")\n            .ai(\"center\")\n            .bc(\"steelblue\")\n            .c(\"white\")\n            .p(\"1em\"),\n\n        m(\"h1\" + b.m(0), \"Boxes\"),\n        state.colors.map(x =>\n          m(\n            \"button\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"2em\")\n                .h(\"2em\")\n                .fs(\"2em\")\n                .m(0)\n                .border(\"none\"),\n            { onclick: () => actions.addBox(x) },\n            \"+\"\n          )\n        )\n      ),\n      m(\"p\", state.description),\n      m(\n        \"\" +\n          b\n            .d(\"grid\")\n            .gridTemplateColumns(\"repeat(3, 1fr)\")\n            .alignItems(\"center\")\n            .justifyItems(\"center\")\n            .padding(\"1em\")\n            .gridRowGap(\"1em\")\n            .maxHeight(\"14em\")\n            .overflowY(\"auto\"),\n\n        state.boxes.map((x, i) =>\n          m(\n            \"\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"4em\")\n                .h(\"4em\"),\n            { onclick: () => actions.removeBox(i) }\n          )\n        )\n      )\n    )\n};\n\nconst acceptors = [stats.accept, description.accept];\nconst services = [storage.service];\n\nconst accept = state =>\n  acceptors.reduce(\n    (updatedState, acceptor) =>\n      O(updatedState, acceptor(updatedState)),\n    state\n  );\n\nconst update = m.stream();\nconst actions = app.Actions(update);\nconst states = m.stream.scan(\n  (state, patch) => accept(O(state, patch)),\n  accept(app.Initial()),\n  update\n);\n\nm.mount(document.getElementById(\"app\"), {\n  view: () => m(App, { state: states(), actions })\n});\n\nstates.map(state =>\n  services.forEach(service => service({ state, update }))\n);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"},{name: "patchinko", type: "js", url: "https://unpkg.com/patchinko@4.1.0/constant.js"}],
+      files: [{name: "index-mergerino.js", content: "/* global b, m, R, mergerino */\nconst merge = mergerino;\n\nconst I = x => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0, -1).join(\", \") +\n      \" \" +\n      s +\n      \" \" +\n      xs.slice(-1)\n    : xs.join(\"\");\n\nconst stats = {\n  accept: R.pipe(\n    x => x.boxes,\n    R.countBy(I),\n    R.always,\n    R.objOf(\"stats\")\n  )\n};\n\nconst description = {\n  accept: R.pipe(\n    x => x.stats,\n    R.toPairs,\n    R.groupBy(R.last),\n    R.map(R.map(R.head)),\n    R.map(humanList(\"and\")),\n    R.toPairs,\n    R.map(R.join(\" \")),\n    humanList(\"and\"),\n    x => x + \".\",\n    R.objOf(\"description\")\n  )\n};\n\nconst storage = {\n  Initial: () => {\n    const stored = localStorage.getItem(\"v1\");\n    return stored ? JSON.parse(stored) : {};\n  },\n\n  service: ({ state }) => {\n    localStorage.setItem(\n      \"v1\",\n      JSON.stringify({ boxes: state.boxes })\n    );\n  }\n};\n\nconst app = {\n  Initial: () =>\n    merge(\n      {\n        boxes: [],\n        colors: [\"red\", \"purple\", \"blue\"]\n      },\n      storage.Initial()\n    ),\n\n  Actions: update => ({\n    addBox: x => update({ boxes: xs => xs.concat(x) }),\n    removeBox: i =>\n      update({\n        boxes: xs => xs.filter((x, j) => i != j)\n      })\n  })\n};\n\nconst App = {\n  view: ({ attrs: { state, actions } }) =>\n    m(\n      \".app\" + b.d(\"grid\").ff(\"Helvetica\"),\n      m(\n        \"nav.header\" +\n          b\n            .d(\"flex\")\n            .jc(\"space-between\")\n            .ai(\"center\")\n            .bc(\"steelblue\")\n            .c(\"white\")\n            .p(\"1em\"),\n\n        m(\"h1\" + b.m(0), \"Boxes\"),\n        state.colors.map(x =>\n          m(\n            \"button\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"2em\")\n                .h(\"2em\")\n                .fs(\"2em\")\n                .m(0)\n                .border(\"none\"),\n            { onclick: () => actions.addBox(x) },\n            \"+\"\n          )\n        )\n      ),\n      m(\"p\", state.description),\n      m(\n        \"\" +\n          b\n            .d(\"grid\")\n            .gridTemplateColumns(\"repeat(3, 1fr)\")\n            .alignItems(\"center\")\n            .justifyItems(\"center\")\n            .padding(\"1em\")\n            .gridRowGap(\"1em\")\n            .maxHeight(\"14em\")\n            .overflowY(\"auto\"),\n\n        state.boxes.map((x, i) =>\n          m(\n            \"\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"4em\")\n                .h(\"4em\"),\n            { onclick: () => actions.removeBox(i) }\n          )\n        )\n      )\n    )\n};\n\nconst acceptors = [stats.accept, description.accept];\nconst services = [storage.service];\n\nconst accept = state =>\n  acceptors.reduce(\n    (updatedState, acceptor) =>\n      merge(updatedState, acceptor(updatedState)),\n    state\n  );\n\nconst update = m.stream();\nconst actions = app.Actions(update);\nconst states = m.stream.scan(\n  (state, patch) => accept(merge(state, patch)),\n  accept(app.Initial()),\n  update\n);\n\nm.mount(document.getElementById(\"app\"), {\n  view: () => m(App, { state: states(), actions })\n});\n\nstates.map(state =>\n  services.forEach(service => service({ state, update }))\n);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 60,
 
       autoFocus: false
@@ -236,7 +236,7 @@ states.map(state =&gt;
   </script>
 
 
-<h4>With Function Patches</h4><p>We can also use this approach with function patches instead of Patchinko. Remember that with
+<h4>With Function Patches</h4><p>We can also use this approach with function patches instead of Mergerino. Remember that with
 function patches, we produce functions <code>f(state) =&gt; updatedState</code> instead of object patches, and we
 wire up Meiosis like this:</p>
 <pre><code class="language-javascript">const T = (x, f) =&gt; f(x);
@@ -254,7 +254,7 @@ const accept = state =&gt;
     state
   );</code></pre>
 <p>As before, we call <code>accept</code> in our <code>scan</code> accumulator, and also call <code>accept</code> on the initial state.
-The only difference is that we use <code>T</code> instead of <code>O</code> to apply a patch -- <code>T = (x, f) =&gt; f(x)</code>.</p>
+The only difference is that we use <code>T</code> instead of <code>merge</code> to apply a patch -- <code>T = (x, f) =&gt; f(x)</code>.</p>
 <pre><code class="language-javascript">const states = m.stream.scan(
   (state, patch) =&gt; accept(T(state, patch)),
   accept(app.Initial()),

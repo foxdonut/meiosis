@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meiosis Tutorial</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="skeleton.css">
+    <link rel="stylesheet" href="prism.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="container">
+    <script src="prism.js" type="text/javascript"></script>
+    <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+    <h1><a href="https://meiosis.js.org">Meiosis</a> Tutorial</h1><p><a href="04-meiosis-with-function-patches.html">&lt; Previous</a> |
+<a href="06-components.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<h2>05 - Meiosis with Mergerino</h2><p>In the previous lesson, <a href="04-meiosis-with-function-patches.html">04 - Meiosis with Function Patches</a>,
+we set up the Meiosis pattern with an <code>update</code> stream of function patches.</p>
+<p>In this section, we will use another approach - my personal favourite - using a library called
+Mergerino. The Meiosis pattern is flexible enough that you can use either of these approaches
+or even one of your own.</p>
+<p><a name="introducing_mergerino"></a></p>
+<h3><a href="#introducing_mergerino">Introducing Mergerino</a></h3><p><a href="https://github.com/fuzetsu/mergerino">Mergerino</a> is a brilliant utility that
+<a href="https://github.com/fuzetsu">Daniel Loomer</a> wrote in less than 30 lines of code. We will
+use it to issue patches onto our <code>update</code> stream, and to produce the updated state from
+our accumulator function.</p>
+<p>Let&#39;s say we have this initial state:</p>
+<pre><code class="language-js">{
+  temperature: {
+    value: 22,
+    units: &quot;C&quot;
+  }
+}</code></pre>
+<p>Imagine that our patches are objects that describe how we want to update the state. If
+we want to change the temperature value to 23, we would call:</p>
+<pre><code class="language-js">update({ value: 23 })</code></pre>
+<p>To change the units:</p>
+<pre><code class="language-js">update({ units: &quot;F&quot; })</code></pre>
+<p>To convert the value at the same time as changing the units:</p>
+<pre><code class="language-js">update({ value: 72, units: &quot;F&quot; })</code></pre>
+<p>How to we write an accumulator function that handles these object patches to update the
+state?</p>
+<p>Mergerino comes with a function, <code>merge</code>, that takes a target object as its first
+parameter, and patch objects in the remainder of the parameters. It patches the target object
+by copying over the properties from the patch objects onto the target object:</p>
+<pre><code class="language-javascript">merge({ value: 22, units: &quot;C&quot; }, { value: 23 })
+// result:
+{ value: 23, units: &quot;C&quot; }
+
+merge({ value: 23, units: &quot;C&quot; }, { comfortable: true })
+// result:
+{ value: 23, units: &quot;C&quot;, comfortable: true }</code></pre>
+<p>If you find that this looks like <code>Object.assign</code>, you are correct: <code>merge</code> does the equivalent.
+However, <code>merge</code> has more capabilities.</p>
+<p><a name="patching_based_on_current"></a></p>
+<h3><a href="#patching_based_on_current">Patching based on the current value</a></h3><p>Within a patch, you can use the current value of the target object to determine the updated value.
+Just pass a <strong>function</strong> as the value of the property. Mergerino passes the value of that property
+to the function, and assigns the function&#39;s return value back to that property.</p>
+<p>This makes it easy for us to update a value using the previous value. For example, say that
+we want to increment the temperature value by 1. We need the previous value to compute the updated
+value. We can use a function for <code>value</code>:</p>
+<pre><code class="language-js">merge({ value: 22, units: &quot;C&quot; }, { value: x =&gt; x + 1 }) // The function receives 22
+// result:
+{ value: 23, units: &quot;C&quot; }</code></pre>
+<blockquote>
+<p>Note that <code>x =&gt; x + 1</code> is ES6 syntax that is short for</p>
+<pre><code class="language-js">function(x) {
+  return + 1;
+}</code></pre>
+</blockquote>
+<p>By passing a function for the <code>value</code> property, Mergerino passes the previous value of that property
+to the function. Our function receives <code>22</code>, adds <code>1</code> and returns <code>23</code>, which Mergerino assigns back
+to the <code>value</code> property.</p>
+<p><a name="deep_patching"></a></p>
+<h3><a href="#deep_patching">Deep Patching</a></h3><p><code>Object.assign</code> performs a <em>shallow</em> merge. If our target object is:</p>
+<pre><code class="language-javascript">{ air:   { value: 22, units: &quot;C&quot; },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>And we want to change the <code>air</code> <code>value</code> to <code>25</code> by calling:</p>
+<pre><code class="language-javascript">Object.assign(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:   { value: 25 } }
+)</code></pre>
+<p>We get this result:</p>
+<pre><code class="language-js">{ air:   { value: 25 },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>We lost the <code>units</code>! This is because properties are merged only at the first level.</p>
+<p>With Mergerino, we can merge properties deeper than the first level without losing the rest:</p>
+<pre><code class="language-javascript">merge(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air: { value: 25 } }
+)
+// result:
+{ air:   { value: 25, units: &quot;C&quot; }, // now we didn&#39;t lose the units!
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>Deep patching and function patching can also be used together:</p>
+<pre><code class="language-javascript">merge(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:  { value: x =&gt; x + 8 } }
+)
+// result:
+{ air:   { value: 30, units: &quot;C&quot; }, // we increased the value by 8, and didn&#39;t lose the units
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>If we want to <em>avoid</em> deep patching and instead want to replace a property, we can use a function.
+Say we want to set <code>air</code> to <code>{ replaced: true }</code> without keeping <code>value</code> and <code>units</code>:</p>
+<pre><code class="language-javascript">merge(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air:   () =&gt; ({ replaced: true }) } // use a function to replace the value
+)</code></pre>
+<p>We get this result:</p>
+<pre><code class="language-js">{ air:   { replaced: true },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p><a name="deleting_a_property"></a></p>
+<h3><a href="#deleting_a_property">Deleting a property</a></h3><p>Finally, we can use <code>undefined</code> as a property value when we wish to delete that property:</p>
+<pre><code class="language-js">merge(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air: undefined }
+)
+// result:
+{ water: { value: 84, units: &quot;F&quot; } }
+
+merge(
+  { air:   { value: 22, units: &quot;C&quot; },
+    water: { value: 84, units: &quot;F&quot; }
+  },
+  { air: { value: undefined } }
+)
+// result:
+{ air:   { units: &quot;C&quot; },
+  water: { value: 84, units: &quot;F&quot; }
+}</code></pre>
+<p>Try it out. Using the code window below, try the following exercises. Use <code>console.log</code> to
+verify your answers.</p>
+<div id="flems1" class="flemscode" style="height:550px"></div>
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "05-meiosis-with-mergerino-01.js", content: "/*global mergerino*/\nconst merge = mergerino;\n\nvar target = {\n  air: { value: 22, units: \"C\" },\n  water: { value: 29, units: \"F\" },\n  comfortable: false,\n  invalid: true\n};\n"}],
+      links: [{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 75
+    })
+  </script>
+
+
+<p><a name="exercises_1"></a></p>
+<h3><a href="#exercises_1">Exercises</a></h3><ol>
+<li>Change <code>water</code> to <code>{ value: 84, units: &quot;F&quot; }</code></li>
+<li>Toggle the <code>comfortable</code> property with a function that changes the value to the
+opposite of what it was</li>
+<li>Change the <code>air</code> value to <code>20</code> without losing the units</li>
+<li>Delete the <code>invalid</code> property.</li>
+</ol>
+<p><a name="solution_1"></a></p>
+<h3><a href="#solution_1">Solution</a></h3><div style="margin-bottom: 24px"><a href="javascript:" onclick="this.style.display='none';document.getElementById('flems2').style.display='block'">Show solution</a></div><div id="flems2" class="flemscode" style="height:800px; display: none"></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "05-meiosis-with-mergerino-01-solution.js", content: "/*global mergerino*/\nconst merge = mergerino;\n\nvar target = {\n  air: { value: 22, units: \"C\" },\n  water: { value: 29, units: \"F\" },\n  comfortable: false,\n  invalid: true\n};\n\n// Change `water` to `{ value: 84, units: \"F\" }`\nconsole.log(merge(target, { water: { value: 84, units: \"F\" } }));\n\n// Toggle the `comfortable` property with a function that changes the value to the\n// opposite of what it was\nconsole.log(merge(target, { comfortable: x => !x }));\n\n// Change the `air` value to `20` without losing the units.\nconsole.log(merge(target, { air: { value: 20 } }));\n\n// Delete the `invalid` property\nconsole.log(merge(target, { invalid: undefined }));\n"}],
+      links: [{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 75
+    })
+  </script>
+
+
+<p><a name="using_mergerino_with_meiosis"></a></p>
+<h3><a href="#using_mergerino_with_meiosis">Using Mergerino with Meiosis</a></h3><p>To use Mergerino with Meiosis, we can pass object patches onto the <code>update</code> stream and use
+them in the accumulator to update the state.</p>
+<p>For example, to increment the temperature value:</p>
+<pre><code class="language-js">increment: function(amount) {
+  update({
+    temperature: {
+      value: x =&gt; x + amount
+    }
+  });
+}</code></pre>
+<p>Now we need to use these object patches in the accumulator function. Remember that the
+accumulator gets the current state and the incoming patch as parameters, and must return the
+updated state. We can use <code>merge</code>:</p>
+<pre><code class="language-js">var states = flyd.scan(function(state, patch) {
+  return merge(state, patch);
+}, temperature.Initial(), update);</code></pre>
+<p>Notice that the accumulator function that we are passing is:</p>
+<pre><code class="language-js">function(state, patch) {
+  return merge(state, patch);
+}</code></pre>
+<p>We have a function that takes (state, patch) and calls <code>merge</code> with (state, patch). But <code>merge</code>
+already does what we want, so we can pass it directly:</p>
+<pre><code class="language-js">var states = flyd.scan(merge, temperature.Initial(), update);</code></pre>
+<p>Putting it all together, we have:</p>
+<div id="flems3" class="flemscode" style="height:800px"></div>
+  <script>
+    window.Flems(flems3, {
+      files: [{name: "05-meiosis-with-mergerino-02.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      temperature: {\n        value: 22,\n        units: \"C\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(amount) {\n        update({\n          temperature: {\n            value: x => x + amount\n          }\n        });\n      },\n      changeUnits: function() {\n        update({\n          temperature: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, temperature.Initial(), update);\n\nvar actions = temperature.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 75
+    })
+  </script>
+
+
+<p><a name="exercises_2"></a></p>
+<h3><a href="#exercises_2">Exercises</a></h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
+type and then press Enter:</p>
+<p><code>actions.increment(2)</code></p>
+<p><code>actions.changeUnits()</code></p>
+<p>In the output on the right, you&#39;ll see the updated states.</p>
+<p>When you are ready, continue on to <a href="06-components.html">06 - Components</a>.</p>
+<p><a href="04-meiosis-with-function-patches.html">&lt; Previous</a> |
+<a href="06-components.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by <a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a> and is released under the MIT license.</p>
+  </body>
+</html>
