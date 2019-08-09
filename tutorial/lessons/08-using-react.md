@@ -181,7 +181,7 @@ class Temperature extends React.Component {
 
 You can see the complete example below.
 
-@flems code/08-using-react-01.jsx,app.html,app.css flyd,react,react-dom,patchinko 800 shown 60
+@flems code/08-using-react-01.jsx,app.html,app.css flyd,react,react-dom,mergerino 800 shown 60
 
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)

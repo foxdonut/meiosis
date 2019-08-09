@@ -1,4 +1,3 @@
-import { DEL } from "mergerino";
 import { findRouteSegment, whenPresent } from "meiosis-routing/state";
 
 import { teaMap } from "./data";
@@ -12,6 +11,6 @@ export const service = ({ state, update }) => {
 
   whenPresent(findRouteSegment(state.route.leave, "TeaDetails"), leave => {
     const id = leave.params.id;
-    update({ tea: { [id]: DEL } });
+    update({ tea: { [id]: undefined } });
   });
 };

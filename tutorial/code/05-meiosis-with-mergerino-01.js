@@ -1,4 +1,5 @@
-/*global O*/
+/*global mergerino*/
+const merge = mergerino;
 
 var target = {
   air: { value: 22, units: "C" },

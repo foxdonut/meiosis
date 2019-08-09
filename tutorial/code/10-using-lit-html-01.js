@@ -3,7 +3,9 @@ import {
   render
 } from "https://unpkg.com/lit-html?module";
 
-/*global flyd, O*/
+/*global flyd, mergerino*/
+const merge = mergerino;
+
 var conditions = {
   Initial: function() {
     return {
@@ -16,10 +18,10 @@ var conditions = {
   Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: O({ precipitations: value }) });
+        update({ conditions: { precipitations: value } });
       },
       changeSky: function(value) {
-        update({ conditions: O({ sky: value }) });
+        update({ conditions: { sky: value } });
       }
     };
   }
@@ -94,18 +96,18 @@ var temperature = {
   Actions: function(update) {
     return {
       increment: function(id, amount) {
-        update({ [id]: O({ value: O(x => x + amount) }) });
+        update({ [id]: { value: x => x + amount } });
       },
       changeUnits: function(id) {
         update({
-          [id]: O(state => {
+          [id]: state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
             return state;
-          })
+          }
         });
       }
     };
@@ -164,7 +166,7 @@ var App = function(state, actions) {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(O, app.Initial(), update);
+var states = flyd.scan(merge, app.Initial(), update);
 
 var actions = app.Actions(update);
 var element = document.getElementById("app");

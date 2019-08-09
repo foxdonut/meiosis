@@ -1,11 +1,13 @@
-/* global React, ReactDOM, flyd, O */
+/* global React, ReactDOM, flyd, mergerino */
+const merge = mergerino;
+
 const entryNumber = {
   Initial: () => ({
     value: ""
   }),
   Actions: update => ({
     editEntryValue: (id, value) =>
-      update({ [id]: O({ value }) })
+      update({ [id]: { value } })
   })
 };
 
@@ -45,7 +47,7 @@ const entryDate = {
   }),
   Actions: update => ({
     editDateValue: (id, value) =>
-      update({ [id]: O({ value }) })
+      update({ [id]: { value } })
   })
 };
 
@@ -94,20 +96,20 @@ const temperature = {
     increment: (id, amount) => evt => {
       evt.preventDefault();
       update({
-        [id]: O({ value: O(value => value + amount) })
+        [id]: { value: value => value + amount }
       });
     },
     changeUnits: id => evt => {
       evt.preventDefault();
       update({
-        [id]: O(state => {
+        [id]: state => {
           const newUnits = state.units === "C" ? "F" : "C";
           const newValue = convert(state.value, newUnits);
-          return O(state, {
+          return merge(state, {
             units: newUnits,
             value: newValue
           });
-        })
+        }
       });
     }
   })
@@ -174,7 +176,7 @@ const app = {
     water: temperature.Initial("Water")
   }),
   Actions: update =>
-    O(
+    Object.assign(
       {
         save: state => evt => {
           evt.preventDefault();
@@ -190,8 +192,8 @@ const app = {
               " " +
               displayTemperature(state.water),
 
-            entry: O({ value: "" }),
-            date: O({ value: "" })
+            entry: { value: "" },
+            date: { value: "" }
           });
         }
       },
@@ -257,7 +259,7 @@ class App extends React.Component {
 }
 
 const update = flyd.stream();
-const states = flyd.scan(O, app.Initial(), update);
+const states = flyd.scan(merge, app.Initial(), update);
 const actions = app.Actions(update);
 
 ReactDOM.render(

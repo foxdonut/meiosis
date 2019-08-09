@@ -1,4 +1,6 @@
-/*global flyd, O*/
+/*global flyd, mergerino*/
+const merge = mergerino;
+
 var convert = function(value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
@@ -18,21 +20,21 @@ var temperature = {
     return {
       increment: function(amount) {
         update({
-          temperature: O({
-            value: O(x => x + amount)
-          })
+          temperature: {
+            value: x => x + amount
+          }
         });
       },
       changeUnits: function() {
         update({
-          temperature: O(state => {
+          temperature: state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
             return state;
-          })
+          }
         });
       }
     };
@@ -40,7 +42,7 @@ var temperature = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(O, temperature.Initial(), update);
+var states = flyd.scan(merge, temperature.Initial(), update);
 
 var actions = temperature.Actions(update);
 states.map(function(state) {

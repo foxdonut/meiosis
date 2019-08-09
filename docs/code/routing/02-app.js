@@ -1,7 +1,7 @@
 /** @jsx preact.h */
 /* global Meiosis */
 import preact from "preact@8.4.2/dist/preact.mjs";
-import merge from "mergerino@0.2.0";
+import merge from "mergerino@0.4.0";
 
 import { Route, navTo } from "./02-routes";
 

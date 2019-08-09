@@ -1,4 +1,3 @@
-import { DEL } from "mergerino";
 import { findRouteSegment, whenPresent } from "meiosis-routing/state";
 
 export const service = ({ state, update }) => {
@@ -9,6 +8,6 @@ export const service = ({ state, update }) => {
 
   whenPresent(findRouteSegment(state.route.leave, "Brewer"), leave => {
     const id = leave.params.id;
-    update({ brewer: { [id]: DEL } });
+    update({ brewer: { [id]: undefined } });
   });
 };

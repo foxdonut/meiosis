@@ -27,6 +27,7 @@ export const Login = ({ state, actions, routing }) => {
           />
         </div>
         <button
+          type="button"
           className="btn btn-primary"
           onClick={() => actions.login(state.login.username, returnTo)}
         >

@@ -145,7 +145,7 @@ var Temperature = {
 
 You can see the complete example below.
 
-@flems code/07-using-mithril-01.js,app.html,app.css mithril,mithril-stream,patchinko 800 shown 60
+@flems code/07-using-mithril-01.js,app.html,app.css mithril,mithril-stream,mergerino 800 shown 60
 
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)

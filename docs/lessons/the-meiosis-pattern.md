@@ -16,12 +16,13 @@ This is a quick summary of the Meiosis Pattern:
 - Separate state management code from view code.
 - Start with an initial state.
 - Create an `update` stream of **patches**.
-- Patches can be [Patchinko](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html)
-patches, [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html),
+- Patches can be
+[Mergerino](https://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html) patches,
+[Function Patches](https://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html),
 or your own patches.
 - Create an `actions` object of functions that issue patches onto the `update` stream.
-- Create a `states` stream by using `scan` on the `update` stream with the initial state and `P` for
-Patchinko or `(x, f) => f(x)` for function patches.
+- Create a `states` stream by using `scan` on the `update` stream with the initial state, and
+`merge` for Mergerino, or `(x, f) => f(x)` for function patches.
 - Pass `state` and `actions` to views (see below for details.)
 
 Here is the code to set up the Meiosis Pattern:
@@ -36,8 +37,8 @@ const app = {
 
 const update = flyd.stream();
 
-// Using Patchinko:
-const states = flyd.scan(P, app.Initial(), update);
+// Using Mergerino:
+const states = flyd.scan(merge, app.Initial(), update);
 
 // Using Function Patches:
 const states = flyd.scan((x, f) => f(x), app.Initial(), update);
@@ -50,16 +51,16 @@ Then, pass `state` and `actions` to views.
 Optionally, add [Services and Accepted State](services.html):
 
 ```javascript
-// Using Patchinko:
+// Using Mergerino:
 const accept = state =>
   acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
 const states = m.stream.scan(
-  (state, patch) => accept(O(state, patch)),
+  (state, patch) => accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );
@@ -197,7 +198,7 @@ pass an `id` along with `state` and `actions` to views. Use `state[id]` to read 
 state, pass the `id` to `actions`, and use the `id` in actions to issue patches that update the
 corresponding state property.
 
-See the [Components](http://meiosis.js.org/tutorial/06-components.html) section of the Meiosis
+See the [Components](https://meiosis.js.org/tutorial/06-components.html) section of the Meiosis
 Tutorial for a complete explanation.
 
 [Table of Contents](toc.html)
@@ -205,6 +206,6 @@ Tutorial for a complete explanation.
 -----
 
 [Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](http://twitter.com/foxdonut00) /
+[@foxdonut00](https://twitter.com/foxdonut00) /
 [foxdonut](https://github.com/foxdonut)
 and is released under the MIT license.

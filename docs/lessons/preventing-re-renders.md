@@ -25,26 +25,26 @@ To prevent re-renders of a component, we determine whether a component's state h
 to produce **new object instances** when updating the state, instead of mutating the existing
 object.
 
-We can do this with Patchinko's immutable `O` function. This produces a new object instance instead
+We can do this with Mergerino's `merge` function. It produces a new object instance instead
 of mutating the state. Here, we are assigning the new instance back to the `[id]` property:
 
 ```js
 actions: update => ({
-  editEntryValue: (id, value) => update({ [id]: O({ value }) })
+  editEntryValue: (id, value) => update({ [id]: { value } })
 })
 ```
 
-This also works patches that use `O(fn)` when returning the result in order to create a new object
+This also works patches that use functions when returning the result in order to create a new object
 instance. For example:
 
 ```js
 changeUnits: id => evt => {
   evt.preventDefault();
-  update({ [id]: O(state => {
+  update({ [id]: state => {
     const newUnits = state.units === "C" ? "F" : "C";
     const newValue = convert(state.value, newUnits);
-    return O(state, { units: newUnits, value: newValue });
-  }) });
+    return merge(state, { units: newUnits, value: newValue });
+  } });
 }
 ```
 
@@ -79,7 +79,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`, `re
 Air`, and `render Temperature Water` appear in the console output **only** when you interact with
 that component in the user interface. Other components do not get re-rendered.
 
-@flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,patchinko-i 800 70
+@flems code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css react,react-dom,flyd,mergerino 800 70
 
 <a name="mithril_prevent_re_render"></a>
 ### [Mithril version](#mithril_prevent_re_render)
@@ -112,7 +112,7 @@ Verify this in the example below. Notice that `render Entry`, `render Date`, `re
 Air`, and `render Temperature Water` appear in the console output **only** when you interact with
 that component in the user interface. Other components do not get re-rendered.
 
-@flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,patchinko-i 800 70
+@flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,mergerino 800 70
 
 [Table of Contents](toc.html)
 

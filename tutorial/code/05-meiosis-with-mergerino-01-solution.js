@@ -1,4 +1,5 @@
-/*global O*/
+/*global mergerino*/
+const merge = mergerino;
 
 var target = {
   air: { value: 22, units: "C" },
@@ -8,14 +9,14 @@ var target = {
 };
 
 // Change `water` to `{ value: 84, units: "F" }`
-console.log(O(target, { water: { value: 84, units: "F" } }));
+console.log(merge(target, { water: { value: 84, units: "F" } }));
 
 // Toggle the `comfortable` property with a function that changes the value to the
 // opposite of what it was
-console.log(O(target, { comfortable: O(x => !x) }));
+console.log(merge(target, { comfortable: x => !x }));
 
 // Change the `air` value to `20` without losing the units.
-console.log(O(target, { air: O({ value: 20 }) }));
+console.log(merge(target, { air: { value: 20 } }));
 
 // Delete the `invalid` property
-console.log(O(target, { invalid: O }));
+console.log(merge(target, { invalid: undefined }));

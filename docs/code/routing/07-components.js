@@ -51,6 +51,7 @@ export const Login = {
             />
           </div>
           <button
+            type="button"
             className="btn btn-primary"
             // eslint-disable-next-line react/no-unknown-property
             onclick={() =>

@@ -2,7 +2,7 @@
 /* global Meiosis, MeiosisRouting */
 import m from "mithril@2.0.0-rc.4";
 import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
-import merge from "mergerino@0.2.0";
+import merge from "mergerino@0.4.0";
 
 import { Route, navTo, router } from "./07-routes";
 

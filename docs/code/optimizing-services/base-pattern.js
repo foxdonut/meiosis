@@ -1,4 +1,5 @@
-/* global React, ReactDOM, flyd, O */
+/* global React, ReactDOM, flyd, mergerino */
+const merge = mergerino;
 
 const routingAccept = state => {
   const [leave, arrive] =
@@ -157,12 +158,12 @@ const actions = app.Actions(update);
 const accept = state =>
   app.acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
 const states = flyd.scan(
-  (state, patch) => accept(O(state, patch)),
+  (state, patch) => accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );

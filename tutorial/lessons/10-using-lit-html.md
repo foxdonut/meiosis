@@ -125,7 +125,7 @@ var Temperature = function(state, id, actions) {
 
 You can see the complete example below.
 
-@flems code/10-using-lit-html-01.js,app.html,app.css flyd,patchinko 800 shown 60
+@flems code/10-using-lit-html-01.js,app.html,app.css flyd,mergerino 800 shown 60
 
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)

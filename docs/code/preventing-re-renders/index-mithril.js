@@ -1,4 +1,6 @@
-/* global m, O */
+/* global m, mergerino */
+const merge = mergerino;
+
 const checkIfStateChanged = (next, prev) =>
   next.attrs.state[next.attrs.id] !==
   prev.attrs.state[prev.attrs.id];
@@ -9,7 +11,7 @@ const entryNumber = {
   }),
   Actions: update => ({
     editEntryValue: (id, value) =>
-      update({ [id]: O({ value }) })
+      update({ [id]: { value } })
   })
 };
 
@@ -41,7 +43,7 @@ const entryDate = {
   }),
   Actions: update => ({
     editDateValue: (id, value) =>
-      update({ [id]: O({ value }) })
+      update({ [id]: { value } })
   })
 };
 
@@ -85,20 +87,20 @@ const temperature = {
     increment: (id, amount) => evt => {
       evt.preventDefault();
       update({
-        [id]: O({ value: O(value => value + amount) })
+        [id]: { value: value => value + amount }
       });
     },
     changeUnits: id => evt => {
       evt.preventDefault();
       update({
-        [id]: O(state => {
+        [id]: state => {
           const newUnits = state.units === "C" ? "F" : "C";
           const newValue = convert(state.value, newUnits);
-          return O(state, {
+          return merge(state, {
             units: newUnits,
             value: newValue
           });
-        })
+        }
       });
     }
   })
@@ -164,7 +166,7 @@ const app = {
     water: temperature.Initial("Water")
   }),
   Actions: update =>
-    O(
+    Object.assign(
       {
         save: state => evt => {
           evt.preventDefault();
@@ -180,8 +182,8 @@ const app = {
               " " +
               displayTemperature(state.water),
 
-            entry: O({ value: "" }),
-            date: O({ value: "" })
+            entry: { value: "" },
+            date: { value: "" }
           });
         }
       },
@@ -212,7 +214,7 @@ const App = {
 };
 
 const update = m.stream();
-const states = m.stream.scan(O, app.Initial(), update);
+const states = m.stream.scan(merge, app.Initial(), update);
 const actions = app.Actions(update);
 
 m.mount(document.getElementById("app"), {

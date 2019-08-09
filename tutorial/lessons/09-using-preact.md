@@ -150,7 +150,7 @@ class Temperature extends preact.Component {
 
 You can see the complete example below.
 
-@flems code/09-using-preact-01.jsx,app.html,app.css flyd,preact,patchinko 800 shown 60
+@flems code/09-using-preact-01.jsx,app.html,app.css flyd,preact,mergerino 800 shown 60
 
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)

@@ -31,6 +31,7 @@ export const Login = {
         m(
           "button.btn.btn-primary",
           {
+            type: "button",
             onclick: () => actions.login(state.login.username, returnTo)
           },
           "Login"

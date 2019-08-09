@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
 [< Previous](03-streams.html) |
-[Next >](05-meiosis-with-patchinko.html) |
+[Next >](05-meiosis-with-mergerino.html) |
 [Table of Contents](toc.html)
 
 ## 04 - Meiosis with Function Patches
@@ -53,7 +53,7 @@ We need to:
 - Write an accumulator function that will use those patches to produce the updated state.
 
 In this section, we will use one approach using **function patches**. In the next section, we
-will look at another approach - my personal favourite - using a small utility called Patchinko.
+will look at another approach - my personal favourite - using a small utility called Mergerino.
 
 <a name="using_function_patches"></a>
 ### [Using Function Patches](#using_function_patches)
@@ -109,11 +109,11 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-In the next section, [05 - Meiosis with Patchinko](05-meiosis-with-patchinko.html), we will look
+In the next section, [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html), we will look
 at an alternative to function patches.
 
 [< Previous](03-streams.html) |
-[Next >](05-meiosis-with-patchinko.html) |
+[Next >](05-meiosis-with-mergerino.html) |
 [Table of Contents](toc.html)
 
 -----

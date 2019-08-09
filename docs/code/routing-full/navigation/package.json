@@ -28,7 +28,7 @@
   "dependencies": {
     "meiosis-routing": "^1.8.0",
     "meiosis-setup": "^2.0.0",
-    "mergerino": "0.2.0",
+    "mergerino": "0.4.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "routing-common": "../routing-common-core"

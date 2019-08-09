@@ -1,4 +1,5 @@
-/* global b, m, R, O */
+/* global b, m, R, mergerino */
+const merge = mergerino;
 
 const I = x => x;
 
@@ -15,6 +16,7 @@ const stats = {
   accept: R.pipe(
     x => x.boxes,
     R.countBy(I),
+    R.always,
     R.objOf("stats")
   )
 };
@@ -50,7 +52,7 @@ const storage = {
 
 const app = {
   Initial: () =>
-    O(
+    merge(
       {
         boxes: [],
         colors: ["red", "purple", "blue"]
@@ -59,10 +61,10 @@ const app = {
     ),
 
   Actions: update => ({
-    addBox: x => update({ boxes: O(xs => xs.concat(x)) }),
+    addBox: x => update({ boxes: xs => xs.concat(x) }),
     removeBox: i =>
       update({
-        boxes: O(xs => xs.filter((x, j) => i != j))
+        boxes: xs => xs.filter((x, j) => i != j)
       })
   })
 };
@@ -132,14 +134,14 @@ const services = [storage.service];
 const accept = state =>
   acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
 const update = m.stream();
 const actions = app.Actions(update);
 const states = m.stream.scan(
-  (state, patch) => accept(O(state, patch)),
+  (state, patch) => accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );

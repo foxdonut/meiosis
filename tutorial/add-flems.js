@@ -6,10 +6,10 @@ var toDir = process.argv[3];
 var linkMap = {
   flyd: "https://unpkg.com/flyd@0.2.8/flyd.js",
   lodash: "https://unpkg.com/lodash@4.17.10",
+  mergerino: "https://unpkg.com/mergerino@0.4.0",
   mithril: "https://unpkg.com/mithril@2.0.0-rc.3",
   "mithril-stream":
     "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
-  patchinko: "https://unpkg.com/patchinko@4.1.0/constant.js",
   preact: "https://unpkg.com/preact@8.4.2/dist/preact.js",
   react:
     "https://unpkg.com/react@16.7.0/umd/react.development.js",

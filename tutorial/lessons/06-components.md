@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](05-meiosis-with-patchinko.html) |
+[< Previous](05-meiosis-with-mergerino.html) |
 [Next >](07-using-mithril.html) |
 [Table of Contents](toc.html)
 
@@ -111,7 +111,7 @@ var app = {
 
 Here is the complete example:
 
-@flems code/06-components-01.js flyd,patchinko 800
+@flems code/06-components-01.js flyd,mergerino 800
 
 In this example, components designate a property for their state (`conditions`, `temperature`).
 What if we want to designate a property from outside the component, to make sure there are no
@@ -178,7 +178,7 @@ var app = {
 
 Here is the complete example:
 
-@flems code/06-components-02.js flyd,patchinko 800
+@flems code/06-components-02.js flyd,mergerino 800
 
 <a name="exercises"></a>
 ### [Exercises](#exercises)
@@ -223,7 +223,7 @@ view libraries. Feel free to jump straight to the view library in which you are 
 - [09 - Using Preact](09-using-preact.html)
 - [10 - Using lit-html](10-using-lit-html.html)
 
-[< Previous](05-meiosis-with-patchinko.html) |
+[< Previous](05-meiosis-with-mergerino.html) |
 [Next >](07-using-mithril.html) |
 [Table of Contents](toc.html)
 

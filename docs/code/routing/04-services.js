@@ -1,7 +1,5 @@
 /* global MeiosisRouting */
 
-import { DEL } from "mergerino@0.2.0";
-
 const {
   findRouteSegment,
   whenPresent
@@ -80,7 +78,7 @@ export const teaDetailService = ({ state, update }) => {
     findRouteSegment(state.route.leave, "TeaDetails"),
     leave => {
       const id = leave.params.id;
-      update({ tea: { [id]: DEL } });
+      update({ tea: { [id]: undefined } });
     }
   );
 };
@@ -99,7 +97,7 @@ export const beverageService = ({ state, update }) => {
     findRouteSegment(state.route.leave, "Beverage"),
     leave => {
       const id = leave.params.id;
-      update({ beverage: { [id]: DEL } });
+      update({ beverage: { [id]: undefined } });
     }
   );
 };
@@ -155,7 +153,7 @@ export const brewerService = ({ state, update }) => {
     findRouteSegment(state.route.leave, "Brewer"),
     leave => {
       const id = leave.params.id;
-      update({ brewer: { [id]: DEL } });
+      update({ brewer: { [id]: undefined } });
     }
   );
 };

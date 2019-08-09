@@ -41,12 +41,12 @@ const actions = app.Actions(update);
 const accept = state =>
   app.acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
 const states = flyd.scan(
-  (state, patch) => accept(O(state, patch)),
+  (state, patch) => accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );
@@ -79,7 +79,7 @@ Try it out below. When you go from the Data page to the About page, there are 4 
 1. the About page displays its "please wait" message
 1. the About page asychronously loads its data.
 
-@flems code/optimizing-services/base-pattern.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
+@flems code/optimizing-services/base-pattern.js,app.html,public/css/spectre.css react,react-dom,flyd,mergerino 700 60
 
 Each state change means that services are called again. Let's start reducing the number of state
 changes and service calls by buffering and combining updates.
@@ -88,10 +88,10 @@ changes and service calls by buffering and combining updates.
 ### Buffering and Combining Updates
 
 To combine updates into one, we need a function that takes an array of patches and combines them
-into a single patch. With Patchinko, we can do this:
+into a single patch. With Mergerino, we can do this:
 
 ```javascript
-const combine = patches => model => O(model, ...patches);
+const combine = patches => patches;
 ```
 
 The patch is a function takes the model and applies all the patches.
@@ -149,7 +149,7 @@ Try it out below. Now, when you go from the Data page to the About page, there a
 these are combined into a single update
 1. the About page asychronously loads its data.
 
-@flems code/optimizing-services/buffered-combined-updates.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
+@flems code/optimizing-services/buffered-combined-updates.js,app.html,public/css/spectre.css react,react-dom,flyd,mergerino 700 60
 
 We can do one better: combine the initial state change with the service updates into a single state
 change, and not call services again after they have emitted their updates.
@@ -214,7 +214,7 @@ Try it out! Now, when you go from the Data page to the About page, there are 2 s
 again here.
 1. the About page asychronously loads its data.
 
-@flems code/optimizing-services/single-state-change.js,app.html,public/css/spectre.css react,react-dom,flyd,patchinko 700 60
+@flems code/optimizing-services/single-state-change.js,app.html,public/css/spectre.css react,react-dom,flyd,mergerino 700 60
 
 [Table of Contents](toc.html)
 

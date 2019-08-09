@@ -5,26 +5,17 @@ var toDir = process.argv[3];
 
 var linkMap = {
   bss: "https://unpkg.com/bss@1.3.0/bss.js",
-  datepicker:
-    "https://raw.githubusercontent.com/fengyuanchen/datepicker/master/dist/datepicker.min.js",
   flyd: "https://unpkg.com/flyd@0.2.8/flyd.js",
-  jquery: "https://unpkg.com/jquery@3.3.1/dist/jquery.js",
-  lodash: "https://unpkg.com/lodash@4.17.10",
-  "lodash-fp":
-    "https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)",
   "meiosis-routing":
     "https://unpkg.com/meiosis-routing@1.7.0/meiosis-routing.js",
   "meiosis-setup":
     "https://unpkg.com/meiosis-setup@2.0.0/dist/meiosis-setup.js",
   "meiosis-tracer":
     "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
+  mergerino: "https://unpkg.com/mergerino@0.4.0",
   mithril: "https://unpkg.com/mithril@2.0.0-rc.3",
   "mithril-stream":
     "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
-  patchinko:
-    "https://unpkg.com/patchinko@4.1.0/constant.js",
-  "patchinko-i":
-    "https://unpkg.com/patchinko@4.1.0/immutable.js",
   ramda: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   react:
     "https://unpkg.com/react@16.7.0/umd/react.development.js",

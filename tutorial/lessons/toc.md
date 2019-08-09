@@ -8,7 +8,7 @@
 | [02 - Initial State and Actions](02-initial-state-and-actions.html) |
 | [03 - Streams](03-streams.html) |
 | [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) |
-| [05 - Meiosis with Patchinko](05-meiosis-with-patchinko.html) |
+| [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) |
 | [06 - Components](06-components.html) |
 | [07 - Using Mithril](07-using-mithril.html) |
 | [08 - Using React](08-using-react.html) |

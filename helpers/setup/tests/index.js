@@ -5,7 +5,6 @@ const Stream = require("mithril/stream");
 const Oc = require("patchinko/constant");
 const Oi = require("patchinko/immutable");
 const merge = require("mergerino");
-const { SUB, DEL } = require("mergerino");
 const R = require("ramda");
 const { produce } = require("immer");
 const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
@@ -270,9 +269,9 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / acceptors", t => {
       const acceptors = [
-        state => (state.increment > 0 && state.increment < 10 ? { count: SUB(x => x + 1) } : null),
-        state => (state.increment <= 0 || state.increment >= 10 ? { increment: DEL } : null),
-        state => (state.invalid ? [{ invalid: DEL }, { combined: true }] : null),
+        state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null),
+        state => (state.increment <= 0 || state.increment >= 10 ? { increment: undefined } : null),
+        state => (state.invalid ? [{ invalid: undefined }, { combined: true }] : null),
         state => (state.sequence ? { sequenced: true } : null),
         state => (state.sequenced ? { received: true } : null)
       ];
@@ -296,7 +295,7 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / acceptors run on initial state", t => {
       const acceptors = [
-        state => (state.increment > 0 && state.increment < 10 ? { count: SUB(x => x + 1) } : null)
+        state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null)
       ];
 
       meiosis.mergerino
@@ -313,7 +312,7 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / services and actions", t => {
       const Actions = update => ({
-        increment: amount => update({ count: SUB(x => x + amount) })
+        increment: amount => update({ count: x => x + amount })
       });
 
       const services = [
@@ -348,7 +347,7 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / actions can use combine", t => {
       const Actions = update => ({
-        increment: amount => update([{ count: SUB(x => x + amount) }, { combined: true }])
+        increment: amount => update([{ count: x => x + amount }, { combined: true }])
       });
 
       meiosis.mergerino
@@ -369,7 +368,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const services = [
         ({ state, update }) => {
           if (state.count === 1) {
-            update({ count: SUB(x => x + 1) });
+            update({ count: x => x + 1 });
             update({ service1: true });
           }
         },
@@ -401,7 +400,7 @@ const mergerinoTest = (merge, streamLib, label) => {
         ({ state, update }) => {
           serviceCalls++;
           if (state.count === 1) {
-            update({ count: SUB(x => x + 1) });
+            update({ count: x => x + 1 });
             update({ service1: true });
           }
         },
@@ -1023,7 +1022,7 @@ const commonTest = (streamLib, label) => {
 
     t.test(label + " / basic common setup with no acceptors/services", t => {
       const Actions = update => ({
-        increment: amount => update({ count: SUB(x => x + amount) })
+        increment: amount => update({ count: x => x + amount })
       });
 
       meiosis.common

@@ -28,8 +28,8 @@
   "dependencies": {
     "meiosis-routing": "^1.8.0",
     "meiosis-setup": "^2.0.0",
-    "mergerino": "0.2.0",
-    "mithril": "^2.0.0-rc.4",
+    "mergerino": "0.4.0",
+    "mithril": "2.0.3",
     "routing-common": "../routing-common-core"
   },
   "devDependencies": {

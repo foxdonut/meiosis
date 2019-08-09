@@ -7,8 +7,8 @@
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll look
 at James' version using streams, and another version using a separate accepted state function and a
 service trigger. For the latter, we'll use two variants, one with
-[Barney Carroll](https://barneycarroll.com)'s
-[Patchinko](https://github.com/barneycarroll/patchinko), and one with function patches.
+[Daniel Loomer](https://github.com/fuzetsu)'s
+[Mergerino](https://github.com/fuzetsu/mergerino), and one with function patches.
 
 James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
@@ -165,15 +165,15 @@ Our component structure is thus:
 }
 ```
 
-#### With Patchinko
+#### With Mergerino
 
-In this section, we'll use [Patchinko](https://github.com/barneycarroll/patchinko), which we looked
-at in the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-patchinko.html).
+In this section, we'll use [Mergerino](https://github.com/fuzetsu/mergerino), which we looked at in
+the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html).
 
-To use Patchinko, we emit patches as objects and we use `O` as our accumulator:
+To use Mergerino, we emit patches as objects and we use `merge` as our accumulator:
 
 ```javascript
-const states = m.stream.scan(O, Initial(), update);
+const states = m.stream.scan(merge, Initial(), update);
 ```
 
 Remember that previously, we had a stats service and a description service:
@@ -212,7 +212,7 @@ const description = {
 Each accept function takes the state and returns a patch. Let's assemble the functions into a
 top-level `accept` function that takes the state and returns the updated state. We can use `reduce`
 on the array of `accept` functions, calling each function and applying the patch on the state with
-`O`:
+`merge`:
 
 ```javascript
 const acceptors = [stats.accept, description.accept];
@@ -220,18 +220,18 @@ const acceptors = [stats.accept, description.accept];
 const accept = state =>
   acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 ```
 
 This gives us a single top-level `accept` function that takes the state, calls all acceptor
-functions, and produces the updated state. We call `accept` after calling `O` in the accumulator
+functions, and produces the updated state. We call `accept` after calling `merge` in the accumulator
 function of `scan`. Note that we also call `accept` on the initial state:
 
 ```javascript
 const states = m.stream.scan(
-  (state, patch) => accept(O(state, patch)),
+  (state, patch) => accept(merge(state, patch)),
   accept(app.Initial()),
   update
 );
@@ -282,11 +282,11 @@ states.map(state =>
 
 You will find the complete example below.
 
-@flems code/services/index-patchinko.js,app.html mithril,mithril-stream,ramda,bss,patchinko 700 60
+@flems code/services/index-mergerino.js,app.html mithril,mithril-stream,ramda,bss,mergerino 700 60
 
 #### With Function Patches
 
-We can also use this approach with function patches instead of Patchinko. Remember that with
+We can also use this approach with function patches instead of Mergerino. Remember that with
 function patches, we produce functions `f(state) => updatedState` instead of object patches, and we
 wire up Meiosis like this:
 
@@ -312,7 +312,7 @@ const accept = state =>
 ```
 
 As before, we call `accept` in our `scan` accumulator, and also call `accept` on the initial state.
-The only difference is that we use `T` instead of `O` to apply a patch -- `T = (x, f) => f(x)`.
+The only difference is that we use `T` instead of `merge` to apply a patch -- `T = (x, f) => f(x)`.
 
 ```javascript
 const states = m.stream.scan(

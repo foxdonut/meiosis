@@ -1,4 +1,5 @@
-/* global React, ReactDOM, flyd, O */
+/* global React, ReactDOM, flyd, mergerino */
+const merge = mergerino;
 
 const routingAccept = state => {
   const [leave, arrive] =
@@ -156,7 +157,7 @@ const update = flyd.stream();
 const accept = state =>
   app.acceptors.reduce(
     (updatedState, acceptor) =>
-      O(updatedState, acceptor(updatedState)),
+      merge(updatedState, acceptor(updatedState)),
     state
   );
 
@@ -164,7 +165,7 @@ const accumulator = (model, patch) => {
   if (typeof patch === "function") {
     return patch(model);
   } else {
-    return O(model, patch);
+    return merge(model, patch);
   }
 };
 
@@ -189,7 +190,7 @@ const bufferedUpdate = patch => {
 
 const actions = app.Actions(bufferedUpdate);
 
-const combine = patches => model => O(model, ...patches);
+const combine = patches => patches;
 
 states.map(state => {
   buffered = true;
