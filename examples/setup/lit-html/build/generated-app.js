@@ -275,6 +275,18 @@ eval("module.exports=function(e){var t={};function n(r){if(t[r])return t[r].expo
 
 /***/ }),
 
+/***/ "./node_modules/mergerino/dist/mergerino.min.js":
+/*!******************************************************!*\
+  !*** ./node_modules/mergerino/dist/mergerino.min.js ***!
+  \******************************************************/
+/*! exports provided: SUB, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"SUB\", function() { return SUB; });\nconst e={};const SUB=t=>({s:e,r:t});const t=Object.assign||((e,t)=>(t&&Object.keys(t).forEach(o=>e[o]=t[o]),e)),o=(t,s,c)=>{const n=typeof c;if(c&&\"object\"===n)if(Array.isArray(c))for(const e of c)s=o(t,s,e);else if(c.s===e)s=c.r;else for(const n of Object.keys(c)){const f=c[n];\"function\"==typeof f?s[n]=f(s[n]):void 0===f?t&&!isNaN(n)?s.splice(n,1):delete s[n]:null===f||\"object\"!=typeof f||Array.isArray(f)?s[n]=f:f.s===e?s[n]=f.r:\"object\"==typeof s[n]?s[n]=f===s[n]?f:r(s[n],f):s[n]=o(!1,{},f)}else\"function\"===n&&(s=o(t,s,c(s)));return s},r=(e,...r)=>{const s=Array.isArray(e);return o(s,s?e.slice():t({},e),r)};/* harmony default export */ __webpack_exports__[\"default\"] = (r);\n//# sourceMappingURL=mergerino.min.js.map\n\n//# sourceURL=webpack:///./node_modules/mergerino/dist/mergerino.min.js?");
+
+/***/ }),
+
 /***/ "./node_modules/moment/locale sync recursive ^\\.\\/.*$":
 /*!**************************************************!*\
   !*** ./node_modules/moment/locale sync ^\.\/.*$ ***!
@@ -1661,17 +1673,6 @@ eval("/* WEBPACK VAR INJECTION */(function(module) {var require;//! moment.js\n\
 
 /***/ }),
 
-/***/ "./node_modules/patchinko/constant.js":
-/*!********************************************!*\
-  !*** ./node_modules/patchinko/constant.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("function O(a, b){\n  if(arguments.length == 1)\n    if(this instanceof O)\n      this.apply =\n        typeof a == 'function' ? a : function(b){\n          return O(b != null ? b : {}, a)\n        }\n\n    else\n      return new O(a)\n\n  else if(a == null)\n    return arguments.length > 2 ? O.call.apply(O, arguments) : b\n\n  else {\n    for(var i = 1; i < arguments.length; i++, b = arguments[i])\n      for(var key in b)\n        if(b.hasOwnProperty(key))\n          b[key] == O\n          ? delete a[key]\n          : a[key] =\n            b[key] instanceof O\n            ? b[key].apply(a[key])\n            : b[key]\n\n    return a\n  }\n}\n\ntry {\n  module.exports = O\n} catch(e) {}\n\n\n//# sourceURL=webpack:///./node_modules/patchinko/constant.js?");
-
-/***/ }),
-
 /***/ "./node_modules/ramda/src/curryN.js":
 /*!******************************************!*\
   !*** ./node_modules/ramda/src/curryN.js ***!
@@ -1780,7 +1781,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! patchinko/constant */ \"./node_modules/patchinko/constant.js\");\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(patchinko_constant__WEBPACK_IMPORTED_MODULE_0__);\n\nvar Actions = function Actions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(value) {\n      return update({\n        conditions: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          precipitations: value\n        })\n      });\n    },\n    changeSky: function changeSky(value) {\n      return update({\n        conditions: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          sky: value\n        })\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/conditions/actions.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\nvar Actions = function Actions(update) {\n  return {\n    togglePrecipitations: function togglePrecipitations(value) {\n      return update({\n        conditions: {\n          precipitations: value\n        }\n      });\n    },\n    changeSky: function changeSky(value) {\n      return update({\n        conditions: {\n          sky: value\n        }\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/conditions/actions.js?");
 
 /***/ }),
 
@@ -1816,7 +1817,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! patchinko/constant */ \"./node_modules/patchinko/constant.js\");\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(patchinko_constant__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _validation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../validation */ \"./src/validation/index.js\");\n\n\nvar Actions = function Actions(update) {\n  return {\n    editDate: function editDate(value) {\n      return update({\n        dateTime: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          date: value\n        })\n      });\n    },\n    editHour: function editHour(value) {\n      return update({\n        dateTime: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          hour: value\n        })\n      });\n    },\n    editMinute: function editMinute(value) {\n      return update({\n        dateTime: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          minute: value\n        })\n      });\n    },\n    validate: function validate(state) {\n      var errors = Object(_validation__WEBPACK_IMPORTED_MODULE_1__[\"validateInput\"])(state);\n      update({\n        errors: errors,\n        conditions: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          message: errors && Object.keys(errors).length > 0 && \"Invalid!\" || \"Valid!\"\n        })\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/dateTime/actions.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\n/* harmony import */ var _validation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../validation */ \"./src/validation/index.js\");\n\nvar Actions = function Actions(update) {\n  return {\n    editDate: function editDate(value) {\n      return update({\n        dateTime: {\n          date: value\n        }\n      });\n    },\n    editHour: function editHour(value) {\n      return update({\n        dateTime: {\n          hour: value\n        }\n      });\n    },\n    editMinute: function editMinute(value) {\n      return update({\n        dateTime: {\n          minute: value\n        }\n      });\n    },\n    validate: function validate(state) {\n      var errors = Object(_validation__WEBPACK_IMPORTED_MODULE_0__[\"validateInput\"])(state);\n      update({\n        errors: errors,\n        conditions: {\n          message: errors && Object.keys(errors).length > 0 && \"Invalid!\" || \"Valid!\"\n        }\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/dateTime/actions.js?");
 
 /***/ }),
 
@@ -1852,7 +1853,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(flyd__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! patchinko/constant */ \"./node_modules/patchinko/constant.js\");\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(patchinko_constant__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\n/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app */ \"./src/app/index.js\");\n\n\n\n\nvar update = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.stream();\nvar states = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.scan(patchinko_constant__WEBPACK_IMPORTED_MODULE_1___default.a, _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].Initial(), update); // Only for using Meiosis Tracer in development.\n\n__webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({\n  selector: \"#tracer\",\n  rows: 25,\n  streams: [states]\n});\n\nvar actions = _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].Actions(update);\nvar element = document.getElementById(\"app\");\nstates.map(function (state) {\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_2__[\"render\"])(Object(_app__WEBPACK_IMPORTED_MODULE_3__[\"App\"])({\n    state: state,\n    actions: actions\n  }), element);\n});\n\n//# sourceURL=webpack:///./src/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flyd */ \"./node_modules/flyd/lib/index.js\");\n/* harmony import */ var flyd__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(flyd__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var mergerino__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! mergerino */ \"./node_modules/mergerino/dist/mergerino.min.js\");\n/* harmony import */ var lit_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lit-html */ \"./node_modules/lit-html/lit-html.js\");\n/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app */ \"./src/app/index.js\");\n\n\n\n\nvar update = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.stream();\nvar states = flyd__WEBPACK_IMPORTED_MODULE_0___default.a.scan(mergerino__WEBPACK_IMPORTED_MODULE_1__[\"default\"], _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].Initial(), update); // Only for using Meiosis Tracer in development.\n\n__webpack_require__(/*! meiosis-tracer */ \"./node_modules/meiosis-tracer/lib/meiosis-tracer.js\")({\n  selector: \"#tracer\",\n  rows: 25,\n  streams: [states]\n});\n\nvar actions = _app__WEBPACK_IMPORTED_MODULE_3__[\"app\"].Actions(update);\nvar element = document.getElementById(\"app\");\nstates.map(function (state) {\n  return Object(lit_html__WEBPACK_IMPORTED_MODULE_2__[\"render\"])(Object(_app__WEBPACK_IMPORTED_MODULE_3__[\"App\"])({\n    state: state,\n    actions: actions\n  }), element);\n});\n\n//# sourceURL=webpack:///./src/index.js?");
 
 /***/ }),
 
@@ -1864,7 +1865,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var flyd
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! patchinko/constant */ \"./node_modules/patchinko/constant.js\");\n/* harmony import */ var patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(patchinko_constant__WEBPACK_IMPORTED_MODULE_0__);\n\nvar Actions = function Actions(update) {\n  return {\n    increment: function increment(amount) {\n      return update({\n        temperature: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()({\n          value: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()(function (x) {\n            return x + amount;\n          })\n        })\n      });\n    },\n    changeUnits: function changeUnits() {\n      update({\n        temperature: patchinko_constant__WEBPACK_IMPORTED_MODULE_0___default()(function (temperature) {\n          if (temperature.units === \"C\") {\n            temperature.units = \"F\";\n            temperature.value = Math.round(temperature.value * 9 / 5 + 32);\n          } else {\n            temperature.units = \"C\";\n            temperature.value = Math.round((temperature.value - 32) / 9 * 5);\n          }\n\n          return temperature;\n        })\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/temperature/actions.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Actions\", function() { return Actions; });\nvar Actions = function Actions(update) {\n  return {\n    increment: function increment(amount) {\n      return update({\n        temperature: {\n          value: function value(x) {\n            return x + amount;\n          }\n        }\n      });\n    },\n    changeUnits: function changeUnits() {\n      update({\n        temperature: function temperature(_temperature) {\n          if (_temperature.units === \"C\") {\n            _temperature.units = \"F\";\n            _temperature.value = Math.round(_temperature.value * 9 / 5 + 32);\n          } else {\n            _temperature.units = \"C\";\n            _temperature.value = Math.round((_temperature.value - 32) / 9 * 5);\n          }\n\n          return _temperature;\n        }\n      });\n    }\n  };\n};\n\n//# sourceURL=webpack:///./src/temperature/actions.js?");
 
 /***/ }),
 
