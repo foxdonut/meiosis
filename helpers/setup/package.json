@@ -34,7 +34,7 @@
     "eslint-plugin-react": "^7.13.0",
     "flyd": "^0.2.8",
     "immer": "^3.1.2",
-    "mergerino": "0.3.0",
+    "mergerino": "0.4.0",
     "mithril": "^1.1.6",
     "patchinko": "^4.1.0",
     "prettier": "1.17.1",

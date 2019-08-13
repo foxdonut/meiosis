@@ -637,7 +637,6 @@ even if a match was found in `arrive`, because both could match at the same time
 matched route segment's params to determine the `id` of the tea to load and/or unload:
 
 ```javascript
-import { DEL } from "mergerino@0.0.4";
 import { findRouteSegment, whenPresent } from "meiosis-routing/state";
 // See below for an explanation of whenPresent.
 
@@ -657,7 +656,7 @@ export const teaDetailService = ({ state, update }) => {
     findRouteSegment(state.route.leave, "TeaDetails"),
     leave => {
       const id = leave.params.id;
-      update({ tea: { [id]: DEL } });
+      update({ tea: { [id]: undefined } });
     }
   );
 };
