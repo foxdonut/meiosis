@@ -502,8 +502,7 @@ and the details are displayed on the right.</p>
 <p>While in <code>teaService</code> we had an <code>if ... else</code>, for the <code>teaDetailService</code> we need to check <code>leave</code>
 even if a match was found in <code>arrive</code>, because both could match at the same time. We can use the
 matched route segment&#39;s params to determine the <code>id</code> of the tea to load and/or unload:</p>
-<pre><code class="language-javascript">import { DEL } from &quot;mergerino@0.0.4&quot;;
-import { findRouteSegment, whenPresent } from &quot;meiosis-routing/state&quot;;
+<pre><code class="language-javascript">import { findRouteSegment, whenPresent } from &quot;meiosis-routing/state&quot;;
 // See below for an explanation of whenPresent.
 
 // teaMap is a simple id-&gt;tea lookup object.
@@ -522,7 +521,7 @@ export const teaDetailService = ({ state, update }) =&gt; {
     findRouteSegment(state.route.leave, &quot;TeaDetails&quot;),
     leave =&gt; {
       const id = leave.params.id;
-      update({ tea: { [id]: DEL } });
+      update({ tea: { [id]: undefined } });
     }
   );
 };</code></pre>
