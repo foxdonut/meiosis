@@ -52,7 +52,10 @@ without needing to add it to your page.</p>
 <p>You can
 <a href="https://chrome.google.com/webstore/detail/meiosis-tracer/lcomllmppaiciocfbeefdeoplnfpnnfl">get it from the Chrome Web Store</a>.</p>
 <p>Alternatively, you can run it directly from the source code. To do so, clone the repository:</p>
-<pre><code>git clone https://github.com/foxdonut/meiosis-tracer</code></pre><ul>
+<pre><code>git clone https://github.com/foxdonut/meiosis-tracer
+cd meiosis-tracer
+npm ci
+npm start</code></pre><ul>
 <li>In Chrome, open <code>chrome://extensions</code></li>
 <li>Press <strong>Load unpacked extension...</strong></li>
 <li>Select the <code>chrome-devtool</code> directory under <code>meiosis-tracer</code></li>
@@ -222,6 +225,12 @@ and how to emit a value onto a stream. Here is an example with RxJS:</p>
 <td>layout direction for multiple streams</td>
 <td><code>row</code>, <code>column</code>, <code>auto</code></td>
 <td><code>column</code></td>
+</tr>
+<tr>
+<td><code>theme</code></td>
+<td>add a <code>theme-&lt;name&gt;</code> class</td>
+<td>any string</td>
+<td><code>light</code></td>
 </tr>
 <tr>
 <td><code>rows</code></td>
