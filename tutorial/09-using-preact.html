@@ -51,9 +51,9 @@ to each one.</p>
     var state = this.state;
     var { actions } = this.props;
     return (&lt;div&gt;
-      &lt;Conditions state={state} actions={actions} /&gt;
-      &lt;Temperature state={state} id=&quot;air&quot; actions={actions} /&gt;
-      &lt;Temperature state={state} id=&quot;water&quot; actions={actions} /&gt;
+      &lt;Conditions state={state} id=&quot;conditions&quot; actions={actions} /&gt;
+      &lt;Temperature state={state} id=&quot;temperature:air&quot; actions={actions} /&gt;
+      &lt;Temperature state={state} id=&quot;temperature:water&quot; actions={actions} /&gt;
       &lt;pre&gt;{JSON.stringify(state, null, 4)}&lt;/pre&gt;
     &lt;/div&gt;);
   }
@@ -63,42 +63,41 @@ to each one.</p>
 butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The <code>state</code> is used to reflect the
 current state, and <code>actions</code> are called to update the state when the user changes the
 checkbox and radio buttons:</p>
-<pre><code class="language-js">var skyOption = function({ state, actions, value, label }) {
+<pre><code class="language-js">var SkyOption = function({ state, id, actions, value, label }) {
   return (&lt;label&gt;
     &lt;input type=&quot;radio&quot; id={value} name=&quot;sky&quot;
-      value={value} checked={state.conditions.sky === value}
-      onChange={evt =&gt; actions.changeSky(evt.target.value)}/&gt;
+      value={value} checked={state[id].sky === value}
+      onChange={evt =&gt; actions.changeSky(id, evt.target.value)}/&gt;
     {label}
   &lt;/label&gt;);
 };
 
 class Conditions extends preact.Component {
   render() {
-    var { state, actions } = this.props;
+    var { state, id, actions } = this.props;
     return (&lt;div&gt;
       &lt;label&gt;
         &lt;input
           type=&quot;checkbox&quot;
-          checked={state.conditions.precipitations}
+          checked={state[id].precipitations}
           onChange={evt =&gt;
-            actions.togglePrecipitations(evt.target.checked)
+            actions.togglePrecipitations(id, evt.target.checked)
           }/&gt;
         Precipitations
       &lt;/label&gt;
       &lt;div&gt;
-        {skyOption({ state, actions, value: &quot;SUNNY&quot;,
-          label: &quot;Sunny&quot;})}
-        {skyOption({ state, actions, value: &quot;CLOUDY&quot;,
-          label: &quot;Cloudy&quot;})}
-        {skyOption({ state, actions, value: &quot;MIX&quot;,
-          label: &quot;Mix of sun/clouds&quot;})}
+        &lt;SkyOption state={state} actions={actions} value=&quot;SUNNY&quot;
+          label=&quot;Sunny&quot;/&gt;
+        &lt;SkyOption state={state} actions={actions} value=&quot;CLOUDY&quot;
+          label=&quot;Cloudy&quot;/&gt;
+        &lt;SkyOption state={state} actions={actions} value=&quot;MIX&quot;
+          label=&quot;Mix of sun/clouds&quot;/&gt;
       &lt;/div&gt;
     &lt;/div&gt;);
   }
 }</code></pre>
 <p><a name="the_temperature_component"></a></p>
-<h3><a href="#the_temperature_component">The Temperature Component</a></h3><p>The <code>Temperature</code> component is similar, except that it also receives an <code>id</code> and uses it to
-read its state:</p>
+<h3><a href="#the_temperature_component">The Temperature Component</a></h3><p>The <code>Temperature</code> component is similar:</p>
 <pre><code class="language-js">class Temperature extends preact.Component {
   render() {
     var { state, id, actions } = this.props;
@@ -128,7 +127,7 @@ read its state:</p>
 <div id="flems1" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "09-using-preact-01.js", content: "/*global preact, flyd, mergerino*/\n/** @jsx preact.h */\nconst merge = mergerino;\n\nvar conditions = {\n  Initial: function() {\n    return {\n      conditions: {\n        precipitations: false,\n        sky: \"Sunny\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: { precipitations: value } });\n      },\n      changeSky: function(value) {\n        update({ conditions: { sky: value } });\n      }\n    };\n  }\n};\n\nvar skyOption = function({ state, actions, value, label }) {\n  return (\n    <label>\n      <input\n        type=\"radio\"\n        id={value}\n        name=\"sky\"\n        value={value}\n        checked={state.conditions.sky === value}\n        onChange={evt => actions.changeSky(evt.target.value)}\n      />\n      {label}\n    </label>\n  );\n};\n\nclass Conditions extends preact.Component {\n  render() {\n    var { state, actions } = this.props;\n    return (\n      <div>\n        <label>\n          <input\n            type=\"checkbox\"\n            checked={state.conditions.precipitations}\n            onChange={evt =>\n              actions.togglePrecipitations(evt.target.checked)\n            }\n          />\n          Precipitations\n        </label>\n        <div>\n          {skyOption({\n            state,\n            actions,\n            value: \"SUNNY\",\n            label: \"Sunny\"\n          })}\n          {skyOption({\n            state,\n            actions,\n            value: \"CLOUDY\",\n            label: \"Cloudy\"\n          })}\n          {skyOption({\n            state,\n            actions,\n            value: \"MIX\",\n            label: \"Mix of sun/clouds\"\n          })}\n        </div>\n      </div>\n    );\n  }\n}\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function(label) {\n    return {\n      label,\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nclass Temperature extends preact.Component {\n  render() {\n    var { state, id, actions } = this.props;\n    return (\n      <div>\n        {state[id].label} Temperature:\n        {state[id].value} &deg; {state[id].units}\n        <div>\n          <button onClick={() => actions.increment(id, 1)}>\n            Increment\n          </button>\n          <button onClick={() => actions.increment(id, -1)}>\n            Decrement\n          </button>\n        </div>\n        <div>\n          <button onClick={() => actions.changeUnits(id)}>\n            Change Units\n          </button>\n        </div>\n      </div>\n    );\n  }\n}\n\nvar app = {\n  Initial: function() {\n    return Object.assign(\n      {},\n      conditions.Initial(),\n      { air: temperature.Initial(\"Air\") },\n      { water: temperature.Initial(\"Water\") }\n    );\n  },\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nclass App extends preact.Component {\n  componentWillMount() {\n    var setState = this.setState.bind(this);\n    this.props.states.map(function(state) {\n      setState(state);\n    });\n  }\n  render() {\n    var state = this.state;\n    var { actions } = this.props;\n    return (\n      <div>\n        <Conditions state={state} actions={actions} />\n        <Temperature state={state} id=\"air\" actions={actions} />\n        <Temperature\n          state={state}\n          id=\"water\"\n          actions={actions}\n        />\n        <pre>{JSON.stringify(state, null, 4)}</pre>\n      </div>\n    );\n  }\n}\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.Initial(), update);\nvar actions = app.Actions(update);\n\npreact.render(\n  <App states={states} actions={actions} />,\n  document.getElementById(\"app\")\n);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}\ninput {\n  margin-right: 4px;\n}\nlabel {\n  margin-right: 8px;\n}\n"}],
+      files: [{name: "09-using-preact-01.js", content: "/*global preact, flyd, mergerino*/\n/** @jsx preact.h */\nconst merge = mergerino;\n\nvar conditions = {\n  Initial: function() {\n    return {\n      precipitations: false,\n      sky: \"Sunny\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(id, value) {\n        update({ [id]: { precipitations: value } });\n      },\n      changeSky: function(id, value) {\n        update({ [id]: { sky: value } });\n      }\n    };\n  }\n};\n\nvar SkyOption = function({ state, id, actions, value, label }) {\n  return (\n    <label>\n      <input\n        type=\"radio\"\n        id={value}\n        name=\"sky\"\n        value={value}\n        checked={state[id].sky === value}\n        onChange={evt =>\n          actions.changeSky(id, evt.target.value)\n        }\n      />\n      {label}\n    </label>\n  );\n};\n\nclass Conditions extends preact.Component {\n  render() {\n    var { state, id, actions } = this.props;\n    return (\n      <div>\n        <label>\n          <input\n            type=\"checkbox\"\n            checked={state[id].precipitations}\n            onChange={evt =>\n              actions.togglePrecipitations(\n                id,\n                evt.target.checked\n              )\n            }\n          />\n          Precipitations\n        </label>\n        <div>\n          <SkyOption\n            state={state}\n            id={id}\n            actions={actions}\n            value=\"SUNNY\"\n            label=\"Sunny\"\n          />\n          <SkyOption\n            state={state}\n            id={id}\n            actions={actions}\n            value=\"CLOUDY\"\n            label=\"Cloudy\"\n          />\n          <SkyOption\n            state={state}\n            id={id}\n            actions={actions}\n            value=\"MIX\"\n            label=\"Mix of sun/clouds\"\n          />\n        </div>\n      </div>\n    );\n  }\n}\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function(label) {\n    return {\n      label,\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nclass Temperature extends preact.Component {\n  render() {\n    var { state, id, actions } = this.props;\n    return (\n      <div>\n        {state[id].label} Temperature:\n        {state[id].value} &deg; {state[id].units}\n        <div>\n          <button onClick={() => actions.increment(id, 1)}>\n            Increment\n          </button>\n          <button onClick={() => actions.increment(id, -1)}>\n            Decrement\n          </button>\n        </div>\n        <div>\n          <button onClick={() => actions.changeUnits(id)}>\n            Change Units\n          </button>\n        </div>\n      </div>\n    );\n  }\n}\n\nvar app = {\n  Initial: function() {\n    return {\n      conditions: conditions.Initial(),\n      \"temperature:air\": temperature.Initial(\"Air\"),\n      \"temperature:water\": temperature.Initial(\"Water\")\n    };\n  },\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nclass App extends preact.Component {\n  componentWillMount() {\n    var setState = this.setState.bind(this);\n    this.props.states.map(function(state) {\n      setState(state);\n    });\n  }\n  render() {\n    var state = this.state;\n    var { actions } = this.props;\n    return (\n      <div>\n        <Conditions\n          state={state}\n          id=\"conditions\"\n          actions={actions}\n        />\n        <Temperature\n          state={state}\n          id=\"temperature:air\"\n          actions={actions}\n        />\n        <Temperature\n          state={state}\n          id=\"temperature:water\"\n          actions={actions}\n        />\n        <pre>{JSON.stringify(state, null, 4)}</pre>\n      </div>\n    );\n  }\n}\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.Initial(), update);\nvar actions = app.Actions(update);\n\npreact.render(\n  <App states={states} actions={actions} />,\n  document.getElementById(\"app\")\n);\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature, .humidity {\n  margin-bottom: 20px;\n}\ninput {\n  margin-right: 4px;\n}\nlabel {\n  margin-right: 8px;\n}\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "preact", type: "js", url: "https://unpkg.com/preact@8.4.2/dist/preact.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 60
     })

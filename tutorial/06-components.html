@@ -16,8 +16,8 @@
 <a href="toc.html">Table of Contents</a></p>
 <h2>06 - Components</h2><p><a name="building_components"></a></p>
 <h3><a href="#building_components">Building Components</a></h3><p>Let&#39;s continue our previous example. We already had a &quot;temperature&quot; component. We&#39;ll add a
-&quot;conditions&quot; component for the current conditions (sunny, cloudy, rain) so that our initial
-state is now:</p>
+&quot;conditions&quot; component for the current conditions (sunny, cloudy, rain) so that our initial state is
+now:</p>
 <pre><code class="language-js">{
   conditions: {
     precipitations: false,
@@ -28,9 +28,8 @@ state is now:</p>
     units: &quot;C&quot;
   }
 }</code></pre>
-<p>Each component will separately indicate its initial state and the actions that it provides.
-At the top-level app, we&#39;ll assemble these together into the complete initial state and set
-of actions.</p>
+<p>Each component will separately indicate its initial state and the actions that it provides. At the
+top-level app, we&#39;ll assemble these together into the complete initial state and set of actions.</p>
 <p>For the conditions, we have:</p>
 <pre><code class="language-js">var conditions = {
   Initial: function() {
@@ -44,10 +43,10 @@ of actions.</p>
   Actions: function(update) {
     return {
       togglePrecipitations: function(value) {
-        update({ conditions: O({ precipitations: value }) });
+        update({ conditions: { precipitations: value } });
       },
       changeSky: function(value) {
-        update({ conditions: O({ sky: value }) });
+        update({ conditions: { sky: value } });
       }
     };
   }
@@ -65,34 +64,34 @@ of actions.</p>
   Actions: function(update) {
     return {
       increment: function(amount) {
-        update({ temperature: O({ value: O(x =&gt; x + amount) }) });
+        update({ temperature: { value: x =&gt; x + amount } });
       },
       changeUnits: function() {
         update({
-          temperature: O(state =&gt; {
+          temperature: state =&gt; {
             var value = state.value;
             var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
             return state;
-          })
+          }
         });
       }
     };
   }
 };</code></pre>
-<p>Then, to assemble the components into the top-level app, we put together the state management
-code by combining the initial state and the actions of the components.</p>
+<p>Then, to assemble the components into the top-level app, we put together the state management code
+by combining the initial state and the actions of the components.</p>
 <pre><code class="language-js">var app = {
   Initial: function() {
-    return O({},
+    return Object.assign({},
       conditions.Initial(),
       temperature.Initial()
     );
   ),
   Actions: function(update) {
-    return O({},
+    return Object.assign({},
       conditions.Actions(update),
       temperature.Actions(update)
     );
@@ -109,50 +108,52 @@ code by combining the initial state and the actions of the components.</p>
   </script>
 
 
-<p>In this example, components designate a property for their state (<code>conditions</code>, <code>temperature</code>).
-What if we want to designate a property from outside the component, to make sure there are no
-conflicts? Even more significantly, what if we want to have multiple instances of a component?</p>
+<p>In this example, components designate a property for their state (<code>conditions</code>, <code>temperature</code>). What
+if we want to designate a property from outside the component, to make sure there are no conflicts?
+Even more significantly, what if we want to have multiple instances of a component?</p>
 <p><a name="using_ids_for_components"></a></p>
-<h3><a href="#using_ids_for_components">Using IDs for Components</a></h3><p>Whether it&#39;s to manage properties from outside of components, or to use multiple instances of
-a component, we can use IDs and pass them to components. Then, instead of having a hardcoded
-property in the component, the ID is used when reading and updating state.</p>
+<h3><a href="#using_ids_for_components">Using IDs for Components</a></h3><p>Whether it&#39;s to manage properties from outside of components, or to use multiple instances of a
+component, we can use IDs and pass them to components. Then, instead of having a hardcoded property
+in the component, the ID is used when reading and updating state.</p>
 <p>Continuing the previous example, let&#39;s say we want to have two instances of the <code>temperature</code>
 component: one for the air temperature and one for the water temperature. We want to use the
-<code>air</code> and <code>water</code> properties in the application state.</p>
-<p>We&#39;ll change the actions to accept an <code>id</code> parameter. Then, we use the <code>id</code> when issuing
-updates, so that we dyamically update the <code>id</code> property of the state:</p>
+<code>temperature:air</code> and <code>temperature:water</code> properties in the application state.</p>
+<p>We&#39;ll change the actions to accept an <code>id</code> parameter. Then, we use the <code>id</code> when issuing updates, so
+that we dyamically update the <code>id</code> property of the state:</p>
 <pre><code class="language-js">Actions: function(update) {
   return {
     increment: function(id, amount) {
-      update({ [id]: O({ value: O(x =&gt; x + amount) }) });
+      update({ [id]: { value: x =&gt; x + amount } });
     },
     changeUnits: function(id) {
       update({
-        [id]: O(state =&gt; {
+        [id]: state =&gt; {
           var value = state.value;
           var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
           var newValue = convert(value, newUnits);
           state.value = newValue;
           state.units = newUnits;
           return state;
-        })
+        }
       });
     }
   };
 }</code></pre>
 <p>Notice the <code>{ [id]: ... }</code> syntax which creates an object with a dynamic <code>id</code> property.</p>
-<p>Now, we create the initial state with two instances of <code>temperature</code>, one with <code>air</code>
-and one with <code>water</code>. The actions are created the same as before. Indeed, we just need
-one instance of the temperature actions; it&#39;s the <code>id</code> that we pass to the actions that
-indicates which instance to act upon.</p>
+<p>Now, we create the initial state with two instances of <code>temperature</code>, one with <code>temperature:air</code> and
+one with <code>temperature:water</code>. The actions are created the same as before. Indeed, we just need one
+instance of the temperature actions; it&#39;s the <code>id</code> that we pass to the actions that indicates which
+instance to act upon.</p>
 <pre><code class="language-js">var app = {
-  Initial: O({},
-    conditions.Initial(),
-    { air: temperature.Initial() },
-    { water: temperature.Initial() }
+  Initial: function() {
+    return {
+      &quot;conditions&quot;: conditions.Initial(),
+      &quot;temperature:air&quot;: temperature.Initial(),
+      &quot;temperature:water&quot;: temperature.Initial()
+    };
   ),
   Actions: function(update) {
-    return O({},
+    return Object.assign({},
       conditions.Actions(update),
       temperature.Actions(update)
     );
@@ -162,7 +163,7 @@ indicates which instance to act upon.</p>
 <div id="flems2" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems2, {
-      files: [{name: "06-components-02.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  Initial: function() {\n    return {\n      conditions: {\n        precipitations: false,\n        sky: \"Sunny\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: { precipitations: value } });\n      },\n      changeSky: function(value) {\n        update({ conditions: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  Initial: function() {\n    return Object.assign(\n      {},\n      conditions.Initial(),\n      { air: temperature.Initial() },\n      { water: temperature.Initial() }\n    );\n  },\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.Initial(), update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      files: [{name: "06-components-02.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  Initial: function() {\n    return {\n      precipitations: false,\n      sky: \"Sunny\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(id, value) {\n        update({ [id]: { precipitations: value } });\n      },\n      changeSky: function(id, value) {\n        update({ [id]: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  Initial: function() {\n    return {\n      conditions: conditions.Initial(),\n      \"temperature:air\": temperature.Initial(),\n      \"temperature:water\": temperature.Initial()\n    };\n  },\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.Initial(), update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 75
     })
@@ -172,9 +173,9 @@ indicates which instance to act upon.</p>
 <p><a name="exercises"></a></p>
 <h3><a href="#exercises">Exercises</a></h3><p>Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:</p>
-<p><code>actions.changeSky(&quot;Cloudy&quot;)</code></p>
-<p><code>actions.increment(&quot;air&quot;, 2)</code></p>
-<p><code>actions.changeUnits(&quot;water&quot;)</code></p>
+<p><code>actions.changeSky(&quot;conditions&quot;, &quot;Cloudy&quot;)</code></p>
+<p><code>actions.increment(&quot;temperature:air&quot;, 2)</code></p>
+<p><code>actions.changeUnits(&quot;temperature:water&quot;)</code></p>
 <p>In the output on the right, you&#39;ll see the updated states.</p>
 <p><a name="state_management_and_view_code"></a></p>
 <h3><a href="#state_management_and_view_code">State Management and View code</a></h3><p>So far, all we have is state management code; there is no view code. This is on purpose:
