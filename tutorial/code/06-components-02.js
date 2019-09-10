@@ -4,19 +4,17 @@ const merge = mergerino;
 var conditions = {
   Initial: function() {
     return {
-      conditions: {
-        precipitations: false,
-        sky: "Sunny"
-      }
+      precipitations: false,
+      sky: "Sunny"
     };
   },
   Actions: function(update) {
     return {
-      togglePrecipitations: function(value) {
-        update({ conditions: { precipitations: value } });
+      togglePrecipitations: function(id, value) {
+        update({ [id]: { precipitations: value } });
       },
-      changeSky: function(value) {
-        update({ conditions: { sky: value } });
+      changeSky: function(id, value) {
+        update({ [id]: { sky: value } });
       }
     };
   }
@@ -58,12 +56,11 @@ var temperature = {
 
 var app = {
   Initial: function() {
-    return Object.assign(
-      {},
-      conditions.Initial(),
-      { air: temperature.Initial() },
-      { water: temperature.Initial() }
-    );
+    return {
+      conditions: conditions.Initial(),
+      "temperature:air": temperature.Initial(),
+      "temperature:water": temperature.Initial()
+    };
   },
   Actions: function(update) {
     return Object.assign(

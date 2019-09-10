@@ -9,25 +9,23 @@ const merge = mergerino;
 var conditions = {
   Initial: function() {
     return {
-      conditions: {
-        precipitations: false,
-        sky: "Sunny"
-      }
+      precipitations: false,
+      sky: "Sunny"
     };
   },
   Actions: function(update) {
     return {
-      togglePrecipitations: function(value) {
-        update({ conditions: { precipitations: value } });
+      togglePrecipitations: function(id, value) {
+        update({ [id]: { precipitations: value } });
       },
-      changeSky: function(value) {
-        update({ conditions: { sky: value } });
+      changeSky: function(id, value) {
+        update({ [id]: { sky: value } });
       }
     };
   }
 };
 
-var skyOption = function({ state, actions, value, label }) {
+var skyOption = function({ state, id, actions, value, label }) {
   return html`
     <label>
       <input
@@ -35,41 +33,48 @@ var skyOption = function({ state, actions, value, label }) {
         id=${value}
         name="sky"
         value=${value}
-        .checked=${state.conditions.sky === value}
-        @change=${evt => actions.changeSky(evt.target.value)}
+        .checked=${state[id].sky === value}
+        @change=${evt =>
+          actions.changeSky(id, evt.target.value)}
       />
       ${label}
     </label>
   `;
 };
 
-var Conditions = function(state, actions) {
+var Conditions = function({ state, id, actions }) {
   return html`
     <div>
       <label>
         <input
           type="checkbox"
-          .checked=${state.conditions.precipitations}
+          .checked=${state[id].precipitations}
           @change=${evt =>
-            actions.togglePrecipitations(evt.target.checked)}
+            actions.togglePrecipitations(
+              id,
+              evt.target.checked
+            )}
         />
         Precipitations
       </label>
       <div>
         ${skyOption({
           state,
+          id,
           actions,
           value: "SUNNY",
           label: "Sunny"
         })}
         ${skyOption({
           state,
+          id,
           actions,
           value: "CLOUDY",
           label: "Cloudy"
         })}
         ${skyOption({
           state,
+          id,
           actions,
           value: "MIX",
           label: "Mix of sun/clouds"
@@ -114,7 +119,7 @@ var temperature = {
   }
 };
 
-var Temperature = function(state, id, actions) {
+var Temperature = function({ state, id, actions }) {
   return html`
     <div>
       ${state[id].label} Temperature: ${state[id].value} &deg;
@@ -138,12 +143,11 @@ var Temperature = function(state, id, actions) {
 
 var app = {
   Initial: function() {
-    return Object.assign(
-      {},
-      conditions.Initial(),
-      { air: temperature.Initial("Air") },
-      { water: temperature.Initial("Water") }
-    );
+    return {
+      conditions: conditions.Initial(),
+      "temperature:air": temperature.Initial("Air"),
+      "temperature:water": temperature.Initial("Water")
+    };
   },
   Actions: function(update) {
     return Object.assign(
@@ -157,9 +161,13 @@ var app = {
 var App = function(state, actions) {
   return html`
     <div>
-      ${Conditions(state, actions)}
-      ${Temperature(state, "air", actions)}
-      ${Temperature(state, "water", actions)}
+      ${Conditions({ state, id: "conditions", actions })}
+      ${Temperature({ state, id: "temperature:air", actions })}
+      ${Temperature({
+        state,
+        id: "temperature:water",
+        actions
+      })}
       <pre>${JSON.stringify(state, null, 4)}</pre>
     </div>
   `;

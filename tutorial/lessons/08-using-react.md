@@ -64,9 +64,9 @@ class App extends React.Component {
     var state = this.state;
     var { actions } = this.props;
     return (<div>
-      <Conditions state={state} actions={actions} />
-      <Temperature state={state} id="air" actions={actions} />
-      <Temperature state={state} id="water" actions={actions} />
+      <Conditions state={state} id="conditions" actions={actions} />
+      <Temperature state={state} id="temperature:air" actions={actions} />
+      <Temperature state={state} id="temperature:water" actions={actions} />
       <pre>{JSON.stringify(state, null, 4)}</pre>
     </div>);
   }
@@ -110,11 +110,11 @@ current state, and `actions` are called to update the state when the user change
 checkbox and radio buttons:
 
 ```js
-var skyOption = function({ state, actions, value, label }) {
+var SkyOption = function({ state, id, actions, value, label }) {
   return (<label>
     <input type="radio" id={value} name="sky"
-      value={value} checked={state.conditions.sky === value}
-      onChange={evt => actions.changeSky(evt.target.value)}/>
+      value={value} checked={state[id].sky === value}
+      onChange={evt => actions.changeSky(id, evt.target.value)}/>
     {label}
   </label>);
 };
@@ -126,19 +126,19 @@ class Conditions extends React.Component {
       <label>
         <input
           type="checkbox"
-          checked={state.conditions.precipitations}
+          checked={state[id].precipitations}
           onChange={evt =>
-            actions.togglePrecipitations(evt.target.checked)
+            actions.togglePrecipitations(id, evt.target.checked)
           }/>
         Precipitations
       </label>
       <div>
-        {skyOption({ state, actions, value: "SUNNY",
-          label: "Sunny"})}
-        {skyOption({ state, actions, value: "CLOUDY",
-          label: "Cloudy"})}
-        {skyOption({ state, actions, value: "MIX",
-          label: "Mix of sun/clouds"})}
+        <SkyOption state={state} actions={actions} value="SUNNY"
+          label="Sunny"/>
+        <SkyOption state={state} actions={actions} value="CLOUDY"
+          label="Cloudy"/>
+        <SkyOption state={state} actions={actions} value="MIX"
+          label="Mix of sun/clouds"/>
       </div>
     </div>);
   }
@@ -148,8 +148,7 @@ class Conditions extends React.Component {
 <a name="the_temperature_component"></a>
 ### [The Temperature Component](#the_temperature_component)
 
-The `Temperature` component is similar, except that it also receives an `id` and uses it to
-read its state:
+The `Temperature` component is similar:
 
 ```js
 class Temperature extends React.Component {

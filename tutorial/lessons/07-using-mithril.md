@@ -6,18 +6,18 @@
 
 ## 07 - Using Mithril
 
-In the [06 - Components](06-components.html) lesson, we created the state management
-code for an example with a `conditions` component and two temperature components, `air` and
-`water`.
+In the [06 - Components](06-components.html) lesson, we created the state management code for an
+example with a `conditions` component and two temperature components, `temperature:air` and
+`temperature:water`.
 
 In this section, we'll wire this up to [Mithril](http://mithril.js.org/).
 
 <a name="mithril_stream"></a>
 ### [Mithril Stream](#mithril_stream)
 
-First, we can use [Mithril Stream](https://mithril.js.org/stream.html) as a stream library.
-For our purposes, it works just like `flyd`. The only difference is that you call `m.stream()`
-instead of `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
+First, we can use [Mithril Stream](https://mithril.js.org/stream.html) as a stream library. For our
+purposes, it works just like `flyd`. The only difference is that you call `m.stream()` instead of
+`flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
 <a name="wiring_meiosis"></a>
 ### [Wiring Meiosis](#wiring_meiosis)
@@ -42,25 +42,24 @@ m.mount(document.getElementById("app"), {
 
 We are calling `states()` to get the latest from the stream and pass it as the `state` attribute.
 
-With Mithril's
-[auto-redraw system](https://mithril.js.org/autoredraw.html), the view is automatically
-re-rendered after user interaction.
+With Mithril's [auto-redraw system](https://mithril.js.org/autoredraw.html), the view is
+automatically re-rendered after user interaction.
 
 <a name="the_app_component"></a>
 ### [The App Component](#the_app_component)
 
-The `App` component retrieves `state` and `actions` from the passed-in attributes. We pass these
-on to other components, in this case `Conditions` and `Temperature`. Notice that we have two
-instances of `Temperature`, and we pass a different `id` to each one.
+The `App` component retrieves `state` and `actions` from the passed-in attributes. We pass these on
+to other components, in this case `Conditions` and `Temperature`. Notice that we have two instances
+of `Temperature`, and we pass a different `id` to each one.
 
 ```js
 var App = {
   view: function(vnode) {
     var { state, actions } = vnode.attrs;
     return m("div",
-      m(Conditions, { state, actions }),
-      m(Temperature, { state, id: "air", actions }),
-      m(Temperature, { state, id: "water", actions }),
+      m(Conditions, { state, id: "conditions", actions }),
+      m(Temperature, { state, id: "temperature:air", actions }),
+      m(Temperature, { state, id: "temperature:water", actions }),
       m("pre", JSON.stringify(state, null, 4))
     );
   }
@@ -70,17 +69,16 @@ var App = {
 <a name="the_conditions_component"></a>
 ### [The Conditions Component](#the_conditions_component)
 
-The `Conditions` component displays a checkbox for "precipitations" and a series of radio
-butons for the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the
-current state, and `actions` are called to update the state when the user changes the
-checkbox and radio buttons:
+The `Conditions` component displays a checkbox for "precipitations" and a series of radio butons for
+the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the current state, and
+`actions` are called to update the state when the user changes the checkbox and radio buttons:
 
 ```js
-var skyOption = function({ state, actions, value, label }) {
+var skyOption = function({ state, id, actions, value, label }) {
   return m("label",
     m("input", { type: "radio", id: value, name: "sky",
-      value, checked: state.conditions.sky === value,
-      onchange: evt => actions.changeSky(evt.target.value)
+      value, checked: state[id].sky === value,
+      onchange: evt => actions.changeSky(id, evt.target.value)
     }),
     label
   );
@@ -88,23 +86,23 @@ var skyOption = function({ state, actions, value, label }) {
 
 var Conditions = {
   view: function(vnode) {
-    var { state, actions } = vnode.attrs;
+    var { state, id, actions } = vnode.attrs;
     return m("div",
       m("label",
         m("input", {
           type: "checkbox",
-          checked: state.conditions.precipitations,
+          checked: state[id].precipitations,
           onchange: evt =>
-            actions.togglePrecipitations(evt.target.checked)
+            actions.togglePrecipitations(id, evt.target.checked)
         }),
         "Precipitations"
       ),
       m("div",
-        skyOption({ state, actions, value: "SUNNY",
+        skyOption({ state, id, actions, value: "SUNNY",
           label: "Sunny"}),
-        skyOption({ state, actions, value: "CLOUDY",
+        skyOption({ state, id, actions, value: "CLOUDY",
           label: "Cloudy"}),
-        skyOption({ state, actions, value: "MIX",
+        skyOption({ state, id, actions, value: "MIX",
           label: "Mix of sun/clouds"})
       )
     );
@@ -115,8 +113,7 @@ var Conditions = {
 <a name="the_temperature_component"></a>
 ### [The Temperature Component](#the_temperature_component)
 
-The `Temperature` component is similar, except that it also receives an `id` and uses it to
-read its state:
+The `Temperature` component is similar:
 
 ```js
 var Temperature = {
@@ -150,21 +147,20 @@ You can see the complete example below.
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)
 
-We can wire up Meiosis to Mithril using `m.mount` and passing `state` from the latest value
-of the `states` stream, along with `actions`, to the top-level Mithril component.
+We can wire up Meiosis to Mithril using `m.mount` and passing `state` from the latest value of the
+`states` stream, along with `actions`, to the top-level Mithril component.
 
-Then, all Mithril components in the application are consistent: they all receive `state`
-and `actions`. When rendering other components, `state` and `actions` are passed along. When
-a component is used multiple times, or when you want to define the state property outside of
-the component, you also pass the `id`.
+Then, all Mithril components in the application are consistent: they all receive `state` and
+`actions`. When rendering other components, `state` and `actions` are passed along. When a component
+is used multiple times, or when you want to define the state property outside of the component, you
+also pass the `id`.
 
-Components can then use the `state` to render the view according to the current application
-state, and call `actions` to trigger changes. Because of Mithril's
-[auto-redraw system](https://mithril.js.org/autoredraw.html), the view is automatically
-re-rendered. Of course, if you trigger state changes outside of Mithril's auto-redraw
-(see
-[When Mithril does not redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw))
-you have to call `m.redraw()` yourself.
+Components can then use the `state` to render the view according to the current application state,
+and call `actions` to trigger changes. Because of Mithril's
+[auto-redraw system](https://mithril.js.org/autoredraw.html), the view is automatically re-rendered.
+Of course, if you trigger state changes outside of Mithril's auto-redraw (see [When Mithril does not
+redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw)) you have to call
+`m.redraw()` yourself.
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)

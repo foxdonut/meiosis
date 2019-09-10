@@ -43,9 +43,9 @@ of `Temperature`, and we also pass a different `id` to each one.
 ```js
 var App = function(state, actions) {
   return html`<div>
-    ${Conditions(state, actions)}
-    ${Temperature(state, "air", actions)}
-    ${Temperature(state, "water", actions)}
+    ${Conditions({ state, id: "conditions", actions })}
+    ${Temperature({ state, id: "temperature:air", actions })}
+    ${Temperature({ state, id: "temperature:water", actions })}
     <pre>${JSON.stringify(state, null, 4)}</pre>
   </div>`;
 };
@@ -60,32 +60,32 @@ current state, and `actions` are called to update the state when the user change
 checkbox and radio buttons:
 
 ```js
-var skyOption = function({ state, actions, value, label }) {
+var skyOption = function({ state, id, actions, value, label }) {
   return html`<label>
     <input type="radio" id=${value} name="sky"
-      value=${value} .checked=${state.conditions.sky === value}
-      @change=${evt => actions.changeSky(evt.target.value)}/>
+      value=${value} .checked=${state[id].sky === value}
+      @change=${evt => actions.changeSky(id, evt.target.value)}/>
     ${label}
   </label>`;
 };
 
-var Conditions = function(state, actions) {
+var Conditions = function({ state, id, actions }) {
   return html`<div>
     <label>
       <input
         type="checkbox"
-        .checked=${state.conditions.precipitations}
+        .checked=${state[id].precipitations}
         @change=${evt =>
-          actions.togglePrecipitations(evt.target.checked)
+          actions.togglePrecipitations(id, evt.target.checked)
         }/>
       Precipitations
     </label>
     <div>
-      ${skyOption({ state, actions, value: "SUNNY",
+      ${skyOption({ state, id, actions, value: "SUNNY",
         label: "Sunny"})}
-      ${skyOption({ state, actions, value: "CLOUDY",
+      ${skyOption({ state, id, actions, value: "CLOUDY",
         label: "Cloudy"})}
-      ${skyOption({ state, actions, value: "MIX",
+      ${skyOption({ state, id, actions, value: "MIX",
         label: "Mix of sun/clouds"})}
     </div>
   </div>`;
@@ -95,11 +95,10 @@ var Conditions = function(state, actions) {
 <a name="the_temperature_view_function"></a>
 ### [The Temperature View Function](#the_temperature_view_function)
 
-The `Temperature` view function is similar, except that it also receives an `id` and uses it to
-read its state:
+The `Temperature` view function is similar:
 
 ```js
-var Temperature = function(state, id, actions) {
+var Temperature = function({ state, id, actions }) {
   return html`<div>
     ${state[id].label} Temperature:
     ${state[id].value} &deg; ${state[id].units}

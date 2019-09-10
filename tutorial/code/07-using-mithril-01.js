@@ -4,25 +4,23 @@ const merge = mergerino;
 var conditions = {
   Initial: function() {
     return {
-      conditions: {
-        precipitations: false,
-        sky: "Sunny"
-      }
+      precipitations: false,
+      sky: "Sunny"
     };
   },
   Actions: function(update) {
     return {
-      togglePrecipitations: function(value) {
-        update({ conditions: { precipitations: value } });
+      togglePrecipitations: function(id, value) {
+        update({ [id]: { precipitations: value } });
       },
-      changeSky: function(value) {
-        update({ conditions: { sky: value } });
+      changeSky: function(id, value) {
+        update({ [id]: { sky: value } });
       }
     };
   }
 };
 
-var skyOption = function({ state, actions, value, label }) {
+var skyOption = function({ state, id, actions, value, label }) {
   return m(
     "label",
     m("input", {
@@ -30,24 +28,24 @@ var skyOption = function({ state, actions, value, label }) {
       id: value,
       name: "sky",
       value,
-      checked: state.conditions.sky === value,
-      onchange: evt => actions.changeSky(evt.target.value)
+      checked: state[id].sky === value,
+      onchange: evt => actions.changeSky(id, evt.target.value)
     }),
     label
   );
 };
 
 var Conditions = {
-  view: function({ attrs: { state, actions } }) {
+  view: function({ attrs: { state, id, actions } }) {
     return m(
       "div",
       m(
         "label",
         m("input", {
           type: "checkbox",
-          checked: state.conditions.precipitations,
+          checked: state[id].precipitations,
           onchange: evt =>
-            actions.togglePrecipitations(evt.target.checked)
+            actions.togglePrecipitations(id, evt.target.checked)
         }),
         "Precipitations"
       ),
@@ -56,17 +54,20 @@ var Conditions = {
         skyOption({
           state,
           actions,
+          id,
           value: "SUNNY",
           label: "Sunny"
         }),
         skyOption({
           state,
+          id,
           actions,
           value: "CLOUDY",
           label: "Cloudy"
         }),
         skyOption({
           state,
+          id,
           actions,
           value: "MIX",
           label: "Mix of sun/clouds"
@@ -147,12 +148,11 @@ var Temperature = {
 
 var app = {
   Initial: function() {
-    return Object.assign(
-      {},
-      conditions.Initial(),
-      { air: temperature.Initial("Air") },
-      { water: temperature.Initial("Water") }
-    );
+    return {
+      conditions: conditions.Initial(),
+      "temperature:air": temperature.Initial("Air"),
+      "temperature:water": temperature.Initial("Water")
+    };
   },
   Actions: function(update) {
     return Object.assign(
@@ -167,9 +167,13 @@ var App = {
   view: function({ attrs: { state, actions } }) {
     return m(
       "div",
-      m(Conditions, { state, actions }),
-      m(Temperature, { state, id: "air", actions }),
-      m(Temperature, { state, id: "water", actions }),
+      m(Conditions, { state, id: "conditions", actions }),
+      m(Temperature, { state, id: "temperature:air", actions }),
+      m(Temperature, {
+        state,
+        id: "temperature:water",
+        actions
+      }),
       m("pre", JSON.stringify(state, null, 4))
     );
   }

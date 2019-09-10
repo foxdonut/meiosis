@@ -4,25 +4,23 @@ const merge = mergerino;
 var conditions = {
   Initial: function() {
     return {
-      conditions: {
-        precipitations: false,
-        sky: "Sunny"
-      }
+      precipitations: false,
+      sky: "Sunny"
     };
   },
   Actions: function(update) {
     return {
-      togglePrecipitations: function(value) {
-        update({ conditions: { precipitations: value } });
+      togglePrecipitations: function(id, value) {
+        update({ [id]: { precipitations: value } });
       },
-      changeSky: function(value) {
-        update({ conditions: { sky: value } });
+      changeSky: function(id, value) {
+        update({ [id]: { sky: value } });
       }
     };
   }
 };
 
-var skyOption = function({ state, actions, value, label }) {
+var SkyOption = function({ state, id, actions, value, label }) {
   return (
     <label>
       <input
@@ -30,8 +28,10 @@ var skyOption = function({ state, actions, value, label }) {
         id={value}
         name="sky"
         value={value}
-        checked={state.conditions.sky === value}
-        onChange={evt => actions.changeSky(evt.target.value)}
+        checked={state[id].sky === value}
+        onChange={evt =>
+          actions.changeSky(id, evt.target.value)
+        }
       />
       {label}
     </label>
@@ -40,38 +40,44 @@ var skyOption = function({ state, actions, value, label }) {
 
 class Conditions extends React.Component {
   render() {
-    var { state, actions } = this.props;
+    var { state, id, actions } = this.props;
     return (
       <div>
         <label>
           <input
             type="checkbox"
-            checked={state.conditions.precipitations}
+            checked={state[id].precipitations}
             onChange={evt =>
-              actions.togglePrecipitations(evt.target.checked)
+              actions.togglePrecipitations(
+                id,
+                evt.target.checked
+              )
             }
           />
           Precipitations
         </label>
         <div>
-          {skyOption({
-            state,
-            actions,
-            value: "SUNNY",
-            label: "Sunny"
-          })}
-          {skyOption({
-            state,
-            actions,
-            value: "CLOUDY",
-            label: "Cloudy"
-          })}
-          {skyOption({
-            state,
-            actions,
-            value: "MIX",
-            label: "Mix of sun/clouds"
-          })}
+          <SkyOption
+            state={state}
+            id={id}
+            actions={actions}
+            value="SUNNY"
+            label="Sunny"
+          />
+          <SkyOption
+            state={state}
+            id={id}
+            actions={actions}
+            value="CLOUDY"
+            label="Cloudy"
+          />
+          <SkyOption
+            state={state}
+            id={id}
+            actions={actions}
+            value="MIX"
+            label="Mix of sun/clouds"
+          />
         </div>
       </div>
     );
@@ -140,12 +146,11 @@ class Temperature extends React.Component {
 
 var app = {
   Initial: function() {
-    return Object.assign(
-      {},
-      conditions.Initial(),
-      { air: temperature.Initial("Air") },
-      { water: temperature.Initial("Water") }
-    );
+    return {
+      conditions: conditions.Initial(),
+      "temperature:air": temperature.Initial("Air"),
+      "temperature:water": temperature.Initial("Water")
+    };
   },
   Actions: function(update) {
     return Object.assign(
@@ -172,11 +177,19 @@ class App extends React.Component {
     var { actions } = this.props;
     return (
       <div>
-        <Conditions state={state} actions={actions} />
-        <Temperature state={state} id="air" actions={actions} />
+        <Conditions
+          state={state}
+          id="conditions"
+          actions={actions}
+        />
         <Temperature
           state={state}
-          id="water"
+          id="temperature:air"
+          actions={actions}
+        />
+        <Temperature
+          state={state}
+          id="temperature:water"
           actions={actions}
         />
         <pre>{JSON.stringify(state, null, 4)}</pre>
