@@ -91,7 +91,7 @@ merge({ value: 22, units: "C" }, { value: x => x + 1 }) // The function receives
 > Note that `x => x + 1` is ES6 syntax that is short for
 ```js
 function(x) {
-  return + 1;
+  return x + 1;
 }
 ```
 
