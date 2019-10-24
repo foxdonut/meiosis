@@ -1315,6 +1315,10 @@ The complete example is shown below.
 
 @flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-acceptors.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 07-app.js
 
+The example below is an experimental, slightly different approach to Meiosis.
+
+@flems code/routing/08-meiosis.js,code/routing/08-routes.js,code/routing/08-components.js,code/routing/08-services.js,code/routing/08-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-routing 700 60 08-app.js
+
 [Section Contents](#section_contents)
 
 [Table of Contents](toc.html)
