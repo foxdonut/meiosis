@@ -19,7 +19,7 @@ window.Meiosis = {
               context
             );
 
-            if (updatedContext.merge) {
+            if (updatedContext.mergePatch) {
               updatedContext.state = merge(
                 updatedContext.state,
                 context.patch
@@ -34,7 +34,7 @@ window.Meiosis = {
                 state: context.state,
                 patch,
                 render: true,
-                merge: true,
+                mergePatch: true,
                 next: []
               }),
             { state: initialState },

@@ -27,8 +27,7 @@ export const loginService = ({ state, patch }) => {
     !confirm("You have unsaved data. Continue?")
   ) {
     return {
-      state: { route: [previousLogin] },
-      merge: false
+      mergePatch: false
     };
   }
 
