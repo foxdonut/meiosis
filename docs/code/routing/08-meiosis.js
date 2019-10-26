@@ -10,20 +10,55 @@ window.Meiosis = {
         .then(initialState => {
           const update = stream();
           const actions = (Actions || (() => ({})))(update);
+          // FIXME: run services on initial state
           const states = stream(initialState);
 
           const updateState = context => {
             const updatedContext = services.reduce(
-              (result, service) =>
-                merge(result, service(result)),
+              (result, service) => {
+                if (result.abort) {
+                  return result;
+                }
+                if (!result.patch) {
+                  return merge(result, { abort: true });
+                }
+
+                const serviceUpdate = service(result);
+
+                if (serviceUpdate) {
+                  if (serviceUpdate.next) {
+                    serviceUpdate.next = arr =>
+                      arr.concat(serviceUpdate.next);
+                  }
+                  if (serviceUpdate.patch) {
+                    return merge(result, serviceUpdate, {
+                      abort: true
+                    });
+                  }
+                  return merge(result, serviceUpdate);
+                }
+                return result;
+              },
               context
             );
 
-            if (updatedContext.mergePatch) {
-              updatedContext.state = merge(
-                updatedContext.state,
-                context.patch
-              );
+            if (updatedContext.abort) {
+              if (updatedContext.patch) {
+                return updateState({
+                  previousState: context.previousState,
+                  state: merge(
+                    context.previousState,
+                    updatedContext.patch
+                  ),
+                  patch: updatedContext.patch,
+                  render: true,
+                  next: []
+                });
+              }
+              return merge(updatedContext, {
+                render: false,
+                next: []
+              });
             }
             return updatedContext;
           };
@@ -31,10 +66,11 @@ window.Meiosis = {
           const contexts = stream.scan(
             (context, patch) =>
               updateState({
-                state: context.state,
+                previousState: context.state,
+                state: merge(context.state, patch),
                 patch,
                 render: true,
-                mergePatch: true,
+                abort: false,
                 next: []
               }),
             { state: initialState },

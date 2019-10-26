@@ -27,7 +27,7 @@ export const loginService = ({ state, patch }) => {
     !confirm("You have unsaved data. Continue?")
   ) {
     return {
-      mergePatch: false
+      patch: null
     };
   }
 
@@ -52,17 +52,16 @@ export const settingsService = ({ state, patch }) => {
   ) {
     return {
       render: false,
-      next: arr =>
-        arr.concat(({ update }) => {
-          update({
-            route: [
-              Route.Login({
-                message: "Please login.",
-                returnTo: Route.Settings()
-              })
-            ]
-          });
-        })
+      next: ({ update }) => {
+        update({
+          route: [
+            Route.Login({
+              message: "Please login.",
+              returnTo: Route.Settings()
+            })
+          ]
+        });
+      }
     };
   }
 };
@@ -124,12 +123,10 @@ export const teaService = ({ state, patch }) => {
   // FIXME: loads even when already on page
   if (findRouteSegment(patch.route, "Tea")) {
     return {
-      next: arr =>
-        arr.concat(({ update }) =>
-          setTimeout(() => {
-            update({ teas });
-          }, 500)
-        )
+      next: ({ update }) =>
+        setTimeout(() => {
+          update({ teas });
+        }, 500)
     };
   } else if (
     // FIXME
