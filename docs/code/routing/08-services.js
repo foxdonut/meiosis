@@ -8,13 +8,18 @@ const {
 
 import { Route } from "./08-routes";
 
-export const loginService = ({ state, patch }) => {
+export const loginService = ({
+  state,
+  patch,
+  previousState
+}) => {
   const currentLogin = findRouteSegment(
     patch.route,
     "Login"
   );
+  // FIXME: route navigation
   const previousLogin = findRouteSegment(
-    state.route,
+    previousState.route,
     "Login"
   );
 
@@ -50,6 +55,7 @@ export const settingsService = ({ state, patch }) => {
     findRouteSegment(patch.route, "Settings") &&
     !state.user
   ) {
+    /*
     return {
       render: false,
       next: ({ update }) => {
@@ -61,6 +67,17 @@ export const settingsService = ({ state, patch }) => {
             })
           ]
         });
+      }
+    };
+    */
+    return {
+      patch: {
+        route: [
+          Route.Login({
+            message: "Please login.",
+            returnTo: Route.Settings()
+          })
+        ]
       }
     };
   }
