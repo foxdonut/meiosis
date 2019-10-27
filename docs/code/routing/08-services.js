@@ -161,9 +161,7 @@ const teaDetailArrive = ({ patch }) => {
     arrive => {
       const id = arrive.params.id;
       const description = teaMap[id].description;
-      return {
-        state: { tea: { [id]: description } }
-      };
+      return { tea: { [id]: description } };
     }
   );
 };
@@ -181,19 +179,19 @@ const teaDetailLeave = ({ state, patch }) => {
         )
       ) {
         const id = leave.params.id;
-        return {
-          state: { tea: { [id]: undefined } }
-        };
+        return { tea: { [id]: undefined } };
       }
     }
   );
 };
 
 export const teaDetailService = context => {
-  return [
-    teaDetailArrive(context),
-    teaDetailLeave(context)
-  ];
+  return {
+    state: [
+      teaDetailArrive(context),
+      teaDetailLeave(context)
+    ]
+  };
 };
 
 export const beverageService = ({ state, update }) => {

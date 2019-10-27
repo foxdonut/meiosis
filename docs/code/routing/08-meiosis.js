@@ -1,9 +1,12 @@
 window.Meiosis = {
-  mergerino: {
-    setup: function({ stream, merge, app }) {
+  common: {
+    setup: function({ stream, accumulator, combine, app }) {
       app = app || {};
       let { Initial, services, Actions } = app;
       services = services || [];
+      const Oa = Object.assign;
+      const singlePatch = patch =>
+        Array.isArray(patch) ? combine(patch) : patch;
 
       return Promise.resolve()
         .then(Initial)
@@ -22,26 +25,33 @@ window.Meiosis = {
                 }
                 // If a service returned a null patch, skip rest of services
                 if (!result.patch) {
-                  return merge(result, { abort: true });
+                  return Oa(result, { abort: true });
                 }
 
                 const serviceUpdate = service(result);
 
                 if (serviceUpdate) {
                   if (serviceUpdate.next) {
-                    const fn = serviceUpdate.next;
-                    serviceUpdate.next = arr =>
-                      arr.concat(fn);
+                    result.next.push(serviceUpdate.next);
+                    delete serviceUpdate.next;
                   }
                   // If a service returns a different patch, abort rest of
                   // services. We'll issue the patch again to run the services
                   // from the start.
                   if (serviceUpdate.patch) {
-                    return merge(result, serviceUpdate, {
+                    return Oa(result, serviceUpdate, {
                       abort: true
                     });
                   }
-                  return merge(result, serviceUpdate);
+                  if (serviceUpdate.state) {
+                    return Oa(result, serviceUpdate, {
+                      state: accumulator(
+                        result.state,
+                        singlePatch(serviceUpdate.state)
+                      )
+                    });
+                  }
+                  return Oa(result, serviceUpdate);
                 }
                 return result;
               },
@@ -54,9 +64,9 @@ window.Meiosis = {
               if (updatedContext.patch) {
                 return updateState({
                   previousState: context.previousState,
-                  state: merge(
+                  state: accumulator(
                     context.previousState,
-                    updatedContext.patch
+                    singlePatch(updatedContext.patch)
                   ),
                   patch: updatedContext.patch,
                   render: true,
@@ -64,7 +74,7 @@ window.Meiosis = {
                 });
               }
               // If a service issued a null patch, cancel the original patch
-              return merge(updatedContext, {
+              return Oa(updatedContext, {
                 render: false,
                 next: []
               });
@@ -81,7 +91,10 @@ window.Meiosis = {
               // next services in the list.
               updateState({
                 previousState: context.state,
-                state: merge(context.state, patch),
+                state: accumulator(
+                  context.state,
+                  singlePatch(patch)
+                ),
                 patch,
                 render: true,
                 abort: false,
@@ -109,6 +122,16 @@ window.Meiosis = {
 
           return { update, contexts, states, actions };
         });
+    }
+  },
+  mergerino: {
+    setup: function({ stream, merge, app }) {
+      return window.Meiosis.common.setup({
+        stream,
+        accumulator: merge,
+        combine: patches => patches,
+        app
+      });
     }
   }
 };
