@@ -7,10 +7,8 @@
  * be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
- * @property {Array<Function>} [acceptors=[]] - an array of acceptor functions, each of which
- * should be `state => patch` or `state => [patch]`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
- * should be `({ state, update, actions }) => void`.
+ * should be `({ state, patch, previousState }) => ({ state?, patch?, render?, next? })`.
  */
 
 /**
@@ -47,9 +45,8 @@
  */
 export default ({ stream, accumulator, combine, app }) => {
   app = app || {};
-  let { Initial, acceptors, services, Actions } = app;
+  let { Initial, Actions, services } = app;
   Initial = Initial || (() => ({}));
-  acceptors = acceptors || [];
   services = services || [];
 
   if (!stream) {
@@ -63,75 +60,96 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
-
-  const accept =
-    acceptors.length > 0
-      ? model =>
-          acceptors.reduce((mdl, acceptor) => accumulator(mdl, singlePatch(acceptor(mdl))), model)
-      : x => x;
+  const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
+  const Oa = Object.assign;
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
-  const hasServices = services.length > 0;
 
   return Promise.resolve()
     .then(Initial)
     .then(initialState => {
       const update = createStream();
+      const actions = (Actions || (() => ({})))(update);
+      const states = createStream();
 
-      const models = scan(
-        (model, patch) => accept(accumulator(model, singlePatch(patch))),
-        accept(initialState),
+      // context is { state, patch, previousState }
+      // should return { state, render, next }
+      const updateState = context => {
+        let updatedContext = context;
+
+        for (let i = 0; i < services.length; i++) {
+          // a service should return { state, patch, render, next } (all optional)
+          const serviceUpdate = services[i](updatedContext);
+
+          if (serviceUpdate) {
+            // If a service cancelled a patch, abort
+            if (serviceUpdate.patch === false) {
+              return {
+                render: false,
+                state: context.previousState,
+                next: []
+              };
+            }
+            // If a service changed a patch, abort current and issue the new patch
+            if (serviceUpdate.patch) {
+              return {
+                render: false,
+                state: context.previousState,
+                next: [({ update }) => update(serviceUpdate.patch)]
+              };
+            }
+            // Append next function
+            if (serviceUpdate.next) {
+              updatedContext.next.push(serviceUpdate.next);
+              delete serviceUpdate.next;
+            }
+            // Update the context
+            updatedContext = Oa(updatedContext, serviceUpdate, {
+              state: accumulatorFn(updatedContext.state, serviceUpdate.state)
+            });
+          }
+        }
+        return updatedContext;
+      };
+
+      const contexts = scan(
+        (context, patch) =>
+          // Patch is merged in to the state by default
+          // Services have access to the previous state
+          // and can cancel or alter the original patch.
+          // State changes by services are available to the
+          // next services in the list.
+          updateState({
+            previousState: context.state,
+            state: accumulatorFn(context.state, patch),
+            patch,
+            render: true,
+            next: []
+          }),
+        { state: initialState },
         update
       );
 
-      let buffered = false,
-        buffer = [],
-        serviceUpdate = false;
+      contexts.map(context => {
+        if (context.render) {
+          states(context.state);
+        }
+        if (context.next) {
+          context.next.forEach(service => {
+            service({
+              state: context.state,
+              update,
+              patch: update(), // FIXME
+              actions
+            });
+          });
+        }
+      });
 
-      const bufferedUpdate = hasServices
-        ? patch => {
-            if (buffered) {
-              buffer.push(patch);
-            } else {
-              update(patch);
-            }
-          }
-        : update;
+      // initial state
+      update(false);
 
-      const states = hasServices ? createStream(models()) : models;
-      const actions = (Actions || (() => ({})))(bufferedUpdate);
-
-      if (hasServices) {
-        models.map(state => {
-          // If the call comes from a service update, we just want to emit the resulting state.
-          if (serviceUpdate) {
-            serviceUpdate = false;
-            states(state);
-          } else {
-            buffered = true;
-            buffer = [];
-
-            services.forEach(service => service({ state, update: bufferedUpdate, actions }));
-            buffered = false;
-
-            if (buffer.length > 0) {
-              // Services produced patches, issue an update and emit the resulting state.
-              serviceUpdate = true;
-              update(combine(buffer));
-            } else {
-              // No service updates, just emit the resulting state.
-              states(state);
-            }
-          }
-        });
-      }
-
-      return {
-        update,
-        models,
-        states,
-        actions
-      };
+      return { update, contexts, states, actions };
     });
 };

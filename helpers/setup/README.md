@@ -21,7 +21,6 @@ Using a `script` tag:
 Using the `script` tag exposes a `Meiosis` global, under which the helper functions are
 provided:
 
-- `patchinko.setup`
 - `mergerino.setup`
 - `functionPatches.setup`
 - `immer.setup`
@@ -45,32 +44,6 @@ For the stream library, you can use `Meiosis.simpleStream`,
 [Flyd](https://github.com/paldepind/flyd), or [Mithril-Stream](https://mithril.js.org/stream.html)
 out-of-the-box. You can also use another stream library; see
 [Using another stream library](#other_stream_library), below.
-
-### Patchinko Setup
-
-To use [Patchinko](https://github.com/barneycarroll/patchinko):
-
-```javascript
-import meiosisPatchinko from "meiosis-setup/patchinko";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-import O from "patchinko/constant";
-// or
-// import O from "patchinko/immutable";
-// or
-// import P from "patchinko/explicit";
-
-const app = {};
-
-meiosisPatchinko({ stream: simpleStream, O, app })
-  .then(({ update, models, states, actions }) => {
-    // setup your view here
-  })
-```
 
 ### Mergerino Setup
 
@@ -165,8 +138,6 @@ do is specify the `accumulator` function and, optionally, the `combine` function
 - `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
 patch (the patch being in whatever form you decide to use), and returns the updated state.
 
-    For example, with Patchinko, the `accumulator` is `O`.
-
     With Mergerino, the `accumulator` is `merge`.
 
     With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
@@ -175,9 +146,6 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
 - `combine`: the `combine` function is of the form `([patches]) => patch`, combining an array of
 patches into a single patch.
-
-    For example, with Patchinko,
-    `combine: patches => model => O(model, ...patches)`
 
     With Mergerino:
     `combine: patches => patches``

@@ -1,6 +1,6 @@
 {
   "name": "meiosis-setup",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Meiosis Helpers - setup",
   "main": "dist/meiosis-setup.js",
   "scripts": {
@@ -26,25 +26,24 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "buble": "^0.19.7",
+    "buble": "^0.19.8",
     "documentation": "^11.0.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.13.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-react": "^7.16.0",
     "flyd": "^0.2.8",
-    "immer": "^3.1.2",
+    "immer": "^4.0.2",
     "mergerino": "0.4.0",
-    "mithril": "^1.1.6",
-    "patchinko": "^4.1.0",
+    "mithril": "^2.0.4",
     "prettier": "1.17.1",
     "ramda": "^0.26.1",
-    "rollup": "^1.13.0",
-    "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-commonjs": "^10.0.0",
-    "rollup-plugin-node-resolve": "^5.0.1",
-    "rollup-plugin-uglify": "^6.0.2",
+    "rollup": "^1.26.0",
+    "rollup-plugin-buble": "^0.19.8",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-uglify": "^6.0.3",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.2"
+    "tape": "^4.11.0"
   }
 }

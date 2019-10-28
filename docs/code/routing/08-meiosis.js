@@ -113,7 +113,7 @@ window.Meiosis = {
                 service({
                   state: context.state,
                   update,
-                  patch: update(),
+                  patch: update(), // FIXME
                   actions
                 });
               });
