@@ -48,6 +48,10 @@ Type: [Object][25]
 Base helper to setup the Meiosis pattern. If you are using Patchinko, Function Patches,
 or Immer, use their respective `setup` function instead.
 
+Patch is merged in to the state by default. Services have access to the previous state
+and can cancel or alter the original patch. State changes by services are available to the
+next services in the list.
+
 ### Parameters
 
 -   `stream` **[StreamLib][28]** the stream library. This works with `meiosis.simpleStream`, `flyd`,

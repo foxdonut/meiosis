@@ -23,7 +23,7 @@ const componentMap = {
 
 export const Root = {
   view: ({ attrs: { state, actions } }) => {
-    const routing = Routing(state.route.current);
+    const routing = Routing(state.route);
     const Component = componentMap[routing.localSegment.id];
     const isActive = tab => (tab === Component ? ".active" : "");
 

@@ -7,11 +7,16 @@
  */
 
 /**
+ * Route segment params.
+ */
+export type Params = Record<string, any>;
+
+/**
  * A route segment.
  */
 export interface RouteSegment {
   id: string;
-  params: Record<string, any>;
+  params: Params;
 }
 
 /**
@@ -25,20 +30,23 @@ export type RouteParamFn = (params?: Record<string, any>) => RouteSegment;
 export type Route = RouteSegment[];
 
 /**
- * The route state.
+ * Convenience route segment lookup for route transitions.
  */
-export interface RouteState {
-  previous: Route;
-  current: Route;
-}
+export type RouteLookup = { [key: string]: RouteSegment };
 
 /**
- * The route transition indicates the [[Route]] that the user is leaving and to which they are
- * arriving.
+ * Convenience route segment lookup for route transitions.
  */
-export interface RouteTransition extends RouteState {
-  leave: Route;
-  arrive: Route;
+export type RouteParamsLookup = { [key: string]: { from: Params, to: Params } };
+
+/**
+ * The route transition indicates the [[Route]] that the user is leaving, to which they are
+ * arriving, and for which parameters have changed.
+ */
+export interface RouteTransition {
+  leave: RouteLookup;
+  arrive: RouteLookup;
+  params: RouteParamsLookup;
 }
 
 /**
@@ -192,31 +200,49 @@ export function findRouteSegment(
  * @returns the route representing the segments that are in the `from` route but not in the `to`
  * route.
  */
-export function diffRoute(from: Route | null, to: Route | null): Route {
-  const init: Route = [];
+export function diffRoute(from: Route | null, to: Route | null): RouteLookup {
+  const init: RouteLookup = {};
 
   return defaultEmpty(from).reduce(
-    (result, route): Route =>
-      result.concat(findRouteSegmentWithParams(to, route) === undefined ? route : []),
+    (result: RouteLookup, fromRouteSegment: RouteSegment): RouteLookup => {
+      if (findRouteSegment(to, fromRouteSegment) === undefined) {
+        result[fromRouteSegment.id] = fromRouteSegment;
+      }
+      return result;
+    },
+    init
+  );
+}
+
+export function diffRouteParams(from: Route | null, to: Route | null): RouteParamsLookup {
+  const init: RouteParamsLookup = {};
+
+  return defaultEmpty(from).reduce(
+    (result: RouteParamsLookup, fromRouteSegment: RouteSegment): RouteParamsLookup => {
+      const toSegment = findRouteSegment(to, fromRouteSegment)
+      if (toSegment && findRouteSegmentWithParams(to, fromRouteSegment) === undefined) {
+        result[fromRouteSegment.id] = { from: fromRouteSegment.params, to: toSegment.params };
+      }
+      return result;
+    },
     init
   );
 }
 
 /**
- * Calculates route transitions, providing `leave` and `arrive` to indicate the route segments for
- * the route that we are leaving, and the route to which we are arriving, respectively.
+ * Calculates route transitions, providing `leave`, `arrive`, and `params` to indicate the route
+ * segments for the route that we are leaving, the route to which we are arriving, and the route
+ * for which params have changed, respectively.
  *
- * @param state the route state.
- * @returns an object with `previous`, `current`, `leave`, and `arrive` properties.
+ * @param currentRoute the current route, before navigation.
+ * @param nextRoute the route to which we are navigating.
+ * @returns an object with `leave`, `arrive`, and `params` properties.
  */
-export function routeTransition(routeState: RouteState): RouteTransition {
-  const { previous, current } = routeState;
-
+export function routeTransition(currentRoute: Route, nextRoute: Route): RouteTransition {
   return {
-    previous: current,
-    current: current,
-    leave: diffRoute(previous, current),
-    arrive: diffRoute(current, previous)
+    leave: diffRoute(currentRoute, nextRoute),
+    arrive: diffRoute(nextRoute, currentRoute),
+    params: diffRouteParams(currentRoute, nextRoute)
   };
 }
 
@@ -293,10 +319,10 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
 
 /**
  * Convenience function which puts the given route into an object of the form
- * `{ route: { current: route } }`.
+ * `{ route }`.
  */
 export function navigateTo(route: Route | RouteSegment): any {
-  return { route: { current: Array.isArray(route) ? route : [route] } };
+  return { route: Array.isArray(route) ? route : [route] };
 }
 
 /**
@@ -306,12 +332,4 @@ export function Actions(update: (any) => void): any {
   return {
     navigateTo: (route: Route | RouteSegment): void => update(navigateTo(route))
   };
-}
-
-/**
- * Convenience function which returns a patch of the form
- * `{ route: routeTransition(state.route) })`.
- */
-export function accept(state: any): any {
-  return { route: routeTransition(state.route) };
 }

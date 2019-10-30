@@ -3,11 +3,11 @@ import queryString from "query-string";
 import Mapper from "url-mapper";
 
 import {
-  accept,
   createRouteSegments,
   findRouteSegment,
   findRouteSegmentWithParams,
   diffRoute,
+  diffRouteParams,
   navigateTo,
   routeTransition,
   whenPresent,
@@ -131,82 +131,133 @@ describe("state", (): void => {
 
   describe("diffRoute", (): void => {
     test("diff route segments", (): void => {
-      expect(diffRoute([Route.Home()], [Route.About()])).toEqual([Route.Home()]);
+      expect(diffRoute([Route.Home()], [Route.About()])).toEqual({ Home: Route.Home() });
+    });
+
+    test("diff route, same params", (): void => {
+      expect(diffRoute([Route.User({ id: 42 })], [Route.User({ id: 43 })])).toEqual({});
     });
 
     test("diff route params", (): void => {
-      expect(diffRoute([Route.User({ id: 42 })], [Route.User({ id: 43 })])).toEqual([
-        Route.User({ id: 42 })
-      ]);
+      expect(diffRouteParams([Route.User({ id: 42 })], [Route.User({ id: 43 })])).toEqual({
+        User: {
+          from: { id: 42 },
+          to: { id: 43 }
+        }
+      });
+    });
+
+    test("diff route multiple params", (): void => {
+      expect(diffRouteParams(
+        [Route.User({ id: 42 }), Route.Search({ term: "A" })],
+        [Route.User({ id: 43 }), Route.Search({ term: "B" })])
+      ).toEqual({
+        User: {
+          from: { id: 42 },
+          to: { id: 43 }
+        },
+        Search: {
+          from: { term: "A" },
+          to: { term: "B" }
+        }
+      });
     });
 
     test("diff route with null target", (): void => {
-      expect(diffRoute(null, [Route.User({ id: 43 })])).toEqual([]);
+      expect(diffRoute(null, [Route.User({ id: 43 })])).toEqual({});
     });
 
     test("diff route with null source", (): void => {
-      expect(diffRoute([Route.User({ id: 43 })], null)).toEqual([Route.User({ id: 43 })]);
+      expect(diffRoute([Route.User({ id: 43 })], null)).toEqual({ User: Route.User({ id: 43 }) });
     });
 
-    test("diff route with nested params", (): void => {
+    test("diff route params with nested params", (): void => {
       expect(
-        diffRoute([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })])
-      ).toEqual([Route.User({ data: { id: 42 } })]);
+        diffRouteParams([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 43 } })])
+      ).toEqual({ User: { from: { data: { id: 42 } }, to: { data: { id: 43 } } } });
     });
 
-    test("no diff route with nested params", (): void => {
+    test("no diff route params with nested params", (): void => {
       expect(
-        diffRoute([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 42 } })])
-      ).toEqual([]);
+        diffRouteParams([Route.User({ data: { id: 42 } })], [Route.User({ data: { id: 42 } })])
+      ).toEqual({});
     });
   });
 
   describe("routeTransition", (): void => {
     test("route transition segment", (): void => {
-      expect(routeTransition({ previous: [Route.Home()], current: [Route.About()] })).toEqual({
-        previous: [Route.About()],
-        current: [Route.About()],
-        leave: [Route.Home()],
-        arrive: [Route.About()]
+      expect(routeTransition([Route.Home()], [Route.About()])).toEqual({
+        leave: { Home: Route.Home() },
+        arrive: { About: Route.About() },
+        params: {}
       });
     });
 
     test("route transition params", (): void => {
       expect(
-        routeTransition({ previous: [Route.User({ id: 42 })], current: [Route.User({ id: 43 })] })
+        routeTransition([Route.User({ id: 42 })], [Route.User({ id: 43 })])
       ).toEqual({
-        previous: [Route.User({ id: 43 })],
-        current: [Route.User({ id: 43 })],
-        leave: [Route.User({ id: 42 })],
-        arrive: [Route.User({ id: 43 })]
+        leave: {},
+        arrive: {},
+        params: {
+          User: {
+            from: { id: 42 },
+            to: { id: 43 }
+          }
+        }
       });
     });
 
     test("route transition with nested params", (): void => {
       expect(
-        routeTransition({
-          previous: [Route.User({ data: { id: 42 } })],
-          current: [Route.User({ data: { id: 43 } })]
-        })
+        routeTransition(
+          [Route.User({ data: { id: 42 } })],
+          [Route.User({ data: { id: 43 } })]
+        )
       ).toEqual({
-        previous: [Route.User({ data: { id: 43 } })],
-        current: [Route.User({ data: { id: 43 } })],
-        leave: [Route.User({ data: { id: 42 } })],
-        arrive: [Route.User({ data: { id: 43 } })]
+        leave: {},
+        arrive: {},
+        params: {
+          User: {
+            from: { data: { id: 42 } },
+            to: { data: { id: 43 } }
+          }
+        }
+      });
+    });
+
+    test("route transition with multiple params", (): void => {
+      expect(
+        routeTransition(
+          [Route.User({ data: { id: 42 } }), Route.Search({ term: "A" })],
+          [Route.User({ data: { id: 43 } }), Route.Search({ term: "B" })]
+        )
+      ).toEqual({
+        leave: {},
+        arrive: {},
+        params: {
+          User: {
+            from: { data: { id: 42 } },
+            to: { data: { id: 43 } }
+          },
+          Search: {
+            from: { term: "A" },
+            to: { term: "B" }
+          }
+        }
       });
     });
 
     test("no route transition with nested params", (): void => {
       expect(
-        routeTransition({
-          previous: [Route.User({ data: { id: 42 } })],
-          current: [Route.User({ data: { id: 42 } })]
-        })
+        routeTransition(
+          [Route.User({ data: { id: 42 } })],
+          [Route.User({ data: { id: 42 } })]
+        )
       ).toEqual({
-        previous: [Route.User({ data: { id: 42 } })],
-        current: [Route.User({ data: { id: 42 } })],
-        leave: [],
-        arrive: []
+        leave: {},
+        arrive: {},
+        params: {}
       });
     });
   });
@@ -337,11 +388,11 @@ describe("state", (): void => {
 
   describe("Actions and navigateTo", (): void => {
     test("navigateTo [route]", (): void => {
-      expect(navigateTo([Route.Home()])).toEqual({ route: { current: [Route.Home()] } });
+      expect(navigateTo([Route.Home()])).toEqual({ route: [Route.Home()] });
     });
 
     test("navigateTo route", (): void => {
-      expect(navigateTo(Route.Login())).toEqual({ route: { current: [Route.Login()] } });
+      expect(navigateTo(Route.Login())).toEqual({ route: [Route.Login()] });
     });
 
     test("Actions navigateTo", (): void => {
@@ -354,23 +405,10 @@ describe("state", (): void => {
       const actions = Actions(update);
 
       actions.navigateTo([Route.Home()]);
-      expect(received).toEqual({ route: { current: [Route.Home()] } });
+      expect(received).toEqual({ route: [Route.Home()] });
 
       actions.navigateTo(Route.Login());
-      expect(received).toEqual({ route: { current: [Route.Login()] } });
-    });
-  });
-
-  describe("accept", (): void => {
-    test("route transition", (): void => {
-      expect(accept({ route: { previous: [Route.Home()], current: [Route.About()] } })).toEqual({
-        route: {
-          previous: [Route.About()],
-          current: [Route.About()],
-          leave: [Route.Home()],
-          arrive: [Route.About()]
-        }
-      });
+      expect(received).toEqual({ route: [Route.Login()] });
     });
   });
 });

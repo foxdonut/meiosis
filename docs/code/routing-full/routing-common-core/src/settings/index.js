@@ -1,7 +1,7 @@
-import { accept } from "./accept";
 import { Actions } from "./actions";
+import { service } from "./service";
 
 export const settings = {
-  accept,
-  Actions
+  Actions,
+  service
 };

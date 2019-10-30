@@ -1,14 +1,21 @@
-import { findRouteSegment } from "meiosis-routing/state";
-
-export const service = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Login")) {
-    update({
-      login: {
-        username: "",
-        password: ""
+export const service = ({ state }) => {
+  if (state.routeTransition.arrive.Login) {
+    return {
+      state: {
+        login: {
+          username: "",
+          password: ""
+        }
       }
-    });
-  } else if (findRouteSegment(state.route.leave, "Login")) {
-    update({ login: null });
+    };
+  } else if (state.routeTransition.leave.Login) {
+    if (
+      !state.user &&
+      (state.login.username || state.login.password) &&
+      !confirm("You have unsaved data. Continue?")
+    ) {
+      return { patch: false };
+    }
+    return { state: { login: null } };
   }
 };

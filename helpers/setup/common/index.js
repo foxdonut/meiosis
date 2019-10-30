@@ -29,6 +29,10 @@
  * Base helper to setup the Meiosis pattern. If you are using Patchinko, Function Patches,
  * or Immer, use their respective `setup` function instead.
  *
+ * Patch is merged in to the state by default. Services have access to the previous state
+ * and can cancel or alter the original patch. State changes by services are available to the
+ * next services in the list.
+ *
  * @async
  * @function meiosis.common.setup
  *
@@ -115,11 +119,6 @@ export default ({ stream, accumulator, combine, app }) => {
 
       const contexts = scan(
         (context, patch) =>
-          // Patch is merged in to the state by default
-          // Services have access to the previous state
-          // and can cancel or alter the original patch.
-          // State changes by services are available to the
-          // next services in the list.
           updateState({
             previousState: context.state,
             state: accumulatorFn(context.state, patch),
@@ -140,7 +139,7 @@ export default ({ stream, accumulator, combine, app }) => {
             service({
               state: context.state,
               update,
-              patch: update(), // FIXME
+              patch: update(),
               actions
             });
           });

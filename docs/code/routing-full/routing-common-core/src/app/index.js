@@ -14,9 +14,9 @@ export const createApp = initialRoute => ({
   Actions: update =>
     Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),
 
-  acceptors: [settings.accept, login.accept, routes.accept],
-
   services: [
+    routes.service,
+    settings.service,
     login.service,
     tea.service,
     teaDetails.service,

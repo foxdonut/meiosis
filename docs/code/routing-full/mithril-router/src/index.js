@@ -22,5 +22,5 @@ meiosisMergerino({ stream: Stream, merge, app }).then(({ states, actions }) => {
   m.route(document.getElementById("app"), "/", router.MithrilRoutes({ states, actions, App }));
 
   states.map(() => m.redraw());
-  states.map(state => router.locationBarSync(state.route.current));
+  states.map(state => router.locationBarSync(state.route));
 });

@@ -27,7 +27,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "buble": "^0.19.8",
-    "documentation": "^11.0.0",
+    "documentation": "^12.1.2",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.1",
@@ -36,7 +36,7 @@
     "immer": "^4.0.2",
     "mergerino": "0.4.0",
     "mithril": "^2.0.4",
-    "prettier": "1.17.1",
+    "prettier": "1.18.2",
     "ramda": "^0.26.1",
     "rollup": "^1.26.0",
     "rollup-plugin-buble": "^0.19.8",
