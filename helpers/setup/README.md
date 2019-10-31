@@ -32,9 +32,9 @@ provided:
 
 ## Setup
 
-The `setup` function sets up the Meiosis pattern using the stream library and application that
-you provide. In the application, you can define the `Initial` function, the `Actions`, the array
-of acceptors, and the array of services, _all of which are optional_.
+The `setup` function sets up the Meiosis pattern using the stream library and application that you
+provide. In the application, you can define the `Initial` function, the `Actions`, and the array of
+services, _all of which are optional_.
 
 Because the `Initial` function may return a `Promise`, the `setup` function also returns a
 `Promise` which provides the `update`, `models`, and `states` streams, as well as the created
