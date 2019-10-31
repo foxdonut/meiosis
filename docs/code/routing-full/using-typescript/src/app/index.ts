@@ -7,7 +7,5 @@ export const createApp = (initialRoute): any => ({
 
   Actions: (update): any => Object.assign({}, routes.Actions(update)),
 
-  acceptors: [routes.accept],
-
-  services: [tea.service, teaDetails.service]
+  services: [routes.service, tea.service, teaDetails.service]
 });

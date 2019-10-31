@@ -32,12 +32,9 @@ export type Route = RouteSegment[];
 /**
  * Convenience route segment lookup for route transitions.
  */
-export type RouteLookup = { [key: string]: RouteSegment };
-
-/**
- * Convenience route segment lookup for route transitions.
- */
-export type RouteParamsLookup = { [key: string]: { from: Params, to: Params } };
+export interface RouteLookup {
+  [key: string]: RouteSegment;
+}
 
 /**
  * The route transition indicates the [[Route]] that the user is leaving, to which they are
@@ -46,7 +43,6 @@ export type RouteParamsLookup = { [key: string]: { from: Params, to: Params } };
 export interface RouteTransition {
   leave: RouteLookup;
   arrive: RouteLookup;
-  params: RouteParamsLookup;
 }
 
 /**
@@ -205,23 +201,8 @@ export function diffRoute(from: Route | null, to: Route | null): RouteLookup {
 
   return defaultEmpty(from).reduce(
     (result: RouteLookup, fromRouteSegment: RouteSegment): RouteLookup => {
-      if (findRouteSegment(to, fromRouteSegment) === undefined) {
+      if (findRouteSegmentWithParams(to, fromRouteSegment) === undefined) {
         result[fromRouteSegment.id] = fromRouteSegment;
-      }
-      return result;
-    },
-    init
-  );
-}
-
-export function diffRouteParams(from: Route | null, to: Route | null): RouteParamsLookup {
-  const init: RouteParamsLookup = {};
-
-  return defaultEmpty(from).reduce(
-    (result: RouteParamsLookup, fromRouteSegment: RouteSegment): RouteParamsLookup => {
-      const toSegment = findRouteSegment(to, fromRouteSegment)
-      if (toSegment && findRouteSegmentWithParams(to, fromRouteSegment) === undefined) {
-        result[fromRouteSegment.id] = { from: fromRouteSegment.params, to: toSegment.params };
       }
       return result;
     },
@@ -241,8 +222,7 @@ export function diffRouteParams(from: Route | null, to: Route | null): RoutePara
 export function routeTransition(currentRoute: Route, nextRoute: Route): RouteTransition {
   return {
     leave: diffRoute(currentRoute, nextRoute),
-    arrive: diffRoute(nextRoute, currentRoute),
-    params: diffRouteParams(currentRoute, nextRoute)
+    arrive: diffRoute(nextRoute, currentRoute)
   };
 }
 

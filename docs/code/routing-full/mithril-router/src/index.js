@@ -8,15 +8,12 @@ import { router } from "./router";
 
 const app = createApp(router.initialRoute);
 
-meiosisMergerino({ stream: Stream, merge, app }).then(({ states, actions }) => {
+meiosisMergerino({ stream: Stream, merge, app }).then(({ states, update, actions }) => {
   // Only for using Meiosis Tracer in development.
   require("meiosis-tracer")({
     selector: "#tracer",
-    rows: 30,
-    streams: [
-      // { stream: update, label: "update" },
-      { stream: states, label: "states" }
-    ]
+    rows: 10,
+    streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]
   });
 
   m.route(document.getElementById("app"), "/", router.MithrilRoutes({ states, actions, App }));

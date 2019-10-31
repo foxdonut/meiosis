@@ -1,4 +1,4 @@
-import { Actions, accept, createRouteSegments } from "meiosis-routing/state";
+import { Actions, createRouteSegments, routeTransition } from "meiosis-routing/state";
 import { RouteConfig } from "meiosis-routing/router-helper";
 
 export { navigateTo } from "meiosis-routing/state";
@@ -19,7 +19,11 @@ export const routeConfig: RouteConfig = {
   Beer: ["/beer?type&country", beverageRoutes]
 };
 
+const service = ({ previousState, state }): any => ({
+  state: { routeTransition: (): any => routeTransition(previousState.route, state.route) }
+});
+
 export const routes = {
   Actions,
-  accept
+  service
 };

@@ -1,13 +1,15 @@
-import { findRouteSegment, whenPresent } from "meiosis-routing/state";
+export const service = ({ state }) => {
+  const patches = [];
 
-export const service = ({ state, update }) => {
-  whenPresent(findRouteSegment(state.route.arrive, "Brewer"), arrive => {
-    const id = arrive.params.id;
-    update({ brewer: { [id]: `Brewer of beverage ${id}` } });
-  });
+  if (state.routeTransition.arrive.Brewer) {
+    const id = state.routeTransition.arrive.Brewer.params.id;
+    patches.push({ brewer: { [id]: `Brewer of beverage ${id}` } });
+  }
 
-  whenPresent(findRouteSegment(state.route.leave, "Brewer"), leave => {
-    const id = leave.params.id;
-    update({ brewer: { [id]: undefined } });
-  });
+  if (state.routeTransition.leave.Brewer) {
+    const id = state.routeTransition.leave.Brewer.params.id;
+    patches.push({ brewer: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };

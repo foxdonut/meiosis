@@ -1,12 +1,15 @@
 import { teas } from "../teaDetails/data";
-import { findRouteSegment } from "meiosis-routing/state";
 
-export const service = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Tea")) {
-    setTimeout(() => {
-      update({ teas });
-    }, 500);
-  } else if (findRouteSegment(state.route.leave, "Tea")) {
-    update({ teas: null });
+export const service = ({ state }) => {
+  if (state.routeTransition.arrive.Tea) {
+    return {
+      next: ({ update }) =>
+        setTimeout(() => {
+          update({ teas });
+        }, 500)
+    };
+  }
+  if (state.routeTransition.leave.Tea) {
+    return { state: { teas: null } };
   }
 };

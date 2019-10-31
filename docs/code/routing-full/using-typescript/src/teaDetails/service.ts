@@ -1,22 +1,18 @@
-import { findRouteSegment, whenPresent } from "meiosis-routing/state";
-
 import { teaMap } from "./data";
 
-export const service = ({ state, update }): void => {
-  whenPresent(
-    findRouteSegment(state.route.arrive, "TeaDetails"),
-    (arrive): void => {
-      const id = arrive.params.id;
-      const description = teaMap[id].description;
-      update({ tea: { [id]: description } });
-    }
-  );
+export const service = ({ state }): any => {
+  const patches = [];
 
-  whenPresent(
-    findRouteSegment(state.route.leave, "TeaDetails"),
-    (leave): void => {
-      const id = leave.params.id;
-      update({ tea: { [id]: undefined } });
-    }
-  );
+  if (state.routeTransition.arrive.TeaDetails) {
+    const id = state.routeTransition.arrive.TeaDetails.params.id;
+    const description = teaMap[id].description;
+    patches.push({ tea: { [id]: description } });
+  }
+
+  if (state.routeTransition.leave.TeaDetails) {
+    const id = state.routeTransition.leave.TeaDetails.params.id;
+    patches.push({ tea: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };
