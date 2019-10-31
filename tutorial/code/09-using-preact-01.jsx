@@ -3,11 +3,9 @@
 const merge = mergerino;
 
 var conditions = {
-  Initial: function() {
-    return {
-      precipitations: false,
-      sky: "Sunny"
-    };
+  initial: {
+    precipitations: false,
+    sky: "Sunny"
   },
   Actions: function(update) {
     return {
@@ -146,12 +144,10 @@ class Temperature extends preact.Component {
 }
 
 var app = {
-  Initial: function() {
-    return {
-      conditions: conditions.Initial(),
-      "temperature:air": temperature.Initial("Air"),
-      "temperature:water": temperature.Initial("Water")
-    };
+  initial: {
+    conditions: conditions.initial,
+    "temperature:air": temperature.Initial("Air"),
+    "temperature:water": temperature.Initial("Water")
   },
   Actions: function(update) {
     return Object.assign(
@@ -196,7 +192,7 @@ class App extends preact.Component {
 }
 
 var update = flyd.stream();
-var states = flyd.scan(merge, app.Initial(), update);
+var states = flyd.scan(merge, app.initial, update);
 var actions = app.Actions(update);
 
 preact.render(

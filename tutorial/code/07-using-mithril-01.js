@@ -2,11 +2,9 @@
 const merge = mergerino;
 
 var conditions = {
-  Initial: function() {
-    return {
-      precipitations: false,
-      sky: "Sunny"
-    };
+  initial: {
+    precipitations: false,
+    sky: "Sunny"
   },
   Actions: function(update) {
     return {
@@ -147,12 +145,10 @@ var Temperature = {
 };
 
 var app = {
-  Initial: function() {
-    return {
-      conditions: conditions.Initial(),
-      "temperature:air": temperature.Initial("Air"),
-      "temperature:water": temperature.Initial("Water")
-    };
+  initial: {
+    conditions: conditions.initial,
+    "temperature:air": temperature.Initial("Air"),
+    "temperature:water": temperature.Initial("Water")
   },
   Actions: function(update) {
     return Object.assign(
@@ -180,7 +176,7 @@ var App = {
 };
 
 var update = m.stream();
-var states = m.stream.scan(merge, app.Initial(), update);
+var states = m.stream.scan(merge, app.initial, update);
 var actions = app.Actions(update);
 
 m.mount(document.getElementById("app"), {

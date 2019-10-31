@@ -118,19 +118,21 @@ const app = {
   })
 };
 
-Meiosis.mergerino
-  .setup({ stream: Meiosis.simpleStream, merge, app })
-  .then(({ states, actions }) => {
-    // eslint-disable-next-line react/no-deprecated
-    preact.render(
-      <App states={states} actions={actions} />,
-      document.getElementById("app")
-    );
+const { states, actions } = Meiosis.mergerino.setup({
+  stream: Meiosis.simpleStream,
+  merge,
+  app
+});
 
-    states.map(state => {
-      if (document.getElementById("consoleLog").checked) {
-        // eslint-disable-next-line no-console
-        console.log(JSON.stringify(state));
-      }
-    });
-  });
+// eslint-disable-next-line react/no-deprecated
+preact.render(
+  <App states={states} actions={actions} />,
+  document.getElementById("app")
+);
+
+states.map(state => {
+  if (document.getElementById("consoleLog").checked) {
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(state));
+  }
+});

@@ -1,6 +1,7 @@
 {
   "name": "meiosis",
   "version": "2.0.0",
+  "private": true,
   "description": "meiosis pattern",
   "repository": {
     "type": "git",

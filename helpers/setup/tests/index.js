@@ -12,25 +12,26 @@ const meiosis = require("../dist/meiosis-setup");
 const mergerinoTest = (merge, streamLib, label) => {
   test("mergerino setup", t => {
     t.test(label + " / minimal", t => {
-      meiosis.mergerino.setup({ stream: streamLib, merge }).then(({ update, states }) => {
-        t.deepEqual(states(), {}, "initial state");
+      const { update, states } = meiosis.mergerino.setup({ stream: streamLib, merge });
+      t.deepEqual(states(), {}, "initial state");
 
-        update({ duck: { sound: "quack" } });
-        update({ duck: { color: "yellow" } });
+      update({ duck: { sound: "quack" } });
+      update({ duck: { color: "yellow" } });
 
-        t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+      t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
 
-        t.end();
-      });
+      t.end();
     });
 
     t.test(label + " / initial state", t => {
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { Initial: () => ({ duck: "yellow" }) } })
-        .then(({ states }) => {
-          t.deepEqual(states(), { duck: "yellow" }, "initial state");
-          t.end();
-        });
+      const { states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial: { duck: "yellow" } }
+      });
+
+      t.deepEqual(states(), { duck: "yellow" }, "initial state");
+      t.end();
     });
 
     t.test(label + " / initial state promise", t => {
@@ -39,7 +40,11 @@ const mergerinoTest = (merge, streamLib, label) => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
         });
 
-      meiosis.mergerino.setup({ stream: streamLib, merge, app: { Initial } }).then(({ states }) => {
+      const createApp = () => Initial().then(initial => ({ initial }));
+
+      createApp().then(app => {
+        const { states } = meiosis.mergerino.setup({ stream: streamLib, merge, app });
+
         t.deepEqual(states(), { duck: "yellow" }, "initial state");
         t.end();
       });
@@ -59,21 +64,23 @@ const mergerinoTest = (merge, streamLib, label) => {
         ({ state }) => (state.sequenced ? { state: { received: true } } : null)
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { Initial: () => ({ count: 0 }), services } })
-        .then(({ update, states }) => {
-          update({ increment: 1 });
-          update({ increment: 10 });
-          update({ invalid: true });
-          update({ sequence: true });
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial: { count: 0 }, services }
+      });
 
-          t.deepEqual(
-            states(),
-            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
-            "resulting state"
-          );
-          t.end();
-        });
+      update({ increment: 1 });
+      update({ increment: 10 });
+      update({ invalid: true });
+      update({ sequence: true });
+
+      t.deepEqual(
+        states(),
+        { count: 1, combined: true, sequence: true, sequenced: true, received: true },
+        "resulting state"
+      );
+      t.end();
     });
 
     t.test(label + " / services run on initial state", t => {
@@ -82,16 +89,14 @@ const mergerinoTest = (merge, streamLib, label) => {
           state.increment > 0 && state.increment < 10 ? { state: { count: x => x + 1 } } : null
       ];
 
-      meiosis.mergerino
-        .setup({
-          stream: streamLib,
-          merge,
-          app: { Initial: () => ({ count: 0, increment: 1 }), services }
-        })
-        .then(({ states }) => {
-          t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
-          t.end();
-        });
+      const { states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial: { count: 0, increment: 1 }, services }
+      });
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services and actions", t => {
@@ -113,20 +118,18 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({
-          stream: streamLib,
-          merge,
-          app: { Initial: () => ({ count: 0 }), services, Actions }
-        })
-        .then(({ update, states, actions }) => {
-          t.ok(typeof actions.increment === "function", "actions");
+      const { update, states, actions } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial: { count: 0 }, services, Actions }
+      });
 
-          update({ count: 1 });
+      t.ok(typeof actions.increment === "function", "actions");
 
-          t.deepEqual(states(), { count: 2, service: true }, "resulting state");
-          t.end();
-        });
+      update({ count: 1 });
+
+      t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / actions can use combine", t => {
@@ -134,18 +137,16 @@ const mergerinoTest = (merge, streamLib, label) => {
         increment: amount => update([{ count: x => x + amount }, { combined: true }])
       });
 
-      meiosis.mergerino
-        .setup({
-          stream: streamLib,
-          merge,
-          app: { Initial: () => ({ count: 0 }), Actions }
-        })
-        .then(({ states, actions }) => {
-          actions.increment(1);
+      const { states, actions } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial: { count: 0 }, Actions }
+      });
 
-          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
-          t.end();
-        });
+      actions.increment(1);
+
+      t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
+      t.end();
     });
 
     t.test(label + " / service calls are combined into a single state update", t => {
@@ -163,18 +164,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          update({ count: 1 });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.equal(ticks, 2, "number of ticks");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update({ count: 1 });
+
+      t.equal(ticks, 2, "number of ticks");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / synchronous service updates", t => {
@@ -199,16 +202,18 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          update({ count: 1 });
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update({ count: 1 });
+
+      // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services may be called in an infinite loop", t => {
@@ -223,15 +228,17 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          update({ count: 1 });
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
-          t.end();
-        });
+      update({ count: 1 });
+
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can change a patch", t => {
@@ -243,14 +250,16 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          update({ one: true });
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          t.deepEqual(states(), { two: true }, "resulting state");
-          t.end();
-        });
+      update({ one: true });
+
+      t.deepEqual(states(), { two: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a patch", t => {
@@ -262,18 +271,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          update({ one: true });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update({ one: true });
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a render", t => {
@@ -285,18 +296,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          update({ one: true });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update({ one: true });
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can make a state change, cancel render, and call next", t => {
@@ -312,18 +325,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      meiosis.mergerino
-        .setup({ stream: streamLib, merge, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { services }
+      });
 
-          update({ one: true });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
-          t.equal(ticks, 2, "number of ticks");
-          t.end();
-        });
+      update({ one: true });
+
+      t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
+      t.end();
     });
   });
 };
@@ -337,25 +352,26 @@ const functionPatchTest = (streamLib, label) => {
 
   test("functionPatch setup", t => {
     t.test(label + " / minimal", t => {
-      meiosis.functionPatches.setup({ stream: streamLib }).then(({ update, states }) => {
-        t.deepEqual(states(), {}, "initial state");
+      const { update, states } = meiosis.functionPatches.setup({ stream: streamLib });
 
-        update(() => ({ duck: { sound: "quack" } }));
-        update(R.assocPath(["duck", "color"], "yellow"));
+      t.deepEqual(states(), {}, "initial state");
 
-        t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+      update(() => ({ duck: { sound: "quack" } }));
+      update(R.assocPath(["duck", "color"], "yellow"));
 
-        t.end();
-      });
+      t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+
+      t.end();
     });
 
     t.test(label + " / initial state", t => {
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { Initial: () => ({ duck: "yellow" }) } })
-        .then(({ states }) => {
-          t.deepEqual(states(), { duck: "yellow" }, "initial state");
-          t.end();
-        });
+      const { states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial: { duck: "yellow" } }
+      });
+
+      t.deepEqual(states(), { duck: "yellow" }, "initial state");
+      t.end();
     });
 
     t.test(label + " / initial state promise", t => {
@@ -364,7 +380,11 @@ const functionPatchTest = (streamLib, label) => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
         });
 
-      meiosis.functionPatches.setup({ stream: streamLib, app: { Initial } }).then(({ states }) => {
+      const createApp = () => Initial().then(initial => ({ initial }));
+
+      createApp().then(app => {
+        const { states } = meiosis.functionPatches.setup({ stream: streamLib, app });
+
         t.deepEqual(states(), { duck: "yellow" }, "initial state");
         t.end();
       });
@@ -385,21 +405,22 @@ const functionPatchTest = (streamLib, label) => {
         ({ state }) => (state.sequenced ? { state: R.assoc("received", true) } : null)
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { Initial: () => ({ count: 0 }), services } })
-        .then(({ update, states }) => {
-          update(R.assoc("increment", 1));
-          update(R.assoc("increment", 10));
-          update(R.assoc("invalid", true));
-          update(R.assoc("sequence", true));
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial: { count: 0 }, services }
+      });
 
-          t.deepEqual(
-            states(),
-            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
-            "resulting state"
-          );
-          t.end();
-        });
+      update(R.assoc("increment", 1));
+      update(R.assoc("increment", 10));
+      update(R.assoc("invalid", true));
+      update(R.assoc("sequence", true));
+
+      t.deepEqual(
+        states(),
+        { count: 1, combined: true, sequence: true, sequenced: true, received: true },
+        "resulting state"
+      );
+      t.end();
     });
 
     t.test(label + " / services run on initial state", t => {
@@ -410,15 +431,13 @@ const functionPatchTest = (streamLib, label) => {
             : null
       ];
 
-      meiosis.functionPatches
-        .setup({
-          stream: streamLib,
-          app: { Initial: () => ({ count: 0, increment: 1 }), services }
-        })
-        .then(({ states }) => {
-          t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
-          t.end();
-        });
+      const { states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial: { count: 0, increment: 1 }, services }
+      });
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services and actions", t => {
@@ -440,16 +459,17 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { Initial: () => ({ count: 0 }), services, Actions } })
-        .then(({ update, states, actions }) => {
-          t.ok(typeof actions.increment === "function", "actions");
+      const { update, states, actions } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial: { count: 0 }, services, Actions }
+      });
 
-          update(R.assoc("count", 1));
+      t.ok(typeof actions.increment === "function", "actions");
 
-          t.deepEqual(states(), { count: 2, service: true }, "resulting state");
-          t.end();
-        });
+      update(R.assoc("count", 1));
+
+      t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / actions can pass arrays to update", t => {
@@ -458,17 +478,15 @@ const functionPatchTest = (streamLib, label) => {
           update([R.over(R.lensProp("count"), R.add(amount)), R.assoc("combined", true)])
       });
 
-      meiosis.functionPatches
-        .setup({
-          stream: streamLib,
-          app: { Initial: () => ({ count: 0 }), Actions }
-        })
-        .then(({ states, actions }) => {
-          actions.increment(1);
+      const { states, actions } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial: { count: 0 }, Actions }
+      });
 
-          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
-          t.end();
-        });
+      actions.increment(1);
+
+      t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
+      t.end();
     });
 
     t.test(label + " / service calls are combined into a single state update", t => {
@@ -486,18 +504,19 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          update(R.assoc("count", 1));
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.equal(ticks, 2, "number of ticks");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update(R.assoc("count", 1));
+
+      t.equal(ticks, 2, "number of ticks");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / synchronous service updates", t => {
@@ -522,16 +541,17 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          update(R.assoc("count", 1));
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update(R.assoc("count", 1));
+
+      // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services may not called in an infinite loop", t => {
@@ -546,15 +566,16 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          update(R.assoc("count", 1));
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
-          t.end();
-        });
+      update(R.assoc("count", 1));
+
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can change a patch", t => {
@@ -566,14 +587,15 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          update(R.assoc("one", true));
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          t.deepEqual(states(), { two: true }, "resulting state");
-          t.end();
-        });
+      update(R.assoc("one", true));
+
+      t.deepEqual(states(), { two: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a patch", t => {
@@ -585,18 +607,19 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          update(R.assoc("one", true));
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update(R.assoc("one", true));
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a render", t => {
@@ -608,18 +631,19 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          update(R.assoc("one", true));
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update(R.assoc("one", true));
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can make a state change, cancel render, and call next", t => {
@@ -635,18 +659,19 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.functionPatches
-        .setup({ stream: streamLib, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { services }
+      });
 
-          update(R.assoc("one", true));
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
-          t.equal(ticks, 2, "number of ticks");
-          t.end();
-        });
+      update(R.assoc("one", true));
+
+      t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
+      t.end();
     });
   });
 };
@@ -660,29 +685,31 @@ const immerTest = (streamLib, label) => {
 
   test("immer setup", t => {
     t.test(label + " / minimal", t => {
-      meiosis.immer.setup({ stream: streamLib, produce }).then(({ update, states }) => {
-        t.deepEqual(states(), {}, "initial state");
+      const { update, states } = meiosis.immer.setup({ stream: streamLib, produce });
 
-        update(state => {
-          state.duck = { sound: "quack" };
-        });
-        update(state => {
-          state.duck.color = "yellow";
-        });
+      t.deepEqual(states(), {}, "initial state");
 
-        t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
-
-        t.end();
+      update(state => {
+        state.duck = { sound: "quack" };
       });
+      update(state => {
+        state.duck.color = "yellow";
+      });
+
+      t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+
+      t.end();
     });
 
     t.test(label + " / initial state", t => {
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { Initial: () => ({ duck: "yellow" }) } })
-        .then(({ states }) => {
-          t.deepEqual(states(), { duck: "yellow" }, "initial state");
-          t.end();
-        });
+      const { states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial: { duck: "yellow" } }
+      });
+
+      t.deepEqual(states(), { duck: "yellow" }, "initial state");
+      t.end();
     });
 
     t.test(label + " / initial state promise", t => {
@@ -691,7 +718,11 @@ const immerTest = (streamLib, label) => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
         });
 
-      meiosis.immer.setup({ stream: streamLib, produce, app: { Initial } }).then(({ states }) => {
+      const createApp = () => Initial().then(initial => ({ initial }));
+
+      createApp().then(app => {
+        const { states } = meiosis.immer.setup({ stream: streamLib, produce, app });
+
         t.deepEqual(states(), { duck: "yellow" }, "initial state");
         t.end();
       });
@@ -737,29 +768,31 @@ const immerTest = (streamLib, label) => {
           }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { Initial: () => ({ count: 0 }), services } })
-        .then(({ update, states }) => {
-          update(state => {
-            state.increment = 1;
-          });
-          update(state => {
-            state.increment = 10;
-          });
-          update(state => {
-            state.invalid = true;
-          });
-          update(state => {
-            state.sequence = true;
-          });
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial: { count: 0 }, services }
+      });
 
-          t.deepEqual(
-            states(),
-            { count: 1, combined: true, sequence: true, sequenced: true, received: true },
-            "resulting state"
-          );
-          t.end();
-        });
+      update(state => {
+        state.increment = 1;
+      });
+      update(state => {
+        state.increment = 10;
+      });
+      update(state => {
+        state.invalid = true;
+      });
+      update(state => {
+        state.sequence = true;
+      });
+
+      t.deepEqual(
+        states(),
+        { count: 1, combined: true, sequence: true, sequenced: true, received: true },
+        "resulting state"
+      );
+      t.end();
     });
 
     t.test(label + " / services run on initial state", t => {
@@ -774,16 +807,14 @@ const immerTest = (streamLib, label) => {
             : null
       ];
 
-      meiosis.immer
-        .setup({
-          stream: streamLib,
-          produce,
-          app: { Initial: () => ({ count: 0, increment: 1 }), services }
-        })
-        .then(({ states }) => {
-          t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
-          t.end();
-        });
+      const { states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial: { count: 0, increment: 1 }, services }
+      });
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services and actions", t => {
@@ -813,22 +844,20 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({
-          stream: streamLib,
-          produce,
-          app: { Initial: () => ({ count: 0 }), services, Actions }
-        })
-        .then(({ update, states, actions }) => {
-          t.ok(typeof actions.increment === "function", "actions");
+      const { update, states, actions } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial: { count: 0 }, services, Actions }
+      });
 
-          update(state => {
-            state.count = 1;
-          });
+      t.ok(typeof actions.increment === "function", "actions");
 
-          t.deepEqual(states(), { count: 2, service: true }, "resulting state");
-          t.end();
-        });
+      update(state => {
+        state.count = 1;
+      });
+
+      t.deepEqual(states(), { count: 2, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / actions can pass an array to update", t => {
@@ -844,18 +873,16 @@ const immerTest = (streamLib, label) => {
           ])
       });
 
-      meiosis.immer
-        .setup({
-          stream: streamLib,
-          produce,
-          app: { Initial: () => ({ count: 0 }), Actions }
-        })
-        .then(({ states, actions }) => {
-          actions.increment(1);
+      const { states, actions } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial: { count: 0 }, Actions }
+      });
 
-          t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
-          t.end();
-        });
+      actions.increment(1);
+
+      t.deepEqual(states(), { count: 1, combined: true }, "combined patches");
+      t.end();
     });
 
     t.test(label + " / service calls are combined into a single state update", t => {
@@ -886,20 +913,22 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          update(state => {
-            state.count = 1;
-          });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.equal(ticks, 2, "number of ticks");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update(state => {
+        state.count = 1;
+      });
+
+      t.equal(ticks, 2, "number of ticks");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / synchronous service updates", t => {
@@ -934,18 +963,20 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          update(state => {
-            state.count = 1;
-          });
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
-          t.end();
-        });
+      update(state => {
+        state.count = 1;
+      });
+
+      // Service calls: 1) initial, 2) update call, 3-4-5) update calls from services/next
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 2, service1: true, service2: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / services may be called in an infinite loop", t => {
@@ -965,17 +996,19 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          update(state => {
-            state.count = 1;
-          });
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          t.equal(serviceCalls, 5, "number of service calls");
-          t.deepEqual(states(), { count: 1, service: true }, "resulting state");
-          t.end();
-        });
+      update(state => {
+        state.count = 1;
+      });
+
+      t.equal(serviceCalls, 5, "number of service calls");
+      t.deepEqual(states(), { count: 1, service: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can change a patch", t => {
@@ -991,16 +1024,18 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          update(draft => {
-            draft.one = true;
-          });
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          t.deepEqual(states(), { two: true }, "resulting state");
-          t.end();
-        });
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), { two: true }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a patch", t => {
@@ -1012,20 +1047,22 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          update(draft => {
-            draft.one = true;
-          });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can cancel a render", t => {
@@ -1037,20 +1074,22 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          update(draft => {
-            draft.one = true;
-          });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), {}, "resulting state");
-          t.equal(ticks, 1, "number of ticks");
-          t.end();
-        });
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
     });
 
     t.test(label + " / a service can make a state change, cancel render, and call next", t => {
@@ -1071,20 +1110,22 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      meiosis.immer
-        .setup({ stream: streamLib, produce, app: { services } })
-        .then(({ update, states }) => {
-          let ticks = 0;
-          states.map(() => ticks++);
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
 
-          update(draft => {
-            draft.one = true;
-          });
+      let ticks = 0;
+      states.map(() => ticks++);
 
-          t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
-          t.equal(ticks, 2, "number of ticks");
-          t.end();
-        });
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), { one: true, two: true, service: true }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
+      t.end();
     });
   });
 };
@@ -1097,10 +1138,10 @@ const commonTest = (streamLib, label) => {
   test("common setup", t => {
     t.test(label + " / required accumulator function", t => {
       try {
-        meiosis.common.setup({ stream: streamLib, combine: x => x, app: {} }).then(() => {
-          t.fail("An error should have been thrown for missing accumulator function.");
-          t.end();
-        });
+        meiosis.common.setup({ stream: streamLib, combine: x => x, app: {} });
+
+        t.fail("An error should have been thrown for missing accumulator function.");
+        t.end();
       } catch (err) {
         t.pass("Error was thrown as it should.");
         t.end();
@@ -1109,12 +1150,10 @@ const commonTest = (streamLib, label) => {
 
     t.test(label + " / required combine function", t => {
       try {
-        meiosis.common
-          .setup({ stream: streamLib, accumulator: (x, f) => f(x), app: {} })
-          .then(() => {
-            t.fail("An error should have been thrown for missing combine function.");
-            t.end();
-          });
+        meiosis.common.setup({ stream: streamLib, accumulator: (x, f) => f(x), app: {} });
+
+        t.fail("An error should have been thrown for missing combine function.");
+        t.end();
       } catch (err) {
         t.pass("Error was thrown as it should.");
         t.end();
@@ -1126,21 +1165,19 @@ const commonTest = (streamLib, label) => {
         increment: amount => update({ count: x => x + amount })
       });
 
-      meiosis.common
-        .setup({
-          stream: streamLib,
-          accumulator: merge,
-          combine: patches => patches,
-          app: { Initial: () => ({ count: 0 }), Actions }
-        })
-        .then(({ states, actions }) => {
-          t.ok(typeof actions.increment === "function", "actions");
+      const { states, actions } = meiosis.common.setup({
+        stream: streamLib,
+        accumulator: merge,
+        combine: patches => patches,
+        app: { initial: { count: 0 }, Actions }
+      });
 
-          actions.increment(2);
+      t.ok(typeof actions.increment === "function", "actions");
 
-          t.deepEqual(states(), { count: 2 }, "resulting state");
-          t.end();
-        });
+      actions.increment(2);
+
+      t.deepEqual(states(), { count: 2 }, "resulting state");
+      t.end();
     });
 
     t.test(label + " / basic functionPatch setup with no services", t => {
@@ -1148,21 +1185,19 @@ const commonTest = (streamLib, label) => {
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
-      meiosis.common
-        .setup({
-          stream: streamLib,
-          accumulator: (x, f) => f(x),
-          combine: compose,
-          app: { Initial: () => ({ count: 0 }), Actions }
-        })
-        .then(({ states, actions }) => {
-          t.ok(typeof actions.increment === "function", "actions");
+      const { states, actions } = meiosis.common.setup({
+        stream: streamLib,
+        accumulator: (x, f) => f(x),
+        combine: compose,
+        app: { initial: { count: 0 }, Actions }
+      });
 
-          actions.increment(2);
+      t.ok(typeof actions.increment === "function", "actions");
 
-          t.deepEqual(states(), { count: 2 }, "resulting state");
-          t.end();
-        });
+      actions.increment(2);
+
+      t.deepEqual(states(), { count: 2 }, "resulting state");
+      t.end();
     });
   });
 };

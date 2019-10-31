@@ -13,8 +13,8 @@ import commonSetup from "../common";
  * @param {Function} merge - the Mergerino `merge` function.
  * @param {app} app - the app, with optional properties.
  *
- * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
- * all of which are streams, except for `actions` which is the created actions.
+ * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams,
+ * and `actions` are the created actions.
  */
 export default ({ stream, merge, app }) =>
   commonSetup({

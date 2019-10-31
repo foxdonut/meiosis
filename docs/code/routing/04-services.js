@@ -1,9 +1,13 @@
 /* global MeiosisRouting */
 
-const {
-  findRouteSegment,
-  whenPresent
-} = MeiosisRouting.state;
+const { routeTransition } = MeiosisRouting.state;
+
+export const routeService = ({ previousState, state }) => ({
+  state: {
+    routeTransition: () =>
+      routeTransition(previousState.route, state.route)
+  }
+});
 
 const teas = [
   {
@@ -54,106 +58,113 @@ const beverageMap = beverages.reduce((result, next) => {
   return result;
 }, {});
 
-export const teaService = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Tea")) {
-    setTimeout(() => {
-      update({ teas });
-    }, 500);
-  } else if (findRouteSegment(state.route.leave, "Tea")) {
-    update({ teas: null });
+export const teaService = ({ state }) => {
+  if (state.routeTransition.arrive.Tea) {
+    return {
+      next: ({ update }) =>
+        setTimeout(() => {
+          update({ teas });
+        }, 500)
+    };
+  }
+  if (state.routeTransition.leave.Tea) {
+    return { state: { teas: null } };
   }
 };
 
-export const teaDetailService = ({ state, update }) => {
-  whenPresent(
-    findRouteSegment(state.route.arrive, "TeaDetails"),
-    arrive => {
-      const id = arrive.params.id;
-      const description = teaMap[id].description;
-      update({ tea: { [id]: description } });
-    }
-  );
+export const teaDetailService = ({ state }) => {
+  const patches = [];
 
-  whenPresent(
-    findRouteSegment(state.route.leave, "TeaDetails"),
-    leave => {
-      const id = leave.params.id;
-      update({ tea: { [id]: undefined } });
-    }
-  );
+  if (state.routeTransition.arrive.TeaDetails) {
+    const id =
+      state.routeTransition.arrive.TeaDetails.params.id;
+    const description = teaMap[id].description;
+    patches.push({ tea: { [id]: description } });
+  }
+
+  if (state.routeTransition.leave.TeaDetails) {
+    const id =
+      state.routeTransition.leave.TeaDetails.params.id;
+    patches.push({ tea: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };
 
-export const beverageService = ({ state, update }) => {
-  whenPresent(
-    findRouteSegment(state.route.arrive, "Beverage"),
-    arrive => {
-      const id = arrive.params.id;
-      const description = beverageMap[id].description;
-      update({ beverage: { [id]: description } });
-    }
-  );
+export const beverageService = ({ state }) => {
+  const patches = [];
 
-  whenPresent(
-    findRouteSegment(state.route.leave, "Beverage"),
-    leave => {
-      const id = leave.params.id;
-      update({ beverage: { [id]: undefined } });
-    }
-  );
+  if (state.routeTransition.arrive.Beverage) {
+    const id =
+      state.routeTransition.arrive.Beverage.params.id;
+    const description = beverageMap[id].description;
+    patches.push({ beverage: { [id]: description } });
+  }
+
+  if (state.routeTransition.leave.Beverage) {
+    const id =
+      state.routeTransition.leave.Beverage.params.id;
+    patches.push({ beverage: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };
 
-export const coffeeService = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Coffee")) {
-    update({ pleaseWait: true });
-
-    setTimeout(
-      () =>
-        update({
-          pleaseWait: false,
-          coffees
-        }),
-      1000
-    );
-  } else if (
-    findRouteSegment(state.route.leave, "Coffee")
-  ) {
-    update({ coffees: null });
+export const coffeeService = ({ state }) => {
+  if (state.routeTransition.arrive.Coffee) {
+    return {
+      state: { pleaseWait: true },
+      next: ({ update }) =>
+        setTimeout(
+          () =>
+            update({
+              pleaseWait: false,
+              coffees
+            }),
+          1000
+        )
+    };
+  }
+  if (state.routeTransition.leave.Coffee) {
+    return { state: { coffees: null } };
   }
 };
 
-export const beerService = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Beer")) {
-    update({ pleaseWait: true });
-
-    setTimeout(
-      () =>
-        update({
-          pleaseWait: false,
-          beers
-        }),
-      1000
-    );
-  } else if (findRouteSegment(state.route.leave, "Beer")) {
-    update({ beers: null });
+export const beerService = ({ state }) => {
+  if (state.routeTransition.arrive.Beer) {
+    return {
+      state: { pleaseWait: true },
+      next: ({ update }) =>
+        setTimeout(
+          () =>
+            update({
+              pleaseWait: false,
+              beers
+            }),
+          1000
+        )
+    };
+  }
+  if (state.routeTransition.leave.Beer) {
+    return { state: { beers: null } };
   }
 };
 
-export const brewerService = ({ state, update }) => {
-  whenPresent(
-    findRouteSegment(state.route.arrive, "Brewer"),
-    arrive => {
-      const id = arrive.params.id;
-      update({
-        brewer: { [id]: `Brewer of ${id}` }
-      });
-    }
-  );
+export const brewerService = ({ state }) => {
+  const patches = [];
 
-  whenPresent(
-    findRouteSegment(state.route.leave, "Brewer"),
-    leave => {
-      const id = leave.params.id;
-      update({ brewer: { [id]: undefined } });
-    }
-  );
+  if (state.routeTransition.arrive.Brewer) {
+    const id =
+      state.routeTransition.arrive.Brewer.params.id;
+    patches.push({
+      brewer: { [id]: `Brewer of beverage ${id}` }
+    });
+  }
+
+  if (state.routeTransition.leave.Brewer) {
+    const id = state.routeTransition.leave.Brewer.params.id;
+    patches.push({ brewer: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };

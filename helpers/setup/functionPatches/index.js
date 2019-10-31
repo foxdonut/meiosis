@@ -14,8 +14,8 @@ const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
  * The returned stream must have a `map` method.
  * @param {app} app - the app, with optional properties.
  *
- * @returns {Promise} - a Promise that resolves to `{ update, models, states, actions }`
- * all of which are streams, except for `actions` which is the created actions.
+ * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams,
+ * and `actions` are the created actions.
  */
 export default ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: compose, app });

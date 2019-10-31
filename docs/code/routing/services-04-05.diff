@@ -1,0 +1,19 @@
+--- 04-services.js	2019-10-31 16:09:34.000000000 -0400
++++ 05-services.js	2019-08-08 12:54:32.000000000 -0400
+@@ -157,3 +157,16 @@
+     }
+   );
+ };
++
++export const loginService = ({ state, update }) => {
++  if (findRouteSegment(state.route.arrive, "Login")) {
++    update({
++      login: {
++        username: "",
++        password: ""
++      }
++    });
++  } else if (findRouteSegment(state.route.leave, "Login")) {
++    update({ login: null });
++  }
++};

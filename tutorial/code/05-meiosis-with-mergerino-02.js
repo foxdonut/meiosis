@@ -8,13 +8,11 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  Initial: function() {
-    return {
-      temperature: {
-        value: 22,
-        units: "C"
-      }
-    };
+  initial: {
+    temperature: {
+      value: 22,
+      units: "C"
+    }
   },
   Actions: function(update) {
     return {
@@ -42,7 +40,7 @@ var temperature = {
 };
 
 var update = flyd.stream();
-var states = flyd.scan(merge, temperature.Initial(), update);
+var states = flyd.scan(merge, temperature.initial, update);
 
 var actions = temperature.Actions(update);
 states.map(function(state) {

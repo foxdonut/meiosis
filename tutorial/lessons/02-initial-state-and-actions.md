@@ -12,15 +12,12 @@ object, and simple ways to update the state.
 Let's imagine a simple counter example. Our initial state might be:
 
 ```js
-function Initial() {
-  return {
-    value: 0
-  };
-}
+var initial = {
+  value: 0
+};
 ```
 
-That is, a function that returns a plain JavaScript object with a `value` property indicating
-the value of the counter.
+That is, a plain JavaScript object with a `value` property indicating the value of the counter.
 
 Now, we want to create an action that increments the counter.
 
@@ -31,18 +28,14 @@ We'll write an `Actions` function that returns object with an `increment` functi
 increments the counter.
 
 ```javascript
-function Initial() {
-  return {
-    value: 0
-  };
-}
-
-var initialState = Initial();
+var initial = {
+  value: 0
+};
 
 function Actions() {
   return {
     increment: function() {
-      initialState.value = initialState.value + 1;
+      initial.value = initial.value + 1;
     }
   };
 }

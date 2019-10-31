@@ -33,7 +33,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
     "flyd": "^0.2.8",
-    "immer": "^4.0.2",
+    "immer": "^5.0.0",
     "mergerino": "0.4.0",
     "mithril": "^2.0.4",
     "prettier": "1.18.2",

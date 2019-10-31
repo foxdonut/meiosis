@@ -104,10 +104,10 @@ manage them.
 
 ### Use `Routing`
 
-We'll store the current route in the application state, under `route.current`:
+We'll store the current route in the application state, under `route`:
 
 ```javascript
-{ route: { current: [Route.Home()] } }
+{ route: [Route.Home()] }
 ```
 
 Next, from our top-level component, we'll create an instance of `Routing`, passing in the current
@@ -131,7 +131,7 @@ import { Home, Login, User } from "./our-components";
 const componentMap = { Home, Login, User };
 
 const Root = ({ state }) => {
-  const routing = Routing(state.route.current);
+  const routing = Routing(state.route);
   const Component = componentMap[routing.localSegment.id];
 
   return (
@@ -168,15 +168,13 @@ const User = ({ state, routing }) => {
 };
 ```
 
-To navigate to a route, we can use a simple action that updates the state's `route.current`
-property:
+To navigate to a route, we can use a simple action that updates the state's `route` property:
 
 ```javascript
-// You can also import { navigateTo, Actions } from "meiosis-routing/state"
-const navigateTo = route => ({
-  route: { current: route }
-});
+// You can also import { navigateTo } from "meiosis-routing/state"
+const navigateTo = route => ({ route });
 
+// You can also import { Actions } from "meiosis-routing/state"
 const Actions = update => ({ navigateTo: route => navigateTo(route) });
 
 const update = ...;
@@ -292,13 +290,13 @@ const router = createFeatherRouter({
 This gives us a `router` with:
 
 - `router.initialRoute`: the initial route as parsed from the browser's location bar. We can use
-  this in our application's initial state, `{ route: {  current: router.initialRoute } }`
+  this in our application's initial state, `{ route: router.initialRoute }`
 - `router.start()`: a function to call at application startup. We pass a `navigateTo` callback for
   route changes: `router.start({ navigateTo: actions.navigateTo })`
 - `router.toPath(route)`: converts a route into a path. For example, `router.toPath([Route.Home()])`
   or a relative route such as `router.toPath(routing.parentRoute())`.
 - `router.locationBarSync()`: a function to call to keep the location bar in sync. Every time the
-  state changes, we call `router.locationBarSync(state.route.current)`.
+  state changes, we call `router.locationBarSync(state.route)`.
 
 Now that we have `router.toPath`, we no longer need to have `href="#"` and `onClick={...}` in our
 links. Instead, we can use `router.toPath()` in `href`:
@@ -376,44 +374,37 @@ The parameters will be available in our route segments just like path parameters
 It's often desirable to load data when arriving at a route, clear data when leaving a route, guard a
 route to restrict access, and so on. We can do them with route _transitions_.
 
-`meiosis-routing` provides a `routeTransition` function that takes the current route state and
-returns the updated route state. You can use this function in an
-[accept function](http://meiosis.js.org/docs/services.html#using_accepted_and_services), in a Redux
-reducer, and so on.
+`meiosis-routing` provides a `routeTransition` function that takes the previous and current route
+state and returns a route transition object, `{ leave: {...}, arrive: {...} }`. You can use this
+function in a [service function](http://meiosis.js.org/docs/services.html#using_meiosis_setup), in a
+Redux reducer, and so on.
 
-As an accept function, it looks like this:
+As a service function, it looks like this:
 
 ```javascript
-// You can also import { accept } from "meiosis-routing/state"
-const routeAccept = state => ({ route: routeTransition(state.route) });
+const service = ({ previousState, state }) => ({
+  state: { routeTransition: () => routeTransition(previousState.route, state.route) }
+});
 ```
 
-With this, `state.route` will contain `leave` and `arrive` properties with the routes that we left
-and arrived to. We can then use the convenience functions that `meiosis-routing` provides,
-`findRouteSegment` and `whenPresent`, to perform any actions we want when leaving from or arriving
-to a route:
+With this, `state.routeTransition` will contain `leave` and `arrive` properties with the routes that
+we left and arrived to, keyed by route id. We can then use this to perform any actions we want when
+leaving from or arriving to a route:
 
 ```javascript
-import { findRouteSegment, whenPresent } from "meiosis-routing/state";
+// in service function, reducer, etc.
 
-// in accept function, reducer, service, etc.
-
-function cleanup(state) {
-  if (findRouteSegment(state.route.leave, Route.User())) {
-    // leaving User route segment, cleanup...
+function loadDataForUser(state) {
+  if (state.routeTransition.arrive.User) {
+    const name = state.routeTransition.arrive.User.params.name;
+    // load data for user according to the value of 'name'...
   }
 }
 
-function loadDataForUser(state) {
-  // whenPresent is a convenience function to get the matching route segment
-  // so that we can have its params
-  whenPresent(
-    findRouteSegment(state.route.arrive, Route.User()),
-    arrive => {
-      const name = arrive.params.name;
-      // load data for user according to the value of 'name'...
-    }
-  );
+function cleanup(state) {
+  if (state.routeTransition.leave.User) {
+    // leaving User route segment, cleanup...
+  }
 }
 ```
 

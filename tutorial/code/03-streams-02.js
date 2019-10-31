@@ -1,9 +1,7 @@
 /*global flyd*/
 var app = {
-  Initial: function() {
-    return {
-      value: 0
-    };
+  initial: {
+    value: 0
   },
   Actions: function(update) {
     return {
@@ -23,7 +21,7 @@ var states = flyd.scan(
     state.value = state.value + increment;
     return state;
   },
-  app.Initial(),
+  app.initial,
   update
 );
 

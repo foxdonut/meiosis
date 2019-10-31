@@ -252,7 +252,7 @@ updated state. We can use `merge`:
 ```js
 var states = flyd.scan(function(state, patch) {
   return merge(state, patch);
-}, temperature.Initial(), update);
+}, temperature.initial, update);
 ```
 
 Notice that the accumulator function that we are passing is:
@@ -267,7 +267,7 @@ We have a function that takes (state, patch) and calls `merge` with (state, patc
 already does what we want, so we can pass it directly:
 
 ```js
-var states = flyd.scan(merge, temperature.Initial(), update);
+var states = flyd.scan(merge, temperature.initial, update);
 ```
 
 Putting it all together, we have:

@@ -172,18 +172,14 @@ Now that have we streams, `map`, and `scan`, we can use them to manage our appli
 Previously, we had:
 
 ```js
-function Initial() {
-  return {
-    value: 0
-  };
-}
-
-var initialState = Initial();
+var initial = {
+  value: 0
+};
 
 function Actions() {
   return {
     increment: function() {
-      initialState.value = initialState.value + 1;
+      initial.value = initial.value + 1;
     }
   };
 }
@@ -203,10 +199,8 @@ Here are our changes:
 
 ```js
 var app = {
-  Initial: function() {
-    return {
-      value: 0
-    };
+  initial: {
+    value: 0
   },
   Actions: function(update) {
     return {
@@ -224,7 +218,7 @@ var update = flyd.stream();
 var states = flyd.scan(function(state, increment) {
   state.value = state.value + increment;
   return state;
-}, app.Initial(), update);
+}, app.initial, update);
 
 var actions = app.Actions(update);
 states.map(function(state) {

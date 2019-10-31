@@ -33,13 +33,11 @@ For the conditions, we have:
 
 ```js
 var conditions = {
-  Initial: function() {
-    return {
-      conditions: {
-        precipitations: false,
-        sky: "Sunny"
-      }
-    };
+  initial: {
+    conditions: {
+      precipitations: false,
+      sky: "Sunny"
+    }
   },
   Actions: function(update) {
     return {
@@ -58,13 +56,11 @@ For the temperature, we have essentially the same code as we previously had.
 
 ```js
 var temperature = {
-  Initial: function() {
-    return {
-      temperature: {
-        value: 22,
-        units: "C"
-      }
-    };
+  initial: {
+    temperature: {
+      value: 22,
+      units: "C"
+    }
   },
   Actions: function(update) {
     return {
@@ -93,11 +89,9 @@ by combining the initial state and the actions of the components.
 
 ```js
 var app = {
-  Initial: function() {
-    return Object.assign({},
-      conditions.Initial(),
-      temperature.Initial()
-    );
+  initial: Object.assign({},
+    conditions.initial,
+    temperature.initial
   ),
   Actions: function(update) {
     return Object.assign({},
@@ -161,12 +155,10 @@ instance to act upon.
 
 ```js
 var app = {
-  Initial: function() {
-    return {
-      "conditions": conditions.Initial(),
-      "temperature:air": temperature.Initial(),
-      "temperature:water": temperature.Initial()
-    };
+  initial: {
+    "conditions": conditions.initial
+    "temperature:air": temperature.initial
+    "temperature:water": temperature.initial
   ),
   Actions: function(update) {
     return Object.assign({},

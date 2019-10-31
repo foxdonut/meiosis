@@ -42,12 +42,14 @@ const Root = ({ state, actions }) => (
 const App = Meiosis.preact.setup({ preact, Root });
 const app = {};
 
-Meiosis.mergerino
-  .setup({ stream: Meiosis.simpleStream, merge, app })
-  .then(({ states, actions }) => {
-    // eslint-disable-next-line react/no-deprecated
-    preact.render(
-      <App states={states} actions={actions} />,
-      document.getElementById("app")
-    );
-  });
+const { states, actions } = Meiosis.mergerino.setup({
+  stream: Meiosis.simpleStream,
+  merge,
+  app
+});
+
+// eslint-disable-next-line react/no-deprecated
+preact.render(
+  <App states={states} actions={actions} />,
+  document.getElementById("app")
+);

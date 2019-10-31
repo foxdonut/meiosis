@@ -6,13 +6,11 @@ var convert = function(value, to) {
 };
 
 var temperature = {
-  Initial: function() {
-    return {
-      temperature: {
-        value: 22,
-        units: "C"
-      }
-    };
+  initial: {
+    temperature: {
+      value: 22,
+      units: "C"
+    }
   },
   Actions: function(update) {
     return {
@@ -42,7 +40,7 @@ var states = flyd.scan(
   function(state, patch) {
     return patch(state);
   },
-  temperature.Initial(),
+  temperature.initial,
   update
 );
 

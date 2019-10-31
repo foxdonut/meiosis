@@ -33,12 +33,10 @@ provided:
 ## Setup
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
-provide. In the application, you can define the `Initial` function, the `Actions`, and the array of
+provide. In the application, you can define the `initial` state, the `Actions`, and the array of
 services, _all of which are optional_.
 
-Because the `Initial` function may return a `Promise`, the `setup` function also returns a
-`Promise` which provides the `update`, `models`, and `states` streams, as well as the created
-`actions`.
+The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
 For the stream library, you can use `Meiosis.simpleStream`,
 [Flyd](https://github.com/paldepind/flyd), or [Mithril-Stream](https://mithril.js.org/stream.html)
@@ -61,10 +59,10 @@ import merge from "mergerino";
 
 const app = {};
 
-meiosisMergerino({ stream: simpleStream, merge, app })
-  .then(({ update, models, states, actions }) => {
-    // setup your view here
-  })
+const { update, states, actions } =
+  meiosisMergerino({ stream: simpleStream, merge, app });
+
+// setup your view here
 ```
 
 ### Function Patch Setup
@@ -82,10 +80,10 @@ import simpleStream from "meiosis-setup/simple-stream";
 
 const app = {};
 
-meiosisFunctionPatches({ stream: simpleStream, app })
-  .then(({ update, models, states, actions }) => {
-    // setup your view here
-  })
+const { update, states, actions } =
+  meiosisFunctionPatches({ stream: simpleStream, app });
+
+// setup your view here
 ```
 
 ### Immer Setup
@@ -104,31 +102,37 @@ import produce from "immer";
 
 const app = {};
 
-meiosisImmer({ stream: simpleStream, produce, app })
-  .then(({ update, models, states, actions }) => {
-    // setup your view here
-  })
+const { update, states, actions } =
+  meiosisImmer({ stream: simpleStream, produce, app });
+
+// setup your view here
 ```
 
 ### Application
 
 In the `app` object that you provide to `setup`, you can optionally provide the following:
 
-- `Initial`: a function that returns the initial state. This function can return immediately
-or return a `Promise`. If not provided, the initial state is `{}`.
+- `initial`: an object that represents the initial state. If not provided, the initial state is
+`{}`.
 - `Actions`: a function that receives `(update)` and returns an object with actions.
 The created actions are returned by `setup`, and also passed to `services`.
 If not provided, the created actions are `{}`.
 For convience, actions can pass arrays of patches to `update` to combine multiple patches into one,
 thus reducing the number of updates, state changes, and view refreshes.
-- `acceptors`: an array of "accept" functions that get called with `(state)`.
-These functions are called in order and should return a patch to modify the state as needed.
-You can also return an array of patches, which will automatically be `combine`d into a single
-patch.
-- `services`: an array of functions that get called with `({ state, update, actions })`. Services
-can issue updates by calling `update` or by calling actions. Services can call `update`
-synchronously or asynchrously. Multiple synchronous calls to `update` are automatically combined
-into a single update.
+- `services`: an array of functions that get called with `({ state, previousState, patch })`.
+Service functions can issue updates by returning an object with any combination of the following
+properties:
+    - `state`: a patch or array of patches to update the state, for example computed properties.
+    - `patch: differentPatch`: this changes the patch to a different one, aborting the current loop
+      and starting over with `differentPatch`.
+    - `patch: false`: this cancels the patch altogether, aborting the current loop and cancelling
+      the render.
+    - `render: false`: this continues the loop but does not render the view. For example, when
+      arriving at a route and needing to load asynchronous data (with `next`, below), but without a
+      "loading..." state.
+    - `next: ({ update, actions, state, patch }) => { ... }`: this schedules a function to be called
+      at the end of the loop. The function can trigger more updates by calling `update` and/or
+      `actions`. Updates can be synchronous and/or asynchronous.
 
 ### Common Setup
 
@@ -204,4 +208,3 @@ for your contributions, feedback, and suggestions. They are much appreciated!
 
 _meiosis-setup is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
-
