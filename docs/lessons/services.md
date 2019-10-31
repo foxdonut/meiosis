@@ -2,13 +2,13 @@
 
 [Table of Contents](toc.html)
 
-## Services and Accepted State
+## Services
 
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll look
-at James' version using streams, and another version using a separate accepted state function and a
-service trigger. For the latter, we'll use two variants, one with
-[Daniel Loomer](https://github.com/fuzetsu)'s
-[Mergerino](https://github.com/fuzetsu/mergerino), and one with function patches.
+at James' version using streams, and another version using
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup)
+with [Daniel Loomer](https://github.com/fuzetsu)'s
+[Mergerino](https://github.com/fuzetsu/mergerino).
 
 James explains that while one-off actions occur after click events, user input, and so on,
 services are for ongoing state synchronization. They can produce computed properties, store and
@@ -134,25 +134,26 @@ The complete example is below.
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish.
 
-<a name="using_accepted_and_services"></a>
-### [Using Accepted State and Services](#using_accepted_and_services)
+<a name="using_meiosis_setup"></a>
+### [Using Meiosis-Setup](#using_meiosis_setup)
 
-In Meiosis, instead of emitting patches from services, we define state management objects that can
-have either one (or both) of these:
+In Meiosis, instead of having services return streams that emit patches, services return an object
+that can be any combination of the following properties:
 
-- an `accept` function
-- a `service` function
+- `state`: to update the state
+- `patch`: to change or cancel the current patch
+- `render`: `false` to cancel the render
+- `next`: to trigger more updates
 
-An `accept` function gets the current state as a parameter and returns a patch to make any necessary
-changes and updates to the state. Then, all accept functions are combined together to produce a
-single `accept` function that receives the current state and produces the accepted state.
+A service function receives the previous state, the current patch, and the state with the current
+patch applied.
 
-Accept functions, or _acceptors_, run **synchronously** and **in order**. Thus, an acceptor can
-depend on the changes made by a previous acceptor.
+Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
+made by a previous service.
 
-For asynchronous changes, we define a `service` function that receives the current state and the
-`update` stream, and decides whether to call `update`. Services can call `update` synchronously, as
-well.
+A service can return a `next` function which gets called for the next render cycle. This function
+receives `({ state, patch, update, actions })` and can make synchronous and/or asynchronous calls to
+`update` and/or `actions`.
 
 Our component structure is thus:
 
@@ -160,8 +161,7 @@ Our component structure is thus:
 {
   Initial: () => initialState,
   Actions: update => actions,
-  accept: state => patch,
-  service: ({ state, update }) => { /* call update() based on state */ }
+  service: ({ state, patch, previousState }) => ({ state, patch, render, next })
 }
 ```
 
@@ -182,84 +182,50 @@ Remember that previously, we had a stats service and a description service:
 - `DescriptionService`: produces the text description of how many boxes of each color are in
 the list.
 
-These become acceptors:
+These services are now:
 
 ```javascript
 const stats = {
-  accept: R.pipe(
-    x => x.boxes,
-    R.countBy(I),
-    R.objOf("stats")
-  )
+  service: ({ state }) =>
+    R.applyTo(
+      state,
+      R.pipe(
+        x => x.boxes,
+        R.countBy(I),
+        R.always,
+        R.objOf("stats"),
+        R.objOf("state")
+      )
+    )
 };
 
 const description = {
-  accept: R.pipe(
-    x => x.stats,
-    R.toPairs,
-    R.groupBy(R.last),
-    R.map(R.map(R.head)),
-    R.map(humanList("and")),
-    R.toPairs,
-    R.map(R.join(" ")),
-    humanList("and"),
-    x => x + ".",
-    R.objOf("description")
-  )
+  service: ({ state }) =>
+    R.applyTo(
+      state,
+      R.pipe(
+        x => x.stats,
+        R.toPairs,
+        R.groupBy(R.last),
+        R.map(R.map(R.head)),
+        R.map(humanList("and")),
+        R.toPairs,
+        R.map(R.join(" ")),
+        humanList("and"),
+        x => x + ".",
+        R.objOf("description"),
+        R.objOf("state")
+      )
+    )
 };
 ```
 
-Each accept function takes the state and returns a patch. Let's assemble the functions into a
-top-level `accept` function that takes the state and returns the updated state. We can use `reduce`
-on the array of `accept` functions, calling each function and applying the patch on the state with
-`merge`:
+Each service function takes the state and returns a `{ state: patch }` object.
 
-```javascript
-const acceptors = [stats.accept, description.accept];
-
-const accept = state =>
-  acceptors.reduce(
-    (updatedState, acceptor) =>
-      merge(updatedState, acceptor(updatedState)),
-    state
-  );
-```
-
-This gives us a single top-level `accept` function that takes the state, calls all acceptor
-functions, and produces the updated state. We call `accept` after calling `merge` in the accumulator
-function of `scan`. Note that we also call `accept` on the initial state:
-
-```javascript
-const states = m.stream.scan(
-  (state, patch) => accept(merge(state, patch)),
-  accept(app.Initial()),
-  update
-);
-```
-
-For asynchronous changes, such as loading data from a server, we'll separately define `service`
-functions that receive the current state and the `update` stream, and call `update` as they see fit.
-
-```javascript
-service: ({ state, update }) => {
-  // determine whether to call update() based on state
-}
-```
-
-As in the previous section, we have to be careful about infinite loops. Indeed, when the service
-calls `update()`, the service will be triggered again. Later, we will look at how we can optimize
-services to avoid calling them again after they issue updates, and thus not have to worry about
-infinite loops.
-
-In this example, the `storage.service` function doesn't call `update`, so it's not an issue.
+A service function does not need to return anything, however. The `storage.service` function is one such function, as it only stores the state into local storage:
 
 ```javascript
 const storage = {
-  Initial: () => {
-    const stored = localStorage.getItem("v1");
-    return stored ? JSON.parse(stored) : {};
-  },
-
   service: ({ state }) => {
     localStorage.setItem(
       "v1",
@@ -269,64 +235,9 @@ const storage = {
 };
 ```
 
-After assembling service functions into an array, wiring them up is simply a matter of calling them
-every time the state changes:
-
-```javascript
-const services = [storage.service];
-
-states.map(state =>
-  services.forEach(service => service({ state, update }))
-);
-```
-
 You will find the complete example below.
 
-@flems code/services/index-mergerino.js,app.html mithril,mithril-stream,ramda,bss,mergerino 700 60
-
-#### With Function Patches
-
-We can also use this approach with function patches instead of Mergerino. Remember that with
-function patches, we produce functions `f(state) => updatedState` instead of object patches, and we
-wire up Meiosis like this:
-
-```javascript
-const T = (x, f) => f(x);
-const update = m.stream();
-const states = m.stream.scan(T, initialState(), update);
-```
-
-Our acceptors and services have the same structure as before, except that patches are functions
-instead of objects. When we call an `acceptor` function, we get back a function. To apply the patch,
-we just call the returned function:
-
-```javascript
-const acceptors = [stats.accept, description.accept];
-
-const accept = state =>
-  acceptors.reduce(
-    (updatedState, acceptor) =>
-      acceptor(updatedState)(updatedState),
-    state
-  );
-```
-
-As before, we call `accept` in our `scan` accumulator, and also call `accept` on the initial state.
-The only difference is that we use `T` instead of `merge` to apply a patch -- `T = (x, f) => f(x)`.
-
-```javascript
-const states = m.stream.scan(
-  (state, patch) => accept(T(state, patch)),
-  accept(app.Initial()),
-  update
-);
-```
-
-The rest of the setup is the same as before.
-
-Have a look at the complete example below.
-
-@flems code/services/index-functions.js,app.html mithril,mithril-stream,ramda,bss 700 60
+@flems code/services/index-mergerino.js,app.html mithril,mithril-stream,ramda,bss,meiosis-setup,mergerino 700 60
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)

@@ -65,21 +65,19 @@ available to the page:
 ```
 
 This is called a _route segment_. To indicate the current route, we'll put it in the application
-state under `route.current`:
+state under `route`:
 
 ```javascript
 { route:
-  { current: { id: "Home", params:{} } }
+  { id: "Home", params: {} }
 }
 ```
 
 Not to have to repeat this everywhere, we'll create a `navTo` function that places a route under
-`route.current`, and a `navigateTo` action that uses it:
+`route`, and a `navigateTo` action that uses it:
 
 ```javascript
-const navTo = route => ({
-  route: { current: route }
-});
+const navTo = route => ({ route });
 
 const app = {
   Actions: ({ update }) => ({

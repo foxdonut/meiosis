@@ -24,7 +24,7 @@ const componentMap = {
 };
 
 const Root = ({ state, actions }) => {
-  const Component = componentMap[state.route.current.id];
+  const Component = componentMap[state.route.id];
   const isActive = tab => tab === Component;
 
   return (

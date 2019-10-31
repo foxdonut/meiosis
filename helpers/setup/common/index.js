@@ -65,7 +65,6 @@ export default ({ stream, accumulator, combine, app }) => {
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
-  const Oa = Object.assign;
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
@@ -109,7 +108,7 @@ export default ({ stream, accumulator, combine, app }) => {
               delete serviceUpdate.next;
             }
             // Update the context
-            updatedContext = Oa(updatedContext, serviceUpdate, {
+            updatedContext = Object.assign(updatedContext, serviceUpdate, {
               state: accumulatorFn(updatedContext.state, serviceUpdate.state)
             });
           }
@@ -138,8 +137,8 @@ export default ({ stream, accumulator, combine, app }) => {
           context.next.forEach(service => {
             service({
               state: context.state,
+              patch: context.patch,
               update,
-              patch: update(),
               actions
             });
           });

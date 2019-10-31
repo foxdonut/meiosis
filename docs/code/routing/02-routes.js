@@ -11,6 +11,4 @@ export const Route = createRouteSegments([
   "Beer"
 ]);
 
-export const navTo = route => ({
-  route: { current: route }
-});
+export const navTo = route => ({ route });

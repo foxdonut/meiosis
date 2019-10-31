@@ -6,8 +6,7 @@
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
-- [Services and Computed Properties](services.html)
-- [Optimizing Services](optimizing-services.html)
+- [Services](services.html)
 - [Routing](routing.html)
 - [Preventing Re-renders](preventing-re-renders.html)
 

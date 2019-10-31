@@ -20,9 +20,7 @@ export const Route = createRouteSegments([
   "NotFound"
 ]);
 
-export const navTo = route => ({
-  route: { current: route }
-});
+export const navTo = route => ({ route });
 
 const beverageRoutes = {
   Beverages: "",

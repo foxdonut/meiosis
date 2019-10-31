@@ -44,7 +44,7 @@ const componentMap = {
 };
 
 const Root = ({ state, actions }) => {
-  const routing = Routing(state.route.current);
+  const routing = Routing(state.route);
   const Component = componentMap[routing.localSegment.id];
   const isActive = tab => tab === Component;
 
@@ -172,7 +172,7 @@ Meiosis.mergerino
     router.start({ navigateTo: actions.navigateTo });
 
     states.map(state =>
-      router.locationBarSync(state.route.current)
+      router.locationBarSync(state.route)
     );
 
     const locationValue = document.getElementById(

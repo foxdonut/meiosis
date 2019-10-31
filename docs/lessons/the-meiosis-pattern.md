@@ -48,42 +48,7 @@ const actions = app.Actions(update);
 
 Then, pass `state` and `actions` to views.
 
-Optionally, add [Services and Accepted State](services.html):
-
-```javascript
-// Using Mergerino:
-const accept = state =>
-  acceptors.reduce(
-    (updatedState, acceptor) =>
-      merge(updatedState, acceptor(updatedState)),
-    state
-  );
-
-const states = m.stream.scan(
-  (state, patch) => accept(merge(state, patch)),
-  accept(app.Initial()),
-  update
-);
-states.map(state =>
-  services.forEach(service => service({ state, update })));
-
-// Using Function Patches:
-const accept = state =>
-  acceptors.reduce(
-    (updatedState, acceptor) =>
-      acceptor(updatedState)(updatedState),
-    state
-  );
-
-const states = m.stream.scan(
-  (state, patch) => accept(T(state, patch)),
-  accept(app.Initial()),
-  update
-);
-
-states.map(state =>
-  services.forEach(service => service({ state, update })));
-```
+Optionally, add [Services](services.html).
 
 <a name="using_mithril"></a>
 ### [Using Mithril](#using_mithril)

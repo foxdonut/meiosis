@@ -1,4 +1,4 @@
-/* global b, m, R, mergerino */
+/* global b, m, R, Meiosis, mergerino */
 const merge = mergerino;
 
 const I = x => x;
@@ -13,27 +13,37 @@ const humanList = s => xs =>
     : xs.join("");
 
 const stats = {
-  accept: R.pipe(
-    x => x.boxes,
-    R.countBy(I),
-    R.always,
-    R.objOf("stats")
-  )
+  service: ({ state }) =>
+    R.applyTo(
+      state,
+      R.pipe(
+        x => x.boxes,
+        R.countBy(I),
+        R.always,
+        R.objOf("stats"),
+        R.objOf("state")
+      )
+    )
 };
 
 const description = {
-  accept: R.pipe(
-    x => x.stats,
-    R.toPairs,
-    R.groupBy(R.last),
-    R.map(R.map(R.head)),
-    R.map(humanList("and")),
-    R.toPairs,
-    R.map(R.join(" ")),
-    humanList("and"),
-    x => x + ".",
-    R.objOf("description")
-  )
+  service: ({ state }) =>
+    R.applyTo(
+      state,
+      R.pipe(
+        x => x.stats,
+        R.toPairs,
+        R.groupBy(R.last),
+        R.map(R.map(R.head)),
+        R.map(humanList("and")),
+        R.toPairs,
+        R.map(R.join(" ")),
+        humanList("and"),
+        x => x + ".",
+        R.objOf("description"),
+        R.objOf("state")
+      )
+    )
 };
 
 const storage = {
@@ -66,7 +76,13 @@ const app = {
       update({
         boxes: xs => xs.filter((x, j) => i != j)
       })
-  })
+  }),
+
+  services: [
+    stats.service,
+    description.service,
+    storage.service
+  ]
 };
 
 const App = {
@@ -128,28 +144,10 @@ const App = {
     )
 };
 
-const acceptors = [stats.accept, description.accept];
-const services = [storage.service];
-
-const accept = state =>
-  acceptors.reduce(
-    (updatedState, acceptor) =>
-      merge(updatedState, acceptor(updatedState)),
-    state
-  );
-
-const update = m.stream();
-const actions = app.Actions(update);
-const states = m.stream.scan(
-  (state, patch) => accept(merge(state, patch)),
-  accept(app.Initial()),
-  update
-);
-
-m.mount(document.getElementById("app"), {
-  view: () => m(App, { state: states(), actions })
-});
-
-states.map(state =>
-  services.forEach(service => service({ state, update }))
-);
+Meiosis.mergerino
+  .setup({ stream: m.stream, merge, app })
+  .then(({ states, actions }) => {
+    m.mount(document.getElementById("app"), {
+      view: () => m(App, { state: states(), actions })
+    });
+  });

@@ -46,7 +46,7 @@ const componentMap = {
 
 const Root = {
   view: ({ attrs: { state, actions } }) => {
-    const routing = Routing(state.route.current);
+    const routing = Routing(state.route);
     const Component = componentMap[routing.localSegment.id];
     const isActive = tab => tab === Component;
 
@@ -180,7 +180,7 @@ Meiosis.mergerino
     states.map(() => m.redraw());
 
     states.map(state =>
-      router.locationBarSync(state.route.current)
+      router.locationBarSync(state.route)
     );
 
     const locationValue = document.getElementById(
