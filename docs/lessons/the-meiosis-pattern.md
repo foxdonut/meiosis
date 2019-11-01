@@ -29,7 +29,7 @@ Here is the code to set up the Meiosis Pattern:
 
 ```js
 const app = {
-  Initial: () => ...,
+  initial: ...,
   Actions: update => {
     return ...
   }
@@ -38,10 +38,10 @@ const app = {
 const update = flyd.stream();
 
 // Using Mergerino:
-const states = flyd.scan(merge, app.Initial(), update);
+const states = flyd.scan(merge, app.initial, update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) => f(x), app.Initial(), update);
+const states = flyd.scan((x, f) => f(x), app.initial, update);
 
 const actions = app.Actions(update);
 ```

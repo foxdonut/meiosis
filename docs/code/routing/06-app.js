@@ -19,14 +19,14 @@ import {
 
 import {
   routeService,
+  settingsService,
+  loginService,
   teaService,
   teaDetailService,
   coffeeService,
   beerService,
   beverageService,
-  brewerService,
-  loginService,
-  settingsService
+  brewerService
 } from "./06-services";
 
 const componentMap = {

@@ -18,14 +18,14 @@ import {
 
 import {
   routeService,
+  settingsService,
+  loginService,
   teaService,
   teaDetailService,
   coffeeService,
   beerService,
   beverageService,
-  brewerService,
-  loginService,
-  settingsService
+  brewerService
 } from "./05-services";
 
 const componentMap = {

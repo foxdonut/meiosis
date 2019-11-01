@@ -124,7 +124,7 @@ Let's initialize the state with the `Home` route:
 
 ```javascript
 const app = {
-  Initial: () => navTo(Route.Home()),
+  initial: navTo(Route.Home()),
   Actions: ({ update }) => ({
     navigateTo: route => update(navTo(route))
   })
@@ -149,12 +149,12 @@ const componentMap = {
 };
 ```
 
-It's now simple in the root view to look up the component using the id of the current route in the
-state, and display it:
+It's now simple in the root view to look up the component using the id of the route in the state,
+and display it:
 
 ```javascript
 const Root = ({ state, actions }) => {
-  const Component = componentMap[state.route.current.id];
+  const Component = componentMap[state.route.id];
 
   return (
     // ...
@@ -234,7 +234,7 @@ becomes:
 
 ```javascript
 const app = {
-  Initial: () => navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   // ...
 };
 ```
@@ -282,13 +282,13 @@ Moreover, the route array opens up the possibility to navigate to:
 without having to mess with paths.
 
 To make all of that simple, `meiosis-routing` provides helper functions. First, you construct a
-_routing_ object with `Routing`, passing in the current route from the state:
+_routing_ object with `Routing`, passing in the route from the state:
 
 ```javascript
 import { Routing } from "meiosis-routing/state";
 
 const Root = ({ state, actions }) => {
-  const routing = Routing(state.route.current);
+  const routing = Routing(state.route);
   // ...
 };
 ```
@@ -309,7 +309,7 @@ segment. We also pass `routing` down to the component:
 
 ```javascript
 const Root = ({ state, actions }) => {
-  const routing = Routing(state.route.current);
+  const routing = Routing(state.route);
   const Component = componentMap[routing.localSegment.id];
 
   return (
@@ -477,58 +477,61 @@ The first thing we'll do is indicate, in the application state, which route we a
 which route we are arriving when navigating. When the state changes but no navigation occurs, both
 will be empty.
 
-The `routeTransition` function from `meiosis-routing` takes a `route` object (which contains the
-`current` route) and returns the object with additional properties: `previous`, `leave`, and
-`arrive`. The function uses `previous` to compare with `current` and determine `leave` and `arrive`.
+The `routeTransition` function from `meiosis-routing` takes the previous route and the next route,
+and returns an object with `leave`, and `arrive` properties. Both contain lookups, keyed by route
+id, that indicate which routes we are leaving and to which we are arriving.
 
-To use `routeTransition`, we need to wire it up as an `accept` function. Refer to
-[Using Accepted State and Services](http://meiosis.js.org/docs/services.html#using_accepted_and_services)
-for a refresher on acceptors, and see the
+To use `routeTransition`, we need to wire it up as a service function. Refer to
+[Services](http://meiosis.js.org/docs/services.html#using_meiosis_setup) for a refresher on
+services, and see the
 [Application](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#application) section for
-information on how to specify acceptors with `meiosis-setup`.
+information on how to specify services with `meiosis-setup`.
 
-Writing an `accept` function for `routeTransition` and wiring it up as an acceptor is simple:
+Here is how to write a service function for `routeTransition` and wire it up:
 
 ```javascript
 import { routeTransition } from "meiosis-routing/state";
 
-export const routeAccept = state => ({
-  route: routeTransition(state.route)
+export const routeService = ({ previousState, state }) => ({
+  state: {
+    routeTransition: () =>
+      routeTransition(previousState.route, state.route)
+  }
 });
 
 // ...
 
 const app = {
   // ...
-  acceptors: [routeAccept],
+  services: [routeService],
   // ...
 };
 ```
-
-> For convenience, `meiosis-routing/state` provides this function as `accept`.
 
 Now, when we navigate from one page to another, such as from `Home` to `Tea`, we'll have this in
 the application state:
 
 ```javascript
 {
-  route: {
-    current: [{ id: "Tea", params:{} }],
-    previous: [{ id: "Tea", params:{} }],
-    leave: [{ id: "Home", params: {} }],
-    arrive: [{ id: "Tea", params: {} }]
+  route: [{ id: "Tea", params:{} }],
+  routeTransition: {
+    leave: {
+      Home: { id: "Home", params: {} }
+    },
+    arrive: {
+      Tea: { id: "Tea", params: {} }
+    }
   }
 }
 ```
 
-We can use `route.leave` to unload data, clean up the application state and so on, and
-`route.arrive` to load data for a page, prepare the state, etc. For these tasks we can use
-_services_.
-
+We can use `state.routeTransition.leave` to unload data, clean up the application state and so on,
+and `state.routeTransition.arrive` to load data for a page, prepare the state, etc. For these tasks
+we can use _services_.
 
 #### Using the Transition State in Services
 
-We've seen how [Services](http://meiosis.js.org/docs/services.html#using_accepted_and_services)
+We've seen how [Services](http://meiosis.js.org/docs/services.html#using_meiosis_setup)
 are functions that run on state changes. Since we're using [meiosis-setup], we just have to specify
 a `services` array in our `app` object with the service functions that we want to execute.
 
@@ -551,51 +554,45 @@ const teas = [
 ```
 
 We want to "load" the list when we arrive at the Tea page, and clean up the application state when
-we leave. We know we've arrived or left depending on the presence of a `Tea` route segment anywhere
-in the `arrive` or `leave` array. For convenience, `meiosis-routing` provides the `findRouteSegment`
-which returns the route segment that matches an id, or `null` if there is no match. We only need to
-specify the id. The params don't matter, but they _will_ be returned in the matched route segment so
+we leave. We know we've arrived or left depending on the presence of the `Tea` id in the `arrive` or
+`leave` object. The params don't matter, but they _will_ be returned in the matched route segment so
 that we can use them as necessary.
-
-> If you need to search for a route segment that also matches specific params, `meiosis-routing`
-also provides `findRouteSegmentWithParams` for that purpose.
 
 Here is the `teaService`:
 
 ```javascript
-export const teaService = ({ state, update }) => {
-  if (findRouteSegment(state.route.arrive, "Tea")) {
-    setTimeout(() => {
-      update({ teas });
-    }, 500);
-  } else if (findRouteSegment(state.route.leave, "Tea")) {
-    update({ teas: null });
+export const teaService = ({ state }) => {
+  if (state.routeTransition.arrive.Tea) {
+    return {
+      next: ({ update }) =>
+        setTimeout(() => {
+          update({ teas });
+        }, 500)
+    };
+  }
+  if (state.routeTransition.leave.Tea) {
+    return { state: { teas: null } };
   }
 };
 ```
 
-If we find the `Tea` route segment in `arrive`, we simulate loading data asynchronously with
-`setTimeout` and set the `teas` in the application state. If we find `Tea` in `leave`, then we clean
-up the application state by setting `teas` to `null`.
+If we find the `Tea` id in `arrive`, we simulate loading data asynchronously with `setTimeout` and
+set the `teas` in the application state. If we find `Tea` in `leave`, then we clean up the
+application state by setting `teas` to `null`.
 
-> Note that we're just using the `"Tea"` id with `findRouteSegment`. If you prefer, you can also use
-`Route.Tea()`:
-```javascript
-if (findRouteSegment(state.route.arrive, Route.Tea())) {
-  // ...
-}
-```
-
-We wire up the service in our `app` object:
+We wire up the service in the `services` array of our `app` object, taking care of putting it
+**after** `routeService`:
 
 ```javascript
 const app = {
   // ...
-  acceptors: [routeAccept],
-  services: [teaService]
+  services: [routeService, teaService]
   // ...
 };
 ```
+
+It's important to put `teaService` after `routeService` because `teaService` uses the
+`routeTransition` data produced by `routeService`.
 
 Now when we arrive at the `Tea` page, the `teas` will not yet be loaded into the application state
 since we simulated a 500 ms delay. We can display a "Loading..." message until the `teas` are
@@ -632,53 +629,30 @@ Now think about what happens when the user clicks on the "Tea 1" link, followed 
 
 While in `teaService` we had an `if ... else`, for the `teaDetailService` we need to check `leave`
 even if a match was found in `arrive`, because both could match at the same time. We can use the
-matched route segment's params to determine the `id` of the tea to load and/or unload:
+matched route segment's `params` to determine the `id` of the tea to load and/or unload:
 
 ```javascript
-import { findRouteSegment, whenPresent } from "meiosis-routing/state";
-// See below for an explanation of whenPresent.
-
 // teaMap is a simple id->tea lookup object.
 
-export const teaDetailService = ({ state, update }) => {
-  whenPresent(
-    findRouteSegment(state.route.arrive, "TeaDetails"),
-    arrive => {
-      const id = arrive.params.id;
-      const description = teaMap[id].description;
-      update({ tea: { [id]: description } });
-    }
-  );
+export const teaDetailService = ({ state }) => {
+  const patches = [];
 
-  whenPresent(
-    findRouteSegment(state.route.leave, "TeaDetails"),
-    leave => {
-      const id = leave.params.id;
-      update({ tea: { [id]: undefined } });
-    }
-  );
+  if (state.routeTransition.arrive.TeaDetails) {
+    const id =
+      state.routeTransition.arrive.TeaDetails.params.id;
+    const description = teaMap[id].description;
+    patches.push({ tea: { [id]: description } });
+  }
+
+  if (state.routeTransition.leave.TeaDetails) {
+    const id =
+      state.routeTransition.leave.TeaDetails.params.id;
+    patches.push({ tea: { [id]: undefined } });
+  }
+
+  return { state: patches };
 };
 ```
-
-> `whenPresent` is this convenience function:
-```javascript
-export const whenPresent = (obj, fn) => (obj != null ? fn(obj) : null);
-```
-It saves you from having to assign the result of a function call to a `const` just to check it for
-null, so that instead of:
-```javascript
-const obj = someFunctionCall();
-if (obj != null) {
-  // use obj
-}
-```
-You can write:
-```javascript
-whenPresent(someFunctionCall(), obj => {
-  // use obj
-});
-```
-Using `whenPresent` is completely optional and only a matter of preference.
 
 Now we can click on Tea 1 and then on Tea 2, and only the selected tea will be loaded into the
 application state; we won't be accumulating state as we click on different links.
@@ -718,24 +692,26 @@ For demonstration purposes, the _Settings_ link always appears in our example, b
 that users must be logged in to access that page. When the user clicks on the link, we want to
 redirect them to the Login page and display the message: "Please login."
 
-Remember that _acceptors_ are functions that produce the accepted state. We've already added one
-`accept` function to compute route transitions. We can write an `accept` function for the Settings
-page which checks whether the user is logged in, and _changes_ the route to the Login page if they
-are not. As a bonus, we want to automatically send the user back to the Settings page after they log
-in, since that is where they were trying to go.
+We can write a service function for the Settings page which checks whether the user is logged in,
+and _changes_ the route to the Login page if they are not. As a bonus, we want to automatically send
+the user back to the Settings page after they log in, since that is where they were trying to go.
 
 ```javascript
-import { findRouteSegment } from "meiosis-routing/state";
 import { Route, navTo } from "./05-routes";
 
-export const settingsAccept = state => {
+export const settingsService = ({ state }) => {
   if (
-    findRouteSegment(state.route.current, "Settings") &&
+    state.routeTransition.arrive.Settings &&
     !state.user
   ) {
-    return navTo([
-      Route.Login({ message: "Please login.", returnTo: Route.Settings() })
-    ]);
+    return {
+      patch: navTo(
+        Route.Login({
+          message: "Please login.",
+          returnTo: Route.Settings()
+        })
+      )
+    };
   }
 };
 ```
@@ -744,18 +720,23 @@ To redirect, the function returns a patch that, using `navTo`, changes the route
 Notice that we are including the `message` and `returnTo` params so that the Login page can display
 the message and return to the Settings page after logging in.
 
-Acceptors run in order, and we want to alter the route before the transition gets computed. So it's
-important to have this acceptor function run **before** the route transition acceptor:
+Returning a patch from a service **cancels** the current loop and **replaces** the patch, restarting
+the services. Services run in order, so it makes sense to place the `settingsService` near the top
+of the list, while still making sure that `routeService` is first:
 
 ```javascript
 const app = {
   // ...
-  acceptors: [settingsAccept, routeAccept],
+  services: [routeService, settingsService, ...],
   // ...
 };
 ```
 
-Now if we navigate to Settings without logging in, we'll be redirected to the Login. We can display
+If we have other services between `routeService` and `settingsService`, things will still work
+correctly, but the work done by those other services would get thrown out when the `settingsService`
+does a redirect.
+
+Now, if we navigate to Settings without logging in, we'll be redirected to the Login. We can display
 the message by retrieving it from the route params. We can also get the `returnTo` value so that we
 can automatically send the user back to the Settings page after they log in.
 
@@ -802,45 +783,45 @@ on the page if they proceed. Let's try that with the Login page. If the user has
 the `username` or `password` field and then navigate away from the page, we'll warn them and give
 them a chance to cancel the navigation and stay on the Login page.
 
-To achieve this, we'll write another `accept` function. Remember that acceptors having to do with
-manipulating navigation must come _before_ the route transition acceptor. As such, we don't have
-access to `arrive` and `leave` information. However, we do have `previous` and `current`. If `Login`
-is in `previous` but not in `current`, the user is navigating away from the Login page. If they were
-in the process of logging in, the state contains something in `username` and/or `password`. We'll
-use `confirm` to ask the user if they want to continue:
+To achieve this, we'll write another service function. When the user arrives at the Login page,
+we'll prepare the `login` state with a blank username and password. If the user is navigating away
+from the Login page, and they in the process of logging in, the state contains something in
+`username` and/or `password`. We'll use `confirm` to ask the user if they want to continue:
 
 ```javascript
-export const loginAccept = state => {
-  const currentLogin = findRouteSegment(
-    state.route.current,
-    "Login"
-  );
-  const previousLogin = findRouteSegment(
-    state.route.previous,
-    "Login"
-  );
-
-  if (
-    !currentLogin &&
-    previousLogin &&
-    !state.user &&
-    (state.login.username || state.login.password) &&
-    !confirm("You have unsaved data. Continue?")
-  ) {
-    return navTo([previousLogin]);
+export const loginService = ({ state }) => {
+  if (state.routeTransition.arrive.Login) {
+    return {
+      state: {
+        login: {
+          username: "",
+          password: ""
+        }
+      }
+    };
+  } else if (state.routeTransition.leave.Login) {
+    if (
+      !state.user &&
+      (state.login.username || state.login.password) &&
+      !confirm("You have unsaved data. Continue?")
+    ) {
+      return { patch: false };
+    }
+    return { state: { login: null } };
   }
 };
 ```
 
-If they decide to cancel, we change the route to the `Login` route segment that we found in
-`previous`, thus preserving its state. This way, `returnTo` will continue to work after they log in.
+If they decide to cancel, we return `{ patch: false }`, which aborts the current loop. Services are
+cancelled and the page is not re-rendered, so we stay on the Login page. The state is not changed,
+so `returnTo`, if present, will continue to work after they log in.
 
-Finally we just need to add `loginAccept` to the list of `acceptors`:
+Finally we just need to add `loginService` to the list of `services`:
 
 ```javascript
 const app = {
   // ...
-  acceptors: [loginAccept, settingsAccept, routeAccept],
+  services: [routeService, settingsService, loginService, ...],
   // ...
 };
 ```
@@ -1097,13 +1078,13 @@ We're not using it in this example because it is embedded inside the page. But n
 simply replace:
 
 ```javascript
-Initial: () => navTo([Route.Home()])
+initial: navTo([Route.Home()])
 ```
 
 with:
 
 ```javascript
-Initial: () => navTo(router.initialRoute)
+initial: navTo(router.initialRoute)
 ```
 
 We do have a "Location" text field to simulate the location bar, but it is initially blank and we
@@ -1168,11 +1149,12 @@ buttons, the location bar changes _first_ and then the router triggers a route c
 make a route change _programatically_ by calling `actions.navigateTo` or changing the route in the
 state, the location bar won't automatically display the corresponding path.
 
-We can use `route.locationBarSync`, calling it when the state changes and passing the current route:
+We can use `route.locationBarSync`, calling it when the state changes and passing the route from the
+state:
 
 ```javascript
 states.map(state =>
-  router.locationBarSync(state.route.current)
+  router.locationBarSync(state.route)
 );
 ```
 This will keep the location bar in sync.
