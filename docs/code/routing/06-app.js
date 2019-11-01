@@ -18,19 +18,15 @@ import {
 } from "./06-components";
 
 import {
-  loginAccept,
-  settingsAccept,
-  routeAccept
-} from "./06-acceptors";
-
-import {
+  routeService,
   teaService,
   teaDetailService,
   coffeeService,
   beerService,
   beverageService,
   brewerService,
-  loginService
+  loginService,
+  settingsService
 } from "./06-services";
 
 const componentMap = {
@@ -130,7 +126,7 @@ const Root = ({ state, actions }) => {
 const App = Meiosis.preact.setup({ preact, Root });
 
 const app = {
-  Initial: () => navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
@@ -148,49 +144,50 @@ const app = {
     logout: () =>
       update([{ user: null }, navTo([Route.Home()])])
   }),
-  acceptors: [loginAccept, settingsAccept, routeAccept],
   services: [
+    routeService,
     teaService,
     teaDetailService,
     coffeeService,
     beerService,
     beverageService,
     brewerService,
-    loginService
+    loginService,
+    settingsService
   ]
 };
 
-Meiosis.mergerino
-  .setup({ stream: Meiosis.simpleStream, merge, app })
-  .then(({ states, actions }) => {
-    // eslint-disable-next-line react/no-deprecated
-    preact.render(
-      <App states={states} actions={actions} />,
-      document.getElementById("app")
-    );
+const { states, actions } = Meiosis.mergerino.setup({
+  stream: Meiosis.simpleStream,
+  merge,
+  app
+});
 
-    router.start({ navigateTo: actions.navigateTo });
+// eslint-disable-next-line react/no-deprecated
+preact.render(
+  <App states={states} actions={actions} />,
+  document.getElementById("app")
+);
 
-    states.map(state =>
-      router.locationBarSync(state.route)
-    );
+router.start({ navigateTo: actions.navigateTo });
 
-    const locationValue = document.getElementById(
-      "locationValue"
-    );
+states.map(state => router.locationBarSync(state.route));
 
-    states.map(state => {
-      if (document.getElementById("consoleLog").checked) {
-        // eslint-disable-next-line no-console
-        console.log(JSON.stringify(state));
-      }
+const locationValue = document.getElementById(
+  "locationValue"
+);
 
-      locationValue.value = location.hash;
-    });
+states.map(state => {
+  if (document.getElementById("consoleLog").checked) {
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(state));
+  }
 
-    document
-      .getElementById("setLocation")
-      .addEventListener("click", () => {
-        location.hash = locationValue.value;
-      });
+  locationValue.value = location.hash;
+});
+
+document
+  .getElementById("setLocation")
+  .addEventListener("click", () => {
+    location.hash = locationValue.value;
   });

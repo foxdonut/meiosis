@@ -13,19 +13,19 @@ import { router } from "./router";
 const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
 
-meiosisMergerino({ stream: simpleStream, merge, app }).then(({ states, actions }) => {
-  // Only for using Meiosis Tracer in development.
-  meiosisTracer({
-    selector: "#tracer",
-    rows: 30,
-    streams: [
-      // { stream: update, label: "update" },
-      { stream: states, label: "states" }
-    ]
-  });
+const { states, actions } = meiosisMergerino({ stream: simpleStream, merge, app });
 
-  render(<App states={states} actions={actions} />, document.getElementById("app"));
-
-  router.start({ navigateTo: actions.navigateTo });
-  states.map(state => router.locationBarSync(state.route));
+// Only for using Meiosis Tracer in development.
+meiosisTracer({
+  selector: "#tracer",
+  rows: 30,
+  streams: [
+    // { stream: update, label: "update" },
+    { stream: states, label: "states" }
+  ]
 });
+
+render(<App states={states} actions={actions} />, document.getElementById("app"));
+
+router.start({ navigateTo: actions.navigateTo });
+states.map(state => router.locationBarSync(state.route));

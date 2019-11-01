@@ -47,10 +47,10 @@ const description = {
 };
 
 const storage = {
-  Initial: () => {
-    const stored = localStorage.getItem("v1");
-    return stored ? JSON.parse(stored) : {};
-  },
+  initial: R.applyTo(
+    localStorage.getItem("v1"),
+    R.ifElse(R.isNil, R.always({}), x => JSON.parse(x))
+  ),
 
   service: ({ state }) => {
     localStorage.setItem(
@@ -61,14 +61,13 @@ const storage = {
 };
 
 const app = {
-  Initial: () =>
-    merge(
-      {
-        boxes: [],
-        colors: ["red", "purple", "blue"]
-      },
-      storage.Initial()
-    ),
+  initial: merge(
+    {
+      boxes: [],
+      colors: ["red", "purple", "blue"]
+    },
+    storage.initial
+  ),
 
   Actions: update => ({
     addBox: x => update({ boxes: xs => xs.concat(x) }),
@@ -144,10 +143,12 @@ const App = {
     )
 };
 
-Meiosis.mergerino
-  .setup({ stream: m.stream, merge, app })
-  .then(({ states, actions }) => {
-    m.mount(document.getElementById("app"), {
-      view: () => m(App, { state: states(), actions })
-    });
-  });
+const { states, actions } = Meiosis.mergerino.setup({
+  stream: m.stream,
+  merge,
+  app
+});
+
+m.mount(document.getElementById("app"), {
+  view: () => m(App, { state: states(), actions })
+});

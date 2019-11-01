@@ -16,9 +16,8 @@ import {
   Beer
 } from "./04-components";
 
-import { routeAccept } from "./04-acceptors";
-
 import {
+  routeService,
   teaService,
   teaDetailService,
   coffeeService,
@@ -153,12 +152,12 @@ const Root = ({ state, actions }) => {
 const App = Meiosis.preact.setup({ preact, Root });
 
 const app = {
-  Initial: () => navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route))
   }),
-  acceptors: [routeAccept],
   services: [
+    routeService,
     teaService,
     teaDetailService,
     coffeeService,

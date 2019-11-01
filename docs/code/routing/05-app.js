@@ -17,19 +17,15 @@ import {
 } from "./05-components";
 
 import {
-  loginAccept,
-  settingsAccept,
-  routeAccept
-} from "./05-acceptors";
-
-import {
+  routeService,
   teaService,
   teaDetailService,
   coffeeService,
   beerService,
   beverageService,
   brewerService,
-  loginService
+  loginService,
+  settingsService
 } from "./05-services";
 
 const componentMap = {
@@ -158,7 +154,7 @@ const Root = ({ state, actions }) => {
 const App = Meiosis.preact.setup({ preact, Root });
 
 const app = {
-  Initial: () => navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
@@ -176,31 +172,34 @@ const app = {
     logout: () =>
       update([{ user: null }, navTo([Route.Home()])])
   }),
-  acceptors: [loginAccept, settingsAccept, routeAccept],
   services: [
+    routeService,
     teaService,
     teaDetailService,
     coffeeService,
     beerService,
     beverageService,
     brewerService,
-    loginService
+    loginService,
+    settingsService
   ]
 };
 
-Meiosis.mergerino
-  .setup({ stream: Meiosis.simpleStream, merge, app })
-  .then(({ states, actions }) => {
-    // eslint-disable-next-line react/no-deprecated
-    preact.render(
-      <App states={states} actions={actions} />,
-      document.getElementById("app")
-    );
+const { states, actions } = Meiosis.mergerino.setup({
+  stream: Meiosis.simpleStream,
+  merge,
+  app
+});
 
-    states.map(state => {
-      if (document.getElementById("consoleLog").checked) {
-        // eslint-disable-next-line no-console
-        console.log(JSON.stringify(state));
-      }
-    });
-  });
+// eslint-disable-next-line react/no-deprecated
+preact.render(
+  <App states={states} actions={actions} />,
+  document.getElementById("app")
+);
+
+states.map(state => {
+  if (document.getElementById("consoleLog").checked) {
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(state));
+  }
+});

@@ -6,9 +6,9 @@ const checkIfStateChanged = (next, prev) =>
   prev.attrs.state[prev.attrs.id];
 
 const entryNumber = {
-  Initial: () => ({
+  initial: {
     value: ""
-  }),
+  },
   Actions: update => ({
     editEntryValue: (id, value) =>
       update({ [id]: { value } })
@@ -38,9 +38,9 @@ const EntryNumber = {
 };
 
 const entryDate = {
-  Initial: () => ({
+  initial: {
     value: ""
-  }),
+  },
   Actions: update => ({
     editDateValue: (id, value) =>
       update({ [id]: { value } })
@@ -158,13 +158,13 @@ const displayTemperature = temperature =>
   temperature.units;
 
 const app = {
-  Initial: () => ({
+  initial: {
     saved: "",
-    entry: entryNumber.Initial(),
-    date: entryDate.Initial(),
+    entry: entryNumber.initial,
+    date: entryDate.initial,
     air: temperature.Initial("Air"),
     water: temperature.Initial("Water")
-  }),
+  },
   Actions: update =>
     Object.assign(
       {
@@ -214,7 +214,7 @@ const App = {
 };
 
 const update = m.stream();
-const states = m.stream.scan(merge, app.Initial(), update);
+const states = m.stream.scan(merge, app.initial, update);
 const actions = app.Actions(update);
 
 m.mount(document.getElementById("app"), {

@@ -701,7 +701,7 @@ possible to leave _and_ arrive route segments with the same id but different par
 
 Below is the complete example.
 
-@flems code/routing/04-routes.js,code/routing/04-components.js,code/routing/04-acceptors.js,code/routing/04-services.js,code/routing/04-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 04-app.js
+@flems code/routing/04-routes.js,code/routing/04-components.js,code/routing/04-services.js,code/routing/04-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 04-app.js
 
 [Section Contents](#section_contents)
 
@@ -847,7 +847,7 @@ const app = {
 
 You can try out the complete example below.
 
-@flems code/routing/05-routes.js,code/routing/05-components.js,code/routing/05-acceptors.js,code/routing/05-services.js,code/routing/05-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 05-app.js
+@flems code/routing/05-routes.js,code/routing/05-components.js,code/routing/05-services.js,code/routing/05-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 05-app.js
 
 #### Advantages of State-Managed Routing
 
@@ -1253,7 +1253,7 @@ embedded into the page, there is no browser location bar. You can use the "Locat
 simulate, by changing the path and pressing the Go button. Also notice that the location bar stays
 in sync as you navigate.
 
-@flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-acceptors.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 06-app.js
+@flems code/routing/06-routes.js,code/routing/06-components.js,code/routing/06-services.js,code/routing/06-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 06-app.js
 
 > Note: while the examples here are embedded into the page, "full" examples that you can run locally
 are available [here](https://github.com/foxdonut/meiosis/tree/master/docs/code/routing-full). Follow
@@ -1311,11 +1311,7 @@ m.route(
 
 The complete example is shown below.
 
-@flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-acceptors.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 07-app.js
-
-The example below is an experimental, slightly different approach to Meiosis.
-
-@flems code/routing/08-meiosis.js,code/routing/08-routes.js,code/routing/08-components.js,code/routing/08-services.js,code/routing/08-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-routing 700 60 08-app.js
+@flems code/routing/07-routes.js,code/routing/07-components.js,code/routing/07-services.js,code/routing/07-app.js,routing.html,public/css/spectre.css,public/css/style.css meiosis-setup,meiosis-routing 700 60 07-app.js
 
 [Section Contents](#section_contents)
 

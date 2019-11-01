@@ -2,9 +2,9 @@
 const merge = mergerino;
 
 const entryNumber = {
-  Initial: () => ({
+  initial: {
     value: ""
-  }),
+  },
   Actions: update => ({
     editEntryValue: (id, value) =>
       update({ [id]: { value } })
@@ -42,9 +42,9 @@ class EntryNumber extends React.Component {
 }
 
 const entryDate = {
-  Initial: () => ({
+  initial: {
     value: ""
-  }),
+  },
   Actions: update => ({
     editDateValue: (id, value) =>
       update({ [id]: { value } })
@@ -168,13 +168,13 @@ const displayTemperature = temperature =>
   temperature.units;
 
 const app = {
-  Initial: () => ({
+  initial: {
     saved: "",
-    entry: entryNumber.Initial(),
-    date: entryDate.Initial(),
+    entry: entryNumber.initial,
+    date: entryDate.initial,
     air: temperature.Initial("Air"),
     water: temperature.Initial("Water")
-  }),
+  },
   Actions: update =>
     Object.assign(
       {
@@ -259,7 +259,7 @@ class App extends React.Component {
 }
 
 const update = flyd.stream();
-const states = flyd.scan(merge, app.Initial(), update);
+const states = flyd.scan(merge, app.initial, update);
 const actions = app.Actions(update);
 
 ReactDOM.render(
