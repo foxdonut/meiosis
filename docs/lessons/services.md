@@ -159,7 +159,7 @@ Our component structure is thus:
 
 ```javascript
 {
-  Initial: () => initialState,
+  initial: initialState,
   Actions: update => actions,
   service: ({ state, patch, previousState }) => ({ state, patch, render, next })
 }
@@ -173,7 +173,7 @@ the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html).
 To use Mergerino, we emit patches as objects and we use `merge` as our accumulator:
 
 ```javascript
-const states = m.stream.scan(merge, Initial(), update);
+const states = m.stream.scan(merge, initial, update);
 ```
 
 Remember that previously, we had a stats service and a description service:

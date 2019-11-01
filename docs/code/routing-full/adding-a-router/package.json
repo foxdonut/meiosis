@@ -28,8 +28,8 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "feather-route-matcher": "^3.1.0",
-    "meiosis-routing": "../../../../helpers/routing/dist",
-    "meiosis-setup": "../../../../helpers/setup",
+    "meiosis-routing": "^2.0.0",
+    "meiosis-setup": "^3.0.0",
     "mergerino": "0.4.0",
     "qs": "^6.9.0",
     "query-string": "^6.8.3",

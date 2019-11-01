@@ -146,14 +146,14 @@ const app = {
   }),
   services: [
     routeService,
+    settingsService,
+    loginService,
     teaService,
     teaDetailService,
     coffeeService,
     beerService,
     beverageService,
-    brewerService,
-    loginService,
-    settingsService
+    brewerService
   ]
 };
 

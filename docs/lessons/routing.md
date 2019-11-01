@@ -77,7 +77,8 @@ Not to have to repeat this everywhere, we'll create a `navTo` function that plac
 `route`, and a `navigateTo` action that uses it:
 
 ```javascript
-const navTo = route => ({ route });
+// For convenience, route can be an array or a single route segment.
+const navTo = route => ({ route: Array.isArray(route) ? route : [route] });
 
 const app = {
   Actions: ({ update }) => ({
@@ -234,7 +235,7 @@ becomes:
 
 ```javascript
 const app = {
-  initial: navTo([Route.Home()]),
+  initial: navTo(Route.Home()),
   // ...
 };
 ```
@@ -769,7 +770,7 @@ login: (username, returnTo) =>
   update(
     combine([
       { user: username },
-      navTo([returnTo || Route.Home()])
+      navTo(returnTo || Route.Home())
     ])
   )
 ```
@@ -1078,7 +1079,7 @@ We're not using it in this example because it is embedded inside the page. But n
 simply replace:
 
 ```javascript
-initial: navTo([Route.Home()])
+initial: navTo(Route.Home())
 ```
 
 with:
