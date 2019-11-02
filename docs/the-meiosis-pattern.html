@@ -37,7 +37,7 @@ or your own patches.</li>
 </ul>
 <p>Here is the code to set up the Meiosis Pattern:</p>
 <pre><code class="language-js">const app = {
-  Initial: () =&gt; ...,
+  initial: ...,
   Actions: update =&gt; {
     return ...
   }
@@ -46,46 +46,14 @@ or your own patches.</li>
 const update = flyd.stream();
 
 // Using Mergerino:
-const states = flyd.scan(merge, app.Initial(), update);
+const states = flyd.scan(merge, app.initial, update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) =&gt; f(x), app.Initial(), update);
+const states = flyd.scan((x, f) =&gt; f(x), app.initial, update);
 
 const actions = app.Actions(update);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
-<p>Optionally, add <a href="services.html">Services and Accepted State</a>:</p>
-<pre><code class="language-javascript">// Using Mergerino:
-const accept = state =&gt;
-  acceptors.reduce(
-    (updatedState, acceptor) =&gt;
-      merge(updatedState, acceptor(updatedState)),
-    state
-  );
-
-const states = m.stream.scan(
-  (state, patch) =&gt; accept(merge(state, patch)),
-  accept(app.Initial()),
-  update
-);
-states.map(state =&gt;
-  services.forEach(service =&gt; service({ state, update })));
-
-// Using Function Patches:
-const accept = state =&gt;
-  acceptors.reduce(
-    (updatedState, acceptor) =&gt;
-      acceptor(updatedState)(updatedState),
-    state
-  );
-
-const states = m.stream.scan(
-  (state, patch) =&gt; accept(T(state, patch)),
-  accept(app.Initial()),
-  update
-);
-
-states.map(state =&gt;
-  services.forEach(service =&gt; service({ state, update })));</code></pre>
+<p>Optionally, add <a href="services.html">Services</a>.</p>
 <p><a name="using_mithril"></a></p>
 <h3><a href="#using_mithril">Using Mithril</a></h3><pre><code class="language-js">const App = {
   view: function({ attrs: { state, actions } }) {

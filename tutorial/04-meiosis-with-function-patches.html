@@ -66,16 +66,16 @@ accumulator gets the current state and the incoming patch as parameters, and mus
 updated state. Since the incoming patches are functions, we just need to call them:</p>
 <pre><code class="language-js">var states = flyd.scan(function(state, patch) {
   return patch(state);
-}, temperature.Initial(), update);</code></pre>
+}, temperature.initial, update);</code></pre>
 <p>Using the ES6 arrow function syntax, this would be:</p>
 <pre><code class="language-js">var states = flyd.scan((state, patch) =&gt; patch(state),
-  temperature.Initial(), update);</code></pre>
+  temperature.initial, update);</code></pre>
 <p>Either way, it&#39;s a simple way to create the stream of states.</p>
 <p>Putting it all together, we have:</p>
 <div id="flems1" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "04-meiosis-with-function-patches-01.js", content: "/*global flyd*/\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  Initial: function() {\n    return {\n      temperature: {\n        value: 22,\n        units: \"C\"\n      }\n    };\n  },\n  Actions: function(update) {\n    return {\n      increment: function(amount) {\n        update(function(state) {\n          state.temperature.value += amount;\n          return state;\n        });\n      },\n      changeUnits: function() {\n        update(function(state) {\n          var value = state.temperature.value;\n          var newUnits =\n            state.temperature.units === \"C\" ? \"F\" : \"C\";\n          var newValue = convert(value, newUnits);\n          state.temperature.value = newValue;\n          state.temperature.units = newUnits;\n          return state;\n        });\n      }\n    };\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(\n  function(state, patch) {\n    return patch(state);\n  },\n  temperature.Initial(),\n  update\n);\n\nvar actions = temperature.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      files: [{name: "04-meiosis-with-function-patches-01.js", content: "/*global flyd*/\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  initial: {\n    temperature: {\n      value: 22,\n      units: \"C\"\n    }\n  },\n  Actions: function(update) {\n    return {\n      increment: function(amount) {\n        update(function(state) {\n          state.temperature.value += amount;\n          return state;\n        });\n      },\n      changeUnits: function() {\n        update(function(state) {\n          var value = state.temperature.value;\n          var newUnits =\n            state.temperature.units === \"C\" ? \"F\" : \"C\";\n          var newValue = convert(value, newUnits);\n          state.temperature.value = newValue;\n          state.temperature.units = newUnits;\n          return state;\n        });\n      }\n    };\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(\n  function(state, patch) {\n    return patch(state);\n  },\n  temperature.initial,\n  update\n);\n\nvar actions = temperature.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"}],
       middle: 75
     })
