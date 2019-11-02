@@ -6,12 +6,15 @@ import meiosisMergerino from "meiosis-setup/mergerino";
 import { createApp, App } from "./app";
 import { router } from "./router";
 
+// Only for using Meiosis Tracer in development.
+import meiosisTracer from "meiosis-tracer";
+
 const app = createApp(router.initialRoute);
 
 const { states, update, actions } = meiosisMergerino({ stream: Stream, merge, app });
 
 // Only for using Meiosis Tracer in development.
-require("meiosis-tracer")({
+meiosisTracer({
   selector: "#tracer",
   rows: 10,
   streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]

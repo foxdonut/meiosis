@@ -37,9 +37,9 @@
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
     "babel-loader": "^8.0.6",
-    "eslint": "^5.16.0",
-    "meiosis-tracer": "^2.0.3",
+    "eslint": "^6.6.0",
+    "meiosis-tracer": "^3.0.0",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "webpack-cli": "^3.3.10"
   }
 }

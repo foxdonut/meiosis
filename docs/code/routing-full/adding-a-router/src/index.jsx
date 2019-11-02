@@ -9,13 +9,16 @@ import { createApp } from "./app";
 import { Root } from "./root";
 import { router } from "./router";
 
+// Only for using Meiosis Tracer in development.
+import meiosisTracer from "meiosis-tracer";
+
 const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
 
 const { states, actions } = meiosisMergerino({ stream: simpleStream, merge, app });
 
 // Only for using Meiosis Tracer in development.
-require("meiosis-tracer")({
+meiosisTracer({
   selector: "#tracer",
   rows: 30,
   streams: [

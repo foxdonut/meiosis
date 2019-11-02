@@ -4,11 +4,13 @@ import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
 import meiosisReact from "meiosis-setup/react";
 import meiosisMergerino from "meiosis-setup/mergerino";
-import * as meiosisTracer from "meiosis-tracer";
 
 import { createApp } from "./app";
 import { Root } from "./root";
 import { router } from "./router";
+
+// Only for using Meiosis Tracer in development.
+import meiosisTracer from "meiosis-tracer";
 
 const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
