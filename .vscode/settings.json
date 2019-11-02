@@ -1,0 +1,10 @@
+{
+  "eslint.workingDirectories": [
+    "./docs",
+    "./docs/code/routing-full",
+    "./docs/code/routing-full/using-typescript",
+    "./helpers",
+    "./helpers/routing",
+    "./tutorial"
+  ]
+}

@@ -32,7 +32,6 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
-.vscode
 tutorial/build
 tutorial/dist
 docs/build
