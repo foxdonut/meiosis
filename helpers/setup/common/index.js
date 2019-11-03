@@ -4,6 +4,8 @@
  * @typedef {Object} app
  * @property {Object} [initial={}] - an object that represents the initial state.
  * If not specified, the initial state will be `{}`.
+ * @property {any} [patch=false] - a patch that will initially be sent onto the `update` stream.
+ * If not specified, the initial patch will be `false`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
@@ -141,8 +143,8 @@ export default ({ stream, accumulator, combine, app }) => {
     }
   });
 
-  // initial state
-  update(false);
+  // run services on initial state
+  update(app.patch || false);
 
   return { update, contexts, states, actions };
 };

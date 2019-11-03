@@ -95,7 +95,33 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial: { count: 0, increment: 1 }, services }
       });
 
+      let ticks = 0;
+      states.map(() => ticks++);
+
       t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / services run on initial patch", t => {
+      const services = [
+        ({ previousState, state }) =>
+          previousState.count === undefined && state.count === 0
+            ? { state: { count: x => x + 1 } }
+            : null
+      ];
+
+      const { states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { patch: { count: 0, increment: 1 }, services }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
       t.end();
     });
 
@@ -436,7 +462,32 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial: { count: 0, increment: 1 }, services }
       });
 
+      let ticks = 0;
+      states.map(() => ticks++);
+
       t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / services run on initial patch", t => {
+      const services = [
+        ({ previousState, state }) =>
+          previousState.count === undefined && state.count === 0
+            ? { state: R.over(R.lensProp("count"), R.add(1)) }
+            : null
+      ];
+
+      const { states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { patch: () => ({ count: 0, increment: 1 }), services }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
       t.end();
     });
 
@@ -813,7 +864,37 @@ const immerTest = (streamLib, label) => {
         app: { initial: { count: 0, increment: 1 }, services }
       });
 
+      let ticks = 0;
+      states.map(() => ticks++);
+
       t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / services run on initial patch", t => {
+      const services = [
+        ({ previousState, state }) =>
+          previousState.count === undefined && state.count === 0
+            ? {
+                state: draft => {
+                  draft.count++;
+                }
+              }
+            : null
+      ];
+
+      const { states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { patch: () => ({ count: 0, increment: 1 }), services }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      t.deepEqual(states(), { count: 1, increment: 1 }, "resulting state");
+      t.equal(ticks, 1, "number of ticks");
       t.end();
     });
 

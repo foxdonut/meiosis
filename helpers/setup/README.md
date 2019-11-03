@@ -114,6 +114,8 @@ In the `app` object that you provide to `setup`, you can optionally provide the 
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
+- `patch`: a patch that will initially be sent onto the `update` stream. If not specified, the
+initial patch will be `false`.
 - `Actions`: a function that receives `(update)` and returns an object with actions.
 The created actions are returned by `setup`, and also passed to `services`.
 If not provided, the created actions are `{}`.
