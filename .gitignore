@@ -40,4 +40,3 @@ docs/code/**/build
 helpers/routing/dist
 helpers/routing/docs
 helpers/setup/dist
-*.tgz
