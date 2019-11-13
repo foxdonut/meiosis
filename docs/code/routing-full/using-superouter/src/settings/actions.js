@@ -1,5 +1,5 @@
-import { Route, navigateTo } from "../routes";
+import { Route } from "../routes";
 
 export const Actions = update => ({
-  logout: () => update([{ user: null }, navigateTo(Route.Home())])
+  logout: () => update([{ user: null }, { route: Route.of.Home() }])
 });

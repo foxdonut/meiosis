@@ -1,5 +1,4 @@
 import m from "mithril";
-import { Routing } from "meiosis-routing/state";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -7,24 +6,22 @@ import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { Coffee } from "../coffee";
 import { Beer } from "../beer";
-
-import { Route } from "routing-common/src/routes";
+import { Route } from "../routes";
 import { router } from "../router";
+import { K } from "../util";
 
-const componentMap = {
-  Home: Home,
-  Login: Login,
-  Settings: Settings,
-  Tea: Tea,
-  Coffee: Coffee,
-  Beer: Beer,
-  NotFound: { view: () => m("div", "Page Not Found") }
-};
+const componentMap = Route.fold({
+  Home: K(Home),
+  Login: K(Login),
+  Settings: K(Settings),
+  Tea: K(Tea),
+  Coffee: K(Coffee),
+  Beer: K(Beer)
+});
 
 export const Root = {
   view: ({ attrs: { state, actions } }) => {
-    const routing = Routing(state.route);
-    const Component = componentMap[routing.localSegment.id];
+    const Component = componentMap(state.route);
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(
@@ -33,24 +30,18 @@ export const Root = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toPath(Route.Home()) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toPath(Route.Login()) }, "Login")),
+          m("li" + isActive(Home), m("a", { href: router.toPath(Route.of.Home()) }, "Home")),
+          m("li" + isActive(Login), m("a", { href: router.toPath(Route.of.Login()) }, "Login")),
           m(
             "li" + isActive(Settings),
-            m("a", { href: router.toPath(Route.Settings()) }, "Settings")
+            m("a", { href: router.toPath(Route.of.Settings()) }, "Settings")
           ),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.Tea()) }, "Tea")),
-          m(
-            "li" + isActive(Coffee),
-            m("a", { href: router.toPath([Route.Coffee(), Route.Beverages()]) }, "Coffee")
-          ),
-          m(
-            "li" + isActive(Beer),
-            m("a", { href: router.toPath([Route.Beer(), Route.Beverages()]) }, "Beer")
-          )
+          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea")),
+          m("li" + isActive(Coffee), m("a", { href: router.toPath(Route.of.Coffee()) }, "Coffee")),
+          m("li" + isActive(Beer), m("a", { href: router.toPath(Route.of.Beer()) }, "Beer"))
         )
       ),
-      m(Component, { state, actions, routing }),
+      m(Component, { state, actions, params: state.route.value }),
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(
         "div",

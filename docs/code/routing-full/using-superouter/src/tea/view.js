@@ -2,7 +2,7 @@ import m from "mithril";
 
 import { router } from "../router";
 import { TeaDetails } from "../teaDetails";
-import { Route } from "routing-common/src/routes";
+import { Route } from "../routes";
 
 export const Tea = {
   view: ({ attrs: { state, actions, routing } }) =>
@@ -21,7 +21,7 @@ export const Tea = {
                   m(
                     "a",
                     {
-                      href: router.toPath(routing.childRoute(Route.TeaDetails({ id: tea.id })))
+                      href: router.toPath(routing.childRoute(Route.of.TeaDetails({ id: tea.id })))
                     },
                     tea.title
                   )

@@ -1,2 +1,7 @@
-export { beer } from "routing-common/src/beer";
+import { service } from "./service";
+
+export const beer = {
+  service
+};
+
 export { Beer } from "./view";

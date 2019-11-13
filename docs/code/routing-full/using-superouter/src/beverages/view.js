@@ -1,7 +1,7 @@
 import m from "mithril";
 
-import { Route } from "routing-common/src/routes";
-import { router } from "../router";
+import { Route } from "../routes";
+// import { router } from "../router";
 
 export const Beverages = {
   view: ({ attrs: { state, routing, beveragesId } }) =>
@@ -16,7 +16,7 @@ export const Beverages = {
             { key: beverage.id },
             m(
               "a",
-              { href: router.toPath(routing.siblingRoute(Route.Beverage({ id: beverage.id }))) },
+              { href: Route.toURL(routing.siblingRoute(Route.Beverage({ id: beverage.id }))) },
               beverage.title
             )
           )

@@ -1,12 +1,10 @@
 import m from "mithril";
 
 export const Login = {
-  view: ({ attrs: { state, actions, routing } }) => {
-    const { message, returnTo } = routing.localSegment.params;
-
-    return m(
+  view: ({ attrs: { state, actions, params } }) =>
+    m(
       "div",
-      message ? m("div", message) : null,
+      params.message ? m("div", params.message) : null,
       m("div", "Login"),
       m(
         "form.form",
@@ -32,11 +30,10 @@ export const Login = {
           "button.btn.btn-primary",
           {
             type: "button",
-            onclick: () => actions.login(state.login.username, returnTo)
+            onclick: () => actions.login(state.login.username, params.returnTo)
           },
           "Login"
         )
       )
-    );
-  }
+    )
 };

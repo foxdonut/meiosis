@@ -1,7 +1,6 @@
 import m from "mithril";
 
-import { Route } from "routing-common/src/routes";
-import { router } from "../router";
+import { Route } from "../routes";
 import { Brewer } from "../brewer";
 
 const componentMap = {
@@ -20,10 +19,10 @@ export const Beverage = {
         m("div", state.beverage[id]),
         m(
           "div",
-          m("a", { href: router.toPath(routing.siblingRoute(Route.Beverages())) }, "Back to list")
+          m("a", { href: Route.toURL(routing.siblingRoute(Route.Beverages())) }, "Back to list")
         ),
         !Component &&
-          m("div", m("a", { href: router.toPath(routing.childRoute(Route.Brewer())) }, "Brewer"))
+          m("div", m("a", { href: Route.toURL(routing.childRoute(Route.Brewer())) }, "Brewer"))
       ),
       Component && m(".col-md-6", m(Component, { state, actions, routing: routing.next() }))
     );
