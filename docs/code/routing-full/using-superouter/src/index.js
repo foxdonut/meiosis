@@ -13,7 +13,7 @@ import meiosisTracer from "meiosis-tracer";
 const app = createApp(router.initialRoute);
 
 let previousState = app.initial;
-const update = Stream();
+const update = Stream(app.initial);
 const actions = app.Actions(update);
 const states = Stream(app.initial);
 
