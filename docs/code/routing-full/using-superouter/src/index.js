@@ -12,26 +12,32 @@ import meiosisTracer from "meiosis-tracer";
 
 const app = createApp(router.initialRoute);
 
-const navigateTo = Stream();
+let previousState = app.initial;
 const update = Stream();
-const states = Stream.scan(merge, app.initial, update);
 const actions = app.Actions(update);
+const states = Stream(app.initial);
+
+update
+  .map(app.validate(states))
+  .map(app.onRouteChange(states))
+  .map(
+    bifold(K(null), patch => {
+      const state = merge(previousState, patch);
+      previousState = state;
+      states(state);
+    })
+  )
+  .map(() => router.locationBarSync(states().route));
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({
   selector: "#tracer",
-  rows: 30,
-  streams: [{ stream: states, label: "states" }]
+  rows: 15,
+  streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]
 });
 
 m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), actions }) });
 
 states.map(() => m.redraw());
 
-router.start({ navigateTo });
-
-navigateTo
-  .map(app.validateRoute(states))
-  .map(app.onRouteChange(states))
-  .map(bifold(K(null), update))
-  .map(() => router.locationBarSync(states().route));
+router.start({ navigateTo: route => update({ route }) });

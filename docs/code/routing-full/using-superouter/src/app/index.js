@@ -1,4 +1,4 @@
-import { Either, run } from "stags";
+import { Either, bifold, run } from "stags";
 
 import { login } from "../login";
 import { settings } from "../settings";
@@ -13,31 +13,34 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 */
 
-const { Y, N } = Either;
+const { Y, N, fromNullable } = Either;
 
 export const createApp = initialRoute => ({
   initial: { route: initialRoute },
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  validateRoute: getState => route =>
+  validate: getState => patch =>
     run(
-      route,
-      Route.fold({
-        ...otherRoutes(K(Y({ route }))),
-        Settings: () =>
-          getState().user
-            ? Y({ route })
-            : Y({
-                route: Route.of.Login(),
-                login: {
-                  message: "Please login.",
-                  returnTo: Route.of.Settings()
-                }
-              }),
-        Tea: N,
-        Coffee: N
-      })
+      fromNullable(patch.route),
+      bifold(
+        K(Y(patch)),
+        Route.fold({
+          ...otherRoutes(K(Y(patch))),
+          Settings: () =>
+            getState().user
+              ? Y(patch)
+              : Y({
+                  route: Route.of.Login(),
+                  login: {
+                    message: "Please login.",
+                    returnTo: Route.of.Settings()
+                  }
+                }),
+          Tea: N,
+          Coffee: N
+        })
+      )
     ),
 
   onRouteChange: getState =>
