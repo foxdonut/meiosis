@@ -1,10 +1,10 @@
 import m from "mithril";
 
 export const Login = {
-  view: ({ attrs: { state, actions, params } }) =>
+  view: ({ attrs: { state, actions } }) =>
     m(
       "div",
-      params.message ? m("div", params.message) : null,
+      state.login.message ? m("div", state.login.message) : null,
       m("div", "Login"),
       m(
         "form.form",
@@ -30,7 +30,7 @@ export const Login = {
           "button.btn.btn-primary",
           {
             type: "button",
-            onclick: () => actions.login(state.login.username, params.returnTo)
+            onclick: () => actions.login(state.login.username, state.login.returnTo)
           },
           "Login"
         )

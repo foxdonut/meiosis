@@ -1,4 +1,5 @@
 import { type } from "superouter";
+import { otherwise } from "stags";
 
 export const Route = type("Route", {
   Home: "/",
@@ -13,3 +14,17 @@ export const Route = type("Route", {
   BeerDetails: "/beer/:id",
   BeerBrewer: "/beer/:id/brewer"
 });
+
+export const otherRoutes = otherwise([
+  "Home",
+  "Login",
+  "Settings",
+  "Tea",
+  "TeaDetails",
+  "Coffee",
+  "CoffeeDetails",
+  "CoffeeBrewer",
+  "Beer",
+  "BeerDetails",
+  "BeerBrewer"
+]);

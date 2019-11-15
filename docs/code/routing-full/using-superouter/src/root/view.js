@@ -41,7 +41,7 @@ export const Root = {
           m("li" + isActive(Beer), m("a", { href: router.toPath(Route.of.Beer()) }, "Beer"))
         )
       ),
-      m(Component, { state, actions, params: state.route.value }),
+      m(Component, { state, actions }),
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(
         "div",
