@@ -20,7 +20,8 @@ export const createApp = initialRoute => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  validate: (state, patch) =>
+  // { state, patch } => { state, Maybe patch }
+  validate: ({ state, patch }) =>
     run(
       fromNullable(patch.route),
       bifold(
@@ -40,10 +41,12 @@ export const createApp = initialRoute => ({
           Tea: N,
           Coffee: N
         })
-      )
+      ),
+      patch => ({ state, patch })
     ),
 
-  onRouteChange: (state, patch) =>
+  // { state, Maybe patch } => Maybe patch
+  onRouteChange: ({ state, patch }) =>
     run(
       patch,
       Either.map(patch =>
