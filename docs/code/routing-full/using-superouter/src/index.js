@@ -12,6 +12,14 @@ import meiosisTracer from "meiosis-tracer";
 
 const app = createApp(router.initialRoute);
 
+// run
+// app.initial
+// app.validate :: state, patch -> Maybe patch
+// app.onRouteChange :: state, Maybe patch -> Maybe patch
+// map(merge) -> Maybe state
+// map(states)
+// map(locationBarSync)
+
 let previousState = app.initial;
 const update = Stream(app.initial);
 const actions = app.Actions(update);

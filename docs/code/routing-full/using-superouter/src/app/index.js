@@ -20,7 +20,7 @@ export const createApp = initialRoute => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  validate: getState => patch =>
+  validate: (state, patch) =>
     run(
       fromNullable(patch.route),
       bifold(
@@ -28,7 +28,7 @@ export const createApp = initialRoute => ({
         Route.fold({
           ...otherRoutes(K(Y(patch))),
           Settings: () =>
-            getState().user
+            state.user
               ? Y(patch)
               : Y({
                   route: Route.of.Login(),
@@ -43,19 +43,22 @@ export const createApp = initialRoute => ({
       )
     ),
 
-  onRouteChange: getState =>
-    Either.map(change =>
-      Object.assign(
-        change,
-        run(
-          change.route,
-          Route.fold(
-            Object.assign(otherRoutes(() => (getState().login ? { login: undefined } : null)), {
-              Login: () =>
-                !getState().login
-                  ? { login: Object.assign({ username: "", password: "" }, change.login) }
-                  : null
-            })
+  onRouteChange: (state, patch) =>
+    run(
+      patch,
+      Either.map(patch =>
+        Object.assign(
+          patch,
+          run(
+            patch.route,
+            Route.fold(
+              Object.assign(otherRoutes(() => (state.login ? { login: undefined } : null)), {
+                Login: () =>
+                  !state.login
+                    ? { login: Object.assign({ username: "", password: "" }, patch.login) }
+                    : null
+              })
+            )
           )
         )
       )
