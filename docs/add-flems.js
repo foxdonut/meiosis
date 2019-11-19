@@ -9,7 +9,7 @@ var linkMap = {
   "meiosis-routing":
     "https://unpkg.com/meiosis-routing@2.0.0/meiosis-routing.js",
   "meiosis-setup":
-    "https://unpkg.com/meiosis-setup@3.0.0/dist/meiosis-setup.js",
+    "https://unpkg.com/meiosis-setup@3.1.0/dist/meiosis-setup.js",
   "meiosis-tracer":
     "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
   mergerino: "https://unpkg.com/mergerino@0.4.0",

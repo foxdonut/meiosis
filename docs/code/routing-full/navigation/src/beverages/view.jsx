@@ -9,7 +9,7 @@ export const Beverages = ({ state, actions, routing, beveragesId }) =>
         {state[beveragesId].map(beverage => (
           <div key={beverage.id}>
             <a
-              href="javascript://"
+              href="#"
               onClick={() =>
                 actions.navigateTo(routing.siblingRoute(Route.Beverage({ id: beverage.id })))
               }

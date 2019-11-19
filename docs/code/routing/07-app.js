@@ -134,7 +134,7 @@ const App = {
 };
 
 const app = {
-  initial: navTo([Route.Home()]),
+  patch: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
