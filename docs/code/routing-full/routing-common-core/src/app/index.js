@@ -9,7 +9,7 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
 export const createApp = initialRoute => ({
-  initial: navigateTo(initialRoute || Route.Home()),
+  patch: navigateTo(initialRoute || Route.Home()),
 
   Actions: update =>
     Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),

@@ -7,7 +7,7 @@ export const Brewer = ({ state, actions, routing }) => {
     <div>
       <div>{state.brewer[id]}</div>
       <div>
-        <a href="javascript://" onClick={() => actions.navigateTo(routing.parentRoute())}>
+        <a href="#" onClick={() => actions.navigateTo(routing.parentRoute())}>
           Close
         </a>
       </div>

@@ -12,7 +12,7 @@ export const Tea = ({ state, actions, routing }) => (
           state.teas.map(tea => (
             <div key={tea.id}>
               <a
-                href="javascript://"
+                href="#"
                 onClick={() =>
                   actions.navigateTo(routing.childRoute(Route.TeaDetails({ id: tea.id })))
                 }

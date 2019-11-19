@@ -3,7 +3,7 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 
 export const createApp = (initialRoute): any => ({
-  initial: navigateTo(initialRoute || Route.Home()),
+  patch: navigateTo(initialRoute || Route.Home()),
 
   Actions: (update): any => Object.assign({}, routes.Actions(update)),
 
