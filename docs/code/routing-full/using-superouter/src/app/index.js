@@ -13,7 +13,7 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 */
 
-const { Y, N, fromNullable } = Either;
+const { fromNullable } = Either;
 
 export const createApp = initialRoute => ({
   initial: { route: initialRoute },
@@ -23,23 +23,24 @@ export const createApp = initialRoute => ({
   // { state, patch } => { state, Maybe patch }
   validate: ({ state, patch }) =>
     run(
-      fromNullable(patch.route),
+      patch.route,
+      fromNullable,
       bifold(
-        K(Y(patch)),
+        K(patch),
         Route.fold({
-          ...otherRoutes(K(Y(patch))),
+          ...otherRoutes(K(patch)),
           Settings: () =>
             state.user
-              ? Y(patch)
-              : Y({
+              ? patch
+              : {
                   route: Route.of.Login(),
                   login: {
                     message: "Please login.",
                     returnTo: Route.of.Settings()
                   }
-                }),
-          Tea: N,
-          Coffee: N
+                },
+          Tea: K({ route: state.route || Route.of.Home() }),
+          Coffee: K({ route: state.route || Route.of.Home() })
         })
       ),
       patch => ({ state, patch })
@@ -47,21 +48,20 @@ export const createApp = initialRoute => ({
 
   // { state, Maybe patch } => Maybe patch
   onRouteChange: ({ state, patch }) =>
-    run(
+    Object.assign(
       patch,
-      Either.map(patch =>
-        Object.assign(
-          patch,
-          run(
-            patch.route,
-            Route.fold(
-              Object.assign(otherRoutes(() => (state.login ? { login: undefined } : null)), {
-                Login: () =>
-                  !state.login
-                    ? { login: Object.assign({ username: "", password: "" }, patch.login) }
-                    : null
-              })
-            )
+      run(
+        patch.route,
+        fromNullable,
+        bifold(
+          K(patch),
+          Route.fold(
+            Object.assign(otherRoutes(() => (state.login ? { login: undefined } : null)), {
+              Login: () =>
+                !state.login
+                  ? { login: Object.assign({ username: "", password: "" }, patch.login) }
+                  : null
+            })
           )
         )
       )
