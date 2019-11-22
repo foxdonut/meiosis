@@ -1,4 +1,5 @@
 import m from "mithril";
+import { always as K } from "ramda";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -8,7 +9,6 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 import { Route } from "../routes";
 import { router } from "../router";
-import { K } from "../util";
 
 const componentMap = Route.fold({
   Home: K(Home),

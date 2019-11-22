@@ -1,11 +1,11 @@
 import m from "mithril";
 
+import { Route } from "../routes";
 import { router } from "../router";
 import { TeaDetails } from "../teaDetails";
-import { Route } from "../routes";
 
 export const Tea = {
-  view: ({ attrs: { state, actions, routing } }) =>
+  view: ({ attrs: { state, actions } }) =>
     m(
       "div",
       m("div", "Tea Page"),
@@ -21,19 +21,19 @@ export const Tea = {
                   m(
                     "a",
                     {
-                      href: router.toPath(routing.childRoute(Route.of.TeaDetails({ id: tea.id })))
+                      href: router.toPath(Route.of.TeaDetails({ id: tea.id }))
                     },
                     tea.title
                   )
                 )
               )
             : m("div", "Loading...")
-        ),
+        ) /*,
         m(
           ".col-md-6",
           routing.childSegment.id === "TeaDetails" &&
-            m(TeaDetails, { state, actions, routing: routing.next() })
-        )
+            m(TeaDetails, { state, actions })
+        )*/
       )
     )
 };

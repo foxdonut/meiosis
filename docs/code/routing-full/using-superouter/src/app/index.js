@@ -1,9 +1,9 @@
-import { Either, bifold, run } from "stags";
+import { always as K, assoc, dissoc, identity as I, mergeLeft, path } from "ramda";
+import { run } from "stags";
 
 import { login } from "../login";
 import { settings } from "../settings";
 import { Route, otherRoutes } from "../routes";
-import { K } from "../util";
 /*
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
@@ -13,58 +13,46 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 */
 
-const { fromNullable } = Either;
-
 export const createApp = initialRoute => ({
   initial: { route: initialRoute },
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  // { state, patch } => { state, Maybe patch }
-  validate: ({ state, patch }) =>
+  // services are { state, previousState } => patch
+
+  validate: ({ state, previousState }) =>
+    // for now this redirects Settings to Login if user is not logged in,
+    // and stays on current route (or Home by default) when trying to go to Tea or Coffee.
     run(
-      patch.route,
-      fromNullable,
-      bifold(
-        K(patch),
-        Route.fold({
-          ...otherRoutes(K(patch)),
-          Settings: () =>
-            state.user
-              ? patch
-              : {
-                  route: Route.of.Login(),
-                  login: {
-                    message: "Please login.",
-                    returnTo: Route.of.Settings()
-                  }
-                },
-          Tea: K({ route: state.route || Route.of.Home() }),
-          Coffee: K({ route: state.route || Route.of.Home() })
-        })
-      ),
-      patch => ({ state, patch })
+      state.route,
+      Route.fold({
+        ...otherRoutes(K(I)),
+        Settings: () =>
+          state.user
+            ? I
+            : mergeLeft({
+                route: Route.of.Login(),
+                login: {
+                  message: "Please login.",
+                  returnTo: Route.of.Settings()
+                }
+              }),
+        Coffee: () => assoc("route", previousState.route || Route.of.Home())
+      })
     ),
 
-  // { state, Maybe patch } => Maybe patch
-  onRouteChange: ({ state, patch }) =>
-    Object.assign(
-      patch,
-      run(
-        patch.route,
-        fromNullable,
-        bifold(
-          K(patch),
-          Route.fold(
-            Object.assign(otherRoutes(() => (state.login ? { login: undefined } : null)), {
-              Login: () =>
-                !state.login
-                  ? { login: Object.assign({ username: "", password: "" }, patch.login) }
-                  : null
-            })
-          )
-        )
-      )
+  onRouteChange: ({ state }) =>
+    // for now this prepares Login upon arrival, and clears upon leaving
+    run(
+      state.route,
+      Route.fold({
+        ...otherRoutes(() => (state.login ? dissoc("login") : I)),
+        Tea: () => I,
+        Login: () =>
+          !path(["login", "username"], state)
+            ? assoc("login", mergeLeft({ username: "", password: "" }, state.login))
+            : I
+      })
     )
 
   /*

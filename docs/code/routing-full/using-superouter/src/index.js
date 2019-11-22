@@ -1,11 +1,10 @@
 import m from "mithril";
 import Stream from "mithril/stream";
-import merge from "mergerino";
+import { assoc, prop, tap } from "ramda";
 import { run } from "stags";
 
 import { createApp, App } from "./app";
 import { router } from "./router";
-import { tap } from "./util";
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
@@ -18,18 +17,27 @@ const update = Stream();
 // Only for using Meiosis Tracer in development.
 meiosisTracer({
   selector: "#tracer",
-  rows: 10,
-  streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]
+  rows: 30,
+  streams: [{ stream: states, label: "states" }]
 });
 
-const fn = (state, patch) =>
-  run({ state, patch }, app.validate, app.onRouteChange, patch => merge(state, patch), tap(states));
+const services = [app.validate, app.onRouteChange];
+const service = context =>
+  services.reduce(
+    (result, service) => ({
+      state: run(result.state, service(result)),
+      previousState: context.previousState
+    }),
+    context
+  );
 
-let state = fn({}, app.initial);
+const fn = context => run(context, service, prop("state"), tap(states));
+
+let state = fn({ state: app.initial, previousState: {} });
 
 // update
 update.map(patch =>
-  run(fn(state, patch), updatedState => {
+  run(fn({ previousState: state, state: patch(state) }), updatedState => {
     state = updatedState;
   })
 );
@@ -42,4 +50,4 @@ states.map(() => {
   router.locationBarSync(states().route);
 });
 
-router.start({ navigateTo: route => update({ route }) });
+router.start({ navigateTo: route => update(assoc("route", route)) });

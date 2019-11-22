@@ -1,10 +1,17 @@
+import { assoc, assocPath, compose } from "ramda";
+
 import { Route } from "../routes";
 
 export const Actions = update => ({
-  username: value => update({ login: { username: value } }),
-  password: value => update({ login: { password: value } }),
+  username: value => update(assocPath(["login", "username"], value)),
+  password: value => update(assocPath(["login", "password"], value)),
 
   login: (username, returnTo) =>
     // FIXME
-    update([{ user: username }, { route: returnTo || Route.of.Home() }])
+    update(
+      compose(
+        assoc("user", username),
+        assoc("route", returnTo || Route.of.Home())
+      )
+    )
 });
