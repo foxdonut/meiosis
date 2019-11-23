@@ -1,5 +1,6 @@
 import m from "mithril";
 import { always as K } from "ramda";
+import { run } from "stags";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -9,6 +10,7 @@ import { Coffee } from "../coffee";
 import { Beer } from "../beer";
 import { Route } from "../routes";
 import { router } from "../router";
+import { Data } from "../util";
 
 const componentMap = Route.fold({
   Home: K(Home),
@@ -17,6 +19,8 @@ const componentMap = Route.fold({
   Tea: K(Tea),
   TeaDetails: K(Tea),
   Coffee: K(Coffee),
+  CoffeeDetails: K(Coffee),
+  CoffeeBrewer: K(Coffee),
   Beer: K(Beer)
 });
 
@@ -46,7 +50,9 @@ export const Root = {
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(
         "div",
-        { style: { visibility: state.pleaseWait ? "visible" : "hidden" } },
+        {
+          style: { visibility: run(state.beverages, Data.getLoadingWith("hidden", K("visible"))) }
+        },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
       )
     );

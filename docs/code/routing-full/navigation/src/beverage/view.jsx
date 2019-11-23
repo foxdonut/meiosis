@@ -16,10 +16,7 @@ export const Beverage = ({ state, actions, routing }) => {
       <div className="col-md-6">
         <div>{state.beverage[id]}</div>
         <div>
-          <a
-            href="#"
-            onClick={() => actions.navigateTo(routing.siblingRoute(Route.Beverages()))}
-          >
+          <a href="#" onClick={() => actions.navigateTo(routing.siblingRoute(Route.Beverages()))}>
             Back to list
           </a>
         </div>

@@ -1,23 +1,24 @@
 import m from "mithril";
+import { run } from "stags";
 
-import { Route } from "../routes";
-// import { router } from "../router";
+import { router } from "../router";
+import { Data } from "../util";
 
 export const Beverages = {
-  view: ({ attrs: { state, routing, beveragesId } }) =>
-    state[beveragesId] &&
-    m(
-      ".row",
-      m(
-        ".col-md-6",
-        state[beveragesId].map(beverage =>
+  view: ({ attrs: { state, beverageRoute } }) =>
+    run(
+      state.beverages,
+      Data.getLoadedWith(null, beverages =>
+        m(
+          ".row",
           m(
-            "div",
-            { key: beverage.id },
-            m(
-              "a",
-              { href: Route.toURL(routing.siblingRoute(Route.Beverage({ id: beverage.id }))) },
-              beverage.title
+            ".col-md-6",
+            beverages.map(beverage =>
+              m(
+                "div",
+                { key: beverage.id },
+                m("a", { href: router.toPath(beverageRoute({ id: beverage.id })) }, beverage.title)
+              )
             )
           )
         )

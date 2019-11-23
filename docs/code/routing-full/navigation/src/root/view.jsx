@@ -49,18 +49,12 @@ export const Root = ({ state, actions }) => {
             </a>
           </li>
           <li className={isActive(Coffee)}>
-            <a
-              href="#"
-              onClick={() => actions.navigateTo([Route.Coffee(), Route.Beverages()])}
-            >
+            <a href="#" onClick={() => actions.navigateTo([Route.Coffee(), Route.Beverages()])}>
               Coffee
             </a>
           </li>
           <li className={isActive(Beer)}>
-            <a
-              href="#"
-              onClick={() => actions.navigateTo([Route.Beer(), Route.Beverages()])}
-            >
+            <a href="#" onClick={() => actions.navigateTo([Route.Beer(), Route.Beverages()])}>
               Beer
             </a>
           </li>
