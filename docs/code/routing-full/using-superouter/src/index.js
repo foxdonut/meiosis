@@ -45,9 +45,10 @@ update.map(patch =>
 const actions = app.Actions(update);
 m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), actions }) });
 
-states.map(() => {
+states.map(state => {
   m.redraw();
-  router.locationBarSync(states().route);
+  router.locationBarSync(state.route);
+  app.next({ state, update });
 });
 
 router.start({ navigateTo: route => update(assoc("route", route)) });

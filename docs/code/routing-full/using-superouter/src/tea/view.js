@@ -13,21 +13,19 @@ export const Tea = {
         ".row",
         m(
           ".col-md-6",
-          state.teas
-            ? state.teas.map(tea =>
-                m(
-                  "div",
-                  { key: tea.id },
-                  m(
-                    "a",
-                    {
-                      href: router.toPath(Route.of.TeaDetails({ id: tea.id }))
-                    },
-                    tea.title
-                  )
-                )
+          state.teas.map(tea =>
+            m(
+              "div",
+              { key: tea.id },
+              m(
+                "a",
+                {
+                  href: router.toPath(Route.of.TeaDetails({ id: tea.id }))
+                },
+                tea.title
               )
-            : m("div", "Loading...")
+            )
+          )
         ) /*,
         m(
           ".col-md-6",
