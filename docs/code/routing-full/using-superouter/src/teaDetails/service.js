@@ -1,18 +1,15 @@
+import { assoc, dissoc, identity as I, path } from "ramda";
+import { run } from "stags";
+
+import { Route, otherRoutes } from "../routes";
 import { teaMap } from "./data";
 
-export const service = ({ state }) => {
-  const patches = [];
-
-  if (state.routeTransition.arrive.TeaDetails) {
-    const id = state.routeTransition.arrive.TeaDetails.params.id;
-    const description = teaMap[id].description;
-    patches.push({ tea: { [id]: description } });
-  }
-
-  if (state.routeTransition.leave.TeaDetails) {
-    const id = state.routeTransition.leave.TeaDetails.params.id;
-    patches.push({ tea: { [id]: undefined } });
-  }
-
-  return { state: patches };
-};
+export const service = ({ state }) =>
+  run(
+    state.route,
+    Route.fold({
+      ...otherRoutes(() => (state.tea ? dissoc("tea") : I)),
+      TeaDetails: ({ id }) =>
+        !path(["tea", id], state) ? assoc("tea", { [id]: teaMap[id].description }) : I
+    })
+  );

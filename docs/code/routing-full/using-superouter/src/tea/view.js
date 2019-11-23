@@ -1,6 +1,8 @@
 import m from "mithril";
+import { always as K } from "ramda";
+import { run } from "stags";
 
-import { Route } from "../routes";
+import { Route, otherRoutes } from "../routes";
 import { router } from "../router";
 import { TeaDetails } from "../teaDetails";
 
@@ -26,12 +28,14 @@ export const Tea = {
               )
             )
           )
-        ) /*,
-        m(
-          ".col-md-6",
-          routing.childSegment.id === "TeaDetails" &&
-            m(TeaDetails, { state, actions })
-        )*/
+        ),
+        run(
+          state.route,
+          Route.fold({
+            ...otherRoutes(K(null)),
+            TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, actions }))
+          })
+        )
       )
     )
 };

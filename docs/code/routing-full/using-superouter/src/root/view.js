@@ -15,6 +15,7 @@ const componentMap = Route.fold({
   Login: K(Login),
   Settings: K(Settings),
   Tea: K(Tea),
+  TeaDetails: K(Tea),
   Coffee: K(Coffee),
   Beer: K(Beer)
 });

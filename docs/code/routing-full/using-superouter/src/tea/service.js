@@ -1,4 +1,4 @@
-import { assoc, compose, dissoc, identity as I } from "ramda";
+import { always as K, assoc, compose, dissoc, identity as I } from "ramda";
 import { run } from "stags";
 
 import { Route, otherRoutes } from "../routes";
@@ -9,6 +9,7 @@ export const service = ({ state, previousState }) =>
     state.route,
     Route.fold({
       ...otherRoutes(() => (state.teas ? dissoc("teas") : I)),
+      TeaDetails: K(I),
       Tea: () =>
         !state.teas
           ? compose(
