@@ -1,21 +1,16 @@
-export const service = ({ state }) => {
-  if (state.routeTransition.arrive.Login) {
-    return {
-      state: {
-        login: {
-          username: "",
-          password: ""
-        }
-      }
-    };
-  } else if (state.routeTransition.leave.Login) {
-    if (
-      !state.user &&
-      (state.login.username || state.login.password) &&
-      !confirm("You have unsaved data. Continue?")
-    ) {
-      return { patch: false };
-    }
-    return { state: { login: null } };
-  }
-};
+import { assoc, dissoc, identity as I, mergeLeft, path } from "ramda";
+import { run } from "stags";
+
+import { Route, otherRoutes } from "../routes";
+
+export const service = ({ state }) =>
+  run(
+    state.route,
+    Route.fold({
+      ...otherRoutes(() => (state.login ? dissoc("login") : I)),
+      Login: () =>
+        !path(["login", "username"], state)
+          ? assoc("login", mergeLeft({ username: "", password: "" }, state.login))
+          : I
+    })
+  );

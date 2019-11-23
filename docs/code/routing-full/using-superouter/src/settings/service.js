@@ -1,9 +1,22 @@
-import { Route } from "../routes";
+import { always as K, identity as I, mergeLeft } from "ramda";
+import { run } from "stags";
 
-export const service = ({ state }) => {
-  if (state.routeTransition.arrive.Settings && !state.user) {
-    return {
-      patch: { route: Route.of.Login({ message: "Please login.", returnTo: Route.Settings() }) }
-    };
-  }
-};
+import { Route, otherRoutes } from "../routes";
+
+export const service = ({ state }) =>
+  run(
+    state.route,
+    Route.fold({
+      ...otherRoutes(K(I)),
+      Settings: () =>
+        state.user
+          ? I
+          : mergeLeft({
+              route: Route.of.Login(),
+              login: {
+                message: "Please login.",
+                returnTo: Route.of.Settings()
+              }
+            })
+    })
+  );

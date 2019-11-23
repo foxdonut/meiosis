@@ -13,9 +13,8 @@ const app = createApp(router.initialRoute);
 
 const update = Stream();
 
-const services = [app.validate, app.onRouteChange];
 const service = context =>
-  services.reduce(
+  app.services.reduce(
     (result, service) => ({
       state: run(result.state, service(result)),
       previousState: context.previousState
@@ -42,7 +41,7 @@ m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), 
 states.map(state => {
   m.redraw();
   router.locationBarSync(state.route);
-  app.next({ state, update });
+  app.next.forEach(fn => fn({ state, update }));
 });
 
 router.start({ navigateTo: route => update(assoc("route", route)) });
