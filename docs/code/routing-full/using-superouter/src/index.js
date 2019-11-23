@@ -25,7 +25,7 @@ const service = context =>
 
 const states = Stream.scan(
   (state, patch) => service({ previousState: state, state: patch(state) }),
-  service({ state: app.initial, previousState: {} }),
+  service({ previousState: {}, state: app.initial }),
   update
 );
 
