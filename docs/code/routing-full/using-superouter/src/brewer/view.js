@@ -3,13 +3,10 @@ import m from "mithril";
 import { router } from "../router";
 
 export const Brewer = {
-  view: ({ attrs: { state, routing } }) => {
-    const id = routing.localSegment.params.id;
-
-    return m(
+  view: ({ attrs: { state, parentRoute } }) =>
+    m(
       "div",
-      m("div", state.brewer[id]),
-      m("div", m("a", { href: router.toPath(routing.parentRoute()) }, "Close"))
-    );
-  }
+      m("div", state.brewer),
+      m("div", m("a", { href: router.toPath(parentRoute({ id: state.route.value.id })) }, "Close"))
+    )
 };

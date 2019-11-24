@@ -1,15 +1,15 @@
-export const service = ({ state }) => {
-  const patches = [];
+import { assoc, dissoc, identity as I } from "ramda";
+import { otherwise, run } from "stags";
 
-  if (state.routeTransition.arrive.Brewer) {
-    const id = state.routeTransition.arrive.Brewer.params.id;
-    patches.push({ brewer: { [id]: `Brewer of beverage ${id}` } });
-  }
+import { Route, otherRoutes } from "../routes";
 
-  if (state.routeTransition.leave.Brewer) {
-    const id = state.routeTransition.leave.Brewer.params.id;
-    patches.push({ brewer: { [id]: undefined } });
-  }
-
-  return { state: patches };
-};
+export const service = ({ state }) =>
+  run(
+    state.route,
+    Route.fold({
+      ...otherRoutes(() => (state.brewer ? dissoc("brewer") : I)),
+      ...otherwise(["CoffeeBrewer", "BeerBrewer"])(({ id }) =>
+        !state.brewer ? assoc("brewer", `Brewer of beverage ${id}`) : I
+      )
+    })
+  );

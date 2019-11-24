@@ -6,8 +6,8 @@ import { coffee } from "../coffee";
 import { beverage } from "../beverage";
 /*
 import { beer } from "../beer";
-import { brewer } from "../brewer";
 */
+import { brewer } from "../brewer";
 import { Data } from "../util";
 
 export const createApp = initialRoute => ({
@@ -22,6 +22,7 @@ export const createApp = initialRoute => ({
     teaDetails.service,
     coffee.service,
     beverage.service,
+    brewer.service,
     login.service
   ],
 
