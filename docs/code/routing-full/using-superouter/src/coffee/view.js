@@ -18,7 +18,13 @@ export const Coffee = {
     return m(
       "div",
       m("div", "Coffee Page"),
-      m(Component, { state, actions, beverageRoute: Route.of.CoffeeDetails })
+      m(Component, {
+        state,
+        actions,
+        beverageRoute: Route.of.CoffeeDetails,
+        parentRoute: Route.of.Coffee,
+        brewerRoute: Route.of.CoffeeBrewer
+      })
     );
   }
 };

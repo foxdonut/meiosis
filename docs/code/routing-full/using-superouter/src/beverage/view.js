@@ -10,16 +10,20 @@ const componentMap = Route.fold({
 });
 
 export const Beverage = {
-  view: ({ attrs: { state, actions, id } }) => {
-    const Component = componentMap(state.route);
+  view: ({ attrs: { state, actions, parentRoute, brewerRoute } }) => {
+    const Component = null; // componentMap(state.route);
 
     return m(
       ".row",
       m(
         ".col-md-6",
-        m("div", state.beverage[id]),
-        m("div", m("a", { href: router.toPath(Route.Beverages()) }, "Back to list")),
-        !Component && m("div", m("a", { href: router.toPath(Route.Brewer()) }, "Brewer"))
+        m("div", state.beverage),
+        m("div", m("a", { href: router.toPath(parentRoute()) }, "Back to list")),
+        !Component &&
+          m(
+            "div",
+            m("a", { href: router.toPath(brewerRoute({ id: state.route.value.id })) }, "Brewer")
+          )
       ),
       Component && m(".col-md-6", m(Component, { state, actions }))
     );
