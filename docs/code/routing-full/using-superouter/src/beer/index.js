@@ -1,7 +1,8 @@
-import { service } from "./service";
+import { service, next } from "./service";
 
 export const beer = {
-  service
+  service,
+  next
 };
 
 export { Beer } from "./view";

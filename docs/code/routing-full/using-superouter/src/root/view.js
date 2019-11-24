@@ -21,7 +21,9 @@ const componentMap = Route.fold({
   Coffee: K(Coffee),
   CoffeeDetails: K(Coffee),
   CoffeeBrewer: K(Coffee),
-  Beer: K(Beer)
+  Beer: K(Beer),
+  BeerDetails: K(Beer),
+  BeerBrewer: K(Beer)
 });
 
 export const Root = {
