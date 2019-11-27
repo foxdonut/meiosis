@@ -46,9 +46,7 @@ const createRouter = ({ Route, defaultRoute }) => {
   // Function to keep the location bar in sync
   const locationBarSync = route => {
     const path = toPath(route);
-    if (getPath() !== path) {
-      setPath(path);
-    }
+    getPath() !== path && setPath(path);
   };
 
   // Listen to location changes and call navigateTo()

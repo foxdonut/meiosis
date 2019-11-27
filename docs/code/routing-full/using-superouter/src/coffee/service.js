@@ -1,5 +1,5 @@
 import { always as K, assoc, identity as I } from "ramda";
-import { run } from "stags";
+import { otherwise, run } from "stags";
 
 import { coffees } from "../beverage/data";
 import { Route, otherRoutes } from "../routes";
@@ -21,9 +21,15 @@ export const next = ({ state, update }) =>
     Route.fold({
       ...otherRoutes(K(I)),
       Coffee: () => {
-        if (Data.isLoading(state.beverages)) {
-          setTimeout(() => update(assoc("beverages", Data.Loaded(coffees))), 1000);
-        }
+        run(
+          state.beverages,
+          Data.fold({
+            ...otherwise(["None", "Loaded"])(K(null)),
+            Loading: () => {
+              setTimeout(() => update(assoc("beverages", Data.Loaded(coffees))), 1000);
+            }
+          })
+        );
       }
     })
   );

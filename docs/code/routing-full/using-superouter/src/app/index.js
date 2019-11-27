@@ -1,3 +1,5 @@
+import { Either } from "stags";
+
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -9,7 +11,7 @@ import { brewer } from "../brewer";
 import { Data } from "../util";
 
 export const createApp = initialRoute => ({
-  initial: { route: initialRoute, beverages: Data.None() },
+  initial: { route: initialRoute, pendingRoute: Either.N(), beverages: Data.None() },
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
