@@ -1,16 +1,5 @@
 import { Route } from "../routes";
 
-/*
-import m from "mithril";
-import { createMithrilRouter } from "meiosis-routing/router-helper";
-import { routeConfig } from "routing-common/src/routes";
-
-export const router = createMithrilRouter({
-  m,
-  routeConfig
-});
-*/
-
 const getQuery = path => {
   const idx = path.indexOf("?");
   return idx >= 0 ? path.substring(idx + 1) : "";
