@@ -1,4 +1,3 @@
-import m from "mithril";
 import { run } from "stags";
 
 import { Home } from "../home";
@@ -25,37 +24,35 @@ const componentMap = Route.fold({
   BeerBrewer: K(Beer)
 });
 
-export const Root = {
-  view: ({ attrs: { state, actions } }) => {
-    const Component = componentMap(state.route);
-    const isActive = tab => (tab === Component ? ".active" : "");
+export const Root = ({ state, actions }) => {
+  const Component = componentMap(state.route);
+  const isActive = tab => (tab === Component ? ".active" : "");
 
-    return m(
+  return [
+    "div",
+    [
+      "nav.navbar.navbar-default",
+      [
+        "ul.nav.navbar-nav",
+        ["li" + isActive(Home), ["a", { href: router.toPath(Route.of.Home()) }, "Home"]],
+        ["li" + isActive(Login), ["a", { href: router.toPath(Route.of.Login()) }, "Login"]],
+        [
+          "li" + isActive(Settings),
+          ["a", { href: router.toPath(Route.of.Settings()) }, "Settings"]
+        ],
+        ["li" + isActive(Tea), ["a", { href: router.toPath(Route.of.Tea()) }, "Tea"]],
+        ["li" + isActive(Coffee), ["a", { href: router.toPath(Route.of.Coffee()) }, "Coffee"]],
+        ["li" + isActive(Beer), ["a", { href: router.toPath(Route.of.Beer()) }, "Beer"]]
+      ]
+    ],
+    Component({ state, actions }),
+    /* Show or hide the Please Wait modal. See public/css/style.css */
+    [
       "div",
-      m(
-        "nav.navbar.navbar-default",
-        m(
-          "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toPath(Route.of.Home()) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toPath(Route.of.Login()) }, "Login")),
-          m(
-            "li" + isActive(Settings),
-            m("a", { href: router.toPath(Route.of.Settings()) }, "Settings")
-          ),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea")),
-          m("li" + isActive(Coffee), m("a", { href: router.toPath(Route.of.Coffee()) }, "Coffee")),
-          m("li" + isActive(Beer), m("a", { href: router.toPath(Route.of.Beer()) }, "Beer"))
-        )
-      ),
-      m(Component, { state, actions }),
-      /* Show or hide the Please Wait modal. See public/css/style.css */
-      m(
-        "div",
-        {
-          style: { visibility: run(state.beverages, Data.getLoadingWith("hidden", K("visible"))) }
-        },
-        m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
-      )
-    );
-  }
+      {
+        style: { visibility: run(state.beverages, Data.getLoadingWith("hidden", K("visible"))) }
+      },
+      ["div.simpleModal", ["div.simpleBox", ["div", "Loading, please wait..."]]]
+    ]
+  ];
 };

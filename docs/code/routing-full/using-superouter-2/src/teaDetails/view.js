@@ -1,13 +1,8 @@
-import m from "mithril";
-
 import { router } from "../router";
 import { Route } from "../routes";
 
-export const TeaDetails = {
-  view: ({ attrs: { state, id } }) =>
-    m(
-      "div",
-      m("div", state.tea[id]),
-      m("div", m("a", { href: router.toPath(Route.of.Tea()) }, "Close"))
-    )
-};
+export const TeaDetails = ({ state, id }) => [
+  "div",
+  ["div", state.tea[id]],
+  ["div", ["a", { href: router.toPath(Route.of.Tea()) }, "Close"]]
+];

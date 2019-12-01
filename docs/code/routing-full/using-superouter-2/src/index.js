@@ -1,4 +1,6 @@
 import m from "mithril";
+import { h } from "seview/mithril";
+
 import Stream from "mithril/stream";
 import merge from "mergerino";
 
@@ -35,7 +37,7 @@ meiosisTracer({
 });
 
 const actions = app.Actions(update);
-m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), actions }) });
+m.mount(document.getElementById("app"), { view: () => h(App({ state: states(), actions })) });
 
 states.map(state => {
   m.redraw();
