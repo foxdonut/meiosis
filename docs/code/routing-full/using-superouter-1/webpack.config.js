@@ -9,12 +9,7 @@ module.exports = {
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".js"],
-    // This is so that routing-common can find peerDependencies
-    alias: {
-      "meiosis-routing": path.resolve("./node_modules/meiosis-routing"),
-      mergerino: path.resolve("./node_modules/mergerino")
-    }
+    extensions: [".js"]
   },
   module: {
     rules: [

@@ -7,7 +7,6 @@ export const Actions = update => ({
   password: value => update(assocPath(["login", "password"], value)),
 
   login: (username, returnTo) =>
-    // FIXME
     update(
       compose(
         assoc("user", username),
