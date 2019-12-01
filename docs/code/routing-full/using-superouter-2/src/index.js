@@ -1,5 +1,9 @@
-import m from "mithril";
-import { h } from "seview/mithril";
+// import m from "mithril";
+// import { h } from "seview/mithril";
+// import { render } from "preact";
+// import { h } from "seview/preact";
+import { createElement } from "react";
+import { render } from "react-dom";
 
 import Stream from "mithril/stream";
 import merge from "mergerino";
@@ -37,10 +41,14 @@ meiosisTracer({
 });
 
 const actions = app.Actions(update);
-m.mount(document.getElementById("app"), { view: () => h(App({ state: states(), actions })) });
+
+// m.mount(document.getElementById("app"), { view: () => h(App({ state: states(), actions })) });
+
+// render(h(App({ initial: states(), states, actions })), document.getElementById("app"));
+render(createElement(App, { initial: states(), states, actions }), document.getElementById("app"));
 
 states.map(state => {
-  m.redraw();
+  // m.redraw();
   router.locationBarSync(state.route);
   app.next.forEach(fn => fn({ state, update }));
 });

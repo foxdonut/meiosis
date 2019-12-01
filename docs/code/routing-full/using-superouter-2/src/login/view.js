@@ -12,7 +12,7 @@ export const Login = ({ state, actions }) => [
           type: "text",
           placeholder: "username",
           value: state.login.username,
-          oninput: evt => actions.username(evt.target.value)
+          onInput: evt => actions.username(evt.target.value)
         }
       ]
     ],
@@ -24,7 +24,7 @@ export const Login = ({ state, actions }) => [
           type: "password",
           placeholder: "password",
           value: state.login.password,
-          oninput: evt => actions.password(evt.target.value)
+          onInput: evt => actions.password(evt.target.value)
         }
       ]
     ],
@@ -32,7 +32,7 @@ export const Login = ({ state, actions }) => [
       "button.btn.btn-primary",
       {
         type: "button",
-        onclick: () => actions.login(state.login.username, state.login.returnTo)
+        onClick: () => actions.login(state.login.username, state.login.returnTo)
       },
       "Login"
     ]

@@ -31,6 +31,9 @@
   "dependencies": {
     "mergerino": "^0.4.0",
     "mithril": "2.0.4",
+    "preact": "^10.0.5",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
     "seview": "^1.0.1",
     "stags": "file:stags-1.0.0-rc30.tgz",
     "superouter": "file:superouter-0.3.1.tgz"
