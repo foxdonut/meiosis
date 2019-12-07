@@ -1,4 +1,4 @@
-import { otherwise, run } from "stags";
+import { run } from "stags";
 
 import { Route, otherRoutes } from "../routes";
 import { beverageMap } from "./data";
@@ -7,9 +7,11 @@ export const service = ({ state }) =>
   run(
     state.route,
     Route.fold({
-      ...otherRoutes(() => (state.beverage ? { beverage: undefined } : null)),
-      ...otherwise(["CoffeeDetails", "BeerDetails"])(({ id }) =>
-        !state.beverage ? { beverage: beverageMap[id].description } : null
-      )
+      ...otherRoutes(() => [
+        state.coffee ? { coffee: undefined } : null,
+        state.beer ? { beer: undefined } : null
+      ]),
+      CoffeeDetails: ({ id }) => (!state.coffee ? { coffee: beverageMap[id].description } : null),
+      BeerDetails: ({ id }) => (!state.beer ? { beer: beverageMap[id].description } : null)
     })
   );

@@ -18,6 +18,8 @@ export const Beer = ({ state, actions }) => {
     Component({
       state,
       actions,
+      list: "beers",
+      single: "beer",
       beverageRoute: Route.of.BeerDetails,
       parentRoute: Route.of.Beer,
       brewerRoute: Route.of.BeerBrewer

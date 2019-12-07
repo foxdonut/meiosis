@@ -3,9 +3,9 @@ import { run } from "stags";
 import { router } from "../router";
 import { Data } from "../util";
 
-export const Beverages = ({ state, beverageRoute }) =>
+export const Beverages = ({ state, list, beverageRoute }) =>
   run(
-    state.beverages,
+    state[list],
     Data.getLoadedWith(null, beverages => [
       ".row",
       [

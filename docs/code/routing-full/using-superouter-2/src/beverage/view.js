@@ -1,11 +1,11 @@
 import { router } from "../router";
 import { Brewer } from "../brewer";
 
-export const Beverage = ({ state, actions, parentRoute, beverageRoute, brewerRoute }) => [
+export const Beverage = ({ state, actions, single, parentRoute, beverageRoute, brewerRoute }) => [
   ".row",
   [
     ".col-md-6",
-    ["div", state.beverage],
+    ["div", state[single]],
     ["div", ["a", { href: router.toPath(parentRoute()) }, "Back to list"]],
     !state.brewer && [
       "div",

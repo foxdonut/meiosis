@@ -11,7 +11,12 @@ import { brewer } from "../brewer";
 import { Data } from "../util";
 
 export const createApp = initialRoute => ({
-  initial: { route: initialRoute, pendingRoute: Either.N(), beverages: Data.None() },
+  initial: {
+    route: initialRoute,
+    pendingRoute: Either.N(),
+    coffees: Data.None(),
+    beers: Data.None()
+  },
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 

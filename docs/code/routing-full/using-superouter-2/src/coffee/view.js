@@ -18,6 +18,8 @@ export const Coffee = ({ state, actions }) => {
     Component({
       state,
       actions,
+      list: "coffees",
+      single: "coffee",
       beverageRoute: Route.of.CoffeeDetails,
       parentRoute: Route.of.Coffee,
       brewerRoute: Route.of.CoffeeBrewer

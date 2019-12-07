@@ -50,7 +50,33 @@ export const Root = ({ state, actions }) => {
     [
       "div",
       {
-        style: { visibility: run(state.beverages, Data.getLoadingWith("hidden", K("visible"))) }
+        style: {
+          visibility: run(
+            state.coffees,
+            // FIXME
+            Data.fold({
+              None: () =>
+                run(
+                  state.beers,
+                  Data.fold({
+                    None: K("hidden"),
+                    Loading: K("visible"),
+                    Loaded: K("hidden")
+                  })
+                ),
+              Loading: K("visible"),
+              Loaded: () =>
+                run(
+                  state.beers,
+                  Data.fold({
+                    None: K("hidden"),
+                    Loading: K("visible"),
+                    Loaded: K("hidden")
+                  })
+                )
+            })
+          )
+        }
       },
       ["div.simpleModal", ["div.simpleBox", ["div", "Loading, please wait..."]]]
     ]

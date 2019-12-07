@@ -8,9 +8,8 @@ export const service = ({ state }) =>
   run(
     state.route,
     Route.fold({
-      // FIXME: reset beverages to Data.None()
-      ...otherRoutes(K(null)),
-      Coffee: () => (Data.isNone(state.beverages) ? { beverages: Data.Loading() } : null)
+      ...otherRoutes(K({ coffees: Data.None(undefined) })),
+      Coffee: () => (Data.isNone(state.coffees) ? { coffees: Data.Loading() } : null)
     })
   );
 
@@ -21,11 +20,11 @@ export const next = ({ state, update }) =>
       ...otherRoutes(K(null)),
       Coffee: () => {
         run(
-          state.beverages,
+          state.coffees,
           Data.fold({
             ...otherwise(["None", "Loaded"])(K(null)),
             Loading: () => {
-              setTimeout(() => update({ beverages: Data.Loaded(coffees) }), 1000);
+              setTimeout(() => update({ coffees: Data.Loaded(coffees) }), 1000);
             }
           })
         );
