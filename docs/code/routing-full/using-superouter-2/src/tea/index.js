@@ -1,5 +1,4 @@
-import { onRouteChange } from "./onRouteChange";
-import { next } from "./next";
+import { onRouteChange, next } from "./service";
 
 export const tea = {
   onRouteChange,

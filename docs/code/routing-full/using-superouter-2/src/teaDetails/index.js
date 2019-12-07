@@ -1,4 +1,4 @@
-import { onRouteChange } from "./onRouteChange";
+import { onRouteChange } from "./service";
 
 export const teaDetails = {
   onRouteChange

@@ -1,5 +1,5 @@
 import { Actions } from "./actions";
-import { onRouteChange } from "./onRouteChange";
+import { onRouteChange } from "./service";
 
 export const login = {
   Actions,
