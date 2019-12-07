@@ -7,9 +7,11 @@ import { render } from "react-dom";
 
 import Stream from "mithril/stream";
 import merge from "mergerino";
+import { run } from "stags";
 
 import { createApp, App } from "./app";
 import { router } from "./router";
+import { Route, otherRoutes } from "./routes";
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
@@ -18,8 +20,15 @@ const app = createApp(router.initialRoute);
 
 const update = Stream();
 
+const onRouteChangeServices = app.onRouteChange.map(onRouteChange => context => {
+  const [otherwise, foldParams] = onRouteChange(context);
+  return run(context.state.route, Route.fold({ ...otherRoutes(otherwise), ...foldParams }));
+});
+
+const services = onRouteChangeServices.concat(app.services);
+
 const service = context =>
-  app.services.reduce(
+  services.reduce(
     (result, service) => ({
       state: merge(result.state, service(result)),
       previousState: context.previousState

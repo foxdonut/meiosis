@@ -1,9 +1,9 @@
 import { Actions } from "./actions";
-import { service } from "./service";
+import { onRouteChange } from "./onRouteChange";
 
 export const login = {
   Actions,
-  service
+  onRouteChange
 };
 
 export { Login } from "./view";

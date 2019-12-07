@@ -15,17 +15,16 @@ export const createApp = initialRoute => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  // services are ({ state, previousState }) => patch
-  services: [
-    settings.service,
-    tea.service,
-    teaDetails.service,
-    coffee.service,
-    beer.service,
-    beverage.service,
-    brewer.service,
-    login.service
+  // onRouteChange functions are ({ state, previousState }) => [defaultFn, {routeFold}]
+  onRouteChange: [
+    settings.onRouteChange,
+    tea.onRouteChange,
+    teaDetails.onRouteChange,
+    login.onRouteChange
   ],
+
+  // service functions are ({ state, previousState }) => patch
+  services: [coffee.service, beer.service, beverage.service, brewer.service],
 
   next: [tea.next, coffee.next, beer.next]
 });
