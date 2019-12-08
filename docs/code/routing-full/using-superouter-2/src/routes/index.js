@@ -1,7 +1,7 @@
 import { type } from "superouter";
 import { otherwise } from "stags";
 
-export const Route = type("Route", {
+const routeConfig = {
   Home: "/",
   Login: "/login",
   Settings: "/settings",
@@ -13,18 +13,10 @@ export const Route = type("Route", {
   Beer: "/beer",
   BeerDetails: "/beer/:id",
   BeerBrewer: "/beer/:id/brewer"
-});
+};
 
-export const otherRoutes = otherwise([
-  "Home",
-  "Login",
-  "Settings",
-  "Tea",
-  "TeaDetails",
-  "Coffee",
-  "CoffeeDetails",
-  "CoffeeBrewer",
-  "Beer",
-  "BeerDetails",
-  "BeerBrewer"
-]);
+export const Route = type("Route", routeConfig);
+
+export const otherRoutes = otherwise(Object.keys(routeConfig));
+
+export const allRoutes = Object.keys(routeConfig).join(",");
