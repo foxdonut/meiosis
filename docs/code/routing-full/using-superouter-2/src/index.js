@@ -11,7 +11,8 @@ import { run } from "stags";
 
 import { createApp, App } from "./app";
 import { router } from "./router";
-import { Route, otherRoutes } from "./routes";
+import { Route } from "./routes";
+import { expandKeys } from "./util";
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
@@ -20,10 +21,9 @@ const app = createApp(router.initialRoute);
 
 const update = Stream();
 
-const onRouteChangeServices = app.onRouteChange.map(onRouteChange => context => {
-  const [otherwise, foldParams] = onRouteChange(context);
-  return run(context.state.route, Route.fold({ ...otherRoutes(otherwise), ...foldParams }));
-});
+const onRouteChangeServices = app.onRouteChange.map(onRouteChange => context =>
+  run(context.state.route, Route.fold(expandKeys(onRouteChange(context))))
+);
 
 const services = onRouteChangeServices.concat(app.services);
 

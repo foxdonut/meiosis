@@ -4,17 +4,11 @@ import { coffees } from "../beverage/data";
 import { Route, allRoutes } from "../routes";
 import { Data, K, expandKeys } from "../util";
 
-export const service = ({ state }) =>
-  run(
-    state.route,
-    Route.fold(
-      expandKeys({
-        [allRoutes]: K({ coffees: Data.None(undefined) }),
-        "CoffeeDetails, CoffeeBrewer": K(null),
-        Coffee: () => (Data.isNone(state.coffees) ? { coffees: Data.Loading() } : null)
-      })
-    )
-  );
+export const onRouteChange = ({ state }) => ({
+  [allRoutes]: K({ coffees: Data.None(undefined) }),
+  "CoffeeDetails, CoffeeBrewer": K(null),
+  Coffee: () => (Data.isNone(state.coffees) ? { coffees: Data.Loading() } : null)
+});
 
 export const next = ({ state, update }) =>
   run(

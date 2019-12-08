@@ -4,17 +4,11 @@ import { beers } from "../beverage/data";
 import { Route, allRoutes } from "../routes";
 import { Data, K, expandKeys } from "../util";
 
-export const service = ({ state }) =>
-  run(
-    state.route,
-    Route.fold(
-      expandKeys({
-        [allRoutes]: K({ beers: Data.None(undefined) }),
-        "BeerDetails, BeerBrewer": K(null),
-        Beer: () => (Data.isNone(state.beers) ? { beers: Data.Loading() } : null)
-      })
-    )
-  );
+export const onRouteChange = ({ state }) => ({
+  [allRoutes]: K({ beers: Data.None(undefined) }),
+  "BeerDetails, BeerBrewer": K(null),
+  Beer: () => (Data.isNone(state.beers) ? { beers: Data.Loading() } : null)
+});
 
 export const next = ({ state, update }) =>
   run(

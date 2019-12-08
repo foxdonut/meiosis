@@ -1,14 +1,7 @@
-import { otherwise, run } from "stags";
+import { allRoutes } from "../routes";
 
-import { Route, otherRoutes } from "../routes";
-
-export const service = ({ state }) =>
-  run(
-    state.route,
-    Route.fold({
-      ...otherRoutes(() => (state.brewer ? { brewer: undefined } : null)),
-      ...otherwise(["CoffeeBrewer", "BeerBrewer"])(({ id }) =>
-        !state.brewer ? { brewer: `Brewer of beverage ${id}` } : null
-      )
-    })
-  );
+export const onRouteChange = ({ state }) => ({
+  [allRoutes]: () => (state.brewer ? { brewer: undefined } : null),
+  "CoffeeBrewer, BeerBrewer": ({ id }) =>
+    !state.brewer ? { brewer: `Brewer of beverage ${id}` } : null
+});

@@ -1,7 +1,7 @@
-import { service } from "./service";
+import { onRouteChange } from "./service";
 
 export const brewer = {
-  service
+  onRouteChange
 };
 
 export { Brewer } from "./view";
