@@ -1,5 +1,3 @@
-import { Either } from "stags";
-
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -8,12 +6,12 @@ import { coffee } from "../coffee";
 import { beverage } from "../beverage";
 import { beer } from "../beer";
 import { brewer } from "../brewer";
-import { Data } from "../util";
+import { Data, N } from "../util";
 
 export const createApp = initialRoute => ({
   initial: {
     route: initialRoute,
-    pendingRoute: Either.N(),
+    pendingRoute: N(),
     coffees: Data.None(),
     beers: Data.None()
   },
