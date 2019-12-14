@@ -7,7 +7,16 @@ import { Data, K, expandKeys } from "../util";
 export const onRouteChange = ({ state }) => ({
   [allRoutes]: K({ coffees: Data.None(undefined) }),
   "CoffeeDetails, CoffeeBrewer": K(null),
-  Coffee: () => (Data.isNone(state.coffees) ? { coffees: Data.Loading() } : null)
+  Coffee: () =>
+    run(
+      state.coffees,
+      Data.fold(
+        expandKeys({
+          None: K({ coffees: Data.Loading() }),
+          "Loading, Loaded": K(null)
+        })
+      )
+    )
 });
 
 export const next = ({ state, update }) =>

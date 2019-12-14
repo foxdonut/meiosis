@@ -22,7 +22,7 @@ const app = createApp(router.initialRoute);
 const update = Stream();
 
 const onRouteChangeServices = app.onRouteChange.map(onRouteChange => context =>
-  run(context.state.route, Route.fold(expandKeys(onRouteChange(context))))
+  run(context.state.route, Route.fold(run(context, onRouteChange, expandKeys)))
 );
 
 const services = onRouteChangeServices.concat(app.services);
