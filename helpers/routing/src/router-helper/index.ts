@@ -263,7 +263,7 @@ export function createRouteMap(
 export function createRouter(config: RouterConfig): Router {
   const { routeConfig, createParsePath, defaultRoute } = config;
 
-  const prefix = config.hasOwnProperty('prefix') ? config.prefix : "#";
+  const prefix = config.prefix != null ? config.prefix : "#";
 
   const getPath =
     config.getPath === undefined
