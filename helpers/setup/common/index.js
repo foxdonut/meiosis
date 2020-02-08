@@ -77,17 +77,13 @@ export default ({ stream, accumulator, combine, app }) => {
 
   // context is { state, patch, previousState }
   // state is optionally updated by service patches; patch and previousState never change.
-  // should return ???
   const runServices = context => {
-    let updatedContext = context;
+    const updatedContext = context;
 
     for (let i = 0; i < services.length; i++) {
-      // a service should return a patch (optional)
+      // a service should (optionally) return a patch
       const servicePatch = services[i](updatedContext);
-
-      updatedContext = Object.assign(updatedContext, {
-        state: accumulatorFn(updatedContext.state, servicePatch)
-      });
+      updatedContext.state = accumulatorFn(updatedContext.state, servicePatch);
     }
     return updatedContext;
   };

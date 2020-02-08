@@ -24,5 +24,7 @@ export const createApp = initialRoute => ({
     beer.service,
     beverage.service,
     brewer.service
-  ]
+  ],
+
+  effects: [tea.effect, coffee.effect, beer.effect]
 });

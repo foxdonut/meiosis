@@ -1,11 +1,9 @@
-export const service = ({ state }) => {
+export const service = ({ state, previousState }) => {
   if (state.routeTransition.arrive.Login) {
     return {
-      state: {
-        login: {
-          username: "",
-          password: ""
-        }
+      login: {
+        username: "",
+        password: ""
       }
     };
   } else if (state.routeTransition.leave.Login) {
@@ -14,8 +12,8 @@ export const service = ({ state }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return { patch: false };
+      return () => previousState;
     }
-    return { state: { login: null } };
+    return { login: null };
   }
 };

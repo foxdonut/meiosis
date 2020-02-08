@@ -11,5 +11,5 @@ export const service = ({ state }) => {
     patches.push({ brewer: { [id]: undefined } });
   }
 
-  return { state: patches };
+  return patches;
 };

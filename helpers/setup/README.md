@@ -33,8 +33,8 @@ provided:
 ## Setup
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
-provide. In the application, you can define the `initial` state, the `Actions`, and the array of
-services, _all of which are optional_.
+provide. In the application, you can define the `initial` state, the `Actions`, the array of
+services, and the array of effects, _all of which are optional_.
 
 The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
@@ -114,27 +114,23 @@ In the `app` object that you provide to `setup`, you can optionally provide the 
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
-- `patch`: a patch that will initially be sent onto the `update` stream. If not specified, the
-initial patch will be `false`.
-- `Actions`: a function that receives `(update)` and returns an object with actions.
-The created actions are returned by `setup`, and also passed to `services`.
-If not provided, the created actions are `{}`.
-For convience, actions can pass arrays of patches to `update` to combine multiple patches into one,
-thus reducing the number of updates, state changes, and view refreshes.
+- `Actions`: a function that receives `(update)` and returns an object with actions. The created
+actions are returned by `setup`, and also passed to `services`. If not provided, the created
+actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
+multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
+If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
+action using `this.otherAction(...)`.
 - `services`: an array of functions that get called with `({ state, previousState, patch })`.
-Service functions can issue updates by returning an object with any combination of the following
-properties:
-    - `state`: a patch or array of patches to update the state, for example computed properties.
-    - `patch: differentPatch`: this changes the patch to a different one, aborting the current loop
-      and starting over with `differentPatch`.
-    - `patch: false`: this cancels the patch altogether, aborting the current loop and cancelling
-      the render.
-    - `render: false`: this continues the loop but does not render the view. For example, when
-      arriving at a route and needing to load asynchronous data (with `next`, below), but without a
-      "loading..." state.
-    - `next: ({ update, actions, state, patch }) => { ... }`: this schedules a function to be called
-      at the end of the loop. The function can trigger more updates by calling `update` and/or
-      `actions`. Updates can be synchronous and/or asynchronous.
+Service functions can change the state by returning a patch:
+    - returning any patch, changes the state
+    - not returning anything, or returning a falsy value, does not change the state
+    - reverting to the previous state using a compatible patch that produces `previousState`. Using
+    `() => previousState` works for Mergerino, Function Patches, and Immer. If you revert to the
+    previous state, the `states` stream does not receive a value and the view is not re-rendered.
+- `effects`: an array of functions that get called with
+`({ state, previousState, patch, update, actions })`. The return value of effect functions is
+ignored. Instead, effect functions should call `update` and/or `actions` to trigger further
+updates.
 
 ### Common Setup
 
