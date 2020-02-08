@@ -4,12 +4,12 @@
  * @typedef {Object} app
  * @property {Object} [initial={}] - an object that represents the initial state.
  * If not specified, the initial state will be `{}`.
- * @property {any} [patch=false] - a patch that will initially be sent onto the `update` stream.
- * If not specified, the initial patch will be `false`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
- * should be `({ state, previousState, patch }) => ({ state?, patch?, render?, next? })`.
+ * should be `({ state, previousState, patch }) => patch?`.
+ * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
+ * should be `({ state, previousState, patch, update }) => void`, optionally calling `update`.
  */
 
 /**
@@ -60,9 +60,10 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   app = app || {};
-  let { initial, Actions, services } = app;
+  let { initial, Actions, services, effects } = app;
   initial = initial || {};
   services = services || [];
+  effects = effects || [];
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -75,76 +76,48 @@ export default ({ stream, accumulator, combine, app }) => {
   const states = createStream();
 
   // context is { state, patch, previousState }
-  // should return { state, render, next }
-  const updateState = context => {
+  // state is optionally updated by service patches; patch and previousState never change.
+  // should return ???
+  const runServices = context => {
     let updatedContext = context;
 
     for (let i = 0; i < services.length; i++) {
-      // a service should return { state, patch, render, next } (all optional)
-      const serviceUpdate = services[i](updatedContext);
+      // a service should return a patch (optional)
+      const servicePatch = services[i](updatedContext);
 
-      if (serviceUpdate) {
-        // If a service cancelled a patch, abort
-        if (serviceUpdate.patch === false) {
-          return {
-            render: false,
-            state: context.previousState,
-            next: []
-          };
-        }
-        // If a service changed a patch, abort current and issue the new patch
-        if (serviceUpdate.patch) {
-          return {
-            render: false,
-            state: context.previousState,
-            next: [({ update }) => update(serviceUpdate.patch)]
-          };
-        }
-        // Append next function
-        if (serviceUpdate.next) {
-          updatedContext.next.push(serviceUpdate.next);
-          delete serviceUpdate.next;
-        }
-        // Update the context
-        updatedContext = Object.assign(updatedContext, serviceUpdate, {
-          state: accumulatorFn(updatedContext.state, serviceUpdate.state)
-        });
-      }
+      updatedContext = Object.assign(updatedContext, {
+        state: accumulatorFn(updatedContext.state, servicePatch)
+      });
     }
     return updatedContext;
   };
 
   const contexts = scan(
     (context, patch) =>
-      updateState({
+      runServices({
         previousState: context.state,
         state: accumulatorFn(context.state, patch),
-        patch,
-        render: true,
-        next: []
+        patch
       }),
-    { state: initial },
+    runServices({ state: initial }),
     update
   );
 
   contexts.map(context => {
-    if (context.render) {
+    if (context.state !== states()) {
       states(context.state);
     }
-    if (context.next) {
-      context.next.forEach(service => {
-        service({
-          state: context.state,
-          patch: context.patch,
-          update,
-          actions
-        });
+
+    effects.forEach(effect => {
+      effect({
+        state: context.state,
+        previousState: context.previousState,
+        patch: context.patch,
+        update,
+        actions
       });
-    }
+    });
   });
 
-  // run services on initial state
-  update(app.patch || false);
-
-  return { update, contexts, states, actions };
+  return { update, states, actions };
 };

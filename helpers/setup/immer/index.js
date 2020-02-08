@@ -20,8 +20,7 @@ export default ({ stream, produce, app }) =>
   commonSetup({
     stream,
     accumulator: produce,
-    combine: patches => model => {
-      patches.forEach(patch => patch(model));
-    },
+    // can't use patches.reduce(produce, state) because that would send a third argument to produce
+    combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
     app
   });

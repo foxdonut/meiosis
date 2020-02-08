@@ -156,11 +156,13 @@ patches into a single patch.
     With Mergerino:
     `combine: patches => patches``
 
-    With Function Patches, `combine` is function composition:
-    `combine = fns => args => fns.reduceRight((arg, fn) => fn(arg), args)`
+    With Function Patches, `combine` is the `pipe` function:
+    `combine = fns => args => fns.reduce((arg, fn) => fn(arg), args)`
 
     With Immer,
-    `combine: patches => model => { patches.forEach(patch => patch(model)); }`
+    `combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state)`
+    (we can't use `patches.reduce(produce, state)` because that would send a third argument to
+    `produce`.
 
 <a name="other_stream_library"></a>
 ### Using another stream library
