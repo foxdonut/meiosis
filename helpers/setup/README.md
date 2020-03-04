@@ -4,6 +4,96 @@
 popular demand and for your convenience, here are some reusable snippets of code that help
 setup and use Meiosis.
 
+## Migrating from version 3 to version 4
+
+Version 4 of `meiosis-setup` works a little differently than version 3. Here are the changes and
+steps to migration:
+
+### Services
+
+In version 3, services returned:
+
+```javascript
+({ state?, patch?, render?, next? })
+```
+
+Respectively indicating:
+- a patch to change the state
+- a different patch
+- aborting the render
+- the next update to run.
+
+In version 4, services return:
+
+```javascript
+patch?
+```
+
+Only a patch to change the state. Thus, services from version 3 should be changed to directly return
+what they were returning under `{ state }`:
+
+```javascript
+// version 3
+return { state: <patch>, ... };
+
+// version 4
+return <patch>;
+```
+
+See below for migrating `{ patch, render, next }`.
+
+### Aborting a Patch
+
+### Preventing a Re-Render
+
+In version 3, a service could return `{ render: false }` to prevent a re-render.
+
+In version 4, a service can achieve the same result by returning a patch that reverts to the
+previous state. Indeed, when the final state after services have applied their patches is the same
+as the previous state, the view is not re-rendered.
+
+### Effects
+
+In version 3, services could return `{ next: fn }` to indicate a function that can trigger updates
+after the current sequence.
+
+In version 4, these are moved to separate `effects`. The function signature is the same, except
+that the function also receives `previousState`, becoming:
+
+```javascript
+({ state, previousState, patch, update, actions }) => {
+  // ...
+}
+```
+
+To use effects, specify an array of effect functions in the `effects` property of the `app` object:
+
+```javascript
+// version 3
+const app = {
+  services: [
+    (/* ... */) => {
+      // ...
+      return {
+        next: fn1
+      };
+    },
+    (/* ... */) => {
+      // ...
+      return {
+        next: fn2
+      };
+    }
+  ]
+}
+
+// version 4
+const app = {
+  services: [/* ... */],
+  effects: [fn1, fn2]
+}
+```
+
 ## Installation
 
 Using `npm`:

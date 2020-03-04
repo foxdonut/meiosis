@@ -40,7 +40,9 @@ Type: [Object][25]
 -   `Actions` **[Function][26]?** a function that creates actions, of the form
     `update => actions`.
 -   `services` **[Array][27]&lt;[Function][26]>?** an array of service functions, each of which
-    should be `({ state, previousState, patch }) => ({ state?, patch?, render?, next? })`.
+    should be `({ state, previousState, patch }) => patch?`.
+-   `effects` **[Array][27]&lt;[Function][26]>?** an array of effect functions, each of which
+    should be `({ state, previousState, patch, update }) => void`, optionally calling `update`.
 
 ## meiosis.common.setup
 
