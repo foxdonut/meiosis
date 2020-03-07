@@ -13,6 +13,9 @@
  * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
  * should be `({ state, previousState, patch, update, actions }) => void`, optionally calling
  * `update`.
+ * @property {Array<Function>} [recovers=[]] - an array of recover functions, each of which
+ * should be `({ invalidState, previousState, patch, update, actions }) => void`, optionally calling
+ * `update`.
  */
 
 /**
@@ -63,11 +66,12 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   app = app || {};
-  let { initial, Actions, guards, services, effects } = app;
+  let { initial, Actions, guards, services, effects, recovers } = app;
   initial = initial || {};
   guards = guards || [];
   services = services || [];
   effects = effects || [];
+  recovers = recovers || [];
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -105,11 +109,11 @@ export default ({ stream, accumulator, combine, app }) => {
       return valid
         ? Object.assign(runServices(nextContext), { invalidState: null })
         : Object.assign(nextContext, {
-            state: nextContext.previousState,
+            state: context.state,
             invalidState: nextContext.state
           });
     },
-    runServices({ state: initial, previousState: initial, valid: true }),
+    runServices({ state: initial, previousState: initial }),
     update
   );
 
@@ -118,7 +122,7 @@ export default ({ stream, accumulator, combine, app }) => {
       states(context.state);
     }
 
-    effects.forEach(effect => {
+    (context.invalidState ? recovers : effects).forEach(effect => {
       effect(
         Object.assign(context, {
           update,

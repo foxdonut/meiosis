@@ -382,9 +382,17 @@ const mergerinoTest = (merge, streamLib, label) => {
       ];
 
       const effects = [
+        ({ update, patch }) => {
+          if (patch && patch.one) {
+            update({ effect: true });
+          }
+        }
+      ];
+
+      const recovers = [
         ({ update, patch, invalidState }) => {
           if (patch && patch.one) {
-            update({ effect: true, valid: !invalidState });
+            update({ recover: true, valid: !invalidState });
           }
         }
       ];
@@ -392,7 +400,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { guards, services, effects }
+        app: { guards, services, effects, recovers }
       });
 
       let ticks = 0;
@@ -400,7 +408,7 @@ const mergerinoTest = (merge, streamLib, label) => {
 
       update({ one: true });
 
-      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
       t.equal(ticks, 2, "number of ticks");
       t.end();
     });
@@ -781,16 +789,24 @@ const functionPatchTest = (streamLib, label) => {
       ];
 
       const effects = [
-        ({ state, previousState, invalidState, update }) => {
-          if (invalidState && invalidState.one && !previousState.one && !state.one) {
-            update([R.assoc("effect", true), R.assoc("valid", !invalidState)]);
+        ({ update, state, previousState }) => {
+          if (state.one && !previousState.one) {
+            update(R.assoc("effect", true));
+          }
+        }
+      ];
+
+      const recovers = [
+        ({ previousState, invalidState, update }) => {
+          if (invalidState && invalidState.one && !previousState.one) {
+            update([R.assoc("recover", true), R.assoc("valid", !invalidState)]);
           }
         }
       ];
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { guards, services, effects }
+        app: { guards, services, effects, recovers }
       });
 
       let ticks = 0;
@@ -798,7 +814,7 @@ const functionPatchTest = (streamLib, label) => {
 
       update(R.assoc("one", true));
 
-      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
       t.equal(ticks, 2, "number of ticks");
       t.end();
     });
@@ -1288,10 +1304,20 @@ const immerTest = (streamLib, label) => {
       ];
 
       const effects = [
-        ({ state, previousState, invalidState, update }) => {
-          if (invalidState && invalidState.one && !previousState.one && !state.one) {
+        ({ update, state, previousState }) => {
+          if (state.one && !previousState.one) {
             update(draft => {
               draft.effect = true;
+            });
+          }
+        }
+      ];
+
+      const recovers = [
+        ({ previousState, invalidState, update }) => {
+          if (invalidState && invalidState.one && !previousState.one) {
+            update(draft => {
+              draft.recover = true;
               draft.valid = !invalidState;
             });
           }
@@ -1301,7 +1327,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { guards, services, effects }
+        app: { guards, services, effects, recovers }
       });
 
       let ticks = 0;
@@ -1311,7 +1337,7 @@ const immerTest = (streamLib, label) => {
         draft.one = true;
       });
 
-      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
       t.equal(ticks, 2, "number of ticks");
       t.end();
     });
