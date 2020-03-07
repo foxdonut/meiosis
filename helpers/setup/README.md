@@ -44,6 +44,13 @@ See below for migrating `{ patch, render, next }`.
 
 ### Aborting a Patch
 
+In version 3, a service could return `{ patch: false }` to abort a patch, or `{ patch: newPatch }` to
+abort the current sequence and issue a different patch.
+
+In version 4, the incoming patch should not be changed. Instead, a service can return a patch that
+reverts to the previous state to abort a patch. The current sequence cannot be aborted, but an
+effect (see below) can be used to issue another patch.
+
 ### Preventing a Re-Render
 
 In version 3, a service could return `{ render: false }` to prevent a re-render.

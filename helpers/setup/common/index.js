@@ -6,6 +6,8 @@
  * If not specified, the initial state will be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
+ * @property {Array<Function>} [guards=[]] - an array of guard functions, each of which
+ * should be `({ state, previousState, patch }) => boolean`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
  * should be `({ state, previousState, patch }) => patch?`.
  * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
@@ -61,8 +63,9 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   app = app || {};
-  let { initial, Actions, services, effects } = app;
+  let { initial, Actions, guards, services, effects } = app;
   initial = initial || {};
+  guards = guards || [];
   services = services || [];
   effects = effects || [];
 
@@ -90,29 +93,38 @@ export default ({ stream, accumulator, combine, app }) => {
   };
 
   const contexts = scan(
-    (context, patch) =>
-      runServices({
+    (context, patch) => {
+      const nextContext = {
         previousState: context.state,
         state: accumulatorFn(context.state, patch),
         patch
-      }),
-    runServices({ state: initial }),
+      };
+
+      const valid = guards.reduce((result, guard) => result && guard(nextContext), true);
+
+      return valid
+        ? Object.assign(runServices(nextContext), { invalidState: null })
+        : Object.assign(nextContext, {
+            state: nextContext.previousState,
+            invalidState: nextContext.state
+          });
+    },
+    runServices({ state: initial, previousState: initial, valid: true }),
     update
   );
 
   contexts.map(context => {
-    if (context.state !== states()) {
+    if (!context.invalidState && context.state !== states()) {
       states(context.state);
     }
 
     effects.forEach(effect => {
-      effect({
-        state: context.state,
-        previousState: context.previousState,
-        patch: context.patch,
-        update,
-        actions
-      });
+      effect(
+        Object.assign(context, {
+          update,
+          actions
+        })
+      );
     });
   });
 

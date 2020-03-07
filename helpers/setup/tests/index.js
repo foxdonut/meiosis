@@ -365,6 +365,45 @@ const mergerinoTest = (merge, streamLib, label) => {
       t.equal(ticks, 3, "number of ticks");
       t.end();
     });
+
+    t.test(label + " / a guard can cancel a sequence", t => {
+      const guards = [
+        ({ patch }) => {
+          return !patch.one;
+        }
+      ];
+
+      const services = [
+        ({ patch }) => {
+          if (patch && patch.one) {
+            return { two: true };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ update, patch, invalidState }) => {
+          if (patch && patch.one) {
+            update({ effect: true, valid: !invalidState });
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { guards, services, effects }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      update({ one: true });
+
+      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
+      t.end();
+    });
   });
 };
 
@@ -723,6 +762,44 @@ const functionPatchTest = (streamLib, label) => {
 
       t.deepEqual(states(), { one: true, two: true, effect: true }, "resulting state");
       t.equal(ticks, 3, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / a guard can cancel a sequence", t => {
+      const guards = [
+        ({ state, previousState }) => {
+          return !(state.one && !previousState.one);
+        }
+      ];
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.one && !previousState.one) {
+            return R.assoc("two", true);
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, previousState, invalidState, update }) => {
+          if (invalidState && invalidState.one && !previousState.one && !state.one) {
+            update([R.assoc("effect", true), R.assoc("valid", !invalidState)]);
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { guards, services, effects }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      update(R.assoc("one", true));
+
+      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
       t.end();
     });
   });
@@ -1190,6 +1267,52 @@ const immerTest = (streamLib, label) => {
 
       t.deepEqual(states(), { one: true, two: true, effect: true }, "resulting state");
       t.equal(ticks, 3, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / a guard can cancel a sequence", t => {
+      const guards = [
+        ({ state, previousState }) => {
+          return !(state.one && !previousState.one);
+        }
+      ];
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.one && !previousState.one) {
+            return draft => {
+              draft.two = true;
+            };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, previousState, invalidState, update }) => {
+          if (invalidState && invalidState.one && !previousState.one && !state.one) {
+            update(draft => {
+              draft.effect = true;
+              draft.valid = !invalidState;
+            });
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { guards, services, effects }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), { effect: true, valid: false }, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
       t.end();
     });
   });
