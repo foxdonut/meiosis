@@ -121,7 +121,7 @@ var SkyOption = function({ state, id, actions, value, label }) {
 
 class Conditions extends React.Component {
   render() {
-    var { state, actions } = this.props;
+    var { state, actions, id } = this.props;
     return (<div>
       <label>
         <input
@@ -133,11 +133,11 @@ class Conditions extends React.Component {
         Precipitations
       </label>
       <div>
-        <SkyOption state={state} actions={actions} value="SUNNY"
+        <SkyOption state={state} actions={actions} id={id} value="SUNNY"
           label="Sunny"/>
-        <SkyOption state={state} actions={actions} value="CLOUDY"
+        <SkyOption state={state} actions={actions} id={id} value="CLOUDY"
           label="Cloudy"/>
-        <SkyOption state={state} actions={actions} value="MIX"
+        <SkyOption state={state} actions={actions} id={id} value="MIX"
           label="Mix of sun/clouds"/>
       </div>
     </div>);
