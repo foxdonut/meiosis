@@ -101,7 +101,7 @@ checkbox and radio buttons:</p>
 
 class Conditions extends React.Component {
   render() {
-    var { state, actions } = this.props;
+    var { state, id, actions } = this.props;
     return (&lt;div&gt;
       &lt;label&gt;
         &lt;input
@@ -113,11 +113,11 @@ class Conditions extends React.Component {
         Precipitations
       &lt;/label&gt;
       &lt;div&gt;
-        &lt;SkyOption state={state} actions={actions} value=&quot;SUNNY&quot;
+        &lt;SkyOption state={state} id={id} actions={actions} value=&quot;SUNNY&quot;
           label=&quot;Sunny&quot;/&gt;
-        &lt;SkyOption state={state} actions={actions} value=&quot;CLOUDY&quot;
+        &lt;SkyOption state={state} id={id} actions={actions} value=&quot;CLOUDY&quot;
           label=&quot;Cloudy&quot;/&gt;
-        &lt;SkyOption state={state} actions={actions} value=&quot;MIX&quot;
+        &lt;SkyOption state={state} id={id} actions={actions} value=&quot;MIX&quot;
           label=&quot;Mix of sun/clouds&quot;/&gt;
       &lt;/div&gt;
     &lt;/div&gt;);
