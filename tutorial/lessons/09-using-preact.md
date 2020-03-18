@@ -102,11 +102,11 @@ class Conditions extends preact.Component {
         Precipitations
       </label>
       <div>
-        <SkyOption state={state} actions={actions} value="SUNNY"
+        <SkyOption state={state} id={id} actions={actions} value="SUNNY"
           label="Sunny"/>
-        <SkyOption state={state} actions={actions} value="CLOUDY"
+        <SkyOption state={state} id={id} actions={actions} value="CLOUDY"
           label="Cloudy"/>
-        <SkyOption state={state} actions={actions} value="MIX"
+        <SkyOption state={state} id={id} actions={actions} value="MIX"
           label="Mix of sun/clouds"/>
       </div>
     </div>);

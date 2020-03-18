@@ -51,8 +51,8 @@ var Conditions = {
         "div",
         skyOption({
           state,
-          actions,
           id,
+          actions,
           value: "SUNNY",
           label: "Sunny"
         }),
