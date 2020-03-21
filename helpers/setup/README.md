@@ -325,6 +325,9 @@ m.mount(document.getElementById("app"), {
 });
 ```
 
+See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/mithril/src/index.js)
+for an example.
+
 ### React Setup
 
 To create the top-level `App` component with [React](https://reactjs.org), use:
@@ -352,6 +355,9 @@ const element = document.getElementById("app");
 ReactDOM.render(<App states={states} update={update} actions={actions} />, element);
 ```
 
+See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/react/src/index.js)
+for an example.
+
 ### Preact Setup
 
 To create the top-level `App` component with [Preact](https://preactjs.com), use:
@@ -378,6 +384,9 @@ const element = document.getElementById("app");
 // If you only use update or actions, you can omit the other
 render(<App states={states} update={update} actions={actions} />, element);
 ```
+
+See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/preact/src/index.js)
+for an example.
 
 ### API
 
