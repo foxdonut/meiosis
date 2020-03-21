@@ -7,7 +7,8 @@
     "start": "rollup -c",
     "watch": "rollup -c -w",
     "test": "npm start && tape 'tests/**/*.js' | tap-spec",
-    "docs": "documentation build index.js -f md -o api.md"
+    "docs": "documentation build index.js -f md -o api.md",
+    "server": "static-server -p ${PORT:-9000}"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,7 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.4",
+    "static-server": "^2.2.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.13.2"
   }

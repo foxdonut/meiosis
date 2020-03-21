@@ -342,12 +342,12 @@ To create the top-level `App` component with [Preact](https://preactjs.com), use
 
 ```javascript
 import meiosis from "meiosis-setup/...";
-import preact from "preact";
+import { h, Component } from "preact";
 import preactSetup from "meiosis-setup/preact";
 
 const Root = /* your root component */
 
-const App = preactSetup({ React, Root });
+const App = preactSetup({ h, Component, Root });
 ```
 
 ### API

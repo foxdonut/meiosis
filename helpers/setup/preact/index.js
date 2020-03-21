@@ -3,23 +3,36 @@
  *
  * @function meiosis.preact.setup
  *
- * @param {preact} preact - the Preact instance.
- * @param {preact.Component} Root - your Root component, which receives `state` and `actions`.
+ * @param {preact.h} h - the Preact h function.
+ * @param {preact.Component} Component - the Preact Component class.
+ * @param {preact.Component} Root - your Root component, which receives `state`, `update`, and
+ * `actions`.
  *
- * @returns {preact.Component} - the top-level component to which you pass `states` and `actions`.
+ * @returns {preact.Component} - the top-level component to which you pass `states`, `update`,
+ * and `actions`.
  */
-export default ({ preact, Root }) => {
-  class App extends preact.Component {
-    // eslint-disable-next-line react/no-deprecated
-    componentWillMount() {
+export default ({ h, Component, Root }) => {
+  class App extends Component {
+    constructor(props) {
+      super(props);
+      this.state = props.states();
+      this.skippedFirst = false;
+    }
+    componentDidMount() {
       const setState = this.setState.bind(this);
-      this.props.states.map(setState);
+      this.props.states.map(state => {
+        if (this.skippedFirst) {
+          setState(state);
+        } else {
+          this.skippedFirst = true;
+        }
+      });
     }
     render() {
       const state = this.state;
-      const { actions } = this.props;
+      const { update, actions } = this.props;
 
-      return preact.h(Root, { state, actions });
+      return h(Root, { state, update, actions });
     }
   }
   return App;
