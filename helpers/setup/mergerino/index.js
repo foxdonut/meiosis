@@ -1,7 +1,7 @@
 import commonSetup from "../common";
 
 /**
- * Helper to setup the Meiosis pattern.
+ * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @async
  * @function meiosis.mergerino.setup

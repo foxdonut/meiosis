@@ -3,7 +3,7 @@ import commonSetup from "../common";
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
 /**
- * Helper to setup the Meiosis pattern.
+ * Helper to setup the Meiosis pattern with function patches.
  *
  * @async
  * @function meiosis.functionPatches.setup

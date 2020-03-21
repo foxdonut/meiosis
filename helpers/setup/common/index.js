@@ -9,8 +9,8 @@
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
  * should be `({ state, previousState, patch }) => patch?`.
  * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
- * should be `({ state, previousState, patch, update, actions }) => void`, optionally calling
- * `update`.
+ * should be `({ state, previousState, patch, update, actions }) => void`, with the function
+ * optionally calling `update` and/or `actions`.
  */
 
 /**
@@ -31,9 +31,12 @@
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
  *
- * Patch is merged in to the state by default. Services have access to the previous state and can
- * cancel or alter the original patch. State changes by services are available to the next services
- * in the list.
+ * Patch is merged in to the state by default. Services have access to the state, previous state,
+ * and patch, and can return a patch that further updates the state, reverts to the previous state,
+ * and so on. State changes by services are available to the next services in the list.
+ *
+ * After the services have run and the state has been updated, effects are executed and have the
+ * opportunity to trigger more updates.
  *
  * @async
  * @function meiosis.common.setup
@@ -46,8 +49,8 @@
  * @param {Function} combine - the function that combines an array of patches into one.
  * @param {app} app - the app, with optional properties.
  *
- * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams,
- * and `actions` are the created actions.
+ * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams, and
+ * `actions` are the created actions.
  */
 export default ({ stream, accumulator, combine, app }) => {
   if (!stream) {

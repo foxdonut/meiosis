@@ -19,11 +19,11 @@
     -   [Parameters][15]
 -   [meiosis.react.setup][16]
     -   [Parameters][17]
--   [simpleStream][18]
+-   [meiosis.simpleStream.stream][18]
     -   [Parameters][19]
-    -   [Properties][20]
--   [meiosis.simpleStream.stream][21]
-    -   [Parameters][22]
+-   [simpleStream][20]
+    -   [Parameters][21]
+    -   [Properties][22]
 -   [meiosis.simpleStream.scan][23]
     -   [Parameters][24]
 
@@ -42,17 +42,20 @@ Type: [Object][25]
 -   `services` **[Array][27]&lt;[Function][26]>?** an array of service functions, each of which
     should be `({ state, previousState, patch }) => patch?`.
 -   `effects` **[Array][27]&lt;[Function][26]>?** an array of effect functions, each of which
-    should be `({ state, previousState, patch, update, actions }) => void`, optionally calling
-    `update`.
+    should be `({ state, previousState, patch, update, actions }) => void`, with the function
+    optionally calling `update` and/or `actions`.
 
 ## meiosis.common.setup
 
 Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
 use their respective `setup` function instead.
 
-Patch is merged in to the state by default. Services have access to the previous state and can
-cancel or alter the original patch. State changes by services are available to the next services
-in the list.
+Patch is merged in to the state by default. Services have access to the state, previous state,
+and patch, and can return a patch that further updates the state, reverts to the previous state,
+and so on. State changes by services are available to the next services in the list.
+
+After the services have run and the state has been updated, effects are executed and have the
+opportunity to trigger more updates.
 
 ### Parameters
 
@@ -64,8 +67,8 @@ in the list.
 -   `combine` **[Function][26]** the function that combines an array of patches into one.
 -   `app` **[app][29]** the app, with optional properties.
 
-Returns **[Object][25]** `{ update, states, actions }`, where `update` and `states` are streams,
-and `actions` are the created actions.
+Returns **[Object][25]** `{ update, states, actions }`, where `update` and `states` are streams, and
+`actions` are the created actions.
 
 ## StreamLib
 
@@ -90,7 +93,7 @@ Returns **[simpleStream][30]** the created stream.
 
 ## meiosis.mergerino.setup
 
-Helper to setup the Meiosis pattern.
+Helper to setup the Meiosis pattern with [Mergerino][31].
 
 ### Parameters
 
@@ -106,7 +109,7 @@ and `actions` are the created actions.
 
 ## meiosis.functionPatches.setup
 
-Helper to setup the Meiosis pattern.
+Helper to setup the Meiosis pattern with function patches.
 
 ### Parameters
 
@@ -121,7 +124,7 @@ and `actions` are the created actions.
 
 ## meiosis.immer.setup
 
-Helper to setup the Meiosis pattern.
+Helper to setup the Meiosis pattern with [Immer][32].
 
 ### Parameters
 
@@ -137,7 +140,7 @@ and `actions` are the created actions.
 
 ## meiosis.preact.setup
 
-Helper to setup the Meiosis pattern.
+Helper to setup the Meiosis pattern with [Preact][33].
 
 ### Parameters
 
@@ -148,7 +151,7 @@ Returns **preact.Component** the top-level component to which you pass `states` 
 
 ## meiosis.react.setup
 
-Helper to setup the Meiosis pattern.
+Helper to setup the Meiosis pattern with [React][34].
 
 ### Parameters
 
@@ -156,6 +159,16 @@ Helper to setup the Meiosis pattern.
 -   `Root` **React.Component**  your Root component, which receives `state` and `actions`.
 
 Returns **React.Component** the top-level component to which you pass `states` and `actions`.
+
+## meiosis.simpleStream.stream
+
+Creates a stream.
+
+### Parameters
+
+-   `initial` **any?** the stream's initial value.
+
+Returns **[simpleStream][30]** the created stream.
 
 ## simpleStream
 
@@ -172,16 +185,6 @@ Type: [Function][26]
 
 -   `map` **[Function][26]** creates a new stream for which the values from the original stream
     are processed by the passed-in function and emitted onto the new stream.
-
-## meiosis.simpleStream.stream
-
-Creates a stream.
-
-### Parameters
-
--   `initial` **any?** the stream's initial value.
-
-Returns **[simpleStream][30]** the created stream.
 
 ## meiosis.simpleStream.scan
 
@@ -233,15 +236,15 @@ Returns **[simpleStream][30]** the created stream.
 
 [17]: #parameters-6
 
-[18]: #simplestream
+[18]: #meiosissimplestreamstream
 
 [19]: #parameters-7
 
-[20]: #properties-2
+[20]: #simplestream
 
-[21]: #meiosissimplestreamstream
+[21]: #parameters-8
 
-[22]: #parameters-8
+[22]: #properties-2
 
 [23]: #meiosissimplestreamscan
 
@@ -258,3 +261,11 @@ Returns **[simpleStream][30]** the created stream.
 [29]: #app
 
 [30]: #simplestream
+
+[31]: https://github.com/fuzetsu/mergerino
+
+[32]: https://github.com/immerjs/immer
+
+[33]: https://preactjs.com/
+
+[34]: https://reactjs.org/

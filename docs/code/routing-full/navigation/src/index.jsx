@@ -3,7 +3,7 @@ import { render } from "react-dom";
 import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
 import meiosisReact from "meiosis-setup/react";
-import meiosisMergerino from "meiosis-setup/mergerino";
+import meiosis from "meiosis-setup/mergerino";
 
 import { createApp } from "./app";
 import { Root } from "./root";
@@ -15,7 +15,7 @@ import meiosisTracer from "meiosis-tracer";
 const App = meiosisReact({ React, Root });
 const app = createApp([Route.Home()]);
 
-const { states, actions } = meiosisMergerino({ stream: simpleStream, merge, app });
+const { states, actions } = meiosis({ stream: simpleStream, merge, app });
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({

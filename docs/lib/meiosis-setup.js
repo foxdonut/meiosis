@@ -13,7 +13,10 @@
    * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
    * `update => actions`.
    * @property {Array<Function>} [services=[]] - an array of service functions, each of which
-   * should be `({ state, previousState, patch }) => ({ state?, patch?, render?, next? })`.
+   * should be `({ state, previousState, patch }) => patch?`.
+   * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
+   * should be `({ state, previousState, patch, update, actions }) => void`, with the function
+   * optionally calling `update` and/or `actions`.
    */
 
   /**
@@ -34,9 +37,12 @@
    * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
    * use their respective `setup` function instead.
    *
-   * Patch is merged in to the state by default. Services have access to the previous state and can
-   * cancel or alter the original patch. State changes by services are available to the next services
-   * in the list.
+   * Patch is merged in to the state by default. Services have access to the state, previous state,
+   * and patch, and can return a patch that further updates the state, reverts to the previous state,
+   * and so on. State changes by services are available to the next services in the list.
+   *
+   * After the services have run and the state has been updated, effects are executed and have the
+   * opportunity to trigger more updates.
    *
    * @async
    * @function meiosis.common.setup
@@ -49,8 +55,8 @@
    * @param {Function} combine - the function that combines an array of patches into one.
    * @param {app} app - the app, with optional properties.
    *
-   * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams,
-   * and `actions` are the created actions.
+   * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams, and
+   * `actions` are the created actions.
    */
   function commonSetup (ref) {
     var stream = ref.stream;
@@ -72,8 +78,10 @@
     var initial = app.initial;
     var Actions = app.Actions;
     var services = app.services;
+    var effects = app.effects;
     initial = initial || {};
     services = services || [];
+    effects = effects || [];
 
     var singlePatch = function (patch) { return (Array.isArray(patch) ? combine(patch) : patch); };
     var accumulatorFn = function (state, patch) { return (patch ? accumulator(state, singlePatch(patch)) : state); };
@@ -86,91 +94,48 @@
     var states = createStream();
 
     // context is { state, patch, previousState }
-    // should return { state, render, next }
-    var updateState = function (context) {
+    // state is optionally updated by service patches; patch and previousState never change.
+    var runServices = function (context) {
       var updatedContext = context;
 
-      var loop = function ( i ) {
-        // a service should return { state, patch, render, next } (all optional)
-        var serviceUpdate = services[i](updatedContext);
-
-        if (serviceUpdate) {
-          // If a service cancelled a patch, abort
-          if (serviceUpdate.patch === false) {
-            return { v: {
-              render: false,
-              state: context.previousState,
-              next: []
-            } };
-          }
-          // If a service changed a patch, abort current and issue the new patch
-          if (serviceUpdate.patch) {
-            return { v: {
-              render: false,
-              state: context.previousState,
-              next: [function (ref) {
-                var update = ref.update;
-
-                return update(serviceUpdate.patch);
-            }]
-            } };
-          }
-          // Append next function
-          if (serviceUpdate.next) {
-            updatedContext.next.push(serviceUpdate.next);
-            delete serviceUpdate.next;
-          }
-          // Update the context
-          updatedContext = Object.assign(updatedContext, serviceUpdate, {
-            state: accumulatorFn(updatedContext.state, serviceUpdate.state)
-          });
-        }
-      };
-
       for (var i = 0; i < services.length; i++) {
-        var returned = loop( i );
-
-        if ( returned ) return returned.v;
+        // a service should (optionally) return a patch
+        var servicePatch = services[i](updatedContext);
+        updatedContext.state = accumulatorFn(updatedContext.state, servicePatch);
       }
       return updatedContext;
     };
 
     var contexts = scan(
-      function (context, patch) { return updateState({
+      function (context, patch) { return runServices({
           previousState: context.state,
           state: accumulatorFn(context.state, patch),
-          patch: patch,
-          render: true,
-          next: []
+          patch: patch
         }); },
-      { state: initial },
+      runServices({ state: initial, previousState: initial }),
       update
     );
 
     contexts.map(function (context) {
-      if (context.render) {
+      if (context.state !== states()) {
         states(context.state);
       }
-      if (context.next) {
-        context.next.forEach(function (service) {
-          service({
-            state: context.state,
-            patch: context.patch,
+
+      effects.forEach(function (effect) {
+        effect(
+          Object.assign(context, {
             update: update,
             actions: actions
-          });
-        });
-      }
+          })
+        );
+      });
     });
 
-    // initial state
-    update(false);
-
-    return { update: update, contexts: contexts, states: states, actions: actions };
+    return { update: update, states: states, actions: actions };
   }
 
   /**
-   * Helper to setup the Meiosis pattern.
+   * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
    *
    * @async
    * @function meiosis.mergerino.setup
@@ -198,10 +163,10 @@
     });
   }
 
-  var compose = function (fns) { return function (args) { return fns.reduceRight(function (arg, fn) { return fn(arg); }, args); }; };
+  var pipe = function (fns) { return function (args) { return fns.reduce(function (arg, fn) { return fn(arg); }, args); }; };
 
   /**
-   * Helper to setup the Meiosis pattern.
+   * Helper to setup the Meiosis pattern with function patches.
    *
    * @async
    * @function meiosis.functionPatches.setup
@@ -219,11 +184,11 @@
       var stream = ref.stream;
       var app = ref.app;
 
-      return commonSetup({ stream: stream, accumulator: function (x, f) { return f(x); }, combine: compose, app: app });
+      return commonSetup({ stream: stream, accumulator: function (x, f) { return f(x); }, combine: pipe, app: app });
   }
 
   /**
-   * Helper to setup the Meiosis pattern.
+   * Helper to setup the Meiosis pattern with [Immer](https://github.com/immerjs/immer).
    *
    * @async
    * @function meiosis.immer.setup
@@ -246,15 +211,14 @@
       return commonSetup({
       stream: stream,
       accumulator: produce,
-      combine: function (patches) { return function (model) {
-        patches.forEach(function (patch) { return patch(model); });
-      }; },
+      // can't use patches.reduce(produce, state) because that would send a third argument to produce
+      combine: function (patches) { return function (state) { return patches.reduce(function (result, patch) { return produce(result, patch); }, state); }; },
       app: app
     });
   }
 
   /**
-   * Helper to setup the Meiosis pattern.
+   * Helper to setup the Meiosis pattern with [Preact](https://preactjs.com/).
    *
    * @function meiosis.preact.setup
    *
@@ -294,7 +258,7 @@
   }
 
   /**
-   * Helper to setup the Meiosis pattern.
+   * Helper to setup the Meiosis pattern with [React](https://reactjs.org/).
    *
    * @function meiosis.react.setup
    *

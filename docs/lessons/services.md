@@ -193,8 +193,7 @@ const stats = {
         x => x.boxes,
         R.countBy(I),
         R.always,
-        R.objOf("stats"),
-        R.objOf("state")
+        R.objOf("stats")
       )
     )
 };
@@ -213,14 +212,13 @@ const description = {
         R.map(R.join(" ")),
         humanList("and"),
         x => x + ".",
-        R.objOf("description"),
-        R.objOf("state")
+        R.objOf("description")
       )
     )
 };
 ```
 
-Each service function takes the state and returns a `{ state: patch }` object.
+Each service function takes the state and returns a patch object.
 
 A service function does not need to return anything, however. The `storage.service` function is one such function, as it only stores the state into local storage:
 

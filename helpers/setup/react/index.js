@@ -1,5 +1,5 @@
 /**
- * Helper to setup the Meiosis pattern.
+ * Helper to setup the Meiosis pattern with [React](https://reactjs.org/).
  *
  * @function meiosis.react.setup
  *

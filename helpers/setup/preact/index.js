@@ -1,5 +1,5 @@
 /**
- * Helper to setup the Meiosis pattern.
+ * Helper to setup the Meiosis pattern with [Preact](https://preactjs.com/).
  *
  * @function meiosis.preact.setup
  *

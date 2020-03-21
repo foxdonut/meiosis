@@ -145,7 +145,7 @@ out-of-the-box. You can also use another stream library; see
 To use [Mergerino](https://github.com/fuzetsu/mergerino):
 
 ```javascript
-import meiosisMergerino from "meiosis-setup/mergerino";
+import meiosis from "meiosis-setup/mergerino";
 import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
@@ -157,7 +157,7 @@ import merge from "mergerino";
 const app = {};
 
 const { update, states, actions } =
-  meiosisMergerino({ stream: simpleStream, merge, app });
+  meiosis({ stream: simpleStream, merge, app });
 
 // setup your view here
 // call update({ duck: "quack" }) to update the state
@@ -167,7 +167,7 @@ const { update, states, actions } =
 asyncFunction(...).then(response => {
   const initial = buildInitialState(response);
   const app = { initial, ... };
-  meiosisMergerino({ stream: simpleStream, merge, app });
+  meiosis({ stream: simpleStream, merge, app });
 
   // setup your view here
   // call update({ duck: "quack" }) to update the state
@@ -180,7 +180,7 @@ To use
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html):
 
 ```javascript
-import meiosisFunctionPatches from "meiosis-setup/functionPatches";
+import meiosis from "meiosis-setup/functionPatches";
 import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
@@ -190,7 +190,7 @@ import simpleStream from "meiosis-setup/simple-stream";
 const app = {};
 
 const { update, states, actions } =
-  meiosisFunctionPatches({ stream: simpleStream, app });
+  meiosis({ stream: simpleStream, app });
 
 // setup your view here
 // call update(state => ({ ...state, duck: "quack" })) to update the state
@@ -200,7 +200,7 @@ const { update, states, actions } =
 asyncFunction(...).then(response => {
   const initial = buildInitialState(response);
   const app = { initial, ... };
-  meiosisMergerino({ stream: simpleStream, app });
+  meiosis({ stream: simpleStream, app });
 
   // setup your view here
   // call update(state => ({ ...state, duck: "quack" })) to update the state
@@ -212,7 +212,7 @@ asyncFunction(...).then(response => {
 To use [Immer](https://github.com/immerjs/immer):
 
 ```javascript
-import meiosisImmer from "meiosis-setup/immer";
+import meiosis from "meiosis-setup/immer";
 import simpleStream from "meiosis-setup/simple-stream";
 // or
 // import Stream from "mithril/stream";
@@ -224,7 +224,7 @@ import produce from "immer";
 const app = {};
 
 const { update, states, actions } =
-  meiosisImmer({ stream: simpleStream, produce, app });
+  meiosis({ stream: simpleStream, produce, app });
 
 // setup your view here
 // call update(draft => { draft.duck = "quack"; }) to update the state
@@ -234,7 +234,7 @@ const { update, states, actions } =
 asyncFunction(...).then(response => {
   const initial = buildInitialState(response);
   const app = { initial, ... };
-  meiosisMergerino({ stream: simpleStream, produce, app });
+  meiosis({ stream: simpleStream, produce, app });
 
   // setup your view here
   // call update(draft => { draft.duck = "quack"; }) to update the state
@@ -301,11 +301,33 @@ or an object with a `stream` property for that function. In either case, there m
 property on the function or object. Finally, the created stream must be a function that, when
 called, emits a value onto the stream; and the function must have a `map` method.
 
+## View Setup
+
+### Mithril Setup
+
+To use `meiosis-setup` with [Mithril](https://mithril.js.org), no special setup is necessary:
+
+```javascript
+import meiosis from "meiosis-setup/...";
+import m from "mithril";
+
+const App = {
+  view: ({ attrs: { state, update, actions } }) => m(...)
+};
+
+const { states, update, actions } = meiosis({ ... });
+
+m.mount(document.getElementById("app"), {
+  view: () => m(App, { state: states(), update, actions })
+});
+```
+
 ### React Setup
 
 To create the top-level `App` component with [React](https://reactjs.org), use:
 
 ```javascript
+import meiosis from "meiosis-setup/...";
 import React from "react";
 import reactSetup from "meiosis-setup/react";
 
@@ -319,6 +341,7 @@ const App = reactSetup({ React, Root });
 To create the top-level `App` component with [Preact](https://preactjs.com), use:
 
 ```javascript
+import meiosis from "meiosis-setup/...";
 import preact from "preact";
 import preactSetup from "meiosis-setup/preact";
 
@@ -334,7 +357,9 @@ const App = preactSetup({ React, Root });
 ## Credits
 
 Many thanks to [Stephan Thon](https://github.com/smuemd),
-[Daniel Loomer](https://github.com/fuzetsu), and [Barney Carroll](https://github.com/barneycarroll)
+[Daniel Loomer](https://github.com/fuzetsu), [Barney Carroll](https://github.com/barneycarroll),
+[Scotty Simpson](https://github.com/CreaturesInUnitards), and
+[James Forbes](https://twitter.com/james_a_forbes)
 for your contributions, feedback, and suggestions. They are much appreciated!
 
 ----

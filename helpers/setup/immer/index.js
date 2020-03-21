@@ -1,7 +1,7 @@
 import commonSetup from "../common";
 
 /**
- * Helper to setup the Meiosis pattern.
+ * Helper to setup the Meiosis pattern with [Immer](https://github.com/immerjs/immer).
  *
  * @async
  * @function meiosis.immer.setup
