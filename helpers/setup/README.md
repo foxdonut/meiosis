@@ -388,6 +388,33 @@ render(<App states={states} update={update} actions={actions} />, element);
 See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/preact/src/index.js)
 for an example.
 
+### lit-html Setup
+
+To use `meiosis-setup` with [lit-html](https://lit-html.polymer-project.org/), no special setup is
+necessary:
+
+```javascript
+import meiosis from "meiosis-setup/...";
+import { html, render } from "lit-html";
+
+const App = ({ state, update, actions }) => html`
+  <div>... </div>
+`;
+
+// Actions are optional
+const app = { initial, Actions, ... };
+// If you only use update or actions, you can omit the other
+const { state, update, actions } = meiosis({ stream, app, ... });
+
+const element = document.getElementById("app");
+// If you only use update or actions, you can omit the other
+states.map(state => render(App({ state, update, actions }), element));
+```
+
+See
+[here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/lit-html/src/index.js)
+for an example.
+
 ### API
 
 [API documentation is here.](api.md)

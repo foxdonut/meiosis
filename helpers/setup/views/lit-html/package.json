@@ -1,0 +1,42 @@
+{
+  "name": "meiosis-view-setup-lit-html",
+  "version": "4.0.0",
+  "description": "meiosis-view-setup lit-html",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "example",
+    "lit-html",
+    "meiosis",
+    "reactive"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "lit-html": "^1.2.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "meiosis-tracer": "^3.0.0",
+    "prettier": "2.0.0",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
+  }
+}
