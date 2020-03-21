@@ -19,11 +19,11 @@
     -   [Parameters][15]
 -   [meiosis.react.setup][16]
     -   [Parameters][17]
--   [meiosis.simpleStream.stream][18]
+-   [simpleStream][18]
     -   [Parameters][19]
--   [simpleStream][20]
-    -   [Parameters][21]
-    -   [Properties][22]
+    -   [Properties][20]
+-   [meiosis.simpleStream.stream][21]
+    -   [Parameters][22]
 -   [meiosis.simpleStream.scan][23]
     -   [Parameters][24]
 
@@ -42,7 +42,8 @@ Type: [Object][25]
 -   `services` **[Array][27]&lt;[Function][26]>?** an array of service functions, each of which
     should be `({ state, previousState, patch }) => patch?`.
 -   `effects` **[Array][27]&lt;[Function][26]>?** an array of effect functions, each of which
-    should be `({ state, previousState, patch, update }) => void`, optionally calling `update`.
+    should be `({ state, previousState, patch, update, actions }) => void`, optionally calling
+    `update`.
 
 ## meiosis.common.setup
 
@@ -156,16 +157,6 @@ Helper to setup the Meiosis pattern.
 
 Returns **React.Component** the top-level component to which you pass `states` and `actions`.
 
-## meiosis.simpleStream.stream
-
-Creates a stream.
-
-### Parameters
-
--   `initial` **any?** the stream's initial value.
-
-Returns **[simpleStream][30]** the created stream.
-
 ## simpleStream
 
 A simple stream.
@@ -181,6 +172,16 @@ Type: [Function][26]
 
 -   `map` **[Function][26]** creates a new stream for which the values from the original stream
     are processed by the passed-in function and emitted onto the new stream.
+
+## meiosis.simpleStream.stream
+
+Creates a stream.
+
+### Parameters
+
+-   `initial` **any?** the stream's initial value.
+
+Returns **[simpleStream][30]** the created stream.
 
 ## meiosis.simpleStream.scan
 
@@ -232,15 +233,15 @@ Returns **[simpleStream][30]** the created stream.
 
 [17]: #parameters-6
 
-[18]: #meiosissimplestreamstream
+[18]: #simplestream
 
 [19]: #parameters-7
 
-[20]: #simplestream
+[20]: #properties-2
 
-[21]: #parameters-8
+[21]: #meiosissimplestreamstream
 
-[22]: #properties-2
+[22]: #parameters-8
 
 [23]: #meiosissimplestreamscan
 
