@@ -359,14 +359,15 @@ To create the top-level `App` component with [Preact](https://preactjs.com), use
 ```javascript
 import meiosis from "meiosis-setup/...";
 import preactSetup from "meiosis-setup/preact";
-import { h, Component, render } from "preact";
+import { h, render } from "preact";
+import { useState } from "preact/hooks";
 
 // your root component
 const Root = ({ state, update, actions }) => (
   <div>...</div>
 );
 
-const App = preactSetup({ h, Component, Root });
+const App = preactSetup({ h, useState, Root });
 
 // Actions are optional
 const app = { initial, Actions, ... };

@@ -1,5 +1,6 @@
 import meiosis from "../../../dist/meiosis-setup";
-import { h, Component, render } from "preact";
+import { h, render } from "preact";
+import { useState } from "preact/hooks";
 
 const Root = ({ state, update, actions }) => (
   <div>
@@ -14,7 +15,7 @@ const Root = ({ state, update, actions }) => (
   </div>
 );
 
-const App = meiosis.preact.setup({ h, Component, Root });
+const App = meiosis.preact.setup({ h, useState, Root });
 
 const { states, update, actions } = meiosis.functionPatches.setup({
   stream: meiosis.simpleStream,

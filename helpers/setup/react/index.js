@@ -10,29 +10,14 @@
  * @returns {React.Component} - the top-level component to which you pass `states`, and either
  * `update`, `actions`, or both.
  */
-export default ({ React, Root }) => {
-  class App extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = props.states();
-      this.skippedFirst = false;
-    }
-    componentDidMount() {
-      const setState = this.setState.bind(this);
-      this.props.states.map(state => {
-        if (this.skippedFirst) {
-          setState(state);
-        } else {
-          this.skippedFirst = true;
-        }
-      });
-    }
-    render() {
-      const state = this.state;
-      const { update, actions } = this.props;
+export default ({ React, Root }) => ({ states, update, actions }) => {
+  const [init, setInit] = React.useState(false);
+  const [state, setState] = React.useState(states());
 
-      return React.createElement(Root, { state, update, actions });
-    }
+  if (!init) {
+    setInit(true);
+    states.map(setState);
   }
-  return App;
+
+  return React.createElement(Root, { state, update, actions });
 };
