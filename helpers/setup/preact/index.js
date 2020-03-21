@@ -8,8 +8,8 @@
  * @param {preact.Component} Root - your Root component, which receives `state`, `update`, and
  * `actions`.
  *
- * @returns {preact.Component} - the top-level component to which you pass `states`, `update`,
- * and `actions`.
+ * @returns {preact.Component} - the top-level component to which you pass `states`, and either
+ * `update`, `actions`, or both.
  */
 export default ({ h, Component, Root }) => {
   class App extends Component {

@@ -4,9 +4,11 @@
  * @function meiosis.react.setup
  *
  * @param {React} React - the React instance.
- * @param {React.Component} Root -  your Root component, which receives `state` and `actions`.
+ * @param {React.Component} Root - your Root component, which receives `state`, `update`, and
+ * `actions`.
  *
- * @returns {React.Component} - the top-level component to which you pass `states` and `actions`.
+ * @returns {React.Component} - the top-level component to which you pass `states`, and either
+ * `update`, `actions`, or both.
  */
 export default ({ React, Root }) => {
   class App extends React.Component {
@@ -27,9 +29,9 @@ export default ({ React, Root }) => {
     }
     render() {
       const state = this.state;
-      const { actions } = this.props;
+      const { update, actions } = this.props;
 
-      return React.createElement(Root, { state, actions });
+      return React.createElement(Root, { state, update, actions });
     }
   }
   return App;
