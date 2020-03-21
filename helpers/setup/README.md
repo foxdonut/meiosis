@@ -312,12 +312,15 @@ import meiosis from "meiosis-setup/...";
 import m from "mithril";
 
 const App = {
+  // If you only use update or actions, you can omit the other
   view: ({ attrs: { state, update, actions } }) => m(...)
 };
 
+// If you only use update or actions, you can omit the other
 const { states, update, actions } = meiosis({ ... });
 
 m.mount(document.getElementById("app"), {
+  // If you only use update or actions, you can omit the other
   view: () => m(App, { state: states(), update, actions })
 });
 ```
@@ -328,12 +331,25 @@ To create the top-level `App` component with [React](https://reactjs.org), use:
 
 ```javascript
 import meiosis from "meiosis-setup/...";
-import React from "react";
 import reactSetup from "meiosis-setup/react";
+import React from "react";
+import ReactDOM from "react-dom";
 
-const Root = /* your root component */
+// your root component
+const Root = ({ state, update, actions }) => (
+  <div>...</div>
+);
 
 const App = reactSetup({ React, Root });
+
+// Actions are optional
+const app = { initial, Actions, ... };
+// If you only use update or actions, you can omit the other
+const { state, update, actions } = meiosis({ stream, app, ... });
+
+const element = document.getElementById("app");
+// If you only use update or actions, you can omit the other
+ReactDOM.render(<App states={states} update={update} actions={actions} />, element);
 ```
 
 ### Preact Setup
@@ -342,8 +358,8 @@ To create the top-level `App` component with [Preact](https://preactjs.com), use
 
 ```javascript
 import meiosis from "meiosis-setup/...";
-import { h, Component, render } from "preact";
 import preactSetup from "meiosis-setup/preact";
+import { h, Component, render } from "preact";
 
 // your root component
 const Root = ({ state, update, actions }) => (
