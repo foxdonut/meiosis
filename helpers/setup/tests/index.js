@@ -262,7 +262,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a service can change a patch", t => {
+    t.test(label + " / a service can alter a state change", t => {
       const services = [
         ({ patch, previousState }) => {
           if (patch && patch.one) {
@@ -366,33 +366,23 @@ const mergerinoTest = (merge, streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a guard can cancel a sequence", t => {
-      const guards = [
-        ({ patch }) => {
-          return !patch.one;
-        }
-      ];
+    t.test(label + " / route change, please wait, load async", t => {
+      const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ patch }) => {
-          if (patch && patch.one) {
-            return { two: true };
+        ({ state }) => {
+          if (state.route === "PageB" && state.data === "None") {
+            return { data: "Loading" };
           }
         }
       ];
 
       const effects = [
-        ({ update, patch }) => {
-          if (patch && patch.one) {
-            update({ effect: true });
-          }
-        }
-      ];
-
-      const recovers = [
-        ({ update, patch, invalidState }) => {
-          if (patch && patch.one) {
-            update({ recover: true, valid: !invalidState });
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update({ data: "Loaded" });
+            }, 10);
           }
         }
       ];
@@ -400,17 +390,201 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { guards, services, effects, recovers }
+        app: { initial, services, effects }
       });
 
-      let ticks = 0;
-      states.map(() => ticks++);
+      update({ route: "PageB" });
 
-      update({ one: true });
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageB", "page showing loading state");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
 
-      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
-      t.equal(ticks, 2, "number of ticks");
-      t.end();
+    t.test(label + " / route change, don't go to page yet, load async", t => {
+      const initial = { route: "PageA", data: "None" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && state.data === "None") {
+            return { route: previousState.route, data: "Loading" };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update({ route: "PageB", data: "Loaded" });
+            }, 10);
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial, services, effects }
+      });
+
+      update({ route: "PageB" });
+
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageA", "staying on previous page while loading");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / route change, not authorized, redirect", t => {
+      const initial = { route: "PageA" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && !state.user) {
+            return {
+              route: previousState.route,
+              redirect: { route: "PageC", message: "Please login." }
+            };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.redirect) {
+            update({
+              route: state.redirect.route,
+              message: state.redirect.message,
+              redirect: undefined
+            });
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial, services, effects }
+      });
+
+      update({ route: "PageB" });
+
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to unauthorized page");
+
+        if (state.route === "PageC") {
+          t.deepEqual(state, { route: "PageC", message: "Please login." }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, cleanup", t => {
+      const initial = { route: "PageA", data: "Loaded" };
+
+      const services = [
+        ({ state }) => {
+          if (state.data === "Loaded" && state.route !== "PageA") {
+            return {
+              data: "None"
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial, services }
+      });
+
+      update({ route: "PageB" });
+
+      states.map(state => {
+        if (state.route === "PageB") {
+          t.deepEqual(state, { route: "PageB", data: "None" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, stay on page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return {
+              route: previousState.route,
+              target: state.route,
+              confirm: true
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial, services }
+      });
+
+      update({ route: "PageB" });
+      update({ confirm: false, target: undefined });
+
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to next page");
+
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.equal(state.route, "PageA", "staying on page after cancelling");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, leave page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return {
+              route: previousState.route,
+              target: state.route,
+              confirm: true
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { initial, services }
+      });
+
+      update({ route: "PageB" });
+      update({ confirm: false, route: "PageB", form: undefined, target: undefined });
+
+      states.map(state => {
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.deepEqual(state, { route: "PageB", confirm: false }, "leaving page after confirming");
+          t.end();
+        }
+      });
     });
   });
 };
@@ -673,7 +847,7 @@ const functionPatchTest = (streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a service can change a patch", t => {
+    t.test(label + " / a service can alter a state change", t => {
       const services = [
         ({ state, previousState }) => {
           if (state.one) {
@@ -773,50 +947,225 @@ const functionPatchTest = (streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a guard can cancel a sequence", t => {
-      const guards = [
-        ({ state, previousState }) => {
-          return !(state.one && !previousState.one);
-        }
-      ];
+    t.test(label + " / route change, please wait, load async", t => {
+      const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.one && !previousState.one) {
-            return R.assoc("two", true);
+        ({ state }) => {
+          if (state.route === "PageB" && state.data === "None") {
+            return R.assoc("data", "Loading");
           }
         }
       ];
 
       const effects = [
-        ({ update, state, previousState }) => {
-          if (state.one && !previousState.one) {
-            update(R.assoc("effect", true));
-          }
-        }
-      ];
-
-      const recovers = [
-        ({ previousState, invalidState, update }) => {
-          if (invalidState && invalidState.one && !previousState.one) {
-            update([R.assoc("recover", true), R.assoc("valid", !invalidState)]);
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update(R.assoc("data", "Loaded"));
+            }, 10);
           }
         }
       ];
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { guards, services, effects, recovers }
+        app: { initial, services, effects }
       });
 
-      let ticks = 0;
-      states.map(() => ticks++);
+      update(R.assoc("route", "PageB"));
 
-      update(R.assoc("one", true));
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageB", "page showing loading state");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
 
-      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
-      t.equal(ticks, 2, "number of ticks");
-      t.end();
+    t.test(label + " / route change, don't go to page yet, load async", t => {
+      const initial = { route: "PageA", data: "None" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && state.data === "None") {
+            return R.compose(R.assoc("route", previousState.route), R.assoc("data", "Loading"));
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update([R.assoc("route", "PageB"), R.assoc("data", "Loaded")]);
+            }, 10);
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial, services, effects }
+      });
+
+      update(R.assoc("route", "PageB"));
+
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageA", "staying on previous page while loading");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / route change, not authorized, redirect", t => {
+      const initial = { route: "PageA" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && !state.user) {
+            return state =>
+              Object.assign({}, state, {
+                route: previousState.route,
+                redirect: { route: "PageC", message: "Please login." }
+              });
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.redirect) {
+            update([
+              R.assoc("route", state.redirect.route),
+              R.assoc("message", state.redirect.message),
+              R.dissoc("redirect")
+            ]);
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial, services, effects }
+      });
+
+      update(R.assoc("route", "PageB"));
+
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to unauthorized page");
+
+        if (state.route === "PageC") {
+          t.deepEqual(state, { route: "PageC", message: "Please login." }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, cleanup", t => {
+      const initial = { route: "PageA", data: "Loaded" };
+
+      const services = [
+        ({ state }) => {
+          if (state.data === "Loaded" && state.route !== "PageA") {
+            return R.assoc("data", "None");
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial, services }
+      });
+
+      update(R.assoc("route", "PageB"));
+
+      states.map(state => {
+        if (state.route === "PageB") {
+          t.deepEqual(state, { route: "PageB", data: "None" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, stay on page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return state =>
+              Object.assign({}, state, {
+                route: previousState.route,
+                target: state.route,
+                confirm: true
+              });
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial, services }
+      });
+
+      update(R.assoc("route", "PageB"));
+      update(R.compose(R.assoc("confirm", false), R.dissoc("target")));
+
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to next page");
+
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.equal(state.route, "PageA", "staying on page after cancelling");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, leave page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return state =>
+              Object.assign({}, state, {
+                route: previousState.route,
+                target: state.route,
+                confirm: true
+              });
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { initial, services }
+      });
+
+      update(R.assoc("route", "PageB"));
+      update([
+        R.assoc("confirm", false),
+        R.assoc("route", "PageB"),
+        R.dissoc("form"),
+        R.dissoc("target")
+      ]);
+
+      states.map(state => {
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.deepEqual(state, { route: "PageB", confirm: false }, "leaving page after confirming");
+          t.end();
+        }
+      });
     });
   });
 };
@@ -1165,7 +1514,7 @@ const immerTest = (streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a service can change a patch", t => {
+    t.test(label + " / a service can alter a state change", t => {
       const services = [
         ({ state, previousState }) => {
           if (state.one) {
@@ -1286,39 +1635,119 @@ const immerTest = (streamLib, label) => {
       t.end();
     });
 
-    t.test(label + " / a guard can cancel a sequence", t => {
-      const guards = [
-        ({ state, previousState }) => {
-          return !(state.one && !previousState.one);
-        }
-      ];
+    t.test(label + " / route change, please wait, load async", t => {
+      const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.one && !previousState.one) {
+        ({ state }) => {
+          if (state.route === "PageB" && state.data === "None") {
             return draft => {
-              draft.two = true;
+              draft.data = "Loading";
             };
           }
         }
       ];
 
       const effects = [
-        ({ update, state, previousState }) => {
-          if (state.one && !previousState.one) {
-            update(draft => {
-              draft.effect = true;
-            });
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update(draft => {
+                draft.data = "Loaded";
+              });
+            }, 10);
           }
         }
       ];
 
-      const recovers = [
-        ({ previousState, invalidState, update }) => {
-          if (invalidState && invalidState.one && !previousState.one) {
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial, services, effects }
+      });
+
+      update(draft => {
+        draft.route = "PageB";
+      });
+
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageB", "page showing loading state");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / route change, don't go to page yet, load async", t => {
+      const initial = { route: "PageA", data: "None" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && state.data === "None") {
+            return draft => {
+              draft.route = previousState.route;
+              draft.data = "Loading";
+            };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.data === "Loading") {
+            setTimeout(() => {
+              update(draft => {
+                draft.route = "PageB";
+                draft.data = "Loaded";
+              });
+            }, 10);
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial, services, effects }
+      });
+
+      update(draft => {
+        draft.route = "PageB";
+      });
+
+      states.map(state => {
+        if (state.data === "Loading") {
+          t.equal(state.route, "PageA", "staying on previous page while loading");
+        } else if (state.data === "Loaded") {
+          t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / route change, not authorized, redirect", t => {
+      const initial = { route: "PageA" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.route === "PageB" && !state.user) {
+            return draft => {
+              draft.route = previousState.route;
+              draft.redirect = { route: "PageC", message: "Please login." };
+            };
+          }
+        }
+      ];
+
+      const effects = [
+        ({ state, update }) => {
+          if (state.redirect) {
             update(draft => {
-              draft.recover = true;
-              draft.valid = !invalidState;
+              draft.route = state.redirect.route;
+              draft.message = state.redirect.message;
+              delete draft.redirect;
             });
           }
         }
@@ -1327,19 +1756,136 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { guards, services, effects, recovers }
+        app: { initial, services, effects }
       });
-
-      let ticks = 0;
-      states.map(() => ticks++);
 
       update(draft => {
-        draft.one = true;
+        draft.route = "PageB";
       });
 
-      t.deepEqual(states(), { recover: true, valid: false }, "resulting state");
-      t.equal(ticks, 2, "number of ticks");
-      t.end();
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to unauthorized page");
+
+        if (state.route === "PageC") {
+          t.deepEqual(state, { route: "PageC", message: "Please login." }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, cleanup", t => {
+      const initial = { route: "PageA", data: "Loaded" };
+
+      const services = [
+        ({ state }) => {
+          if (state.data === "Loaded" && state.route !== "PageA") {
+            return draft => {
+              draft.data = "None";
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial, services }
+      });
+
+      update(draft => {
+        draft.route = "PageB";
+      });
+
+      states.map(state => {
+        if (state.route === "PageB") {
+          t.deepEqual(state, { route: "PageB", data: "None" }, "resulting state");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, stay on page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return draft => {
+              draft.route = previousState.route;
+              draft.target = state.route;
+              draft.confirm = true;
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial, services }
+      });
+
+      update(draft => {
+        draft.route = "PageB";
+      });
+
+      update(draft => {
+        draft.confirm = false;
+        delete draft.target;
+      });
+
+      states.map(state => {
+        t.notEqual(state.route, "PageB", "should never go to next page");
+
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.equal(state.route, "PageA", "staying on page after cancelling");
+          t.end();
+        }
+      });
+    });
+
+    t.test(label + " / leave route, confirm unsaved data, leave page", t => {
+      const initial = { route: "PageA", form: "data" };
+
+      const services = [
+        ({ state, previousState }) => {
+          if (state.form === "data" && state.route !== "PageA") {
+            return draft => {
+              draft.route = previousState.route;
+              draft.target = state.route;
+              draft.confirm = true;
+            };
+          }
+        }
+      ];
+
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { initial, services }
+      });
+
+      update(draft => {
+        draft.route = "PageB";
+      });
+
+      update(draft => {
+        draft.confirm = false;
+        draft.route = "PageB";
+        delete draft.form;
+        delete draft.target;
+      });
+
+      states.map(state => {
+        if (state.confirm === true) {
+          t.equal(state.route, "PageA", "staying on page to confirm");
+        } else if (state.confirm === false) {
+          t.deepEqual(state, { route: "PageB", confirm: false }, "leaving page after confirming");
+          t.end();
+        }
+      });
     });
   });
 };

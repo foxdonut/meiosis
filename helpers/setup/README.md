@@ -160,6 +160,18 @@ const { update, states, actions } =
   meiosisMergerino({ stream: simpleStream, merge, app });
 
 // setup your view here
+// call update({ duck: "quack" }) to update the state
+
+// If the initial state is asynchronous:
+
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosisMergerino({ stream: simpleStream, merge, app });
+
+  // setup your view here
+  // call update({ duck: "quack" }) to update the state
+});
 ```
 
 ### Function Patch Setup
@@ -181,6 +193,18 @@ const { update, states, actions } =
   meiosisFunctionPatches({ stream: simpleStream, app });
 
 // setup your view here
+// call update(state => ({ ...state, duck: "quack" })) to update the state
+
+// If the initial state is asynchronous:
+
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosisMergerino({ stream: simpleStream, app });
+
+  // setup your view here
+  // call update(state => ({ ...state, duck: "quack" })) to update the state
+});
 ```
 
 ### Immer Setup
@@ -203,6 +227,18 @@ const { update, states, actions } =
   meiosisImmer({ stream: simpleStream, produce, app });
 
 // setup your view here
+// call update(draft => { draft.duck = "quack"; }) to update the state
+
+// If the initial state is asynchronous:
+
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosisMergerino({ stream: simpleStream, produce, app });
+
+  // setup your view here
+  // call update(draft => { draft.duck = "quack"; }) to update the state
+});
 ```
 
 ### Application

@@ -6,15 +6,10 @@
  * If not specified, the initial state will be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
- * @property {Array<Function>} [guards=[]] - an array of guard functions, each of which
- * should be `({ state, previousState, patch }) => boolean`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
  * should be `({ state, previousState, patch }) => patch?`.
  * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
  * should be `({ state, previousState, patch, update, actions }) => void`, optionally calling
- * `update`.
- * @property {Array<Function>} [recovers=[]] - an array of recover functions, each of which
- * should be `({ invalidState, previousState, patch, update, actions }) => void`, optionally calling
  * `update`.
  */
 
@@ -66,12 +61,10 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   app = app || {};
-  let { initial, Actions, guards, services, effects, recovers } = app;
+  let { initial, Actions, services, effects } = app;
   initial = initial || {};
-  guards = guards || [];
   services = services || [];
   effects = effects || [];
-  recovers = recovers || [];
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -97,32 +90,22 @@ export default ({ stream, accumulator, combine, app }) => {
   };
 
   const contexts = scan(
-    (context, patch) => {
-      const nextContext = {
+    (context, patch) =>
+      runServices({
         previousState: context.state,
         state: accumulatorFn(context.state, patch),
         patch
-      };
-
-      const valid = guards.reduce((result, guard) => result && guard(nextContext), true);
-
-      return valid
-        ? Object.assign(runServices(nextContext), { invalidState: null })
-        : Object.assign(nextContext, {
-            state: context.state,
-            invalidState: nextContext.state
-          });
-    },
+      }),
     runServices({ state: initial, previousState: initial }),
     update
   );
 
   contexts.map(context => {
-    if (!context.invalidState && context.state !== states()) {
+    if (context.state !== states()) {
       states(context.state);
     }
 
-    (context.invalidState ? recovers : effects).forEach(effect => {
+    effects.forEach(effect => {
       effect(
         Object.assign(context, {
           update,
