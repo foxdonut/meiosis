@@ -70,73 +70,36 @@ m.mount(document.getElementById("app"), {
 ### [Using React](#using_react)
 
 ```js
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
+const App = ({ state, actions }) => {
+  const [init, setInit] = React.useState(false);
+  const [state, setState] = React.useState(states());
+
+  if (!init) {
+    setInit(true);
+    states.map(setState);
   }
-  componentDidMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state => { setState(state); })
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}
+
+  // render view according to state, call actions to trigger changes
+  // pass state={state} actions={actions} to other components.
+  return (<div>...</div>);
+};
 
 ReactDOM.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
-```
-
-This setup initally calls `render()` twice. If this is problematic in your application, we can use a
-`skippedFirst` flag:
-
-```js
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-    this.skippedFirst = false;
-  }
-  componentDidMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state => {
-      if (this.skippedFirst) {
-        setState(state);
-      }
-      else {
-        this.skippedFirst = true;
-      }
-    });
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}
 ```
 
 <a name="using_preact"></a>
 ### [Using Preact](#using_preact)
 
 ```js
-class App extends preact.Component {
-  componentWillMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state => { setState(state); });
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}
+const App = ({ state, actions }) => {
+  const [state, setState] = useState(states());
+  states.map(setState);
+
+  // render view according to state, call actions to trigger changes
+  // pass state={state} actions={actions} to other components.
+  return (<div>...</div>);
+};
 
 preact.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
