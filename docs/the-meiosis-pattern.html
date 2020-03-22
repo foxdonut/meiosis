@@ -66,64 +66,31 @@ m.mount(document.getElementById(&quot;app&quot;), {
   view: () =&gt; m(App, { state: states(), actions })
 });</code></pre>
 <p><a name="using_react"></a></p>
-<h3><a href="#using_react">Using React</a></h3><pre><code class="language-js">class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
+<h3><a href="#using_react">Using React</a></h3><pre><code class="language-js">const App = ({ state, actions }) =&gt; {
+  const [init, setInit] = React.useState(false);
+  const [state, setState] = React.useState(states());
+
+  if (!init) {
+    setInit(true);
+    states.map(setState);
   }
-  componentDidMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state =&gt; { setState(state); })
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}
+
+  // render view according to state, call actions to trigger changes
+  // pass state={state} actions={actions} to other components.
+  return (&lt;div&gt;...&lt;/div&gt;);
+};
 
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
-<p>This setup initally calls <code>render()</code> twice. If this is problematic in your application, we can use a
-<code>skippedFirst</code> flag:</p>
-<pre><code class="language-js">class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-    this.skippedFirst = false;
-  }
-  componentDidMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state =&gt; {
-      if (this.skippedFirst) {
-        setState(state);
-      }
-      else {
-        this.skippedFirst = true;
-      }
-    });
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}</code></pre>
 <p><a name="using_preact"></a></p>
-<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-js">class App extends preact.Component {
-  componentWillMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map(state =&gt; { setState(state); });
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    // render view according to state, call actions to trigger changes
-    // pass state={state} actions={actions} to other components.
-  }
-}
+<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-js">const App = ({ state, actions }) =&gt; {
+  const [state, setState] = useState(states());
+  states.map(setState);
+
+  // render view according to state, call actions to trigger changes
+  // pass state={state} actions={actions} to other components.
+  return (&lt;div&gt;...&lt;/div&gt;);
+};
 
 preact.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
