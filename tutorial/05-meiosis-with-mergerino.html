@@ -64,10 +64,10 @@ value. We can use a function for <code>value</code>:</p>
 { value: 23, units: &quot;C&quot; }</code></pre>
 <blockquote>
 <p>Note that <code>x =&gt; x + 1</code> is ES6 syntax that is short for</p>
+</blockquote>
 <pre><code class="language-js">function(x) {
   return x + 1;
 }</code></pre>
-</blockquote>
 <p>By passing a function for the <code>value</code> property, Mergerino passes the previous value of that property
 to the function. Our function receives <code>22</code>, adds <code>1</code> and returns <code>23</code>, which Mergerino assigns back
 to the <code>value</code> property.</p>
