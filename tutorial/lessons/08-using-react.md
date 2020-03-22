@@ -38,66 +38,26 @@ that the view gets refreshed whenever the state changes.
 <a name="the_app_component"></a>
 ### [The App Component](#the_app_component)
 
-The `App` component retrieves `states` and `actions` from the passed-in props. We initialize
-the React state, `this.state`, from the first value of the `states` stream. Then, in the
-`componentDidMount` lifecycle method, we `map` the `states` stream and call `setState` so
-that the view gets re-rendered when the state is updated.
-
-In the `render` method, we retrieve the state from `this.state`, and the `actions` from the
-props. We pass these on to other components, in this case `Conditions` and `Temperature`,
-as props. Notice that we have two instances of `Temperature`, and we pass a different `id`
-to each one.
+The `App` component retrieves `states` and `actions` from the passed-in props. We initialize a React
+hook with `useState` from the first value of the `states` stream. Then, we `map` the `states` stream
+and call `setState` to set the hook state.
 
 ```js
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-  }
-  componentDidMount() {
-    var setState = this.setState.bind(this);
-    this.props.states.map(function(state) {
-      setState(state);
-    });
-  }
-  render() {
-    var state = this.state;
-    var { actions } = this.props;
-    return (<div>
-      <Conditions state={state} id="conditions" actions={actions} />
-      <Temperature state={state} id="temperature:air" actions={actions} />
-      <Temperature state={state} id="temperature:water" actions={actions} />
-      <pre>{JSON.stringify(state, null, 4)}</pre>
-    </div>);
-  }
-}
-```
+var App = function({ states, actions }) {
+  var [init, setInit] = React.useState(false);
+  var [state, setState] = React.useState(states());
 
-Note that React will technically call `render()` twice initially: once after the constructor,
-and once after `componentDidMount`. This may or may not be a problem depending on your
-application. To prevent this, we can use a `skippedFirst` flag so that we don't initially
-render twice:
+  if (!init) {
+    setInit(true);
+    states.map(setState);
+  }
 
-```js
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-    this.skippedFirst = false;
-  }
-  componentDidMount() {
-    var setState = this.setState.bind(this);
-    this.props.states.map(function(state) {
-      if (this.skippedFirst) {
-        setState(state);
-      }
-      else {
-        this.skippedFirst = true;
-      }
-    });
-  }
-  render() {
-    // same as before
+  return (<div>
+    <Conditions state={state} id="conditions" actions={actions} />
+    <Temperature state={state} id="temperature:air" actions={actions} />
+    <Temperature state={state} id="temperature:water" actions={actions} />
+    <pre>{JSON.stringify(state, null, 4)}</pre>
+  </div>);
 }
 ```
 
@@ -119,10 +79,9 @@ var SkyOption = function({ state, id, actions, value, label }) {
   </label>);
 };
 
-class Conditions extends React.Component {
-  render() {
-    var { state, id, actions } = this.props;
-    return (<div>
+var Conditions = function({ state, id, actions }) {
+  return (
+    <div>
       <label>
         <input
           type="checkbox"
@@ -140,9 +99,9 @@ class Conditions extends React.Component {
         <SkyOption state={state} id={id} actions={actions} value="MIX"
           label="Mix of sun/clouds"/>
       </div>
-    </div>);
-  }
-}
+    </div>
+  );
+};
 ```
 
 <a name="the_temperature_component"></a>
@@ -151,31 +110,28 @@ class Conditions extends React.Component {
 The `Temperature` component is similar:
 
 ```js
-class Temperature extends React.Component {
-  render() {
-    var { state, id, actions } = this.props;
-    return (<div>
-      {state[id].label} Temperature:
-      {state[id].value} &deg; {state[id].units}
-      <div>
-        <button
-          onClick={() => actions.increment(id, 1)}>
-          Increment
-        </button>
-        <button
-          onClick={() => actions.increment(id,-1)}>
-          Decrement
-        </button>
-      </div>
-      <div>
-        <button
-          onClick={() => actions.changeUnits(id)}>
-          Change Units
-        </button>
-      </div>
-    </div>);
-  }
-}
+var Temperature = function({ state, id, actions }) {
+  return (<div>
+    {state[id].label} Temperature:
+    {state[id].value} &deg; {state[id].units}
+    <div>
+      <button
+        onClick={() => actions.increment(id, 1)}>
+        Increment
+      </button>
+      <button
+        onClick={() => actions.increment(id,-1)}>
+        Decrement
+      </button>
+    </div>
+    <div>
+      <button
+        onClick={() => actions.changeUnits(id)}>
+        Change Units
+      </button>
+    </div>
+  </div>);
+};
 ```
 
 You can see the complete example below.
@@ -185,10 +141,8 @@ You can see the complete example below.
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)
 
-We can wire up Meiosis to React using `ReactDOM.render` and passing `states` and `actions` as
-props to the top-level `App` React component. This component initializes the React state and
-calls `map` on the `states` stream to call `setState` when the state changes and automatically
-refresh the view.
+We can wire up Meiosis to React with a hook. We `map` the `states` stream to call `setState` to
+update the state and automatically refresh the view.
 
 Then, all other React components in the application are consistent: they all receive `state`
 and `actions` props. When rendering other components, `state` and `actions` are passed along.

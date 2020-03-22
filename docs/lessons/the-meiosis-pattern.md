@@ -70,7 +70,7 @@ m.mount(document.getElementById("app"), {
 ### [Using React](#using_react)
 
 ```js
-const App = ({ state, actions }) => {
+const App = ({ states, actions }) => {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
 
@@ -109,7 +109,7 @@ preact.render(<App states={states} actions={actions} />,
 ### [Using lit-html](#using_lit_html)
 
 ```js
-const App = (state, actions) => {
+const App = ({ states, actions }) => {
   // render view according to state, call actions to trigger changes
   // pass (state, actions) to other view functions.
 };

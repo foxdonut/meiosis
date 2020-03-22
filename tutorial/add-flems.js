@@ -10,11 +10,13 @@ var linkMap = {
   mithril: "https://unpkg.com/mithril@2.0.0-rc.3",
   "mithril-stream":
     "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
-  preact: "https://unpkg.com/preact@8.4.2/dist/preact.js",
+  preact: "https://unpkg.com/preact@10.3.4/dist/preact.umd.js",
+  preactHooks:
+    "https://unpkg.com/preact@10.3.4/hooks/dist/hooks.umd.js",
   react:
-    "https://unpkg.com/react@16.7.0/umd/react.development.js",
+    "https://unpkg.com/react@16.13.1/umd/react.development.js",
   "react-dom":
-    "https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"
+    "https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"
 };
 
 var filenames = fs.readdirSync(fromDir);

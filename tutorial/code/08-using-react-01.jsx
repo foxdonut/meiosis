@@ -36,51 +36,45 @@ var SkyOption = function({ state, id, actions, value, label }) {
   );
 };
 
-class Conditions extends React.Component {
-  render() {
-    var { state, id, actions } = this.props;
-    return (
+var Conditions = function({ state, id, actions }) {
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={state[id].precipitations}
+          onChange={evt =>
+            actions.togglePrecipitations(id, evt.target.checked)
+          }
+        />
+        Precipitations
+      </label>
       <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={state[id].precipitations}
-            onChange={evt =>
-              actions.togglePrecipitations(
-                id,
-                evt.target.checked
-              )
-            }
-          />
-          Precipitations
-        </label>
-        <div>
-          <SkyOption
-            state={state}
-            id={id}
-            actions={actions}
-            value="SUNNY"
-            label="Sunny"
-          />
-          <SkyOption
-            state={state}
-            id={id}
-            actions={actions}
-            value="CLOUDY"
-            label="Cloudy"
-          />
-          <SkyOption
-            state={state}
-            id={id}
-            actions={actions}
-            value="MIX"
-            label="Mix of sun/clouds"
-          />
-        </div>
+        <SkyOption
+          state={state}
+          id={id}
+          actions={actions}
+          value="SUNNY"
+          label="Sunny"
+        />
+        <SkyOption
+          state={state}
+          id={id}
+          actions={actions}
+          value="CLOUDY"
+          label="Cloudy"
+        />
+        <SkyOption
+          state={state}
+          id={id}
+          actions={actions}
+          value="MIX"
+          label="Mix of sun/clouds"
+        />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 var convert = function(value, to) {
   return Math.round(
@@ -117,30 +111,27 @@ var temperature = {
   }
 };
 
-class Temperature extends React.Component {
-  render() {
-    var { state, id, actions } = this.props;
-    return (
+var Temperature = function({ state, id, actions }) {
+  return (
+    <div>
+      {state[id].label} Temperature:
+      {state[id].value} &deg; {state[id].units}
       <div>
-        {state[id].label} Temperature:
-        {state[id].value} &deg; {state[id].units}
-        <div>
-          <button onClick={() => actions.increment(id, 1)}>
-            Increment
-          </button>
-          <button onClick={() => actions.increment(id, -1)}>
-            Decrement
-          </button>
-        </div>
-        <div>
-          <button onClick={() => actions.changeUnits(id)}>
-            Change Units
-          </button>
-        </div>
+        <button onClick={() => actions.increment(id, 1)}>
+          Increment
+        </button>
+        <button onClick={() => actions.increment(id, -1)}>
+          Decrement
+        </button>
       </div>
-    );
-  }
-}
+      <div>
+        <button onClick={() => actions.changeUnits(id)}>
+          Change Units
+        </button>
+      </div>
+    </div>
+  );
+};
 
 var app = {
   initial: {
@@ -157,42 +148,36 @@ var app = {
   }
 };
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
+var App = function({ states, actions }) {
+  var [init, setInit] = React.useState(false);
+  var [state, setState] = React.useState(states());
+
+  if (!init) {
+    setInit(true);
+    states.map(setState);
   }
-  componentDidMount() {
-    var setState = this.setState.bind(this);
-    this.props.states.map(function(state) {
-      setState(state);
-    });
-  }
-  render() {
-    var state = this.state;
-    var { actions } = this.props;
-    return (
-      <div>
-        <Conditions
-          state={state}
-          id="conditions"
-          actions={actions}
-        />
-        <Temperature
-          state={state}
-          id="temperature:air"
-          actions={actions}
-        />
-        <Temperature
-          state={state}
-          id="temperature:water"
-          actions={actions}
-        />
-        <pre>{JSON.stringify(state, null, 4)}</pre>
-      </div>
-    );
-  }
-}
+
+  return (
+    <div>
+      <Conditions
+        state={state}
+        id="conditions"
+        actions={actions}
+      />
+      <Temperature
+        state={state}
+        id="temperature:air"
+        actions={actions}
+      />
+      <Temperature
+        state={state}
+        id="temperature:water"
+        actions={actions}
+      />
+      <pre>{JSON.stringify(state, null, 4)}</pre>
+    </div>
+  );
+};
 
 var update = flyd.stream();
 var states = flyd.scan(merge, app.initial, update);
