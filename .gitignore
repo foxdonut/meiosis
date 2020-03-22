@@ -37,7 +37,9 @@ tutorial/dist
 docs/build
 docs/dist
 docs/code/**/build
+helpers/routing/*.tgz
 helpers/routing/dist
 helpers/routing/docs
+helpers/setup/*.tgz
 helpers/setup/dist
 helpers/setup/views/**/build
