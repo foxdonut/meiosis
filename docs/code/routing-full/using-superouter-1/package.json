@@ -30,17 +30,17 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "mithril": "2.0.4",
-    "ramda": "^0.26.1",
+    "ramda": "^0.27.0",
     "stags": "file:stags-1.0.0-rc30.tgz",
     "superouter": "file:superouter-0.3.1.tgz"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "babel-loader": "^8.0.6",
-    "eslint": "^6.6.0",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
     "meiosis-tracer": "^3.0.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   }
 }

@@ -9,7 +9,7 @@ import { beverage } from "../beverage";
 import { brewer } from "../brewer";
 
 export const createApp = initialRoute => ({
-  patch: navigateTo(initialRoute || Route.Home()),
+  initial: navigateTo(initialRoute || Route.Home()),
 
   Actions: update =>
     Object.assign({}, routes.Actions(update), login.Actions(update), settings.Actions(update)),
@@ -26,5 +26,5 @@ export const createApp = initialRoute => ({
     brewer.service
   ],
 
-  effects: [tea.effect, coffee.effect, beer.effect]
+  effects: [tea.effect, coffee.effect, beer.effect, settings.effect]
 });

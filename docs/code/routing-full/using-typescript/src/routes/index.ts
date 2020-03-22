@@ -20,7 +20,7 @@ export const routeConfig: RouteConfig = {
 };
 
 const service = ({ previousState, state }): any => ({
-  state: { routeTransition: (): any => routeTransition(previousState.route, state.route) }
+  routeTransition: (): any => routeTransition(previousState.route, state.route)
 });
 
 export const routes = {
