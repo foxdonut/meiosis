@@ -1,5 +1,5 @@
 /** @jsx preact.h */
-import preact from "preact@8.4.2/dist/preact.mjs";
+/* global preact */
 
 import { Route } from "./05-routes";
 

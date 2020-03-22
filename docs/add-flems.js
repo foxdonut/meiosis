@@ -13,9 +13,13 @@ var linkMap = {
   "meiosis-tracer":
     "https://unpkg.com/meiosis-tracer@2.0.2/dist/meiosis-tracer.js",
   mergerino: "https://unpkg.com/mergerino@0.4.0",
-  mithril: "https://unpkg.com/mithril@2.0.0-rc.3",
+  mithril: "https://unpkg.com/mithril@2.0.4",
   "mithril-stream":
-    "https://unpkg.com/mithril@2.0.0-rc.3/stream/stream.js",
+    "https://unpkg.com/mithril@2.0.4/stream/stream.js",
+  preact:
+    "https://unpkg.com/preact@10.3.4/dist/preact.umd.js",
+  preactHooks:
+    "https://unpkg.com/preact@10.3.4/hooks/dist/hooks.umd.js",
   ramda: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js",
   react:
     "https://unpkg.com/react@16.7.0/umd/react.development.js",

@@ -1,6 +1,5 @@
 /** @jsx preact.h */
-/* global Meiosis */
-import preact from "preact@8.4.2/dist/preact.mjs";
+/* global preact, preactHooks, Meiosis */
 import merge from "mergerino@0.4.0";
 
 import { Home } from "./01-components";
@@ -39,7 +38,12 @@ const Root = ({ state, actions }) => (
   </div>
 );
 
-const App = Meiosis.preact.setup({ preact, Root });
+const App = Meiosis.preact.setup({
+  h: preact.h,
+  useState: preactHooks.useState,
+  Root
+});
+
 const app = {};
 
 const { states, actions } = Meiosis.mergerino.setup({

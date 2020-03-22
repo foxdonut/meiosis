@@ -3,10 +3,8 @@
 const { routeTransition } = MeiosisRouting.state;
 
 export const routeService = ({ previousState, state }) => ({
-  state: {
-    routeTransition: () =>
-      routeTransition(previousState.route, state.route)
-  }
+  routeTransition: () =>
+    routeTransition(previousState.route, state.route)
 });
 
 const teas = [
@@ -59,16 +57,16 @@ const beverageMap = beverages.reduce((result, next) => {
 }, {});
 
 export const teaService = ({ state }) => {
-  if (state.routeTransition.arrive.Tea) {
-    return {
-      next: ({ update }) =>
-        setTimeout(() => {
-          update({ teas });
-        }, 500)
-    };
-  }
   if (state.routeTransition.leave.Tea) {
-    return { state: { teas: null } };
+    return { teas: null };
+  }
+};
+
+export const teaEffect = ({ state, update }) => {
+  if (state.routeTransition.arrive.Tea) {
+    setTimeout(() => {
+      update({ teas });
+    }, 500);
   }
 };
 
@@ -88,7 +86,7 @@ export const teaDetailService = ({ state }) => {
     patches.push({ tea: { [id]: undefined } });
   }
 
-  return { state: patches };
+  return patches;
 };
 
 export const beverageService = ({ state }) => {
@@ -107,46 +105,50 @@ export const beverageService = ({ state }) => {
     patches.push({ beverage: { [id]: undefined } });
   }
 
-  return { state: patches };
+  return patches;
 };
 
 export const coffeeService = ({ state }) => {
   if (state.routeTransition.arrive.Coffee) {
-    return {
-      state: { pleaseWait: true },
-      next: ({ update }) =>
-        setTimeout(
-          () =>
-            update({
-              pleaseWait: false,
-              coffees
-            }),
-          1000
-        )
-    };
+    return { pleaseWait: true };
   }
   if (state.routeTransition.leave.Coffee) {
-    return { state: { coffees: null } };
+    return { coffees: null };
+  }
+};
+
+export const coffeeEffect = ({ state, update }) => {
+  if (state.routeTransition.arrive.Coffee) {
+    setTimeout(
+      () =>
+        update({
+          pleaseWait: false,
+          coffees
+        }),
+      1000
+    );
   }
 };
 
 export const beerService = ({ state }) => {
   if (state.routeTransition.arrive.Beer) {
-    return {
-      state: { pleaseWait: true },
-      next: ({ update }) =>
-        setTimeout(
-          () =>
-            update({
-              pleaseWait: false,
-              beers
-            }),
-          1000
-        )
-    };
+    return { pleaseWait: true };
   }
   if (state.routeTransition.leave.Beer) {
-    return { state: { beers: null } };
+    return { beers: null };
+  }
+};
+
+export const beerEffect = ({ state, update }) => {
+  if (state.routeTransition.arrive.Beer) {
+    setTimeout(
+      () =>
+        update({
+          pleaseWait: false,
+          beers
+        }),
+      1000
+    );
   }
 };
 
@@ -166,5 +168,5 @@ export const brewerService = ({ state }) => {
     patches.push({ brewer: { [id]: undefined } });
   }
 
-  return { state: patches };
+  return patches;
 };

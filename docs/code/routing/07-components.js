@@ -1,5 +1,5 @@
 /** @jsx m */
-import m from "mithril@2.0.0-rc.4";
+/* global m */
 
 import { Route, router } from "./07-routes";
 

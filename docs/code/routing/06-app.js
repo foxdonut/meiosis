@@ -1,6 +1,5 @@
 /** @jsx preact.h */
-/* global Meiosis, MeiosisRouting */
-import preact from "preact@8.4.2/dist/preact.mjs";
+/* global preact, preactHooks, Meiosis, MeiosisRouting */
 import merge from "mergerino@0.4.0";
 
 import { Route, navTo, router } from "./06-routes";
@@ -26,7 +25,11 @@ import {
   coffeeService,
   beerService,
   beverageService,
-  brewerService
+  brewerService,
+  teaEffect,
+  coffeeEffect,
+  beerEffect,
+  settingsEffect
 } from "./06-services";
 
 const componentMap = {
@@ -123,10 +126,14 @@ const Root = ({ state, actions }) => {
   );
 };
 
-const App = Meiosis.preact.setup({ preact, Root });
+const App = Meiosis.preact.setup({
+  h: preact.h,
+  useState: preactHooks.useState,
+  Root
+});
 
 const app = {
-  patch: navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
@@ -154,6 +161,12 @@ const app = {
     beerService,
     beverageService,
     brewerService
+  ],
+  effects: [
+    teaEffect,
+    coffeeEffect,
+    beerEffect,
+    settingsEffect
   ]
 };
 

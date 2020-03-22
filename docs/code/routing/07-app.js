@@ -1,7 +1,5 @@
 /** @jsx m */
-/* global Meiosis, MeiosisRouting */
-import m from "mithril@2.0.0-rc.4";
-import Stream from "mithril@2.0.0-rc.4/stream/stream.mjs";
+/* global m, Meiosis, MeiosisRouting */
 import merge from "mergerino@0.4.0";
 
 import { Route, navTo, router } from "./07-routes";
@@ -27,7 +25,11 @@ import {
   coffeeService,
   beerService,
   beverageService,
-  brewerService
+  brewerService,
+  teaEffect,
+  coffeeEffect,
+  beerEffect,
+  settingsEffect
 } from "./07-services";
 
 const componentMap = {
@@ -134,7 +136,7 @@ const App = {
 };
 
 const app = {
-  patch: navTo([Route.Home()]),
+  initial: navTo([Route.Home()]),
   Actions: update => ({
     navigateTo: route => update(navTo(route)),
 
@@ -162,11 +164,17 @@ const app = {
     beerService,
     beverageService,
     brewerService
+  ],
+  effects: [
+    teaEffect,
+    coffeeEffect,
+    beerEffect,
+    settingsEffect
   ]
 };
 
 const { states, actions } = Meiosis.mergerino.setup({
-  stream: Stream,
+  stream: m.stream,
   merge,
   app
 });
