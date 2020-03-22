@@ -137,23 +137,17 @@ wish.
 <a name="using_meiosis_setup"></a>
 ### [Using Meiosis-Setup](#using_meiosis_setup)
 
-In Meiosis, instead of having services return streams that emit patches, services return an object
-that can be any combination of the following properties:
+In Meiosis, instead of having services return streams that emit patches, services patches directly.
+These execute _before_ the final state is produced. Then, after the view has re-rendered, _effects_
+can trigger more updates.
 
-- `state`: to update the state
-- `patch`: to change or cancel the current patch
-- `render`: `false` to cancel the render
-- `next`: to trigger more updates
-
-A service function receives the previous state, the current patch, and the state with the current
-patch applied.
+A service function receives the current state, the previous state, and the patch.
 
 Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
 made by a previous service.
 
-A service can return a `next` function which gets called for the next render cycle. This function
-receives `({ state, patch, update, actions })` and can make synchronous and/or asynchronous calls to
-`update` and/or `actions`.
+Effect functions receive `({ state, patch, update, actions })` and can make synchronous and/or
+asynchronous calls to `update` and/or `actions`.
 
 Our component structure is thus:
 
@@ -161,7 +155,8 @@ Our component structure is thus:
 {
   initial: initialState,
   Actions: update => actions,
-  service: ({ state, patch, previousState }) => ({ state, patch, render, next })
+  services: [({ state, previousState, state }) => patch?,
+  effects: [({ state, prevousState, patch, update, actions }) => void]
 }
 ```
 
@@ -243,6 +238,13 @@ You will find the complete example below.
 We can wire up services in different ways, and use them for computed properties, state
 synchronization, and other purposes. Please note, however, that not everything belongs in a service,
 so it's important to avoid getting carried away.
+
+-----
+
+**For more examples of using services and effects, please see the
+[Meiosis Routing](http://meiosis.js.org/docs/routing.html) documentation.**
+
+-----
 
 [Table of Contents](toc.html)
 

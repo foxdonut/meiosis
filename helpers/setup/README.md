@@ -1,105 +1,43 @@
 # meiosis-setup
 
-[Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to
-popular demand and for your convenience, here are some reusable snippets of code that help
-setup and use Meiosis.
+[Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
+demand and for your convenience, here are some utility functions that help set up and use Meiosis.
 
-## Migrating from version 3 to version 4
+## Getting Started
 
-Version 4 of `meiosis-setup` works a little differently than version 3. Here are the changes and
-steps to migration:
+To use `meiosis-setup`, you specify a stream library, and, optionally, a library instance to manage
+how patches are merged to the application state. Of course, you'll also need a view library.
 
-### Services
+### Choosing a stream library
 
-In version 3, services returned:
+Out of the box, `meiosis-setup` supports these stream libraries:
 
-```javascript
-({ state?, patch?, render?, next? })
-```
+- the `simpleStream` provided by `meiosis-setup`
+- [Flyd](https://github.com/paldepind/flyd)
+- [Mithril-Stream](https://mithril.js.org/stream.html)
 
-Respectively indicating:
-- a patch to change the state
-- a different patch
-- aborting the render
-- the next update to run.
+You can also use another stream library; see [Using another stream library](#other_stream_library).
 
-In version 4, services return:
+### Choosing how to merge patches
 
-```javascript
-patch?
-```
+Remember that the core of the Meiosis pattern is a stream of `states` that `scan`s an `update`
+stream of patches and merges them to produce the states.
 
-Only a patch to change the state. Thus, services from version 3 should be changed to directly return
-what they were returning under `{ state }`:
+With `meiosis-setup`, you can use:
 
-```javascript
-// version 3
-return { state: <patch>, ... };
+- [Mergerino](https://github.com/fuzetsu/mergerino)
+- [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
+- [Immer](https://github.com/immerjs/immer)
 
-// version 4
-return <patch>;
-```
+You can also use another strategy of your choice to merge patches. See [Common Setup](#common_setup)
+for details.
 
-See below for migrating `{ patch, render, next }`.
+### Choosing a view library
 
-### Aborting a Patch
-
-In version 3, a service could return `{ patch: false }` to abort a patch, or `{ patch: newPatch }` to
-abort the current sequence and issue a different patch.
-
-In version 4, the incoming patch should not be changed. Instead, a service can return a patch that
-reverts to the previous state to abort a patch. The current sequence cannot be aborted, but an
-effect (see below) can be used to issue another patch.
-
-### Preventing a Re-Render
-
-In version 3, a service could return `{ render: false }` to prevent a re-render.
-
-In version 4, a service can achieve the same result by returning a patch that reverts to the
-previous state. Indeed, when the final state after services have applied their patches is the same
-as the previous state, the view is not re-rendered.
-
-### Effects
-
-In version 3, services could return `{ next: fn }` to indicate a function that can trigger updates
-after the current sequence.
-
-In version 4, these are moved to separate `effects`. The function signature is the same, except
-that the function also receives `previousState`, becoming:
-
-```javascript
-({ state, previousState, patch, update, actions }) => {
-  // ...
-}
-```
-
-To use effects, specify an array of effect functions in the `effects` property of the `app` object:
-
-```javascript
-// version 3
-const app = {
-  services: [
-    (/* ... */) => {
-      // ...
-      return {
-        next: fn1
-      };
-    },
-    (/* ... */) => {
-      // ...
-      return {
-        next: fn2
-      };
-    }
-  ]
-}
-
-// version 4
-const app = {
-  services: [/* ... */],
-  effects: [fn1, fn2]
-}
-```
+You can use any view library that fits with the Meiosis pattern. `meiosis-setup` provides helper
+functions to use [React](https://reactjs.org) and [Preact](https://preactjs.com). You can also use
+[Mithril](https://mithril.js.org) and [lit-html](https://lit-html.polymer-project.org/) without any
+special setup. See [View Setup](#view_setup) for details.
 
 ## Installation
 
@@ -127,123 +65,17 @@ provided:
 - `simpleStream.stream`
 - `simpleStream.scan`
 
-## Setup
+## Meiosis Setup
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
-provide. In the application, you can define the `initial` state, the `Actions`, the array of
-services, and the array of effects, _all of which are optional_.
+provide. In the application, you can define the `initial` state, the `Actions` constructor function,
+the array of services, and the array of effects, _all of which are optional_.
 
 The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
-For the stream library, you can use `Meiosis.simpleStream`,
-[Flyd](https://github.com/paldepind/flyd), or [Mithril-Stream](https://mithril.js.org/stream.html)
-out-of-the-box. You can also use another stream library; see
-[Using another stream library](#other_stream_library), below.
-
-### Mergerino Setup
-
-To use [Mergerino](https://github.com/fuzetsu/mergerino):
-
-```javascript
-import meiosis from "meiosis-setup/mergerino";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-import merge from "mergerino";
-
-const app = {};
-
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, merge, app });
-
-// setup your view here
-// call update({ duck: "quack" }) to update the state
-
-// If the initial state is asynchronous:
-
-asyncFunction(...).then(response => {
-  const initial = buildInitialState(response);
-  const app = { initial, ... };
-  meiosis({ stream: simpleStream, merge, app });
-
-  // setup your view here
-  // call update({ duck: "quack" }) to update the state
-});
-```
-
-### Function Patch Setup
-
-To use
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html):
-
-```javascript
-import meiosis from "meiosis-setup/functionPatches";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-const app = {};
-
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, app });
-
-// setup your view here
-// call update(state => ({ ...state, duck: "quack" })) to update the state
-
-// If the initial state is asynchronous:
-
-asyncFunction(...).then(response => {
-  const initial = buildInitialState(response);
-  const app = { initial, ... };
-  meiosis({ stream: simpleStream, app });
-
-  // setup your view here
-  // call update(state => ({ ...state, duck: "quack" })) to update the state
-});
-```
-
-### Immer Setup
-
-To use [Immer](https://github.com/immerjs/immer):
-
-```javascript
-import meiosis from "meiosis-setup/immer";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-import produce from "immer";
-
-const app = {};
-
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, produce, app });
-
-// setup your view here
-// call update(draft => { draft.duck = "quack"; }) to update the state
-
-// If the initial state is asynchronous:
-
-asyncFunction(...).then(response => {
-  const initial = buildInitialState(response);
-  const app = { initial, ... };
-  meiosis({ stream: simpleStream, produce, app });
-
-  // setup your view here
-  // call update(draft => { draft.duck = "quack"; }) to update the state
-});
-```
-
 ### Application
 
-In the `app` object that you provide to `setup`, you can optionally provide the following:
+In the `app` object that you pass to `setup`, you can optionally provide the following:
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
@@ -265,42 +97,127 @@ Service functions can change the state by returning a patch:
 ignored. Instead, effect functions should call `update` and/or `actions` to trigger further
 updates.
 
-### Common Setup
+-----
 
-For a setup other than the supported libraries, you can use `meiosis-setup/common`. All you need to
-do is specify the `accumulator` function and, optionally, the `combine` function:
+**For examples of using services and effects, please see the
+[Meiosis Routing](http://meiosis.js.org/docs/routing.html) documentation.**
 
-- `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
-patch (the patch being in whatever form you decide to use), and returns the updated state.
+-----
 
-    With Mergerino, the `accumulator` is `merge`.
+### Mergerino Setup
 
-    With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
+To use [Mergerino](https://github.com/fuzetsu/mergerino):
 
-    With Immer, the `accumulator` is `produce`.
+```javascript
+import meiosis from "meiosis-setup/mergerino";
+import simpleStream from "meiosis-setup/simple-stream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
 
-- `combine`: the `combine` function is of the form `([patches]) => patch`, combining an array of
-patches into a single patch.
+import merge from "mergerino";
 
-    With Mergerino:
-    `combine: patches => patches``
+// A) if the initial state is synchronous:
+const app = {...};
 
-    With Function Patches, `combine` is the `pipe` function:
-    `combine = fns => args => fns.reduce((arg, fn) => fn(arg), args)`
+const { update, states, actions } =
+  meiosis({ stream: simpleStream, merge, app });
 
-    With Immer,
-    `combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state)`
-    (we can't use `patches.reduce(produce, state)` because that would send a third argument to
-    `produce`.
+// setup your view here
+// call update({ duck: "quack" }) to update the state
+// and/or call actions.someAction(someValue)
 
-<a name="other_stream_library"></a>
-### Using another stream library
+// OR
 
-You can use another stream library, as long as you provide either a function that creates a stream,
-or an object with a `stream` property for that function. In either case, there must also be a `scan`
-property on the function or object. Finally, the created stream must be a function that, when
-called, emits a value onto the stream; and the function must have a `map` method.
+// B) if the initial state is asynchronous:
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosis({ stream: simpleStream, merge, app });
 
+  // setup your view here
+  // call update({ duck: "quack" }) to update the state
+  // and/or call actions.someAction(someValue)
+});
+```
+
+### Function Patch Setup
+
+To use
+[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html):
+
+```javascript
+import meiosis from "meiosis-setup/functionPatches";
+import simpleStream from "meiosis-setup/simple-stream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
+
+// A) if the initial state is synchronous:
+const app = {...};
+
+const { update, states, actions } =
+  meiosis({ stream: simpleStream, app });
+
+// setup your view here
+// call update(state => ({ ...state, duck: "quack" })) to update the state
+// and/or call actions.someAction(someValue)
+
+// OR
+
+// B) if the initial state is asynchronous:
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosis({ stream: simpleStream, app });
+
+  // setup your view here
+  // call update(state => ({ ...state, duck: "quack" })) to update the state
+  // and/or call actions.someAction(someValue)
+});
+```
+
+### Immer Setup
+
+To use [Immer](https://github.com/immerjs/immer):
+
+```javascript
+import meiosis from "meiosis-setup/immer";
+import simpleStream from "meiosis-setup/simple-stream";
+// or
+// import Stream from "mithril/stream";
+// or
+// import flyd from "flyd";
+
+import produce from "immer";
+
+// A) if the initial state is synchronous:
+const app = {...};
+
+const { update, states, actions } =
+  meiosis({ stream: simpleStream, produce, app });
+
+// setup your view here
+// call update(draft => { draft.duck = "quack"; }) to update the state
+// and/or call actions.someAction(someValue)
+
+// OR
+
+// B) if the initial state is asynchronous:
+asyncFunction(...).then(response => {
+  const initial = buildInitialState(response);
+  const app = { initial, ... };
+  meiosis({ stream: simpleStream, produce, app });
+
+  // setup your view here
+  // call update(draft => { draft.duck = "quack"; }) to update the state
+  // and/or call actions.someAction(someValue)
+});
+```
+
+<a name="view_setup"></a>
 ## View Setup
 
 ### Mithril Setup
@@ -415,7 +332,44 @@ See
 [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/lit-html/src/index.js)
 for an example.
 
-### API
+<a name="common_setup"></a>
+## Common Setup
+
+For a setup other than the supported libraries, you can use `meiosis-setup/common`. All you need to
+do is specify the `accumulator` function and, optionally, the `combine` function:
+
+- `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
+patch (the patch being in whatever form you decide to use), and returns the updated state.
+
+    With Mergerino, the `accumulator` is `merge`.
+
+    With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
+
+    With Immer, the `accumulator` is `produce`.
+
+- `combine`: the `combine` function is of the form `([patches]) => patch`, combining an array of
+patches into a single patch.
+
+    With Mergerino:
+    `combine: patches => patches``
+
+    With Function Patches, `combine` is the `pipe` function:
+    `combine = fns => args => fns.reduce((arg, fn) => fn(arg), args)`
+
+    With Immer,
+    `combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state)`
+    (we can't use `patches.reduce(produce, state)` because that would send a third argument to
+    `produce`.
+
+<a name="other_stream_library"></a>
+### Using another stream library
+
+You can use another stream library, as long as you provide either a function that creates a stream,
+or an object with a `stream` property for that function. In either case, there must also be a `scan`
+property on the function or object. Finally, the created stream must be a function that, when
+called, emits a value onto the stream; and the function must have a `map` method.
+
+## API
 
 [API documentation is here.](api.md)
 

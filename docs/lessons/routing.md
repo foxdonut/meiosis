@@ -494,10 +494,8 @@ Here is how to write a service function for `routeTransition` and wire it up:
 import { routeTransition } from "meiosis-routing/state";
 
 export const routeService = ({ previousState, state }) => ({
-  state: {
-    routeTransition: () =>
-      routeTransition(previousState.route, state.route)
-  }
+  routeTransition: () =>
+    routeTransition(previousState.route, state.route)
 });
 
 // ...
@@ -563,16 +561,20 @@ Here is the `teaService`:
 
 ```javascript
 export const teaService = ({ state }) => {
-  if (state.routeTransition.arrive.Tea) {
-    return {
-      next: ({ update }) =>
-        setTimeout(() => {
-          update({ teas });
-        }, 500)
-    };
-  }
   if (state.routeTransition.leave.Tea) {
-    return { state: { teas: null } };
+    return { teas: null };
+  }
+};
+```
+
+And here is the `teaEffect`:
+
+```javascript
+export const teaEffect = ({ state, update }) => {
+  if (state.routeTransition.arrive.Tea) {
+    setTimeout(() => {
+      update({ teas });
+    }, 500)
   }
 };
 ```
@@ -587,13 +589,16 @@ We wire up the service in the `services` array of our `app` object, taking care 
 ```javascript
 const app = {
   // ...
-  services: [routeService, teaService]
+  services: [routeService, teaService],
+  effects: [teaEffect]
   // ...
 };
 ```
 
 It's important to put `teaService` after `routeService` because `teaService` uses the
 `routeTransition` data produced by `routeService`.
+
+Notice that we've also set up `teaEffect`, by putting it in the `effects` array.
 
 Now when we arrive at the `Tea` page, the `teas` will not yet be loaded into the application state
 since we simulated a 500 ms delay. We can display a "Loading..." message until the `teas` are
@@ -651,7 +656,7 @@ export const teaDetailService = ({ state }) => {
     patches.push({ tea: { [id]: undefined } });
   }
 
-  return { state: patches };
+  return patches;
 };
 ```
 
