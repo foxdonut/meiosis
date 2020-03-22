@@ -584,7 +584,7 @@ set the `teas` in the application state. If we find `Tea` in `leave`, then we cl
 application state by setting `teas` to `null`.
 
 We wire up the service in the `services` array of our `app` object, taking care of putting it
-**after** `routeService`:
+**after** `routeService`. We also set up `teaEffect` by putting it in the `effects` array:
 
 ```javascript
 const app = {
@@ -597,8 +597,6 @@ const app = {
 
 It's important to put `teaService` after `routeService` because `teaService` uses the
 `routeTransition` data produced by `routeService`.
-
-Notice that we've also set up `teaEffect`, by putting it in the `effects` array.
 
 Now when we arrive at the `Tea` page, the `teas` will not yet be loaded into the application state
 since we simulated a 500 ms delay. We can display a "Loading..." message until the `teas` are
@@ -702,33 +700,42 @@ We can write a service function for the Settings page which checks whether the u
 and _changes_ the route to the Login page if they are not. As a bonus, we want to automatically send
 the user back to the Settings page after they log in, since that is where they were trying to go.
 
+The service uses a `redirect` to indicate where to send the user, and the effect function updates
+the state to redirect the user.
+
 ```javascript
 import { Route, navTo } from "./05-routes";
 
-export const settingsService = ({ state }) => {
+export const settingsService = ({
+  state,
+  previousState
+}) => {
   if (
     state.routeTransition.arrive.Settings &&
     !state.user
   ) {
     return {
-      patch: navTo(
-        Route.Login({
-          message: "Please login.",
-          returnTo: Route.Settings()
-        })
-      )
+      route: previousState.route,
+      redirect: Route.Login({
+        message: "Please login.",
+        returnTo: Route.Settings()
+      })
     };
+  }
+};
+
+export const settingsEffect = ({ state, update }) => {
+  if (state.redirect) {
+    update([
+      navTo(state.redirect),
+      { redirect: undefined }
+    ]);
   }
 };
 ```
 
-To redirect, the function returns a patch that, using `navTo`, changes the route to the Login page.
-Notice that we are including the `message` and `returnTo` params so that the Login page can display
-the message and return to the Settings page after logging in.
-
-Returning a patch from a service **cancels** the current loop and **replaces** the patch, restarting
-the services. Services run in order, so it makes sense to place the `settingsService` near the top
-of the list, while still making sure that `routeService` is first:
+Services run in order, so it makes sense to place the `settingsService` near the top of the list,
+while still making sure that `routeService` is first:
 
 ```javascript
 const app = {
@@ -772,12 +779,10 @@ is one, otherwise to the `Home` page:
 
 ```javascript
 login: (username, returnTo) =>
-  update(
-    combine([
-      { user: username },
-      navTo(returnTo || Route.Home())
-    ])
-  )
+  update([
+    { user: username },
+    navTo(returnTo || Route.Home())
+  ])
 ```
 
 The Settings page now requires the user to log in before accessing the page.
@@ -795,14 +800,12 @@ from the Login page, and they in the process of logging in, the state contains s
 `username` and/or `password`. We'll use `confirm` to ask the user if they want to continue:
 
 ```javascript
-export const loginService = ({ state }) => {
+export const loginService = ({ state, previousState }) => {
   if (state.routeTransition.arrive.Login) {
     return {
-      state: {
-        login: {
-          username: "",
-          password: ""
-        }
+      login: {
+        username: "",
+        password: ""
       }
     };
   } else if (state.routeTransition.leave.Login) {
@@ -811,16 +814,15 @@ export const loginService = ({ state }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return { patch: false };
+      return () => previousState;
     }
-    return { state: { login: null } };
+    return { login: null };
   }
 };
 ```
 
-If they decide to cancel, we return `{ patch: false }`, which aborts the current loop. Services are
-cancelled and the page is not re-rendered, so we stay on the Login page. The state is not changed,
-so `returnTo`, if present, will continue to work after they log in.
+If they decide to cancel, we revert to the previous state, so we stay on the Login page. The state
+is not changed, so `returnTo`, if present, will continue to work after they log in.
 
 Finally we just need to add `loginService` to the list of `services`:
 
