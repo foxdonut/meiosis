@@ -268,6 +268,25 @@ const mergerinoTest = (merge, streamLib, label) => {
       t.end();
     });
 
+    t.test(label + " / effect running on initial state is seen in the states stream", t => {
+      const effects = [
+        ({ state, update }) => {
+          if (!state.effect) {
+            update({ effect: true });
+          }
+        }
+      ];
+
+      const { states } = meiosis.mergerino.setup({
+        stream: streamLib,
+        merge,
+        app: { effects }
+      });
+
+      t.deepEqual(states(), { effect: true }, "resulting state");
+      t.end();
+    });
+
     t.test(label + " / a service can alter a state change", t => {
       const services = [
         ({ patch, previousState }) => {
@@ -856,6 +875,24 @@ const functionPatchTest = (streamLib, label) => {
 
       t.equal(effectCalls, 5, "number of effect calls");
       t.deepEqual(states(), { count: 1, effect: true }, "resulting state");
+      t.end();
+    });
+
+    t.test(label + " / effect running on initial state is seen in the states stream", t => {
+      const effects = [
+        ({ state, update }) => {
+          if (!state.effect) {
+            update(R.assoc("effect", true));
+          }
+        }
+      ];
+
+      const { states } = meiosis.functionPatches.setup({
+        stream: streamLib,
+        app: { effects }
+      });
+
+      t.deepEqual(states(), { effect: true }, "resulting state");
       t.end();
     });
 
@@ -1529,6 +1566,27 @@ const immerTest = (streamLib, label) => {
 
       t.equal(effectCalls, 5, "number of effect calls");
       t.deepEqual(states(), { count: 1, effect: true }, "resulting state");
+      t.end();
+    });
+
+    t.test(label + " / effect running on initial state is seen in the states stream", t => {
+      const effects = [
+        ({ state, update }) => {
+          if (!state.effect) {
+            update(draft => {
+              draft.effect = true;
+            });
+          }
+        }
+      ];
+
+      const { states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { effects }
+      });
+
+      t.deepEqual(states(), { effect: true }, "resulting state");
       t.end();
     });
 

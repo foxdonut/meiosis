@@ -103,17 +103,20 @@ export default ({ stream, accumulator, combine, app }) => {
     update
   );
 
-  contexts.map(context => {
-    if (context.state !== states()) {
-      states(context.state);
-    }
+  contexts
+    .map(context => {
+      if (context.state !== states()) {
+        states(context.state);
+      }
 
-    const effectContext = Object.assign(context, {
-      update,
-      actions
+      return Object.assign(context, {
+        update,
+        actions
+      });
+    })
+    .map(context => {
+      effects.forEach(effect => effect(context));
     });
-    effects.forEach(effect => effect(effectContext));
-  });
 
   return { update, states, actions };
 };
