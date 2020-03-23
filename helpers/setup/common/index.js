@@ -99,7 +99,7 @@ export default ({ stream, accumulator, combine, app }) => {
         state: accumulatorFn(context.state, patch),
         patch
       }),
-    runServices({ state: initial, previousState: initial }),
+    runServices({ state: initial, previousState: {} }),
     update
   );
 

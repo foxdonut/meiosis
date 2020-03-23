@@ -24,10 +24,16 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
+      const services = [
+        ({ previousState }) => {
+          t.deepEqual(previousState, {});
+        }
+      ];
+
       const { states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial: { duck: "yellow" } }
+        app: { initial: { duck: "yellow" }, services }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
@@ -611,9 +617,15 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
+      const services = [
+        ({ previousState }) => {
+          t.deepEqual(previousState, {});
+        }
+      ];
+
       const { states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial: { duck: "yellow" } }
+        app: { initial: { duck: "yellow" }, services }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
@@ -1196,10 +1208,16 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
+      const services = [
+        ({ previousState }) => {
+          t.deepEqual(previousState, {});
+        }
+      ];
+
       const { states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial: { duck: "yellow" } }
+        app: { initial: { duck: "yellow" }, services }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
