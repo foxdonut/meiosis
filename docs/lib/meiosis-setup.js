@@ -112,24 +112,24 @@
           state: accumulatorFn(context.state, patch),
           patch: patch
         }); },
-      runServices({ state: initial, previousState: initial }),
+      runServices({ state: initial, previousState: {} }),
       update
     );
 
-    contexts.map(function (context) {
-      if (context.state !== states()) {
-        states(context.state);
-      }
+    contexts
+      .map(function (context) {
+        if (context.state !== states()) {
+          states(context.state);
+        }
 
-      effects.forEach(function (effect) {
-        effect(
-          Object.assign(context, {
-            update: update,
-            actions: actions
-          })
-        );
+        return Object.assign(context, {
+          update: update,
+          actions: actions
+        });
+      })
+      .map(function (context) {
+        effects.forEach(function (effect) { return effect(context); });
       });
-    });
 
     return { update: update, states: states, actions: actions };
   }
@@ -222,39 +222,31 @@
    *
    * @function meiosis.preact.setup
    *
-   * @param {preact} preact - the Preact instance.
-   * @param {preact.Component} Root - your Root component, which receives `state` and `actions`.
+   * @param {preact.h} - the Preact h function.
+   * @param {preact.useState} - the Preact useState function.
+   * @param {preact.Component} Root - your Root component, which receives `state`, `update`, and
+   * `actions`.
    *
-   * @returns {preact.Component} - the top-level component to which you pass `states` and `actions`.
+   * @returns {preact.Component} - the top-level component to which you pass `states`, and either
+   * `update`, `actions`, or both.
    */
   function preactSetup (ref) {
-    var preact = ref.preact;
+    var h = ref.h;
+    var useState = ref.useState;
     var Root = ref.Root;
 
-    var App = /*@__PURE__*/(function (superclass) {
-      function App () {
-        superclass.apply(this, arguments);
-      }
+    return function (ref) {
+    var states = ref.states;
+    var update = ref.update;
+    var actions = ref.actions;
 
-      if ( superclass ) App.__proto__ = superclass;
-      App.prototype = Object.create( superclass && superclass.prototype );
-      App.prototype.constructor = App;
+    var ref$1 = useState(states());
+    var state = ref$1[0];
+    var setState = ref$1[1];
+    states.map(setState);
 
-      App.prototype.componentWillMount = function componentWillMount () {
-        var setState = this.setState.bind(this);
-        this.props.states.map(setState);
-      };
-      App.prototype.render = function render () {
-        var state = this.state;
-        var ref = this.props;
-        var actions = ref.actions;
-
-        return preact.h(Root, { state: state, actions: actions });
-      };
-
-      return App;
-    }(preact.Component));
-    return App;
+    return h(Root, { state: state, update: update, actions: actions });
+  };
   }
 
   /**
@@ -263,47 +255,35 @@
    * @function meiosis.react.setup
    *
    * @param {React} React - the React instance.
-   * @param {React.Component} Root -  your Root component, which receives `state` and `actions`.
+   * @param {React.Component} Root - your Root component, which receives `state`, `update`, and
+   * `actions`.
    *
-   * @returns {React.Component} - the top-level component to which you pass `states` and `actions`.
+   * @returns {React.Component} - the top-level component to which you pass `states`, and either
+   * `update`, `actions`, or both.
    */
   function reactSetup (ref) {
     var React = ref.React;
     var Root = ref.Root;
 
-    var App = /*@__PURE__*/(function (superclass) {
-      function App(props) {
-        superclass.call(this, props);
-        this.state = props.states();
-        this.skippedFirst = false;
-      }
+    return function (ref) {
+    var states = ref.states;
+    var update = ref.update;
+    var actions = ref.actions;
 
-      if ( superclass ) App.__proto__ = superclass;
-      App.prototype = Object.create( superclass && superclass.prototype );
-      App.prototype.constructor = App;
-      App.prototype.componentDidMount = function componentDidMount () {
-        var this$1 = this;
+    var ref$1 = React.useState(false);
+    var init = ref$1[0];
+    var setInit = ref$1[1];
+    var ref$2 = React.useState(states());
+    var state = ref$2[0];
+    var setState = ref$2[1];
 
-        var setState = this.setState.bind(this);
-        this.props.states.map(function (state) {
-          if (this$1.skippedFirst) {
-            setState(state);
-          } else {
-            this$1.skippedFirst = true;
-          }
-        });
-      };
-      App.prototype.render = function render () {
-        var state = this.state;
-        var ref = this.props;
-        var actions = ref.actions;
+    if (!init) {
+      setInit(true);
+      states.map(setState);
+    }
 
-        return React.createElement(Root, { state: state, actions: actions });
-      };
-
-      return App;
-    }(React.Component));
-    return App;
+    return React.createElement(Root, { state: state, update: update, actions: actions });
+  };
   }
 
   /**

@@ -18,14 +18,13 @@ const app = createApp(router.initialRoute);
 const { states, actions } = meiosis({ stream: simpleStream, merge, app });
 
 // Only for using Meiosis Tracer in development.
+/*
 meiosisTracer({
   selector: "#tracer",
   rows: 30,
-  streams: [
-    // { stream: update, label: "update" },
-    { stream: states, label: "states" }
-  ]
+  streams: [{ stream: states, label: "states" }]
 });
+*/
 
 render(<App states={states} actions={actions} />, document.getElementById("app"));
 

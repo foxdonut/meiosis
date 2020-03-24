@@ -11,13 +11,13 @@ import meiosisTracer from "meiosis-tracer";
 
 const app = createApp(router.initialRoute);
 
-const { states, update, actions } = meiosis({ stream: Stream, merge, app });
+const { states, actions } = meiosis({ stream: Stream, merge, app });
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({
   selector: "#tracer",
-  rows: 10,
-  streams: [{ stream: update, label: "update" }, { stream: states, label: "states" }]
+  rows: 30,
+  streams: [{ stream: states, label: "states" }]
 });
 
 m.route(document.getElementById("app"), "/", router.MithrilRoutes({ states, actions, App }));
