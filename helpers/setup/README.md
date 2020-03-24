@@ -3,6 +3,21 @@
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
 demand and for your convenience, here are some utility functions that help set up and use Meiosis.
 
+`meiosis-setup` wires up the Meiosis pattern for you with these conveniences:
+
+- wires up the `update` and `states` streams
+- creates your `actions`
+- provides the ability to call `update()` with an array of patches, automatically combining them into
+  a single patch
+- automatically ignores null patches
+- calls your `service` and `effect` functions, passing in `state`, `previousState`, `patch`,
+  `update`, and `actions`
+- omits consecutive identical `states`, thus avoiding unncessary re-renders
+- provides a simple stream implementation
+- works with Flyd, Mithril-Stream, Mergerino, function patches, and Immer out of the box
+- wires up React and Preact
+- works with Mithril and lit-html.
+
 ## Getting Started
 
 To use `meiosis-setup`, you specify a stream library, and, optionally, a library instance to manage
