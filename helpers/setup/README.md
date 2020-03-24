@@ -18,6 +18,10 @@ demand and for your convenience, here are some utility functions that help set u
 - wires up React and Preact
 - works with Mithril and lit-html.
 
+See [Meiosis examples](https://meiosis.js.org/examples.html) and
+[Routing documentation](https://meiosis.js.org/docs/routing.html) for some examples using
+`meiosis-setup`.
+
 ## Getting Started
 
 To use `meiosis-setup`, you specify a stream library, and, optionally, a library instance to manage
