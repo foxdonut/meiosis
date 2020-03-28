@@ -291,7 +291,7 @@ const element = document.getElementById("app");
 ReactDOM.render(<App states={states} update={update} actions={actions} />, element);
 ```
 
-See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/react/src/index.js)
+See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/react/src/index.jsx)
 for an example.
 
 ### Preact Setup
