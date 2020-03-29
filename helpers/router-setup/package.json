@@ -1,0 +1,63 @@
+{
+  "name": "meiosis-router-setup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Meiosis Helpers - Router Setup",
+  "main": "meiosis-router-setup.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "watch": "npm run check -- --watch",
+    "lib": "tsc",
+    "build": "rollup -c && cp -r src/* dist/",
+    "start": "npm run lib && npm run build && cp README.md dist/ && cat package.json|grep -v private>dist/package.json",
+    "test": "jest --config jestconfig.json",
+    "docs": "typedoc --excludeNotExported --out docs/ src",
+    "onchange": "onchange -i index.ts 'router-setup/*' -- npm run docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "meiosis",
+    "reactive",
+    "router",
+    "state management"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/jest": "^25.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.25.0",
+    "@typescript-eslint/parser": "^2.25.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "feather-route-matcher": "^3.1.0",
+    "jest": "^25.2.3",
+    "onchange": "^6.1.0",
+    "prettier": "2.0.2",
+    "query-string": "^6.11.1",
+    "rollup": "^2.2.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "superouter": "^0.3.2",
+    "ts-jest": "^25.2.1",
+    "typedoc": "^0.17.3",
+    "typescript": "^3.8.3",
+    "url-mapper": "^2.0.0"
+  }
+}
