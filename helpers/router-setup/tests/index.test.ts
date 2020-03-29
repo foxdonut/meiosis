@@ -13,12 +13,12 @@ import {
   createSuperouter,
   createFeatherRouter,
   createUrlMapperRouter
-} from "../src/router-setup";
+} from "../src";
 
 // Define flatMap for node so that we can run the superouter tests.
 const concat = (x, y): any => x.concat(y);
 const flatMap = (f, xs): any => xs.map(f).reduce(concat, []);
-Array.prototype["flatMap"] = function (f) {
+Array.prototype["flatMap"] = function (f): any {
   return flatMap(f, this);
 };
 
