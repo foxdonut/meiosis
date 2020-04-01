@@ -2,7 +2,6 @@ import { fold } from "static-tagged-union";
 import { T } from "ducklings";
 
 import { Data } from "../util";
-import { Route } from "../routes";
 import { teas } from "../teaDetails/data";
 
 export const effect = ({ state, update }) =>
@@ -10,8 +9,8 @@ export const effect = ({ state, update }) =>
     fold({
       Loading: () => {
         setTimeout(() => {
-          update({ route: Route.Tea(), teas: Data.Loaded({ teas }) });
-        }, 500);
+          update({ teas: Data.Loaded({ teas }) });
+        }, 250);
       }
     })
   );

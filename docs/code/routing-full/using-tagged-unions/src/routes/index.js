@@ -7,11 +7,11 @@ export const Route = createRouteSegments([
   "Tea",
   "TeaDetails",
   "Coffee",
+  "CoffeeBeverage",
+  "CoffeeBrewer",
   "Beer",
-  "Beverages",
-  "Beverage",
-  "Brewer",
-  "NotFound"
+  "BeerBeverage",
+  "BeerBrewer"
 ]);
 
 const teaPath = "/tea";
