@@ -8,7 +8,7 @@ export const Beverages = {
   view: ({ attrs: { state } }) =>
     T(state.beverages)(
       fold({
-        Loaded: ({ beverages }) =>
+        Loaded: ({ beverages, beverageRoute }) =>
           m(
             ".row",
             m(
@@ -20,7 +20,7 @@ export const Beverages = {
                   m(
                     "a",
                     {
-                      href: router.toPath({ id: state.beverageRoute, params: { id: beverage.id } })
+                      href: router.toPath({ id: beverageRoute, params: { id: beverage.id } })
                     },
                     beverage.title
                   )

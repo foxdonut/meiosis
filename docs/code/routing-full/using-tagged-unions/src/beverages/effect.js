@@ -14,8 +14,10 @@ export const effect = ({ state, update }) =>
         setTimeout(
           () =>
             update({
-              beverages: Data.Loaded({ beverages: beverageTypes[beverageType] }),
-              beverageRoute: beverageRoutes[beverageType]
+              beverages: Data.Loaded({
+                beverages: beverageTypes[beverageType],
+                beverageRoute: beverageRoutes[beverageType]
+              })
             }),
           1000
         );
