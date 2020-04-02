@@ -23,8 +23,8 @@ because the streams that we use here are very simple. In fact, we only use two s
 `map` and `scan`, and only to set up the Meiosis pattern at the starting point of the
 application.
 
-A stream is a **sequence of values**, similar to an array. Over time, you can send values onto
-a stream. You can also have functions that get called every time a value arrives on the stream.
+A stream is a **sequence of values**, similar to an array. You can send values onto a stream. You
+can also have functions that get called every time a value arrives on the stream.
 
 Let's say we create a stream called `update`. When we call `update(1)`, `update(-1)`, and so on,
 these values will be in a stream.
