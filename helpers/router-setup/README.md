@@ -5,10 +5,10 @@ demand and for your convenience, here are some reusable snippets of code that he
 Meiosis. This module provides support for setting up a router. Out-of-the-box support is provided
 for these router libraries:
 
-    - [superouter](https://gitlab.com/harth/superouter)
-    - [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
-    - [url-mapper](https://github.com/cerebral/url-mapper)
-    - [Mithril Router](https://mithril.js.org/route.html)
+- [superouter](https://gitlab.com/harth/superouter)
+- [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
+- [url-mapper](https://github.com/cerebral/url-mapper)
+- [Mithril Router](https://mithril.js.org/route.html)
 
 You can also plug in another router library of your choice.
 
@@ -36,41 +36,32 @@ provided:
 ### Create Route Segments
 
 Meiosis router-setup is based on the idea of _route segments_, which are plain objects of the form
-`{ id, params }`. Then, a _route_ is an **array** of route segments:
+`{ id, params }`.
 
 ```javascript
-[{ id: "User", params: { name: "duck" }, { id: "Profile" } }]
+{ id: "User", params: { name: "duck" } }
 ```
 
-Using an array of route segments opens up some nice possibilities:
-
-- Navigating to same, parent, sibling, or child route
-- Creating reusable child routes
-- Managing pages and transitions independently of route paths
-
-For convenience, `meiosis-router-setup/state` provides the `createRouteSegments` to which you
+For convenience, `meiosis-router-setup` provides the `createRouteSegments` function to which you
 provide an array of strings that correspond to the route segments of your application:
 
 ```javascript
-import { createRouteSegments } from "meiosis-router-setup/state";
+import { createRouteSegments } from "meiosis-router-setup";
 
 const Route = createRouteSegments([
   "Home",
   "Login",
   "User",
-  "Profile",
-  "Preferences"
+  "UserProfile",
+  "UserPreferences"
 ]);
 
 Route.Home()
 // returns { id: "Home", params: {} }
 
-[Route.User({ name: "duck" }), Route.Profile()]
-// returns [{ id: "User", params: { name: "duck" } }, { id: "Profile", params: {} }]
+Route.User({ name: "duck" })
+// returns { id: "User", params: { name: "duck" } }
 ```
-
-Now that we can create route segments and routes (arrays of route segments), let's use _routing_ to
-manage them.
 
 ### Use `Routing`
 
@@ -78,29 +69,6 @@ We'll store the current route in the application state, under `route`:
 
 ```javascript
 { route: Route.Home() }
-```
-
-We can now render the top-level component according to the `localSegment` id. We can use a simple
-`string`&rarr;`Component` map to look up the corresponding component:
-
-```javascript
-import { Routing } from "meiosis-router-setup/state";
-import { Home, Login, User } from "./our-components";
-
-const componentMap = { Home, Login, User };
-
-const Root = ({ state }) => {
-  const routing = Routing(state.route);
-  const Component = componentMap[routing.localSegment.id];
-
-  return (
-    <div>
-      {/* ... */}
-      <Component /* other props... */ routing={routing} />
-      {/* ... */}
-    </div>
-  );
-};
 ```
 
 Then in the `Component`, we can use `routing.localSegment.params` to retrieve any params. Again we
@@ -209,10 +177,9 @@ This gives us a `router` with:
 
 - `router.initialRoute`: the initial route as parsed from the browser's location bar. We can use
   this in our application's initial state, `{ route: router.initialRoute }`
-- `router.start()`: a function to call at application startup. We pass a `navigateTo` callback for
+- `router.start`: a function to call at application startup. We pass a `navigateTo` callback for
   route changes: `router.start({ navigateTo: actions.navigateTo })`
-- `router.toPath(route)`: converts a route into a path. For example, `router.toPath([Route.Home()])`
-  or a relative route such as `router.toPath(routing.parentRoute())`.
+- `router.toPath(route)`: converts a route into a path. For example, `router.toPath(Route.Home())`.
 - `router.locationBarSync()`: a function to call to keep the location bar in sync. Every time the
   state changes, we call `router.locationBarSync(state.route)`.
 
@@ -220,31 +187,7 @@ Now that we have `router.toPath`, we no longer need to have `href="#"` and `onCl
 links. Instead, we can use `router.toPath()` in `href`:
 
 ```jsx
-// Say we are in [Route.User({ name }), Route.Profile()].
-// This navigates to [Route.User({ name })]
-<a href={router.toPath(routing.parentRoute())}>
-  User
-</a>
-
-// Say we are in [Route.User({ name })].
-// This navigates to [Route.User({ name }), Route.Profile()]
-<a href={router.toPath(routing.childRoute(Route.Profile()))}>
-  Profile
-</a>
-
-// Say we are in [Route.User({ name }), Route.Profile()].
-// This navigates to [Route.User({ name }), Route.Preferences({ name })]
-// Notice that we don't have to specify ({ name }) in Route.Preferences(),
-// since it is a parameter that is inherited from the parent route segment.
-<a href={router.toPath(routing.siblingRoute(Route.Preferences()))}>
-  Preferences
-</a>
-
-// Say we are in [Route.User({ name: "name1" })].
-// This navigates to [Route.User({ name: "name2" })]
-<a href={router.toPath(routing.sameRoute({ name: "name2" }))}>
-  Profile
-</a>
+<a href={router.toPath(Route.User({ name }))}>User</a>
 ```
 
 #### (Optional) Use Query Strings
@@ -256,8 +199,6 @@ We can use query strings by plugging in a query string library such as:
 - [urlon](https://github.com/cerebral/urlon)
 
 > Note that query strings work out-of-the-box with [Mithril](https://mithril.js.org).
-Refer to the [routing tutorial](https://meiosis.js.org/docs/routing.html) for information on using
-`meiosis-routing` with Mithril.
 
 To use a query string library, we just need to specify it as `queryString` when creating the router:
 
@@ -278,61 +219,16 @@ Then, we specify query string parameters in our route configuration using `?` an
 ```javascript
 const routeConfig = {
   Home: "/",
-  User: ["/user/:name?param1", {
-    Profile: "/profile?param2&param3",
-    Preferences: ["/preferences", ["name"]]
-  }]
+  User: "/user/:name?param1",
+  Profile: "/profile?param2&param3"
 };
 ```
 
-The parameters will be available in our route segments just like path parameters.
+The query string parameters will be available in our route segments just like path parameters.
 
-### Use Transitions
+## API
 
-It's often desirable to load data when arriving at a route, clear data when leaving a route, guard a
-route to restrict access, and so on. We can do them with route _transitions_.
-
-`meiosis-routing` provides a `routeTransition` function that takes the previous and current route
-state and returns a route transition object, `{ leave: {...}, arrive: {...} }`. You can use this
-function in a [service function](http://meiosis.js.org/docs/services.html#using_meiosis_setup), in a
-Redux reducer, and so on.
-
-As a service function, it looks like this:
-
-```javascript
-const service = ({ previousState, state }) => ({
-  state: { routeTransition: () => routeTransition(previousState.route, state.route) }
-});
-```
-
-With this, `state.routeTransition` will contain `leave` and `arrive` properties with the routes that
-we left and arrived to, keyed by route id. We can then use this to perform any actions we want when
-leaving from or arriving to a route:
-
-```javascript
-// in service function, reducer, etc.
-
-function loadDataForUser(state) {
-  if (state.routeTransition.arrive.User) {
-    const name = state.routeTransition.arrive.User.params.name;
-    // load data for user according to the value of 'name'...
-  }
-}
-
-function cleanup(state) {
-  if (state.routeTransition.leave.User) {
-    // leaving User route segment, cleanup...
-  }
-}
-```
-
-### For More Details
-
-As mentioned above, you will find a more in-depth tutorial in the
-[Meiosis Routing documentation](https://meiosis.js.org/docs/routing.html).
-
-More details are also available in the
-[API documentation](https://meiosis.js.org/meiosis-routing/modules/_index_.html).
+[API documentation](https://meiosis.js.org/meiosis-router-setup/modules/_index_.html).
 
 ## Credits
 
@@ -343,4 +239,3 @@ inspiration, and for [superouter](https://gitlab.com/harth/superouter).
 
 _meiosis-router-setup is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
-
