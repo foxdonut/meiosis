@@ -107,7 +107,7 @@ interface BaseRouterConfig {
 
   /**
    * The function to get the path from the browser's location bar.
-   * Defaults to `(() => document.location.hash || prefix + "/")`.
+   * Defaults to `(() => window.location.hash || prefix + "/")`.
    */
   getPath?: () => string;
 
@@ -318,7 +318,7 @@ export function createRouter(config: RouterConfig): Router {
 
   const getPath =
     config.getPath === undefined
-      ? (): string => document.location.hash || prefix + "/"
+      ? (): string => window.location.hash || prefix + "/"
       : config.getPath;
 
   const setPath =

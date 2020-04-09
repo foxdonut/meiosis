@@ -1,4 +1,3 @@
-import { Route } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -10,12 +9,12 @@ import { Data } from "../util";
 
 export const createApp = initialRoute => ({
   initial: {
-    route: initialRoute || Route.Home(),
+    route: initialRoute,
     teas: Data.None(),
     beverages: Data.None()
   },
 
-  Actions: update => Object.assign({}, login.Actions(update) /* settings.Actions(update)*/),
+  Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
   services: [
     login.service,
