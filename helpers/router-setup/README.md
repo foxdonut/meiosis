@@ -29,26 +29,31 @@ Using a `script` tag:
 Using the `script` tag exposes a `MeiosisRouterSetup` global, under which the helper functions are
 provided:
 
-- `routerSetup.*`
+- `createRoutes`
+- `createSuperouter`
+- `createFeatherRouter`
+- `createUrlMapperRouter`
+- `createMithrilRouter`
 
 ## Using `meiosis-router-setup`
 
-### Create Route Segments
+### Create Routes
 
-Meiosis router-setup is based on the idea of _route segments_, which are plain objects of the form
+Meiosis router-setup is based on the idea that a route is a plain objects of the form
 `{ id, params }`.
 
 ```javascript
 { id: "User", params: { name: "duck" } }
 ```
 
-For convenience, `meiosis-router-setup` provides the `createRouteSegments` function to which you
-provide an array of strings that correspond to the route segments of your application:
+For convenience, `meiosis-router-setup` provides the `createRoutes` function to which you specify an
+array of strings that correspond to the routes of your application. For each string, you get a
+function to create a route, optionally with params:
 
 ```javascript
-import { createRouteSegments } from "meiosis-router-setup";
+import { createRoutes } from "meiosis-router-setup";
 
-const Route = createRouteSegments([
+const Route = createRoutes([
   "Home",
   "Login",
   "User",
@@ -63,7 +68,7 @@ Route.User({ name: "duck" })
 // returns { id: "User", params: { name: "duck" } }
 ```
 
-### Use `Routing`
+### Use Routes
 
 We'll store the current route in the application state, under `route`:
 
@@ -128,46 +133,43 @@ routing logic.
 
 #### Route Configuration
 
-First, we create a route configuration. This is a plain object with `id`&rarr;`config` mappings,
-where `id` is the id of the route segment, and `config` can either be:
-
-- a string: the route path
-- an array: `[ path, (optional) array of parameters from the parent, nested route config ]`
+First, we create a route configuration. This is a plain object with `id`&rarr;`path` mappings, where
+`id` is the id of the route, and `path` is the route path. The route path can include path params
+using a colon `:`.
 
 For example:
 
 ```javascript
 const routeConfig = {
   Home: "/",
-  User: ["/user/:name", {
-    Profile: "/profile",
-    Preferences: ["/preferences", ["name"]]
-  }]
+  User: "/user/:name",
+  UserProfile: "/user/:name/profile",
+  Preferences: "/preferences"
 }
 ```
 
 This gives us the following path &rarr; route mappings:
 
-- `/` &rarr; `[Route.Home()]`
-- `/user/:name` &rarr; `[Route.User({ name })]`
-- `/user/:name/profile` &rarr; `[Route.User({ name }), Route.Profile()]`
-- `/user/:name/preferences` &rarr; `[Route.User({ name }), Route.Profile({ name })]`
+- `/` &rarr; `Route.Home()`
+- `/user/:name` &rarr; `Route.User({ name })`
+- `/user/:name/profile` &rarr; `Route.UserProfile({ name })`
+- `/preferences` &rarr; `Route.Preferences()`
 
 #### Create the Router
 
 Next, we create a router. The router libraries mentioned at the top of the page are supported
-out-of-the-box. Let's use `feather-route-matcher`:
+out-of-the-box. Let's use `superouter`:
 
 ```javascript
-import createRouteMatcher from "feather-route-matcher";
-import { createFeatherRouter } from "meiosis-routing/router-helper";
+import { type as superouter } from "superouter";
+import { createSuperouter } from "meiosis-router-helper";
 
 const routeConfig = { ... };
 
-const router = createFeatherRouter({
-  createRouteMatcher,
+const router = createSuperouter({
+  superouter,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: Route.Home()
 });
 ```
 
@@ -183,8 +185,7 @@ This gives us a `router` with:
 - `router.locationBarSync()`: a function to call to keep the location bar in sync. Every time the
   state changes, we call `router.locationBarSync(state.route)`.
 
-Now that we have `router.toPath`, we no longer need to have `href="#"` and `onClick={...}` in our
-links. Instead, we can use `router.toPath()` in `href`:
+Now that we have `router.toPath`, we can use `router.toPath()` in `href`:
 
 ```jsx
 <a href={router.toPath(Route.User({ name }))}>User</a>
@@ -203,14 +204,16 @@ We can use query strings by plugging in a query string library such as:
 To use a query string library, we just need to specify it as `queryString` when creating the router:
 
 ```javascript
-import createRouteMatcher from "feather-route-matcher";
-import qs from "qs";
+import { type as superouter } from "superouter";
+import queryString from "query-string";
 
-const router = createFeatherRouter({
-  createRouteMatcher,
-  queryString: qs,
+const routeConfig = { ... };
+
+const router = createSuperouter({
+  superouter,
+  queryString,
   routeConfig,
-  defaultRoute: [Route.Home()]
+  defaultRoute: Route.Home()
 });
 ```
 
@@ -224,7 +227,8 @@ const routeConfig = {
 };
 ```
 
-The query string parameters will be available in our route segments just like path parameters.
+The query string parameters will be available in our routes just like path parameters. Conversely,
+`toPath(route)` will put parameters into the query string.
 
 ## API
 

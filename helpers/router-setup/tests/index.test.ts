@@ -4,7 +4,7 @@ import Mapper from "url-mapper";
 import { type as superouter } from "superouter";
 
 import {
-  createRouteSegments,
+  createRoutes,
   convertToPath,
   findPathParams,
   findQueryParams,
@@ -22,7 +22,7 @@ Array.prototype["flatMap"] = function (f): any {
   return flatMap(f, this);
 };
 
-const Route = createRouteSegments([
+const Route = createRoutes([
   "Home",
   "Login",
   "User",
@@ -68,7 +68,7 @@ const routeConfig4 = {
 };
 
 describe("routerSetup", (): void => {
-  describe("createRouteSegments", (): void => {
+  describe("createRoutes", (): void => {
     test("route segment", (): void => {
       expect(Route.Home()).toEqual({ id: "Home", params: {} });
     });

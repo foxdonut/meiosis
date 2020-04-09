@@ -8,65 +8,65 @@
  */
 
 /**
- * Route segment params.
+ * Route params.
  */
 export type Params = Record<string, any>;
 
 /**
- * A route segment.
+ * A route.
  */
-export interface RouteSegment {
+export interface Route {
   id: string;
   params: Params;
 }
 
 /**
- * A function that creates a [[RouteSegment]] with optional params.
+ * A function that creates a [[Route]] with optional params.
  */
-export type RouteParamFn = (params?: Record<string, any>) => RouteSegment;
+export type RouteParamFn = (params?: Record<string, any>) => Route;
 
 /**
- * Function that parses a path and returns a route segment.
+ * Function that parses a path and returns a route.
  *
  * @param path the path to parse.
  * @param queryParams an object with the query string parameters, if any are present.
- * @returns the route segment obtained from the path and parameters.
+ * @returns the route obtained from the path and parameters.
  */
-export type parsePath = (path: string, queryParams: Record<string, any>) => RouteSegment;
+export type parsePath = (path: string, queryParams: Record<string, any>) => Route;
 
 /**
  * Function that creates a function to parse a path.
  *
  * @param routeMap an object with key-value pairs.
- * @param defaultRouteSegment the default route segment.
+ * @param defaultRoute the default route.
  * @returns the function that parses a path.
  */
-export type createParsePath = (routeMap: RouteMap, defaultRoute: RouteSegment) => parsePath;
+export type createParsePath = (routeMap: RouteMap, defaultRoute: Route) => parsePath;
 
-/** Represents a function that takes params and produces a [[RouteSegment]]. */
-export type RouteFn = (params?: Record<string, any>) => RouteSegment;
+/** Represents a function that takes params and produces a [[Route]]. */
+export type RouteFn = (params?: Record<string, any>) => Route;
 
-/** Object that maps paths to route segment functions. */
+/** Object that maps paths to route functions. */
 export interface RouteMap {
   [path: string]: RouteFn;
 }
 
 /**
- * Represents a router, which provides properties and functions to manage route segment paths.
+ * Represents a router, which provides properties and functions to manage routes.
  */
 export interface Router {
-  initialRoute: RouteSegment;
-  locationBarSync: (routeSegment: RouteSegment) => void;
-  parsePath: (path: string) => RouteSegment;
+  initialRoute: Route;
+  locationBarSync: (route: Route) => void;
+  parsePath: (path: string) => Route;
   routeMap: RouteMap;
   start: (callback: { navigateTo: (path: string) => void }) => void;
-  toPath: (route: RouteSegment) => string;
+  toPath: (route: Route) => string;
   MithrilRoutes?: any;
 }
 
 /**
- * Route configuration. This is an Object for which the properties are the ids of the route
- * segments, and the values are either:
+ * Route configuration. This is an Object for which the properties are the ids of the routes,
+ * and the values are either:
  *
  * - a string: the route path. May contain `:` for path parameters. May also contain `?` and/or `&`
  *   for query string parameters.
@@ -96,8 +96,8 @@ interface BaseRouterConfig {
   /** The route config. */
   routeConfig: RouteConfig;
 
-  /** The default route segment. */
-  defaultRoute: RouteSegment;
+  /** The default route. */
+  defaultRoute: Route;
 
   /** The URL path prefix. Defaults to `"#"`. */
   prefix?: string;
@@ -154,7 +154,7 @@ export interface MithrilRouterConfig extends BaseRouterConfig {
 ////////
 
 /**
- * Creates a `Route` helper with functions to create route segments.
+ * Creates a `Route` helper with functions to create routes.
  *
  * @param routeNames the list of route names.
  * @returns a `Route` object with constructor functions.
@@ -163,7 +163,7 @@ export interface MithrilRouterConfig extends BaseRouterConfig {
  *
  * ```
  *
- * const Route = createRouteSegments(["Home", "User"]);
+ * const Route = createRoute(["Home", "User"]);
  *
  * Route.Home()
  * // { id: "Home", params: {} }
@@ -172,9 +172,9 @@ export interface MithrilRouterConfig extends BaseRouterConfig {
  * // { id: "User", params: { name: "duck" } }
  * ```
  */
-export function createRouteSegments(routeNames: string[]): Record<string, RouteParamFn> {
+export function createRoutes(routeNames: string[]): Record<string, RouteParamFn> {
   return routeNames.reduce((result, id): Record<string, RouteParamFn> => {
-    result[id] = (params: Record<string, any>): RouteSegment => ({
+    result[id] = (params: Record<string, any>): Route => ({
       id,
       params: params == null ? {} : params
     });
@@ -241,16 +241,12 @@ export const pick = (obj, props): object =>
     return result;
   }, {});
 
-export function convertToPath(
-  routeConfig: RouteConfig,
-  routeSegment: RouteSegment,
-  qsStringify?
-): string {
-  const configPath = routeConfig[routeSegment.id];
-  let path = setParams(configPath, routeSegment.params);
+export function convertToPath(routeConfig: RouteConfig, route: Route, qsStringify?): string {
+  const configPath = routeConfig[route.id];
+  let path = setParams(configPath, route.params);
 
   const queryParams = findQueryParams(configPath);
-  const query = pick(routeSegment.params, queryParams);
+  const query = pick(route.params, queryParams);
 
   if (Object.keys(query).length > 0 && typeof qsStringify === "function") {
     path += "?" + qsStringify(query);
@@ -259,13 +255,13 @@ export function convertToPath(
   return path;
 }
 
-// Returns { "/path": fn(params) => routeSegment }
+// Returns { "/path": fn(params) => route }
 export function createRouteMap(routeConfig: RouteConfig): RouteMap {
   return Object.entries(routeConfig).reduce((result, [id, configPath]): RouteMap => {
     const routeParams = findPathParams(configPath).concat(findQueryParams(configPath));
     const localPath = getPathWithoutQuery(configPath);
 
-    const routeFn: RouteFn = (params?: Record<string, any>): RouteSegment => ({
+    const routeFn: RouteFn = (params?: Record<string, any>): Route => ({
       id,
       params: pick(params, routeParams)
     });
@@ -342,22 +338,22 @@ export function createRouter(config: RouterConfig): Router {
   const parsePathFn = createParsePath ? createParsePath(routeMap, defaultRoute) : null;
 
   const parsePath = parsePathFn
-    ? (pathWithPrefix: string): RouteSegment => {
-        const path = pathWithPrefix.substring(prefix.length);
+    ? (pathWithPrefix: string): Route => {
+        const path = decodeURI(pathWithPrefix.substring(prefix.length));
         const query = getQuery(path);
         const queryParams =
           query.length === 0 || !queryString.parse ? {} : queryString.parse(query);
 
         return parsePathFn(getPathWithoutQuery(path), queryParams);
       }
-    : (): RouteSegment => defaultRoute;
+    : (): Route => defaultRoute;
 
-  const toPath = (route: RouteSegment): string =>
+  const toPath = (route: Route): string =>
     prefix + convertToPath(sanitizedRouteConfig, route, queryString.stringify);
 
   // Function to keep the location bar in sync
-  const locationBarSync = (routeSegment: RouteSegment): void => {
-    const path = toPath(routeSegment);
+  const locationBarSync = (route: Route): void => {
+    const path = toPath(route);
     if (getPath() !== path) {
       setPath(path);
     }
@@ -386,7 +382,7 @@ export function createRouter(config: RouterConfig): Router {
  * import { type as superouter } from "superouter";
  * import queryString from "query-string"; // only if using query strings
  *
- * const Route = createRouteSegments([...]);
+ * const Route = createRoutes([...]);
  *
  * const routeConfig = { ... };
  *
@@ -405,16 +401,16 @@ export function createSuperouter(config: SuperouterConfig): Router {
       {}
     );
 
-    const Superoute = config.superouter("Route", superouteConfig);
+    const Superouter = config.superouter("Route", superouteConfig);
 
-    const parsePath = (path, queryParams): RouteSegment => {
-      const match = Superoute.matchOr(
+    const parsePath = (path, queryParams): Route => {
+      const match = Superouter.matchOr(
         () => ({ case: defaultRoute.id, value: defaultRoute.params }),
         path
       );
 
       const params = Object.keys(match.value || {}).reduce((result: any, key: string): any => {
-        result[key] = decodeURI(match.value[key]);
+        result[key] = match.value[key];
         return result;
       }, {});
 
@@ -439,7 +435,7 @@ export function createSuperouter(config: SuperouterConfig): Router {
  * import createRouteMatcher from "feather-route-matcher";
  * import queryString from "query-string"; // only if using query strings
  *
- * const Route = createRouteSegments([...]);
+ * const Route = createRoutes([...]);
  *
  * const routeConfig = { ... };
  *
@@ -455,12 +451,12 @@ export function createFeatherRouter(config: FeatherRouterConfig): Router {
   const createParsePath = (routeMap, defaultRoute): parsePath => {
     const routeMatcher = config.createRouteMatcher(routeMap);
 
-    const parsePath = (path, queryParams): RouteSegment => {
+    const parsePath = (path, queryParams): Route => {
       const match = routeMatcher(path);
 
       if (match) {
         const params = Object.keys(match.params || {}).reduce((result: any, key: string): any => {
-          result[key] = decodeURI(match.params[key]);
+          result[key] = match.params[key];
           return result;
         }, {});
 
@@ -487,14 +483,14 @@ export function createFeatherRouter(config: FeatherRouterConfig): Router {
  * import Mapper from "url-mapper";
  * import urlon from "urlon"; // only if using query strings
  *
- * const Route = createRouteSegments([...]);
+ * const Route = createRoutes([...]);
  *
  * const routeConfig = { ... };
  *
  * const router = createUrlMapperRouter({
  *   Mapper,
  *   routeConfig,
- *   defaultRoute: [Route.Home()],
+ *   defaultRoute: Route.Home(),
  *   queryString: urlon // only if using query strings
  * });
  * ```
@@ -503,7 +499,7 @@ export function createUrlMapperRouter(config: UrlMapperConfig): Router {
   const createParsePath = (routeMap, defaultRoute): parsePath => {
     const urlMapper = config.Mapper();
 
-    const parsePath = (path, queryParams): RouteSegment => {
+    const parsePath = (path, queryParams): Route => {
       const matchedRoute = urlMapper.map(path, routeMap);
 
       if (matchedRoute) {
@@ -529,7 +525,7 @@ export function createUrlMapperRouter(config: UrlMapperConfig): Router {
  * import m from "mithril";
  * // Note: query strings are built-in to Mithril
  *
- * const Route = createRouteSegments([...]);
+ * const Route = createRoutes([...]);
  *
  * const routeConfig = { ... };
  *
@@ -541,10 +537,8 @@ export function createUrlMapperRouter(config: UrlMapperConfig): Router {
  */
 export function createMithrilRouter(config: MithrilRouterConfig): Router {
   const queryString = { stringify: config.m.buildQueryString };
-  const createParsePath = (_routeMap, _defaultRoute): parsePath => (
-    _path,
-    _queryParams
-  ): RouteSegment => config.defaultRoute;
+  const createParsePath = (_routeMap, _defaultRoute): parsePath => (_path, _queryParams): Route =>
+    config.defaultRoute;
 
   const router = createRouter(
     Object.assign({ prefix: "#!", queryString, createParsePath }, config)
