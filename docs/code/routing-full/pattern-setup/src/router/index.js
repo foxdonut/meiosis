@@ -1,16 +1,10 @@
 import createRouteMatcher from "feather-route-matcher";
 
-const createRouter = () => {
+const createRouter = routeConfig => {
   const prefix = "#";
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
-  const getRoute = createRouteMatcher({
-    "/": "Home",
-    "/login": "Login",
-    "/settings": "Settings",
-    "/tea": "Tea",
-    "/tea/:id": "TeaDetails"
-  });
+  const getRoute = createRouteMatcher(routeConfig);
 
   const initialRoute = getRoute(getPath());
 
@@ -27,4 +21,12 @@ const createRouter = () => {
   return { initialRoute, getRoute, start, locationBarSync };
 };
 
-export const router = createRouter();
+const routeConfig = {
+  "/": "Home",
+  "/login": "Login",
+  "/settings": "Settings",
+  "/tea": "Tea",
+  "/tea/:id": "TeaDetails"
+};
+
+export const router = createRouter(routeConfig);
