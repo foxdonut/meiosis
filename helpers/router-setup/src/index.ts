@@ -409,12 +409,7 @@ export function createSuperouter(config: SuperouterConfig): Router {
         path
       );
 
-      const params = Object.keys(match.value || {}).reduce((result: any, key: string): any => {
-        result[key] = match.value[key];
-        return result;
-      }, {});
-
-      return { id: match.case, params: Object.assign({}, params, queryParams) };
+      return { id: match.case, params: Object.assign({}, match.value, queryParams) };
     };
     return parsePath;
   };
@@ -454,15 +449,7 @@ export function createFeatherRouter(config: FeatherRouterConfig): Router {
     const parsePath = (path, queryParams): Route => {
       const match = routeMatcher(path);
 
-      if (match) {
-        const params = Object.keys(match.params || {}).reduce((result: any, key: string): any => {
-          result[key] = match.params[key];
-          return result;
-        }, {});
-
-        return match.page(Object.assign({}, params, queryParams));
-      }
-      return defaultRoute;
+      return match ? match.page(Object.assign({}, match.params, queryParams)) : defaultRoute;
     };
     return parsePath;
   };
@@ -502,10 +489,9 @@ export function createUrlMapperRouter(config: UrlMapperConfig): Router {
     const parsePath = (path, queryParams): Route => {
       const matchedRoute = urlMapper.map(path, routeMap);
 
-      if (matchedRoute) {
-        return matchedRoute.match(Object.assign({}, matchedRoute.values, queryParams));
-      }
-      return defaultRoute;
+      return matchedRoute
+        ? matchedRoute.match(Object.assign({}, matchedRoute.values, queryParams))
+        : defaultRoute;
     };
     return parsePath;
   };
