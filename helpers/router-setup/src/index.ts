@@ -208,12 +208,8 @@ export const getQuery = (path: string): string => {
   return idx >= 0 ? path.substring(idx + 1) : "";
 };
 
-const extractMatches = (matches): string[] => {
-  if (matches) {
-    return matches.map((param): string => param.substring(1));
-  } else {
-    return [];
-  }
+const extractMatches = (matches: RegExpMatchArray | null): string[] => {
+  return matches ? matches.map((param: string): string => param.substring(1)) : [];
 };
 
 export function findPathParams(path: string): string[] {
