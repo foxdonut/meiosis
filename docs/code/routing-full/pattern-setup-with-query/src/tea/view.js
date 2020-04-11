@@ -1,7 +1,7 @@
 import m from "mithril";
 
 export const Tea = {
-  view: ({ attrs: { state, actions } }) => [
+  view: ({ attrs: { state } }) => [
     m("h3", "Tea Page"),
     m(
       ".row",
@@ -14,13 +14,13 @@ export const Tea = {
               m(
                 "a",
                 {
-                  style: { cursor: "pointer", marginRight: "10px" },
-                  onclick: () => actions.filter(type)
+                  style: { marginRight: "10px" },
+                  href: `#/tea?type=${type}`
                 },
                 type
               )
             ]),
-            m("a", { style: { cursor: "pointer" }, onclick: () => actions.filter("") }, "All")
+            m("a", { href: "#/tea" }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",
