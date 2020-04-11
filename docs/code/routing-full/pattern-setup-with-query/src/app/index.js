@@ -4,8 +4,7 @@ import { tea } from "../tea";
 
 export const createApp = initialRoute => ({
   initial: {
-    route: initialRoute,
-    filter: {}
+    route: initialRoute
   },
 
   Actions: update =>

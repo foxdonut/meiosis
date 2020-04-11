@@ -9,37 +9,18 @@ export const Tea = {
         ".col-md-6",
         state.teas && [
           m(
-            "form",
-            {
-              style: {
-                display: "grid",
-                gridTemplateColumns: "repeat(2, auto)",
-                gridGap: "10px",
-                marginBottom: "10px"
-              }
-            },
-            m("label", "Type"),
-            m(
-              "select",
-              {
-                value: state.filter.type,
-                onchange: evt => actions.setTypeFilter(evt.target.value)
-              },
-              m("option", ""),
-              m("option", "Black"),
-              m("option", "Green"),
-              m("option", "Herbal")
-            ),
-            m("label", "Description"),
-            m("input", {
-              value: state.filter.description,
-              oninput: evt => actions.setDescriptionFilter(evt.target.value)
-            }),
-            m(
-              "button.btn.btn-default",
-              { type: "button", onclick: () => actions.filter(state.filter) },
-              "Filter"
-            )
+            "div",
+            ["Black", "Green", "Herbal"].map(type => [
+              m(
+                "a",
+                {
+                  style: { cursor: "pointer", marginRight: "10px" },
+                  onclick: () => actions.filter(type)
+                },
+                type
+              )
+            ]),
+            m("a", { style: { cursor: "pointer" }, onclick: () => actions.filter("") }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",
