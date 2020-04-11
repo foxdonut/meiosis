@@ -1,9 +1,15 @@
 import m from "mithril";
 
+const types = ["Black", "Green", "Herbal", "Oolong"];
+
 export const Tea = () => {
   const model = { type: "", description: "" };
 
   return {
+    oninit: ({ attrs: { state } }) => {
+      model.type = state.route.queryParams.type;
+      model.description = state.route.queryParams.description;
+    },
     view: ({ attrs: { state, actions } }) => [
       m("h3", "Tea Page"),
       m(
@@ -13,17 +19,31 @@ export const Tea = () => {
           state.teas && [
             m(
               "div",
-              ["Black", "Green", "Herbal"].map(type => [
+              types.map(type => [
                 m(
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    href: `#/tea?type=${type}`
+                    href: `#/tea?type=${type}`,
+                    onclick: () => {
+                      model.type = type;
+                      model.description = "";
+                    }
                   },
                   type
                 )
               ]),
-              m("a", { href: "#/tea" }, "All")
+              m(
+                "a",
+                {
+                  href: "#/tea",
+                  onclick: () => {
+                    model.type = "";
+                    model.description = "";
+                  }
+                },
+                "All"
+              )
             ),
             m(
               "form",
@@ -39,16 +59,19 @@ export const Tea = () => {
               m(
                 "select",
                 {
+                  value: model.type,
                   onchange: evt => {
                     model.type = evt.target.value;
                   }
                 },
-                m("option", "- Select "),
-                ["Black", "Green", "Herbal"].map(type => m("option", { value: type }, type))
+                m("option", { value: "" }, "- Select -"),
+                types.map(type => m("option", { value: type }, type))
               ),
               m("label", "Description:"),
               m("input", {
                 type: "text",
+                placeholder: "Enter a description",
+                value: model.description,
                 oninput: evt => {
                   model.description = evt.target.value;
                 }

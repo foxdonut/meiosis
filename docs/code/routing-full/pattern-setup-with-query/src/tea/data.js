@@ -1,9 +1,12 @@
 export const teas = [
-  { id: "t1", title: "Tea 1", type: "Green", description: "Ginger Matcha" },
-  { id: "t1", title: "Tea 1", type: "Herbal", description: "Guru Chai" },
-  { id: "t1", title: "Tea 1", type: "Black", description: "Darjeeling" },
-  { id: "t1", title: "Tea 1", type: "Black", description: "English Breakfast" },
-  { id: "t2", title: "Tea 2", type: "Oolong", description: "Formosa" }
+  { id: "t1", type: "Green", description: "Ginger Matcha" },
+  { id: "t2", type: "Herbal", description: "Guru Ginger" },
+  { id: "t3", type: "Herbal", description: "Raspberry Nectar" },
+  { id: "t4", type: "Black", description: "Mountain" },
+  { id: "t5", type: "Black", description: "English Breakfast" },
+  { id: "t6", type: "Oolong", description: "Mountain" },
+  { id: "t7", type: "Green", description: "Raspberry Ginger" },
+  { id: "t8", type: "Oolong", description: "Formosa" }
 ];
 
 export const teaMap = teas.reduce((result, next) => {
