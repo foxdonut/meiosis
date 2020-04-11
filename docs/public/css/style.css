@@ -28,12 +28,6 @@ h4 {
   border: 1px solid #e7e7e7;
   padding: 8px;
 }
-.footer {
-  font-size: 11pt;
-  position: absolute;
-  bottom: 0;
-  height: 40px;
-}
 .simpleModal {
   position: fixed;
   top: 0;
