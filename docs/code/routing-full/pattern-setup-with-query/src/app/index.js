@@ -1,16 +1,17 @@
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
-import { teaDetails } from "../teaDetails";
 
 export const createApp = initialRoute => ({
   initial: {
-    route: initialRoute
+    route: initialRoute,
+    filter: {}
   },
 
-  Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
+  Actions: update =>
+    Object.assign({}, login.Actions(update), settings.Actions(update), tea.Actions(update)),
 
-  services: [login.service, settings.service, tea.service, teaDetails.service],
+  services: [login.service, settings.service, tea.service],
 
   effects: [settings.effect, tea.effect]
 });

@@ -40,8 +40,7 @@ const routeConfig = {
   "/": "Home",
   "/login": "Login",
   "/settings": "Settings",
-  "/tea": "Tea",
-  "/tea/:id": "TeaDetails"
+  "/tea": "Tea"
 };
 
 export const router = createRouter(routeConfig);

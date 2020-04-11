@@ -1,4 +1,4 @@
-import { teas } from "../teaDetails/data";
+import { teas } from "./data";
 
 export const effect = ({ state, update }) => {
   if (state.loadTeas) {

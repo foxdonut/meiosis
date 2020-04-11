@@ -1,5 +1,4 @@
 import m from "mithril";
-import queryString from "query-string";
 
 import { Home } from "../home";
 import { Login } from "../login";
@@ -10,8 +9,7 @@ const componentMap = {
   Home,
   Login,
   Settings,
-  Tea,
-  TeaDetails: Tea
+  Tea
 };
 
 export const Root = {
@@ -26,11 +24,8 @@ export const Root = {
         m(
           "ul.nav.navbar-nav",
           m("li" + isActive(Home), m("a", { href: "#/" }, "Home")),
-          m("li" + isActive(Login), m("a", { href: "#/login?test=one" }, "Login")),
-          m(
-            "li" + isActive(Settings),
-            m("a", { href: "#/settings?" + queryString.stringify({ test: "two" }) }, "Settings")
-          ),
+          m("li" + isActive(Login), m("a", { href: "#/login" }, "Login")),
+          m("li" + isActive(Settings), m("a", { href: "#/settings" }, "Settings")),
           m("li" + isActive(Tea), m("a", { href: "#/tea" }, "Tea"))
         )
       ),
