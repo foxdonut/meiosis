@@ -18,7 +18,9 @@ const createRouter = (Route, defaultRoute) => {
     }
   };
 
-  return { initialRoute, getRoute, start, locationBarSync };
+  const toPath = route => "#" + Route.toURL(route);
+
+  return { initialRoute, getRoute, start, locationBarSync, toPath };
 };
 
 const routeConfig = {

@@ -6,17 +6,17 @@ import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { Route, router } from "../router";
 
-const componentMap = Route.fold({
-  Home: () => Home,
-  Login: () => Login,
-  Settings: () => Settings,
-  Tea: () => Tea,
-  TeaDetails: () => Tea
-});
+const componentMap = {
+  Home,
+  Login,
+  Settings,
+  Tea,
+  TeaDetails: Tea
+};
 
 export const Root = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = componentMap(state.route);
+    const Component = componentMap[state.route.page];
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(
@@ -25,13 +25,10 @@ export const Root = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toPath(Route.of.Home()) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toPath(Route.of.Login()) }, "Login")),
-          m(
-            "li" + isActive(Settings),
-            m("a", { href: router.toPath(Route.of.Settings()) }, "Settings")
-          ),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea"))
+          m("li" + isActive(Home), m("a", { href: router.toPath(Route.Home) }, "Home")),
+          m("li" + isActive(Login), m("a", { href: router.toPath(Route.Login) }, "Login")),
+          m("li" + isActive(Settings), m("a", { href: router.toPath(Route.Settings) }, "Settings")),
+          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.Tea) }, "Tea"))
         )
       ),
       m(Component, { state, actions }),

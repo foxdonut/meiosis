@@ -1,7 +1,7 @@
 import m from "mithril";
 
-import { Route, allRoutes, router } from "../router";
 import { TeaDetails } from "../teaDetails";
+import { Route, router } from "../router";
 
 export const Tea = {
   view: ({ attrs: { state, actions } }) =>
@@ -20,17 +20,15 @@ export const Tea = {
                 m(
                   "a",
                   {
-                    href: router.toPath(Route.of.TeaDetails({ id: tea.id }))
+                    href: router.toPath(Route.TeaDetails, { id: tea.id })
                   },
                   tea.title
                 )
               )
             )
         ),
-        Route.fold({
-          ...allRoutes(() => null),
-          TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, actions }))
-        })(state.route)
+        state.route.page === "TeaDetails" &&
+          m(".col-md-6", m(TeaDetails, { state, id: state.route.params.id, actions }))
       )
     )
 };
