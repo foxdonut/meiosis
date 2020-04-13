@@ -2,6 +2,7 @@ import createRouteMatcher from "feather-route-matcher";
 
 const createRouter = routeConfig => {
   const prefix = "#";
+
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
   const getRoute = createRouteMatcher(routeConfig);
@@ -21,12 +22,20 @@ const createRouter = routeConfig => {
   return { initialRoute, getRoute, start, locationBarSync };
 };
 
+export const Route = {
+  Home: "Home",
+  Login: "Login",
+  Settings: "Settings",
+  Tea: "Tea",
+  TeaDetails: "TeaDetails"
+};
+
 const routeConfig = {
-  "/": "Home",
-  "/login": "Login",
-  "/settings": "Settings",
-  "/tea": "Tea",
-  "/tea/:id": "TeaDetails"
+  "/": Route.Home,
+  "/login": Route.Login,
+  "/settings": Route.Settings,
+  "/tea": Route.Tea,
+  "/tea/:id": Route.TeaDetails
 };
 
 export const router = createRouter(routeConfig);

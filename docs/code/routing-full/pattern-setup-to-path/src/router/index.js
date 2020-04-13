@@ -2,6 +2,7 @@ import createRouteMatcher from "feather-route-matcher";
 
 const createRouter = routeConfig => {
   const prefix = "#";
+
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
   const pathLookup = Object.entries(routeConfig).reduce(

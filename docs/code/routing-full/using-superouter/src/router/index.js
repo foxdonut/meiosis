@@ -2,6 +2,7 @@ import { type } from "superouter";
 
 const createRouter = (Route, defaultRoute) => {
   const prefix = "#";
+
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
   const getRoute = path => Route.matchOr(() => defaultRoute, path);

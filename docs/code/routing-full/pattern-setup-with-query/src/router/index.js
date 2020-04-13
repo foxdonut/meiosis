@@ -14,7 +14,7 @@ const createRouter = routeConfig => {
 
   const routeMatcher = createRouteMatcher(routeConfig);
 
-  const getRoute = (path, queryParams) =>
+  const getRoute = (path, queryParams = {}) =>
     Object.assign(routeMatcher(getPathWithoutQuery(path)), {
       queryParams: Object.assign(queryString.parse(getQuery(path)), queryParams)
     });
@@ -36,11 +36,22 @@ const createRouter = routeConfig => {
   return { initialRoute, getRoute, start, locationBarSync };
 };
 
+export const Route = {
+  Home: "Home",
+  Login: "Login",
+  Settings: "Settings",
+  Tea: "Tea",
+  TeaDetails: "TeaDetails",
+  TeaSearch: "TeaSearch"
+};
+
 const routeConfig = {
-  "/": "Home",
-  "/login": "Login",
-  "/settings": "Settings",
-  "/tea": "Tea"
+  "/": Route.Home,
+  "/login": Route.Login,
+  "/settings": Route.Settings,
+  "/tea/search": Route.TeaSearch,
+  "/tea": Route.Tea,
+  "/tea/:id": Route.TeaDetails
 };
 
 export const router = createRouter(routeConfig);

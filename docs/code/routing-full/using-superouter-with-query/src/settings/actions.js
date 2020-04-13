@@ -1,5 +1,5 @@
 import { router } from "../router";
 
 export const Actions = update => ({
-  filter: filter => update({ route: () => router.getRoute("/tea", filter) })
+  logout: () => update({ user: null, route: () => router.getRoute("/") })
 });

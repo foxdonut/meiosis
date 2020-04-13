@@ -4,12 +4,15 @@ import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
+import { TeaSearch } from "../teaSearch";
 
 const componentMap = {
   Home,
   Login,
   Settings,
-  Tea
+  Tea,
+  TeaDetails: Tea,
+  TeaSearch
 };
 
 export const Root = {
@@ -26,7 +29,8 @@ export const Root = {
           m("li" + isActive(Home), m("a", { href: "#/" }, "Home")),
           m("li" + isActive(Login), m("a", { href: "#/login" }, "Login")),
           m("li" + isActive(Settings), m("a", { href: "#/settings" }, "Settings")),
-          m("li" + isActive(Tea), m("a", { href: "#/tea" }, "Tea"))
+          m("li" + isActive(Tea), m("a", { href: "#/tea" }, "Tea")),
+          m("li" + isActive(TeaSearch), m("a", { href: "#/tea/search" }, "Tea Search"))
         )
       ),
       m(Component, { state, actions }),
@@ -36,7 +40,7 @@ export const Root = {
         "div",
         {
           style: {
-            visibility: state.loadTeas ? "visible" : "hidden"
+            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
