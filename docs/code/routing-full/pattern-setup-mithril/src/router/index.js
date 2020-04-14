@@ -1,7 +1,8 @@
-import createRouteMatcher from "feather-route-matcher";
+import m from "mithril";
 
-const createRouter = routeConfig => {
+const createMithrilRouter = routeConfig => {
   const prefix = "#";
+  m.route.prefix = prefix;
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
@@ -21,19 +22,20 @@ const createRouter = routeConfig => {
       );
   };
 
-  const routeMatcher = createRouteMatcher(routeConfig);
-
   const getRoute = (page, params = {}) => ({
     page,
     params,
     url: toPath(page, params).substring(prefix.length)
   });
 
-  const initialRoute = routeMatcher(getPath());
-
-  const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
-  };
+  const createMithrilRoutes = ({ App, navigateTo, states, actions }) =>
+    Object.entries(routeConfig).reduce((result, [path, page]) => {
+      result[path] = {
+        onmatch: (params, url) => navigateTo({ page, params, url }),
+        render: () => m(App, { state: states(), actions })
+      };
+      return result;
+    }, {});
 
   const locationBarSync = path => {
     if (getPath() !== path) {
@@ -41,7 +43,13 @@ const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, getRoute, start, locationBarSync, toPath };
+  return {
+    createMithrilRoutes,
+    initialRoute: { page: "Home", params: {}, url: "/" },
+    locationBarSync,
+    getRoute,
+    toPath
+  };
 };
 
 export const Route = {
@@ -60,4 +68,4 @@ const routeConfig = {
   "/tea/:id": Route.TeaDetails
 };
 
-export const router = createRouter(routeConfig);
+export const router = createMithrilRouter(routeConfig);

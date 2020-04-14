@@ -17,15 +17,20 @@ const createRouter = (Route, defaultRoute) => {
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const getRoute = (path, queryParams = {}) =>
+  const toPath = (route, queryParams = {}) =>
+    prefix + Route.toURL(route) + getQueryString(queryParams);
+
+  const routeMatcherWithQuery = path =>
     Object.assign(Route.matchOr(() => defaultRoute, getPathWithoutQuery(path)), {
-      queryParams: Object.assign(queryString.parse(getQuery(path)), queryParams)
+      queryParams: queryString.parse(getQuery(path))
     });
 
-  const initialRoute = getRoute(getPath());
+  const getRoute = (route, queryParams = {}) => Object.assign({}, route, { queryParams });
+
+  const initialRoute = routeMatcherWithQuery(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(getRoute(getPath()));
+    window.onpopstate = () => navigateTo(routeMatcherWithQuery(getPath()));
   };
 
   const locationBarSync = route => {
@@ -34,9 +39,6 @@ const createRouter = (Route, defaultRoute) => {
       window.history.pushState({}, "", prefix + path);
     }
   };
-
-  const toPath = (route, queryParams = {}) =>
-    "#" + Route.toURL(route) + getQueryString(queryParams);
 
   return { initialRoute, getRoute, start, locationBarSync, toPath };
 };

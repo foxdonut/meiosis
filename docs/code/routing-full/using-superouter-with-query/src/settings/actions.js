@@ -1,5 +1,5 @@
-import { router } from "../router";
+import { Route } from "../router";
 
 export const Actions = update => ({
-  logout: () => update({ user: null, route: () => router.getRoute("/") })
+  logout: () => update({ user: null, route: () => Route.of.Home() })
 });

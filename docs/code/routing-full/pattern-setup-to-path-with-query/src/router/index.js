@@ -12,35 +12,15 @@ const createRouter = routeConfig => {
     return idx >= 0 ? path.substring(idx + 1) : "";
   };
 
-  const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, id]) => Object.assign(result, { [id]: path }),
-    {}
-  );
-
-  const routeMatcher = createRouteMatcher(routeConfig);
-
-  const getRoute = (path, queryParams = {}) =>
-    Object.assign(routeMatcher(getPathWithoutQuery(path)), {
-      queryParams: Object.assign(queryString.parse(getQuery(path)), queryParams)
-    });
-
-  const initialRoute = getRoute(getPath());
-
-  const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(getRoute(getPath()));
-  };
-
   const getQueryString = (queryParams = {}) => {
     const query = queryString.stringify(queryParams);
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const locationBarSync = route => {
-    const path = route.url + getQueryString(route.queryParams);
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
-    }
-  };
+  const pathLookup = Object.entries(routeConfig).reduce(
+    (result, [path, id]) => Object.assign(result, { [id]: path }),
+    {}
+  );
 
   const toPath = (id, params = {}, queryParams = {}) => {
     const path = prefix + pathLookup[id];
@@ -54,6 +34,33 @@ const createRouter = routeConfig => {
           path
         ) + getQueryString(queryParams)
     );
+  };
+
+  const routeMatcher = createRouteMatcher(routeConfig);
+
+  const routeMatcherWithQuery = path =>
+    Object.assign(routeMatcher(getPathWithoutQuery(path)), {
+      queryParams: queryString.parse(getQuery(path))
+    });
+
+  const getRoute = (page, params = {}, queryParams = {}) => ({
+    page,
+    params,
+    queryParams,
+    url: toPath(page, params, queryParams).substring(prefix.length)
+  });
+
+  const initialRoute = routeMatcherWithQuery(getPath());
+
+  const start = ({ navigateTo }) => {
+    window.onpopstate = () => navigateTo(routeMatcherWithQuery(getPath()));
+  };
+
+  const locationBarSync = route => {
+    const path = route.url + getQueryString(route.queryParams);
+    if (getPath() !== path) {
+      window.history.pushState({}, "", prefix + path);
+    }
   };
 
   return { initialRoute, getRoute, start, locationBarSync, toPath };
