@@ -36,10 +36,10 @@ const createRouter = routeConfig => {
     );
   };
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const matcher = createRouteMatcher(routeConfig);
 
-  const routeMatcherWithQuery = path =>
-    Object.assign(routeMatcher(getPathWithoutQuery(path)), {
+  const routeMatcher = path =>
+    Object.assign(matcher(getPathWithoutQuery(path)), {
       queryParams: queryString.parse(getQuery(path))
     });
 
@@ -50,10 +50,10 @@ const createRouter = routeConfig => {
     url: toPath(page, params, queryParams).substring(prefix.length)
   });
 
-  const initialRoute = routeMatcherWithQuery(getPath());
+  const initialRoute = routeMatcher(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcherWithQuery(getPath()));
+    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {

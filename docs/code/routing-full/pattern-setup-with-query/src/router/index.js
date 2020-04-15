@@ -12,28 +12,32 @@ const createRouter = routeConfig => {
     return idx >= 0 ? path.substring(idx + 1) : "";
   };
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
 
-  const getRoute = (path, queryParams = {}) =>
-    Object.assign(routeMatcher(getPathWithoutQuery(path)), {
-      queryParams: Object.assign(queryString.parse(getQuery(path)), queryParams)
+  const matcher = createRouteMatcher(routeConfig);
+
+  const routeMatcher = path =>
+    Object.assign(matcher(getPathWithoutQuery(path)), {
+      queryParams: queryString.parse(getQuery(path))
     });
 
-  const initialRoute = getRoute(getPath());
+  const initialRoute = routeMatcher(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(getRoute(getPath()));
+    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {
-    const query = queryString.stringify(route.queryParams);
-    const path = route.url + (query.length > 0 ? "?" : "") + query;
+    const path = route.url + getQueryString(route.queryParams);
     if (getPath() !== path) {
       window.history.pushState({}, "", prefix + path);
     }
   };
 
-  return { initialRoute, getRoute, start, locationBarSync };
+  return { initialRoute, routeMatcher, start, locationBarSync };
 };
 
 export const Route = {

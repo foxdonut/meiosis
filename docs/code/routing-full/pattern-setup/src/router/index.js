@@ -5,12 +5,12 @@ const createRouter = routeConfig => {
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
-  const getRoute = createRouteMatcher(routeConfig);
+  const routeMatcher = createRouteMatcher(routeConfig);
 
-  const initialRoute = getRoute(getPath());
+  const initialRoute = routeMatcher(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(getRoute(getPath()));
+    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
   };
 
   const locationBarSync = path => {
@@ -19,7 +19,7 @@ const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, getRoute, start, locationBarSync };
+  return { initialRoute, routeMatcher, start, locationBarSync };
 };
 
 export const Route = {
