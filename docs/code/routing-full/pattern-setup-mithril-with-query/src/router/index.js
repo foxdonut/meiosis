@@ -6,26 +6,34 @@ const createMithrilRouter = routeConfig => {
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
+  const getQueryString = (queryParams = {}) => {
+    const query = m.buildQueryString(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
+
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, id]) => Object.assign(result, { [id]: path }),
     {}
   );
 
-  const toPath = (id, params = {}) => {
+  const toPath = (id, params = {}, queryParams = {}) => {
     const path = prefix + pathLookup[id];
-    return [...path.matchAll(/(:[^/]*)/g)]
-      .map(a => a[1])
-      .reduce(
-        (result, pathParam) =>
-          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-        path
-      );
+
+    return (
+      [...path.matchAll(/(:[^/]*)/g)]
+        .map(a => a[1])
+        .reduce(
+          (result, pathParam) =>
+            result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+          path
+        ) + getQueryString(queryParams)
+    );
   };
 
-  const getRoute = (page, params = {}) => ({
+  const getRoute = (page, params = {}, queryParams = {}) => ({
     page,
     params,
-    url: toPath(page, params).substring(prefix.length)
+    url: toPath(page, params, queryParams).substring(prefix.length)
   });
 
   const createMithrilRoutes = ({ App, navigateTo, states, actions }) =>
@@ -56,7 +64,8 @@ export const Route = {
   Login: "Login",
   Settings: "Settings",
   Tea: "Tea",
-  TeaDetails: "TeaDetails"
+  TeaDetails: "TeaDetails",
+  TeaSearch: "TeaSearch"
 };
 
 const routeConfig = {
@@ -64,6 +73,7 @@ const routeConfig = {
   "/login": Route.Login,
   "/settings": Route.Settings,
   "/tea": Route.Tea,
+  "/tea/search": Route.TeaSearch,
   "/tea/:id": Route.TeaDetails
 };
 
