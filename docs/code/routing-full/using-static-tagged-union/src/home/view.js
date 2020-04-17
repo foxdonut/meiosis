@@ -1,4 +1,5 @@
 import m from "mithril";
+import { fold } from "static-tagged-union";
 
 export const Home = {
   view: ({ attrs: { state } }) =>
@@ -6,6 +7,8 @@ export const Home = {
       "div",
       m("div", "Home Page"),
       state.user && m("div", "You are logged in as: ", state.user),
-      state.route.value.queryParams.message && m("div", state.route.value.queryParams.message)
+      fold({
+        Home: ({ queryParams }) => queryParams.message && m("div", queryParams.message)
+      })(state.route)
     )
 };

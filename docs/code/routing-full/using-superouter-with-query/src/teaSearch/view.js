@@ -19,7 +19,7 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  href: router.toPath(Route.of.TeaSearch(), { type })
+                  href: router.toPath(Route.of.TeaSearch({ queryParams: { type } }))
                 },
                 type
               )
@@ -34,9 +34,10 @@ export const TeaSearch = () => ({
               state.searchTeas
                 .filter(
                   tea =>
-                    (!state.route.queryParams.type || tea.type === state.route.queryParams.type) &&
-                    (!state.route.queryParams.description ||
-                      tea.description.includes(state.route.queryParams.description))
+                    (!state.route.value.queryParams.type ||
+                      tea.type === state.route.value.queryParams.type) &&
+                    (!state.route.value.queryParams.description ||
+                      tea.description.includes(state.route.value.queryParams.description))
                 )
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )

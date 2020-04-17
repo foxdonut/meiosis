@@ -7,7 +7,7 @@ export const service = ({ state }) => {
     if (!state.tea || !state.tea[id]) {
       return { tea: () => ({ [id]: teaMap[id].description }) };
     }
-  } else {
+  } else if (state.tea) {
     return { tea: undefined };
   }
 };

@@ -16,9 +16,9 @@ const createRouter = (Route, defaultRoute) => {
   };
 
   const locationBarSync = route => {
-    const path = Route.toURL(route);
+    const path = toPath(route);
     if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+      window.history.pushState({}, "", path);
     }
   };
 
@@ -38,7 +38,6 @@ export const Route = type("Route", routeConfig);
 export const routes = keys => fn =>
   keys.reduce((result, key) => Object.assign(result, { [key]: fn }), {});
 
-const allKeys = Object.keys(routeConfig);
-export const allRoutes = routes(allKeys);
+export const allRoutes = routes(Object.keys(routeConfig));
 
 export const router = createRouter(Route, Route.of.Home());

@@ -17,13 +17,15 @@ const createRouter = (Route, defaultRoute) => {
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const toPath = (route, queryParams = {}) =>
-    prefix + Route.toURL(route) + getQueryString(queryParams);
+  const toPath = route =>
+    prefix + Route.toURL(route) + getQueryString(route.value && route.value.queryParams);
 
-  const routeMatcher = path =>
-    Object.assign(Route.matchOr(() => defaultRoute, getPathWithoutQuery(path)), {
-      queryParams: queryString.parse(getQuery(path))
+  const routeMatcher = path => {
+    const match = Route.matchOr(() => defaultRoute, getPathWithoutQuery(path));
+    return Object.assign(match, {
+      value: Object.assign({ queryParams: queryString.parse(getQuery(path)) }, match.value)
     });
+  };
 
   const initialRoute = routeMatcher(getPath());
 
@@ -32,9 +34,9 @@ const createRouter = (Route, defaultRoute) => {
   };
 
   const locationBarSync = route => {
-    const path = Route.toURL(route) + getQueryString(route.queryParams);
+    const path = toPath(route);
     if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+      window.history.pushState({}, "", path);
     }
   };
 
@@ -55,7 +57,6 @@ export const Route = type("Route", routeConfig);
 export const routes = keys => fn =>
   keys.reduce((result, key) => Object.assign(result, { [key]: fn }), {});
 
-const allKeys = Object.keys(routeConfig);
-export const allRoutes = routes(allKeys);
+export const allRoutes = routes(Object.keys(routeConfig));
 
 export const router = createRouter(Route, Route.of.Home());
