@@ -6,6 +6,6 @@ export const Home = {
       "div",
       m("div", "Home Page"),
       state.user && m("div", "You are logged in as: ", state.user),
-      state.route.value.queryParams.message && m("div", state.route.value.queryParams.message)
+      state.route.queryParams.message && m("div", state.route.queryParams.message)
     )
 };

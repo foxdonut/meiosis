@@ -17,13 +17,13 @@ const createRouter = (Route, defaultRoute) => {
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const toPath = route =>
-    prefix + Route.toURL(route) + getQueryString(route.value && route.value.queryParams);
+  const toPath = (route, queryParams = {}) =>
+    prefix + Route.toURL(route) + getQueryString(queryParams);
 
   const routeMatcher = path => {
     const match = Route.matchOr(() => defaultRoute, getPathWithoutQuery(path));
     return Object.assign(match, {
-      value: Object.assign({ queryParams: queryString.parse(getQuery(path)) }, match.value)
+      queryParams: queryString.parse(getQuery(path))
     });
   };
 
@@ -34,7 +34,7 @@ const createRouter = (Route, defaultRoute) => {
   };
 
   const locationBarSync = route => {
-    const path = toPath(route);
+    const path = toPath(route, route.queryParams);
     if (getPath() !== path) {
       window.history.pushState({}, "", path);
     }

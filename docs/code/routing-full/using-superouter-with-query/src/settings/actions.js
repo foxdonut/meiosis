@@ -4,6 +4,7 @@ export const Actions = update => ({
   logout: () =>
     update({
       user: null,
-      route: () => Route.Home({ queryParams: { message: "You have been logged out." } })
+      route: () =>
+        Object.assign(Route.of.Home(), { queryParams: { message: "You have been logged out." } })
     })
 });
