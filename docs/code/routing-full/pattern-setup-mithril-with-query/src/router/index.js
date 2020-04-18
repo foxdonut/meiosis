@@ -32,7 +32,7 @@ const createMithrilRouter = routeConfig => {
 
   const getRoute = (page, params = {}, queryParams = {}) => ({
     page,
-    params,
+    params: Object.assign(params, queryParams),
     url: toPath(page, params, queryParams).substring(prefix.length)
   });
 
