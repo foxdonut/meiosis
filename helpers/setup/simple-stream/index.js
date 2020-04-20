@@ -27,11 +27,7 @@ export const stream = initial => {
     return latestValue;
   };
   createdStream.map = mapFunction => {
-    let newInitial = undefined;
-    if (latestValue !== undefined) {
-      newInitial = mapFunction(latestValue);
-    }
-    const newStream = stream(newInitial);
+    const newStream = stream(latestValue !== undefined ? mapFunction(latestValue) : undefined);
 
     mapFunctions.push(value => {
       newStream(mapFunction(value));
