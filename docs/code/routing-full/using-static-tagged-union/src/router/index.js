@@ -57,6 +57,7 @@ const createRouter = routeConfig => {
 
   const locationBarSync = route => {
     const path = toPath(route);
+
     if (getPath() !== path) {
       window.history.pushState({}, "", path);
     }

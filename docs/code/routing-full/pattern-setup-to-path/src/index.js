@@ -25,5 +25,5 @@ router.start({ navigateTo: route => update({ route: () => route }) });
 
 states.map(state => {
   m.redraw();
-  router.locationBarSync(state.route.url);
+  router.locationBarSync(state.route);
 });

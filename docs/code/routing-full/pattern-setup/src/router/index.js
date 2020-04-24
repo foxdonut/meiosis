@@ -13,7 +13,9 @@ const createRouter = routeConfig => {
     window.onpopstate = () => navigateTo(routeMatcher(getPath()));
   };
 
-  const locationBarSync = path => {
+  const locationBarSync = route => {
+    const path = route.url;
+
     if (getPath() !== path) {
       window.history.pushState({}, "", prefix + path);
     }

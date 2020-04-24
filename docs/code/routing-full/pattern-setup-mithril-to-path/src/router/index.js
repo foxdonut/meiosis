@@ -13,6 +13,7 @@ const createMithrilRouter = routeConfig => {
 
   const toPath = (id, params = {}) => {
     const path = prefix + pathLookup[id];
+
     return [...path.matchAll(/(:[^/]*)/g)]
       .map(a => a[1])
       .reduce(

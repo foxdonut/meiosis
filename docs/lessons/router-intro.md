@@ -15,7 +15,7 @@ of the setups and tweak it according to your requirements.
 
 Instead of re-inventing the wheel, a router library is used to do the work of matching URLs to route
 paths. You can use a different library by adjusting the pattern setup code to match how your chosen
-library works. The examples in this document use one of the following router libraries:
+library works. The following router libraries are used in the examples of this documentation:
 
 - [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
 - [Mithril Router](https://mithril.js.org/route.html)
@@ -23,8 +23,8 @@ library works. The examples in this document use one of the following router lib
 
 Here is a summary of the approaches:
 
-- [Basic Pattern Setup](router-setup.html): a minimal setup that uses
-  [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher) and hardcoded
+- [Basic Pattern Setup](router-setup.html): introduces the pattern and provides a minimal setup that
+  uses [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher) and hardcoded
   paths in `href`s and actions.
 - [Query String Support](router-query-string.html): builds on the Basic Pattern Setup and adds
   support for using [query strings](https://en.wikipedia.org/wiki/Query_string).
@@ -39,6 +39,19 @@ Here is a summary of the approaches:
 - [Superouter](router-superouter.html): shows how to use
   [Superouter](https://gitlab.com/harth/superouter), which is a router library with built-in support
   for using [tagged unions](https://en.wikipedia.org/wiki/Tagged_union) with routes.
+
+Each setup is ready to use, so have a look and pick the setup that most closely matches your
+requirements. This mostly comes down to:
+
+- Do you need to use [query strings](https://en.wikipedia.org/wiki/Query_string)?
+- Do you prefer to use hardcoded paths (this is easier) or a `toPath` function (this is more
+  robust and resilient to changes)?
+- Do you want to use [Mithril Router](https://mithril.js.org/route.html) instead of a separate
+  router library?
+- Do you want to use [tagged unions](https://en.wikipedia.org/wiki/Tagged_union) with routes (this
+  is also more robust and resilient to changes)?
+
+Let's get started by having a look at the [Basic Pattern Setup](router-setup.html).
 
 [Table of Contents](toc.html)
 

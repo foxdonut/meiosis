@@ -32,6 +32,7 @@ const createRouter = routeConfig => {
 
   const locationBarSync = route => {
     const path = route.url + getQueryString(route.queryParams);
+
     if (getPath() !== path) {
       window.history.pushState({}, "", prefix + path);
     }
