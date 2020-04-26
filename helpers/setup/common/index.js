@@ -76,34 +76,29 @@ export default ({ stream, accumulator, combine, app }) => {
   const scan = stream.scan;
 
   const update = createStream();
-  const actions = (Actions || (() => ({})))(update);
   const states = createStream();
+  const actions = (Actions || (() => ({})))(update, states);
 
   // context is { state, patch, previousState }
   // state is optionally updated by service patches; patch and previousState never change.
-  const runServices = context => {
-    const updatedContext = context;
-
-    for (let i = 0; i < services.length; i++) {
-      // a service should (optionally) return a patch
-      const servicePatch = services[i](updatedContext);
-      updatedContext.state = accumulatorFn(updatedContext.state, servicePatch);
-    }
-    return updatedContext;
-  };
-
-  const contexts = scan(
-    (context, patch) =>
-      runServices({
-        previousState: context.state,
-        state: accumulatorFn(context.state, patch),
-        patch
-      }),
-    runServices({ state: initial, previousState: {} }),
+  scan(
+    (context, patch) => ({
+      previousState: context.state,
+      state: accumulatorFn(context.state, patch),
+      patch
+    }),
+    { state: initial, previousState: {} },
     update
-  );
-
-  contexts
+  )
+    .map(context =>
+      services.reduce(
+        (context, service) =>
+          Object.assign(context, {
+            state: accumulatorFn(context.state, service(context))
+          }),
+        context
+      )
+    )
     .map(context => {
       if (context.state !== states()) {
         states(context.state);
