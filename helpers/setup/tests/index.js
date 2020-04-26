@@ -160,7 +160,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update({ interaction: true });
           this.increment();
         }
@@ -773,7 +773,7 @@ const functionPatchTest = (streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update(R.assoc("interaction", true));
           this.increment();
         }
@@ -1436,7 +1436,7 @@ const immerTest = (streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update(state => {
             state.interaction = true;
           });
