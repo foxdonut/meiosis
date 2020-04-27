@@ -4,13 +4,15 @@ import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
+import { NotFound } from "../notFound";
 
 const componentMap = {
   Home,
   Login,
   Settings,
   Tea,
-  TeaDetails: Tea
+  TeaDetails: Tea,
+  NotFound: NotFound
 };
 
 export const Root = {
