@@ -5,6 +5,7 @@ import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch";
+import { NotFound } from "../notFound";
 import { Route, router } from "../router";
 
 const componentMap = {
@@ -13,7 +14,8 @@ const componentMap = {
   Settings,
   Tea,
   TeaDetails: Tea,
-  TeaSearch
+  TeaSearch,
+  NotFound
 };
 
 export const Root = {

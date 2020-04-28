@@ -33,14 +33,14 @@ const createRouter = routeConfig => {
   const initialRoute = routeMatcher(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
+    window.onhashchange = () => navigateTo(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {
     const path = route.url;
 
     if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+      window.location.hash = prefix + path;
     }
   };
 
@@ -52,7 +52,8 @@ export const Route = {
   Login: "Login",
   Settings: "Settings",
   Tea: "Tea",
-  TeaDetails: "TeaDetails"
+  TeaDetails: "TeaDetails",
+  NotFound: "NotFound"
 };
 
 const routeConfig = {
@@ -60,7 +61,8 @@ const routeConfig = {
   "/login": Route.Login,
   "/settings": Route.Settings,
   "/tea": Route.Tea,
-  "/tea/:id": Route.TeaDetails
+  "/tea/:id": Route.TeaDetails,
+  "/*": Route.NotFound
 };
 
 export const router = createRouter(routeConfig);

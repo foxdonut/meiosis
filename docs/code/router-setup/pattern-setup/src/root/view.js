@@ -12,7 +12,7 @@ const componentMap = {
   Settings,
   Tea,
   TeaDetails: Tea,
-  NotFound: NotFound
+  NotFound
 };
 
 export const Root = {

@@ -42,7 +42,8 @@ export const Route = {
   Login: "Login",
   Settings: "Settings",
   Tea: "Tea",
-  TeaDetails: "TeaDetails"
+  TeaDetails: "TeaDetails",
+  NotFound: "NotFound"
 };
 
 const routeConfig = {
@@ -50,7 +51,8 @@ const routeConfig = {
   "/login": Route.Login,
   "/settings": Route.Settings,
   "/tea": Route.Tea,
-  "/tea/:id": Route.TeaDetails
+  "/tea/:id": Route.TeaDetails,
+  "/*": Route.NotFound
 };
 
 export const router = createRouter(routeConfig);
