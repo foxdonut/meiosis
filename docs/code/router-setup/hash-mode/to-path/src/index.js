@@ -19,7 +19,9 @@ meiosisTracer({
   streams: [{ stream: states, label: "states" }]
 });
 
-m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), actions }) });
+m.mount(document.getElementById("app"), {
+  view: () => m(App, { state: states(), update, actions })
+});
 
 router.start({ navigateTo: route => update({ route: () => route }) });
 

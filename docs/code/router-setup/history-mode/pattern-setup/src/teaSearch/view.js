@@ -1,11 +1,9 @@
 import m from "mithril";
 
-import { Route, router } from "../router";
-
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
-  view: ({ attrs: { state } }) => [
+  view: ({ attrs: { state, update } }) => [
     m("h3", "Tea Search Page"),
     m(
       ".row",
@@ -19,12 +17,13 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  href: router.toPath(Route.TeaSearch, {}, { type })
+                  href: "#",
+                  onclick: () => update({ teaType: type })
                 },
                 type
               )
             ]),
-            m("a", { href: router.toPath(Route.TeaSearch) }, "All")
+            m("a", { href: "#", onclick: () => update({ teaType: null }) }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",
@@ -32,9 +31,7 @@ export const TeaSearch = () => ({
             m(
               "tbody",
               state.searchTeas
-                .filter(
-                  tea => !state.route.queryParams.type || tea.type === state.route.queryParams.type
-                )
+                .filter(tea => !state.teaType || tea.type === state.teaType)
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )
           )

@@ -48,3 +48,6 @@ h4 {
   border: 1px solid #336699;
   padding: 12px;
 }
+ul li {
+  list-style-type: square;
+}

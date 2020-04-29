@@ -41,6 +41,7 @@ export const Route = {
   Home: "Home",
   Login: "Login",
   Settings: "Settings",
+  TeaSearch: "TeaSearch",
   Tea: "Tea",
   TeaDetails: "TeaDetails",
   NotFound: "NotFound"
@@ -50,6 +51,7 @@ const routeConfig = {
   "/": Route.Home,
   "/login": Route.Login,
   "/settings": Route.Settings,
+  "/tea/search": Route.TeaSearch,
   "/tea": Route.Tea,
   "/tea/:id": Route.TeaDetails,
   "/*": Route.NotFound

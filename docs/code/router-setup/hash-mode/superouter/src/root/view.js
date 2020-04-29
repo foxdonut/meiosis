@@ -4,6 +4,7 @@ import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
+import { TeaSearch } from "../teaSearch";
 import { Route, router } from "../router";
 
 const componentMap = Route.fold({
@@ -11,7 +12,8 @@ const componentMap = Route.fold({
   Login: () => Login,
   Settings: () => Settings,
   Tea: () => Tea,
-  TeaDetails: () => Tea
+  TeaDetails: () => Tea,
+  TeaSearch: () => TeaSearch
 });
 
 export const Root = {
@@ -31,7 +33,11 @@ export const Root = {
             "li" + isActive(Settings),
             m("a", { href: router.toPath(Route.of.Settings()) }, "Settings")
           ),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea"))
+          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea")),
+          m(
+            "li" + isActive(TeaSearch),
+            m("a", { href: router.toPath(Route.of.TeaSearch()) }, "Tea Search")
+          )
         )
       ),
       m(Component, { state, actions }),
@@ -41,7 +47,7 @@ export const Root = {
         "div",
         {
           style: {
-            visibility: state.loadTeas ? "visible" : "hidden"
+            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))

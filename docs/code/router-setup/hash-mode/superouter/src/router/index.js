@@ -1,13 +1,31 @@
 import { type } from "superouter";
+import queryString from "query-string";
 
 const createRouter = (Route, defaultRoute) => {
   const prefix = "#";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
+  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
-  const toPath = route => prefix + Route.toURL(route);
+  const getQuery = path => {
+    const idx = path.indexOf("?");
+    return idx >= 0 ? path.substring(idx + 1) : "";
+  };
 
-  const routeMatcher = path => Route.matchOr(() => defaultRoute, path);
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
+
+  const toPath = (route, queryParams = {}) =>
+    prefix + Route.toURL(route) + getQueryString(queryParams);
+
+  const routeMatcher = path => {
+    const match = Route.matchOr(() => defaultRoute, getPathWithoutQuery(path));
+    return Object.assign(match, {
+      queryParams: queryString.parse(getQuery(path))
+    });
+  };
 
   const initialRoute = routeMatcher(getPath());
 
@@ -16,7 +34,7 @@ const createRouter = (Route, defaultRoute) => {
   };
 
   const locationBarSync = route => {
-    const path = toPath(route).substring(prefix.length);
+    const path = toPath(route, route.queryParams).substring(prefix.length);
 
     if (getPath() !== path) {
       window.location.hash = prefix + path;
@@ -31,7 +49,8 @@ const routeConfig = {
   Login: "/login",
   Settings: "/settings",
   Tea: "/tea",
-  TeaDetails: "/tea/:id"
+  TeaDetails: "/tea/:id",
+  TeaSearch: "/tea/search"
 };
 
 export const Route = type("Route", routeConfig);

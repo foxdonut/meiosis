@@ -19,12 +19,12 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  href: router.toPath(Route.TeaSearch, {}, { type })
+                  href: router.toPath(Route.of.TeaSearch(), { type })
                 },
                 type
               )
             ]),
-            m("a", { href: router.toPath(Route.TeaSearch) }, "All")
+            m("a", { href: router.toPath(Route.of.TeaSearch()) }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",

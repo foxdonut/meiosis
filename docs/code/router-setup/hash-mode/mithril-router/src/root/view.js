@@ -4,6 +4,7 @@ import { Home } from "../home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
+import { TeaSearch } from "../teaSearch";
 import { Route, router } from "../router";
 
 const componentMap = {
@@ -11,7 +12,8 @@ const componentMap = {
   Login,
   Settings,
   Tea,
-  TeaDetails: Tea
+  TeaDetails: Tea,
+  TeaSearch
 };
 
 export const Root = {
@@ -28,7 +30,11 @@ export const Root = {
           m("li" + isActive(Home), m("a", { href: router.toPath(Route.Home) }, "Home")),
           m("li" + isActive(Login), m("a", { href: router.toPath(Route.Login) }, "Login")),
           m("li" + isActive(Settings), m("a", { href: router.toPath(Route.Settings) }, "Settings")),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.Tea) }, "Tea"))
+          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.Tea) }, "Tea")),
+          m(
+            "li" + isActive(TeaSearch),
+            m("a", { href: router.toPath(Route.TeaSearch) }, "Tea Search")
+          )
         )
       ),
       m(Component, { state, actions }),
@@ -38,7 +44,7 @@ export const Root = {
         "div",
         {
           style: {
-            visibility: state.loadTeas ? "visible" : "hidden"
+            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))

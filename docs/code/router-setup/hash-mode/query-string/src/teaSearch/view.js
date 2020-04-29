@@ -24,10 +24,7 @@ export const TeaSearch = () => ({
               "tbody",
               state.searchTeas
                 .filter(
-                  tea =>
-                    (!state.route.queryParams.type || tea.type === state.route.queryParams.type) &&
-                    (!state.route.queryParams.description ||
-                      tea.description.includes(state.route.queryParams.description))
+                  tea => !state.route.queryParams.type || tea.type === state.route.queryParams.type
                 )
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )

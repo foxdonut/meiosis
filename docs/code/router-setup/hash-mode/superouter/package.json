@@ -30,6 +30,7 @@
     "meiosis-setup": "^4.0.2",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
+    "query-string": "^6.12.1",
     "superouter": "^0.3.2"
   },
   "devDependencies": {
