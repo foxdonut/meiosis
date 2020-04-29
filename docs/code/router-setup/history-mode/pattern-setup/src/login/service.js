@@ -2,7 +2,7 @@ import { Route } from "../router";
 
 export const service = ({ state, previousState }) => {
   if (state.route.page === Route.Login) {
-    if (!state.login) {
+    if (!state.login || state.login.username == null) {
       return {
         login: {
           username: "",

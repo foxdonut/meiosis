@@ -11,9 +11,9 @@ export const createApp = () => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  services: [login.service, settings.service, tea.service, teaDetails.service, teaSearch.service],
+  services: [settings.service, login.service, tea.service, teaDetails.service, teaSearch.service],
 
-  effects: [settings.effect, tea.effect, teaSearch.effect]
+  effects: [tea.effect, teaSearch.effect]
 });
 
 export { App } from "./view";

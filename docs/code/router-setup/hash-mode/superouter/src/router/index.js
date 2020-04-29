@@ -30,14 +30,14 @@ const createRouter = (Route, defaultRoute) => {
   const initialRoute = routeMatcher(getPath());
 
   const start = ({ navigateTo }) => {
-    window.onhashchange = () => navigateTo(routeMatcher(getPath()));
+    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {
     const path = toPath(route, route.queryParams).substring(prefix.length);
 
     if (getPath() !== path) {
-      window.location.hash = prefix + path;
+      window.history.pushState({}, "", prefix + path);
     }
   };
 

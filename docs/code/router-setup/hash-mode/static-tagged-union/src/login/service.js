@@ -3,7 +3,7 @@ import { fold } from "static-tagged-union";
 export const service = ({ state, previousState }) =>
   fold({
     Login: () => {
-      if (!state.login) {
+      if (!state.login || state.login.username == null) {
         return {
           login: {
             username: "",

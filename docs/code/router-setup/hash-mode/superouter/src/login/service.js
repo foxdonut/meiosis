@@ -15,7 +15,7 @@ export const service = ({ state, previousState }) =>
       }
     }),
     Login: () => {
-      if (!state.login) {
+      if (!state.login || state.login.username == null) {
         return {
           login: {
             username: "",

@@ -13,15 +13,15 @@ export const createApp = initialRoute => ({
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
   services: [
+    settings.service,
     home.service,
     login.service,
-    settings.service,
     tea.service,
     teaDetails.service,
     teaSearch.service
   ],
 
-  effects: [settings.effect, tea.effect, teaSearch.effect]
+  effects: [tea.effect, teaSearch.effect]
 });
 
 export { App } from "./view";
