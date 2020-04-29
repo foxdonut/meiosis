@@ -1,33 +1,53 @@
 import createRouteMatcher from "feather-route-matcher";
+import queryString from "query-string";
 
 const createRouter = routeConfig => {
   const prefix = "#";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
+  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
+  const getQuery = path => {
+    const idx = path.indexOf("?");
+    return idx >= 0 ? path.substring(idx + 1) : "";
+  };
+
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
 
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, id]) => Object.assign(result, { [id]: path }),
     {}
   );
 
-  const toPath = (id, params = {}) => {
+  const toPath = (id, params = {}, queryParams = {}) => {
     const path = prefix + pathLookup[id];
 
-    return [...path.matchAll(/(:[^/]*)/g)]
-      .map(a => a[1])
-      .reduce(
-        (result, pathParam) =>
-          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-        path
-      );
+    return (
+      [...path.matchAll(/(:[^/]*)/g)]
+        .map(a => a[1])
+        .reduce(
+          (result, pathParam) =>
+            result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+          path
+        ) + getQueryString(queryParams)
+    );
   };
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const matcher = createRouteMatcher(routeConfig);
 
-  const getRoute = (page, params = {}) => ({
+  const routeMatcher = path =>
+    Object.assign(matcher(getPathWithoutQuery(path)), {
+      queryParams: queryString.parse(getQuery(path))
+    });
+
+  const getRoute = (page, params = {}, queryParams = {}) => ({
     page,
     params,
-    url: toPath(page, params).substring(prefix.length)
+    queryParams,
+    url: toPath(page, params, queryParams).substring(prefix.length)
   });
 
   const initialRoute = routeMatcher(getPath());
@@ -37,7 +57,7 @@ const createRouter = routeConfig => {
   };
 
   const locationBarSync = route => {
-    const path = route.url;
+    const path = route.url + getQueryString(route.queryParams);
 
     if (getPath() !== path) {
       window.location.hash = prefix + path;

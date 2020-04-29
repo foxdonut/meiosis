@@ -1,4 +1,3 @@
-import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -12,14 +11,7 @@ export const createApp = initialRoute => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  services: [
-    home.service,
-    login.service,
-    settings.service,
-    tea.service,
-    teaDetails.service,
-    teaSearch.service
-  ],
+  services: [login.service, settings.service, tea.service, teaDetails.service, teaSearch.service],
 
   effects: [settings.effect, tea.effect, teaSearch.effect]
 });
