@@ -1,0 +1,43 @@
+{
+  "name": "router-setup-mithril-query-string",
+  "version": "1.0.0",
+  "private": true,
+  "description": "meiosis docs example",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "meiosis",
+    "mithril",
+    "router",
+    "routing",
+    "state",
+    "state management"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "meiosis-setup": "^4.0.2",
+    "mergerino": "^0.4.0",
+    "mithril": "^2.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
+    "meiosis-tracer": "^3.0.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
