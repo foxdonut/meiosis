@@ -41,9 +41,9 @@ export const Route = {
   Home: "Home",
   Login: "Login",
   Settings: "Settings",
-  TeaSearch: "TeaSearch",
   Tea: "Tea",
   TeaDetails: "TeaDetails",
+  TeaSearch: "TeaSearch",
   NotFound: "NotFound"
 };
 
