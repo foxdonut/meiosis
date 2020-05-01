@@ -6,7 +6,7 @@
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
-- [Services](services.html)
+- [Services and Effects](services-and-effects.html)
 - Using a Router
   - [Read This First](router-intro.html)
   - [Basic Pattern Setup](router-setup.html)

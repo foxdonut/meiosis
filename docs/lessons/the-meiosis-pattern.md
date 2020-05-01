@@ -14,6 +14,9 @@ for your convenience.
 This is a quick summary of the Meiosis Pattern:
 
 - Separate state management code from view code.
+- Use a simple stream library such as [flyd](https://github.com/paldepind/flyd),
+[simpleStream from meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup),
+or, if you're using Mithril, [Mithril Stream](https://mithril.js.org/stream.html).
 - Start with an initial state.
 - Create an `update` stream of **patches**.
 - Patches can be
@@ -22,38 +25,92 @@ This is a quick summary of the Meiosis Pattern:
 or your own patches.
 - Create an `actions` object of functions that issue patches onto the `update` stream.
 - Create a `states` stream by using `scan` on the `update` stream with the initial state, and
-`merge` for Mergerino, or `(x, f) => f(x)` for function patches.
+`merge` for Mergerino, or `(state, patch) => patch(state)` for function patches.
 - Pass `state` and `actions` to views (see below for details.)
 
 Here is the code to set up the Meiosis Pattern:
 
-```js
+```javascript
 const app = {
   initial: ...,
-  Actions: update => {
+  Actions: (update, getState) => {
     return ...
   }
 };
 
-const update = flyd.stream();
+const update = stream();
 
 // Using Mergerino:
-const states = flyd.scan(merge, app.initial, update);
+const states = scan(merge, app.initial, update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) => f(x), app.initial, update);
+const states = scan((state, patch) => patch(state), app.initial, update);
 
-const actions = app.Actions(update);
+const actions = app.Actions(update, states);
 ```
 
 Then, pass `state` and `actions` to views.
 
-Optionally, add [Services](services.html).
+Optionally, add [Services and Effects](services-and-effects.html):
+
+```javascript
+const app = {
+  initial: ...,
+  Actions: (update, getState) => {
+    return ...
+  },
+  // services are ({ state, previousState, patch }) => patch
+  services: [...],
+  // effects are ({ state, previousState, patch, update, actions }) => {
+  //   call update(...) or actions.someAction(...);
+  // }
+  effects: [...]
+}
+
+const update = stream();
+
+// Using Mergerino:
+const accumulator = merge;
+
+// Using Function Patches:
+const accumulator = (state, patch) => patch(state);
+
+// a context has { state, previousState, patch }
+const contexts =
+  // scan to apply patches
+  scan(
+    (context, patch) => ({
+      previousState: context.state,
+      state: accumulator(context.state, patch),
+      patch
+    }),
+    { state: app.initial, previousState: {} },
+    update
+  )
+  // run services
+  .map(context =>
+    app.services.reduce((context, service) => Object.assign(context, {
+      state: accumulator(context.state, service(context))
+    }), context)
+  );
+
+// the states stream just extracts the state from the context
+const states = contexts.map(context => context.state);
+
+const actions = app.Actions(update, states);
+
+// apply effects
+contexts.map(context => {
+  app.effects.map(effect => effect(Object.assign(context, { update, actions })))
+});
+```
+
+Next, wire up your view.
 
 <a name="using_mithril"></a>
 ### [Using Mithril](#using_mithril)
 
-```js
+```javascript
 const App = {
   view: function({ attrs: { state, actions } }) {
     // render view according to state, call actions to trigger changes
@@ -69,7 +126,7 @@ m.mount(document.getElementById("app"), {
 <a name="using_react"></a>
 ### [Using React](#using_react)
 
-```js
+```javascript
 const App = ({ states, actions }) => {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
@@ -91,7 +148,7 @@ ReactDOM.render(<App states={states} actions={actions} />,
 <a name="using_preact"></a>
 ### [Using Preact](#using_preact)
 
-```js
+```javascript
 const App = ({ state, actions }) => {
   const [state, setState] = useState(states());
   states.map(setState);
@@ -108,7 +165,7 @@ preact.render(<App states={states} actions={actions} />,
 <a name="using_lit_html"></a>
 ### [Using lit-html](#using_lit_html)
 
-```js
+```javascript
 const App = ({ states, actions }) => {
   // render view according to state, call actions to trigger changes
   // pass (state, actions) to other view functions.
