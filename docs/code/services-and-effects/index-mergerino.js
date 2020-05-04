@@ -3,18 +3,49 @@ const [stream, scan] = [m.stream, m.stream.scan];
 const accumulator = mergerino;
 
 const app = {
-  initial: {},
+  initial: {
+    page: "Home"
+  },
 
   Actions: update => ({
-    removeBox: i =>
-      update({
-        boxes: xs => xs.filter((x, j) => i != j)
-      })
+    loadData: () =>
+      setTimeout(
+        () =>
+          update({
+            data: ["One", "Two"]
+          }),
+        1500
+      )
   }),
 
-  services: [],
+  services: [
+    ({ state }) => {
+      if (state.page === "Login") {
+        if (!state.login) {
+          return { login: { username: "", password: "" } };
+        }
+      } else if (state.login) {
+        return { login: undefined };
+      }
+    },
+    ({ state }) => {
+      if (state.page === "Data") {
+        if (!state.data) {
+          return { data: "loading" };
+        }
+      } else if (state.data) {
+        return { data: undefined };
+      }
+    }
+  ],
 
-  effects: []
+  effects: [
+    ({ state, actions }) => {
+      if (state.data === "loading") {
+        actions.loadData();
+      }
+    }
+  ]
 };
 
 const update = stream();
@@ -52,16 +83,92 @@ const actions = app.Actions(update, states);
 
 // apply effects
 contexts.map(context => {
-  app.effects.map(effect =>
+  app.effects.forEach(effect =>
     effect(Object.assign(context, { update, actions }))
   );
 });
 
 const App = {
-  view: ({ attrs: { _state, _actions } }) =>
-    m("div", "Hello")
+  view: ({ attrs: { state, update } }) => [
+    m(
+      "div",
+      m(
+        "a",
+        {
+          href: "#",
+          onclick: evt => {
+            evt.preventDefault();
+            update({ page: "Home" });
+          }
+        },
+        "Home"
+      ),
+      m("span", " | "),
+      m(
+        "a",
+        {
+          href: "#",
+          onclick: evt => {
+            evt.preventDefault();
+            update({ page: "Login" });
+          }
+        },
+        "Login"
+      ),
+      m("span", " | "),
+      m(
+        "a",
+        {
+          href: "#",
+          onclick: evt => {
+            evt.preventDefault();
+            update({ page: "Data" });
+          }
+        },
+        "Data"
+      )
+    ),
+    state.page === "Home"
+      ? m("h4", "Home page")
+      : state.page === "Login"
+      ? [
+          m("h4", "Login page"),
+          m(
+            "div",
+            m("span", "Username:"),
+            m("input[type=text]", {
+              value: state.login.username,
+              oninput: evt =>
+                update({
+                  login: { username: evt.target.value }
+                })
+            })
+          ),
+          m(
+            "div",
+            m("span", "Password:"),
+            m("input[type=password]", {
+              value: state.login.password,
+              oninput: evt =>
+                update({
+                  login: { password: evt.target.value }
+                })
+            })
+          )
+        ]
+      : state.page === "Data"
+      ? [
+          m("h4", "Data page"),
+          state.data === "loading"
+            ? m("div", "Loading, please wait...")
+            : m("ul", state.data.map(item => m("li", item)))
+        ]
+      : null
+  ]
 };
 
 m.mount(document.getElementById("app"), {
-  view: () => m(App, { state: states(), actions })
+  view: () => m(App, { state: states(), update, actions })
 });
+
+states.map(() => m.redraw());

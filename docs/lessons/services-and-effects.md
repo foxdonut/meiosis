@@ -13,77 +13,147 @@ different approach to James' services, which is described in the [Services](serv
 
 ### Services and Effects Overview
 
-In Meiosis, _services_ are functions that run on every update. These functions can alter the state
-_before_ the final state is produced. To achieve this, services can return patches which are applied
-to the state. After all services have executed, the resulting state is sent to the view.
+![Services and Effects](services-and-effects.svg)
 
-After the view has re-rendered, _effects_ can trigger more updates. Effects are functions that may
-call `update` or `actions` to trigger more updates. Typically, effects are for asynchronous updates,
-such as fetching data from the server.
+In Meiosis, **services** are functions that run every time there is an update. Services can alter
+the state _before_ the final state is sent to the `states` stream. To change the state, services
+return patches which are applied to the state. After all services have executed, the resulting state
+is sent to the states stream, and the view is rendered.
+
+After the view has rendered, **effects** can trigger more updates. Effects are functions that may
+call `update` or `actions` to trigger more updates.
 
 ### Services
 
-A service function receives `({ state, previousState, patch })` and returns a patch.
+A service function receives `({ state, previousState, patch })` and returns a patch to alter the
+state. If a service does not need to alter the state, it simply does not return a patch.
 
 Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
 made by a previous service.
 
+We can use service functions for computed properties, setting up an initial blank state for a page,
+cleaning up state after leaving a page, and any other state changes that we want to perform
+synchronously before rendering the view.
+
 ### Effects
 
-Effect functions receive `({ state, previousState, patch, update, actions })` and make asynchronous
-calls to `update` and/or `actions`.
+Effect functions receive `({ state, previousState, patch, update, actions })` and can make
+asynchronous calls to `update` and/or `actions` to trigger more updates. Since triggering an update
+will call the effect again, **effect functions must change the state in a way that will avoid an
+infinite loop**.
 
-Our app component structure is thus:
+Effects are good for tasks such as loading asynchronous data or triggering other types of
+asynchronous updates.
 
-```javascript
-const app = {
-  initial: initialState,
-  Actions: (update, getState) => actions,
-  services: [({ state, previousState, state }) => patch?],
-  effects: [({ state, prevousState, patch, update, actions }) => void]
-};
-```
+### Pattern Setup
 
-### Using Mergerino
-
-In this section, we'll use [Mergerino](https://github.com/fuzetsu/mergerino), which we looked at in
-the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html). The pattern would
-work the same way with
-[function patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html).
-
-To use Mergerino, we emit patches as objects and we use `merge` as our accumulator:
+Let's see how we can set up services and effects with Meiosis. We'll start with our `update` stream:
 
 ```javascript
-const states = m.stream.scan(merge, initial, update);
-```
-
-Each service function takes the state and may return a patch object.
-
-A service function does not need to return anything, however. The `storage.service` function is one
-such function, as it only stores the state into local storage:
-
-```javascript
-const storage = {
-  service: ({ state }) => {
-    localStorage.setItem(
-      "v1",
-      JSON.stringify({ boxes: state.boxes })
-    );
-  }
-};
-```
-
-```javascript
-// stream and scan come from flyd, simpleStream, Mithril Stream, ...
-
 const update = stream();
+```
 
+Next, our accumulator function. This function needs to ignore `null` or `undefined` patches. That
+way, we can write services that don't return anything when they don't need to alter the state.
+
+If we're using [Mergerino](https://github.com/fuzetsu/mergerino), the accumulator is `merge`. This
+function already ignores empty patches.
+
+```javascript
 // Using Mergerino:
 const accumulator = merge;
+```
 
+If we're using
+[function patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), we make a
+slight adjustment to check whether the patch is truthy before applying it. Otherwise, we just return
+the state.
+
+```javascript
 // Using Function Patches:
 const accumulator = (state, patch) => patch ? patch(state) : state;
+```
 
+Next, we want to pass `({ state, previousState, patch })` to services so that they have everything
+they might need in order to decide if and how to alter the state. We'll call this `context`.
+
+Now, every time a patch arrives on the `update` stream, we want to produce a `context` object. The
+`previousState` is the state before the patch is applied, and the `state` is the state with the
+patch applied. Initially, `state` is our app's initial state, and `previousState` is empty.
+
+We create a stream of `context`s using `scan`:
+
+```javascript
+// a context has { state, previousState, patch }
+const contexts =
+  // scan to apply patches
+  scan(
+    (context, patch) => ({
+      previousState: context.state,
+      state: accumulator(context.state, patch),
+      patch
+    }),
+    { state: app.initial, previousState: {} },
+    update
+  );
+```
+
+So we now have the context information for services. We want to pass the context to each service,
+one after the other, and apply the patches returned by the services. We do this with `map` on the
+stream of contexts, and we run all the services with `reduce`:
+
+```javascript
+// a context has { state, previousState, patch }
+const contexts =
+  // scan to apply patches
+  scan(
+    (context, patch) => ({
+      previousState: context.state,
+      state: accumulator(context.state, patch),
+      patch
+    }),
+    { state: app.initial, previousState: {} },
+    update
+  )
+  // run services
+  .map(context =>
+    app.services.reduce((context, service) => Object.assign(context, {
+      state: accumulator(context.state, service(context))
+    }), context)
+  );
+```
+
+The `previousState` and `patch` never change on the context, but we update the `state` by applying
+the patches returned by the services.
+
+So we now have a stream of `context`s. To get the `states` stream, we just get the `state` out of
+the `context`:
+
+```javascript
+// the states stream just extracts the state from the context
+const states = contexts.map(context => context.state);
+```
+
+Next, we create our actions:
+
+```javascript
+// create actions
+const actions = app.Actions(update, states);
+```
+
+Finally, we trigger effects. This is simply a matter of calling each effect function and passing the
+`context` along with `update` and `actions`:
+
+```javascript
+// apply effects
+contexts.map(context => {
+  app.effects.forEach(effect => effect(Object.assign(context, { update, actions })))
+});
+```
+
+All together, here is our pattern setup:
+
+```javascript
 // a context has { state, previousState, patch }
 const contexts =
   // scan to apply patches
@@ -106,25 +176,25 @@ const contexts =
 // the states stream just extracts the state from the context
 const states = contexts.map(context => context.state);
 
+// create actions
 const actions = app.Actions(update, states);
 
 // apply effects
 contexts.map(context => {
-  app.effects.map(effect => effect(Object.assign(context, { update, actions })))
+  app.effects.forEach(effect => effect(Object.assign(context, { update, actions })))
 });
 ```
 
-You will find the complete example below.
+Something more here..
+
+### Using Services and Effects
+
+Try out and experiment with the complete example below.
 
 @flems code/services-and-effects/index-mergerino.js,app.html mithril,mithril-stream,mergerino 700 60
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
-
------
-
-**For more examples of using services and effects, please see the
-[Meiosis Routing](http://meiosis.js.org/docs/routing.html) documentation.**
 
 -----
 
