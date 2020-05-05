@@ -64,10 +64,11 @@ export default ({ stream, accumulator, combine, app }) => {
   }
 
   app = app || {};
-  let { initial, Actions, services, effects } = app;
+  let { initial, Actions, services, Effects } = app;
   initial = initial || {};
+  Actions = Actions || (() => ({}));
   services = services || [];
-  effects = effects || [];
+  Effects = Effects || (() => []);
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -86,17 +87,10 @@ export default ({ stream, accumulator, combine, app }) => {
     update
   );
 
-  states.map(state => {
-    const context = {
-      state,
-      update,
-      actions
-    };
+  const actions = Actions(update, states);
+  const effects = Effects(update, actions);
 
-    effects.forEach(effect => effect(context));
-  });
-
-  const actions = (Actions || (() => ({})))(update, states);
+  states.map(state => effects.forEach(effect => effect(state)));
 
   return { update, states, actions };
 };

@@ -102,14 +102,14 @@ const mergerinoTest = (merge, streamLib, label) => {
         increment: amount => update({ count: x => x + amount })
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = (update, actions) => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update({ service: true });
           }
@@ -119,7 +119,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states, actions } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -207,15 +207,15 @@ const mergerinoTest = (merge, streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update({ count: x => x + 1 });
             update({ effect1: true });
           }
         },
-        ({ state }) => {
+        state => {
           if (state.count === 1) {
             update({ effect2: true });
           }
@@ -225,7 +225,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       update({ count: 1 });
@@ -239,8 +239,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update({ effect: true });
@@ -251,7 +251,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       update({ count: 1 });
@@ -262,8 +262,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update({ effect: true });
           }
@@ -273,7 +273,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -335,8 +335,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.patch) {
             update({ patch: undefined, effect: true });
           }
@@ -346,7 +346,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
@@ -370,8 +370,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update({ data: "Loaded" });
@@ -383,7 +383,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update({ route: "PageB" });
@@ -409,8 +409,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update({ route: state.nextRoute, nextRoute: undefined, data: "Loaded" });
@@ -422,7 +422,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update({ nextRoute: "PageB" });
@@ -451,8 +451,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update({
               route: state.redirect.route,
@@ -466,7 +466,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update({ nextRoute: "PageB" });
@@ -685,14 +685,14 @@ const functionPatchTest = (streamLib, label) => {
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = (update, actions) => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update(R.assoc("service", true));
           }
@@ -701,7 +701,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states, actions } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -788,15 +788,15 @@ const functionPatchTest = (streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update(R.assoc("count", 2));
             update(R.assoc("effect1", true));
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1) {
             update(R.assoc("effect2", true));
           }
@@ -805,7 +805,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       update(R.assoc("count", 1));
@@ -819,8 +819,8 @@ const functionPatchTest = (streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update(R.assoc("effect", true));
@@ -830,7 +830,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       update(R.assoc("count", 1));
@@ -841,8 +841,8 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update(R.assoc("effect", true));
           }
@@ -851,7 +851,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -911,8 +911,8 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.patch) {
             update([R.assoc("effect", true), R.dissoc("patch")]);
           }
@@ -921,7 +921,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
@@ -945,8 +945,8 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(R.assoc("data", "Loaded"));
@@ -957,7 +957,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(R.assoc("route", "PageB"));
@@ -983,8 +983,8 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update([
@@ -999,7 +999,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(R.assoc("nextRoute", "PageB"));
@@ -1028,8 +1028,8 @@ const functionPatchTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update([
               R.assoc("route", state.redirect.route),
@@ -1042,7 +1042,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(R.assoc("nextRoute", "PageB"));
@@ -1298,14 +1298,14 @@ const immerTest = (streamLib, label) => {
           })
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = update => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update(draft => {
               draft.service = true;
@@ -1317,7 +1317,7 @@ const immerTest = (streamLib, label) => {
       const { update, states, actions } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -1431,8 +1431,8 @@ const immerTest = (streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update(draft => {
@@ -1443,7 +1443,7 @@ const immerTest = (streamLib, label) => {
             });
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1) {
             update(draft => {
               draft.effect2 = true;
@@ -1455,7 +1455,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       update(state => {
@@ -1471,8 +1471,8 @@ const immerTest = (streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update(draft => {
@@ -1485,7 +1485,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       update(state => {
@@ -1498,8 +1498,8 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update(draft => {
               draft.effect = true;
@@ -1511,7 +1511,7 @@ const immerTest = (streamLib, label) => {
       const { states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -1584,8 +1584,8 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.patch) {
             update(draft => {
               draft.effect = true;
@@ -1598,7 +1598,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
@@ -1626,8 +1626,8 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(draft => {
@@ -1641,7 +1641,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
@@ -1671,8 +1671,8 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(draft => {
@@ -1688,7 +1688,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
@@ -1719,8 +1719,8 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update(draft => {
               draft.route = state.redirect.route;
@@ -1734,7 +1734,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
