@@ -2,7 +2,7 @@ import { fold } from "static-tagged-union";
 
 import { Route } from "../router";
 
-export const service = ({ state }) =>
+export const service = state =>
   fold({
     Settings: () => {
       if (!state.user) {

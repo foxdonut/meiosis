@@ -2,7 +2,7 @@ import { fold } from "static-tagged-union";
 
 import { teaMap } from "./data";
 
-export const service = ({ state }) =>
+export const service = state =>
   fold({
     TeaDetails: ({ id }) => {
       if (!state.tea || !state.tea[id]) {

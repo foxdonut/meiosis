@@ -21,7 +21,7 @@ export const createApp = initialRoute => ({
     teaSearch.service
   ],
 
-  effects: [tea.effect, teaSearch.effect]
+  Effects: update => [tea.effect(update), teaSearch.effect(update)]
 });
 
 export { App } from "./view";

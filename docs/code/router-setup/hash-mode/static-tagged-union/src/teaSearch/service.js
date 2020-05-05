@@ -1,6 +1,6 @@
 import { fold } from "static-tagged-union";
 
-export const service = ({ state }) =>
+export const service = state =>
   fold({
     TeaSearch: () => {
       if (!state.searchTeas) {

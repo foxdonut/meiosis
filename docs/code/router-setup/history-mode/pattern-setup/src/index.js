@@ -1,16 +1,16 @@
-import meiosis from "meiosis-setup/mergerino";
-import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
 import m from "mithril";
+import stream from "mithril/stream";
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
 
+import { meiosis } from "./util";
 import { createApp, App } from "./app";
 import { router } from "./router";
 
 const app = createApp(router.initialRoute);
-const { states, update, actions } = meiosis({ stream: simpleStream, merge, app });
+const { states, update, actions } = meiosis({ stream, merge, app });
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({

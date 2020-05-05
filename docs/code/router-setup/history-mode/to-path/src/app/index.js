@@ -13,7 +13,7 @@ export const createApp = initialRoute => ({
 
   services: [settings.service, login.service, tea.service, teaDetails.service, teaSearch.service],
 
-  effects: [tea.effect, teaSearch.effect]
+  Effects: update => [tea.effect(update), teaSearch.effect(update)]
 });
 
 export { App } from "./view";

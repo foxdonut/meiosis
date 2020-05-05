@@ -1,6 +1,6 @@
 import { Route, allRoutes } from "../router";
 
-export const service = ({ state, previousState }) =>
+export const service = state =>
   Route.fold({
     ...allRoutes(() => {
       if (
@@ -9,7 +9,7 @@ export const service = ({ state, previousState }) =>
         (state.login.username || state.login.password) &&
         !confirm("You have unsaved data. Continue?")
       ) {
-        return () => previousState;
+        return { route: () => Route.of.Login() };
       } else if (state.login) {
         return { login: undefined };
       }

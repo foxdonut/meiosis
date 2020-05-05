@@ -1,7 +1,7 @@
 import { Route, allRoutes } from "../router";
 import { teaMap } from "./data";
 
-export const service = ({ state }) =>
+export const service = state =>
   Route.fold({
     ...allRoutes(() => {
       if (state.tea) {

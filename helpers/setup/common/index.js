@@ -82,7 +82,7 @@ export default ({ stream, accumulator, combine, app }) => {
     services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
   const states = scan(
-    (lastState, patch) => runServices(accumulatorFn(lastState, patch)),
+    (state, patch) => runServices(accumulatorFn(state, patch)),
     runServices(initial),
     update
   );

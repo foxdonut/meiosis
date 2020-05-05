@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-setup": "^4.0.2",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4"
   },

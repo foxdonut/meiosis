@@ -1,6 +1,6 @@
 import { Route, allRoutes, routes } from "../router";
 
-export const service = ({ state }) =>
+export const service = state =>
   Route.fold({
     ...allRoutes(() => {
       if (state.teas) {

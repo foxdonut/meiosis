@@ -1,6 +1,6 @@
-import { Route } from "../router";
+import { Route, router } from "../router";
 
-export const service = ({ state, previousState }) => {
+export const service = state => {
   if (state.route.page === Route.Login) {
     if (!state.login || state.login.username == null) {
       return {
@@ -17,7 +17,7 @@ export const service = ({ state, previousState }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return () => previousState;
+      return { route: () => router.getRoute(Route.Login) };
     } else if (state.login) {
       return { login: undefined };
     }
