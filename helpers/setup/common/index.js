@@ -7,7 +7,7 @@
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
- * should be `({ state, previousState, patch }) => patch?`.
+ * should be `state => patch?`.
  * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
  * should be `({ state, previousState, patch, update, actions }) => void`, with the function
  * optionally calling `update` and/or `actions`.
@@ -31,9 +31,9 @@
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
  *
- * Patch is merged in to the state by default. Services have access to the state, previous state,
- * and patch, and can return a patch that further updates the state, reverts to the previous state,
- * and so on. State changes by services are available to the next services in the list.
+ * Patch is merged in to the state by default. Services have access to the state and can return a
+ * patch that further updates the state. State changes by services are available to the next
+ * services in the list.
  *
  * After the services have run and the state has been updated, effects are executed and have the
  * opportunity to trigger more updates.
@@ -76,42 +76,27 @@ export default ({ stream, accumulator, combine, app }) => {
   const scan = stream.scan;
 
   const update = createStream();
-  const states = createStream();
-  const actions = (Actions || (() => ({})))(update, states);
 
-  // context is { state, patch, previousState }
-  // state is optionally updated by service patches; patch and previousState never change.
-  scan(
-    (context, patch) => ({
-      previousState: context.state,
-      state: accumulatorFn(context.state, patch),
-      patch
-    }),
-    { state: initial, previousState: {} },
+  const runServices = startingState =>
+    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
+
+  const states = scan(
+    (lastState, patch) => runServices(accumulatorFn(lastState, patch)),
+    runServices(initial),
     update
-  )
-    .map(context =>
-      services.reduce(
-        (context, service) =>
-          Object.assign(context, {
-            state: accumulatorFn(context.state, service(context))
-          }),
-        context
-      )
-    )
-    .map(context => {
-      if (context.state !== states()) {
-        states(context.state);
-      }
+  );
 
-      return Object.assign(context, {
-        update,
-        actions
-      });
-    })
-    .map(context => {
-      effects.forEach(effect => effect(context));
-    });
+  states.map(state => {
+    const context = {
+      state,
+      update,
+      actions
+    };
+
+    effects.forEach(effect => effect(context));
+  });
+
+  const actions = (Actions || (() => ({})))(update, states);
 
   return { update, states, actions };
 };

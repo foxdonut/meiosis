@@ -19,7 +19,7 @@ const app = {
   }),
 
   services: [
-    ({ state }) => {
+    state => {
       if (state.page === "Login") {
         if (!state.login) {
           return { login: { username: "", password: "" } };
@@ -28,7 +28,7 @@ const app = {
         return { login: undefined };
       }
     },
-    ({ state }) => {
+    state => {
       if (state.page === "Data") {
         if (!state.data) {
           return { data: "loading" };
@@ -39,8 +39,8 @@ const app = {
     }
   ],
 
-  effects: [
-    ({ state, actions }) => {
+  Effects: (_update, actions) => [
+    state => {
       if (state.data === "loading") {
         actions.loadData();
       }
@@ -50,43 +50,24 @@ const app = {
 
 const update = stream();
 
-// a context has { state, previousState, patch }
-const contexts =
-  // scan to apply patches
-  scan(
-    (context, patch) => ({
-      previousState: context.state,
-      state: accumulator(context.state, patch),
-      patch
-    }),
-    { state: app.initial, previousState: {} },
-    update
-  )
-    // run services
-    .map(context =>
-      app.services.reduce(
-        (context, service) =>
-          Object.assign(context, {
-            state: accumulator(
-              context.state,
-              service(context)
-            )
-          }),
-        context
-      )
-    );
+const runServices = startingState =>
+  app.services.reduce(
+    (state, service) => accumulator(state, service(state)),
+    startingState
+  );
 
-// the states stream just extracts the state from the context
-const states = contexts.map(context => context.state);
+const states = scan(
+  (state, patch) => runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
 
 const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
 
-// apply effects
-contexts.map(context => {
-  app.effects.forEach(effect =>
-    effect(Object.assign(context, { update, actions }))
-  );
-});
+states.map(state =>
+  effects.forEach(effect => effect(state))
+);
 
 const App = {
   view: ({ attrs: { state, update } }) => [
