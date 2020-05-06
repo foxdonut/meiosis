@@ -1,6 +1,4 @@
-import { Actions, createRouteSegments, routeTransition } from "meiosis-routing/state";
-
-export { navigateTo } from "meiosis-routing/state";
+import { createRouteSegments, routeTransition } from "meiosis-routing/state";
 
 export const Route = createRouteSegments([
   "Home",
@@ -31,8 +29,12 @@ export const routeConfig = {
   NotFound: "/:404..."
 };
 
-const service = ({ previousState, state }) => ({
-  routeTransition: () => routeTransition(previousState.route, state.route)
+export const navigateTo = route => ({ nextRoute: Array.isArray(route) ? route : [route] });
+export const Actions = update => ({ navigateTo: route => update(navigateTo(route)) });
+
+const service = state => ({
+  routeTransition: () => routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 
 export const routes = {

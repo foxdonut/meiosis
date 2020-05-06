@@ -8,9 +8,9 @@
  * `update => actions`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
  * should be `state => patch?`.
- * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
- * should be `({ state, previousState, patch, update, actions }) => void`, with the function
- * optionally calling `update` and/or `actions`.
+ * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
+ * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+ * and/or `actions.
  */
 
 /**

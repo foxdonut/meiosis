@@ -1,4 +1,4 @@
-export const service = ({ state }) => {
+export const service = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.Brewer) {

@@ -1,9 +1,9 @@
 import { Route } from "../routes";
 
-export const service = ({ state, previousState }) => {
+export const service = state => {
   if (state.routeTransition.arrive.Settings && !state.user) {
     return {
-      route: previousState.route || Route.Home(),
+      route: [state.routeTransition.leave],
       routeTransition: { arrive: () => ({}), leave: () => ({}) },
       redirect: Route.Login({
         message: "Please login.",

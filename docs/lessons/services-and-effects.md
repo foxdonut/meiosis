@@ -25,8 +25,8 @@ call `update` or `actions` to trigger more updates.
 
 ### Services
 
-A service function receives `({ state, previousState, patch })` and returns a patch to alter the
-state. If a service does not need to alter the state, it simply does not return a patch.
+A service function receives `state` and returns a patch to alter the state. If a service does not
+need to alter the state, it simply does not return a patch.
 
 Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
 made by a previous service.
@@ -37,10 +37,9 @@ synchronously before rendering the view.
 
 ### Effects
 
-Effect functions receive `({ state, previousState, patch, update, actions })` and can make
-asynchronous calls to `update` and/or `actions` to trigger more updates. Since triggering an update
-will call the effect again, **effect functions must change the state in a way that will avoid an
-infinite loop**.
+Effect functions receive `state` and can make asynchronous calls to `update` and/or `actions` to
+trigger more updates. Since triggering an update will call the effect again, **effect functions must
+change the state in a way that will avoid an infinite loop**.
 
 Effects are good for tasks such as loading asynchronous data or triggering other types of
 asynchronous updates.
@@ -74,81 +73,42 @@ the state.
 const accumulator = (state, patch) => patch ? patch(state) : state;
 ```
 
-Next, we want to pass `({ state, previousState, patch })` to services so that they have everything
-they might need in order to decide if and how to alter the state. We'll call this `context`.
-
-Now, every time a patch arrives on the `update` stream, we want to produce a `context` object. The
-`previousState` is the state before the patch is applied, and the `state` is the state with the
-patch applied. Initially, `state` is our app's initial state, and `previousState` is empty.
-
-We create a stream of `context`s using `scan`:
+Next, we'll write a function run services. The function calls each service, accumulating state by
+calling `accumulator`:
 
 ```javascript
-// a context has { state, previousState, patch }
-const contexts =
-  // scan to apply patches
-  scan(
-    (context, patch) => ({
-      previousState: context.state,
-      state: accumulator(context.state, patch),
-      patch
-    }),
-    { state: app.initial, previousState: {} },
-    update
+const runServices = startingState =>
+  app.services.reduce(
+    (state, service) => accumulator(state, service(state)),
+    startingState
   );
 ```
 
-So we now have the context information for services. We want to pass the context to each service,
-one after the other, and apply the patches returned by the services. We do this with `map` on the
-stream of contexts, and we run all the services with `reduce`:
+Now, we can create our `states` stream with `scan`. We'll run the services on the initial state, as
+well as in the accumulator function for `scan`:
 
 ```javascript
-// a context has { state, previousState, patch }
-const contexts =
-  // scan to apply patches
-  scan(
-    (context, patch) => ({
-      previousState: context.state,
-      state: accumulator(context.state, patch),
-      patch
-    }),
-    { state: app.initial, previousState: {} },
-    update
-  )
-  // run services
-  .map(context =>
-    app.services.reduce((context, service) => Object.assign(context, {
-      state: accumulator(context.state, service(context))
-    }), context)
-  );
+const states = scan(
+  (state, patch) => runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
 ```
 
-The `previousState` and `patch` never change on the context, but we update the `state` by applying
-the patches returned by the services.
-
-So we now have a stream of `context`s. To get the `states` stream, we just get the `state` out of
-the `context`:
+Next, we create our actions and effects:
 
 ```javascript
-// the states stream just extracts the state from the context
-const states = contexts.map(context => context.state);
-```
-
-Next, we create our actions:
-
-```javascript
-// create actions
 const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
 ```
 
-Finally, we trigger effects. This is simply a matter of calling each effect function and passing the
-`context` along with `update` and `actions`:
+Finally, we trigger effects whenever the state changes. This is simply a matter of calling each
+effect function and passing the `state`:
 
 ```javascript
-// apply effects
-contexts.map(context => {
-  app.effects.forEach(effect => effect(Object.assign(context, { update, actions })))
-});
+states.map(state =>
+  effects.forEach(effect => effect(state))
+);
 ```
 
 All together, here is our pattern setup:

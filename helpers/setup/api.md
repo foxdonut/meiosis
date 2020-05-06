@@ -40,19 +40,19 @@ Type: [Object][25]
 -   `Actions` **[Function][26]?** a function that creates actions, of the form
     `update => actions`.
 -   `services` **[Array][27]&lt;[Function][26]>?** an array of service functions, each of which
-    should be `({ state, previousState, patch }) => patch?`.
--   `effects` **[Array][27]&lt;[Function][26]>?** an array of effect functions, each of which
-    should be `({ state, previousState, patch, update, actions }) => void`, with the function
-    optionally calling `update` and/or `actions`.
+    should be `state => patch?`.
+-   `Effects` **[Function][26]?** a function that creates effects, of the form
+    `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+    and/or \`actions.
 
 ## meiosis.common.setup
 
 Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
 use their respective `setup` function instead.
 
-Patch is merged in to the state by default. Services have access to the state, previous state,
-and patch, and can return a patch that further updates the state, reverts to the previous state,
-and so on. State changes by services are available to the next services in the list.
+Patch is merged in to the state by default. Services have access to the state and can return a
+patch that further updates the state. State changes by services are available to the next
+services in the list.
 
 After the services have run and the state has been updated, effects are executed and have the
 opportunity to trigger more updates.
@@ -144,10 +144,13 @@ Helper to setup the Meiosis pattern with [Preact][33].
 
 ### Parameters
 
--   `preact` **preact** the Preact instance.
--   `Root` **preact.Component** your Root component, which receives `state` and `actions`.
+-   `null-null` **preact.h** the Preact h function.
+-   `null-null` **preact.useState** the Preact useState function.
+-   `Root` **preact.Component** your Root component, which receives `state`, `update`, and
+    `actions`.
 
-Returns **preact.Component** the top-level component to which you pass `states` and `actions`.
+Returns **preact.Component** the top-level component to which you pass `states`, and either
+`update`, `actions`, or both.
 
 ## meiosis.react.setup
 
@@ -156,9 +159,11 @@ Helper to setup the Meiosis pattern with [React][34].
 ### Parameters
 
 -   `React` **React** the React instance.
--   `Root` **React.Component**  your Root component, which receives `state` and `actions`.
+-   `Root` **React.Component** your Root component, which receives `state`, `update`, and
+    `actions`.
 
-Returns **React.Component** the top-level component to which you pass `states` and `actions`.
+Returns **React.Component** the top-level component to which you pass `states`, and either
+`update`, `actions`, or both.
 
 ## meiosis.simpleStream.stream
 

@@ -1,4 +1,6 @@
-export const service = ({ state, previousState }) => {
+import { Route, navigateTo } from "../routes";
+
+export const service = state => {
   if (state.routeTransition.arrive.Login) {
     return {
       login: {
@@ -12,7 +14,7 @@ export const service = ({ state, previousState }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return () => previousState;
+      return navigateTo(Route.Login());
     }
     return { login: null };
   }

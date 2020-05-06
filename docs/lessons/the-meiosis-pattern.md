@@ -59,15 +59,13 @@ const app = {
   Actions: (update, getState) => {
     return ...
   },
-  // services are ({ state, previousState, patch }) => patch
+  // services are state => patch
   services: [...],
-  // effects are ({ state, previousState, patch, update, actions }) => {
+  // effects are state => {
   //   call update(...) or actions.someAction(...);
   // }
-  effects: [...]
+  Effects: (update, actions) => [...]
 }
-
-const update = stream();
 
 // Using Mergerino:
 const accumulator = merge;
@@ -75,34 +73,26 @@ const accumulator = merge;
 // Using Function Patches:
 const accumulator = (state, patch) => patch(state);
 
-// a context has { state, previousState, patch }
-const contexts =
-  // scan to apply patches
-  scan(
-    (context, patch) => ({
-      previousState: context.state,
-      state: accumulator(context.state, patch),
-      patch
-    }),
-    { state: app.initial, previousState: {} },
-    update
-  )
-  // run services
-  .map(context =>
-    app.services.reduce((context, service) => Object.assign(context, {
-      state: accumulator(context.state, service(context))
-    }), context)
+const update = stream();
+
+const runServices = startingState =>
+  app.services.reduce(
+    (state, service) => accumulator(state, service(state)),
+    startingState
   );
 
-// the states stream just extracts the state from the context
-const states = contexts.map(context => context.state);
+const states = scan(
+  (state, patch) => runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
 
 const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
 
-// apply effects
-contexts.map(context => {
-  app.effects.map(effect => effect(Object.assign(context, { update, actions })))
-});
+states.map(state =>
+  effects.forEach(effect => effect(state))
+);
 ```
 
 Next, wire up your view.

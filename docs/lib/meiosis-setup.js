@@ -13,10 +13,10 @@
    * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
    * `update => actions`.
    * @property {Array<Function>} [services=[]] - an array of service functions, each of which
-   * should be `({ state, previousState, patch }) => patch?`.
-   * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
-   * should be `({ state, previousState, patch, update, actions }) => void`, with the function
-   * optionally calling `update` and/or `actions`.
+   * should be `state => patch?`.
+   * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
+   * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+   * and/or `actions.
    */
 
   /**
@@ -37,9 +37,9 @@
    * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
    * use their respective `setup` function instead.
    *
-   * Patch is merged in to the state by default. Services have access to the state, previous state,
-   * and patch, and can return a patch that further updates the state, reverts to the previous state,
-   * and so on. State changes by services are available to the next services in the list.
+   * Patch is merged in to the state by default. Services have access to the state and can return a
+   * patch that further updates the state. State changes by services are available to the next
+   * services in the list.
    *
    * After the services have run and the state has been updated, effects are executed and have the
    * opportunity to trigger more updates.
@@ -78,10 +78,11 @@
     var initial = app.initial;
     var Actions = app.Actions;
     var services = app.services;
-    var effects = app.effects;
+    var Effects = app.Effects;
     initial = initial || {};
+    Actions = Actions || (function () { return ({}); });
     services = services || [];
-    effects = effects || [];
+    Effects = Effects || (function () { return []; });
 
     var singlePatch = function (patch) { return (Array.isArray(patch) ? combine(patch) : patch); };
     var accumulatorFn = function (state, patch) { return (patch ? accumulator(state, singlePatch(patch)) : state); };
@@ -90,46 +91,19 @@
     var scan = stream.scan;
 
     var update = createStream();
-    var actions = (Actions || (function () { return ({}); }))(update);
-    var states = createStream();
 
-    // context is { state, patch, previousState }
-    // state is optionally updated by service patches; patch and previousState never change.
-    var runServices = function (context) {
-      var updatedContext = context;
+    var runServices = function (startingState) { return services.reduce(function (state, service) { return accumulatorFn(state, service(state)); }, startingState); };
 
-      for (var i = 0; i < services.length; i++) {
-        // a service should (optionally) return a patch
-        var servicePatch = services[i](updatedContext);
-        updatedContext.state = accumulatorFn(updatedContext.state, servicePatch);
-      }
-      return updatedContext;
-    };
-
-    var contexts = scan(
-      function (context, patch) { return runServices({
-          previousState: context.state,
-          state: accumulatorFn(context.state, patch),
-          patch: patch
-        }); },
-      runServices({ state: initial, previousState: {} }),
+    var states = scan(
+      function (state, patch) { return runServices(accumulatorFn(state, patch)); },
+      runServices(initial),
       update
     );
 
-    contexts
-      .map(function (context) {
-        if (context.state !== states()) {
-          states(context.state);
-        }
+    var actions = Actions(update, states);
+    var effects = Effects(update, actions);
 
-        return Object.assign(context, {
-          update: update,
-          actions: actions
-        });
-      })
-      .map(function (context) {
-        effects.forEach(function (effect) { return effect(context); });
-      });
+    states.map(function (state) { return effects.forEach(function (effect) { return effect(state); }); });
 
     return { update: update, states: states, actions: actions };
   }
@@ -315,11 +289,7 @@
       return latestValue;
     };
     createdStream.map = function (mapFunction) {
-      var newInitial = undefined;
-      if (latestValue !== undefined) {
-        newInitial = mapFunction(latestValue);
-      }
-      var newStream = stream(newInitial);
+      var newStream = stream(latestValue !== undefined ? mapFunction(latestValue) : undefined);
 
       mapFunctions.push(function (value) {
         newStream(mapFunction(value));

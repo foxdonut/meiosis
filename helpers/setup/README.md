@@ -10,9 +10,7 @@ demand and for your convenience, here are some utility functions that help set u
 - provides the ability to call `update()` with an array of patches, automatically combining them into
   a single patch
 - automatically ignores null patches
-- calls your `service` and `effect` functions, passing in `state`, `previousState`, `patch`,
-  `update`, and `actions`
-- omits consecutive identical `states`, thus avoiding unncessary re-renders
+- calls your `service` and `effect` functions
 - provides a simple stream implementation
 - works with Flyd, Mithril-Stream, Mergerino, function patches, and Immer out of the box
 - wires up React and Preact
@@ -88,7 +86,7 @@ provided:
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
 provide. In the application, you can define the `initial` state, the `Actions` constructor function,
-the array of services, and the array of effects, _all of which are optional_.
+the array of `services`, and the `Effects` constructor function, _all of which are optional_.
 
 The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
@@ -98,23 +96,20 @@ In the `app` object that you pass to `setup`, you can optionally provide the fol
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
-- `Actions`: a function that receives `(update)` and returns an object with actions. The created
-actions are returned by `setup`, and also passed to `services`. If not provided, the created
-actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
-multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
-If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
-action using `this.otherAction(...)`.
-- `services`: an array of functions that get called with `({ state, previousState, patch })`.
-Service functions can change the state by returning a patch:
+- `Actions`: a function that receives `(update, getState)` and returns an object with actions. The
+  created actions are returned by `setup`, and also passed to `Effects`. If not provided, the
+  created actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
+  multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
+  If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
+  action using `this.otherAction(...)`.
+- `services`: an array of functions that get called with `state`. Service functions can change the
+state by returning a patch:
     - returning any patch, changes the state
     - not returning anything, or returning a falsy value, does not change the state
-    - reverting to the previous state using a compatible patch that produces `previousState`. Using
-    `() => previousState` works for Mergerino, Function Patches, and Immer. If you revert to the
-    previous state, the `states` stream does not receive a value and the view is not re-rendered.
-- `effects`: an array of functions that get called with
-`({ state, previousState, patch, update, actions })`. The return value of effect functions is
-ignored. Instead, effect functions should call `update` and/or `actions` to trigger further
-updates.
+- `Effects`: constructor function for effects, which gets called with `(update, actions)` and should
+  return an array of functions that will get called with `state`. The return value of effect
+  functions is ignored. Instead, effect functions should call `update` and/or `actions` to trigger
+  further updates.
 
 -----
 
