@@ -26,10 +26,5 @@ export const createApp = initialRoute => ({
     brewer.service
   ],
 
-  Effects: update => [
-    tea.effect(update),
-    coffee.effect(update),
-    beer.effect(update),
-    settings.effect(update)
-  ]
+  Effects: update => [tea.effect(update), coffee.effect(update), beer.effect(update)]
 });

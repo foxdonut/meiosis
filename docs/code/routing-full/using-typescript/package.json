@@ -27,26 +27,26 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "@types/react": "^16.9.25",
-    "@types/react-dom": "^16.9.5",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.7",
     "feather-route-matcher": "^3.1.0",
     "meiosis-routing": "^2.0.1",
-    "meiosis-setup": "^4.0.2",
+    "meiosis-setup": "file:../meiosis-setup-5.0.0.tgz",
     "mergerino": "0.4.0",
-    "query-string": "^6.11.1",
+    "query-string": "^6.12.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
+    "@typescript-eslint/eslint-plugin": "^2.31.0",
+    "@typescript-eslint/parser": "^2.31.0",
     "awesome-typescript-loader": "^5.2.1",
     "eslint": "^6.8.0",
     "eslint-plugin-react": "^7.19.0",
     "meiosis-tracer": "^3.0.0",
     "source-map-loader": "^0.2.4",
     "typescript": "^3.8.3",
-    "webpack": "^4.42.0",
+    "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
   }
 }

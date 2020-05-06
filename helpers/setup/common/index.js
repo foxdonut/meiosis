@@ -10,7 +10,7 @@
  * should be `state => patch?`.
  * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
  * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
- * and/or `actions.
+ * and/or `actions`.
  */
 
 /**
@@ -49,7 +49,7 @@
  * @param {Function} combine - the function that combines an array of patches into one.
  * @param {app} app - the app, with optional properties.
  *
- * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams, and
+ * @returns {Object} - `{ states, update, actions }`, where `states` and `update` are streams, and
  * `actions` are the created actions.
  */
 export default ({ stream, accumulator, combine, app }) => {
@@ -63,12 +63,7 @@ export default ({ stream, accumulator, combine, app }) => {
     throw new Error("No combine function was specified.");
   }
 
-  app = app || {};
-  let { initial, Actions, services, Effects } = app;
-  initial = initial || {};
-  Actions = Actions || (() => ({}));
-  services = services || [];
-  Effects = Effects || (() => []);
+  app = Object.assign({ initial: {}, Actions: () => ({}), services: [], Effects: () => [] }, app);
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -79,16 +74,16 @@ export default ({ stream, accumulator, combine, app }) => {
   const update = createStream();
 
   const runServices = startingState =>
-    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
+    app.services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
   const states = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
-    runServices(initial),
+    runServices(app.initial),
     update
   );
 
-  const actions = Actions(update, states);
-  const effects = Effects(update, actions);
+  const actions = app.Actions(update, states);
+  const effects = app.Effects(update, actions);
 
   states.map(state => effects.forEach(effect => effect(state)));
 
