@@ -71,7 +71,7 @@ const app = {
 const accumulator = merge;
 
 // Using Function Patches:
-const accumulator = (state, patch) => patch(state);
+const accumulator = (state, patch) => patch ? patch(state) : state;
 
 const update = stream();
 

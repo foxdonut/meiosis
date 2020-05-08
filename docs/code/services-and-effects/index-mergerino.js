@@ -2,6 +2,32 @@
 const [stream, scan] = [m.stream, m.stream.scan];
 const accumulator = mergerino;
 
+const loginService = state => {
+  if (state.page === "Login") {
+    if (!state.login) {
+      return { login: { username: "", password: "" } };
+    }
+  } else if (state.login) {
+    return { login: undefined };
+  }
+};
+
+const dataService = state => {
+  if (state.page === "Data") {
+    if (!state.data) {
+      return { data: "loading" };
+    }
+  } else if (state.data) {
+    return { data: undefined };
+  }
+};
+
+const dataEffect = actions => state => {
+  if (state.data === "loading") {
+    actions.loadData();
+  }
+};
+
 const app = {
   initial: {
     page: "Home"
@@ -18,34 +44,9 @@ const app = {
       )
   }),
 
-  services: [
-    state => {
-      if (state.page === "Login") {
-        if (!state.login) {
-          return { login: { username: "", password: "" } };
-        }
-      } else if (state.login) {
-        return { login: undefined };
-      }
-    },
-    state => {
-      if (state.page === "Data") {
-        if (!state.data) {
-          return { data: "loading" };
-        }
-      } else if (state.data) {
-        return { data: undefined };
-      }
-    }
-  ],
+  services: [loginService, dataService],
 
-  Effects: (_update, actions) => [
-    state => {
-      if (state.data === "loading") {
-        actions.loadData();
-      }
-    }
-  ]
+  Effects: (_update, actions) => [dataEffect(actions)]
 };
 
 const update = stream();
@@ -144,7 +145,8 @@ const App = {
             ? m("div", "Loading, please wait...")
             : m("ul", state.data.map(item => m("li", item)))
         ]
-      : null
+      : null,
+    m("pre", JSON.stringify(state, null, 2))
   ]
 };
 
