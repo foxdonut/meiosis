@@ -17,7 +17,7 @@ export const Route = createRouteSegments([
 ]);
 
 export const navTo = route => ({
-  route: Array.isArray(route) ? route : [route]
+  nextRoute: Array.isArray(route) ? route : [route]
 });
 
 const beverageRoutes = {

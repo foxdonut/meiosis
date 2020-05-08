@@ -482,20 +482,22 @@ The `routeTransition` function from `meiosis-routing` takes the previous route a
 and returns an object with `leave`, and `arrive` properties. Both contain lookups, keyed by route
 id, that indicate which routes we are leaving and to which we are arriving.
 
+In order to have the previous route and the next route, we'll use `nextRoute` in the state to
+indicate to which route we are navigating.
+
 To use `routeTransition`, we need to wire it up as a service function. Refer to
-[Services](http://meiosis.js.org/docs/services.html#using_meiosis_setup) for a refresher on
-services, and see the
-[Application](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup#application) section for
-information on how to specify services with `meiosis-setup`.
+[Services and Effects](http://meiosis.js.org/docs/services-and-effects.html) for a refresher.
 
 Here is how to write a service function for `routeTransition` and wire it up:
 
 ```javascript
 import { routeTransition } from "meiosis-routing/state";
 
-export const routeService = ({ previousState, state }) => ({
-  routeTransition: () =>
-    routeTransition(previousState.route, state.route)
+const navTo = route => ({ nextRoute: Array.isArray(route) ? route : [route] });
+
+export const routeService = state => ({
+  routeTransition: () => routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 
 // ...
@@ -530,8 +532,8 @@ we can use _services_.
 
 #### Using the Transition State in Services
 
-We've seen how [Services](http://meiosis.js.org/docs/services.html#using_meiosis_setup)
-are functions that run on state changes. Since we're using [meiosis-setup], we just have to specify
+We've seen how [Services](http://meiosis.js.org/docs/services-and-effects.html)
+are functions that run on state changes. Since we're using `meiosis-setup`, we just have to specify
 a `services` array in our `app` object with the service functions that we want to execute.
 
 Let's pretend we are loading the list of teas asynchronously. To keep the example simple, we'll just
@@ -560,7 +562,7 @@ that we can use them as necessary.
 Here is the `teaService`:
 
 ```javascript
-export const teaService = ({ state }) => {
+export const teaService = state => {
   if (state.routeTransition.leave.Tea) {
     return { teas: null };
   }
@@ -570,7 +572,7 @@ export const teaService = ({ state }) => {
 And here is the `teaEffect`:
 
 ```javascript
-export const teaEffect = ({ state, update }) => {
+export const teaEffect = update => state => {
   if (state.routeTransition.arrive.Tea) {
     setTimeout(() => {
       update({ teas });
@@ -590,7 +592,7 @@ We wire up the service in the `services` array of our `app` object, taking care 
 const app = {
   // ...
   services: [routeService, teaService],
-  effects: [teaEffect]
+  Effects: update => [teaEffect(update)]
   // ...
 };
 ```
@@ -638,7 +640,7 @@ matched route segment's `params` to determine the `id` of the tea to load and/or
 ```javascript
 // teaMap is a simple id->tea lookup object.
 
-export const teaDetailService = ({ state }) => {
+export const teaDetailService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.TeaDetails) {
@@ -700,36 +702,28 @@ We can write a service function for the Settings page which checks whether the u
 and _changes_ the route to the Login page if they are not. As a bonus, we want to automatically send
 the user back to the Settings page after they log in, since that is where they were trying to go.
 
-The service uses a `redirect` to indicate where to send the user, and the effect function updates
-the state to redirect the user.
-
 ```javascript
-import { Route, navTo } from "./05-routes";
+import { Route } from "./05-routes";
 
-export const settingsService = ({
-  state,
-  previousState
-}) => {
+export const settingsService = state => {
   if (
     state.routeTransition.arrive.Settings &&
     !state.user
   ) {
-    return {
-      route: previousState.route,
-      redirect: Route.Login({
+    const route = [
+      Route.Login({
         message: "Please login.",
         returnTo: Route.Settings()
       })
+    ];
+    return {
+      nextRoute: route,
+      route,
+      routeTransition: {
+        arrive: () => ({ Login: Route.Login() }),
+        leave: () => ({})
+      }
     };
-  }
-};
-
-export const settingsEffect = ({ state, update }) => {
-  if (state.redirect) {
-    update([
-      navTo(state.redirect),
-      { redirect: undefined }
-    ]);
   }
 };
 ```
@@ -800,7 +794,7 @@ from the Login page, and they in the process of logging in, the state contains s
 `username` and/or `password`. We'll use `confirm` to ask the user if they want to continue:
 
 ```javascript
-export const loginService = ({ state, previousState }) => {
+export const loginService = state => {
   if (state.routeTransition.arrive.Login) {
     return {
       login: {
@@ -814,15 +808,23 @@ export const loginService = ({ state, previousState }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return () => previousState;
+      const route = [Route.Login()];
+      return {
+        route,
+        nextRoute: route,
+        routeTransition: {
+          leave: () => ({}),
+          arrive: () => ({})
+        }
+      };
     }
     return { login: null };
   }
 };
 ```
 
-If they decide to cancel, we revert to the previous state, so we stay on the Login page. The state
-is not changed, so `returnTo`, if present, will continue to work after they log in.
+If they decide to cancel, we revert to the previous state, so we stay on the Login page. The rest of
+the state is not changed, so `returnTo`, if present, will continue to work after they log in.
 
 Finally we just need to add `loginService` to the list of `services`:
 

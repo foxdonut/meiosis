@@ -2,9 +2,10 @@
 
 const { routeTransition } = MeiosisRouting.state;
 
-export const routeService = ({ previousState, state }) => ({
+export const routeService = state => ({
   routeTransition: () =>
-    routeTransition(previousState.route, state.route)
+    routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 
 const teas = [
@@ -56,13 +57,13 @@ const beverageMap = beverages.reduce((result, next) => {
   return result;
 }, {});
 
-export const teaService = ({ state }) => {
+export const teaService = state => {
   if (state.routeTransition.leave.Tea) {
     return { teas: null };
   }
 };
 
-export const teaEffect = ({ state, update }) => {
+export const teaEffect = update => state => {
   if (state.routeTransition.arrive.Tea) {
     setTimeout(() => {
       update({ teas });
@@ -70,7 +71,7 @@ export const teaEffect = ({ state, update }) => {
   }
 };
 
-export const teaDetailService = ({ state }) => {
+export const teaDetailService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.TeaDetails) {
@@ -89,7 +90,7 @@ export const teaDetailService = ({ state }) => {
   return patches;
 };
 
-export const beverageService = ({ state }) => {
+export const beverageService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.Beverage) {
@@ -108,7 +109,7 @@ export const beverageService = ({ state }) => {
   return patches;
 };
 
-export const coffeeService = ({ state }) => {
+export const coffeeService = state => {
   if (state.routeTransition.arrive.Coffee) {
     return { pleaseWait: true };
   }
@@ -117,7 +118,7 @@ export const coffeeService = ({ state }) => {
   }
 };
 
-export const coffeeEffect = ({ state, update }) => {
+export const coffeeEffect = update => state => {
   if (state.routeTransition.arrive.Coffee) {
     setTimeout(
       () =>
@@ -130,7 +131,7 @@ export const coffeeEffect = ({ state, update }) => {
   }
 };
 
-export const beerService = ({ state }) => {
+export const beerService = state => {
   if (state.routeTransition.arrive.Beer) {
     return { pleaseWait: true };
   }
@@ -139,7 +140,7 @@ export const beerService = ({ state }) => {
   }
 };
 
-export const beerEffect = ({ state, update }) => {
+export const beerEffect = update => state => {
   if (state.routeTransition.arrive.Beer) {
     setTimeout(
       () =>
@@ -152,7 +153,7 @@ export const beerEffect = ({ state, update }) => {
   }
 };
 
-export const brewerService = ({ state }) => {
+export const brewerService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.Brewer) {

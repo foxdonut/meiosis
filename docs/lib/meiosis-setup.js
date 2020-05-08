@@ -16,7 +16,7 @@
    * should be `state => patch?`.
    * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
    * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
-   * and/or `actions.
+   * and/or `actions`.
    */
 
   /**
@@ -55,7 +55,7 @@
    * @param {Function} combine - the function that combines an array of patches into one.
    * @param {app} app - the app, with optional properties.
    *
-   * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams, and
+   * @returns {Object} - `{ states, update, actions }`, where `states` and `update` are streams, and
    * `actions` are the created actions.
    */
   function commonSetup (ref) {
@@ -74,15 +74,7 @@
       throw new Error("No combine function was specified.");
     }
 
-    app = app || {};
-    var initial = app.initial;
-    var Actions = app.Actions;
-    var services = app.services;
-    var Effects = app.Effects;
-    initial = initial || {};
-    Actions = Actions || (function () { return ({}); });
-    services = services || [];
-    Effects = Effects || (function () { return []; });
+    app = Object.assign({ initial: {}, Actions: function () { return ({}); }, services: [], Effects: function () { return []; } }, app);
 
     var singlePatch = function (patch) { return (Array.isArray(patch) ? combine(patch) : patch); };
     var accumulatorFn = function (state, patch) { return (patch ? accumulator(state, singlePatch(patch)) : state); };
@@ -92,16 +84,16 @@
 
     var update = createStream();
 
-    var runServices = function (startingState) { return services.reduce(function (state, service) { return accumulatorFn(state, service(state)); }, startingState); };
+    var runServices = function (startingState) { return app.services.reduce(function (state, service) { return accumulatorFn(state, service(state)); }, startingState); };
 
     var states = scan(
       function (state, patch) { return runServices(accumulatorFn(state, patch)); },
-      runServices(initial),
+      runServices(app.initial),
       update
     );
 
-    var actions = Actions(update, states);
-    var effects = Effects(update, actions);
+    var actions = app.Actions(update, states);
+    var effects = app.Effects(update, actions);
 
     states.map(function (state) { return effects.forEach(function (effect) { return effect(state); }); });
 
@@ -196,8 +188,8 @@
    *
    * @function meiosis.preact.setup
    *
-   * @param {preact.h} - the Preact h function.
-   * @param {preact.useState} - the Preact useState function.
+   * @param {preact.h} h - the Preact h function.
+   * @param {preact.useState} useState - the Preact useState function.
    * @param {preact.Component} Root - your Root component, which receives `state`, `update`, and
    * `actions`.
    *

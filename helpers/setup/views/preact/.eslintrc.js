@@ -29,7 +29,9 @@ module.exports = {
       {
         "printWidth": 100,
         "semi": true,
-        "singleQuote": false
+        "singleQuote": false,
+        "trailingComma": "none",
+        "arrowParens": "avoid"
       }
     ],
     "react/display-name": [

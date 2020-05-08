@@ -31,7 +31,7 @@
     "@types/react-dom": "^16.9.7",
     "feather-route-matcher": "^3.1.0",
     "meiosis-routing": "^2.0.1",
-    "meiosis-setup": "file:../meiosis-setup-5.0.0.tgz",
+    "meiosis-setup": "^5.0.0",
     "mergerino": "0.4.0",
     "query-string": "^6.12.1",
     "react": "^16.13.1",

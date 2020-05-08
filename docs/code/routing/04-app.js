@@ -171,7 +171,11 @@ const app = {
     beverageService,
     brewerService
   ],
-  effects: [teaEffect, coffeeEffect, beerEffect]
+  Effects: update => [
+    teaEffect(update),
+    coffeeEffect(update),
+    beerEffect(update)
+  ]
 };
 
 const { states, actions } = Meiosis.mergerino.setup({

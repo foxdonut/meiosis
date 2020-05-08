@@ -1,12 +1,13 @@
 /* global MeiosisRouting */
 
-import { Route, navTo } from "./06-routes";
+import { Route } from "./06-routes";
 
 const { routeTransition } = MeiosisRouting.state;
 
-export const routeService = ({ previousState, state }) => ({
+export const routeService = state => ({
   routeTransition: () =>
-    routeTransition(previousState.route, state.route)
+    routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 
 const teas = [
@@ -58,13 +59,13 @@ const beverageMap = beverages.reduce((result, next) => {
   return result;
 }, {});
 
-export const teaService = ({ state }) => {
+export const teaService = state => {
   if (state.routeTransition.leave.Tea) {
     return { teas: null };
   }
 };
 
-export const teaEffect = ({ state, update }) => {
+export const teaEffect = update => state => {
   if (state.routeTransition.arrive.Tea) {
     setTimeout(() => {
       update({ teas });
@@ -72,7 +73,7 @@ export const teaEffect = ({ state, update }) => {
   }
 };
 
-export const teaDetailService = ({ state }) => {
+export const teaDetailService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.TeaDetails) {
@@ -91,7 +92,7 @@ export const teaDetailService = ({ state }) => {
   return patches;
 };
 
-export const beverageService = ({ state }) => {
+export const beverageService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.Beverage) {
@@ -110,7 +111,7 @@ export const beverageService = ({ state }) => {
   return patches;
 };
 
-export const coffeeService = ({ state }) => {
+export const coffeeService = state => {
   if (state.routeTransition.arrive.Coffee) {
     return { pleaseWait: true };
   }
@@ -119,7 +120,7 @@ export const coffeeService = ({ state }) => {
   }
 };
 
-export const coffeeEffect = ({ state, update }) => {
+export const coffeeEffect = update => state => {
   if (state.routeTransition.arrive.Coffee) {
     setTimeout(
       () =>
@@ -132,7 +133,7 @@ export const coffeeEffect = ({ state, update }) => {
   }
 };
 
-export const beerService = ({ state }) => {
+export const beerService = state => {
   if (state.routeTransition.arrive.Beer) {
     return { pleaseWait: true };
   }
@@ -141,7 +142,7 @@ export const beerService = ({ state }) => {
   }
 };
 
-export const beerEffect = ({ state, update }) => {
+export const beerEffect = update => state => {
   if (state.routeTransition.arrive.Beer) {
     setTimeout(
       () =>
@@ -154,7 +155,7 @@ export const beerEffect = ({ state, update }) => {
   }
 };
 
-export const brewerService = ({ state }) => {
+export const brewerService = state => {
   const patches = [];
 
   if (state.routeTransition.arrive.Brewer) {
@@ -173,7 +174,7 @@ export const brewerService = ({ state }) => {
   return patches;
 };
 
-export const loginService = ({ state, previousState }) => {
+export const loginService = state => {
   if (state.routeTransition.arrive.Login) {
     return {
       login: {
@@ -187,35 +188,38 @@ export const loginService = ({ state, previousState }) => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return () => previousState;
+      const route = [Route.Login()];
+      return {
+        route,
+        nextRoute: route,
+        routeTransition: {
+          leave: () => ({}),
+          arrive: () => ({})
+        }
+      };
     }
     return { login: null };
   }
 };
 
-export const settingsService = ({
-  state,
-  previousState
-}) => {
+export const settingsService = state => {
   if (
     state.routeTransition.arrive.Settings &&
     !state.user
   ) {
-    return {
-      route: previousState.route,
-      redirect: Route.Login({
+    const route = [
+      Route.Login({
         message: "Please login.",
         returnTo: Route.Settings()
       })
+    ];
+    return {
+      nextRoute: route,
+      route,
+      routeTransition: {
+        arrive: () => ({ Login: Route.Login() }),
+        leave: () => ({})
+      }
     };
-  }
-};
-
-export const settingsEffect = ({ state, update }) => {
-  if (state.redirect) {
-    update([
-      navTo(state.redirect),
-      { redirect: undefined }
-    ]);
   }
 };
