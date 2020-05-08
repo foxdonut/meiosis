@@ -6,7 +6,7 @@
 
 [James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll look
 at James' version using streams, and another version using
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup)
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup)
 with [Daniel Loomer](https://github.com/fuzetsu)'s
 [Mergerino](https://github.com/fuzetsu/mergerino).
 

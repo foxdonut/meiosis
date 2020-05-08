@@ -8,14 +8,14 @@
 [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 > **Helper functions!** Meiosis is a pattern that you can set up yourself, but by popular demand
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) is now available
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now available
 for your convenience.
 
 This is a quick summary of the Meiosis Pattern:
 
 - Separate state management code from view code.
 - Use a simple stream library such as [flyd](https://github.com/paldepind/flyd),
-[simpleStream from meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup),
+[simpleStream from meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup),
 or, if you're using Mithril, [Mithril Stream](https://mithril.js.org/stream.html).
 - Start with an initial state.
 - Create an `update` stream of **patches**.
@@ -90,9 +90,7 @@ const states = scan(
 const actions = app.Actions(update, states);
 const effects = app.Effects(update, actions);
 
-states.map(state =>
-  effects.forEach(effect => effect(state))
-);
+states.map(state => effects.forEach(effect => effect(state)));
 ```
 
 Next, wire up your view.

@@ -23,11 +23,11 @@ and so on.
 → Read the [Documentation](https://meiosis.js.org/docs/toc.html) to learn more techniques.
 
 → Don't want to setup Meiosis yourself?
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) is available for
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is available for
 your convenience.
 
 → For routing, check out
-[meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing).
+[meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing#meiosis-routing).
 
 ## Ready for More?
 

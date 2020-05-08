@@ -137,9 +137,7 @@ const states = scan(
 const actions = app.Actions(update, states);
 const effects = app.Effects(update, actions);
 
-states.map(state =>
-  effects.forEach(effect => effect(state))
-);
+states.map(state => effects.forEach(effect => effect(state)));
 ```
 
 Our pattern setup is complete, and we can wire up the view using `states`, `update`, and `actions`.
@@ -243,7 +241,7 @@ You can see the complete example in action below.
 
 In this section, we've augmented our Meiosis pattern setup with services and effects. We do not need
 a lot of code for this setup; nevertheless, for your convenience, you can also use the same setup by
-adding [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) to your
+adding [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to your
 project.
 
 -----

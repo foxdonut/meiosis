@@ -4,7 +4,7 @@
 
 ## Routing
 
-The [meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing) package
+The [meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing#meiosis-routing) package
 provides helper functions to manage routing in your state management code and to plug in a router to
 handle parsing URL paths.
 
@@ -44,7 +44,7 @@ familiar with the example. Don't worry about the "Show state in console log" and
 they don't work yet and we'll use them later.
 
 > Note that we're using
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup) to wire up the
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to wire up the
 Meiosis pattern.
 
 @flems code/routing/01-components.js,code/routing/01-app.js,routing.html,public/css/spectre.css,public/css/style.css preact,preactHooks,meiosis-setup 700 60 01-app.js
@@ -485,7 +485,7 @@ id, that indicate which routes we are leaving and to which we are arriving.
 To use `routeTransition`, we need to wire it up as a service function. Refer to
 [Services](http://meiosis.js.org/docs/services.html#using_meiosis_setup) for a refresher on
 services, and see the
-[Application](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#application) section for
+[Application](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup#application) section for
 information on how to specify services with `meiosis-setup`.
 
 Here is how to write a service function for `routeTransition` and wire it up:
