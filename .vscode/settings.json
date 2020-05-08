@@ -1,11 +1,13 @@
 {
   "eslint.workingDirectories": [
     "./docs",
+    "./docs/code/router-setup",
     "./docs/code/routing-full",
     "./docs/code/routing-full/using-typescript",
     "./helpers/router-setup",
     "./helpers/routing",
     "./helpers/setup",
     "./tutorial"
-  ]
+  ],
+  "eslint.enable": true
 }

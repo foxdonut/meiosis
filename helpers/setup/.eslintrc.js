@@ -1,57 +1,44 @@
 module.exports = {
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true
+  env: {
+    browser: true,
+    commonjs: true,
+    es6: true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "prettier"
-  ],
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
+  extends: ["eslint:recommended", "plugin:react/recommended", "prettier"],
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true
     },
-    "sourceType": "module"
+    ecmaVersion: 2018,
+    sourceType: "module"
   },
-  "rules": {
+  rules: {
     "no-unused-vars": [
       "error",
       {
-        "args": "after-used",
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        args: "after-used",
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_"
       }
     ],
     "prettier/prettier": [
       "error",
       {
-        "printWidth": 100,
-        "semi": true,
-        "singleQuote": false,
-        "trailingComma": "none",
-        "arrowParens": "avoid"
+        printWidth: 100,
+        semi: true,
+        singleQuote: false,
+        trailingComma: "none",
+        arrowParens: "avoid"
       }
     ],
-    "react/display-name": [
-      0
-    ],
-    "react/jsx-no-undef": [
-      1,
-      { "allowGlobals": true }
-    ],
-    "react/prop-types": [
-      0
-    ]
+    "react/display-name": [0],
+    "react/jsx-no-undef": [1, { allowGlobals: true }],
+    "react/prop-types": [0]
   },
-  "plugins": [
-    "prettier",
-    "react"
-  ],
-  "settings": {
-    "react": {
-      "pragma": "React"
+  plugins: ["prettier", "react"],
+  settings: {
+    react: {
+      pragma: "React"
     }
   }
-}
+};

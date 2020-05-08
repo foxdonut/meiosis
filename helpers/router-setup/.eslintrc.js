@@ -1,49 +1,49 @@
 module.exports = {
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true,
+  env: {
+    browser: true,
+    commonjs: true,
+    es6: true,
     "jest/globals": true
   },
-  "extends": [
+  extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier",
     "prettier/@typescript-eslint"
   ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true
     },
-    "ecmaVersion": 2018,
-    "sourceType": "module"
+    ecmaVersion: 2018,
+    sourceType: "module"
   },
-  "rules": {
+  rules: {
     "no-unused-vars": [
       "error",
       {
-        "args": "after-used",
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        args: "after-used",
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_"
       }
     ],
     "prettier/prettier": [
       "error",
       {
-        "arrowParens": "avoid",
-        "printWidth": 100,
-        "semi": true,
-        "singleQuote": false,
-        "trailingComma": "none"
+        arrowParens: "avoid",
+        printWidth: 100,
+        semi: true,
+        singleQuote: false,
+        trailingComma: "none"
       }
     ],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_"
       }
     ]
     /*
@@ -51,8 +51,5 @@ module.exports = {
     "@typescript-eslint/indent": ["error", 2]
     */
   },
-  "plugins": [
-    "jest",
-    "prettier"
-  ]
-}
+  plugins: ["jest", "prettier"]
+};
