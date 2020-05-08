@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meiosis Documentation</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="skeleton.css">
+    <link rel="stylesheet" href="prism.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="container">
+    <script src="prism.js" type="text/javascript"></script>
+    <script src="flems.html" type="text/javascript" charset="utf-8"></script>
+    <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
+<h2>Services and Effects</h2><p>All credit goes to <a href="https://james-forbes.com">James Forbes</a> for his idea of <strong>services</strong>, and I am
+grateful to James for sharing this and other ideas that have significantly improved Meiosis.</p>
+<p>In this section, we will look at how <strong>services</strong> and <strong>effects</strong> work in Meiosis. This is a
+slightly different approach than James&#39; services, which is described in the
+<a href="services.html">Services</a> section.</p>
+<h3>Services and Effects Overview</h3><p><img src="services-and-effects.svg" alt="Services and Effects"></p>
+<p>In Meiosis, <strong>services</strong> are functions that run every time there is an update. Services can alter
+the state <em>before</em> the final state arrives onto the <code>states</code> stream. To change the state, services
+return patches which are applied to the state. After all services have executed, the resulting state
+arrives onto states stream, and the view is rendered.</p>
+<p>After the view has rendered, <strong>effects</strong> can trigger more updates. Effects are functions that may
+call <code>update</code> or <code>actions</code> to trigger more updates.</p>
+<h3>Services</h3><p>A service function receives <code>state</code> and returns a patch to alter the state. If a service does not
+need to alter the state, it simply does not return a patch.</p>
+<p>Service functions run <strong>synchronously</strong> and <strong>in order</strong>. Thus, a service can depend on the changes
+made by a previous service.</p>
+<p>We can use service functions for computed properties, setting up an initial blank state for a page,
+cleaning up state after leaving a page, and any other state changes that we want to perform
+synchronously before rendering the view.</p>
+<h3>Effects</h3><p>Effect functions receive <code>state</code> and can make synchronous and/or asynchronous calls to <code>update</code>
+and/or <code>actions</code> to trigger more updates. Since triggering an update will call the effect again,
+<strong>effect functions must change the state in a way that will avoid an infinite loop</strong>.</p>
+<p>Effects are good for tasks such as loading asynchronous data or triggering other types of
+asynchronous updates, saving state to local storage, and so on.</p>
+<h3>Pattern Setup</h3><p>Let&#39;s see how we can set up services and effects with Meiosis. We&#39;ll start with our <code>update</code> stream:</p>
+<pre><code class="language-javascript">const update = stream();</code></pre>
+<p>Next comes our accumulator function. This function needs to ignore <code>null</code> or <code>undefined</code> patches.
+That way, we can write services that don&#39;t return anything when they don&#39;t need to alter the state.</p>
+<p>If we&#39;re using <a href="https://github.com/fuzetsu/mergerino">Mergerino</a>, the accumulator is <code>merge</code>. This
+function already ignores empty patches.</p>
+<pre><code class="language-javascript">// Using Mergerino:
+const accumulator = merge;</code></pre>
+<p>If we&#39;re using
+<a href="http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html">function patches</a>, we make a
+slight adjustment to check whether the patch is truthy before applying it. If it is not, we ignore
+the patch and just return the state unchanged.</p>
+<pre><code class="language-javascript">// Using Function Patches:
+const accumulator = (state, patch) =&gt; patch ? patch(state) : state;</code></pre>
+<p>Next, we&#39;ll write a function that runs services. The function calls each service, accumulating state
+by calling the <code>accumulator</code>:</p>
+<pre><code class="language-javascript">const runServices = startingState =&gt;
+  app.services.reduce(
+    (state, service) =&gt; accumulator(state, service(state)),
+    startingState
+  );</code></pre>
+<p>Now, we can create our <code>states</code> stream with <code>scan</code>. We&#39;ll run the services on the initial state, as
+well as in the accumulator function for <code>scan</code>:</p>
+<pre><code class="language-javascript">const states = scan(
+  (state, patch) =&gt; runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);</code></pre>
+<p>Next, we create our actions and effects:</p>
+<pre><code class="language-javascript">const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);</code></pre>
+<p>Finally, we trigger effects whenever the state changes. This is simply a matter of calling each
+effect function and passing the <code>state</code>:</p>
+<pre><code class="language-javascript">states.map(state =&gt;
+  effects.forEach(effect =&gt; effect(state))
+);</code></pre>
+<p>All together, here is our pattern setup:</p>
+<pre><code class="language-javascript">const update = stream();
+
+// Using Mergerino:
+const accumulator = merge;
+
+// Using Function Patches:
+const accumulator = (state, patch) =&gt; patch ? patch(state) : state;
+
+const runServices = startingState =&gt;
+  app.services.reduce(
+    (state, service) =&gt; accumulator(state, service(state)),
+    startingState
+  );
+
+const states = scan(
+  (state, patch) =&gt; runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
+
+const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
+
+states.map(state =&gt; effects.forEach(effect =&gt; effect(state)));</code></pre>
+<p>Our pattern setup is complete, and we can wire up the view using <code>states</code>, <code>update</code>, and <code>actions</code>.</p>
+<h3>Using Services and Effects</h3><p>Let&#39;s look at an example using services and effects.</p>
+<p>Say we have an app with three pages: Home, Login, and Data. We&#39;ll use services and effects to
+achieve the following:</p>
+<ul>
+<li>Set up a blank form when going to the Login page</li>
+<li>Clean up the form when leaving the Login page</li>
+<li>Change the state to &quot;loading&quot; when going to the Data page</li>
+<li>Load the data asynchronously for the Data page</li>
+<li>Clean up the data when leaving the Data page.</li>
+</ul>
+<p>We&#39;ll use these properties in the state:</p>
+<ul>
+<li><code>page</code> to indicate the current page: <code>&quot;Home&quot;</code>, <code>&quot;Login&quot;</code>, <code>&quot;Data&quot;</code></li>
+<li><code>login</code> with <code>username</code> and <code>password</code> for the Login form</li>
+<li><code>data</code> to indicate <code>&quot;loading&quot;</code> or an array of data for the Data page.</li>
+</ul>
+<p>The login service checks whether the current page is <code>&quot;Login&quot;</code>. If so, and the login form has not
+yet been set up, it returns a patch to set up the form with a blank username and password.</p>
+<p>If the current page is not <code>&quot;Login&quot;</code>, and the login form is still present, the service returns a
+patch to remove the logim form from the state.</p>
+<pre><code class="language-javascript">const loginService = state =&gt; {
+  if (state.page === &quot;Login&quot;) {
+    if (!state.login) {
+      return { login: { username: &quot;&quot;, password: &quot;&quot; } };
+    }
+  } else if (state.login) {
+    return { login: undefined };
+  }
+};</code></pre>
+<p>The data service checks whether the current page is <code>&quot;Data&quot;</code>. If so, and <code>data</code> has not been set,
+the service sets the data to <code>&quot;loading&quot;</code>. The view uses this to display a <code>Loading, please wait...</code>
+message.</p>
+<p>If the current page is not <code>&quot;Data&quot;</code>, the service clears the <code>data</code> property if it is present.</p>
+<pre><code class="language-javascript">const dataService = state =&gt; {
+  if (state.page === &quot;Data&quot;) {
+    if (!state.data) {
+      return { data: &quot;loading&quot; };
+    }
+  } else if (state.data) {
+    return { data: undefined };
+  }
+};</code></pre>
+<p>Finally, the data effect checks to see if the <code>data</code> property is <code>&quot;loading&quot;</code>, in which case it calls
+<code>actions.loadData</code>, which simulates loading data asynchronously.</p>
+<p>Our <code>app</code> contains the <code>initial</code> state, the <code>Actions</code> constructor function, the array of <code>services</code>,
+and the <code>Effects</code> constructor function which returns an array of effects.</p>
+<pre><code class="language-javascript">const dataEffect = actions =&gt; state =&gt; {
+  if (state.data === &quot;loading&quot;) {
+    actions.loadData();
+  }
+};
+
+const app = {
+  initial: {
+    page: &quot;Home&quot;
+  },
+
+  Actions: update =&gt; ({
+    loadData: () =&gt;
+      setTimeout(
+        () =&gt;
+          update({
+            data: [&quot;One&quot;, &quot;Two&quot;]
+          }),
+        1500
+      )
+  }),
+
+  services: [loginService, dataService],
+
+  Effects: (_update, actions) =&gt; [dataEffect(actions)]
+};</code></pre>
+<p>You can see the complete example in action below.</p>
+  <div id="flems1" class="flemscode" style="height:700px"></div>
+
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "index-mergerino.js", content: "/* global m, mergerino */\nconst [stream, scan] = [m.stream, m.stream.scan];\nconst accumulator = mergerino;\n\nconst loginService = state => {\n  if (state.page === \"Login\") {\n    if (!state.login) {\n      return { login: { username: \"\", password: \"\" } };\n    }\n  } else if (state.login) {\n    return { login: undefined };\n  }\n};\n\nconst dataService = state => {\n  if (state.page === \"Data\") {\n    if (!state.data) {\n      return { data: \"loading\" };\n    }\n  } else if (state.data) {\n    return { data: undefined };\n  }\n};\n\nconst dataEffect = actions => state => {\n  if (state.data === \"loading\") {\n    actions.loadData();\n  }\n};\n\nconst app = {\n  initial: {\n    page: \"Home\"\n  },\n\n  Actions: update => ({\n    loadData: () =>\n      setTimeout(\n        () =>\n          update({\n            data: [\"One\", \"Two\"]\n          }),\n        1500\n      )\n  }),\n\n  services: [loginService, dataService],\n\n  Effects: (_update, actions) => [dataEffect(actions)]\n};\n\nconst update = stream();\n\nconst runServices = startingState =>\n  app.services.reduce(\n    (state, service) => accumulator(state, service(state)),\n    startingState\n  );\n\nconst states = scan(\n  (state, patch) => runServices(accumulator(state, patch)),\n  runServices(app.initial),\n  update\n);\n\nconst actions = app.Actions(update, states);\nconst effects = app.Effects(update, actions);\n\nstates.map(state =>\n  effects.forEach(effect => effect(state))\n);\n\nconst App = {\n  view: ({ attrs: { state, update } }) => [\n    m(\n      \"div\",\n      m(\n        \"a\",\n        {\n          href: \"#\",\n          onclick: evt => {\n            evt.preventDefault();\n            update({ page: \"Home\" });\n          }\n        },\n        \"Home\"\n      ),\n      m(\"span\", \" | \"),\n      m(\n        \"a\",\n        {\n          href: \"#\",\n          onclick: evt => {\n            evt.preventDefault();\n            update({ page: \"Login\" });\n          }\n        },\n        \"Login\"\n      ),\n      m(\"span\", \" | \"),\n      m(\n        \"a\",\n        {\n          href: \"#\",\n          onclick: evt => {\n            evt.preventDefault();\n            update({ page: \"Data\" });\n          }\n        },\n        \"Data\"\n      )\n    ),\n    state.page === \"Home\"\n      ? m(\"h4\", \"Home page\")\n      : state.page === \"Login\"\n      ? [\n          m(\"h4\", \"Login page\"),\n          m(\n            \"div\",\n            m(\"span\", \"Username:\"),\n            m(\"input[type=text]\", {\n              value: state.login.username,\n              oninput: evt =>\n                update({\n                  login: { username: evt.target.value }\n                })\n            })\n          ),\n          m(\n            \"div\",\n            m(\"span\", \"Password:\"),\n            m(\"input[type=password]\", {\n              value: state.login.password,\n              oninput: evt =>\n                update({\n                  login: { password: evt.target.value }\n                })\n            })\n          )\n        ]\n      : state.page === \"Data\"\n      ? [\n          m(\"h4\", \"Data page\"),\n          state.data === \"loading\"\n            ? m(\"div\", \"Loading, please wait...\")\n            : m(\"ul\", state.data.map(item => m(\"li\", item)))\n        ]\n      : null,\n    m(\"pre\", JSON.stringify(state, null, 2))\n  ]\n};\n\nm.mount(document.getElementById(\"app\"), {\n  view: () => m(App, { state: states(), update, actions })\n});\n\nstates.map(() => m.redraw());\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 60,
+
+      autoFocus: false
+    })
+  </script>
+
+
+<p><a name="conclusion"></a></p>
+<h3><a href="#conclusion">Conclusion</a></h3><p>In this section, we&#39;ve augmented our Meiosis pattern setup with services and effects. We do not need
+a lot of code for this setup; nevertheless, for your convenience, you can also use the same setup by
+adding <a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup">meiosis-setup</a> to your
+project.</p>
+<hr>
+<p><a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by
+<a href="http://twitter.com/foxdonut00">@foxdonut00</a> /
+<a href="https://github.com/foxdonut">foxdonut</a>
+and is released under the MIT license.</p>
+  </body>
+</html>

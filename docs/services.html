@@ -14,7 +14,7 @@
     <h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="toc.html">Table of Contents</a></p>
 <h2>Services</h2><p><a href="https://james-forbes.com">James Forbes</a> shared his idea of <em>Services</em>. In this section, we&#39;ll look
 at James&#39; version using streams, and another version using
-<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup">meiosis-setup</a>
+<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup">meiosis-setup</a>
 with <a href="https://github.com/fuzetsu">Daniel Loomer</a>&#39;s
 <a href="https://github.com/fuzetsu/mergerino">Mergerino</a>.</p>
 <p>James explains that while one-off actions occur after click events, user input, and so on,
@@ -117,95 +117,10 @@ states.map(view(update)).map(v =&gt; m.render(element, v));</code></pre>
 
 <h4>Flexibility</h4><p>Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish.</p>
-<p><a name="using_meiosis_setup"></a></p>
-<h3><a href="#using_meiosis_setup">Using Meiosis-Setup</a></h3><p>In Meiosis, instead of having services return streams that emit patches, services patches directly.
-These execute <em>before</em> the final state is produced. Then, after the view has re-rendered, <em>effects</em>
-can trigger more updates.</p>
-<p>A service function receives the current state, the previous state, and the patch.</p>
-<p>Service functions run <strong>synchronously</strong> and <strong>in order</strong>. Thus, a service can depend on the changes
-made by a previous service.</p>
-<p>Effect functions receive <code>({ state, patch, update, actions })</code> and can make synchronous and/or
-asynchronous calls to <code>update</code> and/or <code>actions</code>.</p>
-<p>Our component structure is thus:</p>
-<pre><code class="language-javascript">{
-  initial: initialState,
-  Actions: update =&gt; actions,
-  services: [({ state, previousState, state }) =&gt; patch?,
-  effects: [({ state, prevousState, patch, update, actions }) =&gt; void]
-}</code></pre>
-<h4>With Mergerino</h4><p>In this section, we&#39;ll use <a href="https://github.com/fuzetsu/mergerino">Mergerino</a>, which we looked at in
-the <a href="http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html">tutorial</a>.</p>
-<p>To use Mergerino, we emit patches as objects and we use <code>merge</code> as our accumulator:</p>
-<pre><code class="language-javascript">const states = m.stream.scan(merge, initial, update);</code></pre>
-<p>Remember that previously, we had a stats service and a description service:</p>
-<ul>
-<li><code>StatsService</code>: produces an object that indicates how many boxes of each color.</li>
-<li><code>DescriptionService</code>: produces the text description of how many boxes of each color are in
-the list.</li>
-</ul>
-<p>These services are now:</p>
-<pre><code class="language-javascript">const stats = {
-  service: ({ state }) =&gt;
-    R.applyTo(
-      state,
-      R.pipe(
-        x =&gt; x.boxes,
-        R.countBy(I),
-        R.always,
-        R.objOf(&quot;stats&quot;)
-      )
-    )
-};
-
-const description = {
-  service: ({ state }) =&gt;
-    R.applyTo(
-      state,
-      R.pipe(
-        x =&gt; x.stats,
-        R.toPairs,
-        R.groupBy(R.last),
-        R.map(R.map(R.head)),
-        R.map(humanList(&quot;and&quot;)),
-        R.toPairs,
-        R.map(R.join(&quot; &quot;)),
-        humanList(&quot;and&quot;),
-        x =&gt; x + &quot;.&quot;,
-        R.objOf(&quot;description&quot;)
-      )
-    )
-};</code></pre>
-<p>Each service function takes the state and returns a patch object.</p>
-<p>A service function does not need to return anything, however. The <code>storage.service</code> function is one such function, as it only stores the state into local storage:</p>
-<pre><code class="language-javascript">const storage = {
-  service: ({ state }) =&gt; {
-    localStorage.setItem(
-      &quot;v1&quot;,
-      JSON.stringify({ boxes: state.boxes })
-    );
-  }
-};</code></pre>
-<p>You will find the complete example below.</p>
-  <div id="flems2" class="flemscode" style="height:700px"></div>
-
-  <script>
-    window.Flems(flems2, {
-      files: [{name: "index-mergerino.js", content: "/* global b, m, R, Meiosis, mergerino */\nconst merge = mergerino;\n\nconst I = x => x;\n\nconst humanList = s => xs =>\n  xs.length > 1\n    ? xs.slice(0, -1).join(\", \") +\n      \" \" +\n      s +\n      \" \" +\n      xs.slice(-1)\n    : xs.join(\"\");\n\nconst stats = {\n  service: ({ state }) =>\n    R.applyTo(\n      state,\n      R.pipe(\n        x => x.boxes,\n        R.countBy(I),\n        R.always,\n        R.objOf(\"stats\")\n      )\n    )\n};\n\nconst description = {\n  service: ({ state }) =>\n    R.applyTo(\n      state,\n      R.pipe(\n        x => x.stats,\n        R.toPairs,\n        R.groupBy(R.last),\n        R.map(R.map(R.head)),\n        R.map(humanList(\"and\")),\n        R.toPairs,\n        R.map(R.join(\" \")),\n        humanList(\"and\"),\n        x => x + \".\",\n        R.objOf(\"description\")\n      )\n    )\n};\n\nconst storage = {\n  initial: R.applyTo(\n    localStorage.getItem(\"v1\"),\n    R.ifElse(R.isNil, R.always({}), x => JSON.parse(x))\n  ),\n\n  service: ({ state }) => {\n    localStorage.setItem(\n      \"v1\",\n      JSON.stringify({ boxes: state.boxes })\n    );\n  }\n};\n\nconst app = {\n  initial: merge(\n    {\n      boxes: [],\n      colors: [\"red\", \"purple\", \"blue\"]\n    },\n    storage.initial\n  ),\n\n  Actions: update => ({\n    addBox: x => update({ boxes: xs => xs.concat(x) }),\n    removeBox: i =>\n      update({\n        boxes: xs => xs.filter((x, j) => i != j)\n      })\n  }),\n\n  services: [\n    stats.service,\n    description.service,\n    storage.service\n  ]\n};\n\nconst App = {\n  view: ({ attrs: { state, actions } }) =>\n    m(\n      \".app\" + b.d(\"grid\").ff(\"Helvetica\"),\n      m(\n        \"nav.header\" +\n          b\n            .d(\"flex\")\n            .jc(\"space-between\")\n            .ai(\"center\")\n            .bc(\"steelblue\")\n            .c(\"white\")\n            .p(\"1em\"),\n\n        m(\"h1\" + b.m(0), \"Boxes\"),\n        state.colors.map(x =>\n          m(\n            \"button\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"2em\")\n                .h(\"2em\")\n                .fs(\"2em\")\n                .m(0)\n                .border(\"none\"),\n            { onclick: () => actions.addBox(x) },\n            \"+\"\n          )\n        )\n      ),\n      m(\"p\", state.description),\n      m(\n        \"\" +\n          b\n            .d(\"grid\")\n            .gridTemplateColumns(\"repeat(3, 1fr)\")\n            .alignItems(\"center\")\n            .justifyItems(\"center\")\n            .padding(\"1em\")\n            .gridRowGap(\"1em\")\n            .maxHeight(\"14em\")\n            .overflowY(\"auto\"),\n\n        state.boxes.map((x, i) =>\n          m(\n            \"\" +\n              b\n                .bc(x)\n                .c(\"white\")\n                .w(\"4em\")\n                .h(\"4em\"),\n            { onclick: () => actions.removeBox(i) }\n          )\n        )\n      )\n    )\n};\n\nconst { states, actions } = Meiosis.mergerino.setup({\n  stream: m.stream,\n  merge,\n  app\n});\n\nm.mount(document.getElementById(\"app\"), {\n  view: () => m(App, { state: states(), actions })\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "ramda", type: "js", url: "https://unpkg.com/ramda@0.25.0/dist/ramda.min.js"},{name: "bss", type: "js", url: "https://unpkg.com/bss@1.3.0/bss.js"},{name: "meiosis-setup", type: "js", url: "https://unpkg.com/meiosis-setup@4.0.2/dist/meiosis-setup.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
-      middle: 60,
-
-      autoFocus: false
-    })
-  </script>
-
-
 <p><a name="conclusion"></a></p>
-<h3><a href="#conclusion">Conclusion</a></h3><p>We can wire up services in different ways, and use them for computed properties, state
-synchronization, and other purposes. Please note, however, that not everything belongs in a service,
-so it&#39;s important to avoid getting carried away.</p>
-<hr>
-<p><strong>For more examples of using services and effects, please see the
-<a href="http://meiosis.js.org/docs/routing.html">Meiosis Routing</a> documentation.</strong></p>
+<h3><a href="#conclusion">Conclusion</a></h3><p>We can use services for computed properties, state synchronization, and other purposes. Please note,
+however, that not everything belongs in a service, so it&#39;s important to avoid getting carried away.</p>
+<p>In <a href="services-and-effects.html">this section</a>, we look at how services and effects work in Meiosis.</p>
 <hr>
 <p><a href="toc.html">Table of Contents</a></p>
 <hr>

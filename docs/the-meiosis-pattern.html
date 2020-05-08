@@ -18,12 +18,15 @@
 </blockquote>
 <blockquote>
 <p><strong>Helper functions!</strong> Meiosis is a pattern that you can set up yourself, but by popular demand
-<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup">meiosis-setup</a> is now available
+<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup">meiosis-setup</a> is now available
 for your convenience.</p>
 </blockquote>
 <p>This is a quick summary of the Meiosis Pattern:</p>
 <ul>
 <li>Separate state management code from view code.</li>
+<li>Use a simple stream library such as <a href="https://github.com/paldepind/flyd">flyd</a>,
+<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup">simpleStream from meiosis-setup</a>,
+or, if you&#39;re using Mithril, <a href="https://mithril.js.org/stream.html">Mithril Stream</a>.</li>
 <li>Start with an initial state.</li>
 <li>Create an <code>update</code> stream of <strong>patches</strong>.</li>
 <li>Patches can be
@@ -32,30 +35,68 @@ for your convenience.</p>
 or your own patches.</li>
 <li>Create an <code>actions</code> object of functions that issue patches onto the <code>update</code> stream.</li>
 <li>Create a <code>states</code> stream by using <code>scan</code> on the <code>update</code> stream with the initial state, and
-<code>merge</code> for Mergerino, or <code>(x, f) =&gt; f(x)</code> for function patches.</li>
+<code>merge</code> for Mergerino, or <code>(state, patch) =&gt; patch(state)</code> for function patches.</li>
 <li>Pass <code>state</code> and <code>actions</code> to views (see below for details.)</li>
 </ul>
 <p>Here is the code to set up the Meiosis Pattern:</p>
-<pre><code class="language-js">const app = {
+<pre><code class="language-javascript">const app = {
   initial: ...,
-  Actions: update =&gt; {
+  Actions: (update, getState) =&gt; {
     return ...
   }
 };
 
-const update = flyd.stream();
+const update = stream();
 
 // Using Mergerino:
-const states = flyd.scan(merge, app.initial, update);
+const states = scan(merge, app.initial, update);
 
 // Using Function Patches:
-const states = flyd.scan((x, f) =&gt; f(x), app.initial, update);
+const states = scan((state, patch) =&gt; patch(state), app.initial, update);
 
-const actions = app.Actions(update);</code></pre>
+const actions = app.Actions(update, states);</code></pre>
 <p>Then, pass <code>state</code> and <code>actions</code> to views.</p>
-<p>Optionally, add <a href="services.html">Services</a>.</p>
+<p>Optionally, add <a href="services-and-effects.html">Services and Effects</a>:</p>
+<pre><code class="language-javascript">const app = {
+  initial: ...,
+  Actions: (update, getState) =&gt; {
+    return ...
+  },
+  // services are state =&gt; patch
+  services: [...],
+  // effects are state =&gt; {
+  //   call update(...) or actions.someAction(...);
+  // }
+  Effects: (update, actions) =&gt; [...]
+}
+
+// Using Mergerino:
+const accumulator = merge;
+
+// Using Function Patches:
+const accumulator = (state, patch) =&gt; patch ? patch(state) : state;
+
+const update = stream();
+
+const runServices = startingState =&gt;
+  app.services.reduce(
+    (state, service) =&gt; accumulator(state, service(state)),
+    startingState
+  );
+
+const states = scan(
+  (state, patch) =&gt; runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
+
+const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
+
+states.map(state =&gt; effects.forEach(effect =&gt; effect(state)));</code></pre>
+<p>Next, wire up your view.</p>
 <p><a name="using_mithril"></a></p>
-<h3><a href="#using_mithril">Using Mithril</a></h3><pre><code class="language-js">const App = {
+<h3><a href="#using_mithril">Using Mithril</a></h3><pre><code class="language-javascript">const App = {
   view: function({ attrs: { state, actions } }) {
     // render view according to state, call actions to trigger changes
     // pass { state, actions } to other components.
@@ -66,7 +107,7 @@ m.mount(document.getElementById(&quot;app&quot;), {
   view: () =&gt; m(App, { state: states(), actions })
 });</code></pre>
 <p><a name="using_react"></a></p>
-<h3><a href="#using_react">Using React</a></h3><pre><code class="language-js">const App = ({ states, actions }) =&gt; {
+<h3><a href="#using_react">Using React</a></h3><pre><code class="language-javascript">const App = ({ states, actions }) =&gt; {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
 
@@ -83,7 +124,7 @@ m.mount(document.getElementById(&quot;app&quot;), {
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
 <p><a name="using_preact"></a></p>
-<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-js">const App = ({ state, actions }) =&gt; {
+<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-javascript">const App = ({ state, actions }) =&gt; {
   const [state, setState] = useState(states());
   states.map(setState);
 
@@ -95,7 +136,7 @@ ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
 preact.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
 <p><a name="using_lit_html"></a></p>
-<h3><a href="#using_lit_html">Using lit-html</a></h3><pre><code class="language-js">const App = ({ states, actions }) =&gt; {
+<h3><a href="#using_lit_html">Using lit-html</a></h3><pre><code class="language-javascript">const App = ({ states, actions }) =&gt; {
   // render view according to state, call actions to trigger changes
   // pass (state, actions) to other view functions.
 };
