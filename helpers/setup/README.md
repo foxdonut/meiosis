@@ -28,7 +28,6 @@ conveniences:
 [Immer](https://github.com/immerjs/immer) out of the box
 - provides the ability to call `update()` with an array of patches, automatically combining them into
   a single patch
-- automatically ignores null patches
 - provides a simple stream implementation
 - provides convenience functions to wire up [React](https://reactjs.org) and
 [Preact](https://preactjs.com)
