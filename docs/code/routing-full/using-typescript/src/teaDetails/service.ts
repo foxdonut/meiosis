@@ -1,6 +1,6 @@
 import { teaMap } from "./data";
 
-export const service = ({ state }): any => {
+export const service = (state): any => {
   const patches = [];
 
   if (state.routeTransition.arrive.TeaDetails) {

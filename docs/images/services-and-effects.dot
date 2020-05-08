@@ -1,0 +1,15 @@
+digraph meiosistutorial {
+  initial [shape="none", style="filled", fillcolor="orange", label="initial"]
+  update [shape="none", style="filled", fillcolor="yellow", label="update(patch)"]
+  services [shape="none", style="filled", fillcolor="lightblue", label="services"]
+  states [shape="none", style="filled", fillcolor="yellow", label="states"]
+  view [shape="none", style="filled", fillcolor="lightgreen", label="view"]
+  effects [shape="none", style="filled", fillcolor="lightblue", label="effects"]
+
+  initial -> services
+  update -> services -> states -> view [label="     "]
+  states -> effects -> update
+
+  {rank="same"; initial update}
+  {rank="same"; states view}
+}

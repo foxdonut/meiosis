@@ -1,25 +1,42 @@
 # meiosis-setup
 
+```javascript
+import meiosis from "meiosis-setup/functionPatches";
+import simpleStream from "meiosis-setup/simple-stream";
+
+const app = {
+  initial: ...,
+  Actions: update => ...,
+  services: [...],
+  Effects: (update, actions) => [...]
+};
+
+const { update, states, actions } = meiosis({ stream: simpleStream, app });
+```
+
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
 demand and for your convenience, here are some utility functions that help set up and use Meiosis.
 
-`meiosis-setup` wires up the Meiosis pattern for you with these conveniences:
+`meiosis-setup` wires up the Meiosis pattern for you as explained in
+[Services and Effects](https://meiosis.js.org/docs/services-and-effects.html), plus these
+conveniences:
 
-- wires up the `update` and `states` streams
-- creates your `actions`
+- works with [Flyd](https://github.com/paldepind/flyd),
+[Mithril-Stream](https://mithril.js.org/stream.html),
+[Mergerino](https://github.com/fuzetsu/mergerino),
+[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), and
+[Immer](https://github.com/immerjs/immer) out of the box
 - provides the ability to call `update()` with an array of patches, automatically combining them into
   a single patch
 - automatically ignores null patches
-- calls your `service` and `effect` functions, passing in `state`, `previousState`, `patch`,
-  `update`, and `actions`
-- omits consecutive identical `states`, thus avoiding unncessary re-renders
 - provides a simple stream implementation
-- works with Flyd, Mithril-Stream, Mergerino, function patches, and Immer out of the box
-- wires up React and Preact
-- works with Mithril and lit-html.
+- provides convenience functions to wire up [React](https://reactjs.org) and
+[Preact](https://preactjs.com)
 
-See [Meiosis examples](https://meiosis.js.org/examples.html) and
-[Routing documentation](https://meiosis.js.org/docs/routing.html) for some examples using
+Meiosis works with other view libraries of course. This document also shows how to wire up
+[Mithril](https://mithril.js.org) and [lit-html](https://lit-html.polymer-project.org/).
+
+See the [Meiosis examples](https://meiosis.js.org/examples.html) for some examples using
 `meiosis-setup`.
 
 ## Getting Started
@@ -88,38 +105,35 @@ provided:
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
 provide. In the application, you can define the `initial` state, the `Actions` constructor function,
-the array of services, and the array of effects, _all of which are optional_.
+the array of `services`, and the `Effects` constructor function, _all of which are optional_.
 
 The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
 ### Application
 
-In the `app` object that you pass to `setup`, you can optionally provide the following:
+In the `app` object that you pass to `setup`, you can **optionally** provide the following:
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
-- `Actions`: a function that receives `(update)` and returns an object with actions. The created
-actions are returned by `setup`, and also passed to `services`. If not provided, the created
-actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
-multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
-If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
-action using `this.otherAction(...)`.
-- `services`: an array of functions that get called with `({ state, previousState, patch })`.
-Service functions can change the state by returning a patch:
+- `Actions`: a function that receives `(update, getState)` and returns an object with actions. The
+  created actions are returned by `setup`, and also passed to `Effects`. If not provided, the
+  created actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
+  multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
+  If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
+  action using `this.otherAction(...)`.
+- `services`: an array of functions that get called with `state`. Service functions can change the
+state by returning a patch:
     - returning any patch, changes the state
     - not returning anything, or returning a falsy value, does not change the state
-    - reverting to the previous state using a compatible patch that produces `previousState`. Using
-    `() => previousState` works for Mergerino, Function Patches, and Immer. If you revert to the
-    previous state, the `states` stream does not receive a value and the view is not re-rendered.
-- `effects`: an array of functions that get called with
-`({ state, previousState, patch, update, actions })`. The return value of effect functions is
-ignored. Instead, effect functions should call `update` and/or `actions` to trigger further
-updates.
+- `Effects`: constructor function for effects, which gets called with `(update, actions)` and should
+  return an array of functions that will get called with `state`. The return value of effect
+  functions is ignored. Instead, effect functions should call `update` and/or `actions` to trigger
+  further updates.
 
 -----
 
-**For examples of using services and effects, please see the
-[Meiosis Routing](http://meiosis.js.org/docs/routing.html) documentation.**
+**For an explanation of services and effects, please see the
+[Services and Effects documentation](https://meiosis.js.org/docs/services-and-effects.html).**
 
 -----
 
@@ -138,7 +152,7 @@ import simpleStream from "meiosis-setup/simple-stream";
 import merge from "mergerino";
 
 // A) if the initial state is synchronous:
-const app = {...};
+const app = { initial: ..., ... };
 
 const { update, states, actions } =
   meiosis({ stream: simpleStream, merge, app });
@@ -175,7 +189,7 @@ import simpleStream from "meiosis-setup/simple-stream";
 // import flyd from "flyd";
 
 // A) if the initial state is synchronous:
-const app = {...};
+const app = { initial: ..., ... };
 
 const { update, states, actions } =
   meiosis({ stream: simpleStream, app });
@@ -213,7 +227,7 @@ import simpleStream from "meiosis-setup/simple-stream";
 import produce from "immer";
 
 // A) if the initial state is synchronous:
-const app = {...};
+const app = { initial: ..., ... };
 
 const { update, states, actions } =
   meiosis({ stream: simpleStream, produce, app });
@@ -355,7 +369,7 @@ for an example.
 ## Common Setup
 
 For a setup other than the supported libraries, you can use `meiosis-setup/common`. All you need to
-do is specify the `accumulator` function and, optionally, the `combine` function:
+do is specify the `accumulator` function and the `combine` function:
 
 - `accumulator`: `f(state, patch) => updatedState`. This function gets the latest state and the
 patch (the patch being in whatever form you decide to use), and returns the updated state.
@@ -370,15 +384,15 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 patches into a single patch.
 
     With Mergerino:
-    `combine: patches => patches``
+    `combine = patches => patches`
 
-    With Function Patches, `combine` is the `pipe` function:
+    With Function Patches:
     `combine = fns => args => fns.reduce((arg, fn) => fn(arg), args)`
 
     With Immer,
-    `combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state)`
-    (we can't use `patches.reduce(produce, state)` because that would send a third argument to
-    `produce`.
+    `combine = patches => state => patches.reduce((result, patch) => produce(result, patch), state)`.
+    We can't use `patches.reduce(produce, state)` because that would send a third argument to
+    `produce` and not work correctly.
 
 <a name="other_stream_library"></a>
 ### Using another stream library
@@ -394,10 +408,11 @@ called, emits a value onto the stream; and the function must have a `map` method
 
 ## Credits
 
-Many thanks to [Stephan Thon](https://github.com/smuemd),
-[Daniel Loomer](https://github.com/fuzetsu), [Barney Carroll](https://github.com/barneycarroll),
+Many thanks to [Barney Carroll](https://github.com/barneycarroll),
+[James Forbes](https://twitter.com/james_a_forbes),
+[Daniel Loomer](https://github.com/fuzetsu),
 [Scotty Simpson](https://github.com/CreaturesInUnitards), and
-[James Forbes](https://twitter.com/james_a_forbes)
+[Stephan Thon](https://github.com/smuemd)
 for your contributions, feedback, and suggestions. They are much appreciated!
 
 ----

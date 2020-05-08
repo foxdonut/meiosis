@@ -1,4 +1,4 @@
-export const service = ({ state }) => {
+export const service = state => {
   if (state.routeTransition.arrive.Beer) {
     return { pleaseWait: true };
   }

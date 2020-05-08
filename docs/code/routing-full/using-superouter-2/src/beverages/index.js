@@ -1,1 +1,0 @@
-export { Beverages } from "./view";

@@ -24,16 +24,10 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
-      const services = [
-        ({ previousState }) => {
-          t.deepEqual(previousState, {});
-        }
-      ];
-
       const { states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial: { duck: "yellow" }, services }
+        app: { initial: { duck: "yellow" } }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
@@ -58,12 +52,11 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / services", t => {
       const services = [
-        ({ state }) => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null),
-        ({ state }) =>
-          state.increment <= 0 || state.increment >= 10 ? { increment: undefined } : null,
-        ({ state }) => (state.invalid ? [{ invalid: undefined }, { combined: true }] : null),
-        ({ state }) => (state.sequence ? { sequenced: true } : null),
-        ({ state }) => (state.sequenced ? { received: true } : null)
+        state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null),
+        state => (state.increment <= 0 || state.increment >= 10 ? { increment: undefined } : null),
+        state => (state.invalid ? [{ invalid: undefined }, { combined: true }] : null),
+        state => (state.sequence ? { sequenced: true } : null),
+        state => (state.sequenced ? { received: true } : null)
       ];
 
       const { update, states } = meiosis.mergerino.setup({
@@ -87,7 +80,7 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / services run on initial state", t => {
       const services = [
-        ({ state }) => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null)
+        state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null)
       ];
 
       const { states } = meiosis.mergerino.setup({
@@ -109,14 +102,14 @@ const mergerinoTest = (merge, streamLib, label) => {
         increment: amount => update({ count: x => x + amount })
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = (update, actions) => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update({ service: true });
           }
@@ -126,7 +119,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states, actions } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -160,7 +153,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update({ interaction: true });
           this.increment();
         }
@@ -182,13 +175,13 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / service calls are combined into a single state update", t => {
       const services = [
-        ({ state }) => {
+        state => {
           if (state.count === 1) {
             return [{ count: x => x + 1 }, { service1: true }];
           }
         },
         // Services see previous changes
-        ({ state }) => {
+        state => {
           if (state.count === 2) {
             return { service2: true };
           }
@@ -214,15 +207,15 @@ const mergerinoTest = (merge, streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update({ count: x => x + 1 });
             update({ effect1: true });
           }
         },
-        ({ state }) => {
+        state => {
           if (state.count === 1) {
             update({ effect2: true });
           }
@@ -232,7 +225,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       update({ count: 1 });
@@ -246,8 +239,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update({ effect: true });
@@ -258,7 +251,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       update({ count: 1 });
@@ -269,8 +262,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update({ effect: true });
           }
@@ -280,7 +273,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -289,9 +282,9 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / a service can alter a state change", t => {
       const services = [
-        ({ patch, previousState }) => {
-          if (patch && patch.one) {
-            return [() => previousState, { two: true }];
+        state => {
+          if (state.one) {
+            return { one: undefined, two: true };
           }
         }
       ];
@@ -310,9 +303,9 @@ const mergerinoTest = (merge, streamLib, label) => {
 
     t.test(label + " / a service can cancel a patch", t => {
       const services = [
-        ({ patch, previousState }) => {
-          if (patch && patch.one) {
-            return () => previousState;
+        state => {
+          if (state.one) {
+            return { one: undefined };
           }
         }
       ];
@@ -329,48 +322,23 @@ const mergerinoTest = (merge, streamLib, label) => {
       update({ one: true });
 
       t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
-      t.end();
-    });
-
-    t.test(label + " / a service can cancel a render", t => {
-      const services = [
-        ({ patch, previousState }) => {
-          if (patch && patch.one) {
-            return () => previousState;
-          }
-        }
-      ];
-
-      const { update, states } = meiosis.mergerino.setup({
-        stream: streamLib,
-        merge,
-        app: { services }
-      });
-
-      let ticks = 0;
-      states.map(() => ticks++);
-
-      update({ one: true });
-
-      t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
+      t.equal(ticks, 2, "number of ticks");
       t.end();
     });
 
     t.test(label + " / a service and an effect", t => {
       const services = [
-        ({ patch }) => {
-          if (patch && patch.one) {
-            return { two: true };
+        state => {
+          if (state.patch) {
+            return { one: true };
           }
         }
       ];
 
-      const effects = [
-        ({ update, patch }) => {
-          if (patch && patch.one) {
-            update({ effect: true });
+      const Effects = update => [
+        state => {
+          if (state.patch) {
+            update({ patch: undefined, effect: true });
           }
         }
       ];
@@ -378,15 +346,15 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
       states.map(() => ticks++);
 
-      update({ one: true });
+      update({ patch: true });
 
-      t.deepEqual(states(), { one: true, two: true, effect: true }, "resulting state");
+      t.deepEqual(states(), { one: true, effect: true }, "resulting state");
       t.equal(ticks, 3, "number of ticks");
       t.end();
     });
@@ -395,15 +363,15 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.route === "PageB" && state.data === "None") {
             return { data: "Loading" };
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update({ data: "Loaded" });
@@ -415,7 +383,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update({ route: "PageB" });
@@ -434,18 +402,18 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && state.data === "None") {
-            return { route: previousState.route, data: "Loading" };
+        state => {
+          if (state.nextRoute === "PageB" && state.data === "None") {
+            return { data: "Loading" };
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
-              update({ route: "PageB", data: "Loaded" });
+              update({ route: state.nextRoute, nextRoute: undefined, data: "Loaded" });
             }, 10);
           }
         }
@@ -454,10 +422,10 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
-      update({ route: "PageB" });
+      update({ nextRoute: "PageB" });
 
       states.map(state => {
         if (state.data === "Loading") {
@@ -473,18 +441,18 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && !state.user) {
+        state => {
+          if (state.nextRoute === "PageB" && !state.user) {
             return {
-              route: previousState.route,
+              nextRoute: undefined,
               redirect: { route: "PageC", message: "Please login." }
             };
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update({
               route: state.redirect.route,
@@ -498,10 +466,10 @@ const mergerinoTest = (merge, streamLib, label) => {
       const { update, states } = meiosis.mergerino.setup({
         stream: streamLib,
         merge,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
-      update({ route: "PageB" });
+      update({ nextRoute: "PageB" });
 
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to unauthorized page");
@@ -517,7 +485,7 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA", data: "Loaded" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.data === "Loaded" && state.route !== "PageA") {
             return {
               data: "None"
@@ -546,11 +514,9 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA" && state.confirm !== false) {
             return {
-              route: previousState.route,
-              target: state.route,
               confirm: true
             };
           }
@@ -563,8 +529,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services }
       });
 
-      update({ route: "PageB" });
-      update({ confirm: false, target: undefined });
+      update({ nextRoute: "PageB" });
+      update({ confirm: false });
 
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to next page");
@@ -582,12 +548,15 @@ const mergerinoTest = (merge, streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA") {
             return {
-              route: previousState.route,
-              target: state.route,
               confirm: true
+            };
+          } else {
+            return {
+              route: state.nextRoute,
+              nextRoute: undefined
             };
           }
         }
@@ -599,8 +568,8 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services }
       });
 
-      update({ route: "PageB" });
-      update({ confirm: false, route: "PageB", form: undefined, target: undefined });
+      update({ nextRoute: "PageB" });
+      update({ confirm: false, nextRoute: "PageB", form: undefined });
 
       states.map(state => {
         if (state.confirm === true) {
@@ -636,15 +605,9 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
-      const services = [
-        ({ previousState }) => {
-          t.deepEqual(previousState, {});
-        }
-      ];
-
       const { states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial: { duck: "yellow" }, services }
+        app: { initial: { duck: "yellow" } }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
@@ -669,16 +632,15 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / services", t => {
       const services = [
-        ({ state }) =>
+        state =>
           state.increment > 0 && state.increment < 10
             ? R.over(R.lensProp("count"), R.add(1))
             : null,
 
-        ({ state }) =>
-          state.increment <= 0 || state.increment >= 10 ? R.dissoc("increment") : null,
-        ({ state }) => (state.invalid ? [R.dissoc("invalid"), R.assoc("combined", true)] : null),
-        ({ state }) => (state.sequence ? R.assoc("sequenced", true) : null),
-        ({ state }) => (state.sequenced ? R.assoc("received", true) : null)
+        state => (state.increment <= 0 || state.increment >= 10 ? R.dissoc("increment") : null),
+        state => (state.invalid ? [R.dissoc("invalid"), R.assoc("combined", true)] : null),
+        state => (state.sequence ? R.assoc("sequenced", true) : null),
+        state => (state.sequenced ? R.assoc("received", true) : null)
       ];
 
       const { update, states } = meiosis.functionPatches.setup({
@@ -701,7 +663,7 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / services run on initial state", t => {
       const services = [
-        ({ state }) =>
+        state =>
           state.increment > 0 && state.increment < 10 ? R.over(R.lensProp("count"), R.add(1)) : null
       ];
 
@@ -723,14 +685,14 @@ const functionPatchTest = (streamLib, label) => {
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = (update, actions) => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update(R.assoc("service", true));
           }
@@ -739,7 +701,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states, actions } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -773,7 +735,7 @@ const functionPatchTest = (streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update(R.assoc("interaction", true));
           this.increment();
         }
@@ -795,13 +757,13 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / service calls are combined into a single state update", t => {
       const services = [
-        ({ state }) => {
+        state => {
           if (state.count === 1) {
             return [R.assoc("count", 2), R.assoc("service1", true)];
           }
         },
         // Services see previous changes
-        ({ state }) => {
+        state => {
           if (state.count === 2) {
             return R.assoc("service2", true);
           }
@@ -826,15 +788,15 @@ const functionPatchTest = (streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update(R.assoc("count", 2));
             update(R.assoc("effect1", true));
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1) {
             update(R.assoc("effect2", true));
           }
@@ -843,7 +805,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       update(R.assoc("count", 1));
@@ -857,8 +819,8 @@ const functionPatchTest = (streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update(R.assoc("effect", true));
@@ -868,7 +830,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       update(R.assoc("count", 1));
@@ -879,8 +841,8 @@ const functionPatchTest = (streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update(R.assoc("effect", true));
           }
@@ -889,7 +851,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -898,9 +860,9 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / a service can alter a state change", t => {
       const services = [
-        ({ state, previousState }) => {
+        state => {
           if (state.one) {
-            return [R.always(previousState), R.assoc("two", true)];
+            return [R.dissoc("one"), R.assoc("two", true)];
           }
         }
       ];
@@ -918,9 +880,9 @@ const functionPatchTest = (streamLib, label) => {
 
     t.test(label + " / a service can cancel a patch", t => {
       const services = [
-        ({ state, previousState }) => {
+        state => {
           if (state.one) {
-            return R.always(previousState);
+            return R.dissoc("one");
           }
         }
       ];
@@ -936,62 +898,38 @@ const functionPatchTest = (streamLib, label) => {
       update(R.assoc("one", true));
 
       t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
-      t.end();
-    });
-
-    t.test(label + " / a service can cancel a render", t => {
-      const services = [
-        ({ state, previousState }) => {
-          if (state.one) {
-            return R.always(previousState);
-          }
-        }
-      ];
-
-      const { update, states } = meiosis.functionPatches.setup({
-        stream: streamLib,
-        app: { services }
-      });
-
-      let ticks = 0;
-      states.map(() => ticks++);
-
-      update(R.assoc("one", true));
-
-      t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
+      t.equal(ticks, 2, "number of ticks");
       t.end();
     });
 
     t.test(label + " / a service and an effect", t => {
       const services = [
-        ({ state, previousState }) => {
-          if (state.one && !previousState.one) {
-            return R.assoc("two", true);
+        state => {
+          if (state.patch) {
+            return R.assoc("one", true);
           }
         }
       ];
 
-      const effects = [
-        ({ state, previousState, update }) => {
-          if (state.one && !previousState.one) {
-            update(R.assoc("effect", true));
+      const Effects = update => [
+        state => {
+          if (state.patch) {
+            update([R.assoc("effect", true), R.dissoc("patch")]);
           }
         }
       ];
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
       states.map(() => ticks++);
 
-      update(R.assoc("one", true));
+      update(R.assoc("patch", true));
 
-      t.deepEqual(states(), { one: true, two: true, effect: true }, "resulting state");
+      t.deepEqual(states(), { one: true, effect: true }, "resulting state");
       t.equal(ticks, 3, "number of ticks");
       t.end();
     });
@@ -1000,15 +938,15 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.route === "PageB" && state.data === "None") {
             return R.assoc("data", "Loading");
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(R.assoc("data", "Loaded"));
@@ -1019,7 +957,7 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(R.assoc("route", "PageB"));
@@ -1038,18 +976,22 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && state.data === "None") {
-            return R.compose(R.assoc("route", previousState.route), R.assoc("data", "Loading"));
+        state => {
+          if (state.nextRoute === "PageB" && state.data === "None") {
+            return R.assoc("data", "Loading");
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
-              update([R.assoc("route", "PageB"), R.assoc("data", "Loaded")]);
+              update([
+                R.assoc("route", state.nextRoute),
+                R.dissoc("nextRoute"),
+                R.assoc("data", "Loaded")
+              ]);
             }, 10);
           }
         }
@@ -1057,10 +999,10 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
-      update(R.assoc("route", "PageB"));
+      update(R.assoc("nextRoute", "PageB"));
 
       states.map(state => {
         if (state.data === "Loading") {
@@ -1076,19 +1018,18 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && !state.user) {
+        state => {
+          if (state.nextRoute === "PageB" && !state.user) {
             return state =>
-              Object.assign({}, state, {
-                route: previousState.route,
+              Object.assign({}, R.dissoc("nextRoute", state), {
                 redirect: { route: "PageC", message: "Please login." }
               });
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update([
               R.assoc("route", state.redirect.route),
@@ -1101,10 +1042,10 @@ const functionPatchTest = (streamLib, label) => {
 
       const { update, states } = meiosis.functionPatches.setup({
         stream: streamLib,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
-      update(R.assoc("route", "PageB"));
+      update(R.assoc("nextRoute", "PageB"));
 
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to unauthorized page");
@@ -1120,7 +1061,7 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "Loaded" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.data === "Loaded" && state.route !== "PageA") {
             return R.assoc("data", "None");
           }
@@ -1146,12 +1087,10 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA" && state.confirm !== false) {
             return state =>
               Object.assign({}, state, {
-                route: previousState.route,
-                target: state.route,
                 confirm: true
               });
           }
@@ -1163,8 +1102,8 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial, services }
       });
 
-      update(R.assoc("route", "PageB"));
-      update(R.compose(R.assoc("confirm", false), R.dissoc("target")));
+      update(R.assoc("nextRoute", "PageB"));
+      update(R.assoc("confirm", false));
 
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to next page");
@@ -1182,14 +1121,14 @@ const functionPatchTest = (streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA") {
             return state =>
               Object.assign({}, state, {
-                route: previousState.route,
-                target: state.route,
                 confirm: true
               });
+          } else {
+            return [R.assoc("route", state.nextRoute), R.dissoc("nextRoute")];
           }
         }
       ];
@@ -1199,13 +1138,8 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial, services }
       });
 
-      update(R.assoc("route", "PageB"));
-      update([
-        R.assoc("confirm", false),
-        R.assoc("route", "PageB"),
-        R.dissoc("form"),
-        R.dissoc("target")
-      ]);
+      update(R.assoc("nextRoute", "PageB"));
+      update([R.assoc("confirm", false), R.assoc("nextRoute", "PageB"), R.dissoc("form")]);
 
       states.map(state => {
         if (state.confirm === true) {
@@ -1245,16 +1179,10 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / initial state", t => {
-      const services = [
-        ({ previousState }) => {
-          t.deepEqual(previousState, {});
-        }
-      ];
-
       const { states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial: { duck: "yellow" }, services }
+        app: { initial: { duck: "yellow" } }
       });
 
       t.deepEqual(states(), { duck: "yellow" }, "initial state");
@@ -1279,18 +1207,18 @@ const immerTest = (streamLib, label) => {
 
     t.test(label + " / services", t => {
       const services = [
-        ({ state }) =>
+        state =>
           state.increment > 0 &&
           state.increment < 10 &&
           (draft => {
             draft.count++;
           }),
-        ({ state }) =>
+        state =>
           (state.increment <= 0 || state.increment >= 10) &&
           (draft => {
             delete draft.increment;
           }),
-        ({ state }) =>
+        state =>
           state.invalid && [
             draft => {
               delete draft.invalid;
@@ -1299,12 +1227,12 @@ const immerTest = (streamLib, label) => {
               draft.combined = true;
             }
           ],
-        ({ state }) =>
+        state =>
           state.sequence &&
           (draft => {
             draft.sequenced = true;
           }),
-        ({ state }) =>
+        state =>
           state.sequenced &&
           (draft => {
             draft.received = true;
@@ -1340,7 +1268,7 @@ const immerTest = (streamLib, label) => {
 
     t.test(label + " / services run on initial state", t => {
       const services = [
-        ({ state }) =>
+        state =>
           state.increment > 0 && state.increment < 10
             ? draft => {
                 draft.count++;
@@ -1370,14 +1298,14 @@ const immerTest = (streamLib, label) => {
           })
       });
 
-      const effects = [
-        ({ state, actions }) => {
+      const Effects = update => [
+        state => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1 && !state.service) {
             update(draft => {
               draft.service = true;
@@ -1389,7 +1317,7 @@ const immerTest = (streamLib, label) => {
       const { update, states, actions } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial: { count: 0 }, effects, Actions }
+        app: { initial: { count: 0 }, Effects, Actions }
       });
 
       t.ok(typeof actions.increment === "function", "actions");
@@ -1436,7 +1364,7 @@ const immerTest = (streamLib, label) => {
       });
 
       const Actions2 = update => ({
-        interact: function() {
+        interact: function () {
           update(state => {
             state.interaction = true;
           });
@@ -1460,7 +1388,7 @@ const immerTest = (streamLib, label) => {
 
     t.test(label + " / service calls are combined into a single state update", t => {
       const services = [
-        ({ state }) => {
+        state => {
           if (state.count === 1) {
             return [
               draft => {
@@ -1473,7 +1401,7 @@ const immerTest = (streamLib, label) => {
           }
         },
         // Services see previous changes
-        ({ state }) => {
+        state => {
           if (state.count === 2) {
             return draft => {
               draft.service2 = true;
@@ -1503,8 +1431,8 @@ const immerTest = (streamLib, label) => {
     t.test(label + " / synchronous effect updates", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           effectCalls++;
           if (state.count === 1) {
             update(draft => {
@@ -1515,7 +1443,7 @@ const immerTest = (streamLib, label) => {
             });
           }
         },
-        ({ state, update }) => {
+        state => {
           if (state.count === 1) {
             update(draft => {
               draft.effect2 = true;
@@ -1527,7 +1455,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       update(state => {
@@ -1543,8 +1471,8 @@ const immerTest = (streamLib, label) => {
     t.test(label + " / effects may be called in an infinite loop", t => {
       let effectCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update(draft => {
@@ -1557,7 +1485,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       update(state => {
@@ -1570,8 +1498,8 @@ const immerTest = (streamLib, label) => {
     });
 
     t.test(label + " / effect running on initial state is seen in the states stream", t => {
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (!state.effect) {
             update(draft => {
               draft.effect = true;
@@ -1583,7 +1511,7 @@ const immerTest = (streamLib, label) => {
       const { states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { effects }
+        app: { Effects }
       });
 
       t.deepEqual(states(), { effect: true }, "resulting state");
@@ -1592,14 +1520,12 @@ const immerTest = (streamLib, label) => {
 
     t.test(label + " / a service can alter a state change", t => {
       const services = [
-        ({ state, previousState }) => {
+        state => {
           if (state.one) {
-            return [
-              () => previousState,
-              draft => {
-                draft.two = true;
-              }
-            ];
+            return draft => {
+              delete draft.one;
+              draft.two = true;
+            };
           }
         }
       ];
@@ -1620,74 +1546,50 @@ const immerTest = (streamLib, label) => {
 
     t.test(label + " / a service can cancel a patch", t => {
       const services = [
-        ({ state, previousState }) => {
+        state => {
           if (state.one) {
-            return () => previousState;
-          }
-        }
-      ];
-
-      const { update, states } = meiosis.immer.setup({
-        stream: streamLib,
-        produce,
-        app: { services }
-      });
-
-      let ticks = 0;
-      states.map(() => ticks++);
-
-      update(draft => {
-        draft.one = true;
-      });
-
-      t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
-      t.end();
-    });
-
-    t.test(label + " / a service can cancel a render", t => {
-      const services = [
-        ({ state, previousState }) => {
-          if (state.one) {
-            return () => previousState;
-          }
-        }
-      ];
-
-      const { update, states } = meiosis.immer.setup({
-        stream: streamLib,
-        produce,
-        app: { services }
-      });
-
-      let ticks = 0;
-      states.map(() => ticks++);
-
-      update(draft => {
-        draft.one = true;
-      });
-
-      t.deepEqual(states(), {}, "resulting state");
-      t.equal(ticks, 1, "number of ticks");
-      t.end();
-    });
-
-    t.test(label + " / a service and an effect", t => {
-      const services = [
-        ({ state, previousState }) => {
-          if (state.one && !previousState.one) {
             return draft => {
-              draft.two = true;
+              delete draft.one;
             };
           }
         }
       ];
 
-      const effects = [
-        ({ state, previousState, update }) => {
-          if (state.two && !previousState.two) {
+      const { update, states } = meiosis.immer.setup({
+        stream: streamLib,
+        produce,
+        app: { services }
+      });
+
+      let ticks = 0;
+      states.map(() => ticks++);
+
+      update(draft => {
+        draft.one = true;
+      });
+
+      t.deepEqual(states(), {}, "resulting state");
+      t.equal(ticks, 2, "number of ticks");
+      t.end();
+    });
+
+    t.test(label + " / a service and an effect", t => {
+      const services = [
+        state => {
+          if (state.patch) {
+            return draft => {
+              draft.one = true;
+            };
+          }
+        }
+      ];
+
+      const Effects = update => [
+        state => {
+          if (state.patch) {
             update(draft => {
               draft.effect = true;
+              delete draft.patch;
             });
           }
         }
@@ -1696,17 +1598,17 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { services, effects }
+        app: { services, Effects }
       });
 
       let ticks = 0;
       states.map(() => ticks++);
 
       update(draft => {
-        draft.one = true;
+        draft.patch = true;
       });
 
-      t.deepEqual(states(), { one: true, two: true, effect: true }, "resulting state");
+      t.deepEqual(states(), { one: true, effect: true }, "resulting state");
       t.equal(ticks, 3, "number of ticks");
       t.end();
     });
@@ -1715,7 +1617,7 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.route === "PageB" && state.data === "None") {
             return draft => {
               draft.data = "Loading";
@@ -1724,8 +1626,8 @@ const immerTest = (streamLib, label) => {
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(draft => {
@@ -1739,7 +1641,7 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
@@ -1760,22 +1662,22 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "None" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && state.data === "None") {
+        state => {
+          if (state.nextRoute === "PageB" && state.data === "None") {
             return draft => {
-              draft.route = previousState.route;
               draft.data = "Loading";
             };
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.data === "Loading") {
             setTimeout(() => {
               update(draft => {
-                draft.route = "PageB";
+                draft.route = draft.nextRoute;
+                delete draft.nextRoute;
                 draft.data = "Loaded";
               });
             }, 10);
@@ -1786,11 +1688,11 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
-        draft.route = "PageB";
+        draft.nextRoute = "PageB";
       });
 
       states.map(state => {
@@ -1807,18 +1709,18 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.route === "PageB" && !state.user) {
+        state => {
+          if (state.nextRoute === "PageB" && !state.user) {
             return draft => {
-              draft.route = previousState.route;
               draft.redirect = { route: "PageC", message: "Please login." };
+              delete draft.nextRoute;
             };
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
+      const Effects = update => [
+        state => {
           if (state.redirect) {
             update(draft => {
               draft.route = state.redirect.route;
@@ -1832,11 +1734,11 @@ const immerTest = (streamLib, label) => {
       const { update, states } = meiosis.immer.setup({
         stream: streamLib,
         produce,
-        app: { initial, services, effects }
+        app: { initial, services, Effects }
       });
 
       update(draft => {
-        draft.route = "PageB";
+        draft.nextRoute = "PageB";
       });
 
       states.map(state => {
@@ -1853,7 +1755,7 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA", data: "Loaded" };
 
       const services = [
-        ({ state }) => {
+        state => {
           if (state.data === "Loaded" && state.route !== "PageA") {
             return draft => {
               draft.data = "None";
@@ -1884,11 +1786,9 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA" && state.confirm !== false) {
             return draft => {
-              draft.route = previousState.route;
-              draft.target = state.route;
               draft.confirm = true;
             };
           }
@@ -1902,12 +1802,11 @@ const immerTest = (streamLib, label) => {
       });
 
       update(draft => {
-        draft.route = "PageB";
+        draft.nextRoute = "PageB";
       });
 
       update(draft => {
         draft.confirm = false;
-        delete draft.target;
       });
 
       states.map(state => {
@@ -1926,12 +1825,15 @@ const immerTest = (streamLib, label) => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        ({ state, previousState }) => {
-          if (state.form === "data" && state.route !== "PageA") {
+        state => {
+          if (state.form === "data" && state.nextRoute !== "PageA") {
             return draft => {
-              draft.route = previousState.route;
-              draft.target = state.route;
               draft.confirm = true;
+            };
+          } else {
+            return draft => {
+              draft.route = state.nextRoute;
+              delete draft.nextRoute;
             };
           }
         }
@@ -1944,14 +1846,13 @@ const immerTest = (streamLib, label) => {
       });
 
       update(draft => {
-        draft.route = "PageB";
+        draft.nextRoute = "PageB";
       });
 
       update(draft => {
         draft.confirm = false;
-        draft.route = "PageB";
+        draft.nextRoute = "PageB";
         delete draft.form;
-        delete draft.target;
       });
 
       states.map(state => {

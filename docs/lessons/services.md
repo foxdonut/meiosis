@@ -134,115 +134,13 @@ The complete example is below.
 Using streams gives you the flexibility of being able to hook into them and wiring them as you
 wish.
 
-<a name="using_meiosis_setup"></a>
-### [Using Meiosis-Setup](#using_meiosis_setup)
-
-In Meiosis, instead of having services return streams that emit patches, services patches directly.
-These execute _before_ the final state is produced. Then, after the view has re-rendered, _effects_
-can trigger more updates.
-
-A service function receives the current state, the previous state, and the patch.
-
-Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
-made by a previous service.
-
-Effect functions receive `({ state, patch, update, actions })` and can make synchronous and/or
-asynchronous calls to `update` and/or `actions`.
-
-Our component structure is thus:
-
-```javascript
-{
-  initial: initialState,
-  Actions: update => actions,
-  services: [({ state, previousState, state }) => patch?,
-  effects: [({ state, prevousState, patch, update, actions }) => void]
-}
-```
-
-#### With Mergerino
-
-In this section, we'll use [Mergerino](https://github.com/fuzetsu/mergerino), which we looked at in
-the [tutorial](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html).
-
-To use Mergerino, we emit patches as objects and we use `merge` as our accumulator:
-
-```javascript
-const states = m.stream.scan(merge, initial, update);
-```
-
-Remember that previously, we had a stats service and a description service:
-
-- `StatsService`: produces an object that indicates how many boxes of each color.
-- `DescriptionService`: produces the text description of how many boxes of each color are in
-the list.
-
-These services are now:
-
-```javascript
-const stats = {
-  service: ({ state }) =>
-    R.applyTo(
-      state,
-      R.pipe(
-        x => x.boxes,
-        R.countBy(I),
-        R.always,
-        R.objOf("stats")
-      )
-    )
-};
-
-const description = {
-  service: ({ state }) =>
-    R.applyTo(
-      state,
-      R.pipe(
-        x => x.stats,
-        R.toPairs,
-        R.groupBy(R.last),
-        R.map(R.map(R.head)),
-        R.map(humanList("and")),
-        R.toPairs,
-        R.map(R.join(" ")),
-        humanList("and"),
-        x => x + ".",
-        R.objOf("description")
-      )
-    )
-};
-```
-
-Each service function takes the state and returns a patch object.
-
-A service function does not need to return anything, however. The `storage.service` function is one such function, as it only stores the state into local storage:
-
-```javascript
-const storage = {
-  service: ({ state }) => {
-    localStorage.setItem(
-      "v1",
-      JSON.stringify({ boxes: state.boxes })
-    );
-  }
-};
-```
-
-You will find the complete example below.
-
-@flems code/services/index-mergerino.js,app.html mithril,mithril-stream,ramda,bss,meiosis-setup,mergerino 700 60
-
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
 
-We can wire up services in different ways, and use them for computed properties, state
-synchronization, and other purposes. Please note, however, that not everything belongs in a service,
-so it's important to avoid getting carried away.
+We can use services for computed properties, state synchronization, and other purposes. Please note,
+however, that not everything belongs in a service, so it's important to avoid getting carried away.
 
------
-
-**For more examples of using services and effects, please see the
-[Meiosis Routing](http://meiosis.js.org/docs/routing.html) documentation.**
+In [this section](services-and-effects.html), we look at how services and effects work in Meiosis.
 
 -----
 

@@ -3,8 +3,8 @@
  *
  * @function meiosis.preact.setup
  *
- * @param {preact.h} - the Preact h function.
- * @param {preact.useState} - the Preact useState function.
+ * @param {preact.h} h - the Preact h function.
+ * @param {preact.useState} useState - the Preact useState function.
  * @param {preact.Component} Root - your Root component, which receives `state`, `update`, and
  * `actions`.
  *

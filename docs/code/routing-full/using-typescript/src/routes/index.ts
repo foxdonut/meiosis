@@ -1,7 +1,5 @@
-import { Actions, createRouteSegments, routeTransition } from "meiosis-routing/state";
+import { createRouteSegments, routeTransition } from "meiosis-routing/state";
 import { RouteConfig } from "meiosis-routing/router-helper";
-
-export { navigateTo } from "meiosis-routing/state";
 
 export const Route = createRouteSegments(["Home", "Tea", "TeaDetails"]);
 
@@ -19,8 +17,12 @@ export const routeConfig: RouteConfig = {
   Beer: ["/beer?type&country", beverageRoutes]
 };
 
-const service = ({ previousState, state }): any => ({
-  routeTransition: (): any => routeTransition(previousState.route, state.route)
+export const navigateTo = (route): any => ({ nextRoute: Array.isArray(route) ? route : [route] });
+export const Actions = (update): any => ({ navigateTo: (route): any => update(navigateTo(route)) });
+
+const service = (state): any => ({
+  routeTransition: (): any => routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 
 export const routes = {

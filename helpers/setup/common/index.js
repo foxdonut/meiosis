@@ -7,10 +7,10 @@
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
  * `update => actions`.
  * @property {Array<Function>} [services=[]] - an array of service functions, each of which
- * should be `({ state, previousState, patch }) => patch?`.
- * @property {Array<Function>} [effects=[]] - an array of effect functions, each of which
- * should be `({ state, previousState, patch, update, actions }) => void`, with the function
- * optionally calling `update` and/or `actions`.
+ * should be `state => patch?`.
+ * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
+ * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+ * and/or `actions`.
  */
 
 /**
@@ -31,9 +31,9 @@
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
  *
- * Patch is merged in to the state by default. Services have access to the state, previous state,
- * and patch, and can return a patch that further updates the state, reverts to the previous state,
- * and so on. State changes by services are available to the next services in the list.
+ * Patch is merged in to the state by default. Services have access to the state and can return a
+ * patch that further updates the state. State changes by services are available to the next
+ * services in the list.
  *
  * After the services have run and the state has been updated, effects are executed and have the
  * opportunity to trigger more updates.
@@ -49,7 +49,7 @@
  * @param {Function} combine - the function that combines an array of patches into one.
  * @param {app} app - the app, with optional properties.
  *
- * @returns {Object} - `{ update, states, actions }`, where `update` and `states` are streams, and
+ * @returns {Object} - `{ states, update, actions }`, where `states` and `update` are streams, and
  * `actions` are the created actions.
  */
 export default ({ stream, accumulator, combine, app }) => {
@@ -63,11 +63,7 @@ export default ({ stream, accumulator, combine, app }) => {
     throw new Error("No combine function was specified.");
   }
 
-  app = app || {};
-  let { initial, Actions, services, effects } = app;
-  initial = initial || {};
-  services = services || [];
-  effects = effects || [];
+  app = Object.assign({ initial: {}, Actions: () => ({}), services: [], Effects: () => [] }, app);
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -76,47 +72,20 @@ export default ({ stream, accumulator, combine, app }) => {
   const scan = stream.scan;
 
   const update = createStream();
-  const actions = (Actions || (() => ({})))(update);
-  const states = createStream();
 
-  // context is { state, patch, previousState }
-  // state is optionally updated by service patches; patch and previousState never change.
-  const runServices = context => {
-    const updatedContext = context;
+  const runServices = startingState =>
+    app.services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
-    for (let i = 0; i < services.length; i++) {
-      // a service should (optionally) return a patch
-      const servicePatch = services[i](updatedContext);
-      updatedContext.state = accumulatorFn(updatedContext.state, servicePatch);
-    }
-    return updatedContext;
-  };
-
-  const contexts = scan(
-    (context, patch) =>
-      runServices({
-        previousState: context.state,
-        state: accumulatorFn(context.state, patch),
-        patch
-      }),
-    runServices({ state: initial, previousState: {} }),
+  const states = scan(
+    (state, patch) => runServices(accumulatorFn(state, patch)),
+    runServices(app.initial),
     update
   );
 
-  contexts
-    .map(context => {
-      if (context.state !== states()) {
-        states(context.state);
-      }
+  const actions = app.Actions(update, states);
+  const effects = app.Effects(update, actions);
 
-      return Object.assign(context, {
-        update,
-        actions
-      });
-    })
-    .map(context => {
-      effects.forEach(effect => effect(context));
-    });
+  states.map(state => effects.forEach(effect => effect(state)));
 
   return { update, states, actions };
 };

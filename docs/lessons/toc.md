@@ -6,7 +6,15 @@
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
-- [Services](services.html)
+- [Services and Effects](services-and-effects.html)
+- Using a Router
+  - [Read This First](router-intro.html)
+  - [Basic Pattern Setup](router-setup.html)
+  - [Query String Support](router-query-string.html)
+  - [`toPath` Function](router-to-path.html)
+  - [Mithril Router](router-mithril.html)
+  - [Static Tagged Union](router-static-tagged-union.html)
+  - [Superouter](router-superouter.html)
 - [Routing](routing.html)
 - [Preventing Re-renders](preventing-re-renders.html)
 

@@ -28,12 +28,6 @@ h4 {
   border: 1px solid #e7e7e7;
   padding: 8px;
 }
-.footer {
-  font-size: 11pt;
-  position: absolute;
-  bottom: 0;
-  height: 40px;
-}
 .simpleModal {
   position: fixed;
   top: 0;
@@ -53,4 +47,7 @@ h4 {
 .temperature {
   border: 1px solid #336699;
   padding: 12px;
+}
+ul li {
+  list-style-type: square;
 }

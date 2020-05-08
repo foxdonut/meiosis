@@ -1,6 +1,6 @@
 import { teas } from "../teaDetails/data";
 
-export const effect = ({ state, update }) => {
+export const effect = update => state => {
   if (state.routeTransition.arrive.Tea) {
     setTimeout(() => {
       update({ teas });
