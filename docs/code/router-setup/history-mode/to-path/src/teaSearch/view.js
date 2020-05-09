@@ -19,7 +19,7 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  ...router.getHref(Route.TeaSearch, {}, { type })
+                  ...router.getHref(Route.TeaSearch, { queryParams: { type } })
                 },
                 type
               )
@@ -33,7 +33,9 @@ export const TeaSearch = () => ({
               "tbody",
               state.searchTeas
                 .filter(
-                  tea => !state.route.queryParams.type || tea.type === state.route.queryParams.type
+                  tea =>
+                    !state.route.params.queryParams.type ||
+                    tea.type === state.route.params.queryParams.type
                 )
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )
