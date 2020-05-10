@@ -2,16 +2,9 @@ module.exports = {
   env: {
     browser: true,
     commonjs: true,
-    es6: true,
-    "jest/globals": true
+    es6: true
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "prettier/@typescript-eslint"
-  ],
-  parser: "@typescript-eslint/parser",
+  extends: ["eslint:recommended", "prettier"],
   parserOptions: {
     ecmaFeatures: {
       jsx: true
@@ -31,25 +24,13 @@ module.exports = {
     "prettier/prettier": [
       "error",
       {
-        arrowParens: "avoid",
         printWidth: 100,
         semi: true,
         singleQuote: false,
-        trailingComma: "none"
-      }
-    ],
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_"
+        trailingComma: "none",
+        arrowParens: "avoid"
       }
     ]
-    /*
-    "indent": "off",
-    "@typescript-eslint/indent": ["error", 2]
-    */
   },
-  plugins: ["jest", "prettier"]
+  plugins: ["prettier"]
 };

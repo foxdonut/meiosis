@@ -1,20 +1,38 @@
-import commonjs from "rollup-plugin-commonjs";
 import resolve from "rollup-plugin-node-resolve";
-import babel from "rollup-plugin-babel";
+import commonjs from "rollup-plugin-commonjs";
+import buble from "rollup-plugin-buble";
+import { uglify } from "rollup-plugin-uglify";
 
-const extensions = [".js", ".ts"];
-const name = "MeiosisRouterSetup";
-
-export default {
-  input: "./src/index.ts",
-
-  plugins: [resolve({ extensions }), commonjs(), babel({ extensions, include: ["src/**"] })],
-
-  output: [
-    {
+export default [
+  {
+    input: "./src/index.js",
+    output: {
       file: "dist/meiosis-router-setup.js",
-      name,
+      name: "MeiosisRouter",
       format: "umd"
-    }
-  ]
-};
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      buble({
+        exclude: ["node_modules/**"]
+      })
+    ]
+  },
+  {
+    input: "./src/index.js",
+    output: {
+      file: "dist/meiosis-router-setup.min.js",
+      name: "MeiosisRouter",
+      format: "umd"
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      buble({
+        exclude: ["node_modules/**"]
+      }),
+      uglify()
+    ]
+  }
+];
