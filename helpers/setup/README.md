@@ -272,6 +272,8 @@ m.mount(document.getElementById("app"), {
   // If you only use update or actions, you can omit the other
   view: () => m(App, { state: states(), update, actions })
 });
+
+states.map(() => m.redraw());
 ```
 
 See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/mithril/src/index.js)
