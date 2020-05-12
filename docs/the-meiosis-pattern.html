@@ -105,7 +105,9 @@ states.map(state =&gt; effects.forEach(effect =&gt; effect(state)));</code></pre
 
 m.mount(document.getElementById(&quot;app&quot;), {
   view: () =&gt; m(App, { state: states(), actions })
-});</code></pre>
+});
+
+states.map(() =&gt; m.redraw());</code></pre>
 <p><a name="using_react"></a></p>
 <h3><a href="#using_react">Using React</a></h3><pre><code class="language-javascript">const App = ({ states, actions }) =&gt; {
   const [init, setInit] = React.useState(false);
