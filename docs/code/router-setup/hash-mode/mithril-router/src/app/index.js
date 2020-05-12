@@ -14,7 +14,7 @@ export const createApp = () => ({
 
   services: [settings.service, login.service, tea.service, teaDetails.service, teaSearch.service],
 
-  Effects: update => [tea.effect(update), teaSearch.effect(update), router.effect]
+  Effects: update => [tea.Effect(update), teaSearch.Effect(update), router.effect]
 });
 
 export { App } from "./view";

@@ -1,9 +1,9 @@
 import { service } from "./service";
-import { effect } from "./effect";
+import { Effect } from "./effect";
 
 export const teaSearch = {
   service,
-  effect
+  Effect
 };
 
 export { TeaSearch } from "./view";

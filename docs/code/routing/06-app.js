@@ -26,9 +26,9 @@ import {
   beerService,
   beverageService,
   brewerService,
-  teaEffect,
-  coffeeEffect,
-  beerEffect
+  TeaEffect,
+  CoffeeEffect,
+  BeerEffect
 } from "./06-services";
 
 const componentMap = {
@@ -162,9 +162,9 @@ const app = {
     brewerService
   ],
   Effects: update => [
-    teaEffect(update),
-    coffeeEffect(update),
-    beerEffect(update)
+    TeaEffect(update),
+    CoffeeEffect(update),
+    BeerEffect(update)
   ]
 };
 

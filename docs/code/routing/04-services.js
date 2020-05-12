@@ -63,7 +63,7 @@ export const teaService = state => {
   }
 };
 
-export const teaEffect = update => state => {
+export const TeaEffect = update => state => {
   if (state.routeTransition.arrive.Tea) {
     setTimeout(() => {
       update({ teas });
@@ -118,7 +118,7 @@ export const coffeeService = state => {
   }
 };
 
-export const coffeeEffect = update => state => {
+export const CoffeeEffect = update => state => {
   if (state.routeTransition.arrive.Coffee) {
     setTimeout(
       () =>
@@ -140,7 +140,7 @@ export const beerService = state => {
   }
 };
 
-export const beerEffect = update => state => {
+export const BeerEffect = update => state => {
   if (state.routeTransition.arrive.Beer) {
     setTimeout(
       () =>

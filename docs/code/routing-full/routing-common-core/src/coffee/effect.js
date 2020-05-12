@@ -1,6 +1,6 @@
 import { coffees } from "../beverage/data";
 
-export const effect = update => state => {
+export const Effect = update => state => {
   if (state.routeTransition.arrive.Coffee) {
     setTimeout(
       () =>

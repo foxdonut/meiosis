@@ -22,7 +22,7 @@ const dataService = state => {
   }
 };
 
-const dataEffect = actions => state => {
+const DataEffect = actions => state => {
   if (state.data === "loading") {
     actions.loadData();
   }
@@ -46,7 +46,7 @@ const app = {
 
   services: [loginService, dataService],
 
-  Effects: (_update, actions) => [dataEffect(actions)]
+  Effects: (_update, actions) => [DataEffect(actions)]
 };
 
 const update = stream();

@@ -9,5 +9,5 @@ export const createApp = (initialRoute): any => ({
 
   services: [routes.service, tea.service, teaDetails.service],
 
-  Effects: (update): any => [tea.effect(update)]
+  Effects: (update): any => [tea.Effect(update)]
 });

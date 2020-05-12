@@ -1,6 +1,6 @@
 import { searchTeas } from "./data";
 
-export const effect = update => state => {
+export const Effect = update => state => {
   if (state.loadSearchTeas) {
     setTimeout(() => {
       update({ searchTeas, loadSearchTeas: false });
