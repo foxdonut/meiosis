@@ -17,13 +17,13 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  href: "#",
+                  href: "javascript://",
                   onclick: () => update({ teaType: type })
                 },
                 type
               )
             ]),
-            m("a", { href: "#", onclick: () => update({ teaType: null }) }, "All")
+            m("a", { href: "javascript://", onclick: () => update({ teaType: null }) }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",

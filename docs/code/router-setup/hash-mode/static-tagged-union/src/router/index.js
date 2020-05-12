@@ -27,13 +27,11 @@ const createRouter = routeConfig => {
     const path = prefix + pathLookup[route.id];
 
     return (
-      [...path.matchAll(/(:[^/]*)/g)]
-        .map(a => a[1])
-        .reduce(
-          (result, pathParam) =>
-            result.replace(new RegExp(pathParam), encodeURI(route.params[pathParam.substring(1)])),
-          path
-        ) + getQueryString(route.params.queryParams)
+      (path.match(/(:[^/]*)/g) || []).reduce(
+        (result, pathParam) =>
+          result.replace(new RegExp(pathParam), encodeURI(route.params[pathParam.substring(1)])),
+        path
+      ) + getQueryString(route.params.queryParams)
     );
   };
 
@@ -63,7 +61,11 @@ const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, start, locationBarSync, toPath };
+  const effect = state => {
+    locationBarSync(state.route);
+  };
+
+  return { initialRoute, start, locationBarSync, toPath, effect };
 };
 
 export const Route = TaggedUnionChecked("Route", [

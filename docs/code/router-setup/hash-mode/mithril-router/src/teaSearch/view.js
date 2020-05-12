@@ -19,7 +19,7 @@ export const TeaSearch = () => ({
                 "a",
                 {
                   style: { marginRight: "10px" },
-                  href: router.toPath(Route.TeaSearch, {}, { type })
+                  href: router.toPath(Route.TeaSearch, { queryParams: { type } })
                 },
                 type
               )

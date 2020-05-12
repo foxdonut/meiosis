@@ -14,13 +14,11 @@ const createToPath = (prefix, pathLookup, getQueryString) => (id, params = {}) =
   const path = prefix + pathLookup[id];
 
   return (
-    [...path.matchAll(/(:[^/]*)/g)]
-      .map(a => a[1])
-      .reduce(
-        (result, pathParam) =>
-          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-        path
-      ) + getQueryString(params.queryParams)
+    (path.match(/(:[^/]*)/g) || []).reduce(
+      (result, pathParam) =>
+        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+      path
+    ) + getQueryString(params.queryParams)
   );
 };
 
@@ -39,7 +37,8 @@ export const createFeatherRouter = ({
   createRouteMatcher,
   routeConfig,
   queryString = emptyQueryString,
-  historyMode = false
+  historyMode = false,
+  routeProp = "route"
 }) => {
   const prefix = historyMode ? window.location.pathname : "#";
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
@@ -83,7 +82,7 @@ export const createFeatherRouter = ({
   };
 
   const getHref = (page, params = {}) => {
-    const url = toPath(page, params);
+    const url = page.startsWith("/") ? prefix + page : toPath(page, params);
 
     return {
       href: url,
@@ -95,10 +94,14 @@ export const createFeatherRouter = ({
     };
   };
 
-  return { initialRoute, getRoute, getHref, toPath, start, locationBarSync };
+  const effect = state => {
+    locationBarSync(state[routeProp]);
+  };
+
+  return { initialRoute, routeMatcher, getRoute, getHref, toPath, start, locationBarSync, effect };
 };
 
-export const createMithrilRouter = ({ m, routeConfig, prefix = "#" }) => {
+export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = "route" }) => {
   m.route.prefix = prefix;
 
   const getQueryString = (queryParams = {}) => {
@@ -126,10 +129,15 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#" }) => {
     }
   };
 
+  const effect = state => {
+    locationBarSync(state[routeProp].url);
+  };
+
   return {
     createMithrilRoutes,
     locationBarSync,
     getRoute,
-    toPath
+    toPath,
+    effect
   };
 };

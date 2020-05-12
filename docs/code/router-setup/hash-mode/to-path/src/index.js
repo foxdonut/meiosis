@@ -23,7 +23,4 @@ m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), 
 
 router.start({ navigateTo: route => update({ route: () => route }) });
 
-states.map(state => {
-  m.redraw();
-  router.locationBarSync(state.route);
-});
+states.map(() => m.redraw());

@@ -109,6 +109,8 @@ const App = {
 m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), actions })
 });
+
+states.map(() => m.redraw());
 ```
 
 <a name="using_react"></a>

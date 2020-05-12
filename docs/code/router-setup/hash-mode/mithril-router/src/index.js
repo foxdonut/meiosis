@@ -30,7 +30,4 @@ m.route(
   })
 );
 
-states.map(state => {
-  m.redraw();
-  router.locationBarSync(state.route.url);
-});
+states.map(() =>  m.redraw());

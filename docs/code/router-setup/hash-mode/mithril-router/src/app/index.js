@@ -3,6 +3,7 @@ import { settings } from "../settings";
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
+import { router } from "../router";
 
 export const createApp = () => ({
   initial: {
@@ -13,7 +14,7 @@ export const createApp = () => ({
 
   services: [settings.service, login.service, tea.service, teaDetails.service, teaSearch.service],
 
-  Effects: update => [tea.effect(update), teaSearch.effect(update)]
+  Effects: update => [tea.effect(update), teaSearch.effect(update), router.effect]
 });
 
 export { App } from "./view";

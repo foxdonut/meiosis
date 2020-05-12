@@ -32,3 +32,5 @@ const { states, update, actions } = meiosis.functionPatches.setup({
 m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), update, actions })
 });
+
+states.map(() => m.redraw());

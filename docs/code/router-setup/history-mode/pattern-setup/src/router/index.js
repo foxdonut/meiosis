@@ -34,7 +34,11 @@ const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, routeMatcher, getHref, start, locationBarSync };
+  const effect = state => {
+    locationBarSync(state.route);
+  };
+
+  return { initialRoute, routeMatcher, getHref, start, locationBarSync, effect };
 };
 
 export const Route = {
@@ -58,3 +62,8 @@ const routeConfig = {
 };
 
 export const router = createRouter(routeConfig);
+
+/* you can also npm install meiosis-router-setup and use it as shown below:
+import { createFeatherRouter } from "meiosis-router-setup";
+export const router = createFeatherRouter({ createRouteMatcher, routeConfig, historyMode: true });
+*/

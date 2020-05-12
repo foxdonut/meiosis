@@ -16,24 +16,22 @@ const createMithrilRouter = routeConfig => {
     {}
   );
 
-  const toPath = (id, params = {}, queryParams = {}) => {
+  const toPath = (id, params = {}) => {
     const path = prefix + pathLookup[id];
 
     return (
-      [...path.matchAll(/(:[^/]*)/g)]
-        .map(a => a[1])
-        .reduce(
-          (result, pathParam) =>
-            result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-          path
-        ) + getQueryString(queryParams)
+      (path.match(/(:[^/]*)/g) || []).reduce(
+        (result, pathParam) =>
+          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+        path
+      ) + getQueryString(params.queryParams)
     );
   };
 
-  const getRoute = (page, params = {}, queryParams = {}) => ({
+  const getRoute = (page, params = {}) => ({
     page,
-    params: Object.assign(params, queryParams),
-    url: toPath(page, params, queryParams).substring(prefix.length)
+    params,
+    url: toPath(page, params).substring(prefix.length)
   });
 
   const createMithrilRoutes = ({ App, navigateTo, states, actions }) =>
@@ -51,11 +49,16 @@ const createMithrilRouter = routeConfig => {
     }
   };
 
+  const effect = state => {
+    locationBarSync(state.route.url);
+  };
+
   return {
     createMithrilRoutes,
     locationBarSync,
     getRoute,
-    toPath
+    toPath,
+    effect
   };
 };
 
@@ -78,3 +81,8 @@ const routeConfig = {
 };
 
 export const router = createMithrilRouter(routeConfig);
+
+/* you can also npm install meiosis-router-setup and use it as shown below:
+import { createMithrilRouter } from "meiosis-router-setup";
+export const router = createMithrilRouter({ m, routeConfig });
+*/

@@ -41,7 +41,11 @@ const createRouter = (Route, defaultRoute) => {
     }
   };
 
-  return { initialRoute, start, locationBarSync, toPath };
+  const effect = state => {
+    locationBarSync(state.route);
+  };
+
+  return { initialRoute, start, locationBarSync, toPath, effect };
 };
 
 const routeConfig = {
