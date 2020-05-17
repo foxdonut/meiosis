@@ -24,7 +24,7 @@ m.route(
   "/",
   router.createMithrilRoutes({
     App,
-    navigateTo: route => update({ route: () => route }),
+    onRouteChange: route => update({ route: () => route }),
     states,
     actions
   })

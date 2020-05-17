@@ -23,6 +23,6 @@ m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), update, actions })
 });
 
-router.start({ navigateTo: route => update({ route: () => route }) });
+router.start({ onRouteChange: route => update({ route: () => route }) });
 
 states.map(() => m.redraw());

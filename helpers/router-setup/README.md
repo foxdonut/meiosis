@@ -105,13 +105,13 @@ const router = createFeatherRouter({ createRouteMatcher, queryString, routeConfi
 
 Now, `router` provides the `initialRoute` property containing the initial route. Use this to
 initialize your application state. Then, start the router by calling `start` and providing a
-`navigateTo` function:
+`onRouteChange` function:
 
 ```javascript
-router.start({ navigateTo: route => update({ route: () => route }) });
+router.start({ onRouteChange: route => update({ route: () => route }) });
 ```
 
-The `navigateTo` function is called with the `route` whenever the route changes. Normally the
+The `onRouteChange` function is called with the `route` whenever the route changes. Normally the
 function that you provide should call `update` to update the state with the route, using a patch
 that corresponds to your Meiosis setup
 ([Mergerino](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html),
@@ -143,7 +143,7 @@ const router = createMithrilRouter({ m, routeConfig });
 
 Then, use [m.route](https://mithril.js.org/route.html#routeroot,-defaultroute,-routes) and
 `router.createMithrilRoutes` to set up your application. Pass your `App` (root view component),
-`states`, `update` and/or `actions` (from your Meiosis setup), and a `navigateTo` function.
+`states`, `update` and/or `actions` (from your Meiosis setup), and a `onRouteChange` function.
 The latest state (by calling `states()`), `update`, and `actions` will be passed to your `App`.
 
 ```javascript
@@ -151,12 +151,12 @@ m.route(
   document.getElementById("app"),
   "/",
   router.createMithrilRoutes({ App, states, update, actions,
-    navigateTo: route => update({ route: () => route })
+    onRouteChange: route => update({ route: () => route })
   })
 );
 ```
 
-The `navigateTo` function is called with the `route` whenever the route changes. Normally the
+The `onRouteChange` function is called with the `route` whenever the route changes. Normally the
 function that you provide should call `update` to update the state with the route, using a patch
 that corresponds to your Meiosis setup
 ([Mergerino](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html),
@@ -170,13 +170,35 @@ the page ID that corresponds to the route that you specified in your `routeConfi
 `"Login"`, `"UserProfile"`, etc.) and `params` are the path parameters. If you are using query
 string support, query string parameters are located under `params.queryParams`.
 
-With the `navigateTo` function that we provided when setting up the router, `update` will be called
-whenever the route changes, and we can access the route under the `route` property of the
+With the `onRouteChange` function that we provided when setting up the router, `update` will be
+called whenever the route changes, and we can access the route under the `route` property of the
 application state. Then, we can use `state.route.page` to determine the current page,
 `state.route.params` to get the path parameters, and `state.route.params.queryParams` for the query
 string parameters.
 
-Next, you can either use hard-coded paths, or the `toPath` function.
+To keep the location bar in sync, namely when programmatically changing the route, there are two
+options: The first option is to use `router.locationBarSync`:
+
+```javascript
+states.map(state => router.locationBarSync(state.route));
+```
+
+The second option is, if you are already using
+[effects](http://meiosis.js.org/docs/services-and-effects.html), to add `router.effect` to your
+array of effects:
+
+```javascript
+const app = {
+  ...,
+  Effects: update => [
+    your.Effect(update),
+    ...,
+    router.effect
+  ]
+};
+```
+
+Next, add links to your application. You can either use hard-coded paths, or the `toPath` function.
 
 ## Using Hard-Coded Paths
 
@@ -189,9 +211,9 @@ With this option, you use hard-coded paths in `href`:
 ```
 
 ```javascript
-m("a", { href: "#/" }, "Home")),
-m("a", { href: "#/login" }, "Login")),
-m("a", { href: "#/user/42" }, "User Profile")),
+m("a", { href: "#/" }, "Home"),
+m("a", { href: "#/login" }, "Login"),
+m("a", { href: "#/user/42" }, "User Profile")
 ```
 
 For programmatic routes, use the `router.routeMatcher` function and omit the hash prefix:
@@ -216,9 +238,9 @@ With this option, you provide a page ID and the path/query string parameters to 
 ```
 
 ```javascript
-m("a", { href: router.toPath(Route.Home) }, "Home")),
-m("a", { href: router.toPath(Route.Login) }, "Login")),
-m("a", { href: router.toPath(Route.UserProfile, { id: 42 }), "User Profile")),
+m("a", { href: router.toPath(Route.Home) }, "Home"),
+m("a", { href: router.toPath(Route.Login) }, "Login"),
+m("a", { href: router.toPath(Route.UserProfile, { id: 42 }), "User Profile")
 ```
 
 For programmatic routes, use the `router.getRoute` function:

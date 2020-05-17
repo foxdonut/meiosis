@@ -21,6 +21,6 @@ meiosisTracer({
 
 m.mount(document.getElementById("app"), { view: () => m(App, { state: states(), actions }) });
 
-router.start({ navigateTo: route => update({ route: () => route }) });
+router.start({ onRouteChange: route => update({ route: () => route }) });
 
 states.map(() => m.redraw());

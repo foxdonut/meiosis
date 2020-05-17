@@ -36,10 +36,10 @@ export const createMithrilRouter = routeConfig => {
     url: toPath(page, params).substring(prefix.length)
   });
 
-  const createMithrilRoutes = ({ App, navigateTo, states, actions }) =>
+  const createMithrilRoutes = ({ App, onRouteChange, states, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: (params, url) => navigateTo({ page, params, url }),
+        onmatch: (params, url) => onRouteChange({ page, params, url }),
         render: () => m(App, { state: states(), actions })
       };
       return result;

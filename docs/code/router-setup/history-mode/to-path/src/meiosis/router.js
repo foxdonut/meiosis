@@ -69,8 +69,8 @@ export const createRouter = routeConfig => {
     };
   };
 
-  const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
+  const start = ({ onRouteChange }) => {
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {

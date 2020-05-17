@@ -28,8 +28,8 @@ export const createRouter = (Route, defaultRoute) => {
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
+  const start = ({ onRouteChange }) => {
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {

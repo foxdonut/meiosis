@@ -160,8 +160,8 @@ export const createFeatherRouter = ({
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = ({ navigateTo }) => {
-    window.onpopstate = () => navigateTo(routeMatcher(getPath()));
+  const start = ({ onRouteChange }) => {
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
   const locationBarSync = route => {
@@ -219,10 +219,10 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
   const toPath = createToPath(prefix, pathLookup, getQueryString);
   const getRoute = createGetRoute(prefix, toPath);
 
-  const createMithrilRoutes = ({ App, navigateTo, states, update, actions }) =>
+  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: (params, url) => navigateTo({ page, params, url }),
+        onmatch: (params, url) => onRouteChange({ page, params, url }),
         render: () => m(App, { state: states(), update, actions })
       };
       return result;
