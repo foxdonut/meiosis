@@ -1,3 +1,76 @@
+/**
+ * Route configuration. This is a plain object where the properties are the route paths and the
+ * values are strings that identify the route. Route paths may contain parameters by using `:`
+ * as a prefix. For example:
+ *
+ * ```javascript
+ * const routeConfig = {
+ *   "/": "Home",
+ *   "/login": "Login",
+ *   "/user/:id": "UserProfile"
+ * };
+ * ```
+ *
+ * @typedef {Object.<string, string>} RouteConfig
+ */
+
+/**
+ * A route in the application state.
+ *
+ * @typedef {Object} route
+ *
+ * @property {string} page
+ * @property {Object} params
+ */
+
+/**
+ * This is the default function exported by
+ * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher):
+ *
+ * ```javascript
+ * import createRouteMatcher from "feather-route-matcher";
+ * ```
+ *
+ * @typedef {Function} createRouteMatcher
+ */
+
+/**
+ * Query string library that provides the `parse` and `stringify` functions. This is only required
+ * if your application needs query string support. Examples of query string libraries that work
+ * out-of-the-box are:
+ *
+ * - [query-string](https://github.com/sindresorhus/query-string)
+ * - [qs](https://github.com/ljharb/qs)
+ * - [urlon](https://github.com/cerebral/urlon)
+ *
+ * @typedef {{parse: Function, stringify: Function}} QueryStringLib
+ */
+
+/**
+ *
+ * @typedef {Object} FeatherRouter
+ *
+ * @property {Route} initialRoute - x
+ * @property {Function} routeMatcher - x
+ * @property {Function} getRoute - x
+ * @property {Function} getHref - x
+ * @property {Function} toPath - x
+ * @property {Function} start - x
+ * @property {Function} locationBarSync - x
+ * @property {Function} effect - x
+ */
+
+/**
+ *
+ * @typedef {Object} MithrilRouter
+ *
+ * @property {Function} createMithrilRoutes - x
+ * @property {Function} getRoute - x
+ * @property {Function} toPath - x
+ * @property {Function} locationBarSync - x
+ * @property {Function} effect - x
+ */
+
 const createGetPath = (prefix, historyMode) =>
   historyMode
     ? () =>
@@ -33,6 +106,24 @@ const emptyQueryString = {
   stringify: () => ""
 };
 
+/**
+ * Sets up a router using
+ * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher).
+ *
+ * @function MeiosisRouter.createFeatherRouter
+ *
+ * @param {createRouteMatcher} createRouteMatcher - the feather route matcher function.
+ * @param {RouteConfig} routeConfig - the route configuration.
+ * @param {QueryStringLib?} queryString - the query string library to use. You only need to provide
+ * this if your application requires query string support.
+ * @param {boolean?} historyMode - if `true`, uses history mode instead of hash mode. If you are
+ * using history mode, you need to provide server side routing support. By default, `historyMode`
+ * is `false`.
+ * @param {string?} routeProp - this is the property in your state where the route is stored.
+ * Defaults to `"route"`.
+ *
+ * @return {FeatherRouter}
+ */
 export const createFeatherRouter = ({
   createRouteMatcher,
   routeConfig,
@@ -101,6 +192,20 @@ export const createFeatherRouter = ({
   return { initialRoute, routeMatcher, getRoute, getHref, toPath, start, locationBarSync, effect };
 };
 
+/**
+ * Sets up a router using
+ * [Mithril Router](https://mithril.js.org/route.html).
+ *
+ * @function MeiosisRouter.createMithrilRouter
+ *
+ * @param {m} Mithril - the Mithril instance.
+ * @param {RouteConfig} routeConfig - the route configuration.
+ * @param {string?} prefix - hash prefix. Defaults to `"#"`.
+ * @param {string?} routeProp - this is the property in your state where the route is stored.
+ * Defaults to `"route"`.
+ *
+ * @return {MithrilRouter}
+ */
 export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = "route" }) => {
   m.route.prefix = prefix;
 
@@ -114,11 +219,11 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
   const toPath = createToPath(prefix, pathLookup, getQueryString);
   const getRoute = createGetRoute(prefix, toPath);
 
-  const createMithrilRoutes = ({ App, navigateTo, states, actions }) =>
+  const createMithrilRoutes = ({ App, navigateTo, states, update, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: (params, url) => navigateTo({ page, params, url }),
-        render: () => m(App, { state: states(), actions })
+        render: () => m(App, { state: states(), update, actions })
       };
       return result;
     }, {});
@@ -133,11 +238,5 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
     locationBarSync(state[routeProp].url);
   };
 
-  return {
-    createMithrilRoutes,
-    locationBarSync,
-    getRoute,
-    toPath,
-    effect
-  };
+  return { createMithrilRoutes, getRoute, toPath, locationBarSync, effect };
 };

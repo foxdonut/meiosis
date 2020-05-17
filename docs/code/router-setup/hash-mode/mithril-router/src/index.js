@@ -30,4 +30,4 @@ m.route(
   })
 );
 
-states.map(() =>  m.redraw());
+states.map(() => m.redraw());

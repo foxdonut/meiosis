@@ -5,7 +5,7 @@
   "main": "dist/meiosis-router-setup.js",
   "scripts": {
     "start": "rollup -c",
-    "docs": "documentation build index.js -f md -o api.md"
+    "docs": "documentation build src/index.js -f md -o api.md"
   },
   "repository": {
     "type": "git",
