@@ -3,9 +3,9 @@
 ### Table of Contents
 
 -   [RouteConfig][1]
--   [route][2]
+-   [Route][2]
     -   [Properties][3]
--   [createRouteMatcher][4]
+-   [CreateRouteMatcher][4]
 -   [QueryStringLib][5]
 -   [FeatherRouter][6]
     -   [Properties][7]
@@ -32,7 +32,7 @@ const routeConfig = {
 
 Type: [Object][14]&lt;[string][15], [string][15]>
 
-## route
+## Route
 
 A route in the application state.
 
@@ -42,8 +42,9 @@ Type: [Object][14]
 
 -   `page` **[string][15]** 
 -   `params` **[Object][14]** 
+-   `url` **[string][15]** 
 
-## createRouteMatcher
+## CreateRouteMatcher
 
 This is the default function exported by
 [feather-route-matcher][16]:
@@ -72,11 +73,11 @@ Type: [Object][14]
 
 ### Properties
 
--   `initialRoute` **Route** x
+-   `initialRoute` **[Route][21]** x
 -   `routeMatcher` **[Function][17]** x
 -   `getRoute` **[Function][17]** x
 -   `getHref` **[Function][17]** x
--   `toPath` **[Function][17]** x
+-   `toUrl` **[Function][17]** x
 -   `start` **[Function][17]** x
 -   `locationBarSync` **[Function][17]** x
 -   `effect` **[Function][17]** x
@@ -89,7 +90,7 @@ Type: [Object][14]
 
 -   `createMithrilRoutes` **[Function][17]** x
 -   `getRoute` **[Function][17]** x
--   `toPath` **[Function][17]** x
+-   `toUrl` **[Function][17]** x
 -   `locationBarSync` **[Function][17]** x
 -   `effect` **[Function][17]** x
 
@@ -100,32 +101,32 @@ Sets up a router using
 
 ### Parameters
 
--   `createRouteMatcher` **[createRouteMatcher][21]** the feather route matcher function.
--   `routeConfig` **[RouteConfig][22]** the route configuration.
--   `queryString` **[QueryStringLib][23]?** the query string library to use. You only need to provide
+-   `createRouteMatcher` **[CreateRouteMatcher][22]** the feather route matcher function.
+-   `routeConfig` **[RouteConfig][23]** the route configuration.
+-   `queryString` **[QueryStringLib][24]?** the query string library to use. You only need to provide
     this if your application requires query string support.
--   `historyMode` **[boolean][24]?** if `true`, uses history mode instead of hash mode. If you are
+-   `historyMode` **[boolean][25]?** if `true`, uses history mode instead of hash mode. If you are
     using history mode, you need to provide server side routing support. By default, `historyMode`
     is `false`.
 -   `routeProp` **[string][15]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[FeatherRouter][25]** 
+Returns **[FeatherRouter][26]** 
 
 ## MeiosisRouter.createMithrilRouter
 
 Sets up a router using
-[Mithril Router][26].
+[Mithril Router][27].
 
 ### Parameters
 
 -   `Mithril` **m** the Mithril instance.
--   `routeConfig` **[RouteConfig][22]** the route configuration.
+-   `routeConfig` **[RouteConfig][23]** the route configuration.
 -   `prefix` **[string][15]?** hash prefix. Defaults to `"#"`.
 -   `routeProp` **[string][15]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[MithrilRouter][27]** 
+Returns **[MithrilRouter][28]** 
 
 [1]: #routeconfig
 
@@ -167,16 +168,18 @@ Returns **[MithrilRouter][27]**
 
 [20]: https://github.com/cerebral/urlon
 
-[21]: #createroutematcher
+[21]: #route
 
-[22]: #routeconfig
+[22]: #createroutematcher
 
-[23]: #querystringlib
+[23]: #routeconfig
 
-[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[24]: #querystringlib
 
-[25]: #featherrouter
+[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[26]: https://mithril.js.org/route.html
+[26]: #featherrouter
 
-[27]: #mithrilrouter
+[27]: https://mithril.js.org/route.html
+
+[28]: #mithrilrouter

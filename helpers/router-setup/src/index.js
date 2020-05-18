@@ -17,10 +17,11 @@
 /**
  * A route in the application state.
  *
- * @typedef {Object} route
+ * @typedef {Object} Route
  *
  * @property {string} page
  * @property {Object} params
+ * @property {string} url
  */
 
 /**
@@ -31,7 +32,7 @@
  * import createRouteMatcher from "feather-route-matcher";
  * ```
  *
- * @typedef {Function} createRouteMatcher
+ * @typedef {Function} CreateRouteMatcher
  */
 
 /**
@@ -54,7 +55,7 @@
  * @property {Function} routeMatcher - x
  * @property {Function} getRoute - x
  * @property {Function} getHref - x
- * @property {Function} toPath - x
+ * @property {Function} toUrl - x
  * @property {Function} start - x
  * @property {Function} locationBarSync - x
  * @property {Function} effect - x
@@ -66,40 +67,51 @@
  *
  * @property {Function} createMithrilRoutes - x
  * @property {Function} getRoute - x
- * @property {Function} toPath - x
+ * @property {Function} toUrl - x
  * @property {Function} locationBarSync - x
  * @property {Function} effect - x
  */
 
-const createGetPath = (prefix, historyMode) =>
+const createGetUrl = (prefix, historyMode) =>
   historyMode
-    ? () =>
-        decodeURI(window.location.pathname + window.location.search).substring(prefix.length) || "/"
-    : () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
+    ? () => decodeURI(window.location.pathname + window.location.search)
+    : () => decodeURI(window.location.hash || prefix + "/");
 
-const getPathLookup = routeConfig =>
+const createGetPath = (prefix, getUrl) => getUrl().substring(prefix.length) || "/";
+
+const getPathTemplateLookup = routeConfig =>
   Object.entries(routeConfig).reduce(
     (result, [path, id]) => Object.assign(result, { [id]: path }),
     {}
   );
 
-const createToPath = (prefix, pathLookup, getQueryString) => (id, params = {}) => {
-  const path = prefix + pathLookup[id];
+const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (pageId, params = {}) => {
+  const url = prefix + pathTemplateLookup[pageId];
 
   return (
-    (path.match(/(:[^/]*)/g) || []).reduce(
+    (url.match(/(:[^/]*)/g) || []).reduce(
       (result, pathParam) =>
         result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-      path
+      url
     ) + getQueryString(params.queryParams)
   );
 };
 
-const createGetRoute = (prefix, toPath) => (page, params = {}) => ({
+const createGetRoute = (prefix, toUrl) => (page, params = {}) => ({
   page,
   params,
-  url: toPath(page, params).substring(prefix.length)
+  url: toUrl(page, params).substring(prefix.length)
 });
+
+const createLocationBarSync = getUrl => route => {
+  if (route.url !== getUrl()) {
+    window.history.pushState({}, "", route.url);
+  }
+};
+
+const createEffect = (locationBarSync, routeProp) => state => {
+  locationBarSync(state[routeProp]);
+};
 
 const emptyQueryString = {
   parse: () => {},
@@ -112,7 +124,7 @@ const emptyQueryString = {
  *
  * @function MeiosisRouter.createFeatherRouter
  *
- * @param {createRouteMatcher} createRouteMatcher - the feather route matcher function.
+ * @param {CreateRouteMatcher} createRouteMatcher - the feather route matcher function.
  * @param {RouteConfig} routeConfig - the route configuration.
  * @param {QueryStringLib?} queryString - the query string library to use. You only need to provide
  * this if your application requires query string support.
@@ -144,10 +156,11 @@ export const createFeatherRouter = ({
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const pathLookup = getPathLookup(routeConfig);
-  const getPath = createGetPath(prefix, historyMode);
-  const toPath = createToPath(prefix, pathLookup, getQueryString);
-  const getRoute = createGetRoute(prefix, toPath);
+  const pathTemplateLookup = getPathTemplateLookup(routeConfig);
+  const getUrl = createGetUrl(prefix, historyMode);
+  const getPath = createGetPath(prefix, getUrl);
+  const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
+  const getRoute = createGetRoute(prefix, toUrl);
   const matcher = createRouteMatcher(routeConfig);
 
   const routeMatcher = path => {
@@ -155,25 +168,12 @@ export const createFeatherRouter = ({
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });
-    return Object.assign(match, { params });
+    const url = prefix + match.url + getQueryString(params.queryParams);
+    return Object.assign(match, { params, url });
   };
 
-  const initialRoute = routeMatcher(getPath());
-
-  const start = ({ onRouteChange }) => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
-  };
-
-  const locationBarSync = route => {
-    const path = route.url + getQueryString(route.params.queryParams);
-
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
-    }
-  };
-
-  const getHref = (page, params = {}) => {
-    const url = page.startsWith("/") ? prefix + page : toPath(page, params);
+  const getHref = (pageId, params = {}) => {
+    const url = pageId.startsWith("/") ? prefix + pageId : toUrl(pageId, params);
 
     return {
       href: url,
@@ -185,11 +185,16 @@ export const createFeatherRouter = ({
     };
   };
 
-  const effect = state => {
-    locationBarSync(state[routeProp]);
+  const initialRoute = routeMatcher(getPath());
+
+  const start = ({ onRouteChange }) => {
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
-  return { initialRoute, routeMatcher, getRoute, getHref, toPath, start, locationBarSync, effect };
+  const locationBarSync = createLocationBarSync(getUrl);
+  const effect = createEffect(locationBarSync, routeProp);
+
+  return { initialRoute, routeMatcher, getRoute, getHref, toUrl, start, locationBarSync, effect };
 };
 
 /**
@@ -214,10 +219,10 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const pathLookup = getPathLookup(routeConfig);
-  const getPath = createGetPath(prefix, false);
-  const toPath = createToPath(prefix, pathLookup, getQueryString);
-  const getRoute = createGetRoute(prefix, toPath);
+  const pathTemplateLookup = getPathTemplateLookup(routeConfig);
+  const getUrl = createGetUrl(prefix, false);
+  const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
+  const getRoute = createGetRoute(prefix, toUrl);
 
   const createMithrilRoutes = ({ App, onRouteChange, states, update, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
@@ -228,15 +233,8 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
       return result;
     }, {});
 
-  const locationBarSync = path => {
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
-    }
-  };
+  const locationBarSync = createLocationBarSync(getUrl);
+  const effect = createEffect(locationBarSync, routeProp);
 
-  const effect = state => {
-    locationBarSync(state[routeProp].url);
-  };
-
-  return { createMithrilRoutes, getRoute, toPath, locationBarSync, effect };
+  return { createMithrilRoutes, getRoute, toUrl, locationBarSync, effect };
 };

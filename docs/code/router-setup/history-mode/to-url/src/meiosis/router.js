@@ -6,9 +6,8 @@ import queryString from "query-string";
 export const createRouter = routeConfig => {
   const prefix = window.location.pathname;
 
-  const getPath = () =>
-    decodeURI(window.location.pathname + window.location.search).substring(prefix.length) || "/";
-
+  const getUrl = () => decodeURI(window.location.pathname + window.location.search);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
@@ -26,7 +25,7 @@ export const createRouter = routeConfig => {
     {}
   );
 
-  const toPath = (id, params = {}) => {
+  const toUrl = (id, params = {}) => {
     const path = prefix + pathLookup[id];
 
     return (
@@ -45,19 +44,20 @@ export const createRouter = routeConfig => {
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });
-    return Object.assign(match, { params });
+    const url = prefix + match.url + getQueryString(params.queryParams);
+    return Object.assign(match, { params, url });
   };
 
   const getRoute = (page, params = {}) => ({
     page,
     params,
-    url: toPath(page, params).substring(prefix.length)
+    url: toUrl(page, params)
   });
 
   const initialRoute = routeMatcher(getPath());
 
   const getHref = (page, params = {}) => {
-    const url = toPath(page, params);
+    const url = toUrl(page, params);
 
     return {
       href: url,
@@ -74,10 +74,8 @@ export const createRouter = routeConfig => {
   };
 
   const locationBarSync = route => {
-    const path = route.url + getQueryString(route.params.queryParams);
-
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+    if (route.url !== getUrl()) {
+      window.history.pushState({}, "", route.url);
     }
   };
 

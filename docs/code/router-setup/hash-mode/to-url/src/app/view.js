@@ -29,13 +29,13 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toPath(Route.Home) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toPath(Route.Login) }, "Login")),
-          m("li" + isActive(Settings), m("a", { href: router.toPath(Route.Settings) }, "Settings")),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.Tea) }, "Tea")),
+          m("li" + isActive(Home), m("a", { href: router.toUrl(Route.Home) }, "Home")),
+          m("li" + isActive(Login), m("a", { href: router.toUrl(Route.Login) }, "Login")),
+          m("li" + isActive(Settings), m("a", { href: router.toUrl(Route.Settings) }, "Settings")),
+          m("li" + isActive(Tea), m("a", { href: router.toUrl(Route.Tea) }, "Tea")),
           m(
             "li" + isActive(TeaSearch),
-            m("a", { href: router.toPath(Route.TeaSearch) }, "Tea Search")
+            m("a", { href: router.toUrl(Route.TeaSearch) }, "Tea Search")
           )
         )
       ),

@@ -17,7 +17,7 @@ export const Tea = {
               m(
                 "div",
                 { key: tea.id },
-                m("a", { href: router.toPath(Route.TeaDetails, { id: tea.id }) }, tea.title)
+                m("a", { href: router.toUrl(Route.TeaDetails, { id: tea.id }) }, tea.title)
               )
             )
         ),

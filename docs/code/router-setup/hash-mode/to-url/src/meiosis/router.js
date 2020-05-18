@@ -6,7 +6,8 @@ import queryString from "query-string";
 export const createRouter = routeConfig => {
   const prefix = "#";
 
-  const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
+  const getUrl = () => decodeURI(window.location.hash || prefix + "/");
+  const getPath = () => getUrl().substring(prefix.length);
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
@@ -24,7 +25,7 @@ export const createRouter = routeConfig => {
     {}
   );
 
-  const toPath = (id, params = {}) => {
+  const toUrl = (id, params = {}) => {
     const path = prefix + pathLookup[id];
 
     return (
@@ -43,13 +44,14 @@ export const createRouter = routeConfig => {
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });
-    return Object.assign(match, { params });
+    const url = prefix + match.url + getQueryString(params.queryParams);
+    return Object.assign(match, { params, url });
   };
 
   const getRoute = (page, params = {}) => ({
     page,
     params,
-    url: toPath(page, params).substring(prefix.length)
+    url: toUrl(page, params)
   });
 
   const initialRoute = routeMatcher(getPath());
@@ -59,10 +61,8 @@ export const createRouter = routeConfig => {
   };
 
   const locationBarSync = route => {
-    const path = route.url + getQueryString(route.params.queryParams);
-
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+    if (route.url !== getUrl()) {
+      window.history.pushState({}, "", route.url);
     }
   };
 
@@ -70,5 +70,5 @@ export const createRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { initialRoute, getRoute, start, locationBarSync, toPath, effect };
+  return { initialRoute, getRoute, start, locationBarSync, toUrl, effect };
 };
