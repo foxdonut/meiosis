@@ -11,17 +11,12 @@ export const createRouter = routeConfig => {
 
   const initialRoute = routeMatcher(getPath());
 
-  const getHref = path => {
-    const url = prefix + path;
+  const toUrl = path => prefix + path;
 
-    return {
-      href: url,
-      onclick: evt => {
-        evt.preventDefault();
-        window.history.pushState({}, "", url);
-        window.onpopstate();
-      }
-    };
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    window.history.pushState({}, "", url);
+    window.onpopstate();
   };
 
   const start = ({ onRouteChange }) => {
@@ -40,5 +35,5 @@ export const createRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { initialRoute, routeMatcher, getHref, start, locationBarSync, effect };
+  return { initialRoute, routeMatcher, toUrl, getLinkHandler, start, locationBarSync, effect };
 };

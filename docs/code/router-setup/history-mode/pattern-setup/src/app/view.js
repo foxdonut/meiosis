@@ -6,7 +6,7 @@ import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch";
 import { NotFound } from "../notFound";
-import { router } from "../router";
+import { Link } from "../router/link";
 
 const componentMap = {
   Home,
@@ -29,11 +29,11 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", router.getHref("/"), "Home")),
-          m("li" + isActive(Login), m("a", router.getHref("/login"), "Login")),
-          m("li" + isActive(Settings), m("a", router.getHref("/settings"), "Settings")),
-          m("li" + isActive(Tea), m("a", router.getHref("/tea"), "Tea")),
-          m("li" + isActive(TeaSearch), m("a", router.getHref("/tea/search"), "Tea Search"))
+          m("li" + isActive(Home), m(Link, { href: "/" }, "Home")),
+          m("li" + isActive(Login), m(Link, { href: "/login" }, "Login")),
+          m("li" + isActive(Settings), m(Link, { href: "/settings" }, "Settings")),
+          m("li" + isActive(Tea), m(Link, { href: "/tea" }, "Tea")),
+          m("li" + isActive(TeaSearch), m(Link, { href: "/tea/search" }, "Tea Search"))
         )
       ),
       m(Component, { state, update, actions }),

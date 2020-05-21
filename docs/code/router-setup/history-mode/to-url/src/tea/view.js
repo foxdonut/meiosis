@@ -1,7 +1,8 @@
 import m from "mithril";
 
 import { TeaDetails } from "../teaDetails";
-import { Route, router } from "../router";
+import { Route } from "../router";
+import { Link } from "../router/link";
 
 export const Tea = {
   view: ({ attrs: { state, actions } }) =>
@@ -17,7 +18,7 @@ export const Tea = {
               m(
                 "div",
                 { key: tea.id },
-                m("a", router.getHref(Route.TeaDetails, { id: tea.id }), tea.title)
+                m(Link, { page: Route.TeaDetails, params: { id: tea.id } }, tea.title)
               )
             )
         ),

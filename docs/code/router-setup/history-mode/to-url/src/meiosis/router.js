@@ -21,12 +21,12 @@ export const createRouter = routeConfig => {
   };
 
   const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, id]) => Object.assign(result, { [id]: path }),
+    (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
   );
 
-  const toUrl = (id, params = {}) => {
-    const path = prefix + pathLookup[id];
+  const toUrl = (page, params = {}) => {
+    const path = prefix + pathLookup[page];
 
     return (
       (path.match(/(:[^/]*)/g) || []).reduce(
@@ -56,17 +56,10 @@ export const createRouter = routeConfig => {
 
   const initialRoute = routeMatcher(getPath());
 
-  const getHref = (page, params = {}) => {
-    const url = toUrl(page, params);
-
-    return {
-      href: url,
-      onclick: evt => {
-        evt.preventDefault();
-        window.history.pushState({}, "", url);
-        window.onpopstate();
-      }
-    };
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    window.history.pushState({}, "", url);
+    window.onpopstate();
   };
 
   const start = ({ onRouteChange }) => {
@@ -83,5 +76,5 @@ export const createRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { initialRoute, getRoute, getHref, start, locationBarSync, effect };
+  return { initialRoute, getRoute, toUrl, getLinkHandler, start, locationBarSync, effect };
 };

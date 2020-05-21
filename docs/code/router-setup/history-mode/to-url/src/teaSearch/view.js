@@ -1,6 +1,7 @@
 import m from "mithril";
 
-import { Route, router } from "../router";
+import { Route } from "../router";
+import { Link } from "../router/link";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
@@ -16,15 +17,16 @@ export const TeaSearch = () => ({
             "div",
             types.map(type => [
               m(
-                "a",
+                Link,
                 {
-                  style: { marginRight: "10px" },
-                  ...router.getHref(Route.TeaSearch, { queryParams: { type } })
+                  page: Route.TeaSearch,
+                  params: { queryParams: { type } },
+                  style: { marginRight: "10px" }
                 },
                 type
               )
             ]),
-            m("a", router.getHref(Route.TeaSearch), "All")
+            m(Link, { page: Route.TeaSearch }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",
