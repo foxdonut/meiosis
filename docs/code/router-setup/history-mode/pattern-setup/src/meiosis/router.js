@@ -7,9 +7,9 @@ export const createRouter = routeConfig => {
 
   const getPath = () => decodeURI(window.location.pathname).substring(prefix.length) || "/";
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const getRoute = createRouteMatcher(routeConfig);
 
-  const initialRoute = routeMatcher(getPath());
+  const initialRoute = getRoute(getPath());
 
   const toUrl = path => prefix + path;
 
@@ -20,7 +20,7 @@ export const createRouter = routeConfig => {
   };
 
   const start = ({ onRouteChange }) => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+    window.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
   const locationBarSync = route => {
@@ -35,5 +35,5 @@ export const createRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { initialRoute, routeMatcher, toUrl, getLinkHandler, start, locationBarSync, effect };
+  return { initialRoute, getRoute, toUrl, getLinkHandler, start, locationBarSync, effect };
 };

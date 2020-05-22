@@ -22,7 +22,7 @@ export const createRouter = routeConfig => {
 
   const matcher = createRouteMatcher(routeConfig);
 
-  const routeMatcher = path => {
+  const getRoute = path => {
     const match = matcher(getPathWithoutQuery(path));
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
@@ -31,10 +31,10 @@ export const createRouter = routeConfig => {
     return Object.assign(match, { params, url });
   };
 
-  const initialRoute = routeMatcher(getPath());
+  const initialRoute = getRoute(getPath());
 
   const start = ({ onRouteChange }) => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+    window.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
   const locationBarSync = route => {
@@ -47,5 +47,5 @@ export const createRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { initialRoute, routeMatcher, start, locationBarSync, effect };
+  return { initialRoute, getRoute, start, locationBarSync, effect };
 };

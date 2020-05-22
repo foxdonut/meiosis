@@ -5,22 +5,23 @@
 -   [RouteConfig][1]
 -   [Route][2]
     -   [Properties][3]
--   [CreateRouteMatcher][4]
--   [QueryStringLib][5]
--   [FeatherRouter][6]
-    -   [Properties][7]
--   [MithrilRouter][8]
-    -   [Properties][9]
--   [MeiosisRouter.createFeatherRouter][10]
-    -   [Parameters][11]
--   [MeiosisRouter.createMithrilRouter][12]
-    -   [Parameters][13]
+-   [RouteMatcher][4]
+-   [CreateRouteMatcher][5]
+-   [QueryStringLib][6]
+-   [FeatherRouter][7]
+    -   [Properties][8]
+-   [MithrilRouter][9]
+    -   [Properties][10]
+-   [MeiosisRouter.createFeatherRouter][11]
+    -   [Parameters][12]
+-   [MeiosisRouter.createMithrilRouter][13]
+    -   [Parameters][14]
 
 ## RouteConfig
 
-Route configuration. This is a plain object where the properties are the route paths and the
-values are strings that identify the route. Route paths may contain parameters by using `:`
-as a prefix. For example:
+Route configuration. This is a plain object where the properties are the route path templates and
+the values are string page IDs. Route path templates may contain parameters by using `:` as a
+prefix. For example:
 
 ```javascript
 const routeConfig = {
@@ -30,30 +31,37 @@ const routeConfig = {
 };
 ```
 
-Type: [Object][14]&lt;[string][15], [string][15]>
+Type: [Object][15]&lt;[string][16], [string][16]>
 
 ## Route
 
 A route in the application state.
 
-Type: [Object][14]
+Type: [Object][15]
 
 ### Properties
 
--   `page` **[string][15]** 
--   `params` **[Object][14]** 
--   `url` **[string][15]** 
+-   `page` **[string][16]** the page ID.
+-   `params` **[Object][15]** an object with the path parameters, and query string parameters under
+    the `queryParams` property.
+-   `url` **[string][16]** the URL of the route.
+
+## RouteMatcher
+
+A route matcher is created by the [CreateRouteMatcher][5] function from a [RouteConfig][1].
+
+Type: [Function][17]&lt;[String][16], [Route][18]>
 
 ## CreateRouteMatcher
 
 This is the default function exported by
-[feather-route-matcher][16]:
+[feather-route-matcher][19]:
 
 ```javascript
 import createRouteMatcher from "feather-route-matcher";
 ```
 
-Type: [Function][17]
+Type: [Function][17]&lt;[RouteConfig][20], [RouteMatcher][21]>
 
 ## QueryStringLib
 
@@ -61,19 +69,23 @@ Query string library that provides the `parse` and `stringify` functions. This i
 if your application needs query string support. Examples of query string libraries that work
 out-of-the-box are:
 
--   [query-string][18]
--   [qs][19]
--   [urlon][20]
+-   [query-string][22]
+-   [qs][23]
+-   [urlon][24]
 
-Type: {parse: [Function][17], stringify: [Function][17]}
+Note that each library supports different features for query strings.
+
+Type: {parse: [Function][17]&lt;[string][16], [Object][15]>, stringify: [Function][17]&lt;[Object][15], [string][16]>}
 
 ## FeatherRouter
 
-Type: [Object][14]
+This is the router that is created by [MeiosisRouter.createFeatherRouter][11].
+
+Type: [Object][15]
 
 ### Properties
 
--   `initialRoute` **[Route][21]** x
+-   `initialRoute` **[Route][18]** x
 -   `routeMatcher` **[Function][17]** x
 -   `getRoute` **[Function][17]** x
 -   `getHref` **[Function][17]** x
@@ -84,7 +96,7 @@ Type: [Object][14]
 
 ## MithrilRouter
 
-Type: [Object][14]
+Type: [Object][15]
 
 ### Properties
 
@@ -97,36 +109,36 @@ Type: [Object][14]
 ## MeiosisRouter.createFeatherRouter
 
 Sets up a router using
-[feather-route-matcher][16].
+[feather-route-matcher][19].
 
 ### Parameters
 
--   `createRouteMatcher` **[CreateRouteMatcher][22]** the feather route matcher function.
--   `routeConfig` **[RouteConfig][23]** the route configuration.
--   `queryString` **[QueryStringLib][24]?** the query string library to use. You only need to provide
+-   `createRouteMatcher` **[CreateRouteMatcher][25]** the feather route matcher function.
+-   `routeConfig` **[RouteConfig][20]** the route configuration.
+-   `queryString` **[QueryStringLib][26]?** the query string library to use. You only need to provide
     this if your application requires query string support.
--   `historyMode` **[boolean][25]?** if `true`, uses history mode instead of hash mode. If you are
+-   `historyMode` **[boolean][27]?** if `true`, uses history mode instead of hash mode. If you are
     using history mode, you need to provide server side routing support. By default, `historyMode`
     is `false`.
--   `routeProp` **[string][15]?** this is the property in your state where the route is stored.
+-   `routeProp` **[string][16]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[FeatherRouter][26]** 
+Returns **[FeatherRouter][28]** 
 
 ## MeiosisRouter.createMithrilRouter
 
 Sets up a router using
-[Mithril Router][27].
+[Mithril Router][29].
 
 ### Parameters
 
 -   `Mithril` **m** the Mithril instance.
--   `routeConfig` **[RouteConfig][23]** the route configuration.
--   `prefix` **[string][15]?** hash prefix. Defaults to `"#"`.
--   `routeProp` **[string][15]?** this is the property in your state where the route is stored.
+-   `routeConfig` **[RouteConfig][20]** the route configuration.
+-   `prefix` **[string][16]?** hash prefix. Defaults to `"#"`.
+-   `routeProp` **[string][16]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[MithrilRouter][28]** 
+Returns **[MithrilRouter][30]** 
 
 [1]: #routeconfig
 
@@ -134,52 +146,56 @@ Returns **[MithrilRouter][28]**
 
 [3]: #properties
 
-[4]: #createroutematcher
+[4]: #routematcher
 
-[5]: #querystringlib
+[5]: #createroutematcher
 
-[6]: #featherrouter
+[6]: #querystringlib
 
-[7]: #properties-1
+[7]: #featherrouter
 
-[8]: #mithrilrouter
+[8]: #properties-1
 
-[9]: #properties-2
+[9]: #mithrilrouter
 
-[10]: #meiosisroutercreatefeatherrouter
+[10]: #properties-2
 
-[11]: #parameters
+[11]: #meiosisroutercreatefeatherrouter
 
-[12]: #meiosisroutercreatemithrilrouter
+[12]: #parameters
 
-[13]: #parameters-1
+[13]: #meiosisroutercreatemithrilrouter
 
-[14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[14]: #parameters-1
 
-[15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[16]: https://github.com/HenrikJoreteg/feather-route-matcher
+[16]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
 [17]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[18]: https://github.com/sindresorhus/query-string
+[18]: #route
 
-[19]: https://github.com/ljharb/qs
+[19]: https://github.com/HenrikJoreteg/feather-route-matcher
 
-[20]: https://github.com/cerebral/urlon
+[20]: #routeconfig
 
-[21]: #route
+[21]: #routematcher
 
-[22]: #createroutematcher
+[22]: https://github.com/sindresorhus/query-string
 
-[23]: #routeconfig
+[23]: https://github.com/ljharb/qs
 
-[24]: #querystringlib
+[24]: https://github.com/cerebral/urlon
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[25]: #createroutematcher
 
-[26]: #featherrouter
+[26]: #querystringlib
 
-[27]: https://mithril.js.org/route.html
+[27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[28]: #mithrilrouter
+[28]: #featherrouter
+
+[29]: https://mithril.js.org/route.html
+
+[30]: #mithrilrouter

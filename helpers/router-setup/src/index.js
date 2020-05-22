@@ -1,7 +1,7 @@
 /**
- * Route configuration. This is a plain object where the properties are the route paths and the
- * values are strings that identify the route. Route paths may contain parameters by using `:`
- * as a prefix. For example:
+ * Route configuration. This is a plain object where the properties are the route path templates and
+ * the values are string page IDs. Route path templates may contain parameters by using `:` as a
+ * prefix. For example:
  *
  * ```javascript
  * const routeConfig = {
@@ -19,9 +19,16 @@
  *
  * @typedef {Object} Route
  *
- * @property {string} page
- * @property {Object} params
- * @property {string} url
+ * @property {string} page - the page ID.
+ * @property {Object} params - an object with the path parameters, and query string parameters under
+ * the `queryParams` property.
+ * @property {string} url - the URL of the route.
+ */
+
+/**
+ * A route matcher is created by the {@link CreateRouteMatcher} function from a {@link RouteConfig}.
+ *
+ * @typedef {Function<String, Route>} RouteMatcher
  */
 
 /**
@@ -32,7 +39,7 @@
  * import createRouteMatcher from "feather-route-matcher";
  * ```
  *
- * @typedef {Function} CreateRouteMatcher
+ * @typedef {Function<RouteConfig, RouteMatcher>} CreateRouteMatcher
  */
 
 /**
@@ -44,18 +51,21 @@
  * - [qs](https://github.com/ljharb/qs)
  * - [urlon](https://github.com/cerebral/urlon)
  *
- * @typedef {{parse: Function, stringify: Function}} QueryStringLib
+ * Note that each library supports different features for query strings.
+ *
+ * @typedef {{parse: Function<string, Object>, stringify: Function<Object, string>}} QueryStringLib
  */
 
 /**
+ * This is the router that is created by {@link MeiosisRouter.createFeatherRouter}.
  *
  * @typedef {Object} FeatherRouter
  *
  * @property {Route} initialRoute - x
  * @property {Function} routeMatcher - x
  * @property {Function} getRoute - x
- * @property {Function} getHref - x
  * @property {Function} toUrl - x
+ * @property {Function} getLinkHandler - when using history mode, ...
  * @property {Function} start - x
  * @property {Function} locationBarSync - x
  * @property {Function} effect - x
