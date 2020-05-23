@@ -19,16 +19,18 @@
  *
  * @typedef {Object} Route
  *
- * @property {string} page - the page ID.
+ * @property {String} page - the page ID.
  * @property {Object} params - an object with the path parameters, and query string parameters under
  * the `queryParams` property.
- * @property {string} url - the URL of the route.
+ * @property {String} url - the URL of the route.
  */
 
 /**
  * A route matcher is created by the {@link CreateRouteMatcher} function from a {@link RouteConfig}.
  *
- * @typedef {Function<String, Route>} RouteMatcher
+ * @typedef {Function} RouteMatcher
+ * @param {String} url - the URL to resolve.
+ * @return {Route} the resolved route.
  */
 
 /**
@@ -39,7 +41,25 @@
  * import createRouteMatcher from "feather-route-matcher";
  * ```
  *
- * @typedef {Function<RouteConfig, RouteMatcher>} CreateRouteMatcher
+ * @typedef {Function} CreateRouteMatcher
+ * @param {RouteConfig} routeConfig - the route configuration.
+ * @return {RouteMatcher} the created route matcher.
+ */
+
+/**
+ * Query string parse function.
+ *
+ * @typedef {Function} QueryStringParse
+ * @param {String} query - the query string to parse.
+ * @return {Object} the result of parsing the query string.
+ */
+
+/**
+ * Query string stringify function.
+ *
+ * @typedef {Function} QueryStringStringify
+ * @param {Object} query - the query string object.
+ * @return {String} the stringified query string.
  */
 
 /**
@@ -53,7 +73,56 @@
  *
  * Note that each library supports different features for query strings.
  *
- * @typedef {{parse: Function<string, Object>, stringify: Function<Object, string>}} QueryStringLib
+ * @typedef {Object} QueryStringLib
+ *
+ * @property {QueryStringParse} parse
+ * @property {QueryStringStringify} stringify
+ */
+
+/**
+ * Function to generate a {@link Route} from a URL, or from a page ID and params.
+ *
+ * @typedef {Function} GetRoute
+ *
+ * @param {String} page - the page ID, or the URL.
+ * @param {Object?} params - if using a page ID, the parameters. If using query string support, use
+ * the `queryParams` property inside the params object for query string parameters.
+ * @return {Route} the route.
+ */
+
+/**
+ * Function to generate a URL from a page ID and params.
+ *
+ * @typedef {Function} ToUrl
+ *
+ * @param {String} page - the page ID.
+ * @param {Object?} params - the parameters. If using query string support, use the `queryParams`
+ * property inside the params object for query string parameters.
+ * @return {String} the URL.
+ */
+
+/**
+ * Function to generate an event handler for a link.
+ *
+ * @typedef {Function} GetLinkHandler
+ */
+
+/**
+ * Function to start the router.
+ *
+ * @typedef {Function} Start
+ */
+
+/**
+ * Function to synchronize the location bar with the state route.
+ *
+ * @typedef {Function} LocationBarSync
+ */
+
+/**
+ * Effect function to synchronize the location bar with the state route.
+ *
+ * @typedef {Function} Effect
  */
 
 /**
@@ -61,14 +130,13 @@
  *
  * @typedef {Object} FeatherRouter
  *
- * @property {Route} initialRoute - x
- * @property {Function} routeMatcher - x
- * @property {Function} getRoute - x
- * @property {Function} toUrl - x
- * @property {Function} getLinkHandler - when using history mode, ...
- * @property {Function} start - x
- * @property {Function} locationBarSync - x
- * @property {Function} effect - x
+ * @property {Route} initialRoute - the initial route as parsed from the location bar.
+ * @property {GetRoute} getRoute - function to generate a route.
+ * @property {ToUrl} toUrl - function to generate a URL.
+ * @property {GetLinkHandler} getLinkHandler - when using history mode, ...
+ * @property {Start} start - x
+ * @property {LocationBarSync} locationBarSync - x
+ * @property {Effect} effect - x
  */
 
 /**
@@ -76,10 +144,10 @@
  * @typedef {Object} MithrilRouter
  *
  * @property {Function} createMithrilRoutes - x
- * @property {Function} getRoute - x
- * @property {Function} toUrl - x
- * @property {Function} locationBarSync - x
- * @property {Function} effect - x
+ * @property {GetRoute} getRoute - x
+ * @property {ToUrl} toUrl - x
+ * @property {LocationBarSync} locationBarSync - x
+ * @property {Effect} effect - x
  */
 
 const createGetUrl = (prefix, historyMode) =>
@@ -107,11 +175,14 @@ const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (pageId, par
   );
 };
 
-const createGetRoute = (prefix, toUrl) => (page, params = {}) => ({
-  page,
-  params,
-  url: toUrl(page, params).substring(prefix.length)
-});
+const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}) =>
+  page.startsWith("/")
+    ? matcher(page)
+    : {
+        page,
+        params,
+        url: toUrl(page, params).substring(prefix.length)
+      };
 
 const createLocationBarSync = getUrl => route => {
   if (route.url !== getUrl()) {
@@ -141,7 +212,7 @@ const emptyQueryString = {
  * @param {boolean?} historyMode - if `true`, uses history mode instead of hash mode. If you are
  * using history mode, you need to provide server side routing support. By default, `historyMode`
  * is `false`.
- * @param {string?} routeProp - this is the property in your state where the route is stored.
+ * @param {String?} routeProp - this is the property in your state where the route is stored.
  * Defaults to `"route"`.
  *
  * @return {FeatherRouter}
@@ -170,8 +241,8 @@ export const createFeatherRouter = ({
   const getUrl = createGetUrl(prefix, historyMode);
   const getPath = createGetPath(prefix, getUrl);
   const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
-  const getRoute = createGetRoute(prefix, toUrl);
   const matcher = createRouteMatcher(routeConfig);
+  const getRoute = createGetRoute(prefix, toUrl, matcher);
 
   const routeMatcher = path => {
     const match = matcher(getPathWithoutQuery(path));
@@ -182,17 +253,10 @@ export const createFeatherRouter = ({
     return Object.assign(match, { params, url });
   };
 
-  const getHref = (pageId, params = {}) => {
-    const url = pageId.startsWith("/") ? prefix + pageId : toUrl(pageId, params);
-
-    return {
-      href: url,
-      onclick: evt => {
-        evt.preventDefault();
-        window.history.pushState({}, "", url);
-        window.onpopstate();
-      }
-    };
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    window.history.pushState({}, "", url);
+    window.onpopstate();
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -204,7 +268,7 @@ export const createFeatherRouter = ({
   const locationBarSync = createLocationBarSync(getUrl);
   const effect = createEffect(locationBarSync, routeProp);
 
-  return { initialRoute, routeMatcher, getRoute, getHref, toUrl, start, locationBarSync, effect };
+  return { initialRoute, getRoute, getLinkHandler, toUrl, start, locationBarSync, effect };
 };
 
 /**
@@ -215,8 +279,8 @@ export const createFeatherRouter = ({
  *
  * @param {m} Mithril - the Mithril instance.
  * @param {RouteConfig} routeConfig - the route configuration.
- * @param {string?} prefix - hash prefix. Defaults to `"#"`.
- * @param {string?} routeProp - this is the property in your state where the route is stored.
+ * @param {String?} prefix - hash prefix. Defaults to `"#"`.
+ * @param {String?} routeProp - this is the property in your state where the route is stored.
  * Defaults to `"route"`.
  *
  * @return {MithrilRouter}
