@@ -2,49 +2,46 @@
 
 ### Table of Contents
 
--   [ToUrl][1]
-    -   [Parameters][2]
--   [RouteConfig][3]
--   [RouteMatcher][4]
-    -   [Parameters][5]
--   [CreateRouteMatcher][6]
-    -   [Parameters][7]
--   [QueryStringParse][8]
-    -   [Parameters][9]
--   [QueryStringStringify][10]
-    -   [Parameters][11]
--   [QueryStringLib][12]
-    -   [Properties][13]
--   [GetRoute][14]
-    -   [Parameters][15]
--   [Route][16]
-    -   [Properties][17]
--   [GetLinkHandler][18]
--   [Start][19]
--   [LocationBarSync][20]
--   [Effect][21]
--   [FeatherRouter][22]
-    -   [Properties][23]
--   [MithrilRouter][24]
-    -   [Properties][25]
--   [MeiosisRouter.createFeatherRouter][26]
-    -   [Parameters][27]
--   [MeiosisRouter.createMithrilRouter][28]
-    -   [Parameters][29]
+-   [GetLinkHandler][1]
+-   [RouteConfig][2]
+-   [RouteMatcher][3]
+    -   [Parameters][4]
+-   [CreateRouteMatcher][5]
+    -   [Parameters][6]
+-   [QueryStringParse][7]
+    -   [Parameters][8]
+-   [QueryStringStringify][9]
+    -   [Parameters][10]
+-   [QueryStringLib][11]
+    -   [Properties][12]
+-   [GetRoute][13]
+    -   [Parameters][14]
+-   [ToUrl][15]
+    -   [Parameters][16]
+-   [Route][17]
+    -   [Properties][18]
+-   [OnRouteChange][19]
+    -   [Parameters][20]
+-   [Start][21]
+    -   [Parameters][22]
+-   [LocationBarSync][23]
+-   [Effect][24]
+-   [FeatherRouter][25]
+    -   [Properties][26]
+-   [CreateMithrilRoutes][27]
+    -   [Parameters][28]
+-   [MithrilRouter][29]
+    -   [Properties][30]
+-   [MeiosisRouter.createFeatherRouter][31]
+    -   [Parameters][32]
+-   [MeiosisRouter.createMithrilRouter][33]
+    -   [Parameters][34]
 
-## ToUrl
+## GetLinkHandler
 
-Function to generate a URL from a page ID and params.
+Function to generate an event handler for a link.
 
-Type: [Function][30]
-
-### Parameters
-
--   `page` **[String][31]** the page ID.
--   `params` **[Object][32]?** the parameters. If using query string support, use the `queryParams`
-    property inside the params object for query string parameters.
-
-Returns **[String][31]** the URL.
+Type: [Function][35]
 
 ## RouteConfig
 
@@ -60,60 +57,60 @@ const routeConfig = {
 };
 ```
 
-Type: [Object][32]&lt;[string][31], [string][31]>
+Type: [Object][36]&lt;[string][37], [string][37]>
 
 ## RouteMatcher
 
-A route matcher is created by the [CreateRouteMatcher][6] function from a [RouteConfig][3].
+A route matcher is created by the [CreateRouteMatcher][5] function from a [RouteConfig][2].
 
-Type: [Function][30]
+Type: [Function][35]
 
 ### Parameters
 
--   `url` **[String][31]** the URL to resolve.
+-   `url` **[String][37]** the URL to resolve.
 
-Returns **[Route][33]** the resolved route.
+Returns **[Route][38]** the resolved route.
 
 ## CreateRouteMatcher
 
 This is the default function exported by
-[feather-route-matcher][34]:
+[feather-route-matcher][39]:
 
 ```javascript
 import createRouteMatcher from "feather-route-matcher";
 ```
 
-Type: [Function][30]
+Type: [Function][35]
 
 ### Parameters
 
--   `routeConfig` **[RouteConfig][35]** the route configuration.
+-   `routeConfig` **[RouteConfig][40]** the route configuration.
 
-Returns **[RouteMatcher][36]** the created route matcher.
+Returns **[RouteMatcher][41]** the created route matcher.
 
 ## QueryStringParse
 
 Query string parse function.
 
-Type: [Function][30]
+Type: [Function][35]
 
 ### Parameters
 
--   `query` **[String][31]** the query string to parse.
+-   `query` **[String][37]** the query string to parse.
 
-Returns **[Object][32]** the result of parsing the query string.
+Returns **[Object][36]** the result of parsing the query string.
 
 ## QueryStringStringify
 
 Query string stringify function.
 
-Type: [Function][30]
+Type: [Function][35]
 
 ### Parameters
 
--   `query` **[Object][32]** the query string object.
+-   `query` **[Object][36]** the query string object.
 
-Returns **[String][31]** the stringified query string.
+Returns **[String][37]** the stringified query string.
 
 ## QueryStringLib
 
@@ -121,234 +118,308 @@ Query string library that provides the `parse` and `stringify` functions. This i
 if your application needs query string support. Examples of query string libraries that work
 out-of-the-box are:
 
--   [query-string][37]
--   [qs][38]
--   [urlon][39]
+-   [query-string][42]
+-   [qs][43]
+-   [urlon][44]
 
 Note that each library supports different features for query strings.
 
-Type: [Object][32]
+Type: [Object][36]
 
 ### Properties
 
--   `parse` **[QueryStringParse][40]** 
--   `stringify` **[QueryStringStringify][41]** 
+-   `parse` **[QueryStringParse][45]** 
+-   `stringify` **[QueryStringStringify][46]** 
 
 ## GetRoute
 
-Function to generate a [Route][16] from a URL, or from a page ID and params.
+Function to generate a [Route][17] from a URL, or from a page ID and params.
 
-Type: [Function][30]
+Type: [Function][35]
 
 ### Parameters
 
--   `page` **[String][31]** the page ID, or the URL.
--   `params` **[Object][32]?** if using a page ID, the parameters. If using query string support, use
+-   `page` **[String][37]** the page ID, or the URL.
+-   `params` **[Object][36]?** if using a page ID, the parameters. If using query string support, use
     the `queryParams` property inside the params object for query string parameters.
 
-Returns **[Route][33]** the route.
+Returns **[Route][38]** the route.
+
+## ToUrl
+
+Function to generate a URL from a page ID and params.
+
+Type: [Function][35]
+
+### Parameters
+
+-   `page` **[String][37]** the page ID.
+-   `params` **[Object][36]?** the parameters. If using query string support, use the `queryParams`
+    property inside the params object for query string parameters.
+
+Returns **[String][37]** the URL.
 
 ## Route
 
 A route in the application state.
 
-Type: [Object][32]
+Type: [Object][36]
 
 ### Properties
 
--   `page` **[String][31]** the page ID.
--   `params` **[Object][32]** an object with the path parameters, and query string parameters under
+-   `page` **[String][37]** the page ID.
+-   `params` **[Object][36]** an object with the path parameters, and query string parameters under
     the `queryParams` property.
--   `url` **[String][31]** the URL of the route.
+-   `url` **[String][37]** the URL of the route.
 
-## GetLinkHandler
+## OnRouteChange
 
-Function to generate an event handler for a link.
+Callback function for when the route changes. Typically, this function updates the application
+state with the route, for example:
 
-Type: [Function][30]
+```javascript
+router.start({ onRouteChange: route => update({ route: () => route }) });
+```
+
+Type: [Function][35]
+
+### Parameters
+
+-   `route` **[Route][38]** 
+
+Returns **void** 
 
 ## Start
 
 Function to start the router.
 
-Type: [Function][30]
+Type: [Function][35]
+
+### Parameters
+
+-   `onRouteChange` **[OnRouteChange][47]** callback function for when the route changes.
+
+Returns **void** 
 
 ## LocationBarSync
 
 Function to synchronize the location bar with the state route.
 
-Type: [Function][30]
+Type: [Function][35]
 
 ## Effect
 
 Effect function to synchronize the location bar with the state route.
 
-Type: [Function][30]
+Type: [Function][35]
 
 ## FeatherRouter
 
-This is the router that is created by [MeiosisRouter.createFeatherRouter][26].
+This is the router that is created by [MeiosisRouter.createFeatherRouter][31].
 
-Type: [Object][32]
+Type: [Object][36]
 
 ### Properties
 
--   `initialRoute` **[Route][33]** the initial route as parsed from the location bar.
--   `getRoute` **[GetRoute][42]** function to generate a route.
--   `toUrl` **[ToUrl][43]** function to generate a URL.
--   `getLinkHandler` **[GetLinkHandler][44]** when using history mode, ...
--   `start` **[Start][45]** x
--   `locationBarSync` **[LocationBarSync][46]** x
--   `effect` **[Effect][47]** x
+-   `initialRoute` **[Route][38]** the initial route as parsed from the location bar.
+-   `getRoute` **[GetRoute][48]** function to generate a route.
+-   `toUrl` **[ToUrl][49]** function to generate a URL.
+-   `getLinkHandler` **[GetLinkHandler][50]** when using history mode, ...
+-   `start` **[Start][51]** function to start the router.
+-   `locationBarSync` **[LocationBarSync][52]** x
+-   `effect` **[Effect][53]** x
+
+## CreateMithrilRoutes
+
+Creates Mithril routes suitable for passing as the third argument to `m.route`, for example:
+
+```javascript
+m.route(
+  document.getElementById("app"),
+  "/",
+  router.createMithrilRoutes({
+    onRouteChange: route => update({ route: () => route }),
+    App, states, update, actions
+  })
+);
+```
+
+Type: [Function][35]
+
+### Parameters
+
+-   `onRouteChange` **[OnRouteChange][47]** 
+-   `App` **[Object][36]** 
+-   `states` **[Stream][54]** 
+-   `update` **[Stream][54]** 
+-   `actions` **[Object][36]** 
+
+Returns **any** Mithril routes.
 
 ## MithrilRouter
 
-Type: [Object][32]
+Type: [Object][36]
 
 ### Properties
 
--   `createMithrilRoutes` **[Function][30]** x
--   `getRoute` **[GetRoute][42]** x
--   `toUrl` **[ToUrl][43]** x
--   `locationBarSync` **[LocationBarSync][46]** x
--   `effect` **[Effect][47]** x
+-   `createMithrilRoutes` **[CreateMithrilRoutes][55]** x
+-   `getRoute` **[GetRoute][48]** x
+-   `toUrl` **[ToUrl][49]** x
+-   `locationBarSync` **[LocationBarSync][52]** x
+-   `effect` **[Effect][53]** x
 
 ## MeiosisRouter.createFeatherRouter
 
 Sets up a router using
-[feather-route-matcher][34].
+[feather-route-matcher][39].
 
 ### Parameters
 
--   `createRouteMatcher` **[CreateRouteMatcher][48]** the feather route matcher function.
--   `routeConfig` **[RouteConfig][35]** the route configuration.
--   `queryString` **[QueryStringLib][49]?** the query string library to use. You only need to provide
+-   `createRouteMatcher` **[CreateRouteMatcher][56]** the feather route matcher function.
+-   `routeConfig` **[RouteConfig][40]** the route configuration.
+-   `queryString` **[QueryStringLib][57]?** the query string library to use. You only need to provide
     this if your application requires query string support.
--   `historyMode` **[boolean][50]?** if `true`, uses history mode instead of hash mode. If you are
+-   `historyMode` **[boolean][58]?** if `true`, uses history mode instead of hash mode. If you are
     using history mode, you need to provide server side routing support. By default, `historyMode`
     is `false`.
--   `routeProp` **[String][31]?** this is the property in your state where the route is stored.
+-   `routeProp` **[String][37]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[FeatherRouter][51]** 
+Returns **[FeatherRouter][59]** 
 
 ## MeiosisRouter.createMithrilRouter
 
 Sets up a router using
-[Mithril Router][52].
+[Mithril Router][60].
 
 ### Parameters
 
 -   `Mithril` **m** the Mithril instance.
--   `routeConfig` **[RouteConfig][35]** the route configuration.
--   `prefix` **[String][31]?** hash prefix. Defaults to `"#"`.
--   `routeProp` **[String][31]?** this is the property in your state where the route is stored.
+-   `routeConfig` **[RouteConfig][40]** the route configuration.
+-   `prefix` **[String][37]?** hash prefix. Defaults to `"#"`.
+-   `routeProp` **[String][37]?** this is the property in your state where the route is stored.
     Defaults to `"route"`.
 
-Returns **[MithrilRouter][53]** 
+Returns **[MithrilRouter][61]** 
 
-[1]: #tourl
+[1]: #getlinkhandler
 
-[2]: #parameters
+[2]: #routeconfig
 
-[3]: #routeconfig
+[3]: #routematcher
 
-[4]: #routematcher
+[4]: #parameters
 
-[5]: #parameters-1
+[5]: #createroutematcher
 
-[6]: #createroutematcher
+[6]: #parameters-1
 
-[7]: #parameters-2
+[7]: #querystringparse
 
-[8]: #querystringparse
+[8]: #parameters-2
 
-[9]: #parameters-3
+[9]: #querystringstringify
 
-[10]: #querystringstringify
+[10]: #parameters-3
 
-[11]: #parameters-4
+[11]: #querystringlib
 
-[12]: #querystringlib
+[12]: #properties
 
-[13]: #properties
+[13]: #getroute
 
-[14]: #getroute
+[14]: #parameters-4
 
-[15]: #parameters-5
+[15]: #tourl
 
-[16]: #route
+[16]: #parameters-5
 
-[17]: #properties-1
+[17]: #route
 
-[18]: #getlinkhandler
+[18]: #properties-1
 
-[19]: #start
+[19]: #onroutechange
 
-[20]: #locationbarsync
+[20]: #parameters-6
 
-[21]: #effect
+[21]: #start
 
-[22]: #featherrouter
+[22]: #parameters-7
 
-[23]: #properties-2
+[23]: #locationbarsync
 
-[24]: #mithrilrouter
+[24]: #effect
 
-[25]: #properties-3
+[25]: #featherrouter
 
-[26]: #meiosisroutercreatefeatherrouter
+[26]: #properties-2
 
-[27]: #parameters-6
+[27]: #createmithrilroutes
 
-[28]: #meiosisroutercreatemithrilrouter
+[28]: #parameters-8
 
-[29]: #parameters-7
+[29]: #mithrilrouter
 
-[30]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[30]: #properties-3
 
-[31]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[31]: #meiosisroutercreatefeatherrouter
 
-[32]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[32]: #parameters-9
 
-[33]: #route
+[33]: #meiosisroutercreatemithrilrouter
 
-[34]: https://github.com/HenrikJoreteg/feather-route-matcher
+[34]: #parameters-10
 
-[35]: #routeconfig
+[35]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[36]: #routematcher
+[36]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[37]: https://github.com/sindresorhus/query-string
+[37]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[38]: https://github.com/ljharb/qs
+[38]: #route
 
-[39]: https://github.com/cerebral/urlon
+[39]: https://github.com/HenrikJoreteg/feather-route-matcher
 
-[40]: #querystringparse
+[40]: #routeconfig
 
-[41]: #querystringstringify
+[41]: #routematcher
 
-[42]: #getroute
+[42]: https://github.com/sindresorhus/query-string
 
-[43]: #tourl
+[43]: https://github.com/ljharb/qs
 
-[44]: #getlinkhandler
+[44]: https://github.com/cerebral/urlon
 
-[45]: #start
+[45]: #querystringparse
 
-[46]: #locationbarsync
+[46]: #querystringstringify
 
-[47]: #effect
+[47]: #onroutechange
 
-[48]: #createroutematcher
+[48]: #getroute
 
-[49]: #querystringlib
+[49]: #tourl
 
-[50]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[50]: #getlinkhandler
 
-[51]: #featherrouter
+[51]: #start
 
-[52]: https://mithril.js.org/route.html
+[52]: #locationbarsync
 
-[53]: #mithrilrouter
+[53]: #effect
+
+[54]: https://nodejs.org/api/stream.html
+
+[55]: #createmithrilroutes
+
+[56]: #createroutematcher
+
+[57]: #querystringlib
+
+[58]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[59]: #featherrouter
+
+[60]: https://mithril.js.org/route.html
+
+[61]: #mithrilrouter

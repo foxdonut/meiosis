@@ -108,9 +108,27 @@
  */
 
 /**
+ * Callback function for when the route changes. Typically, this function updates the application
+ * state with the route, for example:
+ *
+ * ```javascript
+ * router.start({ onRouteChange: route => update({ route: () => route }) });
+ * ```
+ *
+ * @typedef {Function} OnRouteChange
+ *
+ * @param {Route} route
+ * @return {void}
+ */
+
+/**
  * Function to start the router.
  *
  * @typedef {Function} Start
+ *
+ * @param {OnRouteChange} onRouteChange - callback function for when the route changes.
+ *
+ * @return {void}
  */
 
 /**
@@ -134,16 +152,41 @@
  * @property {GetRoute} getRoute - function to generate a route.
  * @property {ToUrl} toUrl - function to generate a URL.
  * @property {GetLinkHandler} getLinkHandler - when using history mode, ...
- * @property {Start} start - x
+ * @property {Start} start - function to start the router.
  * @property {LocationBarSync} locationBarSync - x
  * @property {Effect} effect - x
+ */
+
+/**
+ * Creates Mithril routes suitable for passing as the third argument to `m.route`, for example:
+ *
+ * ```javascript
+ * m.route(
+ *   document.getElementById("app"),
+ *   "/",
+ *   router.createMithrilRoutes({
+ *     onRouteChange: route => update({ route: () => route }),
+ *     App, states, update, actions
+ *   })
+ * );
+ * ```
+ *
+ * @typedef {Function} CreateMithrilRoutes
+ *
+ * @param {OnRouteChange} onRouteChange
+ * @param {Object} App
+ * @param {Stream} states
+ * @param {Stream} update
+ * @param {Object} actions
+ *
+ * @return Mithril routes.
  */
 
 /**
  *
  * @typedef {Object} MithrilRouter
  *
- * @property {Function} createMithrilRoutes - x
+ * @property {CreateMithrilRoutes} createMithrilRoutes - x
  * @property {GetRoute} getRoute - x
  * @property {ToUrl} toUrl - x
  * @property {LocationBarSync} locationBarSync - x
@@ -298,7 +341,7 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
   const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
   const getRoute = createGetRoute(prefix, toUrl);
 
-  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions }) =>
+  const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: (params, url) => onRouteChange({ page, params, url }),
