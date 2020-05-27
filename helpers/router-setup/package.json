@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Meiosis Helpers - Router Setup",
   "main": "dist/meiosis-router-setup.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "start": "rollup -c",
+    "start": "rollup -c && tsc",
     "docs": "documentation build src/index.js -f md -o api.md"
   },
   "repository": {
@@ -38,6 +39,7 @@
     "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-uglify": "^6.0.4"
+    "rollup-plugin-uglify": "^6.0.4",
+    "typescript": "^3.9.3"
   }
 }

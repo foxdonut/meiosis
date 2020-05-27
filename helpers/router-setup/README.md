@@ -105,15 +105,14 @@ const router = createFeatherRouter({ createRouteMatcher, queryString, routeConfi
 
 Now, `router` provides the `initialRoute` property containing the initial route. Use this to
 initialize your application state. Then, start the router by calling `start` and providing a
-`onRouteChange` function:
+function that gets called when the route changes:
 
 ```javascript
-router.start({ onRouteChange: route => update({ route: () => route }) });
+router.start(route => update({ route: () => route }));
 ```
 
-The `onRouteChange` function is called with the `route` whenever the route changes. Normally the
-function that you provide should call `update` to update the state with the route, using a patch
-that corresponds to your Meiosis setup
+Normally the function that you provide should call `update` to update the state with the route,
+using a patch that corresponds to your Meiosis setup
 ([Mergerino](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html),
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), ...).
 The example above uses Mergerino.
@@ -143,7 +142,7 @@ const router = createMithrilRouter({ m, routeConfig });
 
 Then, use [m.route](https://mithril.js.org/route.html#routeroot,-defaultroute,-routes) and
 `router.createMithrilRoutes` to set up your application. Pass your `App` (root view component),
-`states`, `update` and/or `actions` (from your Meiosis setup), and a `onRouteChange` function.
+`states`, `update` and/or `actions` (from your Meiosis setup), and an `onRouteChange` function.
 The latest state (by calling `states()`), `update`, and `actions` will be passed to your `App`.
 
 ```javascript
@@ -198,7 +197,7 @@ const app = {
 };
 ```
 
-Next, add links to your application. You can either use hard-coded paths, or the `toPath` function.
+Next, add links to your application. You can either use hard-coded paths, or the `toUrl` function.
 
 ## Using Hard-Coded Paths
 
@@ -216,31 +215,41 @@ m("a", { href: "#/login" }, "Login"),
 m("a", { href: "#/user/42" }, "User Profile")
 ```
 
-For programmatic routes, use the `router.routeMatcher` function and omit the hash prefix:
+For programmatic routes, use the `router.getRoute` function and omit the hash prefix:
 
 ```javascript
-update({ route: () => router.routeMatcher("/") });
-update({ route: () => router.routeMatcher("/login") });
-update({ route: () => router.routeMatcher("/user/42") });
+update({ route: () => router.getRoute("/") });
+update({ route: () => router.getRoute("/login") });
+update({ route: () => router.getRoute("/user/42") });
 ```
 
-Of course, you can write your own helper functions to compute the paths. Or, you can use `toPath` to
-use page IDs and parameters instead of hard-coded paths.
+For convenience, you can write a helper function:
 
-## Using `toPath`
+```javascript
+const routeTo = path => ({ route: () => router.getRoute(path) });
+
+update(routeTo("/"));
+update(routeTo("/login"));
+update(routeTo("/user/42"));
+```
+
+Of course, you also can write helper functions to compute the paths. Or, you can use `toUrl` to use
+page IDs and parameters instead of hard-coded paths, as shown below.
+
+## Using `toUrl`
 
 With this option, you provide a page ID and the path/query string parameters to obtain the path:
 
 ```jsx
-<a href={router.toPath(Route.Home)}>Home</a>
-<a href={router.toPath(Route.Login)}>Login</a>
-<a href={router.toPath(Route.UserProfile, { id: 42 })}>User Profile</a>
+<a href={router.toUrl(Route.Home)}>Home</a>
+<a href={router.toUrl(Route.Login)}>Login</a>
+<a href={router.toUrl(Route.UserProfile, { id: 42 })}>User Profile</a>
 ```
 
 ```javascript
-m("a", { href: router.toPath(Route.Home) }, "Home"),
-m("a", { href: router.toPath(Route.Login) }, "Login"),
-m("a", { href: router.toPath(Route.UserProfile, { id: 42 }), "User Profile")
+m("a", { href: router.toUrl(Route.Home) }, "Home"),
+m("a", { href: router.toUrl(Route.Login) }, "Login"),
+m("a", { href: router.toUrl(Route.UserProfile, { id: 42 }), "User Profile")
 ```
 
 For programmatic routes, use the `router.getRoute` function:
@@ -251,6 +260,15 @@ update({ route: () => router.getRoute(Route.Login) });
 update({ route: () => router.getRoute(Route.UserProfile, { id: 42 }) });
 ```
 
+For convenience, you can write a helper function:
+
+```javascript
+const routeTo = path => ({ route: () => router.getRoute(path) });
+
+update(routeTo(Route.Home));
+update(routeTo(Route.Login));
+update(routeTo(Route.UserProfile, { id: 42 }));
+```
 ## API
 
 [API documentation is here.](api.md)

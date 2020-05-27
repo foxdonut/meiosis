@@ -28,7 +28,7 @@ export const createRouter = (Route, defaultRoute) => {
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = ({ onRouteChange }) => {
+  const start = onRouteChange => {
     window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 

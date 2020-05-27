@@ -1,7 +1,6 @@
 /**
- * Route configuration. This is a plain object where the properties are the route path templates and
- * the values are string page IDs. Route path templates may contain parameters by using `:` as a
- * prefix. For example:
+ * Route configuration. This is a plain object that associates route path templates to string page
+ * IDs. Route path templates may contain parameters by using `:` as a prefix. For example:
  *
  * ```javascript
  * const routeConfig = {
@@ -19,17 +18,18 @@
  *
  * @typedef {Object} Route
  *
- * @property {String} page - the page ID.
- * @property {Object} params - an object with the path parameters, and query string parameters under
+ * @property {string} page the page ID.
+ * @property {*} params an object with the path parameters, and query string parameters under
  * the `queryParams` property.
- * @property {String} url - the URL of the route.
+ * @property {string} url the URL of the route.
  */
 
 /**
- * A route matcher is created by the {@link CreateRouteMatcher} function from a {@link RouteConfig}.
+ * A route matcher is created by the {@link CreateRouteMatcher} function from a {@link RouteConfig}
+ * and resolves a URL to a route.
  *
- * @typedef {Function} RouteMatcher
- * @param {String} url - the URL to resolve.
+ * @callback RouteMatcher
+ * @param {string} url the URL to resolve.
  * @return {Route} the resolved route.
  */
 
@@ -41,25 +41,25 @@
  * import createRouteMatcher from "feather-route-matcher";
  * ```
  *
- * @typedef {Function} CreateRouteMatcher
- * @param {RouteConfig} routeConfig - the route configuration.
+ * @callback CreateRouteMatcher
+ * @param {RouteConfig} routeConfig the route configuration.
  * @return {RouteMatcher} the created route matcher.
  */
 
 /**
  * Query string parse function.
  *
- * @typedef {Function} QueryStringParse
- * @param {String} query - the query string to parse.
- * @return {Object} the result of parsing the query string.
+ * @callback QueryStringParse
+ * @param {string} query the query string to parse.
+ * @return {Object.<string,any>} the result of parsing the query string.
  */
 
 /**
  * Query string stringify function.
  *
- * @typedef {Function} QueryStringStringify
- * @param {Object} query - the query string object.
- * @return {String} the stringified query string.
+ * @callback QueryStringStringify
+ * @param {Object.<string,any>} query the query string object.
+ * @return {string} the stringified query string.
  */
 
 /**
@@ -82,10 +82,10 @@
 /**
  * Function to generate a {@link Route} from a URL, or from a page ID and params.
  *
- * @typedef {Function} GetRoute
+ * @callback GetRoute
  *
- * @param {String} page - the page ID, or the URL.
- * @param {Object?} params - if using a page ID, the parameters. If using query string support, use
+ * @param {string} page the page ID, or the URL.
+ * @param {*} [params] if using a page ID, the parameters. If using query string support, use
  * the `queryParams` property inside the params object for query string parameters.
  * @return {Route} the route.
  */
@@ -93,18 +93,30 @@
 /**
  * Function to generate a URL from a page ID and params.
  *
- * @typedef {Function} ToUrl
+ * @callback ToUrl
  *
- * @param {String} page - the page ID.
- * @param {Object?} params - the parameters. If using query string support, use the `queryParams`
+ * @param {string} page the page ID.
+ * @param {*} [params] the parameters. If using query string support, use the `queryParams`
  * property inside the params object for query string parameters.
- * @return {String} the URL.
+ * @return {string} the URL.
+ */
+
+/**
+ * Link handler function which calls `preventDefault` on the link event and emits the URL.
+ *
+ * @callback LinkHandler
+ *
+ * @param {Event} event
+ * @return {void}
  */
 
 /**
  * Function to generate an event handler for a link.
  *
- * @typedef {Function} GetLinkHandler
+ * @callback GetLinkHandler
+ *
+ * @param {string} url the URL of the link.
+ * @return {LinkHandler} the link handler.
  */
 
 /**
@@ -112,10 +124,10 @@
  * state with the route, for example:
  *
  * ```javascript
- * router.start({ onRouteChange: route => update({ route: () => route }) });
+ * router.start(route => update({ route: () => route }));
  * ```
  *
- * @typedef {Function} OnRouteChange
+ * @callback OnRouteChange
  *
  * @param {Route} route
  * @return {void}
@@ -124,37 +136,106 @@
 /**
  * Function to start the router.
  *
- * @typedef {Function} Start
+ * @callback Start
  *
- * @param {OnRouteChange} onRouteChange - callback function for when the route changes.
- *
+ * @param {OnRouteChange} onRouteChange callback function for when the route changes.
  * @return {void}
  */
 
 /**
- * Function to synchronize the location bar with the state route.
+ * Function that synchronizes the location bar with the state route.
  *
- * @typedef {Function} LocationBarSync
+ * @callback LocationBarSync
+ *
+ * @param {Route} route the route from the application state.
+ * @return {void}
  */
 
 /**
  * Effect function to synchronize the location bar with the state route.
  *
- * @typedef {Function} Effect
+ * @callback Effect
+ *
+ * @param {*} state the application state.
+ * @return {void}
  */
 
 /**
- * This is the router that is created by {@link MeiosisRouter.createFeatherRouter}.
+ * Configuration to create a Feather router.
+ *
+ * @typedef {Object} FeatherRouterConfig
+ *
+ * @property {CreateRouteMatcher} createRouteMatcher the feather route matcher function.
+ * @property {RouteConfig} routeConfig the route configuration.
+ * @property {QueryStringLib} [queryString] the query string library to use. You only need to
+ * provide this if your application requires query string support.
+ * @property {boolean} [historyMode=false] if `true`, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support. By default,
+ * `historyMode` is `false`.
+ * @property {string} [routeProp="route"] this is the property in your state where the route is
+ * stored. Defaults to `"route"`.
+ *
+ */
+
+/**
+ * This is the router that is created by {@link createFeatherRouter}.
  *
  * @typedef {Object} FeatherRouter
  *
- * @property {Route} initialRoute - the initial route as parsed from the location bar.
- * @property {GetRoute} getRoute - function to generate a route.
- * @property {ToUrl} toUrl - function to generate a URL.
- * @property {GetLinkHandler} getLinkHandler - when using history mode, ...
- * @property {Start} start - function to start the router.
- * @property {LocationBarSync} locationBarSync - x
- * @property {Effect} effect - x
+ * @property {Route} initialRoute the initial route as parsed from the location bar.
+ * @property {GetRoute} getRoute function to generate a route.
+ * @property {ToUrl} toUrl function to generate a URL.
+ * @property {GetLinkHandler} getLinkHandler when using history mode, ...
+ * @property {Start} start function to start the router.
+ * @property {LocationBarSync} locationBarSync function that synchronizes the location bar with the
+ * state route.
+ * @property {Effect} effect effect function to synchronize the location bar with the state route.
+ */
+
+/**
+ * Configuration to create a Mithril router.
+ *
+ * @typedef {Object} MithrilRouterConfig
+ *
+ * @property {m} m the Mithril instance.
+ * @property {RouteConfig} routeConfig the route configuration.
+ * @property {string} [prefix="#"] hash prefix. Defaults to `"#"`.
+ * @property {string} [routeProp="route"] this is the property in your state where the route is
+ * stored. Defaults to `"route"`.
+ *
+ */
+
+/**
+ * Mithril `onmatch` function.
+ *
+ * @callback MithrilOnmatch
+ *
+ * @param {*} params
+ * @param {string} url
+ * @return {void}
+ */
+
+/**
+ * Mithril `render` function.
+ *
+ * @callback MithrilRender
+ *
+ * @return {void}
+ */
+
+/**
+ * Mithril route.
+ *
+ * @typedef {Object} MithrilRoute
+ *
+ * @property {MithrilOnmatch} onmatch
+ * @property {MithrilRender} render
+ */
+
+/**
+ * Mithril routes.
+ *
+ * @typedef {Object<string,MithrilRoute>} MithrilRoutes
  */
 
 /**
@@ -171,26 +252,29 @@
  * );
  * ```
  *
- * @typedef {Function} CreateMithrilRoutes
+ * @callback CreateMithrilRoutes
  *
  * @param {OnRouteChange} onRouteChange
- * @param {Object} App
- * @param {Stream} states
- * @param {Stream} update
- * @param {Object} actions
+ * @param {*} App
+ * @param {*} states
+ * @param {*} update
+ * @param {*} actions
  *
- * @return Mithril routes.
+ * @return {MithrilRoutes} Mithril routes.
  */
 
 /**
+ * This is the router that is created by {@link createMithrilRouter}.
  *
  * @typedef {Object} MithrilRouter
  *
- * @property {CreateMithrilRoutes} createMithrilRoutes - x
- * @property {GetRoute} getRoute - x
- * @property {ToUrl} toUrl - x
- * @property {LocationBarSync} locationBarSync - x
- * @property {Effect} effect - x
+ * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
+ * as the third argument to `m.route`.
+ * @property {GetRoute} getRoute function to generate a route.
+ * @property {ToUrl} toUrl function to generate a URL.
+ * @property {LocationBarSync} locationBarSync function that synchronizes the location bar with the
+ * state route.
+ * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
 
 const createGetUrl = (prefix, historyMode) =>
@@ -246,17 +330,7 @@ const emptyQueryString = {
  * Sets up a router using
  * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher).
  *
- * @function MeiosisRouter.createFeatherRouter
- *
- * @param {CreateRouteMatcher} createRouteMatcher - the feather route matcher function.
- * @param {RouteConfig} routeConfig - the route configuration.
- * @param {QueryStringLib?} queryString - the query string library to use. You only need to provide
- * this if your application requires query string support.
- * @param {boolean?} historyMode - if `true`, uses history mode instead of hash mode. If you are
- * using history mode, you need to provide server side routing support. By default, `historyMode`
- * is `false`.
- * @param {String?} routeProp - this is the property in your state where the route is stored.
- * Defaults to `"route"`.
+ * @param {FeatherRouterConfig} config
  *
  * @return {FeatherRouter}
  */
@@ -304,7 +378,7 @@ export const createFeatherRouter = ({
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = ({ onRouteChange }) => {
+  const start = onRouteChange => {
     window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
@@ -318,13 +392,7 @@ export const createFeatherRouter = ({
  * Sets up a router using
  * [Mithril Router](https://mithril.js.org/route.html).
  *
- * @function MeiosisRouter.createMithrilRouter
- *
- * @param {m} Mithril - the Mithril instance.
- * @param {RouteConfig} routeConfig - the route configuration.
- * @param {String?} prefix - hash prefix. Defaults to `"#"`.
- * @param {String?} routeProp - this is the property in your state where the route is stored.
- * Defaults to `"route"`.
+ * @param {MithrilRouterConfig} config
  *
  * @return {MithrilRouter}
  */
