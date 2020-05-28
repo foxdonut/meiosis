@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * Route configuration. This is a plain object that associates route path templates to string page
  * IDs. Route path templates may contain parameters by using `:` as a prefix. For example:
@@ -178,6 +180,23 @@
  */
 
 /**
+ * Mithril route property.
+ *
+ * @typedef {Object} MithrilDotRoute
+ *
+ * @property {string} prefix
+ */
+
+/**
+ * Mithril instance.
+ *
+ * @typedef {*} m
+ *
+ * @property {MithrilDotRoute} route
+ * @property {QueryStringStringify} buildQueryString
+ */
+
+/**
  * This is the router that is created by {@link createFeatherRouter}.
  *
  * @typedef {Object} FeatherRouter
@@ -239,6 +258,18 @@
  */
 
 /**
+ * Parameters to `createMithrilRoutes`.
+ *
+ * @typedef {Object} CreateMithrilRoutesConfig
+ *
+ * @property {OnRouteChange} onRouteChange
+ * @property {*} App
+ * @property {*} states
+ * @property {*} update
+ * @property {*} actions
+ */
+
+/**
  * Creates Mithril routes suitable for passing as the third argument to `m.route`, for example:
  *
  * ```javascript
@@ -254,12 +285,7 @@
  *
  * @callback CreateMithrilRoutes
  *
- * @param {OnRouteChange} onRouteChange
- * @param {*} App
- * @param {*} states
- * @param {*} update
- * @param {*} actions
- *
+ * @param {CreateMithrilRoutesConfig} config
  * @return {MithrilRoutes} Mithril routes.
  */
 
@@ -285,8 +311,8 @@ const createGetUrl = (prefix, historyMode) =>
 const createGetPath = (prefix, getUrl) => getUrl().substring(prefix.length) || "/";
 
 const getPathTemplateLookup = routeConfig =>
-  Object.entries(routeConfig).reduce(
-    (result, [path, id]) => Object.assign(result, { [id]: path }),
+  Object.keys(routeConfig).reduce(
+    (result, path) => Object.assign(result, { [routeConfig[path]]: path }),
     {}
   );
 
@@ -322,7 +348,7 @@ const createEffect = (locationBarSync, routeProp) => state => {
 };
 
 const emptyQueryString = {
-  parse: () => {},
+  parse: () => ({}),
   stringify: () => ""
 };
 
@@ -373,7 +399,7 @@ export const createFeatherRouter = ({
   const getLinkHandler = url => evt => {
     evt.preventDefault();
     window.history.pushState({}, "", url);
-    window.onpopstate();
+    window.onpopstate(null);
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -410,7 +436,8 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = 
   const getRoute = createGetRoute(prefix, toUrl);
 
   const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
-    Object.entries(routeConfig).reduce((result, [path, page]) => {
+    Object.keys(routeConfig).reduce((result, path) => {
+      const page = routeConfig[path];
       result[path] = {
         onmatch: (params, url) => onRouteChange({ page, params, url }),
         render: () => m(App, { state: states(), update, actions })

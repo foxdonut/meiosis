@@ -30,8 +30,8 @@ provided:
 
 ## Route Configuration
 
-To configure your routes, use a plain object with the paths and a corresponding string page ID. Use
-the `:` prefix for path parameters:
+To configure your routes, use a plain object with the route path templates and a corresponding
+string page ID. Use the `:` prefix for path parameters. For example:
 
 ```javascript
 const routeConfig = {
@@ -87,7 +87,7 @@ To add query string support, add a query string library. The following work out-
 - [qs](https://github.com/ljharb/qs)
 - [urlon](https://github.com/cerebral/urlon)
 
-Use the `queryString` parameter to specify the query string library. For example:
+Use `queryString` to specify the query string library. For example:
 
 ```javascript
 import createRouteMatcher from "feather-route-matcher";
@@ -128,7 +128,7 @@ is automatically provided.
 Use `createMithrilRouter` to create the router:
 
 ```javascript
-import m from "m";
+import m from "mithril";
 import { createMithrilRouter } from "meiosis-router-setup";
 
 const routeConfig = {
@@ -166,24 +166,27 @@ The example above uses Mergerino.
 
 The router produces route objects of the form `{ page: "PageId", params: {...} }`, where `page` is
 the page ID that corresponds to the route that you specified in your `routeConfig` (`"Home"`,
-`"Login"`, `"UserProfile"`, etc.) and `params` are the path parameters. If you are using query
-string support, query string parameters are located under `params.queryParams`.
+`"Login"`, `"UserProfile"`, etc.) and `params` are the path parameters, such as `{ id: "42" }`. If
+you are using query string support, query string parameters are located under `params.queryParams`,
+such as `{ id: "42", queryParams: { showAll: "true" } }`.
 
-With the `onRouteChange` function that we provided when setting up the router, `update` will be
-called whenever the route changes, and we can access the route under the `route` property of the
+With the `onRouteChange` function that was provided above when setting up the router, `update` will
+be called whenever the route changes, and we can access the route under the `route` property of the
 application state. Then, we can use `state.route.page` to determine the current page,
 `state.route.params` to get the path parameters, and `state.route.params.queryParams` for the query
 string parameters.
 
 To keep the location bar in sync, namely when programmatically changing the route, there are two
-options: The first option is to use `router.locationBarSync`:
+options.
+
+1) The first option is to use `router.locationBarSync`:
 
 ```javascript
 states.map(state => router.locationBarSync(state.route));
 ```
 
-The second option is, if you are already using
-[effects](http://meiosis.js.org/docs/services-and-effects.html), to add `router.effect` to your
+2) The second option, if you are already using
+[effects](http://meiosis.js.org/docs/services-and-effects.html), is to add `router.effect` to your
 array of effects:
 
 ```javascript
@@ -233,12 +236,13 @@ update(routeTo("/login"));
 update(routeTo("/user/42"));
 ```
 
-Of course, you also can write helper functions to compute the paths. Or, you can use `toUrl` to use
-page IDs and parameters instead of hard-coded paths, as shown below.
+Of course, you also can write helper functions to compute the paths.
+
+Instead of using hard-coded paths, you can use `toUrl` with page IDs and parameters, as shown below.
 
 ## Using `toUrl`
 
-With this option, you provide a page ID and the path/query string parameters to obtain the path:
+With this option, you provide a page ID and the path and query string parameters to obtain the path:
 
 ```jsx
 <a href={router.toUrl(Route.Home)}>Home</a>
@@ -269,6 +273,15 @@ update(routeTo(Route.Home));
 update(routeTo(Route.Login));
 update(routeTo(Route.UserProfile, { id: 42 }));
 ```
+
+## Examples
+
+See the [Using a Router]() section of the
+[Meiosis Documentation](http://meiosis.js.org/docs/toc.html) for more explanations and examples.
+
+The [realworld example](http://meiosis.js.org/examples/realworld/index.html) also uses this router
+pattern.
+
 ## API
 
 [API documentation is here.](api.md)
