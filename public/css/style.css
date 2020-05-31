@@ -9,16 +9,45 @@ span, button {
 span.has-error {
   margin-right: 0;
 }
+label, .control-label {
+  font-size: 12pt;
+}
 .modal-header {
   color: #ffffff;
   background-color: #2c3e50;
 }
 #tracer {
-  font-size: 8pt;
+  font-size: 9pt;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 h4 {
   background-color: #f8f8f8;
   border-radius: 4px;
   border: 1px solid #e7e7e7;
   padding: 8px;
+}
+.simpleModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.simpleBox {
+  padding: 30px;
+  background: white;
+  text-align: center;
+}
+.temperature {
+  border: 1px solid #336699;
+  padding: 12px;
+}
+ul li {
+  list-style-type: square;
 }
