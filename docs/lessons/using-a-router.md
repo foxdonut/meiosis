@@ -2,7 +2,11 @@
 
 [Table of Contents](toc.html)
 
-## Using a Router - Intro
+## Using a Router
+
+Coming soon.
+
+<!--
 
 The sections under "Using a Router" show how we can use a router with Meiosis. These sections are a
 different approach than [Meiosis Routing](routing.html), which is a library and pattern for using
@@ -166,6 +170,8 @@ You can see the complete code for the example
 [Section Contents](#section_contents)
 
 [Table of Contents](toc.html)
+
+-->
 
 -----
 

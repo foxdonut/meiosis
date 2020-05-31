@@ -367,7 +367,12 @@ export const createFeatherRouter = ({
   historyMode = false,
   routeProp = "route"
 }) => {
-  const prefix = historyMode ? window.location.pathname : "#";
+  const pathname = window.location.pathname;
+  const prefix = historyMode
+    ? pathname.endsWith("/")
+      ? pathname.substring(0, pathname.length - 1)
+      : pathname
+    : "#";
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {

@@ -8,6 +8,11 @@ for these router libraries:
 - [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
 - [Mithril Router](https://mithril.js.org/route.html)
 
+> This library sets up a router for you and this document explains how to use it. If you are
+interested in more details of how the router works and how you can implement it yourself, see the
+[Using a Router](http://meiosis.js.org/docs/using-a-router.html) section of the
+[Meiosis Documentation](http://meiosis.js.org/docs/toc.html).
+
 ## Installation
 
 Using `npm`:
@@ -167,8 +172,20 @@ The example above uses Mergerino.
 The router produces route objects of the form `{ page: "PageId", params: {...} }`, where `page` is
 the page ID that corresponds to the route that you specified in your `routeConfig` (`"Home"`,
 `"Login"`, `"UserProfile"`, etc.) and `params` are the path parameters, such as `{ id: "42" }`. If
-you are using query string support, query string parameters are located under `params.queryParams`,
-such as `{ id: "42", queryParams: { showAll: "true" } }`.
+you are using query string support, query string parameters are located under `params.queryParams`.
+For example:
+
+```javascript
+{
+  page: "PageId",
+  params: {
+    id: "42",
+    queryParams: {
+      showAll: "true"
+    }
+  }
+}
+```
 
 With the `onRouteChange` function that was provided above when setting up the router, `update` will
 be called whenever the route changes, and we can access the route under the `route` property of the
@@ -274,10 +291,13 @@ update(routeTo(Route.Login));
 update(routeTo(Route.UserProfile, { id: 42 }));
 ```
 
+## Using Services and Effects
+
 ## Examples
 
-See the [Using a Router]() section of the
-[Meiosis Documentation](http://meiosis.js.org/docs/toc.html) for more explanations and examples.
+See the examples under the **Using a Router** section of the
+[Meiosis Documentation Examples](http://meiosis.js.org/docs-examples.html).
+
 
 The [realworld example](http://meiosis.js.org/examples/realworld/index.html) also uses this router
 pattern.

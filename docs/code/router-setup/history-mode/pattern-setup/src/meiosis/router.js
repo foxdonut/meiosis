@@ -3,7 +3,8 @@
 import createRouteMatcher from "feather-route-matcher";
 
 export const createRouter = routeConfig => {
-  const prefix = window.location.pathname;
+  const pathname = window.location.pathname;
+  const prefix = pathname.endsWith("/") ? pathname.substring(0, pathname.length - 1) : pathname;
 
   const getPath = () => decodeURI(window.location.pathname).substring(prefix.length) || "/";
 
