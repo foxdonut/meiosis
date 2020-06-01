@@ -51,11 +51,13 @@ top-level app, we&#39;ll assemble these together into the complete initial state
 };</code></pre>
 <p>For the temperature, we have essentially the same code as we previously had.</p>
 <pre><code class="language-js">var temperature = {
-  initial: {
-    temperature: {
-      value: 22,
-      units: &quot;C&quot;
-    }
+  initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: &quot;C&quot;
+      }
+    };
   },
   Actions: function(update) {
     return {
@@ -68,9 +70,10 @@ top-level app, we&#39;ll assemble these together into the complete initial state
             var value = state.value;
             var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
             var newValue = convert(value, newUnits);
-            state.value = newValue;
-            state.units = newUnits;
-            return state;
+            return {
+              value: newValue,
+              units: newUnits;
+            };
           }
         });
       }
@@ -80,12 +83,14 @@ top-level app, we&#39;ll assemble these together into the complete initial state
 <p>Then, to assemble the components into the top-level app, we put together the state management code
 by combining the initial state and the actions of the components.</p>
 <pre><code class="language-js">var app = {
-  initial: Object.assign({},
+  initial: Object.assign(
+    {},
     conditions.initial,
-    temperature.initial
+    temperature.initial()
   ),
   Actions: function(update) {
-    return Object.assign({},
+    return Object.assign(
+      {},
       conditions.Actions(update),
       temperature.Actions(update)
     );
@@ -95,7 +100,7 @@ by combining the initial state and the actions of the components.</p>
 <div id="flems1" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "06-components-01.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  initial: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(value) {\n        update({ conditions: { precipitations: value } });\n      },\n      changeSky: function(value) {\n        update({ conditions: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  initial: {\n    temperature: {\n      value: 22,\n      units: \"C\"\n    }\n  },\n  Actions: function(update) {\n    return {\n      increment: function(amount) {\n        update({\n          temperature: { value: x => x + amount }\n        });\n      },\n      changeUnits: function() {\n        update({\n          temperature: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initial: Object.assign(\n    {},\n    conditions.initial,\n    temperature.initial\n  ),\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.initial, update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      files: [{name: "06-components-01.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  initial: {\n    conditions: {\n      precipitations: false,\n      sky: \"Sunny\"\n    }\n  },\n  Actions: function (update) {\n    return {\n      togglePrecipitations: function (value) {\n        update({ conditions: { precipitations: value } });\n      },\n      changeSky: function (value) {\n        update({ conditions: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function (value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  initial: function () {\n    return {\n      temperature: {\n        value: 22,\n        units: \"C\"\n      }\n    };\n  },\n  Actions: function (update) {\n    return {\n      increment: function (amount) {\n        update({\n          temperature: { value: x => x + amount }\n        });\n      },\n      changeUnits: function () {\n        update({\n          temperature: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            return {\n              value: newValue,\n              units: newUnits\n            };\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initial: Object.assign(\n    {},\n    conditions.initial,\n    temperature.initial()\n  ),\n  Actions: function (update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.initial, update);\n\n// eslint-disable-next-line no-unused-vars\nvar actions = app.Actions(update);\nstates.map(function (state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 75
     })
@@ -125,9 +130,10 @@ that we dyamically update the <code>id</code> property of the state:</p>
           var value = state.value;
           var newUnits = state.units === &quot;C&quot; ? &quot;F&quot; : &quot;C&quot;;
           var newValue = convert(value, newUnits);
-          state.value = newValue;
-          state.units = newUnits;
-          return state;
+          return {
+            value: newValue,
+            units: newUnits
+          };
         }
       });
     }
@@ -140,9 +146,9 @@ instance of the temperature actions; it&#39;s the <code>id</code> that we pass t
 instance to act upon.</p>
 <pre><code class="language-js">var app = {
   initial: {
-    &quot;conditions&quot;: conditions.initial
-    &quot;temperature:air&quot;: temperature.initial
-    &quot;temperature:water&quot;: temperature.initial
+    &quot;conditions&quot;: conditions.initial,
+    &quot;temperature:air&quot;: temperature.initial(),
+    &quot;temperature:water&quot;: temperature.initial()
   ),
   Actions: function(update) {
     return Object.assign({},
@@ -155,7 +161,7 @@ instance to act upon.</p>
 <div id="flems2" class="flemscode" style="height:800px"></div>
   <script>
     window.Flems(flems2, {
-      files: [{name: "06-components-02.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  initial: {\n    precipitations: false,\n    sky: \"Sunny\"\n  },\n  Actions: function(update) {\n    return {\n      togglePrecipitations: function(id, value) {\n        update({ [id]: { precipitations: value } });\n      },\n      changeSky: function(id, value) {\n        update({ [id]: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function(value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  initial: {\n    value: 22,\n    units: \"C\"\n  },\n  Actions: function(update) {\n    return {\n      increment: function(id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function(id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            state.value = newValue;\n            state.units = newUnits;\n            return state;\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initial: {\n    conditions: conditions.initial,\n    \"temperature:air\": temperature.initial,\n    \"temperature:water\": temperature.initial\n  },\n  Actions: function(update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.initial, update);\n\nvar actions = app.Actions(update);\nstates.map(function(state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
+      files: [{name: "06-components-02.js", content: "/*global flyd, mergerino*/\nconst merge = mergerino;\n\nvar conditions = {\n  initial: {\n    precipitations: false,\n    sky: \"Sunny\"\n  },\n  Actions: function (update) {\n    return {\n      togglePrecipitations: function (id, value) {\n        update({ [id]: { precipitations: value } });\n      },\n      changeSky: function (id, value) {\n        update({ [id]: { sky: value } });\n      }\n    };\n  }\n};\n\nvar convert = function (value, to) {\n  return Math.round(\n    to === \"C\" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32\n  );\n};\n\nvar temperature = {\n  initial: function () {\n    return {\n      value: 22,\n      units: \"C\"\n    };\n  },\n  Actions: function (update) {\n    return {\n      increment: function (id, amount) {\n        update({ [id]: { value: x => x + amount } });\n      },\n      changeUnits: function (id) {\n        update({\n          [id]: state => {\n            var value = state.value;\n            var newUnits = state.units === \"C\" ? \"F\" : \"C\";\n            var newValue = convert(value, newUnits);\n            return {\n              value: newValue,\n              units: newUnits\n            };\n          }\n        });\n      }\n    };\n  }\n};\n\nvar app = {\n  initial: {\n    conditions: conditions.initial,\n    \"temperature:air\": temperature.initial(),\n    \"temperature:water\": temperature.initial()\n  },\n  Actions: function (update) {\n    return Object.assign(\n      {},\n      conditions.Actions(update),\n      temperature.Actions(update)\n    );\n  }\n};\n\nvar update = flyd.stream();\nvar states = flyd.scan(merge, app.initial, update);\n\n// eslint-disable-next-line no-unused-vars\nvar actions = app.Actions(update);\nstates.map(function (state) {\n  document.write(\n    \"<pre>\" + JSON.stringify(state, null, 2) + \"</pre>\"\n  );\n});\n"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 75
     })
