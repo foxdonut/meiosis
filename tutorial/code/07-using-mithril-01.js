@@ -6,19 +6,25 @@ var conditions = {
     precipitations: false,
     sky: "Sunny"
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      togglePrecipitations: function(id, value) {
+      togglePrecipitations: function (id, value) {
         update({ [id]: { precipitations: value } });
       },
-      changeSky: function(id, value) {
+      changeSky: function (id, value) {
         update({ [id]: { sky: value } });
       }
     };
   }
 };
 
-var skyOption = function({ state, id, actions, value, label }) {
+var skyOption = function ({
+  state,
+  id,
+  actions,
+  value,
+  label
+}) {
   return m(
     "label",
     m("input", {
@@ -34,7 +40,7 @@ var skyOption = function({ state, id, actions, value, label }) {
 };
 
 var Conditions = {
-  view: function({ attrs: { state, id, actions } }) {
+  view: function ({ attrs: { state, id, actions } }) {
     return m(
       "div",
       m(
@@ -75,26 +81,26 @@ var Conditions = {
   }
 };
 
-var convert = function(value, to) {
+var convert = function (value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
 var temperature = {
-  Initial: function(label) {
+  Initial: function (label) {
     return {
       label,
       value: 22,
       units: "C"
     };
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      increment: function(id, amount) {
+      increment: function (id, amount) {
         update({ [id]: { value: x => x + amount } });
       },
-      changeUnits: function(id) {
+      changeUnits: function (id) {
         update({
           [id]: state => {
             var value = state.value;
@@ -111,7 +117,7 @@ var temperature = {
 };
 
 var Temperature = {
-  view: function({ attrs: { state, id, actions } }) {
+  view: function ({ attrs: { state, id, actions } }) {
     return m(
       "div",
       state[id].label,
@@ -150,7 +156,7 @@ var app = {
     "temperature:air": temperature.Initial("Air"),
     "temperature:water": temperature.Initial("Water")
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return Object.assign(
       {},
       conditions.Actions(update),
@@ -160,7 +166,7 @@ var app = {
 };
 
 var App = {
-  view: function({ attrs: { state, actions } }) {
+  view: function ({ attrs: { state, actions } }) {
     return m(
       "div",
       m(Conditions, { state, id: "conditions", actions }),

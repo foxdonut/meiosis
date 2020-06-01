@@ -3,12 +3,12 @@ var app = {
   initial: {
     value: 0
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      increment: function() {
+      increment: function () {
         update(1);
       },
-      decrement: function() {
+      decrement: function () {
         update(-1);
       }
     };
@@ -17,7 +17,7 @@ var app = {
 
 var update = flyd.stream();
 var states = flyd.scan(
-  function(state, increment) {
+  function (state, increment) {
     state.value = state.value + increment;
     return state;
   },
@@ -25,7 +25,8 @@ var states = flyd.scan(
   update
 );
 
+// eslint-disable-next-line no-unused-vars
 var actions = app.Actions(update);
-states.map(function(state) {
+states.map(function (state) {
   document.write("<pre>" + JSON.stringify(state) + "</pre>");
 });

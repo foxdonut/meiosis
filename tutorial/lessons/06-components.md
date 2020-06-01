@@ -56,11 +56,13 @@ For the temperature, we have essentially the same code as we previously had.
 
 ```js
 var temperature = {
-  initial: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
+  initial: function() {
+    return {
+      temperature: {
+        value: 22,
+        units: "C"
+      }
+    };
   },
   Actions: function(update) {
     return {
@@ -73,9 +75,10 @@ var temperature = {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
-            state.value = newValue;
-            state.units = newUnits;
-            return state;
+            return {
+              value: newValue,
+              units: newUnits;
+            };
           }
         });
       }
@@ -89,12 +92,14 @@ by combining the initial state and the actions of the components.
 
 ```js
 var app = {
-  initial: Object.assign({},
+  initial: Object.assign(
+    {},
     conditions.initial,
-    temperature.initial
+    temperature.initial()
   ),
   Actions: function(update) {
-    return Object.assign({},
+    return Object.assign(
+      {},
       conditions.Actions(update),
       temperature.Actions(update)
     );
@@ -136,9 +141,10 @@ Actions: function(update) {
           var value = state.value;
           var newUnits = state.units === "C" ? "F" : "C";
           var newValue = convert(value, newUnits);
-          state.value = newValue;
-          state.units = newUnits;
-          return state;
+          return {
+            value: newValue,
+            units: newUnits
+          };
         }
       });
     }
@@ -156,9 +162,9 @@ instance to act upon.
 ```js
 var app = {
   initial: {
-    "conditions": conditions.initial
-    "temperature:air": temperature.initial
-    "temperature:water": temperature.initial
+    "conditions": conditions.initial,
+    "temperature:air": temperature.initial(),
+    "temperature:water": temperature.initial()
   ),
   Actions: function(update) {
     return Object.assign({},

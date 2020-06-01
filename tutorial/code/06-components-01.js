@@ -8,47 +8,50 @@ var conditions = {
       sky: "Sunny"
     }
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      togglePrecipitations: function(value) {
+      togglePrecipitations: function (value) {
         update({ conditions: { precipitations: value } });
       },
-      changeSky: function(value) {
+      changeSky: function (value) {
         update({ conditions: { sky: value } });
       }
     };
   }
 };
 
-var convert = function(value, to) {
+var convert = function (value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
 var temperature = {
-  initial: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
-  },
-  Actions: function(update) {
+  initial: function () {
     return {
-      increment: function(amount) {
+      temperature: {
+        value: 22,
+        units: "C"
+      }
+    };
+  },
+  Actions: function (update) {
+    return {
+      increment: function (amount) {
         update({
           temperature: { value: x => x + amount }
         });
       },
-      changeUnits: function() {
+      changeUnits: function () {
         update({
           temperature: state => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);
-            state.value = newValue;
-            state.units = newUnits;
-            return state;
+            return {
+              value: newValue,
+              units: newUnits
+            };
           }
         });
       }
@@ -60,9 +63,9 @@ var app = {
   initial: Object.assign(
     {},
     conditions.initial,
-    temperature.initial
+    temperature.initial()
   ),
-  Actions: function(update) {
+  Actions: function (update) {
     return Object.assign(
       {},
       conditions.Actions(update),
@@ -74,8 +77,9 @@ var app = {
 var update = flyd.stream();
 var states = flyd.scan(merge, app.initial, update);
 
+// eslint-disable-next-line no-unused-vars
 var actions = app.Actions(update);
-states.map(function(state) {
+states.map(function (state) {
   document.write(
     "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
   );

@@ -9,7 +9,9 @@ var target = {
 };
 
 // Change `water` to `{ value: 84, units: "F" }`
-console.log(merge(target, { water: { value: 84, units: "F" } }));
+console.log(
+  merge(target, { water: { value: 84, units: "F" } })
+);
 
 // Toggle the `comfortable` property with a function that changes the value to the
 // opposite of what it was

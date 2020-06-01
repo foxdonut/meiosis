@@ -1,5 +1,5 @@
 /*global flyd*/
-var convert = function(value, to) {
+var convert = function (value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
@@ -12,16 +12,16 @@ var temperature = {
       units: "C"
     }
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      increment: function(amount) {
-        update(function(state) {
+      increment: function (amount) {
+        update(function (state) {
           state.temperature.value += amount;
           return state;
         });
       },
-      changeUnits: function() {
-        update(function(state) {
+      changeUnits: function () {
+        update(function (state) {
           var value = state.temperature.value;
           var newUnits =
             state.temperature.units === "C" ? "F" : "C";
@@ -37,15 +37,16 @@ var temperature = {
 
 var update = flyd.stream();
 var states = flyd.scan(
-  function(state, patch) {
+  function (state, patch) {
     return patch(state);
   },
   temperature.initial,
   update
 );
 
+// eslint-disable-next-line no-unused-vars
 var actions = temperature.Actions(update);
-states.map(function(state) {
+states.map(function (state) {
   document.write(
     "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
   );

@@ -11,19 +11,25 @@ var conditions = {
     precipitations: false,
     sky: "Sunny"
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      togglePrecipitations: function(id, value) {
+      togglePrecipitations: function (id, value) {
         update({ [id]: { precipitations: value } });
       },
-      changeSky: function(id, value) {
+      changeSky: function (id, value) {
         update({ [id]: { sky: value } });
       }
     };
   }
 };
 
-var skyOption = function({ state, id, actions, value, label }) {
+var skyOption = function ({
+  state,
+  id,
+  actions,
+  value,
+  label
+}) {
   return html`
     <label>
       <input
@@ -40,7 +46,7 @@ var skyOption = function({ state, id, actions, value, label }) {
   `;
 };
 
-var Conditions = function({ state, id, actions }) {
+var Conditions = function ({ state, id, actions }) {
   return html`
     <div>
       <label>
@@ -82,26 +88,26 @@ var Conditions = function({ state, id, actions }) {
   `;
 };
 
-var convert = function(value, to) {
+var convert = function (value, to) {
   return Math.round(
     to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
 var temperature = {
-  Initial: function(label) {
+  Initial: function (label) {
     return {
       label,
       value: 22,
       units: "C"
     };
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return {
-      increment: function(id, amount) {
+      increment: function (id, amount) {
         update({ [id]: { value: x => x + amount } });
       },
-      changeUnits: function(id) {
+      changeUnits: function (id) {
         update({
           [id]: state => {
             var value = state.value;
@@ -117,7 +123,7 @@ var temperature = {
   }
 };
 
-var Temperature = function({ state, id, actions }) {
+var Temperature = function ({ state, id, actions }) {
   return html`
     <div>
       ${state[id].label} Temperature: ${state[id].value} &deg;
@@ -145,7 +151,7 @@ var app = {
     "temperature:air": temperature.Initial("Air"),
     "temperature:water": temperature.Initial("Water")
   },
-  Actions: function(update) {
+  Actions: function (update) {
     return Object.assign(
       {},
       conditions.Actions(update),
@@ -154,7 +160,7 @@ var app = {
   }
 };
 
-var App = function(state, actions) {
+var App = function (state, actions) {
   return html`
     <div>
       ${Conditions({ state, id: "conditions", actions })}
