@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 ## Services and Effects
 
@@ -246,7 +246,7 @@ project.
 
 -----
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 

@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-> **IMPORTANT**: For a complete explanation of the Meiosis Pattern,
+> **Please note**: For a complete explanation of the Meiosis Pattern,
 please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
@@ -10,6 +10,8 @@ please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 - [Using a Router](using-a-router.html)
 - [Routing](routing.html)
 - [Preventing Re-renders](preventing-re-renders.html)
+
+[Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 

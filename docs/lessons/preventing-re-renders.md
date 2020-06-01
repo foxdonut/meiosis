@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 ## Preventing Re-Renders
 
@@ -114,7 +114,7 @@ that component in the user interface. Other components do not get re-rendered.
 
 @flems code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css mithril,mithril-stream,mergerino 800 70
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 

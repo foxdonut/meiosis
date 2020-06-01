@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 ## Routing
 
@@ -1307,7 +1307,7 @@ The complete example is shown below.
 
 [Section Contents](#section_contents)
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 

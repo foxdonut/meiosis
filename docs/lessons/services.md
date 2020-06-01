@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 ## Services
 
@@ -144,7 +144,7 @@ In [this section](services-and-effects.html), we look at how services and effect
 
 -----
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 

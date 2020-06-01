@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 ## The Meiosis Pattern Cheatsheet
 
@@ -176,7 +176,7 @@ corresponding state property.
 See the [Components](https://meiosis.js.org/tutorial/06-components.html) section of the Meiosis
 Tutorial for a complete explanation.
 
-[Table of Contents](toc.html)
+[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
 
 -----
 
