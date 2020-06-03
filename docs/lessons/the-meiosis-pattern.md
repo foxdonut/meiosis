@@ -117,6 +117,8 @@ states.map(() => m.redraw());
 ### [Using React](#using_react)
 
 ```javascript
+import React from "react";
+
 const App = ({ states, actions }) => {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
@@ -139,9 +141,16 @@ ReactDOM.render(<App states={states} actions={actions} />,
 ### [Using Preact](#using_preact)
 
 ```javascript
+import { useState } from "preact/hooks";
+
 const App = ({ state, actions }) => {
+  const [init, setInit] = useState(false);
   const [state, setState] = useState(states());
-  states.map(setState);
+
+  if (!init) {
+    setInit(true);
+    states.map(setState);
+  }
 
   // render view according to state, call actions to trigger changes
   // pass state={state} actions={actions} to other components.
