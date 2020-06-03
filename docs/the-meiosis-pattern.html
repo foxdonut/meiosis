@@ -109,7 +109,9 @@ m.mount(document.getElementById(&quot;app&quot;), {
 
 states.map(() =&gt; m.redraw());</code></pre>
 <p><a name="using_react"></a></p>
-<h3><a href="#using_react">Using React</a></h3><pre><code class="language-javascript">const App = ({ states, actions }) =&gt; {
+<h3><a href="#using_react">Using React</a></h3><pre><code class="language-javascript">import React from &quot;react&quot;;
+
+const App = ({ states, actions }) =&gt; {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
 
@@ -126,9 +128,16 @@ states.map(() =&gt; m.redraw());</code></pre>
 ReactDOM.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
 <p><a name="using_preact"></a></p>
-<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-javascript">const App = ({ state, actions }) =&gt; {
+<h3><a href="#using_preact">Using Preact</a></h3><pre><code class="language-javascript">import { useState } from &quot;preact/hooks&quot;;
+
+const App = ({ state, actions }) =&gt; {
+  const [init, setInit] = useState(false);
   const [state, setState] = useState(states());
-  states.map(setState);
+
+  if (!init) {
+    setInit(true);
+    states.map(setState);
+  }
 
   // render view according to state, call actions to trigger changes
   // pass state={state} actions={actions} to other components.
