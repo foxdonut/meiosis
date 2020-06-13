@@ -13,9 +13,9 @@ export const TeaSearch = () => ({
           m(
             "div",
             types.map(type => [
-              m("a", { style: { marginRight: "10px" }, href: `#/tea/search?type=${type}` }, type)
+              m("a", { style: { marginRight: "10px" }, href: `#!/tea/search?type=${type}` }, type)
             ]),
-            m("a", { href: "#/tea/search" }, "All")
+            m("a", { href: "#!/tea/search" }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",

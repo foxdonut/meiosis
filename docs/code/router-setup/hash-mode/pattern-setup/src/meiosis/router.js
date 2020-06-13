@@ -3,7 +3,7 @@
 import createRouteMatcher from "feather-route-matcher";
 
 export const createRouter = routeConfig => {
-  const prefix = "#";
+  const prefix = "#!";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
@@ -18,7 +18,7 @@ export const createRouter = routeConfig => {
   const locationBarSync = route => {
     const path = route.url;
 
-    if (getPath() !== path) {
+    if (path !== getPath()) {
       window.history.pushState({}, "", prefix + path);
     }
   };

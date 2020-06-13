@@ -5,9 +5,9 @@ import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 import { router } from "../router";
 
-export const createApp = initialRoute => ({
+export const createApp = () => ({
   initial: {
-    route: initialRoute
+    route: router.initialRoute
   },
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),

@@ -28,11 +28,11 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: "#/" }, "Home")),
-          m("li" + isActive(Login), m("a", { href: "#/login" }, "Login")),
-          m("li" + isActive(Settings), m("a", { href: "#/settings" }, "Settings")),
-          m("li" + isActive(Tea), m("a", { href: "#/tea" }, "Tea")),
-          m("li" + isActive(TeaSearch), m("a", { href: "#/tea/search" }, "Tea Search"))
+          m("li" + isActive(Home), m("a", { href: "#!/" }, "Home")),
+          m("li" + isActive(Login), m("a", { href: "#!/login" }, "Login")),
+          m("li" + isActive(Settings), m("a", { href: "#!/settings" }, "Settings")),
+          m("li" + isActive(Tea), m("a", { href: "#!/tea" }, "Tea")),
+          m("li" + isActive(TeaSearch), m("a", { href: "#!/tea/search" }, "Tea Search"))
         )
       ),
       m(Component, { state, update, actions }),

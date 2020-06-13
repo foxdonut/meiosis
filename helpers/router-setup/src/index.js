@@ -171,6 +171,9 @@
  * @property {RouteConfig} routeConfig the route configuration.
  * @property {QueryStringLib} [queryString] the query string library to use. You only need to
  * provide this if your application requires query string support.
+ * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
+ * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
+ * if `historyMode` is `true`.
  * @property {boolean} [historyMode=false] if `true`, uses history mode instead of hash mode. If you
  * are using history mode, you need to provide server side routing support. By default,
  * `historyMode` is `false`.
@@ -218,7 +221,7 @@
  *
  * @property {m} m the Mithril instance.
  * @property {RouteConfig} routeConfig the route configuration.
- * @property {string} [prefix="#"] hash prefix. Defaults to `"#"`.
+ * @property {string} [prefix="#!"] hash prefix. Defaults to `"#!"`.
  * @property {string} [routeProp="route"] this is the property in your state where the route is
  * stored. Defaults to `"route"`.
  *
@@ -364,6 +367,7 @@ export const createFeatherRouter = ({
   createRouteMatcher,
   routeConfig,
   queryString = emptyQueryString,
+  plainHash = false,
   historyMode = false,
   routeProp = "route"
 }) => {
@@ -372,7 +376,7 @@ export const createFeatherRouter = ({
     ? pathname.endsWith("/")
       ? pathname.substring(0, pathname.length - 1)
       : pathname
-    : "#";
+    : "#" + (plainHash ? "" : "!");
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
@@ -427,7 +431,7 @@ export const createFeatherRouter = ({
  *
  * @return {MithrilRouter}
  */
-export const createMithrilRouter = ({ m, routeConfig, prefix = "#", routeProp = "route" }) => {
+export const createMithrilRouter = ({ m, routeConfig, prefix = "#!", routeProp = "route" }) => {
   m.route.prefix = prefix;
 
   const getQueryString = (queryParams = {}) => {

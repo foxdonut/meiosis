@@ -62,7 +62,7 @@ const routeConfig = {
 };
 ```
 
-## Usage with Feather Route Matcher
+## Setup with Feather Route Matcher
 
 To use [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher), you of
 course need to install it:
@@ -122,9 +122,9 @@ using a patch that corresponds to your Meiosis setup
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), ...).
 The example above uses Mergerino.
 
-Next, move on to [Basic Usage](#basic-usage).
+Next, move on to [Using the Router](#using-the-router).
 
-## Usage with Mithril Router
+## Setup with Mithril Router
 
 To use [Mithril Router](https://mithril.js.org/route.html), since you are already using Mithril for
 your application, there is no need to install any other dependency. Moreover, query string support
@@ -167,7 +167,7 @@ that corresponds to your Meiosis setup
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), ...).
 The example above uses Mergerino.
 
-## Basic Usage
+## Using the Router
 
 The router produces route objects of the form `{ page: "PageId", params: {...} }`, where `page` is
 the page ID that corresponds to the route that you specified in your `routeConfig` (`"Home"`,
@@ -217,25 +217,60 @@ const app = {
 };
 ```
 
+## Hash Mode
+
+By default, the router uses _hash mode_. The hash `"#"` in the URL is normally used for _anchor
+links_, which look like `<a href="#example">Example</a>`. Setting the URL from `/something` to
+`/something#example` jumps to that location on the same page.
+
+> The important thing here is that the browser **stays on the same page** and **does not call the
+server** when the hash changes.
+
+We can take advantage of this by using the hash for our routes. The router listens for hash changes
+and triggers route updates.
+
+By default, the router uses `#!` as the hash prefix. Using this prefix makes your pages available
+for Google search engine indexing and improves your web application's visibility by having your
+pages appear in Google search results. It is also a convention to indicate that the hash is being
+used for routing purposes instead of for linking to anchor tags.
+
+If you prefer to use `#` instead of `#!` as the hash prefix, specify `plainHash: true` with
+`createFeatherRouter`:
+
+```javascript
+const router = createFeatherRouter({ createRouteMatcher, routeConfig, plainHash: true });
+```
+
+With `createMithrilRouter`, specify the `prefix` as `"#"`:
+
+```javascript
+const router = createMithrilRouter({ m, routeConfig, prefix: "#" });
+```
+
+The following sections assume that you are using the router in hash mode. Following that, we will
+see how to use the router in [history mode](#history-mode).
+
+## Adding Links
+
 Next, add links to your application. You can either use hard-coded paths, or the `toUrl` function.
 
-## Using Hard-Coded Paths
+### Using Hard-Coded Paths
 
 With this option, you use hard-coded paths in `href`:
 
 ```jsx
-<a href="#/">Home</a>
-<a href="#/login">Login</a>
-<a href="#/user/42">User Profile</a>
+<a href="#!/">Home</a>
+<a href="#!/login">Login</a>
+<a href="#!/user/42">User Profile</a>
 ```
 
 ```javascript
-m("a", { href: "#/" }, "Home"),
-m("a", { href: "#/login" }, "Login"),
-m("a", { href: "#/user/42" }, "User Profile")
+m("a", { href: "#!/" }, "Home"),
+m("a", { href: "#!/login" }, "Login"),
+m("a", { href: "#!/user/42" }, "User Profile")
 ```
 
-For programmatic routes, use the `router.getRoute` function and omit the hash prefix:
+For programmatic routes, use the `router.getRoute` function and omit the hash-bang (`"#!"`) prefix:
 
 ```javascript
 update({ route: () => router.getRoute("/") });
@@ -257,7 +292,7 @@ Of course, you also can write helper functions to compute the paths.
 
 Instead of using hard-coded paths, you can use `toUrl` with page IDs and parameters, as shown below.
 
-## Using `toUrl`
+### Using `toUrl`
 
 With this option, you provide a page ID and the path and query string parameters to obtain the path:
 
@@ -289,6 +324,29 @@ const routeTo = path => ({ route: () => router.getRoute(path) });
 update(routeTo(Route.Home));
 update(routeTo(Route.Login));
 update(routeTo(Route.UserProfile, { id: 42 }));
+```
+
+## History Mode
+
+The router can also operate in _history mode_ instead of hash mode. In history mode, the router uses
+plain URLs, such as `/login` and `/user/42`, instead of URLs with a hash such as `#!/login` and
+`#!/user/42`.
+
+> The important thing here is that the browser normally **calls the server** when the URL changes,
+> and we need to prevent that while navigating within the application. Furthermore, the server must
+> support all possible URLs, since the user could paste a URL in the location bar, or press the
+> browser's Reload button. Server-side support is outside the scope of this documentation.
+
+To use history mode, specify `historyMode: true` with `createFeatherRouter`:
+
+```javascript
+const router = createFeatherRouter({ createRouteMatcher, routeConfig, historyMode: true });
+```
+
+With `createMithrilRouter`, specify the `prefix` as `""`:
+
+```javascript
+const router = createMithrilRouter({ m, routeConfig, prefix: "" });
 ```
 
 ## Using Services and Effects

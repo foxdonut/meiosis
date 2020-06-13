@@ -9,7 +9,7 @@ import { meiosis } from "./meiosis";
 import { createApp, App } from "./app";
 import { router } from "./router";
 
-const app = createApp(router.initialRoute);
+const app = createApp();
 const { states, update, actions } = meiosis({ stream, merge, app });
 
 // Only for using Meiosis Tracer in development.

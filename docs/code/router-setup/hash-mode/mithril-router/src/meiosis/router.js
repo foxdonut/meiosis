@@ -3,10 +3,12 @@
 import m from "mithril";
 
 export const createMithrilRouter = routeConfig => {
-  const prefix = "#";
+  const prefix = "#!";
   m.route.prefix = prefix;
 
-  const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
+  const getUrl = () => decodeURI(window.location.hash || prefix + "/");
+
+  const initialRoute = { url: getUrl() };
 
   const getQueryString = (queryParams = {}) => {
     const query = m.buildQueryString(queryParams);
@@ -18,7 +20,7 @@ export const createMithrilRouter = routeConfig => {
     {}
   );
 
-  const toPath = (id, params = {}) => {
+  const toUrl = (id, params = {}) => {
     const path = prefix + pathLookup[id];
 
     return (
@@ -33,33 +35,27 @@ export const createMithrilRouter = routeConfig => {
   const getRoute = (page, params = {}) => ({
     page,
     params,
-    url: toPath(page, params).substring(prefix.length)
+    url: toUrl(page, params)
   });
 
   const createMithrilRoutes = ({ App, onRouteChange, states, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: (params, url) => onRouteChange({ page, params, url }),
+        onmatch: (params, path) => onRouteChange({ page, params, url: prefix + path }),
         render: () => m(App, { state: states(), actions })
       };
       return result;
     }, {});
 
-  const locationBarSync = path => {
-    if (getPath() !== path) {
-      window.history.pushState({}, "", prefix + path);
+  const locationBarSync = route => {
+    if (route.url !== getUrl()) {
+      window.history.pushState({}, "", route.url);
     }
   };
 
   const effect = state => {
-    locationBarSync(state.route.url);
+    locationBarSync(state.route);
   };
 
-  return {
-    createMithrilRoutes,
-    locationBarSync,
-    getRoute,
-    toPath,
-    effect
-  };
+  return { createMithrilRoutes, initialRoute, locationBarSync, getRoute, toUrl, effect };
 };

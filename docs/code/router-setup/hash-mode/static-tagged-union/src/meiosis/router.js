@@ -2,7 +2,7 @@ import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 
 export const createRouter = routeConfig => {
-  const prefix = "#";
+  const prefix = "#!";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");

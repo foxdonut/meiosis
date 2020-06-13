@@ -13,7 +13,7 @@ export const Tea = {
           ".col-md-6",
           state.teas &&
             state.teas.map(tea =>
-              m("div", { key: tea.id }, m("a", { href: `#/tea/${tea.id}` }, tea.title))
+              m("div", { key: tea.id }, m("a", { href: `#!/tea/${tea.id}` }, tea.title))
             )
         ),
         state.route.page === "TeaDetails" &&

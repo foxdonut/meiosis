@@ -1,7 +1,7 @@
 import queryString from "query-string";
 
 export const createRouter = (Route, defaultRoute) => {
-  const prefix = "#";
+  const prefix = "#!";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
