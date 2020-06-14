@@ -333,7 +333,12 @@ Type: [Object][57]
 
 -   `m` **[m][81]** the Mithril instance.
 -   `routeConfig` **[RouteConfig][61]** the route configuration.
--   `prefix` **[string][58]?** hash prefix. Defaults to `"#!"`.
+-   `plainHash` **[boolean][73]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
+    `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
+    if `historyMode` is `true`.
+-   `historyMode` **[boolean][73]?** if `true`, uses history mode instead of hash mode. If you
+    are using history mode, you need to provide server side routing support. By default,
+    `historyMode` is `false`.
 -   `routeProp` **[string][58]?** this is the property in your state where the route is
     stored. Defaults to `"route"`.
 
@@ -455,7 +460,8 @@ Sets up a router using
 -   `config` **[MithrilRouterConfig][91]** 
     -   `config.m`  
     -   `config.routeConfig`  
-    -   `config.prefix`   (optional, default `"#!"`)
+    -   `config.plainHash`   (optional, default `false`)
+    -   `config.historyMode`   (optional, default `false`)
     -   `config.routeProp`   (optional, default `"route"`)
 
 Returns **[MithrilRouter][92]** 

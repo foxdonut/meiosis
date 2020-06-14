@@ -221,7 +221,12 @@
  *
  * @property {m} m the Mithril instance.
  * @property {RouteConfig} routeConfig the route configuration.
- * @property {string} [prefix="#!"] hash prefix. Defaults to `"#!"`.
+ * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
+ * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
+ * if `historyMode` is `true`.
+ * @property {boolean} [historyMode=false] if `true`, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support. By default,
+ * `historyMode` is `false`.
  * @property {string} [routeProp="route"] this is the property in your state where the route is
  * stored. Defaults to `"route"`.
  *
@@ -431,8 +436,21 @@ export const createFeatherRouter = ({
  *
  * @return {MithrilRouter}
  */
-export const createMithrilRouter = ({ m, routeConfig, prefix = "#!", routeProp = "route" }) => {
-  m.route.prefix = prefix;
+export const createMithrilRouter = ({
+  m,
+  routeConfig,
+  plainHash = false,
+  historyMode = false,
+  routeProp = "route"
+}) => {
+  const pathname = window.location.pathname;
+  const prefix = historyMode
+    ? pathname.endsWith("/")
+      ? pathname.substring(0, pathname.length - 1)
+      : pathname
+    : "#" + (plainHash ? "" : "!");
+
+  m.route.prefix = historyMode ? "" : prefix;
 
   const getQueryString = (queryParams = {}) => {
     const query = m.buildQueryString(queryParams);
@@ -440,7 +458,7 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#!", routeProp =
   };
 
   const pathTemplateLookup = getPathTemplateLookup(routeConfig);
-  const getUrl = createGetUrl(prefix, false);
+  const getUrl = createGetUrl(prefix, historyMode);
   const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
   const getRoute = createGetRoute(prefix, toUrl);
 
@@ -448,7 +466,7 @@ export const createMithrilRouter = ({ m, routeConfig, prefix = "#!", routeProp =
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: (params, url) => onRouteChange({ page, params, url }),
+        onmatch: (params, url) => onRouteChange({ page, params, url: prefix + url }),
         render: () => m(App, { state: states(), update, actions })
       };
       return result;

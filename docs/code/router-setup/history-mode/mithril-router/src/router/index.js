@@ -24,7 +24,7 @@ export const router = createMithrilRouter(routeConfig);
 you can also npm install meiosis-router-setup and use it as shown below:
 
 import { createMithrilRouter } from "meiosis-router-setup";
-export const router = createMithrilRouter({ m, routeConfig });
+export const router = createMithrilRouter({ m, routeConfig, historyMode: true });
 
 See https://meiosis.js.org/router for details.
 */

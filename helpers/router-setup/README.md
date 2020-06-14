@@ -234,17 +234,13 @@ for Google search engine indexing and improves your web application's visibility
 pages appear in Google search results. It is also a convention to indicate that the hash is being
 used for routing purposes instead of for linking to anchor tags.
 
-If you prefer to use `#` instead of `#!` as the hash prefix, specify `plainHash: true` with
-`createFeatherRouter`:
+If you prefer to use `#` instead of `#!` as the hash prefix, specify `plainHash: true` when creating
+the router:
 
 ```javascript
 const router = createFeatherRouter({ createRouteMatcher, routeConfig, plainHash: true });
-```
 
-With `createMithrilRouter`, specify the `prefix` as `"#"`:
-
-```javascript
-const router = createMithrilRouter({ m, routeConfig, prefix: "#" });
+const router = createMithrilRouter({ m, routeConfig, plainHash: true });
 ```
 
 The following sections assume that you are using the router in hash mode. Following that, we will
@@ -337,16 +333,50 @@ plain URLs, such as `/login` and `/user/42`, instead of URLs with a hash such as
 > support all possible URLs, since the user could paste a URL in the location bar, or press the
 > browser's Reload button. Server-side support is outside the scope of this documentation.
 
-To use history mode, specify `historyMode: true` with `createFeatherRouter`:
+To use history mode, specify `historyMode: true` when creating the router:
 
 ```javascript
 const router = createFeatherRouter({ createRouteMatcher, routeConfig, historyMode: true });
+
+const router = createMithrilRouter({ m, routeConfig, historyMode: true });
 ```
 
-With `createMithrilRouter`, specify the `prefix` as `""`:
+In history mode, we need to prevent links from calling the server. That can be achieved by calling
+`preventDefault` on the click event of the link and push the link onto the history. For convenience,
+the router provides a `getLinkHandler` function which does that. To use it, create a `Link`
+component that you will use for links. The component calls `router.toUrl(href)` to get the URL, and
+uses `router.getLinkHandler(url)` as the `onClick` event handler.
+
+With React or Preact and using hard-coded paths:
 
 ```javascript
-const router = createMithrilRouter({ m, routeConfig, prefix: "" });
+export const Link = ({ href, children, ...props }) => {
+  const url = router.toUrl(href);
+
+  return <a href={url} onClick={router.getLinkHandler(url)} {...props}>{children}</a>;
+};
+
+<Link href="/login">Login</Link>
+```
+
+Using page IDs:
+
+```javascript
+export const Link = ({ page, params, children, ...props }) => {
+  const url = router.toUrl(attrs.page, attrs.params);
+
+  return <a href={url} onClick={router.getLinkHandler(url)} {...props}>{children}</a>;
+};
+
+<Link page={Route.UserProfile} params={{ id: 42 }}>User Profile</Link>
+```
+
+With Mithril Router, you can simply use Mithril's `m.route.Link`:
+
+```javascript
+export const Link = m.route.Link;
+
+m(Link, { href: router.toUrl(Route.UserProfile, { id: 42 }) }, "User Profile"))
 ```
 
 ## Using Services and Effects
