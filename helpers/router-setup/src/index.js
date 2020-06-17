@@ -302,6 +302,7 @@
  *
  * @typedef {Object} MithrilRouter
  *
+ * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
  * as the third argument to `m.route`.
  * @property {GetRoute} getRoute function to generate a route.
@@ -316,7 +317,7 @@ const createGetUrl = (prefix, historyMode) =>
     ? () => decodeURI(window.location.pathname + window.location.search)
     : () => decodeURI(window.location.hash || prefix + "/");
 
-const createGetPath = (prefix, getUrl) => getUrl().substring(prefix.length) || "/";
+const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
 
 const getPathTemplateLookup = routeConfig =>
   Object.keys(routeConfig).reduce(
@@ -324,8 +325,8 @@ const getPathTemplateLookup = routeConfig =>
     {}
   );
 
-const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (pageId, params = {}) => {
-  const url = prefix + pathTemplateLookup[pageId];
+const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (page, params = {}) => {
+  const url = prefix + (page.startsWith("/") ? page : pathTemplateLookup[page]);
 
   return (
     (url.match(/(:[^/]*)/g) || []).reduce(
@@ -342,7 +343,7 @@ const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}) =>
     : {
         page,
         params,
-        url: toUrl(page, params).substring(prefix.length)
+        url: prefix + toUrl(page, params)
       };
 
 const createLocationBarSync = getUrl => route => {
@@ -399,7 +400,6 @@ export const createFeatherRouter = ({
   const getPath = createGetPath(prefix, getUrl);
   const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
   const matcher = createRouteMatcher(routeConfig);
-  const getRoute = createGetRoute(prefix, toUrl, matcher);
 
   const routeMatcher = path => {
     const match = matcher(getPathWithoutQuery(path));
@@ -409,6 +409,8 @@ export const createFeatherRouter = ({
     const url = prefix + match.url + getQueryString(params.queryParams);
     return Object.assign(match, { params, url });
   };
+
+  const getRoute = createGetRoute("", toUrl, routeMatcher);
 
   const getLinkHandler = url => evt => {
     evt.preventDefault();
@@ -450,7 +452,7 @@ export const createMithrilRouter = ({
       : pathname
     : "#" + (plainHash ? "" : "!");
 
-  m.route.prefix = historyMode ? "" : prefix;
+  m.route.prefix = prefix;
 
   const getQueryString = (queryParams = {}) => {
     const query = m.buildQueryString(queryParams);
@@ -459,8 +461,8 @@ export const createMithrilRouter = ({
 
   const pathTemplateLookup = getPathTemplateLookup(routeConfig);
   const getUrl = createGetUrl(prefix, historyMode);
-  const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
-  const getRoute = createGetRoute(prefix, toUrl);
+  const toUrl = createToUrl(historyMode ? "" : prefix, pathTemplateLookup, getQueryString);
+  const getRoute = createGetRoute(historyMode ? prefix : "", toUrl);
 
   const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
     Object.keys(routeConfig).reduce((result, path) => {
@@ -472,8 +474,9 @@ export const createMithrilRouter = ({
       return result;
     }, {});
 
+  const initialRoute = { url: getUrl(), page: "", params: { queryParams: {} } };
   const locationBarSync = createLocationBarSync(getUrl);
   const effect = createEffect(locationBarSync, routeProp);
 
-  return { createMithrilRoutes, getRoute, toUrl, locationBarSync, effect };
+  return { createMithrilRoutes, initialRoute, getRoute, toUrl, locationBarSync, effect };
 };

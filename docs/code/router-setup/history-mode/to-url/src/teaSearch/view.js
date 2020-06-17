@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "../router";
+import { Route, router } from "../router";
 import { Link } from "../router/link";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
@@ -19,14 +19,13 @@ export const TeaSearch = () => ({
               m(
                 Link,
                 {
-                  page: Route.TeaSearch,
-                  params: { queryParams: { type } },
+                  href: router.toUrl(Route.TeaSearch, { queryParams: { type } }),
                   style: { marginRight: "10px" }
                 },
                 type
               )
             ]),
-            m(Link, { page: Route.TeaSearch }, "All")
+            m(Link, { href: router.toUrl(Route.TeaSearch) }, "All")
           ),
           m(
             "table.table.table-bordered.table-striped",

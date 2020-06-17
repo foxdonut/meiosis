@@ -1,7 +1,7 @@
 import m from "mithril";
 
 import { TeaDetails } from "../teaDetails";
-import { Route } from "../router";
+import { Route, router } from "../router";
 import { Link } from "../router/link";
 
 export const Tea = {
@@ -18,7 +18,7 @@ export const Tea = {
               m(
                 "div",
                 { key: tea.id },
-                m(Link, { page: Route.TeaDetails, params: { id: tea.id } }, tea.title)
+                m(Link, { href: router.toUrl(Route.TeaDetails, { id: tea.id }) }, tea.title)
               )
             )
         ),

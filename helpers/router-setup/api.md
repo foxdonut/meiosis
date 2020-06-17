@@ -425,6 +425,7 @@ Type: [Object][57]
 
 ### Properties
 
+-   `initialRoute` **[Route][59]** the initial route as parsed from the location bar.
 -   `createMithrilRoutes` **[CreateMithrilRoutes][87]** creates Mithril routes suitable for passing
     as the third argument to `m.route`.
 -   `getRoute` **[GetRoute][75]** function to generate a route.

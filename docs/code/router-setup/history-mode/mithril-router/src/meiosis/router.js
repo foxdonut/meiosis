@@ -5,11 +5,11 @@ import m from "mithril";
 export const createMithrilRouter = routeConfig => {
   const pathname = window.location.pathname;
   const prefix = pathname.endsWith("/") ? pathname.substring(0, pathname.length - 1) : pathname;
-  m.route.prefix = "";
+  m.route.prefix = prefix;
 
   const getUrl = () => decodeURI(window.location.pathname + window.location.search);
 
-  const initialRoute = { url: getUrl() };
+  const initialRoute = { url: getUrl(), page: "", params: { queryParams: {} } };
 
   const getQueryString = (queryParams = {}) => {
     const query = m.buildQueryString(queryParams);
@@ -39,6 +39,11 @@ export const createMithrilRouter = routeConfig => {
     url: prefix + toUrl(page, params)
   });
 
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    m.route.set(url.substring(prefix.length));
+  };
+
   const createMithrilRoutes = ({ App, onRouteChange, states, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
@@ -58,5 +63,13 @@ export const createMithrilRouter = routeConfig => {
     locationBarSync(state.route);
   };
 
-  return { createMithrilRoutes, initialRoute, getRoute, toUrl, locationBarSync, effect };
+  return {
+    createMithrilRoutes,
+    initialRoute,
+    getRoute,
+    toUrl,
+    getLinkHandler,
+    locationBarSync,
+    effect
+  };
 };
