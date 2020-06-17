@@ -171,11 +171,9 @@ const User = ({ state, routing }) => {
 To navigate to a route, we can use a simple action that updates the state's `route` property:
 
 ```javascript
-// You can also import { navigateTo } from "meiosis-routing/state"
-const navigateTo = route => ({ route });
+const navigateTo = route => ({ nextRoute: () => Array.isArray(route) ? route : [route] });
 
-// You can also import { Actions } from "meiosis-routing/state"
-const Actions = update => ({ navigateTo: route => navigateTo(route) });
+const Actions = update => ({ navigateTo: route => update(navigateTo(route)) });
 
 const update = ...;
 const actions = Actions(update);
@@ -374,16 +372,17 @@ The parameters will be available in our route segments just like path parameters
 It's often desirable to load data when arriving at a route, clear data when leaving a route, guard a
 route to restrict access, and so on. We can do them with route _transitions_.
 
-`meiosis-routing` provides a `routeTransition` function that takes the previous and current route
-state and returns a route transition object, `{ leave: {...}, arrive: {...} }`. You can use this
-function in a [service function](http://meiosis.js.org/docs/services.html#using_meiosis_setup), in a
-Redux reducer, and so on.
+`meiosis-routing` provides a `routeTransition` function that takes the current and next route state
+and returns a route transition object, `{ leave: {...}, arrive: {...} }`. You can use this function
+in a [service function](http://meiosis.js.org/docs/services.html#using_meiosis_setup) to update the
+state with the route transition.
 
 As a service function, it looks like this:
 
 ```javascript
-const service = ({ previousState, state }) => ({
-  state: { routeTransition: () => routeTransition(previousState.route, state.route) }
+const service = state => ({
+  routeTransition: () => routeTransition(state.route, state.nextRoute),
+  route: state.nextRoute
 });
 ```
 
@@ -415,6 +414,14 @@ As mentioned above, you will find a more in-depth tutorial in the
 
 More details are also available in the
 [API documentation](https://meiosis.js.org/meiosis-routing/modules/_index_.html).
+
+## Changelog
+
+- Version 3.0.0: Works with `feather-route-matcher` version `4.x`. Breaking changes: removed
+  `navigateTo` and `Actions` since they were limited to working with Mergerino. These should instead
+  be implemented in application code.
+
+- Version 2.1.0: Works with `feather-route-matcher` version `3.x`.
 
 ## Credits
 

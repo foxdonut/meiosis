@@ -7,10 +7,8 @@ import {
   findRouteSegment,
   findRouteSegmentWithParams,
   diffRoute,
-  navigateTo,
   routeTransition,
   whenPresent,
-  Actions,
   Routing
 } from "../src/state";
 
@@ -86,6 +84,10 @@ describe("state", (): void => {
 
     test("found route", (): void => {
       expect(findRouteSegment(route, "Profile")).toEqual({ id: "Profile", params: {} });
+    });
+
+    test("found route", (): void => {
+      expect(findRouteSegment(route, "User")).toEqual({ id: "User", params: { id: 42 } });
     });
 
     test("found route segment", (): void => {
@@ -345,32 +347,6 @@ describe("state", (): void => {
         Route.User({ id: 43 }),
         Route.Profile()
       ]);
-    });
-  });
-
-  describe("Actions and navigateTo", (): void => {
-    test("navigateTo [route]", (): void => {
-      expect(navigateTo([Route.Home()])).toEqual({ route: [Route.Home()] });
-    });
-
-    test("navigateTo route", (): void => {
-      expect(navigateTo(Route.Login())).toEqual({ route: [Route.Login()] });
-    });
-
-    test("Actions navigateTo", (): void => {
-      let received = null;
-
-      const update = (rcvd: any): void => {
-        received = rcvd;
-      };
-
-      const actions = Actions(update);
-
-      actions.navigateTo([Route.Home()]);
-      expect(received).toEqual({ route: [Route.Home()] });
-
-      actions.navigateTo(Route.Login());
-      expect(received).toEqual({ route: [Route.Login()] });
     });
   });
 });

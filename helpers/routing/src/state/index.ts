@@ -296,20 +296,3 @@ export function Routing(route: Route = [], index = 0): RoutingObject {
         .concat(route.slice(index + 1))
   };
 }
-
-/**
- * Convenience function which puts the given route into an object of the form
- * `{ route }`.
- */
-export function navigateTo(route: Route | RouteSegment): any {
-  return { route: Array.isArray(route) ? route : [route] };
-}
-
-/**
- * Convenience function which creates a `navigateTo` action.
- */
-export function Actions(update: (any) => void): any {
-  return {
-    navigateTo: (route: Route | RouteSegment): void => update(navigateTo(route))
-  };
-}

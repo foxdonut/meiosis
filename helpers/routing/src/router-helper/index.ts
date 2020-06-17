@@ -251,7 +251,7 @@ export function createRouteMap(
  *     const match = routeMatcher(path);
  *
  *     if (match) {
- *       return match.page(Object.assign({}, match.params, queryParams));
+ *       return match.value(Object.assign({}, match.params, queryParams));
  *     } else {
  *       return defaultRoute;
  *     }
@@ -357,7 +357,7 @@ export function createFeatherRouter(config: RouterConfig): Router {
           return result;
         }, {});
 
-        return match.page(Object.assign({}, params, queryParams));
+        return match.value(Object.assign({}, params, queryParams));
       } else {
         return defaultRoute;
       }
