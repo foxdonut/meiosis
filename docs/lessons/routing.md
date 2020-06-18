@@ -78,7 +78,7 @@ Not to have to repeat this everywhere, we'll create a `navTo` function that plac
 
 ```javascript
 // For convenience, route can be an array or a single route segment.
-const navTo = route => ({ route: Array.isArray(route) ? route : [route] });
+const navTo = route => ({ route: () => Array.isArray(route) ? route : [route] });
 
 const app = {
   Actions: ({ update }) => ({
@@ -86,9 +86,6 @@ const app = {
   })
 };
 ```
-
-> Note that for convenience, `meiosis-routing/state` provides these functions as `navigateTo` and
-`Actions`.
 
 #### Creating Route Segments
 
@@ -493,7 +490,7 @@ Here is how to write a service function for `routeTransition` and wire it up:
 ```javascript
 import { routeTransition } from "meiosis-routing/state";
 
-const navTo = route => ({ nextRoute: Array.isArray(route) ? route : [route] });
+const navTo = route => ({ nextRoute: () => Array.isArray(route) ? route : [route] });
 
 export const routeService = state => ({
   routeTransition: () => routeTransition(state.route, state.nextRoute),

@@ -29,7 +29,7 @@ export const routeConfig = {
   NotFound: "/:404..."
 };
 
-export const navigateTo = route => ({ nextRoute: Array.isArray(route) ? route : [route] });
+export const navigateTo = route => ({ nextRoute: () => (Array.isArray(route) ? route : [route]) });
 export const Actions = update => ({ navigateTo: route => update(navigateTo(route)) });
 
 const service = state => ({

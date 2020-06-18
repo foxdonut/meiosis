@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-routing": "^2.0.1",
+    "meiosis-routing": "^3.0.0",
     "meiosis-setup": "^5.0.0",
     "mergerino": "0.4.0",
     "react": "^16.13.1",
@@ -35,9 +35,9 @@
     "routing-common": "../routing-common-core"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
-    "@babel/preset-react": "^7.9.4",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
     "babel-loader": "^8.1.0",
     "meiosis-tracer": "^3.0.0",
     "webpack": "^4.43.0",
