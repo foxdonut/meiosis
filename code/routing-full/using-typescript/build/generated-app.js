@@ -215,8 +215,8 @@ var splatParam = /\*/g
 // other maintainers of Backbone.js
 //
 // It has been modified for extraction of
-// named paramaters from the URL
-function parsePattern (pattern) {
+// named parameters from the URL
+var parsePattern = function (pattern) {
   var names = []
   pattern = pattern
     .replace(escapeRegExp, '\\$&')
@@ -225,7 +225,7 @@ function parsePattern (pattern) {
       names.push(match.slice(1))
       return optional ? match : '([^/?]+)'
     })
-    .replace(splatParam, function (match, optional) {
+    .replace(splatParam, function () {
       names.push('path')
       return '([^?]*?)'
     })
@@ -236,17 +236,16 @@ function parsePattern (pattern) {
   }
 }
 
-/* harmony default export */ __webpack_exports__["default"] = (function (routes, fallback) {
+/* harmony default export */ __webpack_exports__["default"] = (function (routes) {
   var keys = Object.keys(routes)
+  var routeCache = {}
 
   // loop through each route we're
   // and build the shell of our
   // route cache.
   for (var item in routes) {
-    if (routes.hasOwnProperty(item)) {
-      routes[item] = {
-        value: routes[item]
-      }
+    routeCache[item] = {
+      value: routes[item]
     }
   }
 
@@ -262,7 +261,7 @@ function parsePattern (pattern) {
 
       // fetch the route pattern from the cache
       // there will always be one
-      route = routes[key]
+      route = routeCache[key]
 
       // if the route doesn't already have
       // a regex we never generated one
@@ -290,7 +289,7 @@ function parsePattern (pattern) {
       // remove other cruft from result
       result = result.slice(1, -1)
 
-      // reduce our match to an object of named paramaters
+      // reduce our match to an object of named parameters
       // we've extracted from the url
       params = result.reduce(function (obj, val, index) {
         if (val) {
@@ -305,18 +304,11 @@ function parsePattern (pattern) {
 
     // no routes matched
     if (!matchFound) {
-      if (fallback) {
-        return {
-          page: fallback,
-          url: url,
-          params: null
-        }
-      }
       return null
     }
 
     return {
-      page: route.value,
+      value: route.value,
       params: params,
       url: url,
       pattern: route.pattern
@@ -345,6 +337,7 @@ function parsePattern (pattern) {
  * @module routerHelper
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createMithrilRouter = exports.createUrlMapperRouter = exports.createFeatherRouter = exports.createRouter = exports.createRouteMap = exports.convertToPath = exports.setParams = exports.findQueryParams = exports.findPathParams = void 0;
 ////////
 const getPathWithoutQuery = (path) => path.replace(/\?.*/, "");
 const getQuery = (path) => {
@@ -453,7 +446,7 @@ exports.createRouteMap = createRouteMap;
  *     const match = routeMatcher(path);
  *
  *     if (match) {
- *       return match.page(Object.assign({}, match.params, queryParams));
+ *       return match.value(Object.assign({}, match.params, queryParams));
  *     } else {
  *       return defaultRoute;
  *     }
@@ -538,7 +531,7 @@ function createFeatherRouter(config) {
                     result[key] = decodeURI(match.params[key]);
                     return result;
                 }, {});
-                return match.page(Object.assign({}, params, queryParams));
+                return match.value(Object.assign({}, params, queryParams));
             }
             else {
                 return defaultRoute;
@@ -647,6 +640,7 @@ exports.createMithrilRouter = createMithrilRouter;
  * @module state
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Routing = exports.whenPresent = exports.routeTransition = exports.diffRoute = exports.findRouteSegment = exports.findRouteSegmentWithParams = exports.createRouteSegments = void 0;
 ////////
 // fastDeepEqual credit: https://github.com/epoberezkin/fast-deep-equal
 // This version does not handle Date and RegExp, because we shouldn't have those types when
@@ -847,23 +841,6 @@ function Routing(route = [], index = 0) {
     };
 }
 exports.Routing = Routing;
-/**
- * Convenience function which puts the given route into an object of the form
- * `{ route }`.
- */
-function navigateTo(route) {
-    return { route: Array.isArray(route) ? route : [route] };
-}
-exports.navigateTo = navigateTo;
-/**
- * Convenience function which creates a `navigateTo` action.
- */
-function Actions(update) {
-    return {
-        navigateTo: (route) => update(navigateTo(route))
-    };
-}
-exports.Actions = Actions;
 
 
 /***/ }),
@@ -1506,21 +1483,40 @@ exports.stringify = (object, options) => {
 };
 
 exports.parseUrl = (input, options) => {
-	return {
-		url: removeHash(input).split('?')[0] || '',
-		query: parse(extract(input), options)
-	};
+	options = Object.assign({
+		decode: true
+	}, options);
+
+	const [url, hash] = splitOnFirst(input, '#');
+
+	return Object.assign(
+		{
+			url: url.split('?')[0] || '',
+			query: parse(extract(input), options)
+		},
+		options && options.parseFragmentIdentifier && hash ? {fragmentIdentifier: decode(hash, options)} : {}
+	);
 };
 
 exports.stringifyUrl = (input, options) => {
+	options = Object.assign({
+		encode: true,
+		strict: true
+	}, options);
+
 	const url = removeHash(input.url).split('?')[0] || '';
 	const queryFromUrl = exports.extract(input.url);
-	const parsedQueryFromUrl = exports.parse(queryFromUrl);
-	const hash = getHash(input.url);
+	const parsedQueryFromUrl = exports.parse(queryFromUrl, {sort: false});
+
 	const query = Object.assign(parsedQueryFromUrl, input.query);
 	let queryString = exports.stringify(query, options);
 	if (queryString) {
 		queryString = `?${queryString}`;
+	}
+
+	let hash = getHash(input.url);
+	if (input.fragmentIdentifier) {
+		hash = `#${encode(input.fragmentIdentifier, options)}`;
 	}
 
 	return `${url}${queryString}${hash}`;
@@ -1587,6 +1583,7 @@ module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.c
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createApp = void 0;
 const routes_1 = __webpack_require__(/*! ../routes */ "./src/routes/index.ts");
 const tea_1 = __webpack_require__(/*! ../tea */ "./src/tea/index.ts");
 const teaDetails_1 = __webpack_require__(/*! ../teaDetails */ "./src/teaDetails/index.ts");
@@ -1594,7 +1591,7 @@ exports.createApp = (initialRoute) => ({
     initial: routes_1.navigateTo(initialRoute || routes_1.Route.Home()),
     Actions: (update) => Object.assign({}, routes_1.routes.Actions(update)),
     services: [routes_1.routes.service, tea_1.tea.service, teaDetails_1.teaDetails.service],
-    Effects: (update) => [tea_1.tea.effect(update)]
+    Effects: (update) => [tea_1.tea.Effect(update)]
 });
 
 
@@ -1611,7 +1608,7 @@ exports.createApp = (initialRoute) => ({
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var view_1 = __webpack_require__(/*! ./view */ "./src/home/view.tsx");
-exports.Home = view_1.Home;
+Object.defineProperty(exports, "Home", { enumerable: true, get: function () { return view_1.Home; } });
 
 
 /***/ }),
@@ -1626,6 +1623,7 @@ exports.Home = view_1.Home;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Home = void 0;
 const React = __webpack_require__(/*! react */ "react");
 exports.Home = ({ state }) => (React.createElement("div", null,
     React.createElement("div", null, "Home Page"),
@@ -1687,7 +1685,7 @@ states.map(state => router_1.router.locationBarSync(state.route));
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var view_1 = __webpack_require__(/*! ./view */ "./src/root/view.tsx");
-exports.Root = view_1.Root;
+Object.defineProperty(exports, "Root", { enumerable: true, get: function () { return view_1.Root; } });
 
 
 /***/ }),
@@ -1702,6 +1700,7 @@ exports.Root = view_1.Root;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Root = void 0;
 const React = __webpack_require__(/*! react */ "react");
 const state_1 = __webpack_require__(/*! meiosis-routing/state */ "./node_modules/meiosis-routing/state/index.ts");
 const home_1 = __webpack_require__(/*! ../home */ "./src/home/index.ts");
@@ -1743,6 +1742,7 @@ exports.Root = ({ state, actions }) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.router = void 0;
 const feather_route_matcher_1 = __webpack_require__(/*! feather-route-matcher */ "./node_modules/feather-route-matcher/index.js");
 const queryString = __webpack_require__(/*! query-string */ "./node_modules/query-string/index.js");
 const router_helper_1 = __webpack_require__(/*! meiosis-routing/router-helper */ "./node_modules/meiosis-routing/router-helper/index.ts");
@@ -1767,6 +1767,7 @@ exports.router = router_helper_1.createFeatherRouter({
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.routes = exports.Actions = exports.navigateTo = exports.routeConfig = exports.Route = void 0;
 const state_1 = __webpack_require__(/*! meiosis-routing/state */ "./node_modules/meiosis-routing/state/index.ts");
 exports.Route = state_1.createRouteSegments(["Home", "Tea", "TeaDetails"]);
 const beverageRoutes = {
@@ -1805,8 +1806,9 @@ exports.routes = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Effect = void 0;
 const data_1 = __webpack_require__(/*! ../teaDetails/data */ "./src/teaDetails/data.ts");
-exports.effect = (update) => (state) => {
+exports.Effect = (update) => (state) => {
     if (state.routeTransition.arrive.Tea) {
         setTimeout(() => {
             update({ teas: data_1.teas });
@@ -1827,14 +1829,15 @@ exports.effect = (update) => (state) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.tea = void 0;
 const service_1 = __webpack_require__(/*! ./service */ "./src/tea/service.ts");
 const effect_1 = __webpack_require__(/*! ./effect */ "./src/tea/effect.ts");
 exports.tea = {
     service: service_1.service,
-    effect: effect_1.effect
+    Effect: effect_1.Effect
 };
 var view_1 = __webpack_require__(/*! ./view */ "./src/tea/view.tsx");
-exports.Tea = view_1.Tea;
+Object.defineProperty(exports, "Tea", { enumerable: true, get: function () { return view_1.Tea; } });
 
 
 /***/ }),
@@ -1849,6 +1852,7 @@ exports.Tea = view_1.Tea;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.service = void 0;
 exports.service = (state) => {
     if (state.routeTransition.leave.Tea) {
         return { teas: null };
@@ -1868,6 +1872,7 @@ exports.service = (state) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tea = void 0;
 const React = __webpack_require__(/*! react */ "react");
 const teaDetails_1 = __webpack_require__(/*! ../teaDetails */ "./src/teaDetails/index.ts");
 const routes_1 = __webpack_require__(/*! ../routes */ "./src/routes/index.ts");
@@ -1892,6 +1897,7 @@ exports.Tea = ({ state, actions, routing }) => (React.createElement("div", null,
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.teaMap = exports.teas = void 0;
 exports.teas = [
     { id: "t1", title: "Tea 1", description: "Description of Tea 1" },
     { id: "t2", title: "Tea 2", description: "Description of Tea 2" }
@@ -1914,12 +1920,13 @@ exports.teaMap = exports.teas.reduce((result, next) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.teaDetails = void 0;
 const service_1 = __webpack_require__(/*! ./service */ "./src/teaDetails/service.ts");
 exports.teaDetails = {
     service: service_1.service
 };
 var view_1 = __webpack_require__(/*! ./view */ "./src/teaDetails/view.tsx");
-exports.TeaDetails = view_1.TeaDetails;
+Object.defineProperty(exports, "TeaDetails", { enumerable: true, get: function () { return view_1.TeaDetails; } });
 
 
 /***/ }),
@@ -1934,6 +1941,7 @@ exports.TeaDetails = view_1.TeaDetails;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.service = void 0;
 const data_1 = __webpack_require__(/*! ./data */ "./src/teaDetails/data.ts");
 exports.service = (state) => {
     const patches = [];
@@ -1962,6 +1970,7 @@ exports.service = (state) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TeaDetails = void 0;
 const React = __webpack_require__(/*! react */ "react");
 const router_1 = __webpack_require__(/*! ../router */ "./src/router/index.ts");
 exports.TeaDetails = ({ state, routing }) => (React.createElement("div", null,
