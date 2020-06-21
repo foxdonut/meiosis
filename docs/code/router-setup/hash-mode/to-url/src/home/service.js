@@ -1,7 +1,8 @@
 import { Route } from "../router";
+import { selectors } from "../state";
 
 export const service = state => {
-  if (state.route.page !== Route.Home && state.message) {
+  if (selectors.page(state) !== Route.Home && state.message) {
     return { message: undefined };
   }
 };

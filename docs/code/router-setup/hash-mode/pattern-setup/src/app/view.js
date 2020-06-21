@@ -6,6 +6,7 @@ import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch";
 import { NotFound } from "../notFound";
+import { selectors } from "../state";
 
 const componentMap = {
   Home,
@@ -19,7 +20,7 @@ const componentMap = {
 
 export const App = {
   view: ({ attrs: { state, update, actions } }) => {
-    const Component = componentMap[state.route.page];
+    const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(

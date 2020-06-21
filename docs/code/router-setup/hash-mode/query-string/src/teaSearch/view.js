@@ -1,5 +1,7 @@
 import m from "mithril";
 
+import { selectors } from "../state";
+
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
@@ -25,8 +27,8 @@ export const TeaSearch = () => ({
               state.searchTeas
                 .filter(
                   tea =>
-                    !state.route.params.queryParams.type ||
-                    tea.type === state.route.params.queryParams.type
+                    !selectors.queryParams(state).type ||
+                    tea.type === selectors.queryParams(state).type
                 )
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )

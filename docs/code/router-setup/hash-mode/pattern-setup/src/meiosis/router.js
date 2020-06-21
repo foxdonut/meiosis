@@ -1,6 +1,7 @@
 /* Equivalent of this code, you can also npm install meiosis-router-setup */
 /* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
+import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
   const prefix = "#!";
@@ -15,17 +16,13 @@ export const createRouter = routeConfig => {
     window.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
-  const locationBarSync = route => {
-    const path = route.url;
+  const effect = state => {
+    const path = selectors.url(state);
 
     if (path !== getPath()) {
       window.history.pushState({}, "", prefix + path);
     }
   };
 
-  const effect = state => {
-    locationBarSync(state.route);
-  };
-
-  return { initialRoute, getRoute, start, locationBarSync, effect };
+  return { initialRoute, getRoute, start, effect };
 };
