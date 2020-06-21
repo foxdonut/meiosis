@@ -2,6 +2,7 @@
 /* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
+import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
   const pathname = window.location.pathname;
@@ -49,11 +50,12 @@ export const createRouter = routeConfig => {
     return Object.assign(match, { params, url });
   };
 
-  const getRoute = (page, params = {}) => ({
-    page,
-    params,
-    url: toUrl(page, params)
-  });
+  const getRoute = (page, params = {}) =>
+    selectors.toRoute({
+      page,
+      params,
+      url: toUrl(page, params)
+    });
 
   const initialRoute = routeMatcher(getPath());
 
@@ -67,15 +69,12 @@ export const createRouter = routeConfig => {
     window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
-  const locationBarSync = route => {
-    if (route.url !== getUrl()) {
-      window.history.pushState({}, "", route.url);
+  const effect = state => {
+    const url = selectors.url(state);
+    if (url !== getUrl()) {
+      window.history.pushState({}, "", url);
     }
   };
 
-  const effect = state => {
-    locationBarSync(state.route);
-  };
-
-  return { initialRoute, getRoute, toUrl, getLinkHandler, start, locationBarSync, effect };
+  return { initialRoute, getRoute, toUrl, getLinkHandler, start, effect };
 };

@@ -8,6 +8,7 @@ import { TeaSearch } from "../teaSearch";
 import { NotFound } from "../notFound";
 import { Route, router } from "../router";
 import { Link } from "../router/link";
+import { selectors } from "../state";
 
 const componentMap = {
   Home,
@@ -21,7 +22,7 @@ const componentMap = {
 
 export const App = {
   view: ({ attrs: { state, actions } }) => {
-    const Component = componentMap[state.route.page];
+    const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(
