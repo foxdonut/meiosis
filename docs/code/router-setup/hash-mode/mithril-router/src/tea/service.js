@@ -1,7 +1,8 @@
 import { Route } from "../router";
+import { selectors } from "../state";
 
 export const service = state => {
-  if (state.route.page === Route.Tea || state.route.page === Route.TeaDetails) {
+  if (selectors.page(state) === Route.Tea || selectors.page(state) === Route.TeaDetails) {
     if (!state.teas) {
       return { loadTeas: true };
     }

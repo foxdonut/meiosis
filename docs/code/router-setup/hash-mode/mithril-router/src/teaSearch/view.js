@@ -1,6 +1,7 @@
 import m from "mithril";
 
 import { Route, router } from "../router";
+import { selectors } from "../state";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
@@ -34,9 +35,9 @@ export const TeaSearch = () => ({
               state.searchTeas
                 .filter(
                   tea =>
-                    (!state.route.params.type || tea.type === state.route.params.type) &&
-                    (!state.route.params.description ||
-                      tea.description.includes(state.route.params.description))
+                    (!selectors.params(state).type || tea.type === selectors.params(state).type) &&
+                    (!selectors.params(state).description ||
+                      tea.description.includes(selectors.params(state).description))
                 )
                 .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
             )
