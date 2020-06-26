@@ -2,6 +2,8 @@
 /* See https://meiosis.js.org/router for details. */
 import m from "mithril";
 
+import { selectors } from "../state";
+
 export const createMithrilRouter = routeConfig => {
   const pathname = window.location.pathname;
   const prefix = pathname.endsWith("/") ? pathname.substring(0, pathname.length - 1) : pathname;
@@ -33,11 +35,12 @@ export const createMithrilRouter = routeConfig => {
     );
   };
 
-  const getRoute = (page, params = {}) => ({
-    page,
-    params,
-    url: prefix + toUrl(page, params)
-  });
+  const getRoute = (page, params = {}) =>
+    selectors.toRoute({
+      page,
+      params,
+      url: toUrl(page, params)
+    });
 
   const getLinkHandler = url => evt => {
     evt.preventDefault();
@@ -47,29 +50,19 @@ export const createMithrilRouter = routeConfig => {
   const createMithrilRoutes = ({ App, onRouteChange, states, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: (params, path) => onRouteChange({ page, params, url: prefix + path }),
+        onmatch: (params, path) =>
+          onRouteChange(selectors.toRoute({ page, params, url: prefix + path })),
         render: () => m(App, { state: states(), actions })
       };
       return result;
     }, {});
 
-  const locationBarSync = route => {
-    if (route.url !== getUrl()) {
-      window.history.pushState({}, "", route.url);
+  const effect = state => {
+    const url = selectors.url(state);
+    if (url !== getUrl()) {
+      window.history.pushState({}, "", url);
     }
   };
 
-  const effect = state => {
-    locationBarSync(state.route);
-  };
-
-  return {
-    createMithrilRoutes,
-    initialRoute,
-    getRoute,
-    toUrl,
-    getLinkHandler,
-    locationBarSync,
-    effect
-  };
+  return { createMithrilRoutes, initialRoute, getRoute, toUrl, getLinkHandler, effect };
 };
