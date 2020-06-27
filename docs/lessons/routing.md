@@ -485,6 +485,11 @@ indicate to which route we are navigating.
 To use `routeTransition`, we need to wire it up as a service function. Refer to
 [Services and Effects](http://meiosis.js.org/docs/services-and-effects.html) for a refresher.
 
+Because we need both the current route and the next route in order to calculate a route transition,
+we'll change `navTo` to set `nextRoute` in the state, so that we have both `route` and `nextRoute`.
+Then, we can pass those values when we call the `routeTransition` function. That will calculate the
+route transition. That being done, we can copy `nextRoute` to `route`.
+
 Here is how to write a service function for `routeTransition` and wire it up:
 
 ```javascript
