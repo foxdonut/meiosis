@@ -386,6 +386,10 @@ id, that indicate which routes we are leaving and to which we are arriving.</p>
 indicate to which route we are navigating.</p>
 <p>To use <code>routeTransition</code>, we need to wire it up as a service function. Refer to
 <a href="http://meiosis.js.org/docs/services-and-effects.html">Services and Effects</a> for a refresher.</p>
+<p>Because we need both the current route and the next route in order to calculate a route transition,
+we&#39;ll change <code>navTo</code> to set <code>nextRoute</code> in the state, so that we have both <code>route</code> and <code>nextRoute</code>.
+Then, we can pass those values when we call the <code>routeTransition</code> function. That will calculate the
+route transition. That being done, we can copy <code>nextRoute</code> to <code>route</code>.</p>
 <p>Here is how to write a service function for <code>routeTransition</code> and wire it up:</p>
 <pre><code class="language-javascript">import { routeTransition } from &quot;meiosis-routing/state&quot;;
 
