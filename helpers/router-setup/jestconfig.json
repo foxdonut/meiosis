@@ -1,0 +1,5 @@
+{
+  "testRegex": "tests/.*test\\.js$",
+  "testPathIgnorePatterns": ["/dist/"],
+  "moduleFileExtensions": ["js"]
+}

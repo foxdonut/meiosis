@@ -163,6 +163,60 @@
  */
 
 /**
+ * Built-in function to decode a URI.
+ *
+ * @callback DecodeURI
+ * @param {string} uri the URI.
+ * @return {string} the decoded URI.
+ */
+
+/**
+ * Built-in function to change the location.
+ *
+ * @callback Pushstate
+ * @param {*} somethingFIXME
+ * @param {string} somethingElseFIXME
+ * @param {string} uri
+ * @return {void}
+ */
+
+/**
+ * Built-in callback function when the location changes.
+ *
+ * @callback Onpopstate
+ * @param {*} event the event.
+ * @return {void}
+ */
+
+/**
+ * Built-in `location` object, defined for testing purposes.
+ *
+ * @typedef {Object} Location
+ *
+ * @property {string} hash
+ * @property {string} pathname
+ * @property {string} search
+ */
+
+/**
+ * Built-in `history` object, defined for testing purposes.
+ *
+ * @typedef {Object} History
+ *
+ * @property {Pushstate} pushstate
+ */
+
+/**
+ * Built-in `window` object, defined for testing purposes.
+ *
+ * @typedef {Object} Window
+ *
+ * @property {DecodeURI} decodeURI function to decode a URI.
+ * @property {Location} location the current location.
+ * @property {Onpopstate} onpopstate callback function when the location changes.
+ */
+
+/**
  * Configuration to create a Feather router.
  *
  * @typedef {Object} FeatherRouterConfig
@@ -179,7 +233,7 @@
  * `historyMode` is `false`.
  * @property {string} [routeProp="route"] this is the property in your state where the route is
  * stored. Defaults to `"route"`.
- *
+ * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
 /**
@@ -229,7 +283,7 @@
  * `historyMode` is `false`.
  * @property {string} [routeProp="route"] this is the property in your state where the route is
  * stored. Defaults to `"route"`.
- *
+ * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
 /**
@@ -312,12 +366,12 @@
  * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
 
-const createGetUrl = (prefix, historyMode) =>
+export const createGetUrl = (prefix, historyMode, wdw = window) =>
   historyMode
-    ? () => window.decodeURI(window.location.pathname + window.location.search)
-    : () => window.decodeURI(window.location.hash || prefix + "/");
+    ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
+    : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
 
-const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
+export const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
 
 const getPathTemplateLookup = routeConfig =>
   Object.keys(routeConfig).reduce(
@@ -346,9 +400,9 @@ const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}) =>
         url: prefix + toUrl(page, params)
       };
 
-const createLocationBarSync = getUrl => route => {
+const createLocationBarSync = (getUrl, wdw = window) => route => {
   if (route.url !== getUrl()) {
-    window.history.pushState({}, "", route.url);
+    wdw.history.pushState({}, "", route.url);
   }
 };
 
@@ -375,9 +429,10 @@ export const createFeatherRouter = ({
   queryString = emptyQueryString,
   plainHash = false,
   historyMode = false,
-  routeProp = "route"
+  routeProp = "route",
+  wdw = window
 }) => {
-  const pathname = window.location.pathname;
+  const pathname = wdw.location.pathname;
   const prefix = historyMode
     ? pathname.endsWith("/")
       ? pathname.substring(0, pathname.length - 1)
@@ -412,16 +467,16 @@ export const createFeatherRouter = ({
 
   const getRoute = createGetRoute("", toUrl, routeMatcher);
 
-  const getLinkHandler = url => evt => {
+  const getLinkHandler = (url, wdw = window) => evt => {
     evt.preventDefault();
-    window.history.pushState({}, "", url);
-    window.onpopstate(null);
+    wdw.history.pushState({}, "", url);
+    wdw.onpopstate(null);
   };
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+  const start = (onRouteChange, wdw = window) => {
+    wdw.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
   const locationBarSync = createLocationBarSync(getUrl);
@@ -443,9 +498,10 @@ export const createMithrilRouter = ({
   routeConfig,
   plainHash = false,
   historyMode = false,
-  routeProp = "route"
+  routeProp = "route",
+  wdw = window
 }) => {
-  const pathname = window.location.pathname;
+  const pathname = wdw.location.pathname;
   const prefix = historyMode
     ? pathname.endsWith("/")
       ? pathname.substring(0, pathname.length - 1)
