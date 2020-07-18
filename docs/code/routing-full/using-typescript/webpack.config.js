@@ -1,4 +1,5 @@
 /*global __dirname*/
+// eslint-disable-next-line
 var path = require("path");
 
 module.exports = {
@@ -28,9 +29,5 @@ module.exports = {
         }
       }
     ]
-  },
-  externals: {
-    react: "React",
-    "react-dom": "ReactDOM"
   }
 };

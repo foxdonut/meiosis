@@ -4,7 +4,6 @@ export const createRouter = (Route, defaultRoute) => {
   const prefix = "#!";
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
     const idx = path.indexOf("?");
@@ -20,7 +19,8 @@ export const createRouter = (Route, defaultRoute) => {
     prefix + Route.toURL(route) + getQueryString(queryParams);
 
   const routeMatcher = path => {
-    const match = Route.matchOr(() => defaultRoute, getPathWithoutQuery(path));
+    const pathWithoutQuery = path.replace(/\?.*/, "");
+    const match = Route.matchOr(() => defaultRoute, pathWithoutQuery);
     return Object.assign(match, {
       queryParams: queryString.parse(getQuery(path))
     });

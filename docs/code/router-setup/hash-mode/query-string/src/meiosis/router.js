@@ -9,7 +9,6 @@ export const createRouter = routeConfig => {
 
   const getUrl = () => decodeURI(window.location.hash || prefix + "/");
   const getPath = () => getUrl().substring(prefix.length);
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
     const idx = path.indexOf("?");
@@ -24,7 +23,8 @@ export const createRouter = routeConfig => {
   const matcher = createRouteMatcher(routeConfig);
 
   const getRoute = path => {
-    const match = matcher(getPathWithoutQuery(path));
+    const pathWithoutQuery = path.replace(/\?.*/, "");
+    const match = matcher(pathWithoutQuery);
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });

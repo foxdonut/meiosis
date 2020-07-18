@@ -314,8 +314,8 @@
 
 const createGetUrl = (prefix, historyMode) =>
   historyMode
-    ? () => decodeURI(window.location.pathname + window.location.search)
-    : () => decodeURI(window.location.hash || prefix + "/");
+    ? () => window.decodeURI(window.location.pathname + window.location.search)
+    : () => window.decodeURI(window.location.hash || prefix + "/");
 
 const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
 
