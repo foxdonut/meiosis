@@ -117,7 +117,7 @@ achieve the following:</p>
 <p>The login service checks whether the current page is <code>&quot;Login&quot;</code>. If so, and the login form has not
 yet been set up, it returns a patch to set up the form with a blank username and password.</p>
 <p>If the current page is not <code>&quot;Login&quot;</code>, and the login form is still present, the service returns a
-patch to remove the logim form from the state.</p>
+patch to remove the login form from the state.</p>
 <pre><code class="language-javascript">const loginService = state =&gt; {
   if (state.page === &quot;Login&quot;) {
     if (!state.login) {
