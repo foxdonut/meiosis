@@ -165,7 +165,7 @@ The login service checks whether the current page is `"Login"`. If so, and the l
 yet been set up, it returns a patch to set up the form with a blank username and password.
 
 If the current page is not `"Login"`, and the login form is still present, the service returns a
-patch to remove the logim form from the state.
+patch to remove the login form from the state.
 
 ```javascript
 const loginService = state => {
