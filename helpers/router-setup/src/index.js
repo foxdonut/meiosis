@@ -21,8 +21,8 @@
  * @typedef {Object} Route
  *
  * @property {string} page the page ID.
- * @property {*} params an object with the path parameters, and query string parameters under
- * the `queryParams` property.
+ * @property {*} params an object with the path parameters.
+ * @property {*} queryParams an object with the query string parameters.
  * @property {string} url the URL of the route.
  */
 
@@ -87,8 +87,8 @@
  * @callback GetRoute
  *
  * @param {string} page the page ID, or the URL.
- * @param {*} [params] if using a page ID, the parameters. If using query string support, use
- * the `queryParams` property inside the params object for query string parameters.
+ * @param {*} [params] if using a page ID, the parameters.
+ * @param {*} [queryParams] if using query string support, the query string parameters.
  * @return {Route} the route.
  */
 
@@ -98,8 +98,8 @@
  * @callback ToUrl
  *
  * @param {string} page the page ID.
- * @param {*} [params] the parameters. If using query string support, use the `queryParams`
- * property inside the params object for query string parameters.
+ * @param {*} [params] the path parameters.
+ * @param {*} [queryParams] the query parameters, if using query string support.
  * @return {string} the URL.
  */
 
@@ -173,7 +173,7 @@
 /**
  * Built-in function to change the location.
  *
- * @callback Pushstate
+ * @callback PushState
  * @param {*} somethingFIXME
  * @param {string} somethingElseFIXME
  * @param {string} uri
@@ -203,7 +203,7 @@
  *
  * @typedef {Object} History
  *
- * @property {Pushstate} pushstate
+ * @property {PushState} pushState
  */
 
 /**
@@ -213,6 +213,7 @@
  *
  * @property {DecodeURI} decodeURI function to decode a URI.
  * @property {Location} location the current location.
+ * @property {History} history the window's history.
  * @property {Onpopstate} onpopstate callback function when the location changes.
  */
 
@@ -366,20 +367,25 @@
  * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
 
-export const createGetUrl = (prefix, historyMode, wdw = window) =>
+const createGetUrl = (prefix, historyMode, wdw = window) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
 
-export const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
+const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
 
-const getPathTemplateLookup = routeConfig =>
-  Object.keys(routeConfig).reduce(
+const createToUrl = (prefix, routeConfig, getQueryString) => (
+  page,
+  params = {},
+  queryParams = {}
+) => {
+  const pathTemplateLookup = Object.keys(routeConfig).reduce(
     (result, path) => Object.assign(result, { [routeConfig[path]]: path }),
     {}
   );
 
-const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (page, params = {}) => {
+  // FIXME. Need to have a better separation of hardcoded paths vs toUrl approach.
+  // Also, who's to say routes map to plain string page IDs?
   const url = prefix + (page.startsWith("/") ? page : pathTemplateLookup[page]);
 
   return (
@@ -387,17 +393,17 @@ const createToUrl = (prefix, pathTemplateLookup, getQueryString) => (page, param
       (result, pathParam) =>
         result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
       url
-    ) + getQueryString(params.queryParams)
+    ) + getQueryString(queryParams)
   );
 };
 
-const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}) =>
+const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}, queryParams = {}) =>
   page.startsWith("/")
     ? matcher(page)
     : {
         page,
         params,
-        url: prefix + toUrl(page, params)
+        url: prefix + toUrl(page, params, queryParams)
       };
 
 const createLocationBarSync = (getUrl, wdw = window) => route => {
@@ -411,8 +417,139 @@ const createEffect = (locationBarSync, routeProp) => state => {
 };
 
 const emptyQueryString = {
-  parse: () => ({}),
-  stringify: () => ""
+  parse: _ => ({}),
+  stringify: _ => ""
+};
+
+/**
+ * Creates a router.
+ */
+export const createRouter = ({
+  routeMatcher,
+  matchToRoute,
+  plainHash = false,
+  historyMode = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  const pathname = wdw.location.pathname;
+  const prefix = historyMode
+    ? pathname.endsWith("/")
+      ? pathname.substring(0, pathname.length - 1)
+      : pathname
+    : "#" + (plainHash ? "" : "!");
+  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
+  const getQuery = path => {
+    const idx = path.indexOf("?");
+    return idx >= 0 ? path.substring(idx + 1) : "";
+  };
+
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const getPath = createGetPath(prefix, getUrl);
+
+  const toRoute = path => {
+    const match = routeMatcher(getPathWithoutQuery(path));
+    const queryParams = queryString.parse(getQuery(path));
+    const url = prefix + path;
+    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url });
+  };
+
+  const initialRoute = toRoute(getPath());
+
+  const start = onRouteChange => {
+    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
+  };
+
+  const syncLocationBar = route => {
+    const url = route.url;
+    if (url !== getUrl()) {
+      wdw.history.pushState({}, "", url);
+    }
+  };
+
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    wdw.history.pushState({}, "", url);
+    wdw.onpopstate(null);
+  };
+
+  return { initialRoute, toRoute, start, syncLocationBar, getLinkHandler };
+};
+
+/**
+ * Creates a router.
+ */
+export const _createRouter = ({
+  // routeConfig,
+  routeMatcher,
+  matchToRoute,
+  fromRoute,
+  toRoute,
+  toUrl,
+  plainHash = false,
+  historyMode = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  const pathname = wdw.location.pathname;
+  const prefix = historyMode
+    ? pathname.endsWith("/")
+      ? pathname.substring(0, pathname.length - 1)
+      : pathname
+    : "#" + (plainHash ? "" : "!");
+  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
+  const getQuery = path => {
+    const idx = path.indexOf("?");
+    return idx >= 0 ? path.substring(idx + 1) : "";
+  };
+
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const getPath = createGetPath(prefix, getUrl);
+  /*
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
+  const toUrl = createToUrl(prefix, routeConfig, getQueryString);
+  */
+
+  const matcher = path => {
+    const match = routeMatcher(getPathWithoutQuery(path));
+    const queryParams = queryString.parse(getQuery(path));
+    return matchToRoute(match, queryParams);
+  };
+
+  /* instead of getRoute:
+   * - toRoute(page, params, queryParams), or
+   * - matcher(path) <-- if we're not using page IDs for routes, we don't need toUrl
+   * and we should store the url in the state.
+   */
+  const getRoute = (page, params = {}, queryParams = {}) =>
+    page.startsWith("/") ? matcher(page) : toRoute(page, params, queryParams);
+
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    wdw.history.pushState({}, "", url);
+    wdw.onpopstate(null);
+  };
+
+  const initialRoute = matcher(getPath());
+
+  const start = onRouteChange => {
+    wdw.onpopstate = () => onRouteChange(matcher(getPath()));
+  };
+
+  const syncLocationBar = route => {
+    const { page, params, queryParams } = fromRoute(route);
+    const url = toUrl(page, params, queryParams);
+    if (url !== getUrl()) {
+      wdw.history.pushState({}, "", url);
+    }
+  };
+
+  return { initialRoute, getRoute, getLinkHandler, toUrl, start, syncLocationBar };
 };
 
 /**
@@ -450,24 +587,21 @@ export const createFeatherRouter = ({
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const pathTemplateLookup = getPathTemplateLookup(routeConfig);
   const getUrl = createGetUrl(prefix, historyMode);
   const getPath = createGetPath(prefix, getUrl);
-  const toUrl = createToUrl(prefix, pathTemplateLookup, getQueryString);
+  const toUrl = createToUrl(prefix, routeConfig, getQueryString);
   const matcher = createRouteMatcher(routeConfig);
 
   const routeMatcher = path => {
     const match = matcher(getPathWithoutQuery(path));
-    const params = Object.assign(match.params, {
-      queryParams: queryString.parse(getQuery(path))
-    });
-    const url = prefix + match.url + getQueryString(params.queryParams);
-    return Object.assign(match, { params, url });
+    const queryParams = queryString.parse(getQuery(path));
+    const url = prefix + match.url + getQueryString(queryParams);
+    return Object.assign(match, { params: match.params, queryParams, url });
   };
 
   const getRoute = createGetRoute("", toUrl, routeMatcher);
 
-  const getLinkHandler = (url, wdw = window) => evt => {
+  const getLinkHandler = url => evt => {
     evt.preventDefault();
     wdw.history.pushState({}, "", url);
     wdw.onpopstate(null);
@@ -475,7 +609,7 @@ export const createFeatherRouter = ({
 
   const initialRoute = routeMatcher(getPath());
 
-  const start = (onRouteChange, wdw = window) => {
+  const start = onRouteChange => {
     wdw.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
@@ -515,9 +649,8 @@ export const createMithrilRouter = ({
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const pathTemplateLookup = getPathTemplateLookup(routeConfig);
   const getUrl = createGetUrl(prefix, historyMode);
-  const toUrl = createToUrl(historyMode ? "" : prefix, pathTemplateLookup, getQueryString);
+  const toUrl = createToUrl(historyMode ? "" : prefix, routeConfig, getQueryString);
   const getRoute = createGetRoute(historyMode ? prefix : "", toUrl);
 
   const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
@@ -530,7 +663,8 @@ export const createMithrilRouter = ({
       return result;
     }, {});
 
-  const initialRoute = { url: getUrl(), page: "", params: { queryParams: {} } };
+  // FIXME
+  const initialRoute = { url: getUrl(), page: "", params: {}, queryParams: {} };
   const locationBarSync = createLocationBarSync(getUrl);
   const effect = createEffect(locationBarSync, routeProp);
 

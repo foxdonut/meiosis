@@ -1,63 +1,237 @@
 /* eslint-env jest */
 
-import { createGetUrl, createGetPath } from "../src/index";
+import createRouteMatcher from "feather-route-matcher";
+import queryString from "query-string";
 
-const prefix = "#!";
-const rootPath = "/root/path";
-const appPath = "/test";
-const search = "?foo=bar";
+import { createRouter } from "../src/index";
+
 const decodeURI = uri => uri;
 
-const testWindow = {
-  decodeURI,
-  location: {
-    pathname: rootPath + appPath,
-    search
-  }
-};
+const someCases = [
+  ["one", x => x + 1, 11],
+  ["two", x => x + 2, 12]
+];
 
-const createWindowWithHash = hash => {
-  const wdw = Object.assign({}, testWindow);
-  wdw.location.hash = hash;
-  return wdw;
-};
-
-describe("getUrl", () => {
-  describe("hash mode", () => {
-    test("returns the hash if it exists", () => {
-      const hash = prefix + "/test";
-      const getUrl = createGetUrl(prefix, false, createWindowWithHash(hash));
-      expect(getUrl()).toEqual(hash);
-    });
-
-    test("returns the prefix and root if hash does not exist", () => {
-      const getUrl = createGetUrl(prefix, false, createWindowWithHash(null));
-      expect(getUrl()).toEqual(prefix + "/");
-    });
-  });
-
-  describe("history mode", () => {
-    test("returns the pathname and search", () => {
-      const getUrl = createGetUrl(rootPath, true, testWindow);
-      expect(getUrl()).toEqual(testWindow.location.pathname + testWindow.location.search);
+describe("each", () => {
+  describe.each(someCases)("%p", (label, fn, expectedResult) => {
+    test("something with " + label, () => {
+      expect(fn(10)).toEqual(expectedResult);
     });
   });
 });
 
-describe("getPath", () => {
-  describe("returns the URL without the prefix", () => {
-    test("hash mode", () => {
-      const path = "/test";
-      const hash = prefix + path;
-      const getUrl = createGetUrl(prefix, false, createWindowWithHash(hash));
-      const getPath = createGetPath(prefix, getUrl);
-      expect(getPath()).toEqual(path);
+describe("hardcoded paths", () => {
+  const prefix = "#!";
+  const routeConfig = {
+    "/": "Home",
+    "/login": "Login",
+    "/user/:id": "UserProfile"
+  };
+  const routeMatcher = createRouteMatcher(routeConfig);
+  const matchToRoute = match => ({
+    page: match.value,
+    params: match.params,
+    queryParams: match.queryParams
+  });
+  const createWindow = path => ({
+    decodeURI,
+    location: {
+      hash: prefix + path
+    }
+  });
+
+  describe("initialRoute", () => {
+    test("just a route", () => {
+      const path = "/login";
+      const routerConfig = { routeMatcher, matchToRoute, wdw: createWindow(path) };
+      const router = createRouter(routerConfig);
+
+      expect(router.initialRoute).toEqual({
+        page: "Login",
+        params: {},
+        queryParams: {},
+        url: prefix + path
+      });
     });
 
-    test("history mode", () => {
-      const getUrl = createGetUrl(rootPath, true, testWindow);
-      const getPath = createGetPath(rootPath, getUrl);
-      expect(getPath()).toEqual(appPath + search);
+    test("with params", () => {
+      const path = "/user/42";
+      const routerConfig = { routeMatcher, matchToRoute, wdw: createWindow(path) };
+      const router = createRouter(routerConfig);
+
+      expect(router.initialRoute).toEqual({
+        page: "UserProfile",
+        params: { id: "42" },
+        queryParams: {},
+        url: prefix + path
+      });
+    });
+
+    test("with queryParams", () => {
+      const path = "/login?sport=tennis";
+      const routerConfig = {
+        routeMatcher,
+        matchToRoute,
+        queryString,
+        wdw: createWindow(path)
+      };
+      const router = createRouter(routerConfig);
+
+      expect(router.initialRoute).toEqual({
+        page: "Login",
+        params: {},
+        queryParams: { sport: "tennis" },
+        url: prefix + path
+      });
+    });
+
+    test("with params and queryParams", () => {
+      const path = "/user/42?sport=tennis";
+      const routerConfig = {
+        routeMatcher,
+        matchToRoute,
+        queryString,
+        wdw: createWindow(path)
+      };
+      const router = createRouter(routerConfig);
+
+      expect(router.initialRoute).toEqual({
+        page: "UserProfile",
+        params: { id: "42" },
+        queryParams: { sport: "tennis" },
+        url: prefix + path
+      });
+    });
+  });
+
+  describe("toRoute", () => {
+    test("just a route", () => {
+      const path = "/login";
+      const routerConfig = { routeMatcher, matchToRoute };
+      const router = createRouter(routerConfig);
+
+      expect(router.toRoute(path)).toEqual({
+        page: "Login",
+        params: {},
+        queryParams: {},
+        url: prefix + path
+      });
+    });
+
+    test("with params", () => {
+      const path = "/user/42";
+      const routerConfig = { routeMatcher, matchToRoute };
+      const router = createRouter(routerConfig);
+
+      expect(router.toRoute(path)).toEqual({
+        page: "UserProfile",
+        params: { id: "42" },
+        queryParams: {},
+        url: prefix + path
+      });
+    });
+
+    test("with queryParams", () => {
+      const path = "/login?sport=tennis";
+      const routerConfig = {
+        routeMatcher,
+        matchToRoute,
+        queryString
+      };
+      const router = createRouter(routerConfig);
+
+      expect(router.toRoute(path)).toEqual({
+        page: "Login",
+        params: {},
+        queryParams: { sport: "tennis" },
+        url: prefix + path
+      });
+    });
+
+    test("with params and queryParams", () => {
+      const path = "/user/42?sport=tennis";
+      const routerConfig = {
+        routeMatcher,
+        matchToRoute,
+        queryString
+      };
+      const router = createRouter(routerConfig);
+
+      expect(router.toRoute(path)).toEqual({
+        page: "UserProfile",
+        params: { id: "42" },
+        queryParams: { sport: "tennis" },
+        url: prefix + path
+      });
+    });
+  });
+
+  describe("start", () => {
+    test("calls onRouteChange", () => {
+      const path = "/login";
+      const wdw = createWindow(path);
+      const routerConfig = { routeMatcher, matchToRoute, wdw };
+      const router = createRouter(routerConfig);
+
+      const onRouteChange = jest.fn();
+
+      router.start(onRouteChange);
+
+      wdw.onpopstate();
+
+      const calls = onRouteChange.mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual({
+        page: "Login",
+        params: {},
+        queryParams: {},
+        url: prefix + path
+      });
+    });
+  });
+
+  describe("syncLocationBar", () => {
+    test("calls pushState", () => {
+      const path = "/login";
+      const pushState = jest.fn();
+      const wdw = Object.assign(createWindow(path), { history: { pushState } });
+      const routerConfig = { routeMatcher, matchToRoute, wdw };
+      const router = createRouter(routerConfig);
+      const url = "#/user/42";
+
+      router.syncLocationBar({ url });
+
+      const calls = pushState.mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual({});
+      expect(calls[0][1]).toEqual("");
+      expect(calls[0][2]).toEqual(url);
+    });
+  });
+
+  describe("getLinkHandler", () => {
+    test("calls pushState and onpopstate", () => {
+      const preventDefault = jest.fn();
+      const pushState = jest.fn();
+      const onpopstate = jest.fn();
+
+      const wdw = Object.assign(createWindow("/"), { onpopstate, history: { pushState } });
+      const routerConfig = { routeMatcher, matchToRoute, wdw };
+      const router = createRouter(routerConfig);
+      const url = "#/user/42";
+
+      const linkHandler = router.getLinkHandler(url);
+      linkHandler({ preventDefault });
+
+      expect(preventDefault.mock.calls.length).toBe(1);
+
+      const calls = pushState.mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual({});
+      expect(calls[0][1]).toEqual("");
+      expect(calls[0][2]).toEqual(url);
+
+      expect(onpopstate.mock.calls.length).toBe(1);
     });
   });
 });
