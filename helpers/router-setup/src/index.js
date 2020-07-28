@@ -464,14 +464,28 @@ export const createRouter = ({
     }
   };
 
-  const getLinkHandler = url => evt => {
-    evt.preventDefault();
-    wdw.history.pushState({}, "", url);
-    wdw.onpopstate(null);
-  };
+  const api = { initialRoute, toRoute, start, syncLocationBar };
 
-  return { initialRoute, toRoute, start, syncLocationBar, getLinkHandler };
+  if (historyMode) {
+    api.getLinkHandler = url => evt => {
+      evt.preventDefault();
+      wdw.history.pushState({}, "", url);
+      wdw.onpopstate(null);
+    };
+  }
+
+  return api;
 };
+
+/* getLinkHandler usage: in a Link component
+export const Link = {
+  view: ({ attrs, children }) => {
+    const url = router.toUrl(attrs.href);
+
+    return m("a", { ...attrs, href: url, onclick: router.getLinkHandler(url) }, children);
+  }
+};
+*/
 
 /**
  * Creates a router.

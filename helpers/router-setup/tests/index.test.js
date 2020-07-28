@@ -128,31 +128,34 @@ describe("hardcoded paths", () => {
         });
       });
 
-      describe("getLinkHandler", () => {
-        test("calls pushState and onpopstate", () => {
-          const preventDefault = jest.fn();
-          const pushState = jest.fn();
-          const onpopstate = jest.fn();
+      const historyMode = !!caseConfig.rootPath;
+      if (historyMode) {
+        describe("getLinkHandler", () => {
+          test("calls pushState and onpopstate", () => {
+            const preventDefault = jest.fn();
+            const pushState = jest.fn();
+            const onpopstate = jest.fn();
 
-          const wdw = Object.assign(createWindow("/"), { onpopstate, history: { pushState } });
-          const routerConfig = createRouterConfig({ routeMatcher, matchToRoute, wdw });
-          const router = createRouter(routerConfig);
-          const url = prefix + "/user/42";
+            const wdw = Object.assign(createWindow("/"), { onpopstate, history: { pushState } });
+            const routerConfig = createRouterConfig({ routeMatcher, matchToRoute, wdw });
+            const router = createRouter(routerConfig);
+            const url = prefix + "/user/42";
 
-          const linkHandler = router.getLinkHandler(url);
-          linkHandler({ preventDefault });
+            const linkHandler = router.getLinkHandler(url);
+            linkHandler({ preventDefault });
 
-          expect(preventDefault.mock.calls.length).toBe(1);
+            expect(preventDefault.mock.calls.length).toBe(1);
 
-          const calls = pushState.mock.calls;
-          expect(calls.length).toBe(1);
-          expect(calls[0][0]).toEqual({});
-          expect(calls[0][1]).toEqual("");
-          expect(calls[0][2]).toEqual(url);
+            const calls = pushState.mock.calls;
+            expect(calls.length).toBe(1);
+            expect(calls[0][0]).toEqual({});
+            expect(calls[0][1]).toEqual("");
+            expect(calls[0][2]).toEqual(url);
 
-          expect(onpopstate.mock.calls.length).toBe(1);
+            expect(onpopstate.mock.calls.length).toBe(1);
+          });
         });
-      });
+      }
     });
   });
 });
