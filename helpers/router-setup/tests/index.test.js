@@ -8,13 +8,16 @@ import { createRouter } from "../src/index";
 const decodeURI = uri => uri;
 
 describe("hardcoded paths", () => {
-  const plainHashCases = [
+  const rootPath = "/my-server/my-base-path";
+  const plainHashAndHistoryModeCases = [
     ["default", {}, "#!"],
-    ["true", { plainHash: true }, "#"]
+    ["plainHash", { plainHash: true }, "#"],
+    ["historyMode", { rootPath }, rootPath]
   ];
-  describe("plainHash", () => {
-    describe.each(plainHashCases)("%s", (_label, plainHashConfig, prefix) => {
-      const createRouterConfig = config => Object.assign(config, plainHashConfig);
+
+  describe("historyMode and plainHash", () => {
+    describe.each(plainHashAndHistoryModeCases)("%s", (_label, caseConfig, prefix) => {
+      const createRouterConfig = config => Object.assign(config, caseConfig);
       const routeConfig = {
         "/": "Home",
         "/login": "Login",
@@ -29,7 +32,9 @@ describe("hardcoded paths", () => {
       const createWindow = path => ({
         decodeURI,
         location: {
-          hash: prefix + path
+          hash: prefix + path,
+          pathname: caseConfig.rootPath + path,
+          search: ""
         }
       });
 
@@ -40,30 +45,37 @@ describe("hardcoded paths", () => {
 
       describe.each(routeCases)("%s", (_label, routerTestFn) => {
         const initialRouteCases = [
-          ["just a route", "/login", { page: "Login", params: {}, queryParams: {} }],
+          ["just a route", "/login", {}, { page: "Login", params: {}, queryParams: {} }],
           [
             "with params",
             "/user/42",
+            {},
             { page: "UserProfile", params: { id: "42" }, queryParams: {} }
           ],
           [
             "with queryParams",
             "/login?sport=tennis",
+            { queryString },
             { page: "Login", params: {}, queryParams: { sport: "tennis" } }
           ],
           [
             "with params and queryParams",
             "/user/42?sport=tennis",
+            { queryString },
             { page: "UserProfile", params: { id: "42" }, queryParams: { sport: "tennis" } }
           ]
         ];
-        test.each(initialRouteCases)("%s", (_label, path, expectedResult) => {
-          const routerConfig = createRouterConfig({
-            routeMatcher,
-            matchToRoute,
-            queryString,
-            wdw: createWindow(path)
-          });
+        test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
+          const routerConfig = createRouterConfig(
+            Object.assign(
+              {
+                routeMatcher,
+                matchToRoute,
+                wdw: createWindow(path)
+              },
+              qsConfig
+            )
+          );
           const router = createRouter(routerConfig);
 
           expect(routerTestFn(router, path)).toEqual(
@@ -83,6 +95,7 @@ describe("hardcoded paths", () => {
 
           router.start(onRouteChange);
 
+          wdw.location.pathname = prefix + path;
           wdw.onpopstate();
 
           const calls = onRouteChange.mock.calls;
@@ -103,7 +116,7 @@ describe("hardcoded paths", () => {
           const wdw = Object.assign(createWindow(path), { history: { pushState } });
           const routerConfig = createRouterConfig({ routeMatcher, matchToRoute, wdw });
           const router = createRouter(routerConfig);
-          const url = "#/user/42";
+          const url = prefix + "/user/42";
 
           router.syncLocationBar({ url });
 
@@ -124,7 +137,7 @@ describe("hardcoded paths", () => {
           const wdw = Object.assign(createWindow("/"), { onpopstate, history: { pushState } });
           const routerConfig = createRouterConfig({ routeMatcher, matchToRoute, wdw });
           const router = createRouter(routerConfig);
-          const url = "#/user/42";
+          const url = prefix + "/user/42";
 
           const linkHandler = router.getLinkHandler(url);
           linkHandler({ preventDefault });

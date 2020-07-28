@@ -427,17 +427,13 @@ const emptyQueryString = {
 export const createRouter = ({
   routeMatcher,
   matchToRoute,
+  rootPath,
   plainHash = false,
-  historyMode = false,
   queryString = emptyQueryString,
   wdw = window
 }) => {
-  const pathname = wdw.location.pathname;
-  const prefix = historyMode
-    ? pathname.endsWith("/")
-      ? pathname.substring(0, pathname.length - 1)
-      : pathname
-    : "#" + (plainHash ? "" : "!");
+  const historyMode = !!rootPath;
+  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
   const getQuery = path => {
