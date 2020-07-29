@@ -4,8 +4,8 @@ export const Login = {
   view: ({ attrs: { state, actions } }) =>
     m(
       "div",
+      m("h3", "Login Page"),
       state.login.message ? m("div", state.login.message) : null,
-      m("div", "Login"),
       m(
         "form.form",
         m(

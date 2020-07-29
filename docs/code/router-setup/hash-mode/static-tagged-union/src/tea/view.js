@@ -8,7 +8,7 @@ export const Tea = {
   view: ({ attrs: { state, actions } }) =>
     m(
       "div",
-      m("div", "Tea Page"),
+      m("h3", "Tea Page"),
       m(
         ".row",
         m(
