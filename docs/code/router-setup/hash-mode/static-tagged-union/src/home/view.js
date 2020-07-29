@@ -2,13 +2,11 @@ import m from "mithril";
 import { fold } from "static-tagged-union";
 
 export const Home = {
-  view: ({ attrs: { state } }) =>
-    m(
-      "div",
-      m("h3", "Home Page"),
-      state.user && m("div", "You are logged in as: ", state.user),
-      fold({
-        Home: ({ queryParams }) => queryParams.message && m("div", queryParams.message)
-      })(state.route)
-    )
+  view: ({ attrs: { state } }) => [
+    m("h3", "Home Page"),
+    state.user && m("div", "You are logged in as: ", state.user),
+    fold({
+      Home: ({ queryParams }) => queryParams.message && m("div", queryParams.message)
+    })(state.route)
+  ]
 };

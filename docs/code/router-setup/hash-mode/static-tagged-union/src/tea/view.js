@@ -5,26 +5,24 @@ import { TeaDetails } from "../teaDetails";
 import { Route, router } from "../router";
 
 export const Tea = {
-  view: ({ attrs: { state, actions } }) =>
+  view: ({ attrs: { state, actions } }) => [
+    m("h3", "Tea Page"),
     m(
-      "div",
-      m("h3", "Tea Page"),
+      ".row",
       m(
-        ".row",
-        m(
-          ".col-md-6",
-          state.teas &&
-            state.teas.map(tea =>
-              m(
-                "div",
-                { key: tea.id },
-                m("a", { href: router.toPath(Route.TeaDetails({ id: tea.id })) }, tea.title)
-              )
+        ".col-md-6",
+        state.teas &&
+          state.teas.map(tea =>
+            m(
+              "div",
+              { key: tea.id },
+              m("a", { href: router.toPath(Route.TeaDetails({ id: tea.id })) }, tea.title)
             )
-        ),
-        fold({
-          TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, actions }))
-        })(state.route)
-      )
+          )
+      ),
+      fold({
+        TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, actions }))
+      })(state.route)
     )
+  ]
 };
