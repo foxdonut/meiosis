@@ -25,5 +25,5 @@ const routeMatcher = createRouteMatcher(routeConfig);
 
 export const router = createRouter({
   routeMatcher,
-  rootPath: ""
+  rootPath: "/my-server"
 });

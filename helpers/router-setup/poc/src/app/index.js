@@ -5,6 +5,9 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 import { router } from "../router";
+import { selectors } from "../state";
+
+const syncLocationBarEffect = state => router.syncLocationBar(selectors.route(state));
 
 export const createApp = () => ({
   initial: {
@@ -22,7 +25,7 @@ export const createApp = () => ({
     teaSearch.service
   ],
 
-  Effects: update => [tea.Effect(update), teaSearch.Effect(update), router.effect]
+  Effects: update => [tea.Effect(update), teaSearch.Effect(update), syncLocationBarEffect]
 });
 
 export { App } from "./view";

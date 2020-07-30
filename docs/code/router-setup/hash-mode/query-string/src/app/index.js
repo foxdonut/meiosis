@@ -1,3 +1,4 @@
+import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
 import { tea } from "../tea";
@@ -12,7 +13,14 @@ export const createApp = () => ({
 
   Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
 
-  services: [settings.service, login.service, tea.service, teaDetails.service, teaSearch.service],
+  services: [
+    settings.service,
+    home.service,
+    login.service,
+    tea.service,
+    teaDetails.service,
+    teaSearch.service
+  ],
 
   Effects: update => [tea.Effect(update), teaSearch.Effect(update), router.effect]
 });

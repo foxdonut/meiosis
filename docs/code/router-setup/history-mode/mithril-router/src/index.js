@@ -26,6 +26,7 @@ m.route(
     App,
     onRouteChange: route => update({ route: () => route }),
     states,
+    update,
     actions
   })
 );

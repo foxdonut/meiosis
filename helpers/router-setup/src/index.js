@@ -432,7 +432,7 @@ export const createRouter = ({
   queryString = emptyQueryString,
   wdw = window
 }) => {
-  const historyMode = !!rootPath;
+  const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
@@ -451,6 +451,8 @@ export const createRouter = ({
     return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url });
   };
 
+  const toUrl = path => prefix + path;
+
   const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
@@ -464,7 +466,7 @@ export const createRouter = ({
     }
   };
 
-  const api = { initialRoute, toRoute, start, syncLocationBar };
+  const api = { initialRoute, toRoute, toUrl, start, syncLocationBar };
 
   if (historyMode) {
     api.getLinkHandler = url => evt => {

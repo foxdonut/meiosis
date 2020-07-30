@@ -42,17 +42,12 @@ export const createMithrilRouter = routeConfig => {
       url: toUrl(page, params)
     });
 
-  const getLinkHandler = url => evt => {
-    evt.preventDefault();
-    m.route.set(url.substring(prefix.length));
-  };
-
-  const createMithrilRoutes = ({ App, onRouteChange, states, actions }) =>
+  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: (params, path) =>
           onRouteChange(selectors.toRoute({ page, params, url: prefix + path })),
-        render: () => m(App, { state: states(), actions })
+        render: () => m(App, { state: states(), update, actions })
       };
       return result;
     }, {});
@@ -64,5 +59,5 @@ export const createMithrilRouter = routeConfig => {
     }
   };
 
-  return { createMithrilRoutes, initialRoute, getRoute, toUrl, getLinkHandler, effect };
+  return { createMithrilRoutes, initialRoute, getRoute, toUrl, effect };
 };

@@ -21,7 +21,7 @@ export const Tea = {
           )
       ),
       selectors.page(state) === "TeaDetails" &&
-        m(".col-md-6", m(TeaDetails, { state, id: state.route.params.id, actions }))
+        m(".col-md-6", m(TeaDetails, { state, id: selectors.params(state).id, actions }))
     )
   ]
 };

@@ -28,7 +28,7 @@ export const createRouter = routeConfig => {
   const effect = state => {
     const path = selectors.url(state);
 
-    if (getPath() !== path) {
+    if (path !== getPath()) {
       window.history.pushState({}, "", prefix + path);
     }
   };

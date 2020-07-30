@@ -6,16 +6,18 @@ export const Route = {
   Settings: "Settings",
   Tea: "Tea",
   TeaDetails: "TeaDetails",
-  TeaSearch: "TeaSearch"
+  TeaSearch: "TeaSearch",
+  NotFound: "NotFound"
 };
 
 const routeConfig = {
   "/": Route.Home,
   "/login": Route.Login,
   "/settings": Route.Settings,
-  "/tea": Route.Tea,
   "/tea/search": Route.TeaSearch,
-  "/tea/:id": Route.TeaDetails
+  "/tea": Route.Tea,
+  "/tea/:id": Route.TeaDetails,
+  "/:404...": Route.NotFound
 };
 
 export const router = createMithrilRouter(routeConfig);

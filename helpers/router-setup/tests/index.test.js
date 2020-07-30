@@ -97,6 +97,17 @@ describe("hardcoded paths", () => {
             });
           });
 
+          describe("toUrl", () => {
+            test("prepends the prefix", () => {
+              const path = "/login";
+              const wdw = createWindow(path);
+              const routerConfig = createRouterConfig({ routeMatcher, wdw });
+              const router = createRouter(routerConfig);
+
+              expect(router.toUrl(path)).toEqual(prefix + path);
+            });
+          });
+
           describe("start", () => {
             test("calls onRouteChange", () => {
               const path = "/login";
