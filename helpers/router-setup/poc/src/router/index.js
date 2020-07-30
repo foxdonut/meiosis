@@ -1,4 +1,5 @@
-import { createRouter } from "../meiosis/router";
+import createRouteMatcher from "feather-route-matcher";
+import { createRouter } from "meiosis-router-setup";
 
 export const Route = {
   Home: "Home",
@@ -20,14 +21,9 @@ const routeConfig = {
   "/*": Route.NotFound
 };
 
-export const router = createRouter(routeConfig);
+const routeMatcher = createRouteMatcher(routeConfig);
 
-/*
-you can also npm install meiosis-router-setup and use it as shown below:
-
-import createRouteMatcher from "feather-route-matcher";
-import { createFeatherRouter } from "meiosis-router-setup";
-export const router = createFeatherRouter({ createRouteMatcher, routeConfig, historyMode: true });
-
-See https://meiosis.js.org/router for details.
-*/
+export const router = createRouter({
+  routeMatcher,
+  rootPath: ""
+});

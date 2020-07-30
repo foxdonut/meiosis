@@ -29,6 +29,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "feather-route-matcher": "^4.0.0",
+    "meiosis-router-setup": "file:../meiosis-router-setup-1.0.0.tgz",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "paperplane": "^3.1.2"

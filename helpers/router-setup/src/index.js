@@ -426,8 +426,8 @@ const emptyQueryString = {
  */
 export const createRouter = ({
   routeMatcher,
-  matchToRoute,
   rootPath,
+  matchToRoute = match => match,
   plainHash = false,
   queryString = emptyQueryString,
   wdw = window

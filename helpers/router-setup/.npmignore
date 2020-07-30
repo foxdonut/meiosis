@@ -1,6 +1,10 @@
+.babelrc
 .eslintrc.js
 .gitignore
 .vscode
+jestconfig.json
+poc
 rollup.config.js
 tests
+tsconfig.json
 *.tgz
