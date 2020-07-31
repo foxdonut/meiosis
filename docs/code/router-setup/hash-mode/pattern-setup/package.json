@@ -29,7 +29,8 @@
   "dependencies": {
     "feather-route-matcher": "^4.0.0",
     "mergerino": "^0.4.0",
-    "mithril": "^2.0.4"
+    "mithril": "^2.0.4",
+    "router-setup-common": "../../common"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",

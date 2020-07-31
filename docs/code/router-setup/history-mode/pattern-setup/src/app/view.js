@@ -1,11 +1,11 @@
 import m from "mithril";
 
-import { Home } from "../home";
+import { Home } from "router-setup-common/src/home";
 import { Login } from "../login";
 import { Settings } from "../settings";
-import { Tea } from "../tea";
-import { TeaSearch } from "../teaSearch";
-import { NotFound } from "../notFound";
+import { Tea } from "../tea/view";
+import { TeaSearch } from "../teaSearch/view";
+import { NotFound } from "router-setup-common/src/notFound";
 import { Link } from "../router/link";
 import { selectors } from "../state";
 

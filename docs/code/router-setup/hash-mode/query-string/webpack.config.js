@@ -9,7 +9,11 @@ module.exports = {
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".js"]
+    extensions: [".js"],
+    // This is so that routing-common can find peerDependencies
+    alias: {
+      mithril: path.resolve("./node_modules/mithril")
+    }
   },
   module: {
     rules: [

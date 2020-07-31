@@ -30,7 +30,8 @@
     "feather-route-matcher": "^4.0.0",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
-    "query-string": "^6.13.1"
+    "query-string": "^6.13.1",
+    "router-setup-common": "../../common"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
