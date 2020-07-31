@@ -6,4 +6,4 @@ export const settings = {
   service
 };
 
-export { Settings } from "./view";
+export { Settings } from "router-setup-common/src/settings/view";

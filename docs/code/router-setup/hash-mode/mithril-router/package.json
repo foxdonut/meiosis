@@ -28,7 +28,8 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "mergerino": "^0.4.0",
-    "mithril": "^2.0.4"
+    "mithril": "^2.0.4",
+    "router-setup-common": "../../common"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",

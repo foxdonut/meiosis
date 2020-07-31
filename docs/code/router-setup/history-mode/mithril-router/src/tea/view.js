@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { TeaDetails } from "../teaDetails";
+import { TeaDetails } from "../teaDetails/view";
 import { Route, router } from "../router";
 import { selectors } from "../state";
 
