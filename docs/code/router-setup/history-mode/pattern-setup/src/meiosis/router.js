@@ -1,17 +1,23 @@
 /* Equivalent of this code, you can also npm install meiosis-router-setup */
 /* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
-import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
-  const pathname = window.location.pathname;
-  const prefix = pathname.endsWith("/") ? pathname.substring(0, pathname.length - 1) : pathname;
+  const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 
-  const getPath = () => decodeURI(window.location.pathname).substring(prefix.length) || "/";
+  const prefix = stripTrailingSlash(window.location.pathname);
 
-  const getRoute = createRouteMatcher(routeConfig);
+  const getUrl = () => decodeURI(window.location.pathname);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
 
-  const initialRoute = getRoute(getPath());
+  const matcher = createRouteMatcher(routeConfig);
+
+  const toRoute = (path, options) => {
+    const match = matcher(path);
+    return Object.assign(match, options, { url: prefix + stripTrailingSlash(match.url) });
+  };
+
+  const initialRoute = toRoute(getPath());
 
   const toUrl = path => prefix + path;
 
@@ -22,16 +28,17 @@ export const createRouter = routeConfig => {
   };
 
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(getRoute(getPath()));
+    window.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const effect = state => {
-    const path = selectors.url(state);
+  const syncLocationBar = route => {
+    const url = route.url;
 
-    if (path !== getPath()) {
-      window.history.pushState({}, "", prefix + path);
+    if (url !== getUrl()) {
+      const fn = route.replace ? "replaceState" : "pushState";
+      window.history[fn].call(window.history, {}, "", url);
     }
   };
 
-  return { initialRoute, getRoute, toUrl, getLinkHandler, start, effect };
+  return { initialRoute, toRoute, toUrl, getLinkHandler, start, syncLocationBar };
 };

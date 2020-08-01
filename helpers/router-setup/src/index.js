@@ -367,6 +367,8 @@
  * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
 
+const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
+
 const createGetUrl = (prefix, historyMode, wdw = window) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
@@ -441,13 +443,19 @@ export const createRouter = ({
     return idx >= 0 ? path.substring(idx + 1) : "";
   };
 
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
+
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
 
   const toRoute = path => {
-    const match = routeMatcher(getPathWithoutQuery(path));
+    const matchPath = getPathWithoutQuery(path) || "/";
+    const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
-    const url = prefix + path;
+    const url = prefix + stripTrailingSlash(matchPath) + getQueryString(queryParams);
     return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url });
   };
 

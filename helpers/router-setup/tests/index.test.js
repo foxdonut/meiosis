@@ -55,6 +55,30 @@ describe("hardcoded paths", () => {
 
           describe.each(routeCases)("%s", (_label, routerTestFn) => {
             const initialRouteCases = [
+              ["slash", "/", {}, { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix }],
+              ["empty", "", {}, { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix }],
+              [
+                "slash with queryParams",
+                "/?sport=tennis",
+                { queryString },
+                {
+                  [pageProp]: "Home",
+                  params: {},
+                  queryParams: { sport: "tennis" },
+                  url: prefix + "?sport=tennis"
+                }
+              ],
+              [
+                "empty with queryParams",
+                "?sport=tennis",
+                { queryString },
+                {
+                  [pageProp]: "Home",
+                  params: {},
+                  queryParams: { sport: "tennis" },
+                  url: prefix + "?sport=tennis"
+                }
+              ],
               ["just a route", "/login", {}, { [pageProp]: "Login", params: {}, queryParams: {} }],
               [
                 "with params",
@@ -92,7 +116,7 @@ describe("hardcoded paths", () => {
               const router = createRouter(routerConfig);
 
               expect(routerTestFn(router, path)).toMatchObject(
-                Object.assign(expectedResult, { url: prefix + path })
+                Object.assign({ url: prefix + path }, expectedResult)
               );
             });
           });

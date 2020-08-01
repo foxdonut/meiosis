@@ -5,8 +5,9 @@ import queryString from "query-string";
 import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
-  const pathname = window.location.pathname;
-  const prefix = pathname.endsWith("/") ? pathname.substring(0, pathname.length - 1) : pathname;
+  const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
+
+  const prefix = stripTrailingSlash(window.location.pathname);
 
   const getUrl = () => decodeURI(window.location.pathname + window.location.search);
   const getPath = () => getUrl().substring(prefix.length) || "/";
@@ -46,7 +47,7 @@ export const createRouter = routeConfig => {
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });
-    const url = prefix + (match.url === "/" ? "" : match.url) + getQueryString(params.queryParams);
+    const url = prefix + stripTrailingSlash(match.url) + getQueryString(params.queryParams);
     return Object.assign(match, { params, url });
   };
 
