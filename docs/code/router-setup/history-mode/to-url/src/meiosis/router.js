@@ -46,7 +46,7 @@ export const createRouter = routeConfig => {
     const params = Object.assign(match.params, {
       queryParams: queryString.parse(getQuery(path))
     });
-    const url = prefix + match.url + getQueryString(params.queryParams);
+    const url = prefix + (match.url === "/" ? "" : match.url) + getQueryString(params.queryParams);
     return Object.assign(match, { params, url });
   };
 
