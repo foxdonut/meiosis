@@ -2,7 +2,6 @@
 /* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
-import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
   const prefix = "#!";
@@ -22,28 +21,26 @@ export const createRouter = routeConfig => {
 
   const matcher = createRouteMatcher(routeConfig);
 
-  const getRoute = path => {
+  const toRoute = path => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = matcher(pathWithoutQuery);
-    const params = Object.assign(match.params, {
-      queryParams: queryString.parse(getQuery(path))
-    });
-    const url = prefix + match.url + getQueryString(params.queryParams);
-    return Object.assign(match, { params, url });
+    const queryParams = queryString.parse(getQuery(path));
+    const url = prefix + match.url + getQueryString(queryParams);
+    return Object.assign(match, { params: match.params, queryParams, url });
   };
 
-  const initialRoute = getRoute(getPath());
+  const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(getRoute(getPath()));
+    window.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const effect = state => {
-    const url = selectors.url(state);
+  const syncLocationBar = route => {
+    const url = route.url;
     if (url !== getUrl()) {
       window.history.pushState({}, "", url);
     }
   };
 
-  return { initialRoute, getRoute, start, effect };
+  return { initialRoute, toRoute, start, syncLocationBar };
 };

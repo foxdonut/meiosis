@@ -4,7 +4,7 @@ export const Actions = update => ({
   logout: () =>
     update({
       user: null,
-      route: () => router.getRoute("/"),
+      route: () => router.toRoute("/"),
       message: "You have been logged out."
     })
 });
