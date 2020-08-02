@@ -17,6 +17,7 @@ describe("hardcoded paths", () => {
 
   describe("historyMode and plainHash", () => {
     describe.each(plainHashAndHistoryModeCases)("%s", (_label, caseConfig, prefix) => {
+      const historyMode = !!caseConfig.rootPath;
       const matchToRoute = match => ({
         page: match.value,
         params: match.params,
@@ -49,14 +50,30 @@ describe("hardcoded paths", () => {
           });
 
           const routeCases = [
-            ["initialRoute", router => router.initialRoute],
-            ["toRoute", (router, path) => router.toRoute(path)]
+            ["initialRoute", {}, router => router.initialRoute],
+            ["toRoute", {}, (router, path) => router.toRoute(path)],
+            [
+              "toRoute with options",
+              { replace: true },
+              (router, path, options) => router.toRoute(path, options)
+            ]
           ];
 
-          describe.each(routeCases)("%s", (_label, routerTestFn) => {
-            const initialRouteCases = [
-              ["slash", "/", {}, { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix }],
-              ["empty", "", {}, { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix }],
+          describe.each(routeCases)("%s", (_label, options, routerTestFn) => {
+            const suffix = historyMode ? "" : "/";
+            const routeCases = [
+              [
+                "slash",
+                "/",
+                {},
+                { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix + suffix }
+              ],
+              [
+                "empty",
+                "",
+                {},
+                { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix + suffix }
+              ],
               [
                 "slash with queryParams",
                 "/?sport=tennis",
@@ -65,7 +82,7 @@ describe("hardcoded paths", () => {
                   [pageProp]: "Home",
                   params: {},
                   queryParams: { sport: "tennis" },
-                  url: prefix + "?sport=tennis"
+                  url: prefix + suffix + "?sport=tennis"
                 }
               ],
               [
@@ -76,7 +93,7 @@ describe("hardcoded paths", () => {
                   [pageProp]: "Home",
                   params: {},
                   queryParams: { sport: "tennis" },
-                  url: prefix + "?sport=tennis"
+                  url: prefix + suffix + "?sport=tennis"
                 }
               ],
               ["just a route", "/login", {}, { [pageProp]: "Login", params: {}, queryParams: {} }],
@@ -103,7 +120,7 @@ describe("hardcoded paths", () => {
                 }
               ]
             ];
-            test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
+            test.each(routeCases)("%s", (_label, path, qsConfig, expectedResult) => {
               const routerConfig = createRouterConfig(
                 Object.assign(
                   {
@@ -115,8 +132,8 @@ describe("hardcoded paths", () => {
               );
               const router = createRouter(routerConfig);
 
-              expect(routerTestFn(router, path)).toMatchObject(
-                Object.assign({ url: prefix + path }, expectedResult)
+              expect(routerTestFn(router, path, options)).toMatchObject(
+                Object.assign({ url: prefix + path }, expectedResult, options)
               );
             });
           });
@@ -158,17 +175,21 @@ describe("hardcoded paths", () => {
           });
 
           describe("syncLocationBar", () => {
-            test("calls pushState", () => {
+            const syncLocationBarCases = [
+              ["pushState", {}],
+              ["replaceState", { replace: true }]
+            ];
+            test.each(syncLocationBarCases)("calls %s", (method, params) => {
               const path = "/login";
-              const pushState = jest.fn();
-              const wdw = Object.assign(createWindow(path), { history: { pushState } });
+              const methodFn = jest.fn();
+              const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
               const routerConfig = createRouterConfig({ routeMatcher, wdw });
               const router = createRouter(routerConfig);
               const url = prefix + "/user/42";
 
-              router.syncLocationBar({ url });
+              router.syncLocationBar(Object.assign({ url }, params));
 
-              const calls = pushState.mock.calls;
+              const calls = methodFn.mock.calls;
               expect(calls.length).toBe(1);
               expect(calls[0][0]).toEqual({});
               expect(calls[0][1]).toEqual("");
@@ -176,7 +197,6 @@ describe("hardcoded paths", () => {
             });
           });
 
-          const historyMode = !!caseConfig.rootPath;
           if (historyMode) {
             describe("getLinkHandler", () => {
               test("calls pushState and onpopstate", () => {

@@ -7,7 +7,8 @@ export const createRouter = routeConfig => {
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
-  const toRoute = createRouteMatcher(routeConfig);
+  const routeMatcher = createRouteMatcher(routeConfig);
+  const toRoute = (path, options) => Object.assign(routeMatcher(path), options);
 
   const initialRoute = toRoute(getPath());
 
@@ -19,7 +20,8 @@ export const createRouter = routeConfig => {
     const path = route.url;
 
     if (path !== getPath()) {
-      window.history.pushState({}, "", prefix + path);
+      const fn = route.replace ? "replaceState" : "pushState";
+      window.history[fn].call(window.history, {}, "", prefix + path);
     }
   };
 

@@ -34,7 +34,7 @@ export const createMithrilRouter = routeConfig => {
     );
   };
 
-  const getRoute = (page, params = {}) =>
+  const toRoute = (page, params = {}) =>
     selectors.toRoute({
       page,
       params,
@@ -58,5 +58,5 @@ export const createMithrilRouter = routeConfig => {
     }
   };
 
-  return { createMithrilRoutes, initialRoute, getRoute, toUrl, effect };
+  return { createMithrilRoutes, initialRoute, toRoute, toUrl, effect };
 };

@@ -451,12 +451,13 @@ export const createRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
 
-  const toRoute = path => {
+  const toRoute = (path, options) => {
     const matchPath = getPathWithoutQuery(path) || "/";
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
-    const url = prefix + stripTrailingSlash(matchPath) + getQueryString(queryParams);
-    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url });
+    const statePath = historyMode ? stripTrailingSlash(matchPath) : matchPath;
+    const url = prefix + statePath + getQueryString(queryParams);
+    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
   };
 
   const toUrl = path => prefix + path;
@@ -470,7 +471,8 @@ export const createRouter = ({
   const syncLocationBar = route => {
     const url = route.url;
     if (url !== getUrl()) {
-      wdw.history.pushState({}, "", url);
+      const fn = route.replace ? "replaceState" : "pushState";
+      wdw.history[fn].call(wdw.history, {}, "", url);
     }
   };
 

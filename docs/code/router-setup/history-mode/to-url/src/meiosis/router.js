@@ -51,7 +51,7 @@ export const createRouter = routeConfig => {
     return Object.assign(match, { params, url });
   };
 
-  const getRoute = (page, params = {}) =>
+  const toRoute = (page, params = {}) =>
     selectors.toRoute({
       page,
       params,
@@ -77,5 +77,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, getRoute, toUrl, getLinkHandler, start, effect };
+  return { initialRoute, toRoute, toUrl, getLinkHandler, start, effect };
 };

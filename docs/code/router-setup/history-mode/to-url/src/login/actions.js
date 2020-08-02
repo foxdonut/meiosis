@@ -5,5 +5,5 @@ export const Actions = update => ({
   password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
-    update({ user: username, route: returnTo || router.getRoute(Route.Home) })
+    update({ user: username, route: returnTo || router.toRoute(Route.Home) })
 });

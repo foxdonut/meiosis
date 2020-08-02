@@ -38,7 +38,8 @@ export const createRouter = routeConfig => {
   const syncLocationBar = route => {
     const url = route.url;
     if (url !== getUrl()) {
-      window.history.pushState({}, "", url);
+      const fn = route.replace ? "replaceState" : "pushState";
+      window.history[fn].call(window.history, {}, "", url);
     }
   };
 

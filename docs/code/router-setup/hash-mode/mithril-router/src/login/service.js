@@ -18,7 +18,7 @@ export const service = state => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return { route: () => router.getRoute(Route.Login) };
+      return { route: () => router.toRoute(Route.Login) };
     } else if (state.login) {
       return { login: undefined };
     }
