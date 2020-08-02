@@ -14,7 +14,7 @@ export const createRouter = routeConfig => {
 
   const toRoute = (path, options) => {
     const match = matcher(path);
-    return Object.assign(match, options, { url: prefix + stripTrailingSlash(match.url) });
+    return Object.assign(match, { url: prefix + stripTrailingSlash(match.url) }, options);
   };
 
   const initialRoute = toRoute(getPath());
