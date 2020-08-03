@@ -368,6 +368,7 @@
  */
 
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
+const I = x => x;
 
 const createGetUrl = (prefix, historyMode, wdw = window) =>
   historyMode
@@ -429,11 +430,25 @@ const emptyQueryString = {
 export const createRouter = ({
   routeMatcher,
   rootPath,
-  matchToRoute = match => match,
+  toUrl,
+  fromRoute,
+  matchToRoute = I,
   plainHash = false,
   queryString = emptyQueryString,
   wdw = window
 }) => {
+  if (toUrl != null) {
+    return createToUrlRouter({
+      routeMatcher,
+      rootPath,
+      toUrl,
+      fromRoute,
+      matchToRoute,
+      plainHash,
+      queryString,
+      wdw
+    });
+  }
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
   const getPathWithoutQuery = path => path.replace(/\?.*/, "");
@@ -460,7 +475,7 @@ export const createRouter = ({
     return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
   };
 
-  const toUrl = path => prefix + path;
+  const routerToUrl = path => prefix + path;
 
   const initialRoute = toRoute(getPath());
 
@@ -476,7 +491,7 @@ export const createRouter = ({
     }
   };
 
-  const api = { initialRoute, toRoute, toUrl, start, syncLocationBar };
+  const api = { initialRoute, toRoute, toUrl: routerToUrl, start, syncLocationBar };
 
   if (historyMode) {
     api.getLinkHandler = url => evt => {
@@ -498,6 +513,93 @@ export const Link = {
   }
 };
 */
+
+export const ToUrl = routeConfig => {
+  const pathLookup = Object.entries(routeConfig).reduce(
+    (result, [path, page]) => Object.assign(result, { [page]: path }),
+    {}
+  );
+
+  return (page, params = {}) => {
+    const path = pathLookup[page];
+
+    return (path.match(/(:[^/]*)/g) || []).reduce(
+      (result, pathParam) =>
+        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+      path
+    );
+  };
+};
+
+/**
+ * Creates a router.
+ */
+const createToUrlRouter = ({
+  routeMatcher,
+  rootPath,
+  toUrl,
+  fromRoute,
+  matchToRoute = I,
+  plainHash = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  const historyMode = rootPath != null;
+  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
+  const getQuery = path => {
+    const idx = path.indexOf("?");
+    return idx >= 0 ? path.substring(idx + 1) : "";
+  };
+
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
+    return (query.length > 0 ? "?" : "") + query;
+  };
+
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const getPath = createGetPath(prefix, getUrl);
+
+  const routerToUrl = (page, params = {}, queryParams = {}) => {
+    const path = (historyMode ? stripTrailingSlash : I)(prefix + toUrl(page, params));
+    return path + getQueryString(queryParams);
+  };
+
+  const matcher = path => {
+    const matchPath = getPathWithoutQuery(path) || "/";
+    const match = routeMatcher(matchPath);
+    const queryParams = queryString.parse(getQuery(path));
+    return Object.assign(matchToRoute(Object.assign(match, { queryParams })));
+  };
+
+  const initialRoute = matcher(getPath());
+
+  const start = onRouteChange => {
+    wdw.onpopstate = () => onRouteChange(matcher(getPath()));
+  };
+
+  const syncLocationBar = route => {
+    const { page, params, queryParams } = fromRoute(route);
+    const url = routerToUrl(page, params, queryParams);
+    if (url !== getUrl()) {
+      const fn = route.replace ? "replaceState" : "pushState";
+      wdw.history[fn].call(wdw.history, {}, "", url);
+    }
+  };
+
+  const api = { initialRoute, toUrl: routerToUrl, start, syncLocationBar };
+
+  if (historyMode) {
+    api.getLinkHandler = url => evt => {
+      evt.preventDefault();
+      wdw.history.pushState({}, "", url);
+      wdw.onpopstate(null);
+    };
+  }
+
+  return api;
+};
 
 /**
  * Creates a router.
