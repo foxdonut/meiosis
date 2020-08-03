@@ -4,6 +4,7 @@ import { settings } from "../settings";
 import { tea } from "router-setup-common/src/tea";
 import { teaDetails } from "router-setup-common/src/teaDetails";
 import { teaSearch } from "router-setup-common/src/teaSearch";
+import { locationBar } from "router-setup-common/src/locationBar";
 import { router } from "../router";
 import { selectors } from "../state";
 
@@ -23,7 +24,11 @@ export const createApp = () => ({
     teaSearch.Service(selectors)
   ],
 
-  Effects: update => [tea.Effect(update), teaSearch.Effect(update), router.effect]
+  Effects: update => [
+    tea.Effect(update),
+    teaSearch.Effect(update),
+    locationBar.Effect(router, selectors)
+  ]
 });
 
 export { App } from "./view";

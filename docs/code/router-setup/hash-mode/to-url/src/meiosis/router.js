@@ -43,8 +43,7 @@ export const createRouter = routeConfig => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = matcher(pathWithoutQuery);
     const queryParams = queryString.parse(getQuery(path));
-    const url = prefix + match.url + getQueryString(queryParams);
-    return Object.assign(match, { params: match.params, queryParams, url });
+    return Object.assign(match, { params: match.params, queryParams });
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -62,5 +61,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, start, toUrl, syncLocationBar };
+  return { initialRoute, toUrl, start, syncLocationBar };
 };

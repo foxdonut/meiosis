@@ -27,15 +27,15 @@ export const createRouter = routeConfig => {
     {}
   );
 
-  const toUrl = (page, params = {}) => {
-    const path = prefix + pathLookup[page];
+  const toUrl = (page, params = {}, queryParams = {}) => {
+    const path = prefix + stripTrailingSlash(pathLookup[page]);
 
     return (
       (path.match(/(:[^/]*)/g) || []).reduce(
         (result, pathParam) =>
           result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
         path
-      ) + getQueryString(params.queryParams)
+      ) + getQueryString(queryParams)
     );
   };
 
@@ -44,19 +44,9 @@ export const createRouter = routeConfig => {
   const routeMatcher = path => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = matcher(pathWithoutQuery);
-    const params = Object.assign(match.params, {
-      queryParams: queryString.parse(getQuery(path))
-    });
-    const url = prefix + stripTrailingSlash(match.url) + getQueryString(params.queryParams);
-    return Object.assign(match, { params, url });
+    const queryParams = queryString.parse(getQuery(path));
+    return Object.assign(match, { params: match.params, queryParams });
   };
-
-  const toRoute = (page, params = {}) =>
-    selectors.toRoute({
-      page,
-      params,
-      url: toUrl(page, params)
-    });
 
   const initialRoute = routeMatcher(getPath());
 
@@ -70,12 +60,14 @@ export const createRouter = routeConfig => {
     window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
-  const effect = state => {
-    const url = selectors.url(state);
+  const syncLocationBar = route => {
+    const { page, params, queryParams } = selectors.fromRoute(route);
+    const url = toUrl(page, params, queryParams);
     if (url !== getUrl()) {
-      window.history.pushState({}, "", url);
+      const fn = route.replace ? "replaceState" : "pushState";
+      window.history[fn].call(window.history, {}, "", url);
     }
   };
 
-  return { initialRoute, toRoute, toUrl, getLinkHandler, start, effect };
+  return { initialRoute, toUrl, getLinkHandler, start, syncLocationBar };
 };
