@@ -370,6 +370,18 @@
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 const I = x => x;
 
+const getPathWithoutQuery = path => path.replace(/\?.*/, "");
+
+const getQuery = path => {
+  const idx = path.indexOf("?");
+  return idx >= 0 ? path.substring(idx + 1) : "";
+};
+
+const getQueryString = (queryString, queryParams = {}) => {
+  const query = queryString.stringify(queryParams);
+  return (query.length > 0 ? "?" : "") + query;
+};
+
 const createGetUrl = (prefix, historyMode, wdw = window) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
@@ -424,6 +436,25 @@ const emptyQueryString = {
   stringify: _ => ""
 };
 
+const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
+  if (url !== getUrl()) {
+    const fn = route.replace ? "replaceState" : "pushState";
+    wdw.history[fn].call(wdw.history, {}, "", url);
+  }
+};
+
+const createApi = ({ api, historyMode, wdw }) => {
+  if (historyMode) {
+    api.getLinkHandler = url => evt => {
+      evt.preventDefault();
+      wdw.history.pushState({}, "", url);
+      wdw.onpopstate(null);
+    };
+  }
+
+  return api;
+};
+
 /**
  * Creates a router.
  */
@@ -436,42 +467,48 @@ export const createRouter = ({
   plainHash = false,
   queryString = emptyQueryString,
   wdw = window
+}) =>
+  toUrl == null
+    ? createHardcodedUrlRouter({
+        routeMatcher,
+        rootPath,
+        matchToRoute,
+        plainHash,
+        queryString,
+        wdw
+      })
+    : createProgrammaticUrlRouter({
+        routeMatcher,
+        rootPath,
+        toUrl,
+        fromRoute,
+        matchToRoute,
+        plainHash,
+        queryString,
+        wdw
+      });
+
+const createHardcodedUrlRouter = ({
+  routeMatcher,
+  rootPath,
+  matchToRoute = I,
+  plainHash = false,
+  queryString = emptyQueryString,
+  wdw = window
 }) => {
-  if (toUrl != null) {
-    return createToUrlRouter({
-      routeMatcher,
-      rootPath,
-      toUrl,
-      fromRoute,
-      matchToRoute,
-      plainHash,
-      queryString,
-      wdw
-    });
-  }
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
-
-  const getQuery = path => {
-    const idx = path.indexOf("?");
-    return idx >= 0 ? path.substring(idx + 1) : "";
-  };
-
-  const getQueryString = (queryParams = {}) => {
-    const query = queryString.stringify(queryParams);
-    return (query.length > 0 ? "?" : "") + query;
-  };
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
+  const getStatePath = historyMode ? stripTrailingSlash : I;
 
   const toRoute = (path, options) => {
     const matchPath = getPathWithoutQuery(path) || "/";
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
-    const statePath = historyMode ? stripTrailingSlash(matchPath) : matchPath;
-    const url = prefix + statePath + getQueryString(queryParams);
+    const statePath = getStatePath(matchPath);
+    const url = prefix + statePath + getQueryString(queryString, queryParams);
     return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
   };
 
@@ -483,25 +520,13 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const syncLocationBar = route => {
-    const url = route.url;
-    if (url !== getUrl()) {
-      const fn = route.replace ? "replaceState" : "pushState";
-      wdw.history[fn].call(wdw.history, {}, "", url);
-    }
-  };
+  const syncLocationBar = route => doSyncLocationBar({ route, url: route.url, getUrl, wdw });
 
-  const api = { initialRoute, toRoute, toUrl: routerToUrl, start, syncLocationBar };
-
-  if (historyMode) {
-    api.getLinkHandler = url => evt => {
-      evt.preventDefault();
-      wdw.history.pushState({}, "", url);
-      wdw.onpopstate(null);
-    };
-  }
-
-  return api;
+  return createApi({
+    api: { initialRoute, toRoute, toUrl: routerToUrl, start, syncLocationBar },
+    historyMode,
+    wdw
+  });
 };
 
 /* getLinkHandler usage: in a Link component
@@ -534,7 +559,7 @@ export const ToUrl = routeConfig => {
 /**
  * Creates a router.
  */
-const createToUrlRouter = ({
+const createProgrammaticUrlRouter = ({
   routeMatcher,
   rootPath,
   toUrl,
@@ -546,201 +571,39 @@ const createToUrlRouter = ({
 }) => {
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
-
-  const getQuery = path => {
-    const idx = path.indexOf("?");
-    return idx >= 0 ? path.substring(idx + 1) : "";
-  };
-
-  const getQueryString = (queryParams = {}) => {
-    const query = queryString.stringify(queryParams);
-    return (query.length > 0 ? "?" : "") + query;
-  };
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
+  const getStatePath = historyMode ? stripTrailingSlash : I;
 
-  const routerToUrl = (page, params = {}, queryParams = {}) => {
-    const path = (historyMode ? stripTrailingSlash : I)(prefix + toUrl(page, params));
-    return path + getQueryString(queryParams);
-  };
-
-  const matcher = path => {
+  const toRoute = path => {
     const matchPath = getPathWithoutQuery(path) || "/";
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
     return Object.assign(matchToRoute(Object.assign(match, { queryParams })));
   };
 
-  const initialRoute = matcher(getPath());
+  const routerToUrl = (page, params = {}, queryParams = {}) => {
+    const path = getStatePath(prefix + toUrl(page, params));
+    return path + getQueryString(queryString, queryParams);
+  };
+
+  const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(matcher(getPath()));
+    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
   const syncLocationBar = route => {
     const { page, params, queryParams } = fromRoute(route);
-    const url = routerToUrl(page, params, queryParams);
-    if (url !== getUrl()) {
-      const fn = route.replace ? "replaceState" : "pushState";
-      wdw.history[fn].call(wdw.history, {}, "", url);
-    }
+    doSyncLocationBar({ route, url: routerToUrl(page, params, queryParams), getUrl, wdw });
   };
 
-  const api = { initialRoute, toUrl: routerToUrl, start, syncLocationBar };
-
-  if (historyMode) {
-    api.getLinkHandler = url => evt => {
-      evt.preventDefault();
-      wdw.history.pushState({}, "", url);
-      wdw.onpopstate(null);
-    };
-  }
-
-  return api;
-};
-
-/**
- * Creates a router.
- */
-export const _createRouter = ({
-  // routeConfig,
-  routeMatcher,
-  matchToRoute,
-  fromRoute,
-  toRoute,
-  toUrl,
-  plainHash = false,
-  historyMode = false,
-  queryString = emptyQueryString,
-  wdw = window
-}) => {
-  const pathname = wdw.location.pathname;
-  const prefix = historyMode
-    ? pathname.endsWith("/")
-      ? pathname.substring(0, pathname.length - 1)
-      : pathname
-    : "#" + (plainHash ? "" : "!");
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
-
-  const getQuery = path => {
-    const idx = path.indexOf("?");
-    return idx >= 0 ? path.substring(idx + 1) : "";
-  };
-
-  const getUrl = createGetUrl(prefix, historyMode, wdw);
-  const getPath = createGetPath(prefix, getUrl);
-  /*
-  const getQueryString = (queryParams = {}) => {
-    const query = queryString.stringify(queryParams);
-    return (query.length > 0 ? "?" : "") + query;
-  };
-  const toUrl = createToUrl(prefix, routeConfig, getQueryString);
-  */
-
-  const matcher = path => {
-    const match = routeMatcher(getPathWithoutQuery(path));
-    const queryParams = queryString.parse(getQuery(path));
-    return matchToRoute(match, queryParams);
-  };
-
-  /* instead of getRoute:
-   * - toRoute(page, params, queryParams), or
-   * - matcher(path) <-- if we're not using page IDs for routes, we don't need toUrl
-   * and we should store the url in the state.
-   */
-  const getRoute = (page, params = {}, queryParams = {}) =>
-    page.startsWith("/") ? matcher(page) : toRoute(page, params, queryParams);
-
-  const getLinkHandler = url => evt => {
-    evt.preventDefault();
-    wdw.history.pushState({}, "", url);
-    wdw.onpopstate(null);
-  };
-
-  const initialRoute = matcher(getPath());
-
-  const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(matcher(getPath()));
-  };
-
-  const syncLocationBar = route => {
-    const { page, params, queryParams } = fromRoute(route);
-    const url = toUrl(page, params, queryParams);
-    if (url !== getUrl()) {
-      wdw.history.pushState({}, "", url);
-    }
-  };
-
-  return { initialRoute, getRoute, getLinkHandler, toUrl, start, syncLocationBar };
-};
-
-/**
- * Sets up a router using
- * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher).
- *
- * @param {FeatherRouterConfig} config
- *
- * @return {FeatherRouter}
- */
-export const createFeatherRouter = ({
-  createRouteMatcher,
-  routeConfig,
-  queryString = emptyQueryString,
-  plainHash = false,
-  historyMode = false,
-  routeProp = "route",
-  wdw = window
-}) => {
-  const pathname = wdw.location.pathname;
-  const prefix = historyMode
-    ? pathname.endsWith("/")
-      ? pathname.substring(0, pathname.length - 1)
-      : pathname
-    : "#" + (plainHash ? "" : "!");
-  const getPathWithoutQuery = path => path.replace(/\?.*/, "");
-
-  const getQuery = path => {
-    const idx = path.indexOf("?");
-    return idx >= 0 ? path.substring(idx + 1) : "";
-  };
-
-  const getQueryString = (queryParams = {}) => {
-    const query = queryString.stringify(queryParams);
-    return (query.length > 0 ? "?" : "") + query;
-  };
-
-  const getUrl = createGetUrl(prefix, historyMode);
-  const getPath = createGetPath(prefix, getUrl);
-  const toUrl = createToUrl(prefix, routeConfig, getQueryString);
-  const matcher = createRouteMatcher(routeConfig);
-
-  const routeMatcher = path => {
-    const match = matcher(getPathWithoutQuery(path));
-    const queryParams = queryString.parse(getQuery(path));
-    const url = prefix + match.url + getQueryString(queryParams);
-    return Object.assign(match, { params: match.params, queryParams, url });
-  };
-
-  const getRoute = createGetRoute("", toUrl, routeMatcher);
-
-  const getLinkHandler = url => evt => {
-    evt.preventDefault();
-    wdw.history.pushState({}, "", url);
-    wdw.onpopstate(null);
-  };
-
-  const initialRoute = routeMatcher(getPath());
-
-  const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(routeMatcher(getPath()));
-  };
-
-  const locationBarSync = createLocationBarSync(getUrl);
-  const effect = createEffect(locationBarSync, routeProp);
-
-  return { initialRoute, getRoute, getLinkHandler, toUrl, start, locationBarSync, effect };
+  return createApi({
+    api: { initialRoute, toUrl: routerToUrl, start, syncLocationBar },
+    historyMode,
+    wdw
+  });
 };
 
 /**

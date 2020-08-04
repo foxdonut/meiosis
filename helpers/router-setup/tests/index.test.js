@@ -7,7 +7,7 @@ import { createRouter } from "../src/index";
 
 const decodeURI = uri => uri;
 
-describe("hardcoded paths", () => {
+describe("hardcoded urls", () => {
   const rootPath = "/my-server/my-base-path";
   const plainHashAndHistoryModeCases = [
     ["default", {}, "#!"],
