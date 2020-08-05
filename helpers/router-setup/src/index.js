@@ -443,7 +443,7 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
   }
 };
 
-const createApi = ({ api, historyMode, wdw }) => {
+const createApi = ({ api, historyMode, isProgrammaticUrl, toRoute, wdw }) => {
   if (historyMode) {
     api.getLinkHandler = url => evt => {
       evt.preventDefault();
@@ -452,94 +452,12 @@ const createApi = ({ api, historyMode, wdw }) => {
     };
   }
 
+  if (!isProgrammaticUrl) {
+    api.toRoute = toRoute;
+  }
+
   return api;
 };
-
-/**
- * Creates a router.
- */
-export const createRouter = ({
-  routeMatcher,
-  rootPath,
-  routeConfig,
-  toUrl,
-  fromRoute,
-  matchToRoute = I,
-  plainHash = false,
-  queryString = emptyQueryString,
-  wdw = window
-}) =>
-  routeConfig == null && toUrl == null
-    ? createHardcodedUrlRouter({
-        routeMatcher,
-        rootPath,
-        matchToRoute,
-        plainHash,
-        queryString,
-        wdw
-      })
-    : createProgrammaticUrlRouter({
-        routeMatcher,
-        rootPath,
-        routeConfig,
-        toUrl,
-        fromRoute,
-        matchToRoute,
-        plainHash,
-        queryString,
-        wdw
-      });
-
-const createHardcodedUrlRouter = ({
-  routeMatcher,
-  rootPath,
-  matchToRoute = I,
-  plainHash = false,
-  queryString = emptyQueryString,
-  wdw = window
-}) => {
-  const historyMode = rootPath != null;
-  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
-
-  const getUrl = createGetUrl(prefix, historyMode, wdw);
-  const getPath = createGetPath(prefix, getUrl);
-  const getStatePath = historyMode ? stripTrailingSlash : I;
-
-  const toRoute = (path, options) => {
-    const matchPath = getPathWithoutQuery(path) || "/";
-    const match = routeMatcher(matchPath);
-    const queryParams = queryString.parse(getQuery(path));
-    const statePath = getStatePath(matchPath);
-    const url = prefix + statePath + getQueryString(queryString, queryParams);
-    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
-  };
-
-  const routerToUrl = path => prefix + path;
-
-  const initialRoute = toRoute(getPath());
-
-  const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
-  };
-
-  const syncLocationBar = route => doSyncLocationBar({ route, url: route.url, getUrl, wdw });
-
-  return createApi({
-    api: { initialRoute, toRoute, toUrl: routerToUrl, start, syncLocationBar },
-    historyMode,
-    wdw
-  });
-};
-
-/* getLinkHandler usage: in a Link component
-export const Link = {
-  view: ({ attrs, children }) => {
-    const url = router.toUrl(attrs.href);
-
-    return m("a", { ...attrs, href: url, onclick: router.getLinkHandler(url) }, children);
-  }
-};
-*/
 
 export const ToUrl = routeConfig => {
   const pathLookup = Object.entries(routeConfig).reduce(
@@ -561,7 +479,7 @@ export const ToUrl = routeConfig => {
 /**
  * Creates a router.
  */
-const createProgrammaticUrlRouter = ({
+export const createRouter = ({
   routeMatcher,
   rootPath,
   routeConfig,
@@ -572,25 +490,33 @@ const createProgrammaticUrlRouter = ({
   queryString = emptyQueryString,
   wdw = window
 }) => {
+  const isProgrammaticUrl = routeConfig != null || toUrl != null;
+
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = routeConfig != null ? ToUrl(routeConfig) : toUrl;
+  const toUrlFn = isProgrammaticUrl ? (routeConfig != null ? ToUrl(routeConfig) : toUrl) : null;
 
-  const toRoute = path => {
+  const toRoute = (path, options) => {
     const matchPath = getPathWithoutQuery(path) || "/";
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
-    return Object.assign(matchToRoute(Object.assign(match, { queryParams })));
+
+    const statePath = getStatePath(matchPath);
+    const url = prefix + statePath + getQueryString(queryString, queryParams);
+
+    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
   };
 
-  const routerToUrl = (page, params = {}, queryParams = {}) => {
-    const path = getStatePath(prefix + toUrlFn(page, params));
-    return path + getQueryString(queryString, queryParams);
-  };
+  const routerToUrl = isProgrammaticUrl
+    ? (page, params = {}, queryParams = {}) => {
+        const path = getStatePath(prefix + toUrlFn(page, params));
+        return path + getQueryString(queryString, queryParams);
+      }
+    : path => prefix + path;
 
   const initialRoute = toRoute(getPath());
 
@@ -598,17 +524,31 @@ const createProgrammaticUrlRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const syncLocationBar = route => {
-    const { page, params, queryParams } = fromRoute(route);
-    doSyncLocationBar({ route, url: routerToUrl(page, params, queryParams), getUrl, wdw });
-  };
+  const syncLocationBar = isProgrammaticUrl
+    ? route => {
+        const { page, params, queryParams } = fromRoute(route);
+        doSyncLocationBar({ route, url: routerToUrl(page, params, queryParams), getUrl, wdw });
+      }
+    : route => doSyncLocationBar({ route, url: route.url, getUrl, wdw });
 
   return createApi({
     api: { initialRoute, toUrl: routerToUrl, start, syncLocationBar },
     historyMode,
+    isProgrammaticUrl,
+    toRoute,
     wdw
   });
 };
+
+/* getLinkHandler usage: in a Link component
+export const Link = {
+  view: ({ attrs, children }) => {
+    const url = router.toUrl(attrs.href);
+
+    return m("a", { ...attrs, href: url, onclick: router.getLinkHandler(url) }, children);
+  }
+};
+*/
 
 /**
  * Sets up a router using
