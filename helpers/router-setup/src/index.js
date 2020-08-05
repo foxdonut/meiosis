@@ -461,6 +461,7 @@ const createApi = ({ api, historyMode, wdw }) => {
 export const createRouter = ({
   routeMatcher,
   rootPath,
+  routeConfig,
   toUrl,
   fromRoute,
   matchToRoute = I,
@@ -468,7 +469,7 @@ export const createRouter = ({
   queryString = emptyQueryString,
   wdw = window
 }) =>
-  toUrl == null
+  routeConfig == null && toUrl == null
     ? createHardcodedUrlRouter({
         routeMatcher,
         rootPath,
@@ -480,6 +481,7 @@ export const createRouter = ({
     : createProgrammaticUrlRouter({
         routeMatcher,
         rootPath,
+        routeConfig,
         toUrl,
         fromRoute,
         matchToRoute,
@@ -562,6 +564,7 @@ export const ToUrl = routeConfig => {
 const createProgrammaticUrlRouter = ({
   routeMatcher,
   rootPath,
+  routeConfig,
   toUrl,
   fromRoute,
   matchToRoute = I,
@@ -575,6 +578,7 @@ const createProgrammaticUrlRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = createGetPath(prefix, getUrl);
   const getStatePath = historyMode ? stripTrailingSlash : I;
+  const toUrlFn = routeConfig != null ? ToUrl(routeConfig) : toUrl;
 
   const toRoute = path => {
     const matchPath = getPathWithoutQuery(path) || "/";
@@ -584,7 +588,7 @@ const createProgrammaticUrlRouter = ({
   };
 
   const routerToUrl = (page, params = {}, queryParams = {}) => {
-    const path = getStatePath(prefix + toUrl(page, params));
+    const path = getStatePath(prefix + toUrlFn(page, params));
     return path + getQueryString(queryString, queryParams);
   };
 
