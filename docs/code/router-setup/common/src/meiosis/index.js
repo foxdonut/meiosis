@@ -8,7 +8,7 @@ export const meiosis = ({ stream, merge, app }) => {
 
   const states = stream.scan(
     (state, patch) => runServices(merge(state, patch)),
-    runServices(app.initial),
+    runServices(app.initial || {}),
     update
   );
 

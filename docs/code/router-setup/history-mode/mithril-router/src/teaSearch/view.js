@@ -23,7 +23,7 @@ export const TeaSearch = () => ({
                   m.route.Link,
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, { queryParams: { type } })
+                    href: router.toUrl(Route.TeaSearch, { type })
                   },
                   type
                 )

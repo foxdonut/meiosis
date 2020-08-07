@@ -3,7 +3,6 @@ export const selectors = {
   page: state => state.route.value,
   params: state => state.route.params,
   queryParams: state => state.route.queryParams,
-  url: state => state.route.url,
   teaType: state => selectors.queryParams(state).type,
   toRoute: (page, params = {}, queryParams = {}, options = {}) => ({
     value: page,
