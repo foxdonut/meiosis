@@ -1,4 +1,3 @@
-// FIXME: adjust other selectors
 export const selectors = {
   route: state => state.route || {},
   page: state => selectors.route(state).page,

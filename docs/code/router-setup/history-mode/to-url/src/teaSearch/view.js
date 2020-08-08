@@ -24,7 +24,7 @@ export const TeaSearch = () => ({
                   Link,
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, {}, { type })
+                    href: router.toUrl(Route.TeaSearch, { type })
                   },
                   type
                 )

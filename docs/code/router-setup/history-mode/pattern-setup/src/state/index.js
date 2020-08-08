@@ -1,7 +1,7 @@
 export const selectors = {
   route: state => state.route,
-  page: state => state.route.value,
-  params: state => state.route.params,
-  url: state => state.route.url,
+  page: state => selectors.route(state).value,
+  params: state => selectors.route(state).params,
+  url: state => selectors.route(state).url,
   teaType: state => state.teaType
 };

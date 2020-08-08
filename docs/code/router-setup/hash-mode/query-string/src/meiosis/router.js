@@ -26,7 +26,7 @@ export const createRouter = routeConfig => {
     const match = matcher(pathWithoutQuery);
     const queryParams = queryString.parse(getQuery(path));
     const url = prefix + match.url + getQueryString(queryParams);
-    return Object.assign(match, { params: match.params, queryParams, url }, options);
+    return Object.assign(match, { params: Object.assign(match.params, queryParams), url }, options);
   };
 
   const initialRoute = toRoute(getPath());

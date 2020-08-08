@@ -16,12 +16,12 @@ export const createMithrilRouter = routeConfig => {
   };
 
   const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, id]) => Object.assign(result, { [id]: path }),
+    (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
   );
 
-  const toUrl = (id, params = {}) => {
-    const path = prefix + pathLookup[id];
+  const toUrl = (page, params = {}) => {
+    const path = prefix + pathLookup[page];
     const pathParams = [];
 
     const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {

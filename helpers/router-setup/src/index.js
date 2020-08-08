@@ -147,7 +147,7 @@
 /**
  * Function that synchronizes the location bar with the state route.
  *
- * @callback LocationBarSync
+ * @callback SyncLocationBar
  *
  * @param {Route} route the route from the application state.
  * @return {void}
@@ -264,7 +264,7 @@
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  * @property {Start} start function to start the router.
- * @property {LocationBarSync} locationBarSync function that synchronizes the location bar with the
+ * @property {SyncLocationBar} locationBarSync function that synchronizes the location bar with the
  * state route.
  * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
@@ -275,15 +275,15 @@
  * @typedef {Object} MithrilRouterConfig
  *
  * @property {m} m the Mithril instance.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support.
  * @property {RouteConfig} routeConfig the route configuration.
+ * @property {*} fromRoute
+ * @property {*} toRoute
+ * @property {*} matchToRoute
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `historyMode` is `true`.
- * @property {boolean} [historyMode=false] if `true`, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support. By default,
- * `historyMode` is `false`.
- * @property {string} [routeProp="route"] this is the property in your state where the route is
- * stored. Defaults to `"route"`.
  * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
@@ -357,14 +357,11 @@
  *
  * @typedef {Object} MithrilRouter
  *
- * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
  * as the third argument to `m.route`.
- * @property {GetRoute} getRoute function to generate a route.
  * @property {ToUrl} toUrl function to generate a URL.
- * @property {LocationBarSync} locationBarSync function that synchronizes the location bar with the
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
- * @property {Effect} effect effect function to synchronize the location bar with the state route.
  */
 
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
@@ -382,54 +379,10 @@ const getQueryString = (queryString, queryParams = {}) => {
   return (query.length > 0 ? "?" : "") + query;
 };
 
-const createGetUrl = (prefix, historyMode, wdw = window) =>
+const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
-
-const createGetPath = (prefix, getUrl) => () => getUrl().substring(prefix.length) || "/";
-
-const createToUrl = (prefix, routeConfig, getQueryString) => (
-  page,
-  params = {},
-  queryParams = {}
-) => {
-  const pathTemplateLookup = Object.keys(routeConfig).reduce(
-    (result, path) => Object.assign(result, { [routeConfig[path]]: path }),
-    {}
-  );
-
-  // FIXME. Need to have a better separation of hardcoded paths vs toUrl approach.
-  // Also, who's to say routes map to plain string page IDs?
-  const url = prefix + (page.startsWith("/") ? page : pathTemplateLookup[page]);
-
-  return (
-    (url.match(/(:[^/]*)/g) || []).reduce(
-      (result, pathParam) =>
-        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-      url
-    ) + getQueryString(queryParams)
-  );
-};
-
-const createGetRoute = (prefix, toUrl, matcher) => (page, params = {}, queryParams = {}) =>
-  page.startsWith("/")
-    ? matcher(page)
-    : {
-        page,
-        params,
-        url: prefix + toUrl(page, params, queryParams)
-      };
-
-const createLocationBarSync = (getUrl, wdw = window) => route => {
-  if (route.url !== getUrl()) {
-    wdw.history.pushState({}, "", route.url);
-  }
-};
-
-const createEffect = (locationBarSync, routeProp) => state => {
-  locationBarSync(state[routeProp]);
-};
 
 const emptyQueryString = {
   parse: _ => ({}),
@@ -496,7 +449,7 @@ export const createRouter = ({
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
-  const getPath = createGetPath(prefix, getUrl);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
   const getStatePath = historyMode ? stripTrailingSlash : I;
   const toUrlFn = isProgrammaticUrl ? (routeConfig != null ? ToUrl(routeConfig) : toUrl) : null;
 
@@ -560,44 +513,66 @@ export const Link = {
  */
 export const createMithrilRouter = ({
   m,
+  rootPath,
   routeConfig,
+  fromRoute,
+  toRoute,
   plainHash = false,
-  historyMode = false,
-  routeProp = "route",
   wdw = window
 }) => {
-  const pathname = wdw.location.pathname;
-  const prefix = historyMode
-    ? pathname.endsWith("/")
-      ? pathname.substring(0, pathname.length - 1)
-      : pathname
-    : "#" + (plainHash ? "" : "!");
+  const historyMode = rootPath != null;
+  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
   m.route.prefix = prefix;
 
-  const getQueryString = (queryParams = {}) => {
-    const query = m.buildQueryString(queryParams);
-    return (query.length > 0 ? "?" : "") + query;
-  };
+  const queryString = { stringify: m.buildQueryString };
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
 
-  const getUrl = createGetUrl(prefix, historyMode);
-  const toUrl = createToUrl(historyMode ? "" : prefix, routeConfig, getQueryString);
-  const getRoute = createGetRoute(historyMode ? prefix : "", toUrl);
+  const pathLookup = Object.entries(routeConfig).reduce(
+    (result, [path, id]) => Object.assign(result, { [id]: path }),
+    {}
+  );
+
+  const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
+
+  const toUrl = (id, params = {}) => {
+    const path = getStatePath(pathLookup[id]);
+    const pathParams = [];
+
+    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
+      pathParams.push(pathParam.substring(1));
+      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
+    }, path);
+
+    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
+      if (pathParams.indexOf(key) < 0) {
+        result[key] = value;
+      }
+      return result;
+    }, {});
+
+    return result + getQueryString(queryString, queryParams);
+  };
 
   const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: (params, url) => onRouteChange({ page, params, url: prefix + url }),
+        onmatch: params => onRouteChange(toRoute(page, params)),
         render: () => m(App, { state: states(), update, actions })
       };
       return result;
     }, {});
 
-  // FIXME
-  const initialRoute = { url: getUrl(), page: "", params: {}, queryParams: {} };
-  const locationBarSync = createLocationBarSync(getUrl);
-  const effect = createEffect(locationBarSync, routeProp);
+  // FIXME: prefix, no prefix, getPath, getUrl...
+  const addPrefix = historyMode ? url => prefix + url : I;
 
-  return { createMithrilRoutes, initialRoute, getRoute, toUrl, locationBarSync, effect };
+  const syncLocationBar = route => {
+    const { page, params } = fromRoute(route);
+    if (page) {
+      doSyncLocationBar({ route, url: addPrefix(toUrl(page, params)), getUrl, wdw });
+    }
+  };
+
+  return { createMithrilRoutes, toUrl, syncLocationBar };
 };
