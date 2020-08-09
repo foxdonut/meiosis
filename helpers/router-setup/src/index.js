@@ -564,7 +564,6 @@ export const createMithrilRouter = ({
       return result;
     }, {});
 
-  // FIXME: prefix, no prefix, getPath, getUrl...
   const addPrefix = historyMode ? url => prefix + url : I;
 
   const syncLocationBar = route => {

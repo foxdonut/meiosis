@@ -1,5 +1,5 @@
 import { service } from "./service";
-import { Effect } from "./effect";
+import { Effect } from "router-setup-common/src/teaSearch/effect";
 
 export const teaSearch = {
   service,

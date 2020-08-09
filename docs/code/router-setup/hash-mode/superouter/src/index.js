@@ -5,7 +5,7 @@ import stream from "mithril/stream";
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
 
-import { meiosis } from "./meiosis";
+import { meiosis } from "router-setup-common/src/meiosis";
 import { createApp, App } from "./app";
 import { router } from "./router";
 

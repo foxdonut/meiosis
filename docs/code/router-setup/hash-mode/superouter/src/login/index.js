@@ -6,4 +6,4 @@ export const login = {
   service
 };
 
-export { Login } from "./view";
+export { Login } from "router-setup-common/src/login/view";

@@ -1,10 +1,10 @@
 import m from "mithril";
 
-import { Home } from "../home";
+import { Home } from "router-setup-common/src/home";
 import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
-import { TeaSearch } from "../teaSearch";
+import { TeaSearch } from "../teaSearch/view";
 import { Route, router } from "../router";
 
 const componentMap = Route.fold({
@@ -27,16 +27,16 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toPath(Route.of.Home()) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toPath(Route.of.Login()) }, "Login")),
+          m("li" + isActive(Home), m("a", { href: router.toUrl(Route.of.Home()) }, "Home")),
+          m("li" + isActive(Login), m("a", { href: router.toUrl(Route.of.Login()) }, "Login")),
           m(
             "li" + isActive(Settings),
-            m("a", { href: router.toPath(Route.of.Settings()) }, "Settings")
+            m("a", { href: router.toUrl(Route.of.Settings()) }, "Settings")
           ),
-          m("li" + isActive(Tea), m("a", { href: router.toPath(Route.of.Tea()) }, "Tea")),
+          m("li" + isActive(Tea), m("a", { href: router.toUrl(Route.of.Tea()) }, "Tea")),
           m(
             "li" + isActive(TeaSearch),
-            m("a", { href: router.toPath(Route.of.TeaSearch()) }, "Tea Search")
+            m("a", { href: router.toUrl(Route.of.TeaSearch()) }, "Tea Search")
           )
         )
       ),

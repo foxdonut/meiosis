@@ -7,6 +7,6 @@ export const TeaDetails = {
     m(
       "div",
       m("div", state.tea[id]),
-      m("div", m("a", { href: router.toPath(Route.of.Tea()) }, "Close"))
+      m("div", m("a", { href: router.toUrl(Route.of.Tea()) }, "Close"))
     )
 };

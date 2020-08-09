@@ -1,5 +1,5 @@
 import { Route, allRoutes } from "../router";
-import { teaMap } from "./data";
+import { teaMap } from "router-setup-common/src/teaDetails/data";
 
 export const service = state =>
   Route.fold({

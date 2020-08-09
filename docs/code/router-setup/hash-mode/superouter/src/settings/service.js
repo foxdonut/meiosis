@@ -6,7 +6,7 @@ export const service = state =>
     Settings: () => {
       if (!state.user) {
         return {
-          route: Route.of.Login(),
+          route: () => Object.assign(Route.of.Login(), { replace: true }),
           login: {
             message: "Please login.",
             returnTo: Route.of.Settings()

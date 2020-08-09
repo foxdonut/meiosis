@@ -1,5 +1,12 @@
 export const selectors = {
-  page: state => state.route.value,
-  params: state => state.route.params,
-  url: state => state.route.url
+  route: state => state.route,
+  page: state => selectors.route(state).value,
+  params: state => selectors.route(state).params,
+  teaType: state => selectors.params(state).type,
+  toRoute: (page, params = {}, options = {}) => ({
+    value: page,
+    params,
+    ...options
+  }),
+  fromRoute: route => ({ page: route.value, params: route.params })
 };
