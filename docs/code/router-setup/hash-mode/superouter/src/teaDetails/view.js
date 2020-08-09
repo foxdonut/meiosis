@@ -1,9 +1,9 @@
 import m from "mithril";
 
-import { Route, router } from "../router";
+import { Route } from "../router";
 
 export const TeaDetails = {
-  view: ({ attrs: { state, id } }) =>
+  view: ({ attrs: { state, id, router } }) =>
     m(
       "div",
       m("div", state.tea[id]),

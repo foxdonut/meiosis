@@ -99,7 +99,6 @@
  *
  * @param {string} page the page ID.
  * @param {*} [params] the path parameters.
- * @param {*} [queryParams] the query parameters, if using query string support.
  * @return {string} the URL.
  */
 
@@ -412,7 +411,7 @@ const createApi = ({ api, historyMode, isProgrammaticUrl, toRoute, wdw }) => {
   return api;
 };
 
-export const ToUrl = routeConfig => {
+export const ToUrl = (routeConfig, queryString) => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
@@ -420,12 +419,21 @@ export const ToUrl = routeConfig => {
 
   return (page, params = {}) => {
     const path = pathLookup[page];
+    const pathParams = [];
 
-    return (path.match(/(:[^/]*)/g) || []).reduce(
-      (result, pathParam) =>
-        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-      path
-    );
+    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
+      pathParams.push(pathParam.substring(1));
+      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
+    }, path);
+
+    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
+      if (pathParams.indexOf(key) < 0) {
+        result[key] = value;
+      }
+      return result;
+    }, {});
+
+    return result + getQueryString(queryString, queryParams);
   };
 };
 
@@ -451,7 +459,11 @@ export const createRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || "/";
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = isProgrammaticUrl ? (routeConfig != null ? ToUrl(routeConfig) : toUrl) : null;
+  const toUrlFn = isProgrammaticUrl
+    ? routeConfig != null
+      ? ToUrl(routeConfig, queryString)
+      : toUrl
+    : null;
 
   const toRoute = (path, options) => {
     const matchPath = getPathWithoutQuery(path) || "/";
@@ -461,14 +473,15 @@ export const createRouter = ({
     const statePath = getStatePath(matchPath);
     const url = prefix + statePath + getQueryString(queryString, queryParams);
 
-    return Object.assign(matchToRoute(Object.assign(match, { queryParams })), { url }, options);
+    return Object.assign(
+      matchToRoute(Object.assign(match, { params: Object.assign({}, match.params, queryParams) })),
+      { url },
+      options
+    );
   };
 
   const routerToUrl = isProgrammaticUrl
-    ? (page, params = {}, queryParams = {}) => {
-        const path = getStatePath(prefix + toUrlFn(page, params));
-        return path + getQueryString(queryString, queryParams);
-      }
+    ? (page, params = {}) => getStatePath(prefix + toUrlFn(page, params))
     : path => prefix + path;
 
   const initialRoute = toRoute(getPath());
@@ -479,8 +492,8 @@ export const createRouter = ({
 
   const syncLocationBar = isProgrammaticUrl
     ? route => {
-        const { page, params, queryParams } = fromRoute(route);
-        doSyncLocationBar({ route, url: routerToUrl(page, params, queryParams), getUrl, wdw });
+        const { page, params } = fromRoute(route);
+        doSyncLocationBar({ route, url: routerToUrl(page, params), getUrl, wdw });
       }
     : route => doSyncLocationBar({ route, url: route.url, getUrl, wdw });
 

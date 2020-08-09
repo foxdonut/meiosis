@@ -5,7 +5,7 @@
   "description": "meiosis docs example",
   "main": "src/index.js",
   "scripts": {
-    "start": "webpack",
+    "start": "webpack && mv index-no-deps.html build-no-deps/index.html && mv index-with-lib.html build-with-lib/index.html",
     "watch": "webpack --progress --colors --watch"
   },
   "repository": {
@@ -37,6 +37,7 @@
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
     "babel-loader": "^8.1.0",
+    "html-webpack-plugin": "^4.3.0",
     "meiosis-tracer": "^4.0.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12"

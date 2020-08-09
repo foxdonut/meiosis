@@ -5,10 +5,9 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 import { locationBar } from "router-setup-common/src/locationBar";
-import { router } from "../router";
 import { selectors } from "../state";
 
-export const createApp = () => ({
+export const createApp = router => ({
   initial: {
     route: router.initialRoute
   },

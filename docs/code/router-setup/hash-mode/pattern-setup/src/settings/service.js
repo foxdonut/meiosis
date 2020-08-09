@@ -1,7 +1,7 @@
-import { Route, router } from "../router";
+import { Route } from "../router";
 import { selectors } from "../state";
 
-export const service = state => {
+export const Service = router => state => {
   if (selectors.page(state) === Route.Settings && !state.user) {
     return {
       route: router.toRoute("/login", { replace: true }),

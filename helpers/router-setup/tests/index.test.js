@@ -20,8 +20,7 @@ describe("hardcoded urls", () => {
       const historyMode = !!caseConfig.rootPath;
       const matchToRoute = match => ({
         page: match.value,
-        params: match.params,
-        queryParams: match.queryParams
+        params: match.params
       });
       const matchToRouteCases = [
         ["default", {}, "value"],
@@ -62,26 +61,15 @@ describe("hardcoded urls", () => {
           describe.each(routeCases)("%s", (_label, options, routerTestFn) => {
             const suffix = historyMode ? "" : "/";
             const routeCases = [
-              [
-                "slash",
-                "/",
-                {},
-                { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix + suffix }
-              ],
-              [
-                "empty",
-                "",
-                {},
-                { [pageProp]: "Home", params: {}, queryParams: {}, url: prefix + suffix }
-              ],
+              ["slash", "/", {}, { [pageProp]: "Home", params: {}, url: prefix + suffix }],
+              ["empty", "", {}, { [pageProp]: "Home", params: {}, url: prefix + suffix }],
               [
                 "slash with queryParams",
                 "/?sport=tennis",
                 { queryString },
                 {
                   [pageProp]: "Home",
-                  params: {},
-                  queryParams: { sport: "tennis" },
+                  params: { sport: "tennis" },
                   url: prefix + suffix + "?sport=tennis"
                 }
               ],
@@ -91,23 +79,17 @@ describe("hardcoded urls", () => {
                 { queryString },
                 {
                   [pageProp]: "Home",
-                  params: {},
-                  queryParams: { sport: "tennis" },
+                  params: { sport: "tennis" },
                   url: prefix + suffix + "?sport=tennis"
                 }
               ],
-              ["just a route", "/login", {}, { [pageProp]: "Login", params: {}, queryParams: {} }],
-              [
-                "with params",
-                "/user/42",
-                {},
-                { [pageProp]: "UserProfile", params: { id: "42" }, queryParams: {} }
-              ],
+              ["just a route", "/login", {}, { [pageProp]: "Login", params: {} }],
+              ["with params", "/user/42", {}, { [pageProp]: "UserProfile", params: { id: "42" } }],
               [
                 "with queryParams",
                 "/login?sport=tennis",
                 { queryString },
-                { [pageProp]: "Login", params: {}, queryParams: { sport: "tennis" } }
+                { [pageProp]: "Login", params: { sport: "tennis" } }
               ],
               [
                 "with params and queryParams",
@@ -115,8 +97,7 @@ describe("hardcoded urls", () => {
                 { queryString },
                 {
                   [pageProp]: "UserProfile",
-                  params: { id: "42" },
-                  queryParams: { sport: "tennis" }
+                  params: { id: "42", sport: "tennis" }
                 }
               ]
             ];
@@ -168,7 +149,6 @@ describe("hardcoded urls", () => {
               expect(calls[0][0]).toMatchObject({
                 [pageProp]: "Login",
                 params: {},
-                queryParams: {},
                 url: prefix + path
               });
             });

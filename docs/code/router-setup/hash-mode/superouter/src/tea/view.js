@@ -1,10 +1,10 @@
 import m from "mithril";
 
-import { Route, allRoutes, router } from "../router";
+import { Route, allRoutes } from "../router";
 import { TeaDetails } from "../teaDetails";
 
 export const Tea = {
-  view: ({ attrs: { state, actions } }) => [
+  view: ({ attrs: { state, router } }) => [
     m("h3", "Tea Page"),
     m(
       ".row",
@@ -21,7 +21,7 @@ export const Tea = {
       ),
       Route.fold({
         ...allRoutes(() => null),
-        TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, actions }))
+        TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, router }))
       })(state.route)
     )
   ]

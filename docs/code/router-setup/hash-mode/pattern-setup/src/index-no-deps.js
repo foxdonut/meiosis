@@ -7,7 +7,7 @@ import meiosisTracer from "meiosis-tracer";
 
 import { meiosis } from "router-setup-common/src/meiosis";
 import { createApp, App } from "./app";
-import { router } from "./router";
+import { router } from "./router/index-no-deps";
 
 const app = createApp(router);
 const { states, update, actions } = meiosis({ stream, merge, app });
@@ -20,7 +20,7 @@ meiosisTracer({
 });
 
 m.mount(document.getElementById("app"), {
-  view: () => m(App, { state: states(), actions, router })
+  view: () => m(App, { state: states(), update, actions, router })
 });
 
 router.start(route => update({ route: () => route }));

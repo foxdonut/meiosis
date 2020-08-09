@@ -5,7 +5,7 @@ import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch/view";
-import { Route, router } from "../router";
+import { Route } from "../router";
 
 const componentMap = Route.fold({
   Home: () => Home,
@@ -17,7 +17,7 @@ const componentMap = Route.fold({
 });
 
 export const App = {
-  view: ({ attrs: { state, actions } }) => {
+  view: ({ attrs: { state, actions, router } }) => {
     const Component = componentMap(state.route);
     const isActive = tab => (tab === Component ? ".active" : "");
 
@@ -40,7 +40,7 @@ export const App = {
           )
         )
       ),
-      m(Component, { state, actions }),
+      m(Component, { state, actions, router }),
 
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(
