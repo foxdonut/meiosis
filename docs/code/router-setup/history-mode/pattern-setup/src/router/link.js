@@ -1,11 +1,5 @@
-import m from "mithril";
+export const getLinkAttrs = (router, href) => {
+  const url = router.toUrl(href);
 
-import { router } from ".";
-
-export const Link = {
-  view: ({ attrs, children }) => {
-    const url = router.toUrl(attrs.href);
-
-    return m("a", { href: url, onclick: router.getLinkHandler(url), ...attrs }, children);
-  }
+  return { href: url, onclick: router.getLinkHandler(url) };
 };

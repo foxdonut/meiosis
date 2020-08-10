@@ -1,6 +1,4 @@
-import { router } from "../router";
-
-export const Actions = update => ({
+export const Actions = (update, router) => ({
   logout: () =>
     update({
       user: null,

@@ -1,6 +1,4 @@
-import { router } from "../router";
-
-export const Actions = update => ({
+export const Actions = (update, router) => ({
   username: value => update({ login: { username: value } }),
   password: value => update({ login: { password: value } }),
 

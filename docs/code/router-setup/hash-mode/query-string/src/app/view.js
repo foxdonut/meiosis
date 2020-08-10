@@ -19,7 +19,7 @@ const componentMap = {
 };
 
 export const App = {
-  view: ({ attrs: { state, update, actions } }) => {
+  view: ({ attrs: { state, update, actions, router } }) => {
     const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
@@ -36,7 +36,7 @@ export const App = {
           m("li" + isActive(TeaSearch), m("a", { href: "#!/tea/search" }, "Tea Search"))
         )
       ),
-      m(Component, { state, update, actions }),
+      m(Component, { state, update, actions, router }),
 
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(

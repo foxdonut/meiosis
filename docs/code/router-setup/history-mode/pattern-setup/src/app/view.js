@@ -6,7 +6,7 @@ import { Settings } from "../settings";
 import { Tea } from "../tea/view";
 import { TeaSearch } from "../teaSearch/view";
 import { NotFound } from "router-setup-common/src/notFound";
-import { Link } from "../router/link";
+import { getLinkAttrs } from "../router/link";
 import { selectors } from "../state";
 
 const componentMap = {
@@ -20,7 +20,7 @@ const componentMap = {
 };
 
 export const App = {
-  view: ({ attrs: { state, update, actions } }) => {
+  view: ({ attrs: { state, update, actions, router } }) => {
     const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
@@ -30,14 +30,14 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m(Link, { href: "/" }, "Home")),
-          m("li" + isActive(Login), m(Link, { href: "/login" }, "Login")),
-          m("li" + isActive(Settings), m(Link, { href: "/settings" }, "Settings")),
-          m("li" + isActive(Tea), m(Link, { href: "/tea" }, "Tea")),
-          m("li" + isActive(TeaSearch), m(Link, { href: "/tea/search" }, "Tea Search"))
+          m("li" + isActive(Home), m("a", getLinkAttrs("/"), "Home")),
+          m("li" + isActive(Login), m("a", getLinkAttrs("/login"), "Login")),
+          m("li" + isActive(Settings), m("a", getLinkAttrs("/settings"), "Settings")),
+          m("li" + isActive(Tea), m("a", getLinkAttrs("/tea"), "Tea")),
+          m("li" + isActive(TeaSearch), m("a", getLinkAttrs("/tea/search"), "Tea Search"))
         )
       ),
-      m(Component, { state, update, actions }),
+      m(Component, { state, update, actions, router }),
 
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(

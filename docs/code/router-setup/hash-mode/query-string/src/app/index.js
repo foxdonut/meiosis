@@ -5,20 +5,20 @@ import { tea } from "router-setup-common/src/tea";
 import { teaDetails } from "router-setup-common/src/teaDetails";
 import { teaSearch } from "router-setup-common/src/teaSearch";
 import { locationBar } from "router-setup-common/src/locationBar";
-import { router } from "../router";
 import { selectors } from "../state";
 
-export const createApp = () => ({
+export const createApp = router => ({
   initial: {
     route: router.initialRoute
   },
 
-  Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
+  Actions: update =>
+    Object.assign({}, login.Actions(update, router), settings.Actions(update, router)),
 
   services: [
-    settings.service,
+    settings.Service(router),
     home.Service(selectors),
-    login.service,
+    login.Service(router),
     tea.Service(selectors),
     teaDetails.Service(selectors),
     teaSearch.Service(selectors)

@@ -1,12 +1,12 @@
 import m from "mithril";
 
-import { Route, router } from "../router";
+import { Route } from "router-setup-common/src/router";
 import { selectors } from "../state";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
-  view: ({ attrs: { state } }) => {
+  view: ({ attrs: { state, router } }) => {
     const teaType = selectors.teaType(state);
 
     return [

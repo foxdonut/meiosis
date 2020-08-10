@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "../router";
+import { Route } from "router-setup-common/src/router";
 import { selectors } from "../state";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];

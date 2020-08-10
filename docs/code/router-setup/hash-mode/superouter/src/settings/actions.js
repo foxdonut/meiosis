@@ -1,4 +1,4 @@
-import { Route } from "../router";
+import { Route } from "router-setup-common/src/router";
 
 export const Actions = update => ({
   logout: () =>

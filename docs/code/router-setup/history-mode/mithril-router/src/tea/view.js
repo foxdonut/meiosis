@@ -1,7 +1,7 @@
 import m from "mithril";
 
 import { TeaDetails } from "../teaDetails/view";
-import { Route, router } from "../router";
+import { Route } from "router-setup-common/src/router";
 import { selectors } from "../state";
 
 export const Tea = {

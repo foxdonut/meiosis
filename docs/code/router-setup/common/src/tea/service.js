@@ -1,4 +1,4 @@
-import { Route } from "../router";
+import { Route } from "router-setup-common/src/router";
 
 export const Service = selectors => state => {
   if (selectors.page(state) === Route.Tea || selectors.page(state) === Route.TeaDetails) {

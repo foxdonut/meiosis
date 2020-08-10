@@ -7,7 +7,7 @@ import { Tea } from "../tea/view";
 import { TeaSearch } from "../teaSearch/view";
 import { NotFound } from "router-setup-common/src/notFound";
 import { selectors } from "../state";
-import { Route, router } from "../router";
+import { Route } from "router-setup-common/src/router";
 
 const componentMap = {
   Home,
@@ -20,7 +20,7 @@ const componentMap = {
 };
 
 export const App = {
-  view: ({ attrs: { state, update, actions } }) => {
+  view: ({ attrs: { state, update, actions, router } }) => {
     const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
@@ -40,7 +40,7 @@ export const App = {
           )
         )
       ),
-      m(Component, { state, update, actions }),
+      m(Component, { state, update, actions, router }),
 
       /* Show or hide the Please Wait modal. See public/css/style.css */
       m(

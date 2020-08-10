@@ -1,7 +1,7 @@
-import { Route, router } from "../router";
+import { Route } from "router-setup-common/src/router";
 import { selectors } from "../state";
 
-export const service = state => {
+export const Service = router => state => {
   if (selectors.page(state) === Route.Login) {
     if (!state.login || state.login.username == null) {
       return {

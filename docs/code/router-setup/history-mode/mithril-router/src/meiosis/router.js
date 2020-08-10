@@ -45,7 +45,7 @@ export const createMithrilRouter = routeConfig => {
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: params => onRouteChange(selectors.toRoute(page, params)),
-        render: () => m(App, { state: states(), update, actions })
+        render: () => m(App, { state: states(), update, actions, router })
       };
       return result;
     }, {});

@@ -5,7 +5,7 @@ import { Login } from "../login";
 import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch/view";
-import { Route } from "../router";
+import { Route } from "router-setup-common/src/router";
 
 const componentMap = Route.fold({
   Home: () => Home,

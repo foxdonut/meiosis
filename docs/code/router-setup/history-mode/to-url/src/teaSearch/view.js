@@ -1,13 +1,13 @@
 import m from "mithril";
 
-import { Route, router } from "../router";
-import { Link } from "../router/link";
+import { Route } from "router-setup-common/src/router";
+import { getLinkAttrs } from "../router/link";
 import { selectors } from "../state";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
-  view: ({ attrs: { state } }) => {
+  view: ({ attrs: { state, router } }) => {
     const teaType = selectors.teaType(state);
 
     return [
@@ -21,15 +21,15 @@ export const TeaSearch = () => ({
               "div",
               types.map(type => [
                 m(
-                  Link,
+                  "a",
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, { type })
+                    ...getLinkAttrs(router, Route.TeaSearch, { type })
                   },
                   type
                 )
               ]),
-              m(Link, { href: router.toUrl(Route.TeaSearch) }, "All")
+              m("a", getLinkAttrs(router, Route.TeaSearch), "All")
             ),
             m(
               "table.table.table-bordered.table-striped",
