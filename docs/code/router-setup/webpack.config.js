@@ -24,9 +24,9 @@ modes.forEach(mode =>
         plugins: [
           new HtmlWebpackPlugin({
             hash: true,
-            base: `/code/router-setup/${mode}-mode/${example}/build-${type}/`,
             template: "./index-template.html",
             filename: "index.html",
+            chunks: [],
             mode,
             type,
             title: example

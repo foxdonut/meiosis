@@ -26,7 +26,7 @@
       <a href="https://meiosis.js.org/docs/using-a-router.html"
          target="_blank">Using a Router <span class="glyphicon glyphicon-new-window"></span></a>
       &gt;
-      <a href="../build-<%= htmlWebpackPlugin.options.type %>">
+      <a href="./build-<%= htmlWebpackPlugin.options.type %>">
         <b>
           <%= htmlWebpackPlugin.options.mode %> mode -
           <%= htmlWebpackPlugin.options.title %> - <%= htmlWebpackPlugin.options.type %>
@@ -41,5 +41,7 @@
       </div>
     </div>
     <div id="tracer"></div>
+
+    <script src="./build-<%= htmlWebpackPlugin.options.type %>/generated-app.js"></script>
   </body>
 </html>
