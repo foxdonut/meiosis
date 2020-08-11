@@ -11,7 +11,6 @@ import { selectors } from "../state";
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-export { Route } from "router-setup-common/src/router";
 export const router = createRouter({
   routeMatcher,
   routeConfig,

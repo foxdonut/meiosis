@@ -11,10 +11,9 @@ import { selectors } from "../state";
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-export { Route } from "router-setup-common/src/router";
 export const router = createRouter({
   routeMatcher,
-  rootPath: "/code/router-setup/history-mode/to-url",
+  rootPath: "/code/router-setup/history-mode/to-url/build-with-lib",
   routeConfig,
   fromRoute: selectors.fromRoute,
   queryString

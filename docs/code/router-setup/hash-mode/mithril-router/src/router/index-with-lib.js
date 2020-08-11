@@ -8,7 +8,6 @@ import { createMithrilRouter } from "meiosis-router-setup";
 import { routeConfig } from "router-setup-common/src/router";
 import { selectors } from "../state";
 
-export { Route } from "router-setup-common/src/router";
 export const router = createMithrilRouter({
   m,
   routeConfig,

@@ -30,11 +30,11 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", getLinkAttrs("/"), "Home")),
-          m("li" + isActive(Login), m("a", getLinkAttrs("/login"), "Login")),
-          m("li" + isActive(Settings), m("a", getLinkAttrs("/settings"), "Settings")),
-          m("li" + isActive(Tea), m("a", getLinkAttrs("/tea"), "Tea")),
-          m("li" + isActive(TeaSearch), m("a", getLinkAttrs("/tea/search"), "Tea Search"))
+          m("li" + isActive(Home), m("a", getLinkAttrs(router, "/"), "Home")),
+          m("li" + isActive(Login), m("a", getLinkAttrs(router, "/login"), "Login")),
+          m("li" + isActive(Settings), m("a", getLinkAttrs(router, "/settings"), "Settings")),
+          m("li" + isActive(Tea), m("a", getLinkAttrs(router, "/tea"), "Tea")),
+          m("li" + isActive(TeaSearch), m("a", getLinkAttrs(router, "/tea/search"), "Tea Search"))
         )
       ),
       m(Component, { state, update, actions, router }),

@@ -39,7 +39,7 @@ export const createMithrilRouter = routeConfig => {
     return result + getQueryString(queryParams);
   };
 
-  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions }) =>
+  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: params => onRouteChange(selectors.toRoute(page, params)),

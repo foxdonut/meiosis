@@ -27,7 +27,8 @@ m.route(
     onRouteChange: route => update({ route: () => route }),
     states,
     update,
-    actions
+    actions,
+    router
   })
 );
 

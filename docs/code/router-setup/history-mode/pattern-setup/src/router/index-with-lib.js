@@ -9,10 +9,9 @@ import { routeConfig } from "router-setup-common/src/router";
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-export { Route } from "router-setup-common/src/router";
 export const router = createRouter({
   routeMatcher,
-  rootPath: "/code/router-setup/history-mode/pattern-setup"
+  rootPath: "/code/router-setup/history-mode/pattern-setup/build-with-lib"
 });
 
 /*

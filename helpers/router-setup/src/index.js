@@ -567,12 +567,12 @@ export const createMithrilRouter = ({
     return result + getQueryString(queryString, queryParams);
   };
 
-  const createMithrilRoutes = ({ onRouteChange, App, states, update, actions }) =>
+  const createMithrilRoutes = ({ onRouteChange, App, states, update, actions, router }) =>
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
         onmatch: params => onRouteChange(toRoute(page, params)),
-        render: () => m(App, { state: states(), update, actions })
+        render: () => m(App, { state: states(), update, actions, router })
       };
       return result;
     }, {});
