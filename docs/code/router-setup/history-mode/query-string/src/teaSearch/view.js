@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "../router";
+import { getLinkAttrs } from "../router/link";
 import { selectors } from "../state";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
@@ -23,12 +23,12 @@ export const TeaSearch = () => ({
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.of.TeaSearch(), { type })
+                    ...getLinkAttrs(router, `/tea/search?type=${type}`)
                   },
                   type
                 )
               ]),
-              m("a", { href: router.toUrl(Route.of.TeaSearch()) }, "All")
+              m("a", getLinkAttrs(router, "/tea/search"), "All")
             ),
             m(
               "table.table.table-bordered.table-striped",

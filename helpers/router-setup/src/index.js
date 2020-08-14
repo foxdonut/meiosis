@@ -373,7 +373,17 @@ const getQuery = path => {
   return idx >= 0 ? path.substring(idx + 1) : "";
 };
 
-const getQueryString = (queryString, queryParams = {}) => {
+export const getQueryParams = (path, params) => {
+  const pathParams = (path.match(/(:[^/]*)/g) || []).map(k => k.substring(1));
+  return Object.entries(params).reduce((result, [k, v]) => {
+    if (pathParams.indexOf(k) < 0) {
+      result[k] = v;
+    }
+    return result;
+  }, {});
+};
+
+export const getQueryString = (queryString, queryParams = {}) => {
   const query = queryString.stringify(queryParams);
   return (query.length > 0 ? "?" : "") + query;
 };
@@ -419,21 +429,14 @@ export const ToUrl = (routeConfig, queryString) => {
 
   return (page, params = {}) => {
     const path = pathLookup[page];
-    const pathParams = [];
 
-    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
-      pathParams.push(pathParam.substring(1));
-      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
-    }, path);
-
-    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
-      if (pathParams.indexOf(key) < 0) {
-        result[key] = value;
-      }
-      return result;
-    }, {});
-
-    return result + getQueryString(queryString, queryParams);
+    return (
+      (path.match(/(:[^/]*)/g) || []).reduce(
+        (result, pathParam) =>
+          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+        path
+      ) + getQueryString(queryString, getQueryParams(path, params))
+    );
   };
 };
 

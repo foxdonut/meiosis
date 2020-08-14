@@ -5,7 +5,7 @@ import { selectors } from "../state";
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
-  view: ({ attrs: { state, router } }) => {
+  view: ({ attrs: { state } }) => {
     const teaType = selectors.teaType(state);
 
     return [

@@ -4,16 +4,12 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const modes = ["hash", "history"];
 const types = ["no-lib", "with-lib"];
-const examples = {
-  hash: ["pattern-setup", "query-string", "to-url", "mithril-router", "superouter"],
-  history: ["pattern-setup", "to-url", "mithril-router"]
-};
-
+const examples = ["pattern-setup", "query-string", "to-url", "mithril-router", "superouter"];
 const configs = [];
 
 modes.forEach(mode =>
   types.forEach(type =>
-    examples[mode].forEach(example =>
+    examples.forEach(example =>
       configs.push({
         mode: "development",
         entry: `./${mode}-mode/${example}/src/index-${type}.js`,
@@ -29,7 +25,7 @@ modes.forEach(mode =>
             chunks: [],
             mode,
             type,
-            title: example
+            example
           })
         ],
         resolve: {

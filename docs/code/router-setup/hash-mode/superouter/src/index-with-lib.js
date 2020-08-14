@@ -7,7 +7,7 @@ import meiosisTracer from "meiosis-tracer";
 
 import { meiosis } from "router-setup-common/src/meiosis";
 import { createApp, App } from "./app";
-import { router } from "./router/index-lib";
+import { router } from "./router/index-with-lib";
 
 const app = createApp(router);
 const { states, update, actions } = meiosis({ stream, merge, app });
