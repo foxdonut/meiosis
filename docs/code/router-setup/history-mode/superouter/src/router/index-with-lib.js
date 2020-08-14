@@ -13,6 +13,7 @@ const toUrl = (route, params = {}) => Route.toURL(route) + getQueryString(queryS
 
 export const router = createRouter({
   routeMatcher,
+  rootPath: "/code/router-setup/history-mode/superouter/build-with-lib",
   toUrl,
   fromRoute: selectors.fromRoute,
   queryString

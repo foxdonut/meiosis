@@ -1,10 +1,14 @@
+/* Equivalent of this code, you can also npm install meiosis-router-setup */
+/* See https://meiosis.js.org/router for details. */
 import queryString from "query-string";
 
 export const createRouter = (Route, defaultRoute) => {
-  const prefix = "#!";
+  const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 
-  const getUrl = () => decodeURI(window.location.hash || prefix + "/");
-  const getPath = () => getUrl().substring(prefix.length);
+  const prefix = stripTrailingSlash(window.location.pathname);
+
+  const getUrl = () => decodeURI(window.location.pathname + window.location.search);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
 
   const getQuery = path => {
     const idx = path.indexOf("?");
@@ -16,17 +20,22 @@ export const createRouter = (Route, defaultRoute) => {
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const toUrl = (route, params = {}) => prefix + Route.toURL(route) + getQueryString(params);
+  const toUrl = (route, params = {}) =>
+    prefix + stripTrailingSlash(Route.toURL(route)) + getQueryString(params);
 
   const routeMatcher = path => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = Route.matchOr(() => defaultRoute, pathWithoutQuery);
-    return Object.assign(match, {
-      params: queryString.parse(getQuery(path))
-    });
+    return Object.assign(match, { params: queryString.parse(getQuery(path)) });
   };
 
   const initialRoute = routeMatcher(getPath());
+
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    window.history.pushState({}, "", url);
+    window.onpopstate();
+  };
 
   const start = onRouteChange => {
     window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
@@ -41,5 +50,5 @@ export const createRouter = (Route, defaultRoute) => {
     }
   };
 
-  return { initialRoute, toUrl, start, syncLocationBar };
+  return { initialRoute, toUrl, getLinkHandler, start, syncLocationBar };
 };

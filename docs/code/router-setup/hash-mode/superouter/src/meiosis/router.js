@@ -21,9 +21,7 @@ export const createRouter = (Route, defaultRoute) => {
   const routeMatcher = path => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = Route.matchOr(() => defaultRoute, pathWithoutQuery);
-    return Object.assign(match, {
-      params: queryString.parse(getQuery(path))
-    });
+    return Object.assign(match, { params: queryString.parse(getQuery(path)) });
   };
 
   const initialRoute = routeMatcher(getPath());

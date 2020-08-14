@@ -2,6 +2,7 @@ import m from "mithril";
 
 import { Route, allRoutes } from "../router";
 import { TeaDetails } from "../teaDetails";
+import { getLinkAttrs } from "../router/link";
 
 export const Tea = {
   view: ({ attrs: { state, router } }) => [
@@ -15,7 +16,7 @@ export const Tea = {
             m(
               "div",
               { key: tea.id },
-              m("a", { href: router.toUrl(Route.of.TeaDetails({ id: tea.id })) }, tea.title)
+              m("a", getLinkAttrs(router, Route.of.TeaDetails({ id: tea.id })), tea.title)
             )
           )
       ),
