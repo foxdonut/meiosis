@@ -22,37 +22,25 @@
  *
  * @property {string} page the page ID.
  * @property {*} params an object with the path parameters.
- * @property {*} queryParams an object with the query string parameters.
- * @property {string} url the URL of the route.
  */
 
 /**
- * A route matcher is created by the {@link CreateRouteMatcher} function from a {@link RouteConfig}
- * and resolves a URL to a route.
+ * A route matcher resolves a URL to a route.
  *
  * @callback RouteMatcher
+ *
  * @param {string} url the URL to resolve.
+ *
  * @return {Route} the resolved route.
- */
-
-/**
- * This is the default function exported by
- * [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher):
- *
- * ```javascript
- * import createRouteMatcher from "feather-route-matcher";
- * ```
- *
- * @callback CreateRouteMatcher
- * @param {RouteConfig} routeConfig the route configuration.
- * @return {RouteMatcher} the created route matcher.
  */
 
 /**
  * Query string parse function.
  *
  * @callback QueryStringParse
+ *
  * @param {string} query the query string to parse.
+ *
  * @return {Object.<string,any>} the result of parsing the query string.
  */
 
@@ -60,7 +48,9 @@
  * Query string stringify function.
  *
  * @callback QueryStringStringify
+ *
  * @param {Object.<string,any>} query the query string object.
+ *
  * @return {string} the stringified query string.
  */
 
@@ -82,13 +72,33 @@
  */
 
 /**
- * Function to generate a {@link Route} from a URL, or from a page ID and params.
+ * Function to extract the page ID and params from a {@link Route}.
  *
- * @callback GetRoute
+ * @callback FromRoute
  *
- * @param {string} page the page ID, or the URL.
- * @param {*} [params] if using a page ID, the parameters.
- * @param {*} [queryParams] if using query string support, the query string parameters.
+ * @param {Route} route the route.
+ *
+ * @return {Route} the `page` and `params`.
+ */
+
+/**
+ * Function to generate a {@link Route} from a URL.
+ *
+ * @callback ToRoute
+ *
+ * @param {string} path the route path.
+ * @param {*} [options] additional route options.
+ *
+ * @return {Route} the route.
+ */
+
+/**
+ * Function to convert a route match to a {@link Route}.
+ *
+ * @callback MatchToRoute
+ *
+ * @param {*} match the route match.
+ *
  * @return {Route} the route.
  */
 
@@ -99,6 +109,7 @@
  *
  * @param {string} page the page ID.
  * @param {*} [params] the path parameters.
+ *
  * @return {string} the URL.
  */
 
@@ -108,6 +119,7 @@
  * @callback LinkHandler
  *
  * @param {Event} event
+ *
  * @return {void}
  */
 
@@ -117,6 +129,7 @@
  * @callback GetLinkHandler
  *
  * @param {string} url the URL of the link.
+ *
  * @return {LinkHandler} the link handler.
  */
 
@@ -131,6 +144,7 @@
  * @callback OnRouteChange
  *
  * @param {Route} route
+ *
  * @return {void}
  */
 
@@ -140,6 +154,7 @@
  * @callback Start
  *
  * @param {OnRouteChange} onRouteChange callback function for when the route changes.
+ *
  * @return {void}
  */
 
@@ -149,15 +164,7 @@
  * @callback SyncLocationBar
  *
  * @param {Route} route the route from the application state.
- * @return {void}
- */
-
-/**
- * Effect function to synchronize the location bar with the state route.
  *
- * @callback Effect
- *
- * @param {*} state the application state.
  * @return {void}
  */
 
@@ -165,7 +172,9 @@
  * Built-in function to decode a URI.
  *
  * @callback DecodeURI
+ *
  * @param {string} uri the URI.
+ *
  * @return {string} the decoded URI.
  */
 
@@ -173,9 +182,11 @@
  * Built-in function to change the location.
  *
  * @callback PushState
+ *
  * @param {*} somethingFIXME
  * @param {string} somethingElseFIXME
  * @param {string} uri
+ *
  * @return {void}
  */
 
@@ -183,7 +194,9 @@
  * Built-in callback function when the location changes.
  *
  * @callback Onpopstate
+ *
  * @param {*} event the event.
+ *
  * @return {void}
  */
 
@@ -219,147 +232,34 @@
 /**
  * Configuration to create a Feather router.
  *
- * @typedef {Object} FeatherRouterConfig
+ * @typedef {Object} RouterConfig
  *
- * @property {CreateRouteMatcher} createRouteMatcher the feather route matcher function.
- * @property {RouteConfig} routeConfig the route configuration.
+ * @property {RouteMatcher} routeMatcher the route matcher function.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support.
+ * @property {RouteConfig} [routeConfig] the route configuration.
+ * @property {ToUrl} [toUrl] the `toUrl` function.
+ * @property {FromRoute} [fromRoute]
+ * @property {MatchToRoute} [matchToRoute]
  * @property {QueryStringLib} [queryString] the query string library to use. You only need to
  * provide this if your application requires query string support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `historyMode` is `true`.
- * @property {boolean} [historyMode=false] if `true`, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support. By default,
- * `historyMode` is `false`.
- * @property {string} [routeProp="route"] this is the property in your state where the route is
- * stored. Defaults to `"route"`.
  * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
 /**
- * Mithril route property.
+ * This is the router that is created by {@link createRouter}.
  *
- * @typedef {Object} MithrilDotRoute
- *
- * @property {string} prefix
- */
-
-/**
- * Mithril instance.
- *
- * @typedef {*} m
- *
- * @property {MithrilDotRoute} route
- * @property {QueryStringStringify} buildQueryString
- */
-
-/**
- * This is the router that is created by {@link createFeatherRouter}.
- *
- * @typedef {Object} FeatherRouter
+ * @typedef {Object} Router
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
- * @property {GetRoute} getRoute function to generate a route.
+ * @property {ToRoute} toRoute function to generate a route.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  * @property {Start} start function to start the router.
  * @property {SyncLocationBar} locationBarSync function that synchronizes the location bar with the
- * state route.
- * @property {Effect} effect effect function to synchronize the location bar with the state route.
- */
-
-/**
- * Configuration to create a Mithril router.
- *
- * @typedef {Object} MithrilRouterConfig
- *
- * @property {m} m the Mithril instance.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
- * @property {RouteConfig} routeConfig the route configuration.
- * @property {*} fromRoute
- * @property {*} toRoute
- * @property {*} matchToRoute
- * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
- * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
- * if `historyMode` is `true`.
- * @property {Window} [wdw=window] the `window`, used for testing purposes.
- */
-
-/**
- * Mithril `onmatch` function.
- *
- * @callback MithrilOnmatch
- *
- * @param {*} params
- * @param {string} url
- * @return {void}
- */
-
-/**
- * Mithril `render` function.
- *
- * @callback MithrilRender
- *
- * @return {void}
- */
-
-/**
- * Mithril route.
- *
- * @typedef {Object} MithrilRoute
- *
- * @property {MithrilOnmatch} onmatch
- * @property {MithrilRender} render
- */
-
-/**
- * Mithril routes.
- *
- * @typedef {Object<string,MithrilRoute>} MithrilRoutes
- */
-
-/**
- * Parameters to `createMithrilRoutes`.
- *
- * @typedef {Object} CreateMithrilRoutesConfig
- *
- * @property {OnRouteChange} onRouteChange
- * @property {*} App
- * @property {*} states
- * @property {*} update
- * @property {*} actions
- */
-
-/**
- * Creates Mithril routes suitable for passing as the third argument to `m.route`, for example:
- *
- * ```javascript
- * m.route(
- *   document.getElementById("app"),
- *   "/",
- *   router.createMithrilRoutes({
- *     onRouteChange: route => update({ route: () => route }),
- *     App, states, update, actions
- *   })
- * );
- * ```
- *
- * @callback CreateMithrilRoutes
- *
- * @param {CreateMithrilRoutesConfig} config
- * @return {MithrilRoutes} Mithril routes.
- */
-
-/**
- * This is the router that is created by {@link createMithrilRouter}.
- *
- * @typedef {Object} MithrilRouter
- *
- * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
- * as the third argument to `m.route`.
- * @property {ToUrl} toUrl function to generate a URL.
- * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
  */
 
@@ -421,6 +321,14 @@ const createApi = ({ api, historyMode, isProgrammaticUrl, toRoute, wdw }) => {
   return api;
 };
 
+/**
+ * Helper that creates a `toUrl` function.
+ *
+ * @param {RouteConfig} routeConfig
+ * @param {QueryStringLib} queryString
+ *
+ * @return {ToUrl}
+ */
 export const ToUrl = (routeConfig, queryString) => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
@@ -442,6 +350,10 @@ export const ToUrl = (routeConfig, queryString) => {
 
 /**
  * Creates a router.
+ *
+ * @param {RouterConfig} config
+ *
+ * @return {Router}
  */
 export const createRouter = ({
   routeMatcher,
@@ -509,19 +421,138 @@ export const createRouter = ({
   });
 };
 
-/* getLinkHandler usage: in a Link component
-export const Link = {
-  view: ({ attrs, children }) => {
-    const url = router.toUrl(attrs.href);
+/* getLinkHandler usage: with a getLinkAttrs function
+// without programmatic urls
+export const getLinkAttrs = (router, href) => {
+  const url = router.toUrl(href);
 
-    return m("a", { ...attrs, href: url, onclick: router.getLinkHandler(url) }, children);
-  }
+  return { href: url, onclick: router.getLinkHandler(url) };
+};
+
+// with programmatic urls
+export const getLinkAttrs = (router, page, params) => {
+  const url = router.toUrl(page, params);
+
+  return { href: url, onclick: router.getLinkHandler(url) };
 };
 */
 
 /**
- * Sets up a router using
- * [Mithril Router](https://mithril.js.org/route.html).
+ * Configuration to create a Mithril router.
+ *
+ * @typedef {Object} MithrilRouterConfig
+ *
+ * @property {m} m the Mithril instance.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support.
+ * @property {RouteConfig} routeConfig the route configuration.
+ * @property {FromRoute} fromRoute
+ * @property {ToRoute} toRoute
+ * @property {MatchToRoute} matchToRoute
+ * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
+ * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
+ * if `historyMode` is `true`.
+ * @property {Window} [wdw=window] the `window`, used for testing purposes.
+ */
+
+/**
+ * Mithril `onmatch` function.
+ *
+ * @callback MithrilOnmatch
+ *
+ * @param {*} params
+ * @param {string} url
+ *
+ * @return {void}
+ */
+
+/**
+ * Mithril `render` function.
+ *
+ * @callback MithrilRender
+ *
+ * @return {void}
+ */
+
+/**
+ * Mithril route.
+ *
+ * @typedef {Object} MithrilRoute
+ *
+ * @property {MithrilOnmatch} onmatch
+ * @property {MithrilRender} render
+ */
+
+/**
+ * Mithril routes.
+ *
+ * @typedef {Object<string,MithrilRoute>} MithrilRoutes
+ */
+
+/**
+ * Parameters to `createMithrilRoutes`.
+ *
+ * @typedef {Object} CreateMithrilRoutesConfig
+ *
+ * @property {OnRouteChange} onRouteChange
+ * @property {*} App
+ * @property {*} states
+ * @property {*} update
+ * @property {*} actions
+ */
+
+/**
+ * Creates Mithril routes suitable for passing as the third argument to `m.route`, for example:
+ *
+ * ```javascript
+ * m.route(
+ *   document.getElementById("app"),
+ *   "/",
+ *   router.createMithrilRoutes({
+ *     onRouteChange: route => update({ route: () => route }),
+ *     App, states, update, actions
+ *   })
+ * );
+ * ```
+ *
+ * @callback CreateMithrilRoutes
+ *
+ * @param {CreateMithrilRoutesConfig} config
+ *
+ * @return {MithrilRoutes} Mithril routes.
+ */
+
+/**
+ * This is the router that is created by {@link createMithrilRouter}.
+ *
+ * @typedef {Object} MithrilRouter
+ *
+ * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
+ * as the third argument to `m.route`.
+ * @property {ToUrl} toUrl function to generate a URL.
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
+ * state route.
+ */
+
+/**
+ * Mithril route property.
+ *
+ * @typedef {Object} MithrilDotRoute
+ *
+ * @property {string} prefix
+ */
+
+/**
+ * Mithril instance.
+ *
+ * @typedef {*} m
+ *
+ * @property {MithrilDotRoute} route
+ * @property {QueryStringStringify} buildQueryString
+ */
+
+/**
+ * Sets up a router using [Mithril Router](https://mithril.js.org/route.html).
  *
  * @param {MithrilRouterConfig} config
  *
