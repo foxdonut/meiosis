@@ -22,6 +22,7 @@
  *
  * @property {string} page the page ID.
  * @property {*} params an object with the path parameters.
+ * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
 /**
@@ -230,7 +231,7 @@
  */
 
 /**
- * Configuration to create a Feather router.
+ * Configuration to create a router.
  *
  * @typedef {Object} RouterConfig
  *
@@ -245,7 +246,7 @@
  * provide this if your application requires query string support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
- * if `historyMode` is `true`.
+ * if `rootPath` is specified.
  * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
@@ -437,6 +438,19 @@ export const getLinkAttrs = (router, page, params) => {
 };
 */
 
+// ----- Mithril
+
+/**
+ * Function to convert to a {@link Route}.
+ *
+ * @callback ConvertToRoute
+ *
+ * @param {string} page the page ID.
+ * @param {*} params an object with the path parameters.
+ *
+ * @return {Route} the route.
+ */
+
 /**
  * Configuration to create a Mithril router.
  *
@@ -447,7 +461,7 @@ export const getLinkAttrs = (router, page, params) => {
  * are using history mode, you need to provide server side routing support.
  * @property {RouteConfig} routeConfig the route configuration.
  * @property {FromRoute} fromRoute
- * @property {ToRoute} toRoute
+ * @property {ConvertToRoute} toRoute
  * @property {MatchToRoute} matchToRoute
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
