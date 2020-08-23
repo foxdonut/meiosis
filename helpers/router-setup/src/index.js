@@ -260,7 +260,7 @@
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  * @property {Start} start function to start the router.
- * @property {SyncLocationBar} locationBarSync function that synchronizes the location bar with the
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
  */
 
@@ -306,17 +306,13 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
   }
 };
 
-const createApi = ({ api, historyMode, isProgrammaticUrl, toRoute, wdw }) => {
+const createApi = ({ api, historyMode, wdw }) => {
   if (historyMode) {
     api.getLinkHandler = url => evt => {
       evt.preventDefault();
       wdw.history.pushState({}, "", url);
       wdw.onpopstate(null);
     };
-  }
-
-  if (!isProgrammaticUrl) {
-    api.toRoute = toRoute;
   }
 
   return api;
@@ -353,33 +349,24 @@ export const ToUrl = (routeConfig, queryString) => {
  * Creates a router.
  *
  * @param {RouterConfig} config
- *
- * @return {Router}
  */
-export const createRouter = ({
+const createRouter = ({
   routeMatcher,
   rootPath,
-  routeConfig,
-  toUrl,
-  fromRoute,
   matchToRoute = I,
   plainHash = false,
   queryString = emptyQueryString,
+  RouterToUrl,
+  SyncLocationBar,
+  includeToRoute,
   wdw = window
 }) => {
-  const isProgrammaticUrl = routeConfig != null || toUrl != null;
-
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || "/";
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = isProgrammaticUrl
-    ? routeConfig != null
-      ? ToUrl(routeConfig, queryString)
-      : toUrl
-    : null;
 
   const toRoute = (path, options) => {
     const matchPath = getPathWithoutQuery(path) || "/";
@@ -396,28 +383,96 @@ export const createRouter = ({
     );
   };
 
-  const routerToUrl = isProgrammaticUrl
-    ? (page, params = {}) => getStatePath(prefix + toUrlFn(page, params))
-    : path => prefix + path;
-
   const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const syncLocationBar = isProgrammaticUrl
-    ? route => {
-        const { page, params } = fromRoute(route);
-        doSyncLocationBar({ route, url: routerToUrl(page, params), getUrl, wdw });
-      }
-    : route => doSyncLocationBar({ route, url: route.url, getUrl, wdw });
+  const toUrl = RouterToUrl(prefix, getStatePath);
 
-  return createApi({
-    api: { initialRoute, toUrl: routerToUrl, start, syncLocationBar },
+  const api = createApi({
+    api: { initialRoute, toUrl, start, syncLocationBar: SyncLocationBar(getUrl, toUrl) },
     historyMode,
-    isProgrammaticUrl,
-    toRoute,
+    wdw
+  });
+
+  if (includeToRoute) {
+    api.toRoute = toRoute;
+  }
+
+  return api;
+};
+
+/**
+ * Creates a router that uses plain string URLs.
+ *
+ * @param {PlainUrlRouterConfig} config
+ *
+ * @return {Router}
+ */
+export const createPlainUrlRouter = ({
+  routeMatcher,
+  rootPath,
+  matchToRoute = I,
+  plainHash = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  const RouterToUrl = prefix => path => prefix + path;
+
+  const SyncLocationBar = getUrl => route =>
+    doSyncLocationBar({ route, url: route.url, getUrl, wdw });
+
+  return createRouter({
+    routeMatcher,
+    rootPath,
+    matchToRoute,
+    plainHash,
+    queryString,
+    RouterToUrl,
+    SyncLocationBar,
+    includeToRoute: true,
+    wdw
+  });
+};
+
+/**
+ * Creates a router that uses programmatic URLs.
+ *
+ * @param {ProgrammaticUrlRouterConfig} config
+ *
+ * @return {Router}
+ */
+export const createProgrammaticUrlRouter = ({
+  routeMatcher,
+  rootPath,
+  routeConfig,
+  toUrl,
+  fromRoute,
+  matchToRoute = I,
+  plainHash = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  const toUrlFn = routeConfig != null ? ToUrl(routeConfig, queryString) : toUrl;
+
+  const RouterToUrl = (prefix, getStatePath) => (page, params = {}) =>
+    getStatePath(prefix + toUrlFn(page, params));
+
+  const SyncLocationBar = (getUrl, toUrl) => route => {
+    const { page, params } = fromRoute(route);
+    doSyncLocationBar({ route, url: toUrl(page, params), getUrl, wdw });
+  };
+
+  return createRouter({
+    routeMatcher,
+    rootPath,
+    matchToRoute,
+    plainHash,
+    queryString,
+    RouterToUrl,
+    SyncLocationBar,
     wdw
   });
 };

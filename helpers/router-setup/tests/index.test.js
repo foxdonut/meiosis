@@ -3,7 +3,7 @@
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 
-import { createRouter } from "../src/index";
+import { createPlainUrlRouter } from "../src/index";
 
 const decodeURI = uri => uri;
 
@@ -111,7 +111,7 @@ describe("hardcoded urls", () => {
                   qsConfig
                 )
               );
-              const router = createRouter(routerConfig);
+              const router = createPlainUrlRouter(routerConfig);
 
               expect(routerTestFn(router, path, options)).toMatchObject(
                 Object.assign({ url: prefix + path }, expectedResult, options)
@@ -124,7 +124,7 @@ describe("hardcoded urls", () => {
               const path = "/login";
               const wdw = createWindow(path);
               const routerConfig = createRouterConfig({ routeMatcher, wdw });
-              const router = createRouter(routerConfig);
+              const router = createPlainUrlRouter(routerConfig);
 
               expect(router.toUrl(path)).toEqual(prefix + path);
             });
@@ -135,7 +135,7 @@ describe("hardcoded urls", () => {
               const path = "/login";
               const wdw = createWindow(path);
               const routerConfig = createRouterConfig({ routeMatcher, wdw });
-              const router = createRouter(routerConfig);
+              const router = createPlainUrlRouter(routerConfig);
 
               const onRouteChange = jest.fn();
 
@@ -164,7 +164,7 @@ describe("hardcoded urls", () => {
               const methodFn = jest.fn();
               const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
               const routerConfig = createRouterConfig({ routeMatcher, wdw });
-              const router = createRouter(routerConfig);
+              const router = createPlainUrlRouter(routerConfig);
               const url = prefix + "/user/42";
 
               router.syncLocationBar(Object.assign({ url }, params));
@@ -189,7 +189,7 @@ describe("hardcoded urls", () => {
                   history: { pushState }
                 });
                 const routerConfig = createRouterConfig({ routeMatcher, wdw });
-                const router = createRouter(routerConfig);
+                const router = createPlainUrlRouter(routerConfig);
                 const url = prefix + "/user/42";
 
                 const linkHandler = router.getLinkHandler(url);
