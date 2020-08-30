@@ -73,22 +73,11 @@
  */
 
 /**
- * Function to extract the page ID and params from a {@link Route}.
- *
- * @callback FromRoute
- *
- * @param {Route} route the route.
- *
- * @return {Route} the `page` and `params`.
- */
-
-/**
  * Function to generate a {@link Route} from a URL.
  *
  * @callback ToRoute
  *
  * @param {string} path the route path.
- * @param {*} [options] additional route options.
  *
  * @return {Route} the route.
  */
@@ -236,54 +225,15 @@
  * @typedef {Object} RouterConfig
  *
  * @property {RouteMatcher} routeMatcher the route matcher function.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
- * @property {MatchToRoute} [matchToRoute]
- * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
- * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
- * if `rootPath` is specified.
- * @property {QueryStringLib} [queryString] the query string library to use. You only need to
- * provide this if your application requires query string support.
- * @property {boolean} [includeToRoute=false]
- * @property {*} RouterToUrl
- * @property {*} SyncLocationBar
- * @property {Window} [wdw=window] the `window`, used for testing purposes.
- */
-
-/**
- * Configuration to create a plain URL router.
- *
- * @typedef {Object} PlainUrlRouterConfig
- *
- * @property {RouteMatcher} routeMatcher the route matcher function.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
- * @property {MatchToRoute} [matchToRoute]
- * @property {QueryStringLib} [queryString] the query string library to use. You only need to
- * provide this if your application requires query string support.
- * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
- * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
- * if `rootPath` is specified.
- * @property {Window} [wdw=window] the `window`, used for testing purposes.
- */
-
-/**
- * Configuration to create a programmatic URL router.
- *
- * @typedef {Object} ProgrammaticUrlRouterConfig
- *
- * @property {RouteMatcher} routeMatcher the route matcher function.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
  * @property {RouteConfig} [routeConfig] the route configuration.
  * @property {ToUrl} [toUrl] the `toUrl` function.
- * @property {FromRoute} [fromRoute]
- * @property {MatchToRoute} [matchToRoute]
- * @property {QueryStringLib} [queryString] the query string library to use. You only need to
- * provide this if your application requires query string support.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `rootPath` is specified.
+ * @property {QueryStringLib} [queryString] the query string library to use. You only need to
+ * provide this if your application requires query string support.
  * @property {Window} [wdw=window] the `window`, used for testing purposes.
  */
 
@@ -293,12 +243,11 @@
  * @typedef {Object} Router
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
- * @property {ToRoute} toRoute function to generate a route.
  * @property {ToUrl} toUrl function to generate a URL.
- * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  * @property {Start} start function to start the router.
  * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
+ * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  */
 
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
@@ -343,18 +292,6 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
   }
 };
 
-const createApi = ({ api, historyMode, wdw }) => {
-  if (historyMode) {
-    api.getLinkHandler = url => evt => {
-      evt.preventDefault();
-      wdw.history.pushState({}, "", url);
-      wdw.onpopstate(null);
-    };
-  }
-
-  return api;
-};
-
 /**
  * Helper that creates a `toUrl` function.
  *
@@ -386,16 +323,16 @@ export const ToUrl = (routeConfig, queryString) => {
  * Creates a router.
  *
  * @param {RouterConfig} config
+ *
+ * @return {Router} the created router.
  */
-const createRouter = ({
+export const createRouter = ({
   routeMatcher,
+  routeConfig,
+  toUrl,
   rootPath,
-  matchToRoute = I,
   plainHash = false,
   queryString = emptyQueryString,
-  RouterToUrl,
-  SyncLocationBar,
-  includeToRoute,
   wdw = window
 }) => {
   const historyMode = rootPath != null;
@@ -405,19 +342,12 @@ const createRouter = ({
   const getPath = () => getUrl().substring(prefix.length) || "/";
   const getStatePath = historyMode ? stripTrailingSlash : I;
 
-  const toRoute = (path, options) => {
+  const toRoute = path => {
     const matchPath = getPathWithoutQuery(path) || "/";
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    const statePath = getStatePath(matchPath);
-    const url = prefix + statePath + getQueryString(queryString, queryParams);
-
-    return Object.assign(
-      matchToRoute(Object.assign(match, { params: Object.assign({}, match.params, queryParams) })),
-      { url },
-      options
-    );
+    return { page: match.page, params: Object.assign({}, match.params, queryParams) };
   };
 
   const initialRoute = toRoute(getPath());
@@ -426,103 +356,24 @@ const createRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const toUrl = RouterToUrl(prefix, getStatePath);
+  const toUrlFn = toUrl || ToUrl(routeConfig, queryString);
+  toUrl = (page, params = {}) => getStatePath(prefix + toUrlFn(page, params));
 
-  const api = createApi({
-    api: { initialRoute, toUrl, start, syncLocationBar: SyncLocationBar(getUrl, toUrl) },
-    historyMode,
-    wdw
-  });
-
-  if (includeToRoute) {
-    api.toRoute = toRoute;
-  }
-
-  return api;
-};
-
-/**
- * Creates a router that uses plain string URLs.
- *
- * @param {PlainUrlRouterConfig} config
- *
- * @return {Router}
- */
-export const createPlainUrlRouter = ({
-  routeMatcher,
-  rootPath,
-  matchToRoute = I,
-  plainHash = false,
-  queryString = emptyQueryString,
-  wdw = window
-}) => {
-  const RouterToUrl = prefix => path => prefix + path;
-
-  const SyncLocationBar = getUrl => route =>
-    doSyncLocationBar({ route, url: route.url, getUrl, wdw });
-
-  return createRouter({
-    routeMatcher,
-    rootPath,
-    matchToRoute,
-    plainHash,
-    queryString,
-    RouterToUrl,
-    SyncLocationBar,
-    includeToRoute: true,
-    wdw
-  });
-};
-
-/**
- * Creates a router that uses programmatic URLs.
- *
- * @param {ProgrammaticUrlRouterConfig} config
- *
- * @return {Router}
- */
-export const createProgrammaticUrlRouter = ({
-  routeMatcher,
-  rootPath,
-  routeConfig,
-  toUrl,
-  fromRoute,
-  matchToRoute = I,
-  plainHash = false,
-  queryString = emptyQueryString,
-  wdw = window
-}) => {
-  const toUrlFn = routeConfig != null ? ToUrl(routeConfig, queryString) : toUrl;
-
-  const RouterToUrl = (prefix, getStatePath) => (page, params = {}) =>
-    getStatePath(prefix + toUrlFn(page, params));
-
-  const SyncLocationBar = (getUrl, toUrl) => route => {
-    const { page, params } = fromRoute(route);
+  const syncLocationBar = route => {
+    const { page, params } = route;
     doSyncLocationBar({ route, url: toUrl(page, params), getUrl, wdw });
   };
 
-  return createRouter({
-    routeMatcher,
-    rootPath,
-    matchToRoute,
-    plainHash,
-    queryString,
-    RouterToUrl,
-    SyncLocationBar,
-    wdw
-  });
+  const getLinkHandler = url => evt => {
+    evt.preventDefault();
+    wdw.history.pushState({}, "", url);
+    wdw.onpopstate(null);
+  };
+
+  return { initialRoute, toUrl, start, syncLocationBar, getLinkHandler };
 };
 
 /* getLinkHandler usage: with a getLinkAttrs function
-// without programmatic urls
-export const getLinkAttrs = (router, href) => {
-  const url = router.toUrl(href);
-
-  return { href: url, onclick: router.getLinkHandler(url) };
-};
-
-// with programmatic urls
 export const getLinkAttrs = (router, page, params) => {
   const url = router.toUrl(page, params);
 
@@ -533,17 +384,6 @@ export const getLinkAttrs = (router, page, params) => {
 // ----- Mithril
 
 /**
- * Function to convert to a {@link Route}.
- *
- * @callback ConvertToRoute
- *
- * @param {string} page the page ID.
- * @param {*} params an object with the path parameters.
- *
- * @return {Route} the route.
- */
-
-/**
  * Configuration to create a Mithril router.
  *
  * @typedef {Object} MithrilRouterConfig
@@ -552,9 +392,6 @@ export const getLinkAttrs = (router, page, params) => {
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
  * are using history mode, you need to provide server side routing support.
  * @property {RouteConfig} routeConfig the route configuration.
- * @property {FromRoute} fromRoute
- * @property {ConvertToRoute} toRoute
- * @property {MatchToRoute} matchToRoute
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `historyMode` is `true`.
@@ -668,8 +505,6 @@ export const createMithrilRouter = ({
   m,
   rootPath,
   routeConfig,
-  fromRoute,
-  toRoute,
   plainHash = false,
   wdw = window
 }) => {
@@ -682,14 +517,14 @@ export const createMithrilRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
 
   const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, id]) => Object.assign(result, { [id]: path }),
+    (result, [path, pageId]) => Object.assign(result, { [pageId]: path }),
     {}
   );
 
   const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
 
-  const toUrl = (id, params = {}) => {
-    const path = getStatePath(pathLookup[id]);
+  const toUrl = (pageId, params = {}) => {
+    const path = getStatePath(pathLookup[pageId]);
     const pathParams = [];
 
     const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
@@ -711,7 +546,7 @@ export const createMithrilRouter = ({
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: params => onRouteChange(toRoute(page, params)),
+        onmatch: params => onRouteChange({ page, params }),
         render: () => m(App, { state: states(), update, actions, router })
       };
       return result;
@@ -720,7 +555,7 @@ export const createMithrilRouter = ({
   const addPrefix = historyMode ? url => prefix + url : I;
 
   const syncLocationBar = route => {
-    const { page, params } = fromRoute(route);
+    const { page, params } = route;
     if (page) {
       doSyncLocationBar({ route, url: addPrefix(toUrl(page, params)), getUrl, wdw });
     }
