@@ -300,7 +300,7 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
  *
  * @return {ToUrl}
  */
-export const ToUrl = (routeConfig, queryString) => {
+export const ToUrl = (routeConfig, queryString = emptyQueryString) => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
