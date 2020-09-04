@@ -213,6 +213,14 @@ describe("historyMode and plainHash", () => {
         });
       }
     });
+
+    describe("mithril router", () => {
+      test("sets m.route.prefix", () => {
+        const mock_m = { route: {} };
+        createMithrilRouter(createMithrilConfig({ m: mock_m }));
+        expect(mock_m.route.prefix).toBe(prefix);
+      });
+    });
   });
 });
 

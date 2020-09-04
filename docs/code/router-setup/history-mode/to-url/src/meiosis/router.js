@@ -2,7 +2,6 @@
 /* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
-import { selectors } from "../state";
 
 export const createRouter = routeConfig => {
   const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
@@ -52,7 +51,7 @@ export const createRouter = routeConfig => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = matcher(pathWithoutQuery);
     const queryParams = queryString.parse(getQuery(path));
-    return Object.assign(match, { params: Object.assign(match.params, queryParams) });
+    return { page: match.value, params: Object.assign(match.params, queryParams) };
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -68,7 +67,7 @@ export const createRouter = routeConfig => {
   };
 
   const syncLocationBar = route => {
-    const { page, params } = selectors.fromRoute(route);
+    const { page, params } = route;
     const url = toUrl(page, params);
     if (url !== getUrl()) {
       const fn = route.replace ? "replaceState" : "pushState";

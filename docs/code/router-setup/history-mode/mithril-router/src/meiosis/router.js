@@ -51,7 +51,7 @@ export const createMithrilRouter = routeConfig => {
     }, {});
 
   const syncLocationBar = route => {
-    const { page, params } = selectors.fromRoute(route);
+    const { page, params } = route;
     if (page) {
       const url = prefix + toUrl(page, params);
       if (url !== getUrl()) {

@@ -23,12 +23,8 @@ m.route(
   document.getElementById("app"),
   "/",
   router.createMithrilRoutes({
-    App,
     onRouteChange: route => update({ route: () => route }),
-    states,
-    update,
-    actions,
-    router
+    render: () => m(App, { state: states(), update, actions, router })
   })
 );
 

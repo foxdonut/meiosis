@@ -1,5 +1,3 @@
-/* Equivalent of this code, you can also npm install meiosis-router-setup */
-/* See https://meiosis.js.org/router for details. */
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 

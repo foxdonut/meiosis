@@ -7,14 +7,16 @@ import createRouteMatcher from "feather-route-matcher";
 import { createRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
-import { selectors } from "../state";
 
-const routeMatcher = createRouteMatcher(routeConfig);
+const featherRouteMatcher = createRouteMatcher(routeConfig);
+const routeMatcher = path => {
+  const match = featherRouteMatcher(path);
+  return { page: match.value, params: match.params };
+};
 
 export const router = createRouter({
   routeMatcher,
   routeConfig,
-  fromRoute: selectors.fromRoute,
   queryString
 });
 

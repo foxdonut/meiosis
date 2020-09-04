@@ -467,10 +467,7 @@ export const getLinkAttrs = (router, page, params) => {
  * @typedef {Object} CreateMithrilRoutesConfig
  *
  * @property {OnRouteChange} onRouteChange
- * @property {*} App
- * @property {*} states
- * @property {*} update
- * @property {*} actions
+ * @property {*} render
  */
 
 /**
@@ -556,12 +553,12 @@ export const createMithrilRouter = ({
   const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
   const toUrl = ToUrl(routeConfig, getStatePath, queryString);
 
-  const createMithrilRoutes = ({ onRouteChange, App, states, update, actions, router }) =>
+  const createMithrilRoutes = ({ onRouteChange, render }) =>
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
         onmatch: params => onRouteChange({ page, params }),
-        render: () => m(App, { state: states(), update, actions, router })
+        render
       };
       return result;
     }, {});
