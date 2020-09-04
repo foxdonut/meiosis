@@ -300,14 +300,14 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
  *
  * @return {ToUrl}
  */
-export const ToUrl = (routeConfig, queryString = emptyQueryString) => {
+const ToUrl = (routeConfig, getStatePath, queryString = emptyQueryString) => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
   );
 
   return (page, params = {}) => {
-    const path = pathLookup[page];
+    const path = getStatePath(pathLookup[page]);
 
     return (
       (path.match(/(:[^/]*)/g) || []).reduce(
@@ -318,6 +318,27 @@ export const ToUrl = (routeConfig, queryString = emptyQueryString) => {
     );
   };
 };
+
+/*
+const toUrl = (page, params = {}) => {
+  const path = getStatePath(pathLookup[page]);
+  const pathParams = [];
+
+  const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
+    pathParams.push(pathParam.substring(1));
+    return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
+  }, path);
+
+  const queryParams = Object.entries(params).reduce((result, [key, value]) => {
+    if (pathParams.indexOf(key) < 0) {
+      result[key] = value;
+    }
+    return result;
+  }, {});
+
+  return result + getQueryString(queryString, queryParams);
+};
+*/
 
 /**
  * Creates a router.
@@ -335,6 +356,14 @@ export const createRouter = ({
   queryString = emptyQueryString,
   wdw = window
 }) => {
+  if (!routeMatcher) {
+    throw "routeMatcher is required";
+  }
+
+  if (!routeConfig && !toUrl) {
+    throw "routeConfig or toUrl is required";
+  }
+
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
@@ -356,8 +385,8 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const toUrlFn = toUrl || ToUrl(routeConfig, queryString);
-  toUrl = (page, params = {}) => getStatePath(prefix + toUrlFn(page, params));
+  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath, queryString);
+  toUrl = (page, params = {}) => prefix + toUrlFn(page, params);
 
   const syncLocationBar = route => {
     const { page, params } = route;
@@ -389,9 +418,9 @@ export const getLinkAttrs = (router, page, params) => {
  * @typedef {Object} MithrilRouterConfig
  *
  * @property {m} m the Mithril instance.
+ * @property {RouteConfig} routeConfig the route configuration.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
  * are using history mode, you need to provide server side routing support.
- * @property {RouteConfig} routeConfig the route configuration.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `historyMode` is `true`.
@@ -503,44 +532,29 @@ export const getLinkAttrs = (router, page, params) => {
  */
 export const createMithrilRouter = ({
   m,
-  rootPath,
   routeConfig,
+  rootPath,
   plainHash = false,
   wdw = window
 }) => {
+  if (!m) {
+    throw "m is required";
+  }
+
+  if (!routeConfig) {
+    throw "routeConfig is required";
+  }
+
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
 
   m.route.prefix = prefix;
 
-  const queryString = { stringify: m.buildQueryString };
+  const queryString = { stringify: m.buildQueryString, parse: m.parseQueryString };
   const getUrl = createGetUrl(prefix, historyMode, wdw);
 
-  const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, pageId]) => Object.assign(result, { [pageId]: path }),
-    {}
-  );
-
   const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
-
-  const toUrl = (pageId, params = {}) => {
-    const path = getStatePath(pathLookup[pageId]);
-    const pathParams = [];
-
-    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
-      pathParams.push(pathParam.substring(1));
-      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
-    }, path);
-
-    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
-      if (pathParams.indexOf(key) < 0) {
-        result[key] = value;
-      }
-      return result;
-    }, {});
-
-    return result + getQueryString(queryString, queryParams);
-  };
+  const toUrl = ToUrl(routeConfig, getStatePath, queryString);
 
   const createMithrilRoutes = ({ onRouteChange, App, states, update, actions, router }) =>
     Object.keys(routeConfig).reduce((result, path) => {

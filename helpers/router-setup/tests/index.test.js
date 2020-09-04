@@ -4,7 +4,7 @@ import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 import m from "mithril";
 
-import { createRouter, createMithrilRouter, ToUrl } from "../src/index";
+import { createRouter, createMithrilRouter } from "../src/index";
 
 const decodeURI = uri => uri;
 
@@ -103,16 +103,11 @@ describe("historyMode and plainHash", () => {
       test("uses custom toUrl", () => {
         const path = "/login";
         const wdw = createWindow(path);
-        const toUrlFn = ToUrl(routeConfig);
-        const fn = jest.fn();
-        const toUrl = (path, params) => {
-          fn();
-          return toUrlFn(path, params);
-        };
+        const toUrl = jest.fn();
         const router = createRouter(createRouterConfig({ toUrl, wdw }));
 
-        expect(router.toUrl(Route.Login)).toEqual(prefix + path);
-        expect(fn.mock.calls.length).toBe(1);
+        router.toUrl(Route.Login);
+        expect(toUrl.mock.calls.length).toBe(1);
       });
 
       describe("initial route", () => {
@@ -218,15 +213,25 @@ describe("historyMode and plainHash", () => {
         });
       }
     });
+  });
+});
 
-    describe("mithril router", () => {
-      test("basic", () => {
-        const wdw = mockWindow(rootPath, "#!", "/");
-        const router = createMithrilRouter({ m, routeConfig, wdw });
-        const mithrilRoutes = router.createMithrilRoutes({});
+describe("generic router", () => {
+  test("requires routeMatcher", () => {
+    expect(() => createRouter({})).toThrow("routeMatcher is required");
+  });
 
-        expect(Object.keys(mithrilRoutes).length).toBe(Object.keys(routeConfig).length);
-      });
-    });
+  test("requires routeConfig or toUrl", () => {
+    expect(() => createRouter({ routeMatcher })).toThrow("routeConfig or toUrl is required");
+  });
+});
+
+describe("mithril router", () => {
+  test("requires m", () => {
+    expect(() => createMithrilRouter({ routeConfig })).toThrow("m is required");
+  });
+
+  test("requires routeConfig", () => {
+    expect(() => createMithrilRouter({ m })).toThrow("routeConfig is required");
   });
 });
