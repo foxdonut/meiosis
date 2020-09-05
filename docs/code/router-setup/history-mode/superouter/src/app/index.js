@@ -1,6 +1,6 @@
 import { home } from "../home";
-import { login } from "router-setup-common/src/login";
-import { settings } from "router-setup-common/src/settings";
+import { login } from "../login";
+import { settings } from "../settings";
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
