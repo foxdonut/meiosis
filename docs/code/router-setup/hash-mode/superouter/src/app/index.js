@@ -1,11 +1,11 @@
 import { home } from "../home";
-import { login } from "../login";
-import { settings } from "../settings";
+import { login } from "router-setup-common/src/login";
+import { settings } from "router-setup-common/src/settings";
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 import { locationBar } from "router-setup-common/src/locationBar";
-import { selectors } from "../state";
+import { selectors } from "router-setup-common/src/selectors";
 
 export const createApp = router => ({
   initial: {

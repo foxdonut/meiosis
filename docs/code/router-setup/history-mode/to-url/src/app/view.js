@@ -1,14 +1,14 @@
 import m from "mithril";
 
 import { Home } from "router-setup-common/src/home";
-import { Login } from "../login";
-import { Settings } from "../settings";
+import { Login } from "router-setup-common/src/login/index-route";
+import { Settings } from "router-setup-common/src/settings/index-route";
 import { Tea } from "../tea/view";
 import { TeaSearch } from "../teaSearch/view";
 import { NotFound } from "router-setup-common/src/notFound";
 import { Route } from "router-setup-common/src/router";
 import { getLinkAttrs } from "../router/link";
-import { selectors } from "../state";
+import { selectors } from "router-setup-common/src/selectors";
 
 const componentMap = {
   Home,

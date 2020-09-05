@@ -1,5 +1,5 @@
-import { Service } from "./service";
+import { service } from "./service";
 
 export const teaDetails = {
-  Service
+  service
 };

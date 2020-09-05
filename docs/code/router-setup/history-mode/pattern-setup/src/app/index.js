@@ -1,11 +1,10 @@
 import { home } from "router-setup-common/src/home";
-import { login } from "../login";
-import { settings } from "../settings";
+import { login } from "router-setup-common/src/login/index-url";
+import { settings } from "router-setup-common/src/settings/index-url";
 import { tea } from "router-setup-common/src/tea";
 import { teaDetails } from "router-setup-common/src/teaDetails";
 import { teaSearch } from "router-setup-common/src/teaSearch";
 import { locationBar } from "router-setup-common/src/locationBar";
-import { selectors } from "../state";
 
 export const createApp = router => ({
   initial: {
@@ -17,18 +16,14 @@ export const createApp = router => ({
 
   services: [
     settings.Service(router),
-    home.Service(selectors),
+    home.service,
     login.Service(router),
-    tea.Service(selectors),
-    teaDetails.Service(selectors),
-    teaSearch.Service(selectors)
+    tea.service,
+    teaDetails.service,
+    teaSearch.service
   ],
 
-  Effects: update => [
-    tea.Effect(update),
-    teaSearch.Effect(update),
-    locationBar.Effect(router, selectors)
-  ]
+  Effects: update => [tea.Effect(update), teaSearch.Effect(update), locationBar.Effect(router)]
 });
 
 export { App } from "./view";

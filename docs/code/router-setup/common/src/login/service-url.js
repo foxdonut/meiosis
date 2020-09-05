@@ -1,7 +1,7 @@
-import { Route } from "router-setup-common/src/router";
-import { selectors } from "../state";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
-export const service = state => {
+export const Service = router => state => {
   if (selectors.page(state) === Route.Login) {
     if (!state.login || state.login.username == null) {
       return {
@@ -18,7 +18,7 @@ export const service = state => {
       (state.login.username || state.login.password) &&
       !confirm("You have unsaved data. Continue?")
     ) {
-      return { route: () => selectors.toRoute(Route.Login) };
+      return { route: () => router.toRoute("/login") };
     } else if (state.login) {
       return { login: undefined };
     }

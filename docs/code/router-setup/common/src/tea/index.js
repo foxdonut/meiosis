@@ -1,7 +1,7 @@
-import { Service } from "./service";
+import { service } from "./service";
 import { Effect } from "./effect";
 
 export const tea = {
-  Service,
+  service,
   Effect
 };

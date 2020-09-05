@@ -2,7 +2,7 @@
 /* See https://meiosis.js.org/router for details. */
 import m from "mithril";
 
-import { selectors } from "../state";
+import { selectors } from "router-setup-common/src/selectors";
 
 export const createMithrilRouter = routeConfig => {
   const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);

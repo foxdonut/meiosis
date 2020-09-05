@@ -2,7 +2,7 @@ import m from "mithril";
 
 import { TeaDetails } from "../teaDetails/view";
 import { getLinkAttrs } from "../router/link";
-import { selectors } from "../state";
+import { selectors } from "router-setup-common/src/selectors";
 
 export const Tea = {
   view: ({ attrs: { state, actions, router } }) => [

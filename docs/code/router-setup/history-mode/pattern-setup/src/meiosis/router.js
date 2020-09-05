@@ -12,7 +12,10 @@ export const createRouter = routeConfig => {
 
   const toRoute = (path, options) => {
     const match = matcher(path);
-    return Object.assign(match, { url: prefix + stripTrailingSlash(match.url) }, options);
+    return Object.assign(
+      { page: match.value, params: match.params, url: prefix + stripTrailingSlash(match.url) },
+      options
+    );
   };
 
   const initialRoute = toRoute(getPath());

@@ -1,5 +1,5 @@
-import { Route } from "router-setup-common/src/router";
-import { selectors } from "../state";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
 export const Actions = update => ({
   logout: () =>

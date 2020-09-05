@@ -5,7 +5,11 @@ export const createRouter = routeConfig => {
 
   const getPath = () => decodeURI(window.location.hash || prefix + "/").substring(prefix.length);
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const featherRouteMatcher = createRouteMatcher(routeConfig);
+  const routeMatcher = path => {
+    const match = featherRouteMatcher(path);
+    return { page: match.value, params: match.params, url: match.url };
+  };
   const toRoute = (path, options) => Object.assign(routeMatcher(path), options);
 
   const initialRoute = toRoute(getPath());

@@ -1,6 +1,7 @@
-import { Route } from "router-setup-common/src/router";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
-export const Service = selectors => state => {
+export const service = state => {
   if (selectors.page(state) === Route.TeaSearch) {
     if (!state.searchTeas) {
       return { loadSearchTeas: true };
