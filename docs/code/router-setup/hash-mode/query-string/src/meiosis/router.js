@@ -27,6 +27,8 @@ export const createRouter = routeConfig => {
     return Object.assign({ page: match.value, params: match.params, queryParams, url }, options);
   };
 
+  const replaceRoute = path => toRoute(path, { replace: true });
+
   const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
@@ -41,5 +43,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, toRoute, start, syncLocationBar };
+  return { initialRoute, toRoute, replaceRoute, start, syncLocationBar };
 };

@@ -18,6 +18,8 @@ export const createRouter = routeConfig => {
     );
   };
 
+  const replaceRoute = path => toRoute(path, { replace: true });
+
   const initialRoute = toRoute(getPath());
 
   const toUrl = path => prefix + path;
@@ -41,5 +43,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, toRoute, toUrl, getLinkHandler, start, syncLocationBar };
+  return { initialRoute, toRoute, replaceRoute, toUrl, getLinkHandler, start, syncLocationBar };
 };

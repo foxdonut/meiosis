@@ -36,7 +36,7 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertRouteMatch = ({ match, queryParams }) => ({
+const convertMatchToRoute = (match, queryParams) => ({
   page: match.value,
   params: match.params,
   queryParams
@@ -55,7 +55,7 @@ describe("historyMode and plainHash", () => {
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
     const createRouterConfig = config =>
-      Object.assign({ routeMatcher, convertRouteMatch, routeConfig }, caseConfig, config);
+      Object.assign({ routeMatcher, convertMatchToRoute, routeConfig }, caseConfig, config);
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 

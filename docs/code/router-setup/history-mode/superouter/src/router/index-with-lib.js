@@ -9,7 +9,7 @@ import { Route } from ".";
 import { selectors } from "router-setup-common/src/selectors";
 
 const routeMatcher = path => Route.matchOr(() => Route.of.NotFound({ any: null }), path);
-const convertMatchToRoute = ({ match, queryParams }) => ({ page: match, queryParams });
+const convertMatchToRoute = (match, queryParams) => ({ page: match, queryParams });
 
 export const router = createRouter({
   routeMatcher,

@@ -40,7 +40,8 @@
  *
  * @callback ConvertMatchToRoute
  *
- * @param {Route} the route.
+ * @param {*} match the route match.
+ * @param {*} queryParams the query params.
  *
  * @return {*} the converted route.
  */
@@ -88,16 +89,6 @@
  * @callback ToRoute
  *
  * @param {string} path the route path.
- *
- * @return {Route} the route.
- */
-
-/**
- * Function to convert a route match to a {@link Route}.
- *
- * @callback MatchToRoute
- *
- * @param {*} match the route match.
  *
  * @return {Route} the route.
  */
@@ -244,9 +235,9 @@
  * @typedef {Object} RouterConfig
  *
  * @property {RouteMatcher} routeMatcher the route matcher function.
+ * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
  * @property {RouteConfig} [routeConfig] the route configuration.
  * @property {ToUrl} [toUrl] the `toUrl` function.
- * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
  * are using history mode, you need to provide server side routing support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
@@ -338,7 +329,7 @@ export const createRouter = ({
   routeMatcher,
   routeConfig,
   toUrl,
-  convertMatchToRoute = I,
+  convertMatchToRoute,
   rootPath,
   plainHash = false,
   queryString = emptyQueryString,
@@ -364,7 +355,7 @@ export const createRouter = ({
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    return convertMatchToRoute({ match, queryParams });
+    return convertMatchToRoute(match, queryParams);
   };
 
   const initialRoute = toRoute(getPath());
@@ -560,7 +551,6 @@ export const createMithrilRouter = ({
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        // FIXME: separate params and queryParams
         onmatch: params =>
           onRouteChange(Object.assign({ page }, separateParamsAndQueryParams(path, params))),
         render

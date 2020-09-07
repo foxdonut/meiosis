@@ -20,38 +20,47 @@ export const createMithrilRouter = routeConfig => {
     {}
   );
 
-  const toUrl = (page, params = {}) => {
+  const toUrl = (page, params = {}, queryParams = {}) => {
     const path = prefix + pathLookup[page];
     const pathParams = [];
 
-    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
-      pathParams.push(pathParam.substring(1));
-      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
-    }, path);
+    return (
+      (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
+        pathParams.push(pathParam.substring(1));
+        return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
+      }, path) + getQueryString(queryParams)
+    );
+  };
 
-    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
-      if (pathParams.indexOf(key) < 0) {
-        result[key] = value;
-      }
-      return result;
-    }, {});
+  const separateParamsAndQueryParams = (path, allParams) => {
+    const pathParams = (path.match(/(:[^/]*)/g) || []).map(key => key.substring(1));
 
-    return result + getQueryString(queryParams);
+    return Object.entries(allParams).reduce(
+      (result, [key, value]) => {
+        const slot = pathParams.indexOf(key) >= 0 ? "params" : "queryParams";
+        result[slot][key] = value;
+        return result;
+      },
+      { params: {}, queryParams: {} }
+    );
   };
 
   const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) =>
     Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: params => onRouteChange(selectors.toRoute(page, params)),
+        onmatch: allParams => {
+          const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
+          return onRouteChange(selectors.toRoute(page, params, queryParams));
+        },
         render: () => m(App, { state: states(), update, actions, router })
       };
       return result;
     }, {});
 
   const syncLocationBar = route => {
-    const { page, params } = route;
+    const { page, params, queryParams } = route;
     if (page) {
-      const url = toUrl(page, params);
+      const url = toUrl(page, params, queryParams);
       if (url !== getUrl()) {
         const fn = route.replace ? "replaceState" : "pushState";
         window.history[fn].call(window.history, {}, "", url);

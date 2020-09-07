@@ -4,6 +4,12 @@ export const selectors = {
   params: state => selectors.route(state).params || {},
   queryParams: state => selectors.route(state).queryParams || {},
   url: state => selectors.route(state).url,
-  toRoute: (page, params, options = {}) => ({ page, params, ...options }),
+  toRoute: (page, params = {}, queryParams = {}) => ({ page, params, queryParams }),
+  replaceRoute: (page, params = {}, queryParams = {}) => ({
+    page,
+    params,
+    queryParams,
+    replace: true
+  }),
   teaType: state => state.teaType || selectors.queryParams(state).type
 };

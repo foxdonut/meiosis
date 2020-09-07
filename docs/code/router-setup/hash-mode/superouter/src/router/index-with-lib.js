@@ -8,7 +8,7 @@ import queryString from "query-string";
 import { Route } from ".";
 
 const routeMatcher = path => Route.matchOr(() => Route.of.NotFound({ any: null }), path);
-const convertMatchToRoute = ({ match, queryParams }) => ({ page: match, queryParams });
+const convertMatchToRoute = (match, queryParams) => ({ page: match, queryParams });
 
 export const router = createRouter({
   routeMatcher,

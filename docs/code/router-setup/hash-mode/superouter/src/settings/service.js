@@ -7,7 +7,7 @@ export const service = state =>
     Settings: () => {
       if (!state.user) {
         return {
-          route: () => ({ page: Route.of.Login(), replace: true }),
+          route: () => selectors.replaceRoute(Route.of.Login()),
           login: {
             message: "Please login.",
             returnTo: Route.of.Settings()

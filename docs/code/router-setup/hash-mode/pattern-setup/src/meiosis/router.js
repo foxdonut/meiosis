@@ -10,7 +10,8 @@ export const createRouter = routeConfig => {
     const match = featherRouteMatcher(path);
     return { page: match.value, params: match.params, url: match.url };
   };
-  const toRoute = (path, options) => Object.assign(routeMatcher(path), options);
+  const toRoute = routeMatcher;
+  const replaceRoute = path => Object.assign(routeMatcher(path), { replace: true });
 
   const initialRoute = toRoute(getPath());
 
@@ -27,5 +28,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, toRoute, start, syncLocationBar };
+  return { initialRoute, toRoute, replaceRoute, start, syncLocationBar };
 };

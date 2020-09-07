@@ -9,7 +9,7 @@ import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
 
 const routeMatcher = createRouteMatcher(routeConfig);
-const convertMatchToRoute = ({ match, queryParams }) => ({
+const convertMatchToRoute = (match, queryParams) => ({
   page: match.value,
   params: match.params,
   queryParams
