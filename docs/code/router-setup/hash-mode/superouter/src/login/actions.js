@@ -1,3 +1,4 @@
+import { selectors } from "router-setup-common/src/selectors";
 import { Route } from "../router";
 
 export const Actions = update => ({
@@ -5,5 +6,5 @@ export const Actions = update => ({
   password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
-    update({ user: username, route: () => ({ page: returnTo || Route.of.Home() }) })
+    update({ user: username, route: () => selectors.toRoute(returnTo || Route.of.Home()) })
 });
