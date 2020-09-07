@@ -1,5 +1,5 @@
-export const getLinkAttrs = (router, page, params) => {
-  const url = router.toUrl(page, params);
+export const getLinkAttrs = (router, page, params, queryParams) => {
+  const url = router.toUrl(page, params, queryParams);
 
   return { href: url, onclick: router.getLinkHandler(url) };
 };

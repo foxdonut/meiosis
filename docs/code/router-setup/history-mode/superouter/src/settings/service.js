@@ -1,3 +1,4 @@
+import { selectors } from "router-setup-common/src/selectors";
 import { Route, allRoutes } from "../router";
 
 export const service = state =>
@@ -6,7 +7,7 @@ export const service = state =>
     Settings: () => {
       if (!state.user) {
         return {
-          route: () => Object.assign(Route.of.Login(), { replace: true }),
+          route: () => ({ page: Route.of.Login(), replace: true }),
           login: {
             message: "Please login.",
             returnTo: Route.of.Settings()
@@ -14,4 +15,4 @@ export const service = state =>
         };
       }
     }
-  })(state.route);
+  })(selectors.page(state));

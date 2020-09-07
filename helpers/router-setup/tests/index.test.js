@@ -3,8 +3,11 @@
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 import m from "mithril";
+import * as Superouter from "superouter";
 
 import { createRouter, createMithrilRouter } from "../src/index";
+
+const pipe = (f, g) => a => g(f(a));
 
 const decodeURI = uri => uri;
 
@@ -31,14 +34,13 @@ const routeConfig = {
   "/user/:id": Route.UserProfile
 };
 
-const featherRouteMatcher = createRouteMatcher(routeConfig);
+const routeMatcher = createRouteMatcher(routeConfig);
 
-const pipe = (f, g) => a => g(f(a));
-
-const routeMatcher = pipe(featherRouteMatcher, match => ({
+const convertRouteMatch = ({ match, queryParams }) => ({
   page: match.value,
-  params: match.params
-}));
+  params: match.params,
+  queryParams
+});
 
 const plainHashAndHistoryModeCases = [
   ["default hash", {}, "#!"],
@@ -53,7 +55,7 @@ describe("historyMode and plainHash", () => {
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
     const createRouterConfig = config =>
-      Object.assign({ routeMatcher, routeConfig }, caseConfig, config);
+      Object.assign({ routeMatcher, convertRouteMatch, routeConfig }, caseConfig, config);
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 
@@ -80,13 +82,17 @@ describe("historyMode and plainHash", () => {
           ["pushState", {}],
           ["replaceState", { replace: true }]
         ];
-        test.each(syncLocationBarCases)("calls %s", (method, params) => {
+
+        test.each(syncLocationBarCases)("calls %s", (method, options) => {
           const path = "/login";
           const methodFn = jest.fn();
           const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
-          const router = createRouterFn({ wdw });
-          const url = prefix + "/user/42";
-          const route = Object.assign({ page: Route.UserProfile, params: { id: "42" } }, params);
+          const router = createRouterFn({ queryString, wdw });
+          const url = prefix + "/user/42?sport=tennis";
+          const route = Object.assign(
+            { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } },
+            options
+          );
 
           router.syncLocationBar(route);
 
@@ -100,16 +106,6 @@ describe("historyMode and plainHash", () => {
     });
 
     describe("generic router", () => {
-      test("uses custom toUrl", () => {
-        const path = "/login";
-        const wdw = createWindow(path);
-        const toUrl = jest.fn();
-        const router = createRouter(createRouterConfig({ toUrl, wdw }));
-
-        router.toUrl(Route.Login);
-        expect(toUrl.mock.calls.length).toBe(1);
-      });
-
       describe("initial route", () => {
         const initialRouteCases = [
           ["slash", "/", {}, { page: Route.Home, params: {} }],
@@ -120,7 +116,7 @@ describe("historyMode and plainHash", () => {
             { queryString },
             {
               page: Route.Home,
-              params: { sport: "tennis" }
+              queryParams: { sport: "tennis" }
             }
           ],
           [
@@ -129,7 +125,7 @@ describe("historyMode and plainHash", () => {
             { queryString },
             {
               page: Route.Home,
-              params: { sport: "tennis" }
+              queryParams: { sport: "tennis" }
             }
           ],
           ["just a route", "/login", {}, { page: Route.Login, params: {} }],
@@ -138,7 +134,7 @@ describe("historyMode and plainHash", () => {
             "with queryParams",
             "/login?sport=tennis",
             { queryString },
-            { page: Route.Login, params: { sport: "tennis" } }
+            { page: Route.Login, queryParams: { sport: "tennis" } }
           ],
           [
             "with params and queryParams",
@@ -146,7 +142,8 @@ describe("historyMode and plainHash", () => {
             { queryString },
             {
               page: Route.UserProfile,
-              params: { id: "42", sport: "tennis" }
+              params: { id: "42" },
+              queryParams: { sport: "tennis" }
             }
           ]
         ];
@@ -212,6 +209,27 @@ describe("historyMode and plainHash", () => {
           });
         });
       }
+
+      test("uses custom toUrl", () => {
+        const path = "/login";
+        const wdw = createWindow(path);
+
+        const superouterConfig = {
+          Home: "/",
+          Login: "/login",
+          UserProfile: "/user/:id"
+        };
+
+        const Route = Superouter.type("Route", superouterConfig);
+
+        const toUrl = Route.toURL;
+        const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
+        const router = createRouter(createRouterConfig({ routeMatcher, toUrl, queryString, wdw }));
+
+        const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
+
+        expect(result).toBe(prefix + "/user/42?sport=tennis");
+      });
     });
 
     describe("mithril router", () => {
@@ -241,5 +259,21 @@ describe("mithril router", () => {
 
   test("requires routeConfig", () => {
     expect(() => createMithrilRouter({ m })).toThrow("routeConfig is required");
+  });
+
+  test("calls onRouteChange", () => {
+    const router = createMithrilRouter({ m, routeConfig });
+    const onRouteChange = jest.fn();
+    const mithrilRoutes = router.createMithrilRoutes({ onRouteChange });
+
+    mithrilRoutes["/user/:id"].onmatch({ id: "42", sport: "tennis" });
+
+    const calls = onRouteChange.mock.calls;
+    expect(calls.length).toBe(1);
+    expect(calls[0][0]).toEqual({
+      page: Route.UserProfile,
+      params: { id: "42" },
+      queryParams: { sport: "tennis" }
+    });
   });
 });

@@ -24,7 +24,7 @@ export const TeaSearch = () => ({
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    ...getLinkAttrs(router, Route.TeaSearch, { type })
+                    ...getLinkAttrs(router, Route.TeaSearch, {}, { type })
                   },
                   type
                 )

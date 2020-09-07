@@ -1,5 +1,6 @@
-import { Route, allRoutes } from "../router";
+import { selectors } from "router-setup-common/src/selectors";
 import { teaMap } from "router-setup-common/src/teaDetails/data";
+import { Route, allRoutes } from "../router";
 
 export const service = state =>
   Route.fold({
@@ -13,4 +14,4 @@ export const service = state =>
         return { tea: () => ({ [id]: teaMap[id].description }) };
       }
     }
-  })(state.route);
+  })(selectors.page(state));

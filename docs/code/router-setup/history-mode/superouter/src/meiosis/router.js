@@ -15,18 +15,18 @@ export const createRouter = (Route, defaultRoute) => {
     return idx >= 0 ? path.substring(idx + 1) : "";
   };
 
-  const getQueryString = (params = {}) => {
-    const query = queryString.stringify(params);
+  const getQueryString = (queryParams = {}) => {
+    const query = queryString.stringify(queryParams);
     return (query.length > 0 ? "?" : "") + query;
   };
 
-  const toUrl = (route, params = {}) =>
-    prefix + stripTrailingSlash(Route.toURL(route)) + getQueryString(params);
+  const toUrl = (route, _params, queryParams = {}) =>
+    prefix + stripTrailingSlash(Route.toURL(route)) + getQueryString(queryParams);
 
   const routeMatcher = path => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = Route.matchOr(() => defaultRoute, pathWithoutQuery);
-    return Object.assign(match, { params: queryString.parse(getQuery(path)) });
+    return { page: match, queryParams: queryString.parse(getQuery(path)) };
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -42,7 +42,7 @@ export const createRouter = (Route, defaultRoute) => {
   };
 
   const syncLocationBar = route => {
-    const url = toUrl(route, route.params);
+    const url = toUrl(route.page, null, route.queryParams);
 
     if (url !== getUrl()) {
       const fn = route.replace ? "replaceState" : "pushState";

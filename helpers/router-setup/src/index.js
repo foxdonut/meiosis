@@ -20,8 +20,8 @@
  *
  * @typedef {Object} Route
  *
- * @property {string} page the page ID.
- * @property {*} params an object with the path parameters.
+ * @property {*} match the match returned by the router.
+ * @property {*} queryParams an object with the query parameters.
  * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
@@ -33,6 +33,16 @@
  * @param {string} url the URL to resolve.
  *
  * @return {Route} the resolved route.
+ */
+
+/**
+ * A function to convert routes.
+ *
+ * @callback ConvertMatchToRoute
+ *
+ * @param {Route} the route.
+ *
+ * @return {*} the converted route.
  */
 
 /**
@@ -99,6 +109,7 @@
  *
  * @param {string} page the page ID.
  * @param {*} [params] the path parameters.
+ * @param {*} [queryParams] the path parameters.
  *
  * @return {string} the URL.
  */
@@ -149,11 +160,19 @@
  */
 
 /**
+ * @typedef SyncLocationBarParams
+ *
+ * @property {string} page
+ * @property {*} params
+ * @property {boolean} replace
+ */
+
+/**
  * Function that synchronizes the location bar with the state route.
  *
  * @callback SyncLocationBar
  *
- * @param {Route} route the route from the application state.
+ * @param {SyncLocationBarParams} syncLocationBarParams
  *
  * @return {void}
  */
@@ -227,6 +246,7 @@
  * @property {RouteMatcher} routeMatcher the route matcher function.
  * @property {RouteConfig} [routeConfig] the route configuration.
  * @property {ToUrl} [toUrl] the `toUrl` function.
+ * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
  * are using history mode, you need to provide server side routing support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
@@ -260,16 +280,6 @@ const getQuery = path => {
   return idx >= 0 ? path.substring(idx + 1) : "";
 };
 
-export const getQueryParams = (path, params) => {
-  const pathParams = (path.match(/(:[^/]*)/g) || []).map(k => k.substring(1));
-  return Object.entries(params).reduce((result, [k, v]) => {
-    if (pathParams.indexOf(k) < 0) {
-      result[k] = v;
-    }
-    return result;
-  }, {});
-};
-
 export const getQueryString = (queryString, queryParams = {}) => {
   const query = queryString.stringify(queryParams);
   return (query.length > 0 ? "?" : "") + query;
@@ -285,9 +295,9 @@ const emptyQueryString = {
   stringify: _ => ""
 };
 
-const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
+const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
   if (url !== getUrl()) {
-    const fn = route.replace ? "replaceState" : "pushState";
+    const fn = replace ? "replaceState" : "pushState";
     wdw.history[fn].call(wdw.history, {}, "", url);
   }
 };
@@ -296,11 +306,11 @@ const doSyncLocationBar = ({ route, url, getUrl, wdw }) => {
  * Helper that creates a `toUrl` function.
  *
  * @param {RouteConfig} routeConfig
- * @param {QueryStringLib} queryString
+ * @param {*} getStatePath
  *
  * @return {ToUrl}
  */
-const ToUrl = (routeConfig, getStatePath, queryString = emptyQueryString) => {
+const ToUrl = (routeConfig, getStatePath) => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
@@ -309,36 +319,13 @@ const ToUrl = (routeConfig, getStatePath, queryString = emptyQueryString) => {
   return (page, params = {}) => {
     const path = getStatePath(pathLookup[page]);
 
-    return (
-      (path.match(/(:[^/]*)/g) || []).reduce(
-        (result, pathParam) =>
-          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-        path
-      ) + getQueryString(queryString, getQueryParams(path, params))
+    return (path.match(/(:[^/]*)/g) || []).reduce(
+      (result, pathParam) =>
+        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+      path
     );
   };
 };
-
-/*
-const toUrl = (page, params = {}) => {
-  const path = getStatePath(pathLookup[page]);
-  const pathParams = [];
-
-  const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
-    pathParams.push(pathParam.substring(1));
-    return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
-  }, path);
-
-  const queryParams = Object.entries(params).reduce((result, [key, value]) => {
-    if (pathParams.indexOf(key) < 0) {
-      result[key] = value;
-    }
-    return result;
-  }, {});
-
-  return result + getQueryString(queryString, queryParams);
-};
-*/
 
 /**
  * Creates a router.
@@ -351,6 +338,7 @@ export const createRouter = ({
   routeMatcher,
   routeConfig,
   toUrl,
+  convertMatchToRoute = I,
   rootPath,
   plainHash = false,
   queryString = emptyQueryString,
@@ -376,7 +364,7 @@ export const createRouter = ({
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    return { page: match.page, params: Object.assign({}, match.params, queryParams) };
+    return convertMatchToRoute({ match, queryParams });
   };
 
   const initialRoute = toRoute(getPath());
@@ -385,12 +373,12 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath, queryString);
-  toUrl = (page, params = {}) => prefix + toUrlFn(page, params);
+  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath);
+  toUrl = (page, params = {}, queryParams = {}) =>
+    prefix + toUrlFn(page, params) + getQueryString(queryString, queryParams);
 
-  const syncLocationBar = route => {
-    const { page, params } = route;
-    doSyncLocationBar({ route, url: toUrl(page, params), getUrl, wdw });
+  const syncLocationBar = ({ page, params, queryParams, replace }) => {
+    doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
   };
 
   const getLinkHandler = url => evt => {
@@ -520,6 +508,19 @@ export const getLinkAttrs = (router, page, params) => {
  * @property {QueryStringStringify} buildQueryString
  */
 
+const separateParamsAndQueryParams = (path, allParams) => {
+  const pathParams = (path.match(/(:[^/]*)/g) || []).map(key => key.substring(1));
+
+  return Object.entries(allParams).reduce(
+    (result, [key, value]) => {
+      const slot = pathParams.indexOf(key) >= 0 ? "params" : "queryParams";
+      result[slot][key] = value;
+      return result;
+    },
+    { params: {}, queryParams: {} }
+  );
+};
+
 /**
  * Sets up a router using [Mithril Router](https://mithril.js.org/route.html).
  *
@@ -551,13 +552,17 @@ export const createMithrilRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
 
   const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
-  const toUrl = ToUrl(routeConfig, getStatePath, queryString);
+  const toUrlFn = ToUrl(routeConfig, getStatePath);
+  const toUrl = (page, params = {}, queryParams = {}) =>
+    toUrlFn(page, params) + getQueryString(queryString, queryParams);
 
   const createMithrilRoutes = ({ onRouteChange, render }) =>
     Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: params => onRouteChange({ page, params }),
+        // FIXME: separate params and queryParams
+        onmatch: params =>
+          onRouteChange(Object.assign({ page }, separateParamsAndQueryParams(path, params))),
         render
       };
       return result;
@@ -565,10 +570,9 @@ export const createMithrilRouter = ({
 
   const addPrefix = historyMode ? url => prefix + url : I;
 
-  const syncLocationBar = route => {
-    const { page, params } = route;
+  const syncLocationBar = ({ page, params, queryParams, replace }) => {
     if (page) {
-      doSyncLocationBar({ route, url: addPrefix(toUrl(page, params)), getUrl, wdw });
+      doSyncLocationBar({ replace, url: addPrefix(toUrl(page, params, queryParams)), getUrl, wdw });
     }
   };
 

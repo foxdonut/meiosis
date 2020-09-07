@@ -26,7 +26,7 @@ export const createRouter = routeConfig => {
     {}
   );
 
-  const toUrl = (page, params = {}) => {
+  const toUrl = (page, params = {}, queryParams = {}) => {
     const path = prefix + stripTrailingSlash(pathLookup[page]);
     const pathParams = [];
 
@@ -34,13 +34,6 @@ export const createRouter = routeConfig => {
       pathParams.push(pathParam.substring(1));
       return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
     }, path);
-
-    const queryParams = Object.entries(params).reduce((result, [key, value]) => {
-      if (pathParams.indexOf(key) < 0) {
-        result[key] = value;
-      }
-      return result;
-    }, {});
 
     return result + getQueryString(queryParams);
   };
@@ -51,7 +44,7 @@ export const createRouter = routeConfig => {
     const pathWithoutQuery = path.replace(/\?.*/, "");
     const match = matcher(pathWithoutQuery);
     const queryParams = queryString.parse(getQuery(path));
-    return { page: match.value, params: Object.assign(match.params, queryParams) };
+    return { page: match.value, params: match.params, queryParams };
   };
 
   const initialRoute = routeMatcher(getPath());
@@ -67,8 +60,8 @@ export const createRouter = routeConfig => {
   };
 
   const syncLocationBar = route => {
-    const { page, params } = route;
-    const url = toUrl(page, params);
+    const { page, params, queryParams } = route;
+    const url = toUrl(page, params, queryParams);
     if (url !== getUrl()) {
       const fn = route.replace ? "replaceState" : "pushState";
       window.history[fn].call(window.history, {}, "", url);

@@ -24,10 +24,7 @@ export const createRouter = routeConfig => {
     const match = matcher(pathWithoutQuery);
     const queryParams = queryString.parse(getQuery(path));
     const url = prefix + match.url + getQueryString(queryParams);
-    return Object.assign(
-      { page: match.value, params: Object.assign(match.params, queryParams), url },
-      options
-    );
+    return Object.assign({ page: match.value, params: match.params, queryParams, url }, options);
   };
 
   const initialRoute = toRoute(getPath());

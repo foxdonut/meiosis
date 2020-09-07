@@ -1,5 +1,6 @@
 import m from "mithril";
 
+import { selectors } from "router-setup-common/src/selectors";
 import { Route, allRoutes } from "../router";
 import { TeaDetails } from "../teaDetails";
 
@@ -22,7 +23,7 @@ export const Tea = {
       Route.fold({
         ...allRoutes(() => null),
         TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, router }))
-      })(state.route)
+      })(selectors.page(state))
     )
   ]
 };

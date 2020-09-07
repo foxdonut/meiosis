@@ -1,3 +1,4 @@
+import { selectors } from "router-setup-common/src/selectors";
 import { Route, allRoutes } from "../router";
 
 export const service = state =>
@@ -12,4 +13,4 @@ export const service = state =>
         return { loadSearchTeas: true };
       }
     }
-  })(state.route);
+  })(selectors.page(state));

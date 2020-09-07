@@ -5,5 +5,5 @@ export const Actions = update => ({
   password: value => update({ login: { password: value } }),
 
   login: (username, returnTo) =>
-    update({ user: username, route: () => returnTo || Route.of.Home() })
+    update({ user: username, route: () => ({ page: returnTo || Route.of.Home() }) })
 });
