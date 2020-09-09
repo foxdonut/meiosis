@@ -18,3 +18,12 @@ export const routeConfig = {
   "/:404...": Route.NotFound,
   "/*": Route.NotFound
 };
+
+export const router5Config = [
+  { path: "/", name: Route.Home },
+  { path: "/login", name: Route.Login },
+  { path: "/settings", name: Route.Settings },
+  { path: "/tea/search", name: Route.TeaSearch },
+  { path: "/tea", name: Route.Tea },
+  { path: "/tea/:id", name: Route.TeaDetails }
+];

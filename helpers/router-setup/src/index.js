@@ -32,7 +32,7 @@
  *
  * @param {string} url the URL to resolve.
  *
- * @return {Route} the resolved route.
+ * @return {*} the matched route.
  */
 
 /**
@@ -81,16 +81,6 @@
  *
  * @property {QueryStringParse} parse
  * @property {QueryStringStringify} stringify
- */
-
-/**
- * Function to generate a {@link Route} from a URL.
- *
- * @callback ToRoute
- *
- * @param {string} path the route path.
- *
- * @return {Route} the route.
  */
 
 /**
@@ -234,7 +224,7 @@
  *
  * @typedef {Object} RouterConfig
  *
- * @property {RouteMatcher} routeMatcher the route matcher function.
+ * @property {RouteMatcher} routeMatcher the function that matches routes.
  * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
  * @property {RouteConfig} [routeConfig] the route configuration.
  * @property {ToUrl} [toUrl] the `toUrl` function.
