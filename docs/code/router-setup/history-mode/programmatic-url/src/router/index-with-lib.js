@@ -19,7 +19,7 @@ export const router = createRouter({
   routeMatcher,
   convertMatchToRoute,
   routeConfig,
-  rootPath: "/code/router-setup/history-mode/to-url/build-with-lib",
+  rootPath: "/code/router-setup/history-mode/programmatic-url/build-with-lib",
   queryString
 });
 
