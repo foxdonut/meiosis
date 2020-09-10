@@ -1,5 +1,7 @@
 import * as m from "mithril";
 
+import { Router } from "meiosis-router-setup";
+
 import { Home } from "router-setup-common/src/home";
 import { Login } from "router-setup-common/src/login/index-route";
 import { Settings } from "router-setup-common/src/settings/index-route";
@@ -20,7 +22,10 @@ const componentMap = {
 };
 
 export const App = {
-  view: ({ attrs: { state, update, actions, router } }) => {
+  view: (vnode: m.Vnode<m.Attributes, any>): any => {
+    const { attrs } = vnode;
+    const { state, update, actions } = attrs;
+    const router: Router = attrs.router;
     const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
