@@ -1,7 +1,8 @@
 /**
  * Application object.
  *
- * @typedef {Object} app
+ * @typedef {Object} App
+ *
  * @property {Object} [initial={}] - an object that represents the initial state.
  * If not specified, the initial state will be `{}`.
  * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
@@ -38,7 +39,6 @@
  * After the services have run and the state has been updated, effects are executed and have the
  * opportunity to trigger more updates.
  *
- * @async
  * @function meiosis.common.setup
  *
  * @param {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,
@@ -47,7 +47,7 @@
  * returned stream must have a `map` method.
  * @param {Function} accumulator - the accumulator function.
  * @param {Function} combine - the function that combines an array of patches into one.
- * @param {app} app - the app, with optional properties.
+ * @param {App} app - the app, with optional properties.
  *
  * @returns {Object} - `{ states, update, actions }`, where `states` and `update` are streams, and
  * `actions` are the created actions.

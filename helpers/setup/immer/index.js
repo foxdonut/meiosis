@@ -3,7 +3,6 @@ import commonSetup from "../common";
 /**
  * Helper to setup the Meiosis pattern with [Immer](https://github.com/immerjs/immer).
  *
- * @async
  * @function meiosis.immer.setup
  *
  * @param {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,

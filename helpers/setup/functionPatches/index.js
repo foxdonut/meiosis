@@ -5,7 +5,6 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 /**
  * Helper to setup the Meiosis pattern with function patches.
  *
- * @async
  * @function meiosis.functionPatches.setup
  *
  * @param {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,
