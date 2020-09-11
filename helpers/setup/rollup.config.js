@@ -5,7 +5,7 @@ import { uglify } from "rollup-plugin-uglify";
 
 export default [
   {
-    input: "./index.js",
+    input: "./src/index.js",
     output: {
       file: "dist/meiosis-setup.js",
       name: "Meiosis",
@@ -20,7 +20,7 @@ export default [
     ]
   },
   {
-    input: "./index.js",
+    input: "./src/index.js",
     output: {
       file: "dist/meiosis-setup.min.js",
       name: "Meiosis",
