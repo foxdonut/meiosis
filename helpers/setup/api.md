@@ -2,13 +2,13 @@
 
 ### Table of Contents
 
--   [app][1]
+-   [App][1]
     -   [Properties][2]
--   [meiosis.common.setup][3]
+-   [StreamLib][3]
     -   [Parameters][4]
--   [StreamLib][5]
-    -   [Parameters][6]
-    -   [Properties][7]
+    -   [Properties][5]
+-   [meiosis.common.setup][6]
+    -   [Parameters][7]
 -   [meiosis.mergerino.setup][8]
     -   [Parameters][9]
 -   [meiosis.functionPatches.setup][10]
@@ -27,7 +27,7 @@
 -   [meiosis.simpleStream.scan][23]
     -   [Parameters][24]
 
-## app
+## App
 
 Application object.
 
@@ -44,31 +44,6 @@ Type: [Object][25]
 -   `Effects` **[Function][26]?** a function that creates effects, of the form
     `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
     and/or `actions`.
-
-## meiosis.common.setup
-
-Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
-use their respective `setup` function instead.
-
-Patch is merged in to the state by default. Services have access to the state and can return a
-patch that further updates the state. State changes by services are available to the next
-services in the list.
-
-After the services have run and the state has been updated, effects are executed and have the
-opportunity to trigger more updates.
-
-### Parameters
-
--   `stream` **[StreamLib][28]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
-    `m.stream`, or anything for which you provide either a function or an object with a `stream`
-    function to create a stream. The function or object must also have a `scan` property. The
-    returned stream must have a `map` method.
--   `accumulator` **[Function][26]** the accumulator function.
--   `combine` **[Function][26]** the function that combines an array of patches into one.
--   `app` **[app][29]** the app, with optional properties.
-
-Returns **[Object][25]** `{ states, update, actions }`, where `states` and `update` are streams, and
-`actions` are the created actions.
 
 ## StreamLib
 
@@ -89,7 +64,32 @@ Type: ([Object][25] \| [Function][26])
     not a function.
 -   `scan` **[Function][26]** the stream library's `scan` function.
 
-Returns **[simpleStream][30]** the created stream.
+Returns **[simpleStream][28]** the created stream.
+
+## meiosis.common.setup
+
+Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
+use their respective `setup` function instead.
+
+Patch is merged in to the state by default. Services have access to the state and can return a
+patch that further updates the state. State changes by services are available to the next
+services in the list.
+
+After the services have run and the state has been updated, effects are executed and have the
+opportunity to trigger more updates.
+
+### Parameters
+
+-   `stream` **[StreamLib][29]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+    `m.stream`, or anything for which you provide either a function or an object with a `stream`
+    function to create a stream. The function or object must also have a `scan` property. The
+    returned stream must have a `map` method.
+-   `accumulator` **[Function][26]** the accumulator function.
+-   `combine` **[Function][26]** the function that combines an array of patches into one.
+-   `app` **[App][30]** the app, with optional properties.
+
+Returns **[Object][25]** `{ states, update, actions }`, where `states` and `update` are streams, and
+`actions` are the created actions.
 
 ## meiosis.mergerino.setup
 
@@ -97,12 +97,12 @@ Helper to setup the Meiosis pattern with [Mergerino][31].
 
 ### Parameters
 
--   `stream` **[StreamLib][28]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][29]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
 -   `merge` **[Function][26]** the Mergerino `merge` function.
--   `app` **[app][29]** the app, with optional properties.
+-   `app` **app** the app, with optional properties.
 
 Returns **[Object][25]** `{ update, states, actions }`, where `update` and `states` are streams,
 and `actions` are the created actions.
@@ -113,11 +113,11 @@ Helper to setup the Meiosis pattern with function patches.
 
 ### Parameters
 
--   `stream` **[StreamLib][28]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][29]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
--   `app` **[app][29]** the app, with optional properties.
+-   `app` **app** the app, with optional properties.
 
 Returns **[Object][25]** `{ update, states, actions }`, where `update` and `states` are streams,
 and `actions` are the created actions.
@@ -128,12 +128,12 @@ Helper to setup the Meiosis pattern with [Immer][32].
 
 ### Parameters
 
--   `stream` **[StreamLib][28]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][29]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property.
     The returned stream must have a `map` method.
 -   `produce` **[Function][26]** the Immer `produce` function.
--   `app` **[app][29]** the app, with optional properties.
+-   `app` **app** the app, with optional properties.
 
 Returns **[Object][25]** `{ update, states, actions }`, where `update` and `states` are streams,
 and `actions` are the created actions.
@@ -189,7 +189,7 @@ Creates a stream.
 
 -   `initial` **any?** the stream's initial value.
 
-Returns **[simpleStream][30]** the created stream.
+Returns **[simpleStream][28]** the created stream.
 
 ## meiosis.simpleStream.scan
 
@@ -202,24 +202,24 @@ result and the source stream value.
 -   `accumulator` **[Function][26]** a two-parameter function, the result of which is emitted
     onto the returned stream.
 -   `initial` **any** the initial value for the returned stream.
--   `sourceStream` **[simpleStream][30]** the source stream from which values are processed by the
+-   `sourceStream` **[simpleStream][28]** the source stream from which values are processed by the
     accumulator function.
 
-Returns **[simpleStream][30]** the created stream.
+Returns **[simpleStream][28]** the created stream.
 
 [1]: #app
 
 [2]: #properties
 
-[3]: #meiosiscommonsetup
+[3]: #streamlib
 
 [4]: #parameters
 
-[5]: #streamlib
+[5]: #properties-1
 
-[6]: #parameters-1
+[6]: #meiosiscommonsetup
 
-[7]: #properties-1
+[7]: #parameters-1
 
 [8]: #meiosismergerinosetup
 
@@ -261,11 +261,11 @@ Returns **[simpleStream][30]** the created stream.
 
 [27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[28]: #streamlib
+[28]: #simplestream
 
-[29]: #app
+[29]: #streamlib
 
-[30]: #simplestream
+[30]: #app
 
 [31]: https://github.com/fuzetsu/mergerino
 
