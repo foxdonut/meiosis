@@ -7,7 +7,10 @@ import { teaSearch } from "router-setup-common/src/teaSearch";
 import { locationBar } from "router-setup-common/src/locationBar";
 
 export const createApp = router => ({
-  Actions: update => Object.assign({}, login.Actions(update), settings.Actions(update)),
+  Actions: update => ({
+    login: login.Actions(update),
+    settings: settings.Actions(update)
+  }),
 
   services: [
     settings.service,

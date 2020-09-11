@@ -11,8 +11,10 @@ export const createApp = router => ({
     route: router.initialRoute
   },
 
-  Actions: update =>
-    Object.assign({}, login.Actions(update, router), settings.Actions(update, router)),
+  Actions: update => ({
+    login: login.Actions(update, router),
+    settings: settings.Actions(update, router)
+  }),
 
   services: [
     settings.Service(router),

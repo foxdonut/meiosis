@@ -141,10 +141,11 @@
  */
 
 /**
- * @typedef SyncLocationBarParams
+ * @typedef {Object} SyncLocationBarParams
  *
  * @property {string} page
  * @property {*} params
+ * @property {*} queryParams
  * @property {boolean} replace
  */
 

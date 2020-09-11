@@ -4,7 +4,7 @@ import { TeaDetails } from "../teaDetails/view";
 import { selectors } from "router-setup-common/src/selectors";
 
 export const Tea = {
-  view: ({ attrs: { state, actions } }) => [
+  view: ({ attrs: { state } }) => [
     m("h3", "Tea Page"),
     m(
       ".row",
@@ -16,7 +16,7 @@ export const Tea = {
           )
       ),
       selectors.page(state) === "TeaDetails" &&
-        m(".col-md-6", m(TeaDetails, { state, id: selectors.params(state).id, actions }))
+        m(".col-md-6", m(TeaDetails, { state, id: selectors.params(state).id }))
     )
   ]
 };
