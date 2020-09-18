@@ -1,17 +1,99 @@
+// @ts-check
+
+/**
+ * @template T
+ * @callback Stream
+ *
+ * @param {T} [value]
+ *
+ * @return {T} the value
+ */
+
+/**
+ * @template S, P
+ * @callback Accumulator
+ *
+ * @param {S} state
+ * @param {P} patch
+ *
+ * @return {S}
+ */
+
+/**
+ * @template S, P
+ * @callback Service
+ *
+ * @param {S} state
+ *
+ * @return {P} the patch.
+ */
+
+/**
+ * @template S
+ * @callback Effect
+ *
+ * @param {S} state
+ *
+ * @return {void}
+ */
+
+/**
+ * @template S, P, A
+ * @callback ActionConstructor
+ *
+ * @param {Stream<P>} update
+ * @param {Stream<S>} [states]
+ *
+ * @return {A} actions
+ */
+
+/**
+ * @template S, P, A
+ * @callback EffectConstructor
+ *
+ * @param {Stream<P>} update
+ * @param {A} [actions]
+ *
+ * @return {Effect<S>[]} effects
+ */
+
 /**
  * Application object.
  *
+ * @template S, P, A
  * @typedef {Object} App
  *
- * @property {Object} [initial={}] - an object that represents the initial state.
+ * @property {S} [initial={}] - an object that represents the initial state.
  * If not specified, the initial state will be `{}`.
- * @property {Function} [Actions=()=>({})] - a function that creates actions, of the form
- * `update => actions`.
- * @property {Array<Function>} [services=[]] - an array of service functions, each of which
+ * @property {Service<S, P>[]} [services=[]] - an array of service functions, each of which
  * should be `state => patch?`.
- * @property {Function} [Effects=()=>[]] - a function that creates effects, of the form
+ * @property {ActionConstructor<S, P, A>} [Actions=()=>({})] - a function that creates actions, of the form
+ * `update => actions`.
+ * @property {EffectConstructor<S, P, A>} [Effects=()=>[]] - a function that creates effects, of the form
  * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
  * and/or `actions`.
+ */
+
+/**
+ * @template S, P, A
+ * @typedef {Object} MeiosisConfig
+ *
+ * @property {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,
+ * `m.stream`, or anything for which you provide either a function or an object with a `stream`
+ * function to create a stream. The function or object must also have a `scan` property. The
+ * returned stream must have a `map` method.
+ * @property {Accumulator<S, P>} accumulator - the accumulator function.
+ * @property {Function} combine - the function that combines an array of patches into one.
+ * @property {App<S, P, A>} app - the app, with optional properties.
+ */
+
+/**
+ * @template S, P
+ * @typedef {Object} Meiosis
+ *
+ * @property {Stream<S>} states
+ * @property {Stream<P>} update
+ * @property {Object} actions
  */
 
 /**
@@ -39,18 +121,13 @@
  * After the services have run and the state has been updated, effects are executed and have the
  * opportunity to trigger more updates.
  *
+ * @template St, Pa, Ac
  * @function meiosis.common.setup
  *
- * @param {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,
- * `m.stream`, or anything for which you provide either a function or an object with a `stream`
- * function to create a stream. The function or object must also have a `scan` property. The
- * returned stream must have a `map` method.
- * @param {Function} accumulator - the accumulator function.
- * @param {Function} combine - the function that combines an array of patches into one.
- * @param {App} app - the app, with optional properties.
+ * @param {MeiosisConfig<St, Pa, Ac>} config the Meiosis config
  *
- * @returns {Object} - `{ states, update, actions }`, where `states` and `update` are streams, and
- * `actions` are the created actions.
+ * @returns {Meiosis<St, Pa>} - `{ states, update, actions }`, where `states` and `update` are
+ * streams, and `actions` are the created actions.
  */
 export default ({ stream, accumulator, combine, app }) => {
   if (!stream) {
@@ -87,5 +164,5 @@ export default ({ stream, accumulator, combine, app }) => {
 
   states.map(state => effects.forEach(effect => effect(state)));
 
-  return { update, states, actions };
+  return { states, update, actions };
 };

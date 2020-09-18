@@ -1,4 +1,4 @@
-import * as m from "mithril";
+import m from "mithril";
 
 import { Route } from "router-setup-common/src/router";
 

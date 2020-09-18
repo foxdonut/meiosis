@@ -1,19 +1,21 @@
 import { Router } from "meiosis-router-setup";
 
-import { home } from "router-setup-common/src/home";
-import { login } from "router-setup-common/src/login/index-route";
-import { settings } from "router-setup-common/src/settings/index-route";
-import { tea } from "router-setup-common/src/tea";
-import { teaDetails } from "router-setup-common/src/teaDetails";
-import { teaSearch } from "router-setup-common/src/teaSearch";
-import { locationBar } from "router-setup-common/src/locationBar";
+import { State, Patch, AppActions } from "./types";
+import { App } from "../meiosis";
+import { home } from "../home";
+import { login } from "../login";
+import { settings } from "../settings";
+import { tea } from "../tea";
+import { teaDetails } from "../teaDetails";
+import { teaSearch } from "../teaSearch";
+import { locationBar } from "../locationBar";
 
-export const createApp = (router: Router): any => ({
+export const createApp = (router: Router): App<State, Patch, AppActions> => ({
   initial: {
     route: router.initialRoute
   },
 
-  Actions: update => ({
+  Actions: (update): AppActions => ({
     login: login.Actions(update),
     settings: settings.Actions(update)
   }),

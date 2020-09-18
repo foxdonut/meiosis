@@ -1,6 +1,6 @@
-import * as m from "mithril";
+import m from "mithril";
 
-import { TeaDetails } from "../teaDetails/view";
+import { TeaDetails } from "../teaDetails";
 import { Route } from "router-setup-common/src/router";
 import { selectors } from "router-setup-common/src/selectors";
 
