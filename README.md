@@ -68,7 +68,7 @@ for their work and that of their respective communities.
 [Daniel Loomer](https://github.com/fuzetsu),
 and many others, for all their help, sharing their knowledge, and discussing ideas!
 
-- [CycleJS driven by state](http://www.christianalfoni.com/articles/2016_04_06_CycleJS-driven-by-state)
+- [CycleJS driven by state](https://christianalfoni.herokuapp.com/articles/2016_04_06_CycleJS-driven-by-state)
 by [Christian Alfoni](http://www.christianalfoni.com/). This article was very inspirational to me and
 I am very grateful to Christian! I also find Christian's other projects very interesting, including
 (but not limited to) [Cerebral](http://cerebraljs.com) and
