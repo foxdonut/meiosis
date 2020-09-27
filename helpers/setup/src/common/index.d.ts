@@ -24,7 +24,6 @@ export type Scan<T, U> = (acc: (result: U, next: T) => U, init: U, stream: Strea
  */
 export interface StreamLib {
   <T>(value?: T): Stream<T>;
-  stream?<T>(value?: T): Stream<T>;
   scan<T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>): Stream<U>;
 }
 
