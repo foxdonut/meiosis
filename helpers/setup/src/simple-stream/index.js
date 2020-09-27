@@ -1,18 +1,21 @@
+// @ts-check
+
 /**
- * A simple stream.
+ * Simple stream implementation.
  *
- * @typedef {Function} simpleStream
- * @param {*} [value] - emits a value onto the stream. When not specified, returns the
- * stream's latest value.
- * @property {Function} map - creates a new stream for which the values from the original stream
- * are processed by the passed-in function and emitted onto the new stream.
+ * @template T, U
+ * @typedef {Object} SimpleStream
+ *
+ * @property {import("../common").StreamConstructor<T>} stream the stream constructor function.
+ * @property {import("../common").Scan<T, U>} scan the scan function.
  */
 
 /**
  * Creates a stream.
+ *
  * @function meiosis.simpleStream.stream
  * @param {*} [initial] - the stream's initial value.
- * @returns {simpleStream} the created stream.
+ * @returns {import("../common").Stream} the created stream.
  */
 export const stream = initial => {
   const mapFunctions = [];
@@ -39,18 +42,12 @@ export const stream = initial => {
 };
 
 /**
- * Creates a new stream that starts with the initial value and, for each value arriving onto
- * the source stream, emits the result of calling the accumulator function with the latest
- * result and the source stream value.
+ * Creates a new stream that starts with the initial value and, for each value arriving onto the
+ * source stream, emits the result of calling the accumulator function with the latest result and
+ * the source stream value.
  *
- * @function meiosis.simpleStream.scan
- *
- * @param {Function} accumulator - a two-parameter function, the result of which is emitted
- * onto the returned stream.
- * @param {*} initial - the initial value for the returned stream.
- * @param {simpleStream} sourceStream - the source stream from which values are processed by the
- * accumulator function.
- * @returns {simpleStream} the created stream.
+ * @template T, U
+ * @type {import("../common").Scan<T, U>}
  */
 export const scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);
@@ -64,6 +61,10 @@ export const scan = (accumulator, initial, sourceStream) => {
   return newStream;
 };
 
+/**
+ * @template T, U
+ * @type SimpleStream<T, U>
+ */
 export default {
   stream,
   scan

@@ -1,7 +1,0 @@
-.eslintrc.js
-.gitignore
-.vscode
-rollup.config.js
-tests
-views
-*.tgz

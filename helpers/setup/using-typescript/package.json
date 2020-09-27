@@ -1,0 +1,46 @@
+{
+  "name": "meiosis-setup-using-typescript",
+  "version": "1.0.0",
+  "private": true,
+  "description": "meiosis docs example",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "meiosis",
+    "reactive",
+    "state",
+    "state management"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "immer": "^7.0.9",
+    "meiosis-setup": "file:../dist/meiosis-setup-5.1.0.tgz",
+    "mergerino": "^0.4.0",
+    "mithril": "^2.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@types/mithril": "^2.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "awesome-typescript-loader": "^5.2.1",
+    "babel-loader": "^8.1.0",
+    "source-map-loader": "^1.1.0",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}

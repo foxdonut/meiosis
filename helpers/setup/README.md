@@ -5,8 +5,8 @@ import meiosis from "meiosis-setup/functionPatches";
 import simpleStream from "meiosis-setup/simple-stream";
 
 const app = {
-  initial: ...,
-  Actions: update => ...,
+  initial: { ... },
+  Actions: (update, getState) => ...,
   services: [...],
   Effects: (update, actions) => [...]
 };
@@ -31,17 +31,18 @@ conveniences:
 - provides a simple stream implementation
 - provides convenience functions to wire up [React](https://reactjs.org) and
 [Preact](https://preactjs.com)
+- shows how to wire up [Mithril](https://mithril.js.org) and
+[lit-html](https://lit-html.polymer-project.org/).
 
-Meiosis works with other view libraries of course. This document also shows how to wire up
-[Mithril](https://mithril.js.org) and [lit-html](https://lit-html.polymer-project.org/).
+Meiosis works with other view libraries of course.
 
 See the [Meiosis examples](https://meiosis.js.org/examples.html) for some examples using
 `meiosis-setup`.
 
 ## Getting Started
 
-To use `meiosis-setup`, you specify a stream library, and, optionally, a library instance to manage
-how patches are merged to the application state. Of course, you'll also need a view library.
+To use `meiosis-setup`, specify a stream library, and, optionally, a library instance to manage how
+patches are merged to the application state. Of course, you'll also need a view library.
 
 ### Choosing a stream library
 

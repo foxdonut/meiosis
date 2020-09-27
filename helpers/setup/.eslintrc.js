@@ -17,8 +17,7 @@ module.exports = {
       "error",
       {
         args: "after-used",
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_"
+        argsIgnorePattern: "^_"
       }
     ],
     "prettier/prettier": [
@@ -40,5 +39,22 @@ module.exports = {
     react: {
       pragma: "React"
     }
-  }
+  },
+  overrides: [
+    {
+      files: ["*.ts"],
+      parser: "@typescript-eslint/parser",
+      extends: ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_"
+          }
+        ]
+      }
+    }
+  ]
 };

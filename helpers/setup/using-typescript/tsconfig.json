@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "./build",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "target": "es6",
+    "esModuleInterop": true,
+    "lib": ["es2017", "dom"]
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

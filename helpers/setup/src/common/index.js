@@ -10,13 +10,39 @@
  */
 
 /**
+ * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
+ * which you provide either a function or an object with a `stream` function to create a stream. The
+ * function or object must also have a `scan` property. The returned stream must have a `map`
+ * method.
+ *
+ * @typedef {(Object|Function)} StreamLib
+ *
+ * @param {*} [value] the stream's initial value.
+ *
+ * @property {Function<T>} stream the function to create a stream, if the stream library itself is
+ * not a function.
+ * @property {Function} scan the stream library's `scan` function.
+ *
+ * @return {Stream<T>} the created stream.
+ */
+
+/**
  * @template S, P
  * @callback Accumulator
  *
  * @param {S} state
  * @param {P} patch
  *
- * @return {S}
+ * @return {S} updated state
+ */
+
+/**
+ * @template P
+ * @callback Combine
+ *
+ * @param {P[]} patches
+ *
+ * @return {P} patch
  */
 
 /**
@@ -63,13 +89,13 @@
  * @template S, P, A
  * @typedef {Object} App
  *
- * @property {S} [initial={}] - an object that represents the initial state.
+ * @property {S} [initial={}] an object that represents the initial state.
  * If not specified, the initial state will be `{}`.
- * @property {Service<S, P>[]} [services=[]] - an array of service functions, each of which
+ * @property {Service<S, P>[]} [services=[]] an array of service functions, each of which
  * should be `state => patch?`.
- * @property {ActionConstructor<S, P, A>} [Actions=()=>({})] - a function that creates actions, of the form
+ * @property {ActionConstructor<S, P, A>} [Actions=()=>({})] a function that creates actions, of the form
  * `update => actions`.
- * @property {EffectConstructor<S, P, A>} [Effects=()=>[]] - a function that creates effects, of the form
+ * @property {EffectConstructor<S, P, A>} [Effects=()=>[]] a function that creates effects, of the form
  * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
  * and/or `actions`.
  */
@@ -78,36 +104,22 @@
  * @template S, P, A
  * @typedef {Object} MeiosisConfig
  *
- * @property {StreamLib} stream - the stream library. This works with `meiosis.simpleStream`, `flyd`,
+ * @property {StreamLib} stream the stream library. This works with `meiosis.simpleStream`, `flyd`,
  * `m.stream`, or anything for which you provide either a function or an object with a `stream`
  * function to create a stream. The function or object must also have a `scan` property. The
  * returned stream must have a `map` method.
- * @property {Accumulator<S, P>} accumulator - the accumulator function.
- * @property {Function} combine - the function that combines an array of patches into one.
- * @property {App<S, P, A>} app - the app, with optional properties.
+ * @property {Accumulator<S, P>} accumulator the accumulator function.
+ * @property {Combine<P>} combine the function that combines an array of patches into one patch.
+ * @property {App<S, P, A>} app the app, with optional properties.
  */
 
 /**
- * @template S, P
+ * @template S, P, A
  * @typedef {Object} Meiosis
  *
  * @property {Stream<S>} states
  * @property {Stream<P>} update
- * @property {Object} actions
- */
-
-/**
- * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
- * which you provide either a function or an object with a `stream` function to create a stream. The
- * function or object must also have a `scan` property. The returned stream must have a `map`
- * method.
- *
- * @typedef {Object|Function} StreamLib
- * @param {*} [value] - the stream's initial value.
- * @property {Function} stream - the function to create a stream, if the stream library itself is
- * not a function.
- * @property {Function} scan - the stream library's `scan` function.
- * @return {simpleStream} - the created stream.
+ * @property {A} actions
  */
 
 /**
@@ -121,12 +133,12 @@
  * After the services have run and the state has been updated, effects are executed and have the
  * opportunity to trigger more updates.
  *
- * @template St, Pa, Ac
+ * @template S, P, A
  * @function meiosis.common.setup
  *
- * @param {MeiosisConfig<St, Pa, Ac>} config the Meiosis config
+ * @param {MeiosisConfig<S, P, A>} config the Meiosis config
  *
- * @returns {Meiosis<St, Pa>} - `{ states, update, actions }`, where `states` and `update` are
+ * @returns {Meiosis<S, P, A>} `{ states, update, actions }`, where `states` and `update` are
  * streams, and `actions` are the created actions.
  */
 export default ({ stream, accumulator, combine, app }) => {
