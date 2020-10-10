@@ -240,7 +240,7 @@
  */
 
 /**
- * This is the router that is created by {@link createRouter}.
+ * This is the router that is created by {@link createProgrammaticRouter}.
  *
  * @typedef {Object} Router
  *
@@ -310,13 +310,22 @@ const ToUrl = (routeConfig, getStatePath) => {
 };
 
 /**
- * Creates a router.
+ * Creates a router that uses hardcoded URLs.
+ */
+export const createHardcodedRouter = ({ routeMatcher }) => {
+  if (!routeMatcher) {
+    throw "routeMatcher is required";
+  }
+};
+
+/**
+ * Creates a router that uses programmatic URLs.
  *
  * @param {RouterConfig} config
  *
  * @return {Router} the created router.
  */
-export const createRouter = ({
+export const createProgrammaticRouter = ({
   routeMatcher,
   routeConfig,
   toUrl,

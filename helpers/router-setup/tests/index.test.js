@@ -5,7 +5,7 @@ import queryString from "query-string";
 import m from "mithril";
 import * as Superouter from "superouter";
 
-import { createRouter, createMithrilRouter } from "../src/index";
+import { createProgrammaticRouter, createMithrilRouter } from "../src/index";
 
 const pipe = (f, g) => a => g(f(a));
 
@@ -62,7 +62,7 @@ describe("historyMode and plainHash", () => {
     const mPrefix = historyMode ? "" : prefix;
 
     const routerCases = [
-      ["generic router", pipe(createRouterConfig, createRouter), prefix],
+      ["generic router", pipe(createRouterConfig, createProgrammaticRouter), prefix],
       ["mithril router", pipe(createMithrilConfig, createMithrilRouter), mPrefix]
     ];
 
@@ -152,7 +152,7 @@ describe("historyMode and plainHash", () => {
           const routerConfig = createRouterConfig(
             Object.assign({ wdw: createWindow(path) }, qsConfig)
           );
-          const router = createRouter(routerConfig);
+          const router = createProgrammaticRouter(routerConfig);
 
           expect(router.initialRoute).toMatchObject(expectedResult);
         });
@@ -162,7 +162,7 @@ describe("historyMode and plainHash", () => {
         test("calls onRouteChange", () => {
           const path = "/login";
           const wdw = createWindow(path);
-          const router = createRouter(createRouterConfig({ wdw }));
+          const router = createProgrammaticRouter(createRouterConfig({ wdw }));
 
           const onRouteChange = jest.fn();
 
@@ -191,7 +191,7 @@ describe("historyMode and plainHash", () => {
               onpopstate,
               history: { pushState }
             });
-            const router = createRouter(createRouterConfig({ wdw }));
+            const router = createProgrammaticRouter(createRouterConfig({ wdw }));
             const url = prefix + "/user/42";
 
             const linkHandler = router.getLinkHandler(url);
@@ -224,7 +224,9 @@ describe("historyMode and plainHash", () => {
 
         const toUrl = Route.toURL;
         const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
-        const router = createRouter(createRouterConfig({ routeMatcher, toUrl, queryString, wdw }));
+        const router = createProgrammaticRouter(
+          createRouterConfig({ routeMatcher, toUrl, queryString, wdw })
+        );
 
         const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
 
@@ -244,11 +246,13 @@ describe("historyMode and plainHash", () => {
 
 describe("generic router", () => {
   test("requires routeMatcher", () => {
-    expect(() => createRouter({})).toThrow("routeMatcher is required");
+    expect(() => createProgrammaticRouter({})).toThrow("routeMatcher is required");
   });
 
   test("requires routeConfig or toUrl", () => {
-    expect(() => createRouter({ routeMatcher })).toThrow("routeConfig or toUrl is required");
+    expect(() => createProgrammaticRouter({ routeMatcher })).toThrow(
+      "routeConfig or toUrl is required"
+    );
   });
 });
 

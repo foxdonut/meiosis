@@ -1,3 +1,5 @@
+// @ts-check
+
 import React from "react";
 import { render } from "react-dom";
 import simpleStream from "meiosis-setup/simple-stream";

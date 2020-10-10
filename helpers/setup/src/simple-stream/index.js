@@ -6,8 +6,8 @@
  * @template T, U
  * @typedef {Object} SimpleStream
  *
- * @property {import("../common").StreamConstructor<T>} stream the stream constructor function.
- * @property {import("../common").Scan<T, U>} scan the scan function.
+ * @property {import("../common").StreamConstructor} stream the stream constructor function.
+ * @property {import("../common").Scan} scan the scan function.
  */
 
 /**
@@ -20,21 +20,31 @@
 export const stream = initial => {
   const mapFunctions = [];
   let latestValue = initial;
+  // credit @cmnstmntmn for discovering this bug
+  // Keep track of mapped values so that they are sent to mapped streams in order.
+  // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
+  let mappedValues = [];
   const createdStream = value => {
     if (value !== undefined) {
       latestValue = value;
+      mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
-        mapFunctions[i](value);
+        const nextValue = mappedValues[i].shift();
+        mapFunctions[i](nextValue);
       }
     }
     return latestValue;
   };
+  /**
+   * @type {import("../common").Map}
+   */
   createdStream.map = mapFunction => {
     const newStream = stream(latestValue !== undefined ? mapFunction(latestValue) : undefined);
 
     mapFunctions.push(value => {
       newStream(mapFunction(value));
     });
+    mappedValues.push([]);
 
     return newStream;
   };
@@ -47,7 +57,7 @@ export const stream = initial => {
  * the source stream value.
  *
  * @template T, U
- * @type {import("../common").Scan<T, U>}
+ * @type {import("../common").Scan}
  */
 export const scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);

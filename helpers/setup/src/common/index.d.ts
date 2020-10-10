@@ -7,14 +7,15 @@ declare function _default<S, P, A>({
 
 export default _default;
 
+export type Map = <T, U>(fn: (value: T) => U) => Stream<U>;
+
 export interface Stream<T> {
   (value?: T): T;
   map<U>(fn: (value: T) => U): Stream<U>;
 }
 
-export type StreamConstructor<T> = (value?: T) => Stream<T>;
-export type Map<T, U> = (fn: (value: T) => U) => Stream<U>;
-export type Scan<T, U> = (acc: (result: U, next: T) => U, init: U, stream: Stream<T>) => Stream<U>;
+export type StreamConstructor = <T>(value?: T) => Stream<T>;
+export type Scan = <T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>) => Stream<U>;
 
 /**
  * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -24,7 +25,7 @@ export type Scan<T, U> = (acc: (result: U, next: T) => U, init: U, stream: Strea
  */
 export interface StreamLib {
   <T>(value?: T): Stream<T>;
-  scan<T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>): Stream<U>;
+  scan: Scan;
 }
 
 export type Accumulator<S, P> = (state: S, patch: P) => S;

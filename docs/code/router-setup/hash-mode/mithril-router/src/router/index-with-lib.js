@@ -1,3 +1,4 @@
+// @ts-check
 /*
 Instead of meiosis/router.js,
 you can also npm install meiosis-router-setup and use it as shown below:

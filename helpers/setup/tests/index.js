@@ -1,40 +1,65 @@
-const test = require("tape");
+/* eslint-env jest */
 
-const flyd = require("flyd");
-const Stream = require("mithril/stream");
-const merge = require("mergerino");
-const R = require("ramda");
-const { produce } = require("immer");
-const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
+import flyd from "flyd";
+import Stream from "mithril/stream";
+import merge from "mergerino";
+import R from "ramda";
+import { produce } from "immer";
 
-const meiosis = require("../dist/meiosis-setup");
+import meiosis from "../src/index";
 
-const mergerinoTest = (merge, streamLib, label) => {
-  test("mergerino setup", t => {
-    t.test(label + " / minimal", t => {
-      const { update, states } = meiosis.mergerino.setup({ stream: streamLib, merge });
-      t.deepEqual(states(), {}, "initial state");
+const streamCases = [
+  ["Meiosis simple-stream", meiosis.simpleStream],
+  ["flyd", flyd],
+  ["mithril-stream", Stream]
+];
 
-      update({ duck: { sound: "quack" } });
-      update({ duck: { color: "yellow" } });
+describe("meiosis setup", () => {
+  describe.each(streamCases)("%s", (_label, streamLib) => {
+    const applyPatchCases = [
+      ["mergerino", app => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
+      ["functionPatches", app => meiosis.functionPatches.setup({ stream: streamLib, app })],
+      ["immer", app => meiosis.immer.setup({ stream: streamLib, produce, app })]
+    ];
 
-      t.deepEqual(states(), { duck: { sound: "quack", color: "yellow" } }, "resulting state");
+    const createTestCases = (label, arr = [[], [], []]) => {
+      const result = [];
+      for (let i = 0; i < applyPatchCases.length; i++) {
+        result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
+      }
+      return result;
+    };
 
-      t.end();
+    test.each(
+      createTestCases("minimal", [
+        [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+        [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+        [
+          state => {
+            state.duck = { sound: "quack" };
+          },
+          state => {
+            state.duck.color = "yellow";
+          }
+        ]
+      ])
+    )("%s", (_label, setupFn, patch1, patch2) => {
+      const { update, states } = setupFn();
+      expect(states()).toEqual({});
+
+      update(patch1);
+      update(patch2);
+
+      expect(states()).toEqual({ duck: { sound: "quack", color: "yellow" } });
     });
 
-    t.test(label + " / initial state", t => {
-      const { states } = meiosis.mergerino.setup({
-        stream: streamLib,
-        merge,
-        app: { initial: { duck: "yellow" } }
-      });
+    test.each(createTestCases("initial state"))("%s", (_label, setupFn) => {
+      const { states } = setupFn({ initial: { duck: "yellow" } });
 
-      t.deepEqual(states(), { duck: "yellow" }, "initial state");
-      t.end();
+      expect(states()).toEqual({ duck: "yellow" }, "initial state");
     });
 
-    t.test(label + " / initial state promise", t => {
+    test.each(createTestCases("initial state promise"))("%s", (_label, setupFn) => {
       const Initial = () =>
         new Promise(resolve => {
           setTimeout(() => resolve({ duck: "yellow" }), 10);
@@ -42,42 +67,105 @@ const mergerinoTest = (merge, streamLib, label) => {
 
       const createApp = () => Initial().then(initial => ({ initial }));
 
-      createApp().then(app => {
-        const { states } = meiosis.mergerino.setup({ stream: streamLib, merge, app });
+      return createApp().then(app => {
+        const { states } = setupFn(app);
 
-        t.deepEqual(states(), { duck: "yellow" }, "initial state");
-        t.end();
+        expect(states()).toEqual({ duck: "yellow" }, "initial state");
       });
     });
 
-    t.test(label + " / services", t => {
+    test.each(
+      createTestCases("services", [
+        [
+          [
+            { count: x => x + 1 },
+            { increment: undefined },
+            [{ invalid: undefined }, { combined: true }],
+            { sequenced: true },
+            { received: true }
+          ],
+          [{ increment: 1 }, { increment: 10 }, { invalid: true }, { sequence: true }]
+        ],
+        [
+          [
+            R.over(R.lensProp("count"), R.add(1)),
+            R.dissoc("increment"),
+            [R.dissoc("invalid"), R.assoc("combined", true)],
+            R.assoc("sequenced", true),
+            R.assoc("received", true)
+          ],
+          [
+            R.assoc("increment", 1),
+            R.assoc("increment", 10),
+            R.assoc("invalid", true),
+            R.assoc("sequence", true)
+          ]
+        ],
+        [
+          [
+            draft => {
+              draft.count++;
+            },
+            draft => {
+              delete draft.increment;
+            },
+            [
+              draft => {
+                delete draft.invalid;
+              },
+              draft => {
+                draft.combined = true;
+              }
+            ],
+            draft => {
+              draft.sequenced = true;
+            },
+            draft => {
+              draft.received = true;
+            }
+          ],
+          [
+            state => {
+              state.increment = 1;
+            },
+            state => {
+              state.increment = 10;
+            },
+            state => {
+              state.invalid = true;
+            },
+            state => {
+              state.sequence = true;
+            }
+          ]
+        ]
+      ])
+    )("%s", (_label, setupFn, servicePatches, updatePatches) => {
       const services = [
-        state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null),
-        state => (state.increment <= 0 || state.increment >= 10 ? { increment: undefined } : null),
-        state => (state.invalid ? [{ invalid: undefined }, { combined: true }] : null),
-        state => (state.sequence ? { sequenced: true } : null),
-        state => (state.sequenced ? { received: true } : null)
+        state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
+        state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+        state => (state.invalid ? servicePatches[2] : null),
+        state => (state.sequence ? servicePatches[3] : null),
+        state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const { update, states } = meiosis.mergerino.setup({
-        stream: streamLib,
-        merge,
-        app: { initial: { count: 0 }, services }
+      const { update, states } = setupFn({ initial: { count: 0 }, services });
+
+      update(updatePatches[0]);
+      update(updatePatches[1]);
+      update(updatePatches[2]);
+      update(updatePatches[3]);
+
+      expect(states()).toEqual({
+        count: 1,
+        combined: true,
+        sequence: true,
+        sequenced: true,
+        received: true
       });
-
-      update({ increment: 1 });
-      update({ increment: 10 });
-      update({ invalid: true });
-      update({ sequence: true });
-
-      t.deepEqual(
-        states(),
-        { count: 1, combined: true, sequence: true, sequenced: true, received: true },
-        "resulting state"
-      );
-      t.end();
     });
 
+    /*
     t.test(label + " / services run on initial state", t => {
       const services = [
         state => (state.increment > 0 && state.increment < 10 ? { count: x => x + 1 } : null)
@@ -360,6 +448,8 @@ const mergerinoTest = (merge, streamLib, label) => {
     });
 
     t.test(label + " / route change, please wait, load async", t => {
+      t.plan(2);
+
       const initial = { route: "PageA", data: "None" };
 
       const services = [
@@ -386,19 +476,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update({ route: "PageB" });
-
       states.map(state => {
         if (state.data === "Loading") {
           t.equal(state.route, "PageB", "page showing loading state");
         } else if (state.data === "Loaded") {
           t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
-          t.end();
         }
       });
+
+      update({ route: "PageB" });
     });
 
     t.test(label + " / route change, don't go to page yet, load async", t => {
+      t.plan(2);
+
       const initial = { route: "PageA", data: "None" };
 
       const services = [
@@ -425,19 +516,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update({ nextRoute: "PageB" });
-
       states.map(state => {
         if (state.data === "Loading") {
           t.equal(state.route, "PageA", "staying on previous page while loading");
         } else if (state.data === "Loaded") {
           t.deepEqual(state, { route: "PageB", data: "Loaded" }, "resulting state");
-          t.end();
         }
       });
+
+      update({ nextRoute: "PageB" });
     });
 
     t.test(label + " / route change, not authorized, redirect", t => {
+      t.plan(4);
+
       const initial = { route: "PageA" };
 
       const services = [
@@ -469,19 +561,20 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update({ nextRoute: "PageB" });
-
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to unauthorized page");
 
         if (state.route === "PageC") {
           t.deepEqual(state, { route: "PageC", message: "Please login." }, "resulting state");
-          t.end();
         }
       });
+
+      update({ nextRoute: "PageB" });
     });
 
     t.test(label + " / leave route, cleanup", t => {
+      t.plan(1);
+
       const initial = { route: "PageA", data: "Loaded" };
 
       const services = [
@@ -500,17 +593,18 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services }
       });
 
-      update({ route: "PageB" });
-
       states.map(state => {
         if (state.route === "PageB") {
           t.deepEqual(state, { route: "PageB", data: "None" }, "resulting state");
-          t.end();
         }
       });
+
+      update({ route: "PageB" });
     });
 
     t.test(label + " / leave route, confirm unsaved data, stay on page", t => {
+      t.plan(6);
+
       const initial = { route: "PageA", form: "data" };
 
       const services = [
@@ -529,9 +623,6 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services }
       });
 
-      update({ nextRoute: "PageB" });
-      update({ confirm: false });
-
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to next page");
 
@@ -539,12 +630,16 @@ const mergerinoTest = (merge, streamLib, label) => {
           t.equal(state.route, "PageA", "staying on page to confirm");
         } else if (state.confirm === false) {
           t.equal(state.route, "PageA", "staying on page after cancelling");
-          t.end();
         }
       });
+
+      update({ nextRoute: "PageB" });
+      update({ confirm: false });
     });
 
     t.test(label + " / leave route, confirm unsaved data, leave page", t => {
+      t.plan(3);
+
       const initial = { route: "PageA", form: "data" };
 
       const services = [
@@ -568,25 +663,83 @@ const mergerinoTest = (merge, streamLib, label) => {
         app: { initial, services }
       });
 
-      update({ nextRoute: "PageB" });
-      update({ confirm: false, nextRoute: "PageB", form: undefined });
-
       states.map(state => {
         if (state.confirm === true) {
           t.equal(state.route, "PageA", "staying on page to confirm");
         } else if (state.confirm === false) {
           t.deepEqual(state, { route: "PageB", confirm: false }, "leaving page after confirming");
-          t.end();
         }
       });
+
+      update({ nextRoute: "PageB" });
+      update({ confirm: false, nextRoute: "PageB", form: undefined });
+    });
+    */
+
+    // credit @cmnstmntmn for this test case
+    const userData = [
+      { id: 1, name: "John" },
+      { id: 2, name: "Mary" }
+    ];
+
+    test.each(
+      createTestCases("stream - action and effect calling another action", [
+        [
+          {
+            data: userData
+          },
+          { flag: "action2" }
+        ],
+        [R.assoc("data", userData), R.assoc("flag", "action2")],
+        [
+          state => {
+            state.data = userData;
+          },
+          state => {
+            state.flag = "action2";
+          }
+        ]
+      ])
+    )("%s", (_label, setupFn, patch1, patch2) => {
+      const appEffects = (_update, actions) => state => {
+        if (state.flag === null && state.data.length > 0) {
+          actions.action2();
+        }
+      };
+
+      const app = {
+        initial: {
+          flag: null,
+          data: []
+        },
+        Actions: update => ({
+          action1: () => {
+            update(patch1);
+          },
+          action2: () => {
+            update(patch2);
+          }
+        }),
+        Effects: (update, actions) => [appEffects(update, actions)]
+      };
+
+      const { states, actions } = setupFn(app);
+
+      const stateLog = [];
+      states.map(state => stateLog.push(state));
+
+      actions.action1();
+
+      expect(stateLog.length).toEqual(3); // "number of states"
+
+      if (stateLog.length === 3) {
+        expect(stateLog[2].flag).toEqual("action2");
+      }
     });
   });
-};
+});
 
-mergerinoTest(merge, meiosis.simpleStream, "mergerino + Meiosis simple-stream");
-mergerinoTest(merge, flyd, "mergerino + flyd");
-mergerinoTest(merge, Stream, "mergerino + mithril-stream");
-
+/*
 const functionPatchTest = (streamLib, label) => {
   label = "functionPatch + " + label;
 
@@ -960,8 +1113,6 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update(R.assoc("route", "PageB"));
-
       states.map(state => {
         if (state.data === "Loading") {
           t.equal(state.route, "PageB", "page showing loading state");
@@ -970,6 +1121,8 @@ const functionPatchTest = (streamLib, label) => {
           t.end();
         }
       });
+
+      update(R.assoc("route", "PageB"));
     });
 
     t.test(label + " / route change, don't go to page yet, load async", t => {
@@ -1002,8 +1155,6 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update(R.assoc("nextRoute", "PageB"));
-
       states.map(state => {
         if (state.data === "Loading") {
           t.equal(state.route, "PageA", "staying on previous page while loading");
@@ -1012,9 +1163,13 @@ const functionPatchTest = (streamLib, label) => {
           t.end();
         }
       });
+
+      update(R.assoc("nextRoute", "PageB"));
     });
 
     t.test(label + " / route change, not authorized, redirect", t => {
+      t.plan(2);
+
       const initial = { route: "PageA" };
 
       const services = [
@@ -1045,16 +1200,15 @@ const functionPatchTest = (streamLib, label) => {
         app: { initial, services, Effects }
       });
 
-      update(R.assoc("nextRoute", "PageB"));
-
       states.map(state => {
         t.notEqual(state.route, "PageB", "should never go to unauthorized page");
 
         if (state.route === "PageC") {
           t.deepEqual(state, { route: "PageC", message: "Please login." }, "resulting state");
-          t.end();
         }
       });
+
+      update(R.assoc("nextRoute", "PageB"));
     });
 
     t.test(label + " / leave route, cleanup", t => {
@@ -1152,11 +1306,13 @@ const functionPatchTest = (streamLib, label) => {
     });
   });
 };
+*/
 
-functionPatchTest(meiosis.simpleStream, "Meiosis simple-stream");
-functionPatchTest(flyd, "flyd");
-functionPatchTest(Stream, "mithril-stream");
+// functionPatchTest(meiosis.simpleStream, "Meiosis simple-stream");
+// functionPatchTest(flyd, "flyd");
+// functionPatchTest(Stream, "mithril-stream");
 
+/*
 const immerTest = (streamLib, label) => {
   label = "immer + " + label;
 
@@ -1866,12 +2022,16 @@ const immerTest = (streamLib, label) => {
     });
   });
 };
+*/
 
-immerTest(meiosis.simpleStream, "Meiosis simple-stream");
-immerTest(flyd, "flyd");
-immerTest(Stream, "mithril-stream");
+// immerTest(meiosis.simpleStream, "Meiosis simple-stream");
+// immerTest(flyd, "flyd");
+// immerTest(Stream, "mithril-stream");
 
+/*
 const commonTest = (streamLib, label) => {
+  const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
+
   test("common setup", t => {
     t.test(label + " / required accumulator function", t => {
       try {
@@ -1949,3 +2109,4 @@ test("simpleStream", t => {
   t.equal(result, 42, "emitting value onto stream should return the value");
   t.end();
 });
+*/

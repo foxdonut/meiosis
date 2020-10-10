@@ -1,5 +1,10 @@
 import meiosis from "meiosis-setup";
 import m from "mithril";
+import { stream, scan } from "meiosis-setup/simple-stream";
+
+const s = stream(0);
+const y = scan((x, y) => x + y, 0, s);
+y.map(x => x);
 
 const App = {
   view: ({ attrs: { state, update, actions } }) =>

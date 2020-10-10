@@ -1,3 +1,5 @@
+// @ts-check
+
 import { Route, routes, navigateTo } from "../routes";
 import { login } from "../login";
 import { settings } from "../settings";

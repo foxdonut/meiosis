@@ -1,12 +1,6 @@
 import { App, Meiosis, StreamLib } from "../common";
 
-declare function _default<S, P, A>({
-  stream,
-  merge,
-  app
-}: MeiosisMergerinoConfig<S, P, A>): Meiosis<S, P, A>;
-export default _default;
-export type MeiosisMergerinoConfig<S, P, A> = {
+export type MeiosisMergerinoConfig<S, A> = {
   /**
    * - the stream library. This works with `meiosis.simpleStream`, `flyd`,
    * `m.stream`, or anything for which you provide either a function or an object with a `stream`
@@ -17,9 +11,17 @@ export type MeiosisMergerinoConfig<S, P, A> = {
   /**
    * - the Mergerino `merge` function.
    */
-  merge: (state: S, patch: P) => S;
+  merge: (state: S, patch: any) => S;
   /**
    * - the app, with optional properties.
    */
-  app: App<S, P, A>;
+  app: App<S, any, A>;
 };
+
+declare function _default<S, A>({
+  stream,
+  merge,
+  app
+}: MeiosisMergerinoConfig<S, A>): Meiosis<S, any, A>;
+
+export default _default;
