@@ -14,7 +14,7 @@ const streamCases = [
   ["mithril-stream", Stream]
 ];
 
-describe("meiosis setup", () => {
+describe("meiosis setup with library for applying patches", () => {
   describe.each(streamCases)("%s", (_label, streamLib) => {
     const applyPatchCases = [
       ["mergerino", app => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
@@ -959,32 +959,23 @@ describe("meiosis setup", () => {
   });
 });
 
-/*
-const commonTest = (streamLib, label) => {
-  const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
+describe("meiosis setup with generic common", () => {
+  describe.each(streamCases)("%s", (_label, streamLib) => {
+    const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
 
-  test("common setup", t => {
-    t.test(label + " / required accumulator function", t => {
-      try {
+    test("required accumulator function", () => {
+      expect(() => {
         meiosis.common.setup({ stream: streamLib, combine: x => x, app: {} });
-
-        t.fail("An error should have been thrown for missing accumulator function.");
-      } catch (err) {
-        t.pass("Error was thrown as it should.");
-      }
+      }).toThrow();
     });
 
-    t.test(label + " / required combine function", t => {
-      try {
+    test("required combine function", () => {
+      expect(() => {
         meiosis.common.setup({ stream: streamLib, accumulator: (x, f) => f(x), app: {} });
-
-        t.fail("An error should have been thrown for missing combine function.");
-      } catch (err) {
-        t.pass("Error was thrown as it should.");
-      }
+      }).toThrow();
     });
 
-    t.test(label + " / basic common setup with no services", t => {
+    test("basic common setup with no services", () => {
       const Actions = update => ({
         increment: amount => update({ count: x => x + amount })
       });
@@ -996,14 +987,14 @@ const commonTest = (streamLib, label) => {
         app: { initial: { count: 0 }, Actions }
       });
 
-      t.ok(typeof actions.increment === "function", "actions");
+      expect(typeof actions.increment).toEqual("function");
 
       actions.increment(2);
 
       expect(states()).toEqual({ count: 2 });
     });
 
-    t.test(label + " / basic functionPatch setup with no services", t => {
+    test("basic functionPatch setup with no services", () => {
       const Actions = update => ({
         increment: amount => update(R.over(R.lensProp("count"), R.add(amount)))
       });
@@ -1015,22 +1006,39 @@ const commonTest = (streamLib, label) => {
         app: { initial: { count: 0 }, Actions }
       });
 
-      t.ok(typeof actions.increment === "function", "actions");
+      expect(typeof actions.increment).toEqual("function");
 
       actions.increment(2);
 
       expect(states()).toEqual({ count: 2 });
     });
   });
-};
+});
 
-commonTest(meiosis.simpleStream, "common + Meiosis simple-stream");
-commonTest(flyd, "common + flyd");
-commonTest(Stream, "common + mithril-stream");
-
-test("simpleStream", t => {
+test("simpleStream", () => {
   const s1 = meiosis.simpleStream.stream();
   const result = s1(42);
   expect(result).toEqual(42);
 });
-*/
+
+test("simpleStream value order", () => {
+  const s1 = meiosis.simpleStream.stream();
+
+  const f1 = x => {
+    if (x == 10) {
+      s1(20);
+    }
+  };
+
+  const f2 = x => x;
+
+  s1.map(f1);
+  const s2 = s1.map(f2);
+
+  const values = [];
+  s2.map(value => values.push(value));
+
+  s1(10);
+
+  expect(values).toEqual([10, 20]);
+});
