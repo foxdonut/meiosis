@@ -31,9 +31,9 @@ made by a previous service.</p>
 <p>We can use service functions for computed properties, setting up an initial blank state for a page,
 cleaning up state after leaving a page, and any other state changes that we want to perform
 synchronously before rendering the view.</p>
-<h3>Effects</h3><p>Effect functions receive <code>state</code> and can make synchronous and/or asynchronous calls to <code>update</code>
-and/or <code>actions</code> to trigger more updates. Since triggering an update will call the effect again,
-<strong>effect functions must change the state in a way that will avoid an infinite loop</strong>.</p>
+<h3>Effects</h3><p>Effect functions receive <code>state</code> and may make asynchronous calls to <code>update</code> and/or <code>actions</code> to
+trigger more updates. Since triggering an update will call the effect again, <strong>effect functions must
+change the state in a way that will avoid an infinite loop</strong>.</p>
 <p>Effects are good for tasks such as loading asynchronous data or triggering other types of
 asynchronous updates, saving state to local storage, and so on.</p>
 <h3>Pattern Setup</h3><p>Let&#39;s see how we can set up services and effects with Meiosis. We&#39;ll start with our <code>update</code> stream:</p>
