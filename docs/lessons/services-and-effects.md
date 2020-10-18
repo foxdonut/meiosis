@@ -37,9 +37,9 @@ synchronously before rendering the view.
 
 ### Effects
 
-Effect functions receive `state` and can make synchronous and/or asynchronous calls to `update`
-and/or `actions` to trigger more updates. Since triggering an update will call the effect again,
-**effect functions must change the state in a way that will avoid an infinite loop**.
+Effect functions receive `state` and may make asynchronous calls to `update` and/or `actions` to
+trigger more updates. Since triggering an update will call the effect again, **effect functions must
+change the state in a way that will avoid an infinite loop**.
 
 Effects are good for tasks such as loading asynchronous data or triggering other types of
 asynchronous updates, saving state to local storage, and so on.
