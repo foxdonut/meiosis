@@ -604,11 +604,15 @@ describe("meiosis setup with library for applying patches", () => {
         const { update, states } = setupFn({ initial, services, Effects });
 
         states.map(state => {
-          if (state.data === "Loading") {
-            expect(state.route).toEqual("PageB");
-          } else if (state.data === "Loaded") {
-            expect(state).toEqual({ route: "PageB", data: "Loaded" });
-            done();
+          try {
+            if (state.data === "Loading") {
+              expect(state.route).toEqual("PageB");
+            } else if (state.data === "Loaded") {
+              expect(state).toEqual({ route: "PageB", data: "Loaded" });
+              done();
+            }
+          } catch (error) {
+            done(error);
           }
         });
 
@@ -671,11 +675,15 @@ describe("meiosis setup with library for applying patches", () => {
         const { update, states } = setupFn({ initial, services, Effects });
 
         states.map(state => {
-          if (state.data === "Loading") {
-            expect(state.route).toEqual("PageA");
-          } else if (state.data === "Loaded") {
-            expect(state).toEqual({ route: "PageB", data: "Loaded" });
-            done();
+          try {
+            if (state.data === "Loading") {
+              expect(state.route).toEqual("PageA");
+            } else if (state.data === "Loaded") {
+              expect(state).toEqual({ route: "PageB", data: "Loaded" });
+              done();
+            }
+          } catch (error) {
+            done(error);
           }
         });
 
@@ -904,12 +912,7 @@ describe("meiosis setup with library for applying patches", () => {
 
     test.each(
       createTestCases("stream - action and effect calling another action", [
-        [
-          {
-            data: userData
-          },
-          { flag: "action2" }
-        ],
+        [{ data: userData }, { flag: "action2" }],
         [R.assoc("data", userData), R.assoc("flag", "action2")],
         [
           state => {
@@ -950,11 +953,180 @@ describe("meiosis setup with library for applying patches", () => {
 
       actions.action1();
 
-      expect(stateLog.length).toEqual(3); // "number of states"
+      expect(stateLog.length).toEqual(3);
 
       if (stateLog.length === 3) {
         expect(stateLog[2].flag).toEqual("action2");
       }
+    });
+
+    test.each(
+      createTestCases("one event triggers multiple services", [
+        [
+          { events: { event1: true } },
+          { events: { event1: undefined }, triggers: { trigger1: true, trigger2: true } },
+          { triggers: { trigger1: undefined }, service1: true },
+          { triggers: { trigger2: undefined }, service2: true }
+        ],
+        [
+          R.assocPath(["events", "event1"], true),
+          [
+            R.dissocPath(["events", "event1"]),
+            R.assoc("triggers", { trigger1: true, trigger2: true })
+          ],
+          [R.dissocPath(["triggers", "trigger1"]), R.assoc("service1", true)],
+          [R.dissocPath(["triggers", "trigger2"]), R.assoc("service2", true)]
+        ],
+        [
+          state => {
+            state.events.event1 = true;
+          },
+          state => {
+            delete state.events.event1;
+            state.triggers = { trigger1: true, trigger2: true };
+          },
+          state => {
+            delete state.triggers.trigger1;
+            state.service1 = true;
+          },
+          state => {
+            delete state.triggers.trigger2;
+            state.service2 = true;
+          }
+        ]
+      ])
+    )("%s", (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
+      const appService = state => {
+        if (state.events.event1) {
+          return appServicePatch;
+        }
+      };
+
+      const service1 = state => {
+        if (state.triggers.trigger1) {
+          return servicePatch1;
+        }
+      };
+
+      const service2 = state => {
+        if (state.triggers.trigger2) {
+          return servicePatch2;
+        }
+      };
+
+      const services = [appService, service1, service2];
+
+      const app = {
+        initial: {
+          events: {},
+          triggers: {}
+        },
+        services
+      };
+
+      const { states, update } = setupFn(app);
+
+      const stateLog = [];
+      states.map(state => stateLog.push(state));
+
+      update(updatePatch);
+
+      expect(stateLog).toEqual([
+        { events: {}, triggers: {} },
+        { events: {}, triggers: {}, service1: true, service2: true }
+      ]);
+    });
+
+    describe.each(
+      createTestCases("one event triggers multiple effects", [
+        [
+          { events: { event1: true } },
+          { events: { event1: undefined }, triggers: { trigger1: true, trigger2: true } },
+          { triggers: { trigger1: undefined }, effect1: true },
+          { triggers: { trigger2: undefined }, effect2: true }
+        ],
+        [
+          R.assocPath(["events", "event1"], true),
+          [
+            R.dissocPath(["events", "event1"]),
+            R.assoc("triggers", { trigger1: true, trigger2: true })
+          ],
+          [R.dissocPath(["triggers", "trigger1"]), R.assoc("effect1", true)],
+          [R.dissocPath(["triggers", "trigger2"]), R.assoc("effect2", true)]
+        ],
+        [
+          state => {
+            state.events.event1 = true;
+          },
+          state => {
+            delete state.events.event1;
+            state.triggers = { trigger1: true, trigger2: true };
+          },
+          state => {
+            delete state.triggers.trigger1;
+            state.effect1 = true;
+          },
+          state => {
+            delete state.triggers.trigger2;
+            state.effect2 = true;
+          }
+        ]
+      ])
+    )("%s", (_label, setupFn, updatePatch, appEffectPatch, effectPatch1, effectPatch2) => {
+      test("async", done => {
+        const AppEffect = update => state => {
+          if (state.events.event1) {
+            setTimeout(() => update(appEffectPatch), 1);
+          }
+        };
+
+        const Effect1 = update => state => {
+          if (state.triggers.trigger1) {
+            setTimeout(() => update(effectPatch1), 1);
+          }
+        };
+
+        const Effect2 = update => state => {
+          if (state.triggers.trigger2) {
+            setTimeout(() => update(effectPatch2), 1);
+          }
+        };
+
+        const Effects = update => [AppEffect(update), Effect1(update), Effect2(update)];
+
+        const app = {
+          initial: {
+            events: {},
+            triggers: {}
+          },
+          Effects
+        };
+
+        const { states, update } = setupFn(app);
+
+        const stateLog = [];
+        states.map(state => {
+          stateLog.push(state);
+
+          if (stateLog.length === 6) {
+            try {
+              expect(stateLog).toEqual([
+                { events: {}, triggers: {} },
+                { events: { event1: true }, triggers: {} },
+                { events: {}, triggers: { trigger1: true, trigger2: true } },
+                { events: {}, triggers: { trigger2: true }, effect1: true },
+                { events: {}, triggers: {}, effect1: true, effect2: true },
+                { events: {}, triggers: {}, effect1: true, effect2: true }
+              ]);
+              done();
+            } catch (error) {
+              done(error);
+            }
+          }
+        });
+
+        update(updatePatch);
+      });
     });
   });
 });
@@ -1015,30 +1187,32 @@ describe("meiosis setup with generic common", () => {
   });
 });
 
-test("simpleStream", () => {
-  const s1 = meiosis.simpleStream.stream();
-  const result = s1(42);
-  expect(result).toEqual(42);
-});
+describe("simpleStream", () => {
+  test("basic", () => {
+    const s1 = meiosis.simpleStream.stream();
+    const result = s1(42);
+    expect(result).toEqual(42);
+  });
 
-test("simpleStream value order", () => {
-  const s1 = meiosis.simpleStream.stream();
+  test("value order", () => {
+    const s1 = meiosis.simpleStream.stream();
 
-  const f1 = x => {
-    if (x == 10) {
-      s1(20);
-    }
-  };
+    const f1 = x => {
+      if (x === 10) {
+        s1(20);
+      }
+    };
 
-  const f2 = x => x;
+    const f2 = x => x;
 
-  s1.map(f1);
-  const s2 = s1.map(f2);
+    s1.map(f1);
+    const s2 = s1.map(f2);
 
-  const values = [];
-  s2.map(value => values.push(value));
+    const values = [];
+    s2.map(value => values.push(value));
 
-  s1(10);
+    s1(10);
 
-  expect(values).toEqual([10, 20]);
+    expect(values).toEqual([10, 20]);
+  });
 });
