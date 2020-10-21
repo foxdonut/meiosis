@@ -64,10 +64,10 @@ export type App<S, P, A> = {
 
 export type MeiosisConfig<S, P, A> = {
   /**
-   * the stream library. This works with `meiosis.simpleStream`, `flyd`,
-   * `m.stream`, or anything for which you provide either a function or an object with a `stream`
-   * function to create a stream. The function or object must also have a `scan` property. The
-   * returned stream must have a `map` method.
+   * the stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
+   * which you provide either a function or an object with a `stream` function to create a stream.
+   * The function or object must also have a `scan` property. The returned stream must have a `map`
+   * method.
    */
   stream: StreamLib;
   /**

@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
+    "@types/react": "^16.9.53",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "buble": "^0.20.0",
@@ -41,8 +42,10 @@
     "jest": "^26.5.2",
     "mergerino": "0.4.0",
     "mithril": "^2.0.4",
+    "preact": "^10.5.5",
     "prettier": "^2.1.2",
     "ramda": "^0.27.1",
+    "react": "^16.13.1",
     "rollup": "^2.27.1",
     "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-commonjs": "^10.1.0",

@@ -1,4 +1,6 @@
-import meiosis from "../../../dist/meiosis-setup";
+// @ts-check
+
+import meiosis from "../../../dist/index";
 import m from "mithril";
 
 const App = {
