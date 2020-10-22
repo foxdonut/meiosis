@@ -5,11 +5,10 @@
   "description": "Meiosis Helpers - setup",
   "main": "meiosis-setup.js",
   "scripts": {
-    "start": "rollup -c && tsc && cp -r src/* README.md api.md dist/ && cat package.json|grep -v private>dist/package.json",
+    "start": "rollup -c && tsc && cp -r src/* ../README.md ../api.md dist/ && cat package.json|grep -v private>dist/package.json",
     "watch": "rollup -c -w",
     "test": "jest --config jestconfig.json",
-    "docs": "documentation build src/index.js -f md -o api.md",
-    "server": "static-server -p ${PORT:-9000}"
+    "docs": "documentation build src/index.js -f md -o ../api.md"
   },
   "repository": {
     "type": "git",
@@ -28,7 +27,6 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "@types/react": "^16.9.53",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "buble": "^0.20.0",
@@ -42,16 +40,13 @@
     "jest": "^26.5.2",
     "mergerino": "0.4.0",
     "mithril": "^2.0.4",
-    "preact": "^10.5.5",
     "prettier": "^2.1.2",
     "ramda": "^0.27.1",
-    "react": "^16.13.1",
     "rollup": "^2.27.1",
     "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.4",
-    "static-server": "^2.2.1",
     "typescript": "^4.0.3"
   }
 }

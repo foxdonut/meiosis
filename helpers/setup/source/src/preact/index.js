@@ -5,16 +5,15 @@
  *
  * @function meiosis.preact.setup
  *
- * @param {preact.h} h - the Preact h function.
+ * @param {*} h - the Preact h function.
  * @param {*} useState - the Preact hooks useState function.
- * @param {preact.AnyComponent} Root - your Root component, which receives `state`, `update`, and
+ * @param {*} Root - your Root component, which receives `state`, `update`, and
  * `actions`.
  *
- * @returns {preact.FunctionalComponent} - the top-level component to which you pass `states`, and
+ * @returns {*} - the top-level component to which you pass `states`, and
  * either `update`, `actions`, or both.
  */
-export default preactSetup => ({ states, update, actions }) => {
-  const { h, useState, Root } = preactSetup;
+export default ({ h, useState, Root }) => ({ states, update, actions }) => {
   const [state, setState] = useState(states());
   states.map(setState);
 

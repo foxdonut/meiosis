@@ -46,7 +46,6 @@ helpers/router-setup/*.tgz
 helpers/router-setup/dist
 helpers/router-setup/docs
 helpers/router-setup/poc/build
-helpers/setup/*.tgz
-helpers/setup/dist
-helpers/setup/generated-d-ts
-helpers/setup/views/**/build
+helpers/setup/source/dist
+helpers/setup/source/generated-d-ts
+helpers/setup/**/build

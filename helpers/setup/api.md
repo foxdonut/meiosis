@@ -286,13 +286,13 @@ Helper to setup the Meiosis pattern with [Preact][75].
 
 ### Parameters
 
--   `h` **preact.h** the Preact h function.
--   `useState` **preact.useState** the Preact useState function.
--   `Root` **preact.Component** your Root component, which receives `state`, `update`, and
+-   `h` **any** the Preact h function.
+-   `useState` **any** the Preact hooks useState function.
+-   `Root` **any** your Root component, which receives `state`, `update`, and
     `actions`.
 
-Returns **preact.Component** the top-level component to which you pass `states`, and either
-`update`, `actions`, or both.
+Returns **any** the top-level component to which you pass `states`, and
+either `update`, `actions`, or both.
 
 ## meiosis.react.setup
 
@@ -300,11 +300,11 @@ Helper to setup the Meiosis pattern with [React][76].
 
 ### Parameters
 
--   `React` **React** the React instance.
--   `Root` **React.Component** your Root component, which receives `state`, `update`, and
+-   `React` **any** the React instance.
+-   `Root` **any** your Root component, which receives `state`, `update`, and
     `actions`.
 
-Returns **React.Component** the top-level component to which you pass `states`, and either
+Returns **any** the top-level component to which you pass `states`, and either
 `update`, `actions`, or both.
 
 ## SimpleStream

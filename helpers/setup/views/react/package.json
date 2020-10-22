@@ -1,6 +1,6 @@
 {
   "name": "meiosis-example-setup-react",
-  "version": "4.0.0",
+  "version": "5.1.0",
   "description": "meiosis-view-setup react",
   "private": true,
   "main": "src/index.jsx",

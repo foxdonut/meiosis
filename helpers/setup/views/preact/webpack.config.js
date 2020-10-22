@@ -1,5 +1,5 @@
 /*global __dirname*/
-var path = require("path")
+var path = require("path");
 
 module.exports = {
   mode: "development",
@@ -26,4 +26,4 @@ module.exports = {
       }
     ]
   }
-}
+};

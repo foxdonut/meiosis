@@ -1,6 +1,6 @@
 // @ts-check
 
-import meiosis from "../../../dist/index";
+import meiosis from "../../../source/dist/index";
 import { html, render } from "lit-html";
 
 const App = ({ state, update, actions }) => html`

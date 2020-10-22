@@ -1,6 +1,6 @@
 // @ts-check
 
-import meiosis from "../../../dist/index";
+import meiosis from "../../../source/dist/index";
 import { h, render } from "preact";
 import { useState } from "preact/hooks";
 

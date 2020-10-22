@@ -1,6 +1,6 @@
 // @ts-check
 
-import meiosis from "../../../dist/index";
+import meiosis from "../../../source/dist/index";
 import React from "react";
 import ReactDOM from "react-dom";
 

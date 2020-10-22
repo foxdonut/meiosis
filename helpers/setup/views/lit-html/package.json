@@ -1,6 +1,6 @@
 {
   "name": "meiosis-view-setup-lit-html",
-  "version": "4.0.0",
+  "version": "5.1.0",
   "description": "meiosis-view-setup lit-html",
   "private": true,
   "main": "index.js",

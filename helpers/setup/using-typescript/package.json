@@ -26,7 +26,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "immer": "^7.0.14",
-    "meiosis-setup": "file:../dist/meiosis-setup-5.1.0.tgz",
+    "meiosis-setup": "file:../source/dist/meiosis-setup-5.1.0.tgz",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4"
   },

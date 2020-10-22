@@ -1,9 +1,13 @@
+/*global __dirname*/
+var path = require("path");
+
 module.exports = {
   mode: "development",
   entry: "./src/index.ts",
   devtool: "source-map",
   output: {
-    filename: "./build/generated-app.js"
+    path: path.join(__dirname, "build"),
+    filename: "generated-app.js"
   },
   resolve: {
     extensions: [".ts", ".js"]
