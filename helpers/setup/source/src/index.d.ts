@@ -1,10 +1,9 @@
-import commonSetup from "./common";
+import commonSetup, { StreamLib } from "./common";
 import mergerinoSetup from "./mergerino";
 import functionPatchesSetup from "./functionPatches";
 import immerSetup from "./immer";
 import preactSetup from "./preact";
 import reactSetup from "./react";
-import { SimpleStream } from "./simple-stream";
 
 declare namespace _default {
   export namespace common {
@@ -25,7 +24,7 @@ declare namespace _default {
   export namespace react {
     export { reactSetup as setup };
   }
-  let simpleStream: SimpleStream;
+  let simpleStream: StreamLib;
 }
 
 export default _default;

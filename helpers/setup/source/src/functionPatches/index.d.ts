@@ -1,6 +1,8 @@
 import { App, Meiosis, StreamLib } from "../common";
 
-export type MeiosisFunctionPatchesConfig<S, P, A> = {
+export type FunctionPatch<S> = (state: S) => S;
+
+export type MeiosisFunctionPatchesConfig<S, A> = {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -11,12 +13,12 @@ export type MeiosisFunctionPatchesConfig<S, P, A> = {
   /**
    * the app, with optional properties.
    */
-  app: App<S, P, A>;
+  app: App<S, FunctionPatch<S>, A>;
 };
 
-declare function _default<S, P, A>({
+declare function _default<S, A>({
   stream,
   app
-}: MeiosisFunctionPatchesConfig<S, P, A>): Meiosis<S, P, A>;
+}: MeiosisFunctionPatchesConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
 export default _default;

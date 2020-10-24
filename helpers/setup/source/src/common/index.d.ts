@@ -1,12 +1,3 @@
-declare function _default<S, P, A>({
-  stream,
-  accumulator,
-  combine,
-  app
-}: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
-
-export default _default;
-
 export type Map = <T, U>(fn: (value: T) => U) => Stream<U>;
 
 export interface Stream<T> {
@@ -15,7 +6,20 @@ export interface Stream<T> {
 }
 
 export type StreamConstructor = <T>(value?: T) => Stream<T>;
-export type Scan = <T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>) => Stream<U>;
+export type Scan = <T, U>(acc: (result: U | Object, next: T | Object) => U,
+  init: U, stream: Stream<T | Object>) => Stream<U | Object>;
+
+interface StreamScan {
+  scan: Scan;
+}
+
+interface StreamLibWithFunction extends StreamScan {
+  <T>(value?: T): Stream<T>;
+}
+
+interface StreamLibWithProperty extends StreamScan {
+  stream?<T>(value?: T): Stream<T>;
+}
 
 /**
  * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -23,10 +27,7 @@ export type Scan = <T, U>(acc: (result: U, next: T) => U, init: U, stream: Strea
  * function or object must also have a `scan` property. The returned stream must have a `map`
  * method.
  */
-export interface StreamLib {
-  <T>(value?: T): Stream<T>;
-  scan: Scan;
-}
+export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
 export type Accumulator<S, P> = (state: S, patch: P) => S;
 export type Combine<P> = (patches: P[]) => P;
@@ -89,3 +90,12 @@ export type Meiosis<S, P, A> = {
   update: Stream<P>;
   actions: A;
 };
+
+declare function _default<S, P, A>({
+  stream,
+  accumulator,
+  combine,
+  app
+}: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
+
+export default _default;

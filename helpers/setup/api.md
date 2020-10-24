@@ -262,7 +262,7 @@ Type: [Function][54]
 
 -   `state` **S** current state
 
-Returns **void** 
+Returns **(S | void)** 
 
 ## MeiosisImmerConfig
 

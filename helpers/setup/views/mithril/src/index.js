@@ -1,7 +1,9 @@
 // @ts-check
 
 import meiosis from "../../../source/dist/index";
+import merge from "mergerino";
 import m from "mithril";
+import Stream from "mithril/stream";
 
 const App = {
   view: ({ attrs: { state, update, actions } }) =>
@@ -14,19 +16,22 @@ const App = {
         "div",
         m(
           "button",
-          { onclick: () => update(state => ({ ...state, greeting: "Hello" })) },
+          { onclick: () => update({ greeting: "Hello" }) },
           "Say Hello"
         )
       )
     )
 };
 
-const { states, update, actions } = meiosis.functionPatches.setup({
-  stream: meiosis.simpleStream,
+const { states, update, actions } = meiosis.mergerino.setup({
+  stream: Stream,
+  merge,
   app: {
     initial: { counter: 0 },
     Actions: update => ({
-      increment: () => update(state => ({ ...state, counter: state.counter + 1 }))
+      increment: () => {
+        update({ counter: value => value + 1 });
+      }
     })
   }
 });

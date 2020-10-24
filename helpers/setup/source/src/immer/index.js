@@ -6,7 +6,7 @@
  *
  * @param {S} state current state
  *
- * @return {void}
+ * @return {S | void}
  */
 
 import commonSetup from "../common";
@@ -31,8 +31,9 @@ import commonSetup from "../common";
  *
  * @param {MeiosisImmerConfig<S, A>} config the Meiosis config for use with Mergerino
  *
- * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} meiosis `{ states, update, actions }`, where
- * `states` and `update` are streams, and `actions` are the created actions.
+ * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} meiosis
+ * `{ states, update, actions }`, where `states` and `update` are streams, and `actions` are the
+ * created actions.
  */
 export default ({ stream, produce, app }) =>
   commonSetup({

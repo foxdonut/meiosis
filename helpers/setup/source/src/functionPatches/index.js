@@ -33,8 +33,8 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
  * @param {MeiosisFunctionPatchesConfig<S, A>} config the Meiosis config for use with Function
  * Patches
  *
- * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`, where
- * `states` and `update` are streams, and `actions` are the created actions.
+ * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
+ * where `states` and `update` are streams, and `actions` are the created actions.
  */
 export default ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: pipe, app });

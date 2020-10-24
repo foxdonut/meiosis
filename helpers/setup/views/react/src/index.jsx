@@ -1,6 +1,8 @@
 // @ts-check
 
 import meiosis from "../../../source/dist/index";
+import flyd from "flyd";
+import produce from "immer";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -12,22 +14,25 @@ const Root = ({ state, update, actions }) => (
       <button onClick={() => actions.increment()}>Increment</button>
     </div>
     <div>
-      <button onClick={() => update(state => ({ ...state, greeting: "Hello" }))}>Say Hello</button>
+      <button onClick={() => update(state => { state.greeting = "Hello"; })}>Say Hello</button>
     </div>
   </div>
 );
 
 const App = meiosis.react.setup({ React, Root });
 
-const { states, update, actions } = meiosis.functionPatches.setup({
-  stream: meiosis.simpleStream,
+const { states, update, actions } = meiosis.immer.setup({
+  stream: flyd,
+  produce: (s, p) => produce(s, p),
   app: {
     initial: { counter: 0 },
     Actions: update => ({
-      increment: () => update(state => ({ ...state, counter: state.counter + 1 }))
+      increment: () => {
+        update(state => { state.counter++; });
+      }
     })
   }
 });
 
 const element = document.getElementById("app");
-ReactDOM.render(<App states={states} update={update} actions={actions} />, element);
+ReactDOM.render(React.createElement(App, { states, update, actions }), element);

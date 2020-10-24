@@ -1,6 +1,7 @@
 // @ts-check
 
 import meiosis from "../../../source/dist/index";
+import merge from "mergerino";
 import { h, render } from "preact";
 import { useState } from "preact/hooks";
 
@@ -12,19 +13,22 @@ const Root = ({ state, update, actions }) => (
       <button onClick={() => actions.increment()}>Increment</button>
     </div>
     <div>
-      <button onClick={() => update(state => ({ ...state, greeting: "Hello" }))}>Say Hello</button>
+      <button onClick={() => update({ greeting: "Hello" })}>Say Hello</button>
     </div>
   </div>
 );
 
 const App = meiosis.preact.setup({ h, useState, Root });
 
-const { states, update, actions } = meiosis.functionPatches.setup({
+const { states, update, actions } = meiosis.mergerino.setup({
   stream: meiosis.simpleStream,
+  merge,
   app: {
     initial: { counter: 0 },
     Actions: update => ({
-      increment: () => update(state => ({ ...state, counter: state.counter + 1 }))
+      increment: () => {
+        update({ counter: value => value + 1 });
+      }
     })
   }
 });
