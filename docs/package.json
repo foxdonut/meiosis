@@ -30,15 +30,11 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "eslint": "^7.7.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.6",
     "harp": "^0.32.0",
     "http-server": "^0.12.3",
     "onchange": "^7.0.2",
-    "prettier": "^2.0.5",
     "reload": "^3.1.0",
     "static-server": "^2.2.1"
-  }
+  },
+  "dependencies": {}
 }

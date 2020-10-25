@@ -14,7 +14,15 @@ const Root = ({ state, update, actions }) => (
       <button onClick={() => actions.increment()}>Increment</button>
     </div>
     <div>
-      <button onClick={() => update(state => { state.greeting = "Hello"; })}>Say Hello</button>
+      <button
+        onClick={() =>
+          update(state => {
+            state.greeting = "Hello";
+          })
+        }
+      >
+        Say Hello
+      </button>
     </div>
   </div>
 );
@@ -28,7 +36,9 @@ const { states, update, actions } = meiosis.immer.setup({
     initial: { counter: 0 },
     Actions: update => ({
       increment: () => {
-        update(state => { state.counter++; });
+        update(state => {
+          state.counter++;
+        });
       }
     })
   }

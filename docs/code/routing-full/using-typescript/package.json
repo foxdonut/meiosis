@@ -38,8 +38,6 @@
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^3.6.1",
-    "@typescript-eslint/parser": "^3.6.1",
     "awesome-typescript-loader": "^5.2.1",
     "meiosis-tracer": "^4.0.0",
     "source-map-loader": "^1.0.1",

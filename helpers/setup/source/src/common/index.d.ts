@@ -6,8 +6,7 @@ export interface Stream<T> {
 }
 
 export type StreamConstructor = <T>(value?: T) => Stream<T>;
-export type Scan = <T, U>(acc: (result: U | Object, next: T | Object) => U,
-  init: U, stream: Stream<T | Object>) => Stream<U | Object>;
+export type Scan = <T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>) => Stream<U>;
 
 interface StreamScan {
   scan: Scan;

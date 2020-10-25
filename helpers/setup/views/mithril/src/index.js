@@ -5,6 +5,11 @@ import merge from "mergerino";
 import m from "mithril";
 import Stream from "mithril/stream";
 
+const stream = {
+  stream: Stream,
+  scan: (acc, init, stream) => Stream.scan(acc, init, stream)
+};
+
 const App = {
   view: ({ attrs: { state, update, actions } }) =>
     m(
@@ -12,19 +17,12 @@ const App = {
       m("div", "Counter: ", state.counter),
       m("div", "Greeting: ", state.greeting),
       m("div", m("button", { onclick: () => actions.increment() }, "Increment")),
-      m(
-        "div",
-        m(
-          "button",
-          { onclick: () => update({ greeting: "Hello" }) },
-          "Say Hello"
-        )
-      )
+      m("div", m("button", { onclick: () => update({ greeting: "Hello" }) }, "Say Hello"))
     )
 };
 
 const { states, update, actions } = meiosis.mergerino.setup({
-  stream: Stream,
+  stream,
   merge,
   app: {
     initial: { counter: 0 },

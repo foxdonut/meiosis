@@ -39,17 +39,9 @@
     "@babel/preset-env": "^7.10.2",
     "@babel/preset-typescript": "^7.10.1",
     "@types/jest": "^26.0.0",
-    "@typescript-eslint/eslint-plugin": "^3.3.0",
-    "@typescript-eslint/parser": "^3.3.0",
-    "eslint": "^7.2.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-jest": "^23.13.2",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.0",
     "feather-route-matcher": "^4.0.0",
     "jest": "^26.0.1",
     "onchange": "^7.0.2",
-    "prettier": "2.0.5",
     "query-string": "^6.13.1",
     "rollup": "^2.16.1",
     "rollup-plugin-babel": "^4.4.0",
@@ -59,5 +51,6 @@
     "typedoc": "^0.17.7",
     "typescript": "^3.9.5",
     "url-mapper": "^2.0.0"
-  }
+  },
+  "dependencies": {}
 }

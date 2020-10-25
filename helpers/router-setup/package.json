@@ -29,13 +29,9 @@
   "devDependencies": {
     "buble": "^0.20.0",
     "documentation": "^13.0.2",
-    "eslint": "^7.5.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
     "feather-route-matcher": "^4.0.0",
     "jest": "^26.1.0",
     "mithril": "^2.0.4",
-    "prettier": "^2.0.5",
     "query-string": "^6.13.1",
     "rollup": "^2.23.0",
     "rollup-plugin-buble": "^0.19.8",
@@ -45,5 +41,6 @@
     "superouter": "^0.3.2",
     "typescript": "^3.9.7",
     "url-mapper": "^2.0.0"
-  }
+  },
+  "dependencies": {}
 }
