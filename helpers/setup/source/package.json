@@ -5,7 +5,7 @@
   "description": "Meiosis Helpers - setup",
   "main": "meiosis-setup.js",
   "scripts": {
-    "start": "rollup -c && tsc && cp -r src/* ../README.md ../api.md dist/ && cat package.json|grep -v private>dist/package.json",
+    "start": "rollup -c && tsc && cp -r .npmignore src/* ../README.md ../api.md dist/ && cat package.json|grep -v private>dist/package.json",
     "watch": "rollup -c -w",
     "test": "jest --config jestconfig.json",
     "docs": "documentation build src/index.js -f md -o ../api.md"

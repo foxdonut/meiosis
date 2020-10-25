@@ -1,23 +1,21 @@
 import { Stream } from "../common";
 
-interface ReactFunctions {
+export interface ReactFunctions {
   createElement: any;
   useState: any;
 }
 
-interface ReactSetup {
+export interface ReactSetup {
   React: ReactFunctions;
   Root: any;
 }
 
-interface AppProps<S, P, A> {
+export interface ReactAppProps<S, P, A> {
   states: Stream<S>;
   update?: Stream<P>;
   actions?: A;
 }
 
-declare function _default<S, P, A>(
-  setup: ReactSetup
-): (props: AppProps<S, P, A>) => any;
+declare function _default<S, P, A>(setup: ReactSetup): (props: ReactAppProps<S, P, A>) => any;
 
 export default _default;

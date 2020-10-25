@@ -5,6 +5,19 @@ import merge from "mergerino";
 import { h, render } from "preact";
 import { useState } from "preact/hooks";
 
+const { states, update, actions } = meiosis.mergerino.setup({
+  stream: meiosis.simpleStream,
+  merge,
+  app: {
+    initial: { counter: 0 },
+    Actions: update => ({
+      increment: () => {
+        update({ counter: value => value + 1 });
+      }
+    })
+  }
+});
+
 const Root = ({ state, update, actions }) => (
   <div>
     <div>Counter: {state.counter}</div>
@@ -19,19 +32,6 @@ const Root = ({ state, update, actions }) => (
 );
 
 const App = meiosis.preact.setup({ h, useState, Root });
-
-const { states, update, actions } = meiosis.mergerino.setup({
-  stream: meiosis.simpleStream,
-  merge,
-  app: {
-    initial: { counter: 0 },
-    Actions: update => ({
-      increment: () => {
-        update({ counter: value => value + 1 });
-      }
-    })
-  }
-});
 
 const element = document.getElementById("app");
 render(<App states={states} update={update} actions={actions} />, element);

@@ -27,4 +27,11 @@ declare namespace _default {
   let simpleStream: StreamLib;
 }
 
+export * from "./common";
+export * from "./functionPatches";
+export * from "./immer";
+export * from "./mergerino";
+export * from "./preact";
+export * from "./react";
+
 export default _default;

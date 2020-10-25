@@ -10,17 +10,6 @@ const stream = {
   scan: (acc, init, stream) => Stream.scan(acc, init, stream)
 };
 
-const App = {
-  view: ({ attrs: { state, update, actions } }) =>
-    m(
-      "div",
-      m("div", "Counter: ", state.counter),
-      m("div", "Greeting: ", state.greeting),
-      m("div", m("button", { onclick: () => actions.increment() }, "Increment")),
-      m("div", m("button", { onclick: () => update({ greeting: "Hello" }) }, "Say Hello"))
-    )
-};
-
 const { states, update, actions } = meiosis.mergerino.setup({
   stream,
   merge,
@@ -33,6 +22,17 @@ const { states, update, actions } = meiosis.mergerino.setup({
     })
   }
 });
+
+const App = {
+  view: ({ attrs: { state, update, actions } }) =>
+    m(
+      "div",
+      m("div", "Counter: ", state.counter),
+      m("div", "Greeting: ", state.greeting),
+      m("div", m("button", { onclick: () => actions.increment() }, "Increment")),
+      m("div", m("button", { onclick: () => update({ greeting: "Hello" }) }, "Say Hello"))
+    )
+};
 
 m.mount(document.getElementById("app"), {
   view: () => m(App, { state: states(), update, actions })

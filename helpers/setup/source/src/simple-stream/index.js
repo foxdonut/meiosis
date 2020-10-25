@@ -20,7 +20,7 @@
 export const stream = initial => {
   const mapFunctions = [];
   let latestValue = initial;
-  // credit @cmnstmntmn for discovering this bug
+  // credit @cmnstmntmn for discovering this bug.
   // Keep track of mapped values so that they are sent to mapped streams in order.
   // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
   let mappedValues = [];

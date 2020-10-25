@@ -10,8 +10,8 @@
  */
 
 /**
- * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
- * which you provide either a function or an object with a `stream` function to create a stream. The
+ * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for which
+ * you provide either a function or an object with a `stream` function to create a stream. The
  * function or object must also have a `scan` property. The returned stream must have a `map`
  * method.
  *
@@ -89,14 +89,14 @@
  * @template S, P, A
  * @typedef {Object} App
  *
- * @property {S} [initial={}] an object that represents the initial state.
- * If not specified, the initial state will be `{}`.
- * @property {Service<S, P>[]} [services=[]] an array of service functions, each of which
- * should be `state => patch?`.
- * @property {ActionConstructor<S, P, A>} [Actions=()=>({})] a function that creates actions, of the form
- * `update => actions`.
- * @property {EffectConstructor<S, P, A>} [Effects=()=>[]] a function that creates effects, of the form
- * `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+ * @property {S} [initial={}] an object that represents the initial state. If not specified, the
+ * initial state will be `{}`.
+ * @property {Service<S, P>[]} [services=[]] an array of service functions, each of which should be
+ * `state => patch?`.
+ * @property {ActionConstructor<S, P, A>} [Actions=()=>({})] a function that creates actions, of the
+ * form `update => actions`.
+ * @property {EffectConstructor<S, P, A>} [Effects=()=>[]] a function that creates effects, of the
+ * form `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
  * and/or `actions`.
  */
 
