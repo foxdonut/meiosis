@@ -3,19 +3,19 @@ var path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.ts",
+  entry: "./src/index.tsx",
   devtool: "source-map",
   output: {
     path: path.join(__dirname, "build"),
     filename: "generated-app.js"
   },
   resolve: {
-    extensions: [".ts", ".js"]
+    extensions: [".ts", ".tsx", ".js"]
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         use: {
           loader: "awesome-typescript-loader"
         }

@@ -2,8 +2,8 @@
 
 import meiosis from "../../source/dist/index";
 import flyd from "flyd";
-import produce from "immer";
 import merge from "mergerino";
+import produce from "immer";
 import { html, render as litHtmlRender } from "lit-html";
 import m from "mithril";
 import Stream from "mithril/stream";
