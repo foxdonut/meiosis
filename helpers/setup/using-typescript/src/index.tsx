@@ -118,10 +118,27 @@ import ReactDOM from "react-dom";
 
 // preact + mergerino + simple-stream
 (() => {
-  interface State {
+  interface FixedState {
     counter: number;
     greeting?: string;
   }
+
+  interface DynamicState {
+    [key: string]: string;
+  }
+
+  type State = FixedState & DynamicState;
+
+  type MergerinoPatch = {
+    [K in keyof State]: State[K] | ((a: State[K]) => State[K]);
+  }
+
+  const p1: MergerinoPatch = { counter: x => x + 1, greeting: "hi", another: "yes" };
+  console.log(p1);
+
+  // Mergerino patch type would be something like
+  // Object | function (State => State)
+  // Object with key in state and value is same type, either a value or a function Type => Type
 
   interface Actions {
     increment: (value: number) => void;
@@ -182,7 +199,7 @@ import ReactDOM from "react-dom";
 
   interface Attrs {
     state: State;
-    update: Stream<any>;
+    update: Stream<ImmerPatch<State>>;
     actions: Actions;
   }
 
@@ -226,35 +243,4 @@ import ReactDOM from "react-dom";
 
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(App, { states, update, actions }), element);
-})();
-
-// simple-stream, immer
-(() => {
-  interface State {
-    counter: number;
-    greeting?: string;
-  }
-
-  const initial: State = {
-    counter: 0
-  };
-
-  const { states, update, actions } = meiosis.immer.setup({
-    stream: meiosis.simpleStream,
-    produce: (s, p) => produce(s, p),
-    app: {
-      initial,
-      Actions: update => ({
-        increment: (amount: number) =>
-          update(state => {
-            state.counter += amount;
-            state.greeting = "hello";
-          })
-      })
-    }
-  });
-
-  actions.increment(2);
-
-  console.log(states, update, actions);
 })();

@@ -1128,6 +1128,74 @@ describe("meiosis setup with library for applying patches", () => {
         update(updatePatch);
       });
     });
+
+    const get = (object, path) =>
+      path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object);
+
+    const setInPlace = (object = {}, [first, ...rest], value) => {
+      object[first] = rest.length ? setInPlace(object[first], rest, value) : value;
+      return object;
+    };
+
+    const setImmutable = (object = {}, [first, ...rest], value) => ({
+      ...object,
+      [first]: rest.length ? setImmutable(object[first], rest, value) : value
+    });
+
+    test.each(
+      createTestCases("nesting", [
+        [
+          path => patch => setInPlace({}, path, patch),
+          { color: "orange" },
+          { feathers: x => x + 100 },
+          { other: "test" }
+        ],
+        [
+          path => patch => state => setImmutable(state, path, patch(get(state, path))),
+          R.assoc("color", "orange"),
+          R.over(R.lensProp("feathers"), R.add(100)),
+          R.assoc("other", "test")
+        ],
+        [
+          path => patch => state => {
+            setInPlace(state, path, produce(get(state, path), patch));
+          },
+          state => {
+            state.color = "orange";
+          },
+          state => {
+            state.feathers += 100;
+          },
+          state => {
+            state.other = "test";
+          }
+        ]
+      ])
+    )("%s", (_label, setupFn, patchFn, patch1, patch2, patch3) => {
+      const nestState = (state, path) => ({
+        state: get(state, path),
+        patch: patchFn(path)
+      });
+
+      const { update, states } = setupFn({
+        initial: { duck: { attrs: { color: "yellow", sound: "quack", feathers: 150 } } }
+      });
+
+      const local = nestState(states(), ["duck", "attrs"]);
+      expect(local.state.color).toEqual("yellow");
+      expect(local.state.sound).toEqual("quack");
+
+      update(local.patch(patch1));
+      expect(states()).toEqual({
+        duck: { attrs: { color: "orange", sound: "quack", feathers: 150 } }
+      });
+
+      update([local.patch(patch2), patch3]);
+      expect(states()).toEqual({
+        duck: { attrs: { color: "orange", sound: "quack", feathers: 250 } },
+        other: "test"
+      });
+    });
   });
 });
 
