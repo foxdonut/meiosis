@@ -48,7 +48,6 @@ const InitialTemperature = label => ({
     <label>
       <input
         type="radio"
-        id=${value}
         name="sky"
         value=${value}
         .checked=${local.get(state).sky === value}
@@ -130,10 +129,7 @@ const InitialTemperature = label => ({
     </div>
   `;
 
-  const { states, actions } = meiosis.functionPatches.setup({
-    stream: meiosis.simpleStream,
-    app
-  });
+  const { states, actions } = meiosis.functionPatches.setup({ stream: meiosis.simpleStream, app });
 
   const element = document.getElementById("litHtmlApp");
   states.map(state => litHtmlRender(App({ state, actions }), element));
@@ -160,7 +156,6 @@ const InitialTemperature = label => ({
       "label",
       m("input", {
         type: "radio",
-        id: value,
         name: "sky",
         value,
         checked: local.get(state).sky === value,
@@ -270,74 +265,253 @@ const InitialTemperature = label => ({
 
 // preact + mergerino + simple-stream
 (() => {
-  const { states, update, actions } = meiosis.mergerino.setup({
-    stream: meiosis.simpleStream,
-    merge,
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: () => {
-          update({ counter: value => value + 1 });
-        }
-      })
-    }
-  });
+  const nest = meiosis.mergerino.nest;
+
+  const conditions = {
+    initial: initialConditions,
+    Actions: update => ({
+      togglePrecipitations: (local, value) => {
+        update(local.patch({ precipitations: value }));
+      },
+      changeSky: (local, value) => {
+        update(local.patch({ sky: value }));
+      }
+    })
+  };
 
   // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
   // file, we'll use h here.
-  const Root = ({ state, update, actions }) =>
+  const skyOption = ({ state, local, actions, value, label }) =>
+    h(
+      "label",
+      {},
+      h("input", {
+        type: "radio",
+        name: "sky",
+        value,
+        checked: local.get(state).sky === value,
+        onchange: evt => actions.changeSky(local, evt.target.value)
+      }),
+      label
+    );
+
+  const Conditions = ({ state, local, actions }) =>
     h(
       "div",
       {},
-      h("div", {}, "Counter: ", state.counter),
-      h("div", {}, "Greeting: ", state.greeting),
-      h("div", {}, h("button", { onClick: () => actions.increment() }, "Increment")),
-      h("div", {}, h("button", { onClick: () => update({ greeting: "Hello" }) }, "Say Hello"))
+      h(
+        "label",
+        {},
+        h("input", {
+          type: "checkbox",
+          checked: local.get(state).precipitations,
+          onchange: evt => actions.togglePrecipitations(local, evt.target.checked)
+        }),
+        "Precipitations"
+      ),
+      h(
+        "div",
+        {},
+        skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
+        skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+        skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+      )
+    );
+
+  const temperature = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(local.patch({ value: x => x + amount }));
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            return { ...state, value: newValue, units: newUnits };
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature = ({ state, local, actions }) =>
+    h(
+      "div",
+      {},
+      local.get(state).label,
+      " Temperature: ",
+      local.get(state).value,
+      m.trust("&deg;"),
+      local.get(state).units,
+      h(
+        "div",
+        {},
+        h("button", { onclick: () => actions.increment(local, 1) }, "Increment"),
+        h("button", { onclick: () => actions.increment(local, -1) }, "Decrement")
+      ),
+      h("div", {}, h("button", { onclick: () => actions.changeUnits(local) }, "Change Units"))
+    );
+
+  const app = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
+  };
+
+  const Root = ({ state, actions }) =>
+    h(
+      "div",
+      { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+      h(
+        "div",
+        {},
+        h(Conditions, { state, local: nest("conditions"), actions }),
+        h(Temperature, { state, local: nest(["temperature", "air"]), actions }),
+        h(Temperature, { state, local: nest(["temperature", "water"]), actions })
+      ),
+      h("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
     );
 
   const App = meiosis.preact.setup({ h, useState, Root });
 
+  const { states, actions } = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
+
   const element = document.getElementById("preactApp");
-  preactRender(h(App, { states, update, actions }), element);
+  preactRender(h(App, { states, actions }), element);
 })();
 
 // react + immer + flyd
 (() => {
-  const { states, update, actions } = meiosis.immer.setup({
-    stream: flyd,
-    produce: (s, p) => produce(s, p),
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: () => {
-          update(state => {
-            state.counter++;
-          });
-        }
-      })
-    }
-  });
+  const nest = meiosis.immer.nest(produce);
 
-  const Root = ({ state, update, actions }) => (
+  const conditions = {
+    initial: initialConditions,
+    Actions: update => ({
+      togglePrecipitations: (local, value) => {
+        update(
+          local.patch(state => {
+            state.precipitations = value;
+          })
+        );
+      },
+      changeSky: (local, value) => {
+        update(
+          local.patch(state => {
+            state.sky = value;
+          })
+        );
+      }
+    })
+  };
+
+  const SkyOption = ({ state, local, actions, value, label }) => (
+    <label>
+      <input
+        type="radio"
+        value={value}
+        checked={local.get(state).sky === value}
+        onChange={evt => actions.changeSky(local, evt.target.value)}
+      />
+      {label}
+    </label>
+  );
+
+  const Conditions = ({ state, local, actions }) => (
     <div>
-      <div>Counter: {state.counter}</div>
-      <div>Greeting: {state.greeting}</div>
+      <label>
+        <input
+          type="checkbox"
+          checked={local.get(state).precipitations}
+          onChange={evt => actions.togglePrecipitations(local, evt.target.checked)}
+        />
+        Precipitations
+      </label>
       <div>
-        <button onClick={() => actions.increment()}>Increment</button>
-      </div>
-      <div>
-        <button
-          onClick={() =>
-            update(state => {
-              state.greeting = "Hello";
-            })
-          }
-        >
-          Say Hello
-        </button>
+        <SkyOption state={state} local={local} actions={actions} value="SUNNY" label="Sunny" />
+        <SkyOption state={state} local={local} actions={actions} value="CLOUDY" label="Cloudy" />
+        <SkyOption
+          state={state}
+          local={local}
+          actions={actions}
+          value="MIX"
+          label="Mix of sun/clouds"
+        />
       </div>
     </div>
   );
+
+  const temperature = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(
+          local.patch(state => {
+            state.value += amount;
+          })
+        );
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            state.value = convert(value, newUnits);
+            state.units = newUnits;
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature = ({ state, local, actions }) => (
+    <div>
+      {local.get(state).label} Temperature:
+      {local.get(state).value}&deg;{local.get(state).units}
+      <div>
+        <button onClick={() => actions.increment(local, 1)}>Increment</button>
+        <button onClick={() => actions.increment(local, -1)}>Decrement</button>
+      </div>
+      <div>
+        <button onClick={() => actions.changeUnits(local)}>Change Units</button>
+      </div>
+    </div>
+  );
+
+  const Root = ({ state, actions }) => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      <div>
+        <Conditions state={state} local={nest("conditions")} actions={actions} />
+        <Temperature state={state} local={nest(["temperature", "air"])} actions={actions} />
+        <Temperature state={state} local={nest(["temperature", "water"])} actions={actions} />
+      </div>
+      <pre style={{ margin: "0" }}>{JSON.stringify(state, null, 4)}</pre>
+    </div>
+  );
+
+  const app = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
+  };
+
+  const { states, update, actions } = meiosis.immer.setup({
+    stream: flyd,
+    produce: (s, p) => produce(s, p),
+    app
+  });
 
   const App = meiosis.react.setup({ React, Root });
 

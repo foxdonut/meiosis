@@ -2,6 +2,8 @@ import { App, Meiosis, NestFunction, StreamLib } from "../common";
 
 export type ImmerPatch<S> = (state: S) => S | void;
 
+export type Produce<S> = (state: S, patch: ImmerPatch<S>) => S;
+
 export type MeiosisImmerConfig<S, A> = {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -13,7 +15,7 @@ export type MeiosisImmerConfig<S, A> = {
   /**
    * the Immer `produce` function.
    */
-  produce: (state: S, patch: ImmerPatch<S>) => S;
+  produce: Produce<S>;
   /**
    * the app, with optional properties.
    */
@@ -28,4 +30,4 @@ declare function _default<S, A>({
 
 export default _default;
 
-export const nest: NestFunction;
+export function nest<S>(produce: Produce<S>): NestFunction;
