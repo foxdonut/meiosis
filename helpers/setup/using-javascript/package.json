@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "webpack",
-    "watch": "webpack --progress --colors --watch",
+    "watch": "webpack --progress --watch",
     "server": "static-server -p ${PORT:-9000}"
   },
   "repository": {
@@ -38,10 +38,10 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@babel/preset-react": "^7.12.1",
+    "@babel/preset-react": "^7.12.5",
     "babel-loader": "^8.1.0",
     "static-server": "^2.2.1",
-    "webpack": "^5.2.0",
-    "webpack-cli": "^4.1.0"
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.2.0"
   }
 }
