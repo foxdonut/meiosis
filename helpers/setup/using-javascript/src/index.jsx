@@ -12,35 +12,131 @@ import { useState } from "preact/hooks";
 import React from "react";
 import ReactDOM from "react-dom";
 
+// common code
+const initialConditions = {
+  precipitations: false,
+  sky: "Sunny"
+};
+
+const convert = function (value, to) {
+  return Math.round(to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32);
+};
+
+const InitialTemperature = label => ({
+  label,
+  value: 22,
+  units: "C"
+});
+
 // lit-html + functionPatches + simple-stream
 (() => {
-  const { states, update, actions } = meiosis.functionPatches.setup({
-    stream: meiosis.simpleStream,
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: () => update(state => ({ ...state, counter: state.counter + 1 }))
-      })
-    }
-  });
+  const nest = meiosis.functionPatches.nest;
 
-  const App = ({ state, update, actions }) => html`
+  const conditions = {
+    initial: initialConditions,
+    Actions: update => ({
+      togglePrecipitations: (local, value) => {
+        update(local.patch(state => ({ ...state, precipitations: value })));
+      },
+      changeSky: (local, value) => {
+        update(local.patch(state => ({ ...state, sky: value })));
+      }
+    })
+  };
+
+  const skyOption = ({ state, local, actions, value, label }) => html`
+    <label>
+      <input
+        type="radio"
+        id=${value}
+        name="sky"
+        value=${value}
+        .checked=${local.get(state).sky === value}
+        @change=${evt => actions.changeSky(local, evt.target.value)}
+      />
+      ${label}
+    </label>
+  `;
+
+  const Conditions = ({ state, local, actions }) => html`
     <div>
-      <div>Counter: ${state.counter}</div>
-      <div>Greeting: ${state.greeting}</div>
+      <label>
+        <input
+          type="checkbox"
+          .checked=${local.get(state).precipitations}
+          @change=${evt => actions.togglePrecipitations(local, evt.target.checked)}
+        />
+        Precipitations
+      </label>
       <div>
-        <button @click=${() => actions.increment()}>Increment</button>
-      </div>
-      <div>
-        <button @click=${() => update(state => ({ ...state, greeting: "Hello" }))}>
-          Say Hello
-        </button>
+        ${skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" })}
+        ${skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" })}
+        ${skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })}
       </div>
     </div>
   `;
 
+  const temperature = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(local.patch(state => ({ ...state, value: state.value + amount })));
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            return { ...state, value: newValue, units: newUnits };
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature = ({ state, local, actions }) => html`
+    <div>
+      ${local.get(state).label} Temperature: ${local.get(state).value}&deg;${local.get(state).units}
+      <div>
+        <button @click=${() => actions.increment(local, 1)}>Increment</button>
+        <button @click=${() => actions.increment(local, -1)}>Decrement</button>
+      </div>
+      <div>
+        <button @click=${() => actions.changeUnits(local)}>Change Units</button>
+      </div>
+    </div>
+  `;
+
+  const app = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
+  };
+
+  const App = ({ state, actions }) => html`
+    <div style="display: grid; grid-template-columns: 1fr 1fr">
+      <div>
+        ${Conditions({ state, local: nest("conditions"), actions })}
+        ${Temperature({ state, local: nest(["temperature", "air"]), actions })}
+        ${Temperature({ state, local: nest(["temperature", "water"]), actions })}
+      </div>
+      <pre style="margin: 0">${JSON.stringify(state, null, 4)}</pre>
+    </div>
+  `;
+
+  const { states, actions } = meiosis.functionPatches.setup({
+    stream: meiosis.simpleStream,
+    app
+  });
+
   const element = document.getElementById("litHtmlApp");
-  states.map(state => litHtmlRender(App({ state, update, actions }), element));
+  states.map(state => litHtmlRender(App({ state, actions }), element));
 })();
 
 // mithril + mergerino + mithril-stream
