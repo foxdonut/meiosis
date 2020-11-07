@@ -344,7 +344,7 @@ const InitialTemperature = label => ({
       local.get(state).label,
       " Temperature: ",
       local.get(state).value,
-      m.trust("&deg;"),
+      h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
       local.get(state).units,
       h(
         "div",
