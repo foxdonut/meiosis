@@ -1,5 +1,7 @@
 // @ts-check
 
+import { get } from "../util";
+
 /**
  * @template T
  * @callback Stream
@@ -177,4 +179,14 @@ export default ({ stream, accumulator, combine, app }) => {
   states.map(state => effects.forEach(effect => effect(state)));
 
   return { states, update, actions };
+};
+
+export const Nest = nestPatch => (path, local = { path: [] }) => {
+  const nestedPath = local.path.concat(path);
+
+  return {
+    get: state => get(state, nestedPath),
+    patch: nestPatch(nestedPath),
+    path: nestedPath
+  };
 };

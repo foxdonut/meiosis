@@ -1,10 +1,11 @@
 // @ts-check
 
+import commonSetup, { Nest } from "../common";
+import { setMutate } from "../util";
+
 /**
  * @typedef {*} MergerinoPatch
  */
-
-import commonSetup from "../common";
 
 /**
  * @template S, A
@@ -36,3 +37,5 @@ export default ({ stream, merge, app }) =>
     combine: patches => patches,
     app
   });
+
+export const nest = Nest(path => patch => setMutate({}, path, patch));

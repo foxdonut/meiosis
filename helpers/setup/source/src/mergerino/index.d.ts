@@ -1,4 +1,4 @@
-import { App, Meiosis, StreamLib } from "../common";
+import { App, Meiosis, NestFunction, StreamLib } from "../common";
 
 export type MeiosisMergerinoConfig<S, A> = {
   /**
@@ -25,3 +25,5 @@ declare function _default<S, A>({
 }: MeiosisMergerinoConfig<S, A>): Meiosis<S, any, A>;
 
 export default _default;
+
+export const nest: NestFunction;

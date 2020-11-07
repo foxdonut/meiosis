@@ -1,23 +1,27 @@
 import commonSetup from "./common";
-import mergerinoSetup from "./mergerino";
-import functionPatchesSetup from "./functionPatches";
-import immerSetup from "./immer";
+import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
+import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
+import immerSetup, { nest as immerNest } from "./immer";
 import preactSetup from "./preact";
 import reactSetup from "./react";
 import simpleStream from "./simple-stream";
+import { get, setMutate, setImmutable } from "./util";
 
 export default {
   common: {
     setup: commonSetup
   },
   mergerino: {
-    setup: mergerinoSetup
+    setup: mergerinoSetup,
+    nest: mergerinoNest
   },
   functionPatches: {
-    setup: functionPatchesSetup
+    setup: functionPatchesSetup,
+    nest: functionPatchesNest
   },
   immer: {
-    setup: immerSetup
+    setup: immerSetup,
+    nest: immerNest
   },
   preact: {
     setup: preactSetup
@@ -25,5 +29,10 @@ export default {
   react: {
     setup: reactSetup
   },
-  simpleStream
+  simpleStream,
+  util: {
+    get,
+    setMutate,
+    setImmutable
+  }
 };

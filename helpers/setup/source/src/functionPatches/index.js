@@ -1,5 +1,10 @@
 // @ts-check
 
+import commonSetup, { Nest } from "../common";
+import { get, setImmutable } from "../util";
+
+const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
+
 /**
  * @template S
  * @callback FunctionPatch
@@ -8,10 +13,6 @@
  *
  * @return {S} the updated state
  */
-
-import commonSetup from "../common";
-
-const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
 /**
  * @template S, A
@@ -39,3 +40,7 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
  */
 export default ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: pipe, app });
+
+export const nest = Nest(path => patch => state =>
+  setImmutable(state, path, patch(get(state, path)))
+);

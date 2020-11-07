@@ -98,3 +98,17 @@ declare function _default<S, P, A>({
 }: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
 
 export default _default;
+
+export interface Local {
+  get: (state: any) => any;
+  patch: (patch: any) => any;
+  path: string | Array<string>;
+}
+
+export type NestPatchFunction = (patch: any) => any;
+export type NestFunction = (path: string | Array<string>, local?: Local) => Local;
+export type NestConstructor = (nestPatchFn: NestPatchFunction) => NestFunction;
+
+declare const Nest: NestConstructor;
+
+export { Nest };

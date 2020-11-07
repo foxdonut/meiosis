@@ -1,5 +1,8 @@
 // @ts-check
 
+import commonSetup, { Nest } from "../common";
+import { get, setMutate } from "../util";
+
 /**
  * @template S
  * @callback ImmerPatch
@@ -8,8 +11,6 @@
  *
  * @return {S | void}
  */
-
-import commonSetup from "../common";
 
 /**
  * @template S, A
@@ -42,4 +43,9 @@ export default ({ stream, produce, app }) =>
     // can't use patches.reduce(produce, state) because that would send a third argument to produce
     combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
     app
+  });
+
+export const nest = produce =>
+  Nest(path => patch => state => {
+    setMutate(state, path, produce(get(state, path), patch));
   });

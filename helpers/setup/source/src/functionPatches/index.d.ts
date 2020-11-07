@@ -1,4 +1,4 @@
-import { App, Meiosis, StreamLib } from "../common";
+import { App, Meiosis, NestFunction, StreamLib } from "../common";
 
 export type FunctionPatch<S> = (state: S) => S;
 
@@ -22,3 +22,5 @@ declare function _default<S, A>({
 }: MeiosisFunctionPatchesConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
 export default _default;
+
+export const nest: NestFunction;

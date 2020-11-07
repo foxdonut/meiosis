@@ -1,4 +1,4 @@
-import { App, Meiosis, StreamLib } from "../common";
+import { App, Meiosis, NestFunction, StreamLib } from "../common";
 
 export type ImmerPatch<S> = (state: S) => S | void;
 
@@ -27,3 +27,5 @@ declare function _default<S, A>({
 }: MeiosisImmerConfig<S, A>): Meiosis<S, ImmerPatch<S>, A>;
 
 export default _default;
+
+export const nest: NestFunction;
