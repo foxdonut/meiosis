@@ -1,4 +1,4 @@
-import meiosis, { Stream, ImmerPatch } from "meiosis-setup";
+import meiosis, { ActionConstructor, ImmerPatch, Stream } from "meiosis-setup";
 import { stream, scan } from "meiosis-setup/simple-stream";
 import flyd from "flyd";
 import merge from "mergerino";
@@ -17,6 +17,84 @@ import ReactDOM from "react-dom";
   const y = scan((x, y) => x + y, 0, s);
   y.map(x => x);
 })();
+
+// common code
+type Sky = "SUNNY" | "CLOUDY" | "MIX";
+
+interface Conditions {
+  precipitations: boolean;
+  sky: Sky;
+}
+
+interface ConditionActions {
+  togglePrecipitations: (local, value: boolean) => void;
+  changeSky: (local, value: Sky) => void;
+}
+
+interface ConditionComponent<P> {
+  initial: Conditions;
+  Actions: ActionConstructor<Conditions, P, ConditionActions>;
+}
+
+type TemperatureUnits = "C" | "F";
+
+interface Temperature {
+  label: string;
+  value: number;
+  units: TemperatureUnits;
+}
+
+interface TemperatureActions {
+  increment: (local, amount: boolean) => void;
+  changeUnits: (local) => void;
+}
+
+interface TemperatureComponent<P> {
+  Initial: (label: string) => Temperature;
+  Actions: ActionConstructor<Temperature, P, TemperatureActions>;
+}
+
+interface State {
+  conditions: Conditions;
+  temperature: {
+    air: Temperature;
+    water: Temperature;
+  }
+}
+
+interface Actions {
+  conditions: ConditionActions;
+  temperature: TemperatureActions;
+}
+
+const initialConditions: Conditions = {
+  precipitations: false,
+  sky: "SUNNY"
+};
+
+const convert = (value: number, to: TemperatureUnits): number => {
+  return Math.round(to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32);
+};
+
+const InitialTemperature = (label: string): Temperature => ({
+  label,
+  value: 22,
+  units: "C"
+});
+
+const createApp = (conditions, temperature) => ({
+  initial: {
+    conditions: conditions.initial,
+    temperature: {
+      air: temperature.Initial("Air"),
+      water: temperature.Initial("Water")
+    }
+  },
+  Actions: update => ({
+    conditions: conditions.Actions(update),
+    temperature: temperature.Actions(update)
+  })
+});
 
 // lit-html + functionPatches + simple-stream
 (() => {
@@ -118,6 +196,7 @@ import ReactDOM from "react-dom";
 
 // preact + mergerino + simple-stream
 (() => {
+  /*
   interface FixedState {
     counter: number;
     greeting?: string;
@@ -135,6 +214,12 @@ import ReactDOM from "react-dom";
 
   const p1: MergerinoPatch = { counter: x => x + 1, greeting: "hi", another: "yes" };
   console.log(p1);
+  */
+
+  interface State {
+    counter: number;
+    greeting?: string;
+  }
 
   // Mergerino patch type would be something like
   // Object | function (State => State)

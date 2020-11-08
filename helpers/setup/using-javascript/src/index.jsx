@@ -15,10 +15,10 @@ import ReactDOM from "react-dom";
 // common code
 const initialConditions = {
   precipitations: false,
-  sky: "Sunny"
+  sky: "SUNNY"
 };
 
-const convert = function (value, to) {
+const convert = (value, to) => {
   return Math.round(to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32);
 };
 
@@ -26,6 +26,20 @@ const InitialTemperature = label => ({
   label,
   value: 22,
   units: "C"
+});
+
+const createApp = (conditions, temperature) => ({
+  initial: {
+    conditions: conditions.initial,
+    temperature: {
+      air: temperature.Initial("Air"),
+      water: temperature.Initial("Water")
+    }
+  },
+  Actions: update => ({
+    conditions: conditions.Actions(update),
+    temperature: temperature.Actions(update)
+  })
 });
 
 // lit-html + functionPatches + simple-stream
@@ -51,7 +65,7 @@ const InitialTemperature = label => ({
         name="sky"
         value=${value}
         .checked=${local.get(state).sky === value}
-        @change=${evt => actions.changeSky(local, evt.target.value)}
+        @change=${evt => actions.conditions.changeSky(local, evt.target.value)}
       />
       ${label}
     </label>
@@ -63,7 +77,7 @@ const InitialTemperature = label => ({
         <input
           type="checkbox"
           .checked=${local.get(state).precipitations}
-          @change=${evt => actions.togglePrecipitations(local, evt.target.checked)}
+          @change=${evt => actions.conditions.togglePrecipitations(local, evt.target.checked)}
         />
         Precipitations
       </label>
@@ -98,25 +112,16 @@ const InitialTemperature = label => ({
     <div>
       ${local.get(state).label} Temperature: ${local.get(state).value}&deg;${local.get(state).units}
       <div>
-        <button @click=${() => actions.increment(local, 1)}>Increment</button>
-        <button @click=${() => actions.increment(local, -1)}>Decrement</button>
+        <button @click=${() => actions.temperature.increment(local, 1)}>Increment</button>
+        <button @click=${() => actions.temperature.increment(local, -1)}>Decrement</button>
       </div>
       <div>
-        <button @click=${() => actions.changeUnits(local)}>Change Units</button>
+        <button @click=${() => actions.temperature.changeUnits(local)}>Change Units</button>
       </div>
     </div>
   `;
 
-  const app = {
-    initial: {
-      conditions: conditions.initial,
-      temperature: {
-        air: temperature.Initial("Air"),
-        water: temperature.Initial("Water")
-      }
-    },
-    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
-  };
+  const app = createApp(conditions, temperature);
 
   const App = ({ state, actions }) => html`
     <div style="display: grid; grid-template-columns: 1fr 1fr">
@@ -159,7 +164,7 @@ const InitialTemperature = label => ({
         name: "sky",
         value,
         checked: local.get(state).sky === value,
-        onchange: evt => actions.changeSky(local, evt.target.value)
+        onchange: evt => actions.conditions.changeSky(local, evt.target.value)
       }),
       label
     );
@@ -173,7 +178,7 @@ const InitialTemperature = label => ({
           m("input", {
             type: "checkbox",
             checked: local.get(state).precipitations,
-            onchange: evt => actions.togglePrecipitations(local, evt.target.checked)
+            onchange: evt => actions.conditions.togglePrecipitations(local, evt.target.checked)
           }),
           "Precipitations"
         ),
@@ -216,23 +221,17 @@ const InitialTemperature = label => ({
         local.get(state).units,
         m(
           "div",
-          m("button", { onclick: () => actions.increment(local, 1) }, "Increment"),
-          m("button", { onclick: () => actions.increment(local, -1) }, "Decrement")
+          m("button", { onclick: () => actions.temperature.increment(local, 1) }, "Increment"),
+          m("button", { onclick: () => actions.temperature.increment(local, -1) }, "Decrement")
         ),
-        m("div", m("button", { onclick: () => actions.changeUnits(local) }, "Change Units"))
+        m(
+          "div",
+          m("button", { onclick: () => actions.temperature.changeUnits(local) }, "Change Units")
+        )
       )
   };
 
-  const app = {
-    initial: {
-      conditions: conditions.initial,
-      temperature: {
-        air: temperature.Initial("Air"),
-        water: temperature.Initial("Water")
-      }
-    },
-    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
-  };
+  const app = createApp(conditions, temperature);
 
   const App = {
     view: ({ attrs: { state, actions } }) =>
@@ -290,7 +289,7 @@ const InitialTemperature = label => ({
         name: "sky",
         value,
         checked: local.get(state).sky === value,
-        onchange: evt => actions.changeSky(local, evt.target.value)
+        onchange: evt => actions.conditions.changeSky(local, evt.target.value)
       }),
       label
     );
@@ -305,7 +304,7 @@ const InitialTemperature = label => ({
         h("input", {
           type: "checkbox",
           checked: local.get(state).precipitations,
-          onchange: evt => actions.togglePrecipitations(local, evt.target.checked)
+          onchange: evt => actions.conditions.togglePrecipitations(local, evt.target.checked)
         }),
         "Precipitations"
       ),
@@ -349,22 +348,17 @@ const InitialTemperature = label => ({
       h(
         "div",
         {},
-        h("button", { onclick: () => actions.increment(local, 1) }, "Increment"),
-        h("button", { onclick: () => actions.increment(local, -1) }, "Decrement")
+        h("button", { onclick: () => actions.temperature.increment(local, 1) }, "Increment"),
+        h("button", { onclick: () => actions.temperature.increment(local, -1) }, "Decrement")
       ),
-      h("div", {}, h("button", { onclick: () => actions.changeUnits(local) }, "Change Units"))
+      h(
+        "div",
+        {},
+        h("button", { onclick: () => actions.temperature.changeUnits(local) }, "Change Units")
+      )
     );
 
-  const app = {
-    initial: {
-      conditions: conditions.initial,
-      temperature: {
-        air: temperature.Initial("Air"),
-        water: temperature.Initial("Water")
-      }
-    },
-    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
-  };
+  const app = createApp(conditions, temperature);
 
   const Root = ({ state, actions }) =>
     h(
@@ -418,7 +412,7 @@ const InitialTemperature = label => ({
         type="radio"
         value={value}
         checked={local.get(state).sky === value}
-        onChange={evt => actions.changeSky(local, evt.target.value)}
+        onChange={evt => actions.conditions.changeSky(local, evt.target.value)}
       />
       {label}
     </label>
@@ -430,7 +424,7 @@ const InitialTemperature = label => ({
         <input
           type="checkbox"
           checked={local.get(state).precipitations}
-          onChange={evt => actions.togglePrecipitations(local, evt.target.checked)}
+          onChange={evt => actions.conditions.togglePrecipitations(local, evt.target.checked)}
         />
         Precipitations
       </label>
@@ -476,11 +470,11 @@ const InitialTemperature = label => ({
       {local.get(state).label} Temperature:
       {local.get(state).value}&deg;{local.get(state).units}
       <div>
-        <button onClick={() => actions.increment(local, 1)}>Increment</button>
-        <button onClick={() => actions.increment(local, -1)}>Decrement</button>
+        <button onClick={() => actions.temperature.increment(local, 1)}>Increment</button>
+        <button onClick={() => actions.temperature.increment(local, -1)}>Decrement</button>
       </div>
       <div>
-        <button onClick={() => actions.changeUnits(local)}>Change Units</button>
+        <button onClick={() => actions.temperature.changeUnits(local)}>Change Units</button>
       </div>
     </div>
   );
@@ -496,16 +490,7 @@ const InitialTemperature = label => ({
     </div>
   );
 
-  const app = {
-    initial: {
-      conditions: conditions.initial,
-      temperature: {
-        air: temperature.Initial("Air"),
-        water: temperature.Initial("Water")
-      }
-    },
-    Actions: update => Object.assign({}, conditions.Actions(update), temperature.Actions(update))
-  };
+  const app = createApp(conditions, temperature);
 
   const { states, update, actions } = meiosis.immer.setup({
     stream: flyd,
