@@ -62,7 +62,6 @@ const createApp = (conditions, temperature) => ({
     <label>
       <input
         type="radio"
-        name="sky"
         value=${value}
         .checked=${local.get(state).sky === value}
         @change=${evt => actions.conditions.changeSky(local, evt.target.value)}
@@ -161,7 +160,6 @@ const createApp = (conditions, temperature) => ({
       "label",
       m("input", {
         type: "radio",
-        name: "sky",
         value,
         checked: local.get(state).sky === value,
         onchange: evt => actions.conditions.changeSky(local, evt.target.value)
@@ -286,7 +284,6 @@ const createApp = (conditions, temperature) => ({
       {},
       h("input", {
         type: "radio",
-        name: "sky",
         value,
         checked: local.get(state).sky === value,
         onchange: evt => actions.conditions.changeSky(local, evt.target.value)

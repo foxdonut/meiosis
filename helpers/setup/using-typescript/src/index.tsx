@@ -1,4 +1,11 @@
-import meiosis, { ActionConstructor, App, FunctionPatch, ImmerPatch, LocalPatch, Stream } from "meiosis-setup";
+import meiosis, {
+  ActionConstructor,
+  App,
+  FunctionPatch,
+  ImmerPatch,
+  LocalPatch,
+  Stream
+} from "meiosis-setup";
 import { stream, scan } from "meiosis-setup/simple-stream";
 import flyd from "flyd";
 import merge from "mergerino";
@@ -59,14 +66,7 @@ interface State {
   temperature: {
     air: Temperature;
     water: Temperature;
-  }
-}
-
-type States = Stream<State>;
-
-interface IActions<P1, P2, P3> {
-  conditions: ConditionsActions<P1, P2>;
-  temperature: TemperatureActions<P1, P3>;
+  };
 }
 
 const initialConditions: Conditions = {
@@ -84,28 +84,17 @@ const InitialTemperature = (label: string): Temperature => ({
   units: "C"
 });
 
-const createApp = <P1, P2, P3>(conditions: ConditionsComponent<P1, P2>,
-    temperature: TemperatureComponent<P1, P3>): App<State, P1, any> => ({
-  initial: {
-    conditions: conditions.initial,
-    temperature: {
-      air: temperature.Initial("Air"),
-      water: temperature.Initial("Water")
-    }
-  },
-  Actions: update => ({
-    conditions: conditions.Actions(update),
-    temperature: temperature.Actions(update)
-  })
-});
-
 // lit-html + functionPatches + simple-stream
 (() => {
   type Patch = FunctionPatch<State>;
   type ConditionsPatch = FunctionPatch<Conditions>;
   type TemperaturePatch = FunctionPatch<Temperature>;
   type Update = Stream<Patch>;
-  type Actions = IActions<Patch, ConditionsPatch, TemperaturePatch>;
+
+  interface Actions {
+    conditions: ConditionsActions<Patch, ConditionsPatch>;
+    temperature: TemperatureActions<Patch, TemperaturePatch>;
+  }
 
   interface Attrs {
     state: State;
@@ -130,7 +119,6 @@ const createApp = <P1, P2, P3>(conditions: ConditionsComponent<P1, P2>,
     <label>
       <input
         type="radio"
-        name="sky"
         value=${value}
         .checked=${local.get(state).sky === value}
         @change=${evt => actions.conditions.changeSky(local, evt.target.value)}
@@ -189,7 +177,19 @@ const createApp = <P1, P2, P3>(conditions: ConditionsComponent<P1, P2>,
     </div>
   `;
 
-  const app = createApp<Patch, ConditionsPatch, TemperaturePatch>(conditions, temperature);
+  const app: App<State, Patch, Actions> = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => ({
+      conditions: conditions.Actions(update),
+      temperature: temperature.Actions(update)
+    })
+  };
 
   const App: (attrs: Attrs) => TemplateResult = ({ state, actions }) => html`
     <div style="display: grid; grid-template-columns: 1fr 1fr">
