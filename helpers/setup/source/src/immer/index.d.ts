@@ -1,4 +1,4 @@
-import { App, Meiosis, NestFunction, StreamLib } from "../common";
+import { App, Meiosis, LocalPath, Local, StreamLib } from "../common";
 
 export type ImmerPatch<S> = (state: S) => S | void;
 
@@ -30,4 +30,6 @@ declare function _default<S, A>({
 
 export default _default;
 
-export function nest<S>(produce: Produce<S>): NestFunction;
+export function nest<S, T, P, Q>(
+  produce: Produce<S>
+): (path: string | Array<string>, local?: LocalPath) => Local<S, T, P, Q>;

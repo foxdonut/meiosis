@@ -1,4 +1,4 @@
-import { App, Meiosis, NestFunction, StreamLib } from "../common";
+import { App, LocalPath, Local, Meiosis, StreamLib } from "../common";
 
 export type FunctionPatch<S> = (state: S) => S;
 
@@ -23,4 +23,7 @@ declare function _default<S, A>({
 
 export default _default;
 
-export const nest: NestFunction;
+export function nest<S, T, P, Q>(
+  path: string | Array<string>,
+  local?: LocalPath
+): Local<S, T, P, Q>;

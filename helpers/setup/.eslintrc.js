@@ -37,7 +37,8 @@ module.exports = {
   plugins: ["prettier", "react"],
   settings: {
     react: {
-      pragma: "React"
+      pragma: "React",
+      version: "detect"
     }
   },
   overrides: [

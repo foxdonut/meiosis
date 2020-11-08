@@ -1,9 +1,9 @@
-import meiosis, { ActionConstructor, ImmerPatch, Stream } from "meiosis-setup";
+import meiosis, { ActionConstructor, App, FunctionPatch, ImmerPatch, LocalPatch, Stream } from "meiosis-setup";
 import { stream, scan } from "meiosis-setup/simple-stream";
 import flyd from "flyd";
 import merge from "mergerino";
 import produce from "immer";
-import { html, render, TemplateResult } from "lit-html";
+import { html, render as litHtmlRender, TemplateResult } from "lit-html";
 import m from "mithril";
 import MStream from "mithril/stream";
 import { h, render as preactRender } from "preact";
@@ -26,14 +26,14 @@ interface Conditions {
   sky: Sky;
 }
 
-interface ConditionActions {
-  togglePrecipitations: (local, value: boolean) => void;
-  changeSky: (local, value: Sky) => void;
+interface ConditionsActions<P1, P2> {
+  togglePrecipitations: (local: LocalPatch<P1, P2>, value: boolean) => void;
+  changeSky: (local: LocalPatch<P1, P2>, value: Sky) => void;
 }
 
-interface ConditionComponent<P> {
+interface ConditionsComponent<P1, P2> {
   initial: Conditions;
-  Actions: ActionConstructor<Conditions, P, ConditionActions>;
+  Actions: ActionConstructor<Conditions, P1, ConditionsActions<P1, P2>>;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -44,14 +44,14 @@ interface Temperature {
   units: TemperatureUnits;
 }
 
-interface TemperatureActions {
-  increment: (local, amount: boolean) => void;
-  changeUnits: (local) => void;
+interface TemperatureActions<P1, P2> {
+  increment: (local: LocalPatch<P1, P2>, amount: number) => void;
+  changeUnits: (local: LocalPatch<P1, P2>) => void;
 }
 
-interface TemperatureComponent<P> {
+interface TemperatureComponent<P1, P2> {
   Initial: (label: string) => Temperature;
-  Actions: ActionConstructor<Temperature, P, TemperatureActions>;
+  Actions: ActionConstructor<Temperature, P1, TemperatureActions<P1, P2>>;
 }
 
 interface State {
@@ -62,9 +62,11 @@ interface State {
   }
 }
 
-interface Actions {
-  conditions: ConditionActions;
-  temperature: TemperatureActions;
+type States = Stream<State>;
+
+interface IActions<P1, P2, P3> {
+  conditions: ConditionsActions<P1, P2>;
+  temperature: TemperatureActions<P1, P3>;
 }
 
 const initialConditions: Conditions = {
@@ -82,7 +84,8 @@ const InitialTemperature = (label: string): Temperature => ({
   units: "C"
 });
 
-const createApp = (conditions, temperature) => ({
+const createApp = <P1, P2, P3>(conditions: ConditionsComponent<P1, P2>,
+    temperature: TemperatureComponent<P1, P3>): App<State, P1, any> => ({
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -98,49 +101,114 @@ const createApp = (conditions, temperature) => ({
 
 // lit-html + functionPatches + simple-stream
 (() => {
-  interface State {
-    counter: number;
-    greeting?: string;
-  }
-
-  interface Actions {
-    increment: (value: number) => void;
-  }
+  type Patch = FunctionPatch<State>;
+  type ConditionsPatch = FunctionPatch<Conditions>;
+  type TemperaturePatch = FunctionPatch<Temperature>;
+  type Update = Stream<Patch>;
+  type Actions = IActions<Patch, ConditionsPatch, TemperaturePatch>;
 
   interface Attrs {
     state: State;
-    update: Stream<any>;
     actions: Actions;
   }
 
-  const { states, update, actions } = meiosis.functionPatches.setup<State, Actions>({
-    stream: meiosis.simpleStream,
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: (amount: number) =>
-          update(state => ({ ...state, counter: state.counter + amount }))
-      })
-    }
-  });
+  const nest = meiosis.functionPatches.nest;
 
-  const App: (attrs: Attrs) => TemplateResult = ({ state, update, actions }) => html`
+  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+    initial: initialConditions,
+    Actions: (update: Update) => ({
+      togglePrecipitations: (local, value) => {
+        update(local.patch(state => ({ ...state, precipitations: value })));
+      },
+      changeSky: (local, value) => {
+        update(local.patch(state => ({ ...state, sky: value })));
+      }
+    })
+  };
+
+  const skyOption = ({ state, local, actions, value, label }) => html`
+    <label>
+      <input
+        type="radio"
+        name="sky"
+        value=${value}
+        .checked=${local.get(state).sky === value}
+        @change=${evt => actions.conditions.changeSky(local, evt.target.value)}
+      />
+      ${label}
+    </label>
+  `;
+
+  const Conditions = ({ state, local, actions }) => html`
     <div>
-      <div>Counter: ${state.counter}</div>
-      <div>Greeting: ${state.greeting}</div>
+      <label>
+        <input
+          type="checkbox"
+          .checked=${local.get(state).precipitations}
+          @change=${evt => actions.conditions.togglePrecipitations(local, evt.target.checked)}
+        />
+        Precipitations
+      </label>
       <div>
-        <button @click=${() => actions.increment(2)}>Increment</button>
-      </div>
-      <div>
-        <button @click=${() => update(state => ({ ...state, greeting: "Hello" }))}>
-          Say Hello
-        </button>
+        ${skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" })}
+        ${skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" })}
+        ${skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })}
       </div>
     </div>
   `;
 
+  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(local.patch(state => ({ ...state, value: state.value + amount })));
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            return { ...state, value: newValue, units: newUnits };
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature = ({ state, local, actions }) => html`
+    <div>
+      ${local.get(state).label} Temperature: ${local.get(state).value}&deg;${local.get(state).units}
+      <div>
+        <button @click=${() => actions.temperature.increment(local, 1)}>Increment</button>
+        <button @click=${() => actions.temperature.increment(local, -1)}>Decrement</button>
+      </div>
+      <div>
+        <button @click=${() => actions.temperature.changeUnits(local)}>Change Units</button>
+      </div>
+    </div>
+  `;
+
+  const app = createApp<Patch, ConditionsPatch, TemperaturePatch>(conditions, temperature);
+
+  const App: (attrs: Attrs) => TemplateResult = ({ state, actions }) => html`
+    <div style="display: grid; grid-template-columns: 1fr 1fr">
+      <div>
+        ${Conditions({ state, local: nest("conditions"), actions })}
+        ${Temperature({ state, local: nest(["temperature", "air"]), actions })}
+        ${Temperature({ state, local: nest(["temperature", "water"]), actions })}
+      </div>
+      <pre style="margin: 0">${JSON.stringify(state, null, 4)}</pre>
+    </div>
+  `;
+
+  const { states, actions } = meiosis.functionPatches.setup<State, Actions>({
+    stream: meiosis.simpleStream,
+    app
+  });
+
   const element = document.getElementById("litHtmlApp") as HTMLElement;
-  states.map(state => render(App({ state, update, actions }), element));
+  states.map(state => litHtmlRender(App({ state, actions }), element));
 })();
 
 // mithril + mergerino + mithril-stream

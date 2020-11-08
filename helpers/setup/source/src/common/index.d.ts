@@ -99,16 +99,27 @@ declare function _default<S, P, A>({
 
 export default _default;
 
-export interface Local {
-  get: (state: any) => any;
-  patch: (patch: any) => any;
+export interface LocalPath {
   path: string | Array<string>;
 }
 
-export type NestPatchFunction = (patch: any) => any;
-export type NestFunction = (path: string | Array<string>, local?: Local) => Local;
-export type NestConstructor = (nestPatchFn: NestPatchFunction) => NestFunction;
+export interface LocalPatch<P1, P2> {
+  patch: (patch: P2) => P1;
+}
 
-declare const Nest: NestConstructor;
+export interface Local<S1, P1, S2, P2> extends LocalPath, LocalPatch<P1, P2> {
+  get: (state: S1) => S2;
+}
+
+type NestPatchFunction<P2, P1> = (patch: P2) => P1;
+
+type NestFunction<S1, P1, S2, P2> = (
+  path: string | Array<string>,
+  local?: LocalPath
+) => Local<S1, P1, S2, P2>;
+
+declare function Nest<S1, P1, S2, P2>(
+  nestPatchFn: NestPatchFunction<P2, P1>
+): NestFunction<S1, P1, S2, P2>;
 
 export { Nest };

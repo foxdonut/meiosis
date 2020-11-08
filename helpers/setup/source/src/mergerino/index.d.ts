@@ -1,4 +1,4 @@
-import { App, Meiosis, NestFunction, StreamLib } from "../common";
+import { App, Meiosis, LocalPath, Local, StreamLib } from "../common";
 
 export type MeiosisMergerinoConfig<S, A> = {
   /**
@@ -23,7 +23,9 @@ declare function _default<S, A>({
   merge,
   app
 }: MeiosisMergerinoConfig<S, A>): Meiosis<S, any, A>;
-
 export default _default;
 
-export const nest: NestFunction;
+export function nest<S, T, P, Q>(
+  path: string | Array<string>,
+  local?: LocalPath
+): Local<S, T, P, Q>;
