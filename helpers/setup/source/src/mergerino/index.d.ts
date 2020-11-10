@@ -1,5 +1,13 @@
 import { App, Meiosis, LocalPath, Local, StreamLib } from "../common";
 
+type MergerinoFunctionPatch<S> = (state: S) => S;
+
+type MergerinoObjectPatch<S> = {
+  [K in keyof S]?: S[K] | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
+};
+
+export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
+
 export type MeiosisMergerinoConfig<S, A> = {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -25,7 +33,7 @@ declare function _default<S, A>({
 }: MeiosisMergerinoConfig<S, A>): Meiosis<S, any, A>;
 export default _default;
 
-export function nest<S, T, P, Q>(
+export function nest<S1, P1, S2, P2>(
   path: string | Array<string>,
   local?: LocalPath
-): Local<S, T, P, Q>;
+): Local<S1, P1, S2, P2>;

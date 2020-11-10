@@ -34,7 +34,7 @@ declare namespace _default {
 export * from "./common";
 export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
 export { ImmerPatch, MeiosisImmerConfig } from "./immer";
-export { MeiosisMergerinoConfig } from "./mergerino";
+export { MergerinoPatch, MeiosisMergerinoConfig } from "./mergerino";
 export { PreactSetup, PreactAppProps } from "./preact";
 export { ReactFunctions, ReactSetup, ReactAppProps } from "./react";
 

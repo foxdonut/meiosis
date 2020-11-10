@@ -23,7 +23,7 @@ declare function _default<S, A>({
 
 export default _default;
 
-export function nest<S, T, P, Q>(
+export function nest<S1, P1, S2, P2>(
   path: string | Array<string>,
   local?: LocalPath
-): Local<S, T, P, Q>;
+): Local<S1, P1, S2, P2>;
