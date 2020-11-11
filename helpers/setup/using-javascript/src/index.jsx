@@ -155,17 +155,19 @@ const createApp = (conditions, temperature) => ({
     })
   };
 
-  const skyOption = ({ state, local, actions, value, label }) =>
-    m(
-      "label",
-      m("input", {
-        type: "radio",
-        value,
-        checked: local.get(state).sky === value,
-        onchange: evt => actions.conditions.changeSky(local, evt.target.value)
-      }),
-      label
-    );
+  const skyOption = {
+    view: ({ attrs: { state, local, actions, value, label } }) =>
+      m(
+        "label",
+        m("input", {
+          type: "radio",
+          value,
+          checked: local.get(state).sky === value,
+          onchange: evt => actions.conditions.changeSky(local, evt.target.value)
+        }),
+        label
+      )
+  };
 
   const Conditions = {
     view: ({ attrs: { state, local, actions } }) =>
@@ -182,9 +184,9 @@ const createApp = (conditions, temperature) => ({
         ),
         m(
           "div",
-          skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
-          skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-          skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+          m(skyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+          m(skyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+          m(skyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
         )
       )
   };

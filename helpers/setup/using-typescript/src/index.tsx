@@ -4,6 +4,7 @@ import meiosis, {
   FunctionPatch,
   ImmerPatch,
   LocalPatch,
+  Local,
   MergerinoPatch,
   Stream
 } from "meiosis-setup";
@@ -91,6 +92,8 @@ const InitialTemperature = (label: string): Temperature => ({
   type ConditionsPatch = FunctionPatch<Conditions>;
   type TemperaturePatch = FunctionPatch<Temperature>;
   type Update = Stream<Patch>;
+  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
+  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
 
   interface Actions {
     conditions: ConditionsActions<Patch, ConditionsPatch>;
@@ -100,6 +103,20 @@ const InitialTemperature = (label: string): Temperature => ({
   interface Attrs {
     state: State;
     actions: Actions;
+  }
+
+  interface SkyOptionAttrs extends Attrs {
+    local: ConditionsLocal;
+    value: string;
+    label: string;
+  }
+
+  interface ConditionsAttrs extends Attrs {
+    local: ConditionsLocal;
+  }
+
+  interface TemperatureAttrs extends Attrs {
+    local: TemperatureLocal;
   }
 
   const nest = meiosis.functionPatches.nest;
@@ -116,7 +133,13 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const skyOption = ({ state, local, actions, value, label }) => html`
+  const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({
+    state,
+    local,
+    actions,
+    value,
+    label
+  }) => html`
     <label>
       <input
         type="radio"
@@ -128,7 +151,11 @@ const InitialTemperature = (label: string): Temperature => ({
     </label>
   `;
 
-  const Conditions = ({ state, local, actions }) => html`
+  const Conditions: (attrs: ConditionsAttrs) => TemplateResult = ({
+    state,
+    local,
+    actions
+  }) => html`
     <div>
       <label>
         <input
@@ -165,7 +192,11 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Temperature = ({ state, local, actions }) => html`
+  const Temperature: (attrs: TemperatureAttrs) => TemplateResult = ({
+    state,
+    local,
+    actions
+  }) => html`
     <div>
       ${local.get(state).label} Temperature: ${local.get(state).value}&deg;${local.get(state).units}
       <div>
@@ -218,6 +249,8 @@ const InitialTemperature = (label: string): Temperature => ({
   type ConditionsPatch = MergerinoPatch<Conditions>;
   type TemperaturePatch = MergerinoPatch<Temperature>;
   type Update = Stream<Patch>;
+  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
+  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
 
   interface Actions {
     conditions: ConditionsActions<Patch, ConditionsPatch>;
@@ -227,6 +260,20 @@ const InitialTemperature = (label: string): Temperature => ({
   interface Attrs {
     state: State;
     actions: Actions;
+  }
+
+  interface SkyOptionAttrs extends Attrs {
+    local: ConditionsLocal;
+    value: string;
+    label: string;
+  }
+
+  interface ConditionsAttrs extends Attrs {
+    local: ConditionsLocal;
+  }
+
+  interface TemperatureAttrs extends Attrs {
+    local: TemperatureLocal;
   }
 
   const nest = meiosis.mergerino.nest;
@@ -243,19 +290,22 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const skyOption = ({ state, local, actions, value, label }) =>
-    m(
-      "label",
-      m("input", {
-        type: "radio",
-        value,
-        checked: local.get(state).sky === value,
-        onchange: evt => actions.conditions.changeSky(local, evt.target.value)
-      }),
-      label
-    );
+  const skyOption: m.Component<SkyOptionAttrs> = {
+    view: ({ attrs: { state, local, actions, value, label } }) =>
+      m(
+        "label",
+        m("input", {
+          type: "radio",
+          value,
+          checked: local.get(state).sky === value,
+          // FIXME: evt type
+          onchange: evt => actions.conditions.changeSky(local, evt.target.value)
+        }),
+        label
+      )
+  };
 
-  const Conditions = {
+  const Conditions: m.Component<ConditionsAttrs> = {
     view: ({ attrs: { state, local, actions } }) =>
       m(
         "div",
@@ -270,14 +320,14 @@ const InitialTemperature = (label: string): Temperature => ({
         ),
         m(
           "div",
-          skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
-          skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-          skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+          m(skyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+          m(skyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+          m(skyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
         )
       )
   };
 
-  const temperature = {
+  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -296,7 +346,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Temperature = {
+  const Temperature: m.Component<TemperatureAttrs> = {
     view: ({ attrs: { state, local, actions } }) =>
       m(
         "div",
@@ -338,17 +388,25 @@ const InitialTemperature = (label: string): Temperature => ({
         { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
         m(
           "div",
-          m(Conditions, { state, local: nest("conditions"), actions }),
-          m(Temperature, { state, local: nest(["temperature", "air"]), actions }),
-          m(Temperature, { state, local: nest(["temperature", "water"]), actions })
+          m(Conditions, { state, local: nest("conditions") as ConditionsLocal, actions }),
+          m(Temperature, {
+            state,
+            local: nest(["temperature", "air"]) as TemperatureLocal,
+            actions
+          }),
+          m(Temperature, {
+            state,
+            local: nest(["temperature", "water"]) as TemperatureLocal,
+            actions
+          })
         ),
         m("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
       )
   };
 
   const stream = {
-    stream: value => MStream(value),
-    scan: (acc, init, stream) => MStream.scan(acc, init, stream)
+    stream: (value: any) => MStream(value),
+    scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
   const { states, actions } = meiosis.mergerino.setup({ stream, merge, app });
@@ -362,6 +420,136 @@ const InitialTemperature = (label: string): Temperature => ({
 
 // preact + mergerino + simple-stream
 (() => {
+  type Patch = MergerinoPatch<State>;
+  type ConditionsPatch = MergerinoPatch<Conditions>;
+  type TemperaturePatch = MergerinoPatch<Temperature>;
+  type Update = Stream<Patch>;
+  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
+  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+
+  interface Actions {
+    conditions: ConditionsActions<Patch, ConditionsPatch>;
+    temperature: TemperatureActions<Patch, TemperaturePatch>;
+  }
+
+  interface Attrs {
+    state: State;
+    actions: Actions;
+  }
+
+  interface SkyOptionAttrs extends Attrs {
+    local: ConditionsLocal;
+    value: string;
+    label: string;
+  }
+
+  interface ConditionsAttrs extends Attrs {
+    local: ConditionsLocal;
+  }
+
+  interface TemperatureAttrs extends Attrs {
+    local: TemperatureLocal;
+  }
+
+  const nest = meiosis.mergerino.nest;
+
+  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+    initial: initialConditions,
+    Actions: (update: Update) => ({
+      togglePrecipitations: (local, value) => {
+        update(local.patch({ precipitations: value }));
+      },
+      changeSky: (local, value) => {
+        update(local.patch({ sky: value }));
+      }
+    })
+  };
+
+  // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
+  // file, we'll use h here.
+  const skyOption: (attrs: SkyOptionAttrs) => preact.VNode = ({
+    state,
+    local,
+    actions,
+    value,
+    label
+  }) =>
+    h(
+      "label",
+      {},
+      h("input", {
+        type: "radio",
+        value,
+        checked: local.get(state).sky === value,
+        onchange: evt => actions.conditions.changeSky(local, evt.target.value)
+      }),
+      label
+    );
+
+  const Conditions: (attrs: ConditionsAttrs) => preact.VNode = ({ state, local, actions }) =>
+    h(
+      "div",
+      {},
+      h(
+        "label",
+        {},
+        h("input", {
+          type: "checkbox",
+          checked: local.get(state).precipitations,
+          onchange: evt => actions.conditions.togglePrecipitations(local, evt.target.checked)
+        }),
+        "Precipitations"
+      ),
+      h(
+        "div",
+        {},
+        skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
+        skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+        skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+      )
+    );
+
+  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(local.patch({ value: x => x + amount }));
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            return { ...state, value: newValue, units: newUnits };
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature: (attrs: TemperatureAttrs) => preact.VNode = ({ state, local, actions }) =>
+    h(
+      "div",
+      {},
+      local.get(state).label,
+      " Temperature: ",
+      local.get(state).value,
+      h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
+      local.get(state).units,
+      h(
+        "div",
+        {},
+        h("button", { onclick: () => actions.temperature.increment(local, 1) }, "Increment"),
+        h("button", { onclick: () => actions.temperature.increment(local, -1) }, "Decrement")
+      ),
+      h(
+        "div",
+        {},
+        h("button", { onclick: () => actions.temperature.changeUnits(local) }, "Change Units")
+      )
+    );
+
   /*
   interface FixedState {
     counter: number;
@@ -382,54 +570,48 @@ const InitialTemperature = (label: string): Temperature => ({
   console.log(p1);
   */
 
-  interface State {
-    counter: number;
-    greeting?: string;
-  }
-
   // Mergerino patch type would be something like
   // Object | function (State => State)
   // Object with key in state and value is same type, either a value or a function Type => Type
 
-  interface Actions {
-    increment: (value: number) => void;
-  }
+  const app: App<State, Patch, Actions> = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => ({
+      conditions: conditions.Actions(update),
+      temperature: temperature.Actions(update)
+    })
+  };
 
-  interface Attrs {
-    state: State;
-    update: Stream<any>;
-    actions: Actions;
-  }
-
-  const { states, update, actions } = meiosis.mergerino.setup<State, Actions>({
-    stream: meiosis.simpleStream,
-    merge,
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: (amount: number) => {
-          update({ counter: value => value + amount });
-        }
-      })
-    }
-  });
-
-  // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
-  // file, we'll use h here.
-  const Root: (attrs: Attrs) => preact.VNode = ({ state, update, actions }) =>
+  const Root: (attrs: Attrs) => preact.VNode = ({ state, actions }) =>
     h(
       "div",
-      {},
-      h("div", {}, "Counter: ", state.counter),
-      h("div", {}, "Greeting: ", state.greeting),
-      h("div", {}, h("button", { onClick: () => actions.increment(2) }, "Increment")),
-      h("div", {}, h("button", { onClick: () => update({ greeting: "Hello" }) }, "Say Hello"))
+      { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+      h(
+        "div",
+        {},
+        h(Conditions, { state, local: nest("conditions") as ConditionsLocal, actions }),
+        h(Temperature, { state, local: nest(["temperature", "air"]) as TemperatureLocal, actions }),
+        h(Temperature, {
+          state,
+          local: nest(["temperature", "water"]) as TemperatureLocal,
+          actions
+        })
+      ),
+      h("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
     );
 
   const App = meiosis.preact.setup<State, any, Actions>({ h, useState, Root });
 
+  const { states, actions } = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
+
   const element = document.getElementById("preactApp") as HTMLElement;
-  preactRender(h(App, { states, update, actions }), element);
+  preactRender(h(App, { states, actions }), element);
 })();
 
 // react + immer + flyd
