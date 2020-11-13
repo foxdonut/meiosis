@@ -155,7 +155,7 @@ const createApp = (conditions, temperature) => ({
     })
   };
 
-  const skyOption = {
+  const SkyOption = {
     view: ({ attrs: { state, local, actions, value, label } }) =>
       m(
         "label",
@@ -184,9 +184,9 @@ const createApp = (conditions, temperature) => ({
         ),
         m(
           "div",
-          m(skyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
-          m(skyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-          m(skyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+          m(SkyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+          m(SkyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+          m(SkyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
         )
       )
   };
@@ -280,7 +280,7 @@ const createApp = (conditions, temperature) => ({
 
   // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
   // file, we'll use h here.
-  const skyOption = ({ state, local, actions, value, label }) =>
+  const SkyOption = ({ state, local, actions, value, label }) =>
     h(
       "label",
       {},
@@ -310,9 +310,9 @@ const createApp = (conditions, temperature) => ({
       h(
         "div",
         {},
-        skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
-        skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-        skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+        h(SkyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+        h(SkyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+        h(SkyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
       )
     );
 

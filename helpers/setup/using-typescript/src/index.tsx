@@ -290,7 +290,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const skyOption: m.Component<SkyOptionAttrs> = {
+  const SkyOption: m.Component<SkyOptionAttrs> = {
     view: ({ attrs: { state, local, actions, value, label } }) =>
       m(
         "label",
@@ -320,9 +320,9 @@ const InitialTemperature = (label: string): Temperature => ({
         ),
         m(
           "div",
-          m(skyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
-          m(skyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-          m(skyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+          m(SkyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+          m(SkyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+          m(SkyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
         )
       )
   };
@@ -467,7 +467,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
   // file, we'll use h here.
-  const skyOption: (attrs: SkyOptionAttrs) => preact.VNode = ({
+  const SkyOption: (attrs: SkyOptionAttrs) => preact.VNode = ({
     state,
     local,
     actions,
@@ -503,9 +503,9 @@ const InitialTemperature = (label: string): Temperature => ({
       h(
         "div",
         {},
-        skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" }),
-        skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-        skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+        h(SkyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
+        h(SkyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
+        h(SkyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
       )
     );
 
@@ -606,7 +606,7 @@ const InitialTemperature = (label: string): Temperature => ({
       h("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
     );
 
-  const App = meiosis.preact.setup<State, any, Actions>({ h, useState, Root });
+  const App = meiosis.preact.setup<State, Patch, Actions>({ h, useState, Root });
 
   const { states, actions } = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
 
@@ -616,61 +616,182 @@ const InitialTemperature = (label: string): Temperature => ({
 
 // react + immer + flyd
 (() => {
+  type Patch = ImmerPatch<State>;
+  type ConditionsPatch = ImmerPatch<Conditions>;
+  type TemperaturePatch = ImmerPatch<Temperature>;
+  type Update = Stream<Patch>;
+  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
+  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+
+  interface Actions {
+    conditions: ConditionsActions<Patch, ConditionsPatch>;
+    temperature: TemperatureActions<Patch, TemperaturePatch>;
+  }
+
+  interface Attrs {
+    state: State;
+    actions: Actions;
+  }
+
+  interface SkyOptionAttrs extends Attrs {
+    local: ConditionsLocal;
+    value: string;
+    label: string;
+  }
+
+  interface ConditionsAttrs extends Attrs {
+    local: ConditionsLocal;
+  }
+
+  interface TemperatureAttrs extends Attrs {
+    local: TemperatureLocal;
+  }
+
+  const nest = meiosis.immer.nest(produce);
+
+  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+    initial: initialConditions,
+    Actions: (update: Update) => ({
+      togglePrecipitations: (local, value) => {
+        update(
+          local.patch(state => {
+            state.precipitations = value;
+          })
+        );
+      },
+      changeSky: (local, value) => {
+        update(
+          local.patch(state => {
+            state.sky = value;
+          })
+        );
+      }
+    })
+  };
+
+  const SkyOption: (attrs: SkyOptionAttrs) => JSX.Element = ({
+    state,
+    local,
+    actions,
+    value,
+    label
+  }) => (
+    <label>
+      <input
+        type="radio"
+        value={value}
+        checked={local.get(state).sky === value}
+        onChange={evt => actions.conditions.changeSky(local, evt.target.value)}
+      />
+      {label}
+    </label>
+  );
+
+  const Conditions: (attrs: ConditionsAttrs) => JSX.Element = ({ state, local, actions }) => (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={local.get(state).precipitations}
+          onChange={evt => actions.conditions.togglePrecipitations(local, evt.target.checked)}
+        />
+        Precipitations
+      </label>
+      <div>
+        <SkyOption state={state} local={local} actions={actions} value="SUNNY" label="Sunny" />
+        <SkyOption state={state} local={local} actions={actions} value="CLOUDY" label="Cloudy" />
+        <SkyOption
+          state={state}
+          local={local}
+          actions={actions}
+          value="MIX"
+          label="Mix of sun/clouds"
+        />
+      </div>
+    </div>
+  );
+
+  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(
+          local.patch(state => {
+            state.value += amount;
+          })
+        );
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            state.value = newValue;
+            state.units = newUnits;
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature: (attrs: TemperatureAttrs) => JSX.Element = ({ state, local, actions }) => (
+    <div>
+      {local.get(state).label} Temperature:
+      {local.get(state).value}&deg;{local.get(state).units}
+      <div>
+        <button onClick={() => actions.temperature.increment(local, 1)}>Increment</button>
+        <button onClick={() => actions.temperature.increment(local, -1)}>Decrement</button>
+      </div>
+      <div>
+        <button onClick={() => actions.temperature.changeUnits(local)}>Change Units</button>
+      </div>
+    </div>
+  );
+
+  const app: App<State, Patch, Actions> = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => ({
+      conditions: conditions.Actions(update),
+      temperature: temperature.Actions(update)
+    })
+  };
+
+  const Root: (attrs: Attrs) => JSX.Element = ({ state, actions }) => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      <div>
+        <Conditions state={state} local={nest("conditions") as ConditionsLocal} actions={actions} />
+        <Temperature
+          state={state}
+          local={nest(["temperature", "air"]) as TemperatureLocal}
+          actions={actions}
+        />
+        <Temperature
+          state={state}
+          local={nest(["temperature", "water"]) as TemperatureLocal}
+          actions={actions}
+        />
+      </div>
+      <pre style={{ margin: "0" }}>{JSON.stringify(state, null, 4)}</pre>
+    </div>
+  );
+
   const stream = {
     stream: value => flyd.stream(value),
     scan: (acc, init, stream) => flyd.scan(acc, init, stream)
   };
 
-  interface State {
-    counter: number;
-    greeting?: string;
-  }
-
-  interface Actions {
-    increment: (value: number) => void;
-  }
-
-  interface Attrs {
-    state: State;
-    update: Stream<ImmerPatch<State>>;
-    actions: Actions;
-  }
-
   const { states, update, actions } = meiosis.immer.setup<State, Actions>({
     stream,
     produce: (s, p) => produce(s, p),
-    app: {
-      initial: { counter: 0 },
-      Actions: update => ({
-        increment: (amount: number) => {
-          update(state => {
-            state.counter += amount;
-          });
-        }
-      })
-    }
+    app
   });
-
-  const Root: (attrs: Attrs) => JSX.Element = ({ state, update, actions }) => (
-    <div>
-      <div>Counter: {state.counter}</div>
-      <div>Greeting: {state.greeting}</div>
-      <div>
-        <button onClick={() => actions.increment(2)}>Increment</button>
-      </div>
-      <div>
-        <button
-          onClick={() =>
-            update(state => {
-              state.greeting = "Hello";
-            })
-          }
-        >
-          Say Hello
-        </button>
-      </div>
-    </div>
-  );
 
   const App = meiosis.react.setup<State, ImmerPatch<State>, Actions>({ React, Root });
 
