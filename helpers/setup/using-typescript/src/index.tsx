@@ -550,30 +550,6 @@ const InitialTemperature = (label: string): Temperature => ({
       )
     );
 
-  /*
-  interface FixedState {
-    counter: number;
-    greeting?: string;
-  }
-
-  interface DynamicState {
-    [key: string]: string;
-  }
-
-  type State = FixedState & DynamicState;
-
-  type MergerinoPatch = {
-    [K in keyof State]: State[K] | ((a: State[K]) => State[K]);
-  }
-
-  const p1: MergerinoPatch = { counter: x => x + 1, greeting: "hi", another: "yes" };
-  console.log(p1);
-  */
-
-  // Mergerino patch type would be something like
-  // Object | function (State => State)
-  // Object with key in state and value is same type, either a value or a function Type => Type
-
   const app: App<State, Patch, Actions> = {
     initial: {
       conditions: conditions.initial,
@@ -783,8 +759,8 @@ const InitialTemperature = (label: string): Temperature => ({
   );
 
   const stream = {
-    stream: value => flyd.stream(value),
-    scan: (acc, init, stream) => flyd.scan(acc, init, stream)
+    stream: (value: any) => flyd.stream(value),
+    scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
   };
 
   const { states, update, actions } = meiosis.immer.setup<State, Actions>({
