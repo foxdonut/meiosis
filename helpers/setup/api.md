@@ -68,8 +68,8 @@ Returns **T** the value
 
 ## StreamLib
 
-Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-which you provide either a function or an object with a `stream` function to create a stream. The
+Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for which
+you provide either a function or an object with a `stream` function to create a stream. The
 function or object must also have a `scan` property. The returned stream must have a `map`
 method.
 
@@ -158,14 +158,14 @@ Type: [Object][55]
 
 ### Properties
 
--   `initial` **S?** an object that represents the initial state.
-    If not specified, the initial state will be `{}`.
--   `services` **[Array][57]&lt;[Service][59]&lt;S, P>>?** an array of service functions, each of which
-    should be `state => patch?`.
--   `Actions` **[ActionConstructor][60]&lt;S, P, A>?** a function that creates actions, of the form
-    `update => actions`.
--   `Effects` **[EffectConstructor][61]&lt;S, P, A>?** a function that creates effects, of the form
-    `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
+-   `initial` **S?** an object that represents the initial state. If not specified, the
+    initial state will be `{}`.
+-   `services` **[Array][57]&lt;[Service][59]&lt;S, P>>?** an array of service functions, each of which should be
+    `state => patch?`.
+-   `Actions` **[ActionConstructor][60]&lt;S, P, A>?** a function that creates actions, of the
+    form `update => actions`.
+-   `Effects` **[EffectConstructor][61]&lt;S, P, A>?** a function that creates effects, of the
+    form `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
     and/or `actions`.
 
 ## MeiosisConfig
@@ -288,11 +288,10 @@ Helper to setup the Meiosis pattern with [Preact][75].
 
 -   `h` **any** the Preact h function.
 -   `useState` **any** the Preact hooks useState function.
--   `Root` **any** your Root component, which receives `state`, `update`, and
-    `actions`.
+-   `Root` **any** your Root component, which receives `state`, `update`, and `actions`.
 
-Returns **any** the top-level component to which you pass `states`, and
-either `update`, `actions`, or both.
+Returns **any** the top-level component to which you pass `states`, and either `update`,
+`actions`, or both.
 
 ## meiosis.react.setup
 
@@ -301,11 +300,10 @@ Helper to setup the Meiosis pattern with [React][76].
 ### Parameters
 
 -   `React` **any** the React instance.
--   `Root` **any** your Root component, which receives `state`, `update`, and
-    `actions`.
+-   `Root` **any** your Root component, which receives `state`, `update`, and `actions`.
 
-Returns **any** the top-level component to which you pass `states`, and either
-`update`, `actions`, or both.
+Returns **any** the top-level component to which you pass `states`, and either `update`,
+`actions`, or both.
 
 ## SimpleStream
 
