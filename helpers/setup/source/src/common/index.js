@@ -181,12 +181,61 @@ export default ({ stream, accumulator, combine, app }) => {
   return { states, update, actions };
 };
 
-export const Nest = nestPatch => (path, local = { path: [] }) => {
+/**
+ * @typedef {Object} LocalPath
+ *
+ * @property {string[]} path
+ */
+
+/**
+ * Function that nests a patch `P2`
+ *
+ * @template P2, P1
+ * @callback NestPatchFunction
+ *
+ * @param {P2} patch the nested patch
+ *
+ * @return {P1} the resulting patch
+ */
+
+/**
+ * @template P1, P2
+ * @typedef {Object} LocalPatch
+ *
+ * @property {NestPatchFunction<P2, P1>} patch
+ */
+
+/**
+ * @template S1, P1, S2, P2
+ * @typedef {LocalPath & LocalPatch<P1, P2>} Local
+ *
+ * @property {function(S1): S2} get
+ */
+
+/**
+ * @template S1, P1, S2, P2
+ * @callback NestFunction
+ *
+ * @param {string|string[]} path
+ * @param {LocalPath} [local]
+ *
+ * @return {Local<S1, P1, S2, P2>}
+ */
+
+/**
+ * Constructor to create a `nest` function.
+ *
+ * @template S1, P1, S2, P2
+ * @param {function(string[]): NestPatchFunction<P2, P1>} createNestPatchFunction
+ *
+ * @return {NestFunction<S1, P1, S2, P2>}
+ */
+export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
   const nestedPath = local.path.concat(path);
 
   return {
     get: state => get(state, nestedPath),
-    patch: nestPatch(nestedPath),
+    patch: createNestPatchFunction(nestedPath),
     path: nestedPath
   };
 };
