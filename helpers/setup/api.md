@@ -226,6 +226,8 @@ streams, and `actions` are the created actions.
 
 ## LocalPath
 
+The `path` is stored on the local object for internal use.
+
 Type: [Object][68]
 
 ### Properties
@@ -242,9 +244,11 @@ Type: [Function][67]
 
 -   `patch` **P2** the nested patch
 
-Returns **P1** the resulting patch
+Returns **P1** the top-level patch with `P2` nested within
 
 ## LocalPatch
+
+A local object with a `patch` function to create a nested patch.
 
 Type: [Object][68]
 
@@ -253,6 +257,8 @@ Type: [Object][68]
 -   `patch` **[NestPatchFunction][82]&lt;P2, P1>** 
 
 ## Nest
+
+Function to get the local state from the global state.
 
 ### Parameters
 
@@ -273,6 +279,9 @@ Constructor to create a `nest` function.
 Returns **[NestFunction][83]&lt;S1, P1, S2, P2>** 
 
 ## NestFunction
+
+Function that creates a local object from the specified nest path and, optionally, another
+local object.
 
 Type: [Function][67]
 

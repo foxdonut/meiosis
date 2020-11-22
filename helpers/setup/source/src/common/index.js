@@ -182,6 +182,8 @@ export default ({ stream, accumulator, combine, app }) => {
 };
 
 /**
+ * The `path` is stored on the local object for internal use.
+ *
  * @typedef {Object} LocalPath
  *
  * @property {string[]} path
@@ -195,10 +197,12 @@ export default ({ stream, accumulator, combine, app }) => {
  *
  * @param {P2} patch the nested patch
  *
- * @return {P1} the resulting patch
+ * @return {P1} the top-level patch with `P2` nested within
  */
 
 /**
+ * A local object with a `patch` function to create a nested patch.
+ *
  * @template P1, P2
  * @typedef {Object} LocalPatch
  *
@@ -206,6 +210,8 @@ export default ({ stream, accumulator, combine, app }) => {
  */
 
 /**
+ * Function to get the local state from the global state.
+ *
  * @template S1, P1, S2, P2
  * @typedef {LocalPath & LocalPatch<P1, P2>} Local
  *
@@ -213,6 +219,9 @@ export default ({ stream, accumulator, combine, app }) => {
  */
 
 /**
+ * Function that creates a local object from the specified nest path and, optionally, another
+ * local object.
+ *
  * @template S1, P1, S2, P2
  * @callback NestFunction
  *

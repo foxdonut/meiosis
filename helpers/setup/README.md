@@ -36,7 +36,11 @@ conveniences:
 
 Meiosis works with other view libraries of course.
 
-See the [Meiosis examples](https://meiosis.js.org/examples.html) for some examples using
+See the repository for examples:
+- [Using JavaScript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-javascript)
+- [Using Typescript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-typescript)
+
+Also see the [Meiosis examples](https://meiosis.js.org/examples.html) for more examples using
 `meiosis-setup`.
 
 ## Getting Started
@@ -403,6 +407,50 @@ You can use another stream library, as long as you provide either a function tha
 or an object with a `stream` property for that function. In either case, there must also be a `scan`
 property on the function or object. Finally, the created stream must be a function that, when
 called, emits a value onto the stream; and the function must have a `map` method.
+
+## Nesting
+
+As explained in the [Components](http://meiosis.js.org/tutorial/06-components.html) section of the
+Meiosis Tutorial, we can use IDs for using multiple instances of a component. Optionally, we can
+also use _nesting_.
+
+With nesting, we call a helper function `nest` with a path to where the component state is stored
+within the top-level application state. The `nest` function returns a `local` object that contains
+these functions:
+- `get(<state>)`: returns the component's local state from the top-level `state`
+- `patch(<patch>)`: creates a top-level patch from the component's local patch
+
+By passing `local` to a component, the component can use `get` and `patch` to respectively get and
+update its local state without needing to know where its state is stored within the top-level
+application state.
+
+To use nesting, start by obtaining the `nest` function according to the type of patch:
+
+```javascript
+const nest = meiosis.functionPatches.nest;
+const nest = meiosis.mergerino.nest;
+const nest = meiosis.immer.nest(produce);
+```
+
+Then call `nest`, passing the path, either a string for a single level, or an array of strings for
+nesting down multiple levels:
+
+```javascript
+const local = nest("conditions");
+const local = nest(["temperature", "air"]);
+```
+
+Finally, pass `local` to the component, and use `local.get` and `local.patch` to get and update the
+local state:
+
+```javascript
+const temperature = local.get(state).value;
+update( local.patch({ value: x => x + amount }) );
+```
+
+See the repository for examples:
+- [Using JavaScript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-javascript)
+- [Using Typescript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-typescript)
 
 ## API
 
