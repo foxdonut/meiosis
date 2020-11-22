@@ -5,7 +5,7 @@ import merge from "mergerino";
 import meiosisReact from "meiosis-setup/react";
 import meiosis from "meiosis-setup/mergerino";
 
-import { createApp } from "./app";
+import { Actions, createApp } from "./app";
 import { Root } from "./root";
 import { router } from "./router";
 
@@ -15,7 +15,7 @@ import meiosisTracer from "meiosis-tracer";
 const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
 
-const { states, actions } = meiosis({ stream: simpleStream, merge, app });
+const { states, actions } = meiosis<any, Actions>({ stream: simpleStream, merge, app });
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({

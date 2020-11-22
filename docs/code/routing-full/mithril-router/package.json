@@ -28,7 +28,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "meiosis-routing": "^3.0.0",
-    "meiosis-setup": "^5.0.0",
+    "meiosis-setup": "^5.1.0",
     "mergerino": "0.4.0",
     "mithril": "2.0.4",
     "routing-common": "../routing-common-core"
