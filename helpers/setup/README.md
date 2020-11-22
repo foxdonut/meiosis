@@ -29,6 +29,7 @@ conveniences:
 - provides the ability to call `update()` with an array of patches, automatically combining them into
   a single patch
 - provides a simple stream implementation
+- provides [TypeScript](https://www.typescriptlang.org) support
 - provides convenience functions to wire up [React](https://reactjs.org) and
 [Preact](https://preactjs.com)
 - shows how to wire up [Mithril](https://mithril.js.org) and
