@@ -8,7 +8,7 @@ type MergerinoObjectPatch<S> = {
 
 export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
 
-export type MeiosisMergerinoConfig<S, A> = {
+export type MeiosisMergerinoConfig<S, P, A> = {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -19,18 +19,18 @@ export type MeiosisMergerinoConfig<S, A> = {
   /**
    * The Mergerino `merge` function.
    */
-  merge: (state: S, patch: any) => S;
+  merge: (state: S, patch: P) => S;
   /**
    * The app, with optional properties.
    */
   app: App<S, any, A>;
 };
 
-declare function _default<S, A>({
+declare function _default<S, P, A>({
   stream,
   merge,
   app
-}: MeiosisMergerinoConfig<S, A>): Meiosis<S, any, A>;
+}: MeiosisMergerinoConfig<S, P, A>): Meiosis<S, P, A>;
 export default _default;
 
 export function nest<S1, P1, S2, P2>(

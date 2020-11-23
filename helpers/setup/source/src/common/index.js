@@ -44,7 +44,7 @@ import { get } from "../util";
  *
  * @param {P[]} patches
  *
- * @return {P} patch
+ * @return {(P|P[])} patch
  */
 
 /**

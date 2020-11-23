@@ -29,7 +29,7 @@ interface StreamLibWithProperty extends StreamScan {
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
 export type Accumulator<S, P> = (state: S, patch: P) => S;
-export type Combine<P> = (patches: P[]) => P;
+export type Combine<P> = (patches: P[]) => P | P[];
 export type Service<S, P> = (state: S) => P;
 export type Effect<S> = (state: S) => void;
 export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>) => A;

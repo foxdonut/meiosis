@@ -40,38 +40,37 @@
     -   [Parameters][36]
 -   [NestFunction][37]
     -   [Parameters][38]
--   [MergerinoPatch][39]
--   [MeiosisMergerinoConfig][40]
-    -   [Properties][41]
--   [meiosis.mergerino.setup][42]
-    -   [Parameters][43]
--   [FunctionPatch][44]
-    -   [Parameters][45]
--   [MeiosisFunctionPatchesConfig][46]
--   [meiosis.functionPatches.setup][47]
-    -   [Parameters][48]
--   [ImmerPatch][49]
-    -   [Parameters][50]
--   [MeiosisImmerConfig][51]
-    -   [Properties][52]
--   [meiosis.immer.setup][53]
-    -   [Parameters][54]
--   [meiosis.preact.setup][55]
-    -   [Parameters][56]
--   [meiosis.react.setup][57]
-    -   [Parameters][58]
--   [SimpleStream][59]
--   [meiosis.simpleStream.stream][60]
-    -   [Parameters][61]
--   [map][62]
-    -   [Parameters][63]
--   [scan][64]
-    -   [Parameters][65]
--   [index][66]
+-   [MeiosisMergerinoConfig][39]
+    -   [Properties][40]
+-   [meiosis.mergerino.setup][41]
+    -   [Parameters][42]
+-   [FunctionPatch][43]
+    -   [Parameters][44]
+-   [MeiosisFunctionPatchesConfig][45]
+-   [meiosis.functionPatches.setup][46]
+    -   [Parameters][47]
+-   [ImmerPatch][48]
+    -   [Parameters][49]
+-   [MeiosisImmerConfig][50]
+    -   [Properties][51]
+-   [meiosis.immer.setup][52]
+    -   [Parameters][53]
+-   [meiosis.preact.setup][54]
+    -   [Parameters][55]
+-   [meiosis.react.setup][56]
+    -   [Parameters][57]
+-   [SimpleStream][58]
+-   [meiosis.simpleStream.stream][59]
+    -   [Parameters][60]
+-   [map][61]
+    -   [Parameters][62]
+-   [scan][63]
+    -   [Parameters][64]
+-   [index][65]
 
 ## Stream
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -86,7 +85,7 @@ you provide either a function or an object with a `stream` function to create a 
 function or object must also have a `scan` property. The returned stream must have a `map`
 method.
 
-Type: ([Object][68] \| [Function][67])
+Type: ([Object][67] \| [Function][66])
 
 ### Parameters
 
@@ -94,15 +93,15 @@ Type: ([Object][68] \| [Function][67])
 
 ### Properties
 
--   `stream` **[Function][67]&lt;T>** the function to create a stream, if the stream library itself is
+-   `stream` **[Function][66]&lt;T>** the function to create a stream, if the stream library itself is
     not a function.
--   `scan` **[Function][67]** the stream library's `scan` function.
+-   `scan` **[Function][66]** the stream library's `scan` function.
 
-Returns **[Stream][69]&lt;T>** the created stream.
+Returns **[Stream][68]&lt;T>** the created stream.
 
 ## Accumulator
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -113,17 +112,17 @@ Returns **S** updated state
 
 ## Combine
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
--   `patches` **[Array][70]&lt;P>** 
+-   `patches` **[Array][69]&lt;P>** 
 
-Returns **P** patch
+Returns **(P | [Array][69]&lt;P>)** patch
 
 ## Service
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -133,7 +132,7 @@ Returns **P** the patch.
 
 ## Effect
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -143,66 +142,66 @@ Returns **void**
 
 ## ActionConstructor
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
--   `update` **[Stream][69]&lt;P>** 
--   `states` **[Stream][69]&lt;S>?** 
+-   `update` **[Stream][68]&lt;P>** 
+-   `states` **[Stream][68]&lt;S>?** 
 
 Returns **A** actions
 
 ## EffectConstructor
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
--   `update` **[Stream][69]&lt;P>** 
+-   `update` **[Stream][68]&lt;P>** 
 -   `actions` **A?** 
 
-Returns **[Array][70]&lt;[Effect][71]&lt;S>>** effects
+Returns **[Array][69]&lt;[Effect][70]&lt;S>>** effects
 
 ## App
 
 Application object.
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
 -   `initial` **S?** an object that represents the initial state. If not specified, the
     initial state will be `{}`.
--   `services` **[Array][70]&lt;[Service][72]&lt;S, P>>?** an array of service functions, each of which should be
+-   `services` **[Array][69]&lt;[Service][71]&lt;S, P>>?** an array of service functions, each of which should be
     `state => patch?`.
--   `Actions` **[ActionConstructor][73]&lt;S, P, A>?** a function that creates actions, of the
+-   `Actions` **[ActionConstructor][72]&lt;S, P, A>?** a function that creates actions, of the
     form `update => actions`.
--   `Effects` **[EffectConstructor][74]&lt;S, P, A>?** a function that creates effects, of the
+-   `Effects` **[EffectConstructor][73]&lt;S, P, A>?** a function that creates effects, of the
     form `(update, actions) => [effects]`, which each effect is `state => void` and calls `update`
     and/or `actions`.
 
 ## MeiosisConfig
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `stream` **[StreamLib][75]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
+-   `stream` **[StreamLib][74]** the stream library. This works with `meiosis.simpleStream`, `flyd`,
     `m.stream`, or anything for which you provide either a function or an object with a `stream`
     function to create a stream. The function or object must also have a `scan` property. The
     returned stream must have a `map` method.
--   `accumulator` **[Accumulator][76]&lt;S, P>** the accumulator function.
--   `combine` **[Combine][77]&lt;P>** the function that combines an array of patches into one patch.
--   `app` **[App][78]&lt;S, P, A>** the app, with optional properties.
+-   `accumulator` **[Accumulator][75]&lt;S, P>** the accumulator function.
+-   `combine` **[Combine][76]&lt;P>** the function that combines an array of patches into one patch.
+-   `app` **[App][77]&lt;S, P, A>** the app, with optional properties.
 
 ## Meiosis
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `states` **[Stream][69]&lt;S>** 
--   `update` **[Stream][69]&lt;P>** 
+-   `states` **[Stream][68]&lt;S>** 
+-   `update` **[Stream][68]&lt;P>** 
 -   `actions` **A** 
 
 ## meiosis.common.setup
@@ -219,26 +218,26 @@ opportunity to trigger more updates.
 
 ### Parameters
 
--   `config` **[MeiosisConfig][79]&lt;S, P, A>** the Meiosis config
+-   `config` **[MeiosisConfig][78]&lt;S, P, A>** the Meiosis config
 
-Returns **[Meiosis][80]&lt;S, P, A>** `{ states, update, actions }`, where `states` and `update` are
+Returns **[Meiosis][79]&lt;S, P, A>** `{ states, update, actions }`, where `states` and `update` are
 streams, and `actions` are the created actions.
 
 ## LocalPath
 
 The `path` is stored on the local object for internal use.
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `path` **[Array][70]&lt;[string][81]>** 
+-   `path` **[Array][69]&lt;[string][80]>** 
 
 ## NestPatchFunction
 
 Function that nests a patch `P2`
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -250,11 +249,11 @@ Returns **P1** the top-level patch with `P2` nested within
 
 A local object with a `patch` function to create a nested patch.
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `patch` **[NestPatchFunction][82]&lt;P2, P1>** 
+-   `patch` **[NestPatchFunction][81]&lt;P2, P1>** 
 
 ## Nest
 
@@ -274,47 +273,43 @@ Constructor to create a `nest` function.
 
 ### Parameters
 
--   `createNestPatchFunction` **function ([Array][70]&lt;[string][81]>): [NestPatchFunction][82]&lt;P2, P1>** 
+-   `createNestPatchFunction` **function ([Array][69]&lt;[string][80]>): [NestPatchFunction][81]&lt;P2, P1>** 
 
-Returns **[NestFunction][83]&lt;S1, P1, S2, P2>** 
+Returns **[NestFunction][82]&lt;S1, P1, S2, P2>** 
 
 ## NestFunction
 
 Function that creates a local object from the specified nest path and, optionally, another
 local object.
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
--   `path` **([string][81] \| [Array][70]&lt;[string][81]>)** 
--   `local` **[LocalPath][84]?** 
+-   `path` **([string][80] \| [Array][69]&lt;[string][80]>)** 
+-   `local` **[LocalPath][83]?** 
 
 Returns **Local&lt;S1, P1, S2, P2>** 
 
-## MergerinoPatch
-
-Type: any
-
 ## MeiosisMergerinoConfig
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `merge` **function (S, [MergerinoPatch][85]): S** the Mergerino `merge` function.
+-   `merge` **function (S, P): S** the Mergerino `merge` function.
 
 ## meiosis.mergerino.setup
 
-Helper to setup the Meiosis pattern with [Mergerino][86].
+Helper to setup the Meiosis pattern with [Mergerino][84].
 
 ### Parameters
 
--   `config` **[MeiosisMergerinoConfig][87]&lt;S, A>** the Meiosis config for use with Mergerino
+-   `config` **[MeiosisMergerinoConfig][85]&lt;S, P, A>** the Meiosis config for use with Mergerino
 
 ## FunctionPatch
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -324,7 +319,7 @@ Returns **S** the updated state
 
 ## MeiosisFunctionPatchesConfig
 
-Type: [Object][68]
+Type: [Object][67]
 
 ## meiosis.functionPatches.setup
 
@@ -332,12 +327,12 @@ Helper to setup the Meiosis pattern with function patches.
 
 ### Parameters
 
--   `config` **[MeiosisFunctionPatchesConfig][88]&lt;S, A>** the Meiosis config for use with Function
+-   `config` **[MeiosisFunctionPatchesConfig][86]&lt;S, A>** the Meiosis config for use with Function
     Patches
 
 ## ImmerPatch
 
-Type: [Function][67]
+Type: [Function][66]
 
 ### Parameters
 
@@ -347,23 +342,23 @@ Returns **(S | void)**
 
 ## MeiosisImmerConfig
 
-Type: [Object][68]
+Type: [Object][67]
 
 ### Properties
 
--   `produce` **function (S, [ImmerPatch][89]&lt;S>): S** the Immer `produce` function.
+-   `produce` **function (S, [ImmerPatch][87]&lt;S>): S** the Immer `produce` function.
 
 ## meiosis.immer.setup
 
-Helper to setup the Meiosis pattern with [Immer][90].
+Helper to setup the Meiosis pattern with [Immer][88].
 
 ### Parameters
 
--   `config` **[MeiosisImmerConfig][91]&lt;S, A>** the Meiosis config for use with Mergerino
+-   `config` **[MeiosisImmerConfig][89]&lt;S, A>** the Meiosis config for use with Mergerino
 
 ## meiosis.preact.setup
 
-Helper to setup the Meiosis pattern with [Preact][92].
+Helper to setup the Meiosis pattern with [Preact][90].
 
 ### Parameters
 
@@ -376,7 +371,7 @@ Returns **any** the top-level component to which you pass `states`, and either `
 
 ## meiosis.react.setup
 
-Helper to setup the Meiosis pattern with [React][93].
+Helper to setup the Meiosis pattern with [React][91].
 
 ### Parameters
 
@@ -390,7 +385,7 @@ Returns **any** the top-level component to which you pass `states`, and either `
 
 Simple stream implementation.
 
-Type: [Object][68]
+Type: [Object][67]
 
 ## meiosis.simpleStream.stream
 
@@ -496,112 +491,108 @@ the source stream value.
 
 [38]: #parameters-12
 
-[39]: #mergerinopatch
+[39]: #meiosismergerinoconfig
 
-[40]: #meiosismergerinoconfig
+[40]: #properties-7
 
-[41]: #properties-7
+[41]: #meiosismergerinosetup
 
-[42]: #meiosismergerinosetup
+[42]: #parameters-13
 
-[43]: #parameters-13
+[43]: #functionpatch
 
-[44]: #functionpatch
+[44]: #parameters-14
 
-[45]: #parameters-14
+[45]: #meiosisfunctionpatchesconfig
 
-[46]: #meiosisfunctionpatchesconfig
+[46]: #meiosisfunctionpatchessetup
 
-[47]: #meiosisfunctionpatchessetup
+[47]: #parameters-15
 
-[48]: #parameters-15
+[48]: #immerpatch
 
-[49]: #immerpatch
+[49]: #parameters-16
 
-[50]: #parameters-16
+[50]: #meiosisimmerconfig
 
-[51]: #meiosisimmerconfig
+[51]: #properties-8
 
-[52]: #properties-8
+[52]: #meiosisimmersetup
 
-[53]: #meiosisimmersetup
+[53]: #parameters-17
 
-[54]: #parameters-17
+[54]: #meiosispreactsetup
 
-[55]: #meiosispreactsetup
+[55]: #parameters-18
 
-[56]: #parameters-18
+[56]: #meiosisreactsetup
 
-[57]: #meiosisreactsetup
+[57]: #parameters-19
 
-[58]: #parameters-19
+[58]: #simplestream
 
-[59]: #simplestream
+[59]: #meiosissimplestreamstream
 
-[60]: #meiosissimplestreamstream
+[60]: #parameters-20
 
-[61]: #parameters-20
+[61]: #map
 
-[62]: #map
+[62]: #parameters-21
 
-[63]: #parameters-21
+[63]: #scan
 
-[64]: #scan
+[64]: #parameters-22
 
-[65]: #parameters-22
+[65]: #index
 
-[66]: #index
+[66]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[67]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[67]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[68]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[68]: #stream
 
-[69]: #stream
+[69]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[70]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[70]: #effect
 
-[71]: #effect
+[71]: #service
 
-[72]: #service
+[72]: #actionconstructor
 
-[73]: #actionconstructor
+[73]: #effectconstructor
 
-[74]: #effectconstructor
+[74]: #streamlib
 
-[75]: #streamlib
+[75]: #accumulator
 
-[76]: #accumulator
+[76]: #combine
 
-[77]: #combine
+[77]: #app
 
-[78]: #app
+[78]: #meiosisconfig
 
-[79]: #meiosisconfig
+[79]: #meiosis
 
-[80]: #meiosis
+[80]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[81]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[81]: #nestpatchfunction
 
-[82]: #nestpatchfunction
+[82]: #nestfunction
 
-[83]: #nestfunction
+[83]: #localpath
 
-[84]: #localpath
+[84]: https://github.com/fuzetsu/mergerino
 
-[85]: #mergerinopatch
+[85]: #meiosismergerinoconfig
 
-[86]: https://github.com/fuzetsu/mergerino
+[86]: #meiosisfunctionpatchesconfig
 
-[87]: #meiosismergerinoconfig
+[87]: #immerpatch
 
-[88]: #meiosisfunctionpatchesconfig
+[88]: https://github.com/immerjs/immer
 
-[89]: #immerpatch
+[89]: #meiosisimmerconfig
 
-[90]: https://github.com/immerjs/immer
+[90]: https://preactjs.com/
 
-[91]: #meiosisimmerconfig
-
-[92]: https://preactjs.com/
-
-[93]: https://reactjs.org/
+[91]: https://reactjs.org/
