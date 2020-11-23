@@ -15,7 +15,7 @@ import meiosisTracer from "meiosis-tracer";
 const App = meiosisReact({ React, Root });
 const app = createApp(router.initialRoute);
 
-const { states, actions } = meiosis<any, Actions>({ stream: simpleStream, merge, app });
+const { states, actions } = meiosis<any, any, Actions>({ stream: simpleStream, merge, app });
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({
