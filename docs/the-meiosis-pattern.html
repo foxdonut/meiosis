@@ -147,13 +147,13 @@ const App = ({ state, actions }) =&gt; {
 preact.render(&lt;App states={states} actions={actions} /&gt;,
   document.getElementById(&quot;app&quot;));</code></pre>
 <p><a name="using_lit_html"></a></p>
-<h3><a href="#using_lit_html">Using lit-html</a></h3><pre><code class="language-javascript">const App = ({ states, actions }) =&gt; {
+<h3><a href="#using_lit_html">Using lit-html</a></h3><pre><code class="language-javascript">const App = ({ state, actions }) =&gt; {
   // render view according to state, call actions to trigger changes
-  // pass (state, actions) to other view functions.
+  // pass { state, actions } to other view functions.
 };
 
 const element = document.getElementById(&quot;app&quot;);
-states.map(state =&gt; render(App(state, actions), element));</code></pre>
+states.map(state =&gt; render(App({ state, actions }), element));</code></pre>
 <p><a name="components"></a></p>
 <h3><a href="#components">Components</a></h3><p>To use multiple instances of a component, or to specify the state property outside of a component,
 pass an <code>id</code> along with <code>state</code> and <code>actions</code> to views. Use <code>state[id]</code> to read the component&#39;s
