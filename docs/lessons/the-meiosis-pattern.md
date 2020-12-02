@@ -165,13 +165,13 @@ preact.render(<App states={states} actions={actions} />,
 ### [Using lit-html](#using_lit_html)
 
 ```javascript
-const App = ({ states, actions }) => {
+const App = ({ state, actions }) => {
   // render view according to state, call actions to trigger changes
-  // pass (state, actions) to other view functions.
+  // pass { state, actions } to other view functions.
 };
 
 const element = document.getElementById("app");
-states.map(state => render(App(state, actions), element));
+states.map(state => render(App({ state, actions }), element));
 ```
 
 <a name="components"></a>
