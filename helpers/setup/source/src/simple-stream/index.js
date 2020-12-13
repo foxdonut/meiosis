@@ -39,12 +39,16 @@ export const stream = initial => {
    * @type {import("../common").Map}
    */
   createdStream.map = mapFunction => {
-    const newStream = stream(latestValue !== undefined ? mapFunction(latestValue) : undefined);
+    const newStream = stream();
 
     mapFunctions.push(value => {
       newStream(mapFunction(value));
     });
     mappedValues.push([]);
+
+    if (latestValue !== undefined) {
+      newStream(mapFunction(latestValue));
+    }
 
     return newStream;
   };

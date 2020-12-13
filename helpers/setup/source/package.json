@@ -1,6 +1,6 @@
 {
   "name": "meiosis-setup",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "private": true,
   "description": "Meiosis Helpers - setup",
   "main": "meiosis-setup.js",
@@ -35,11 +35,11 @@
     "mergerino": "0.4.0",
     "mithril": "^2.0.4",
     "ramda": "^0.27.1",
-    "rollup": "^2.33.3",
+    "rollup": "^2.34.2",
     "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.4",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.3"
   }
 }

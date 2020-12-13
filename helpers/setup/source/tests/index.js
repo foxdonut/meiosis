@@ -1277,6 +1277,41 @@ describe("simpleStream", () => {
 
     expect(values).toEqual([10, 20]);
   });
+
+  test("effect on initial state", done => {
+    const update = meiosis.simpleStream.stream();
+    const initial = { route: "Home", routeChanged: true, data: [] };
+
+    const states = meiosis.simpleStream.scan(
+      (state, patch) => merge(state, patch),
+      initial,
+      update
+    );
+
+    const effect = state => {
+      if (state.route === "Home") {
+        if (state.routeChanged) {
+          update({ routeChanged: false, loading: true });
+        } else if (state.loading) {
+          setTimeout(() => {
+            update({ loading: false, data: ["duck", "quack"] });
+          });
+        }
+      }
+    };
+
+    states.map(state => effect(state));
+
+    states.map(state => {
+      try {
+        if (state.data.length === 2) {
+          done();
+        }
+      } catch (error) {
+        done(error);
+      }
+    });
+  });
 });
 
 describe("util", () => {
