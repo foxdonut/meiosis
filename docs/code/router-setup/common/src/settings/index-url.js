@@ -1,9 +1,9 @@
 import { Actions } from "./actions-url";
-import { Service } from "./service-url";
+import { Effect } from "./effect-url";
 
 export const settings = {
   Actions,
-  Service
+  Effect
 };
 
 export { Settings } from "./view";

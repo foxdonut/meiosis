@@ -1,15 +1,14 @@
-import { AppService } from "../app/types";
-import { Route } from "router-setup-common/src/router";
-import { selectors } from "router-setup-common/src/selectors";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
-export const service: AppService = state => {
+export const Effect = update => state => {
   if (selectors.page(state) === Route.Settings && !state.user) {
-    return {
+    update({
       route: selectors.replaceRoute(Route.Login),
       login: {
         message: "Please login.",
         returnTo: selectors.toRoute(Route.Settings)
       }
-    };
+    });
   }
 };

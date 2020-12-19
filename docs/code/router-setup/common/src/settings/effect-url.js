@@ -1,14 +1,14 @@
 import { Route } from "../router";
 import { selectors } from "../selectors";
 
-export const service = state => {
+export const Effect = (update, router) => state => {
   if (selectors.page(state) === Route.Settings && !state.user) {
-    return {
-      route: selectors.replaceRoute(Route.Login),
+    update({
+      route: router.replaceRoute("/login"),
       login: {
         message: "Please login.",
-        returnTo: selectors.toRoute(Route.Settings)
+        returnTo: router.toRoute("/settings")
       }
-    };
+    });
   }
 };

@@ -49,7 +49,7 @@ export const App = {
         "div",
         {
           style: {
-            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
+            visibility: state.loading ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))

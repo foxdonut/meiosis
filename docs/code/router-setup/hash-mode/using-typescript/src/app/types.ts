@@ -1,4 +1,5 @@
 import Stream from "mithril/stream";
+import { Router } from "meiosis-router-setup";
 import { Service, Effect } from "../meiosis";
 
 /*
@@ -27,10 +28,9 @@ export interface State {
   user?: string;
   message?: string;
   login?: Login;
-  loadTeas?: boolean;
+  loading?: boolean;
   teas?: Tea[];
   tea?: Tea;
-  loadSearchTeas?: boolean;
   searchTeas?: Tea[];
 }
 
@@ -52,4 +52,11 @@ export interface SettingsActions {
 export interface AppActions {
   login: LoginActions;
   settings: SettingsActions;
+}
+
+export interface ViewAttrs {
+  state: State;
+  update: Update;
+  actions: AppActions;
+  router: Router;
 }

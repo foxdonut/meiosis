@@ -1,7 +1,5 @@
 import m from "mithril";
 
-import { Router } from "meiosis-router-setup";
-
 import { Home } from "../home";
 import { Login } from "router-setup-common/src/login/index-route";
 import { Settings } from "router-setup-common/src/settings/index-route";
@@ -10,6 +8,7 @@ import { TeaSearch } from "../teaSearch";
 import { NotFound } from "router-setup-common/src/notFound";
 import { selectors } from "router-setup-common/src/selectors";
 import { Route } from "router-setup-common/src/router";
+import { ViewAttrs } from "./types";
 
 const componentMap = {
   Home,
@@ -21,11 +20,8 @@ const componentMap = {
   NotFound
 };
 
-export const App = {
-  view: (vnode: m.Vnode<m.Attributes, any>): any => {
-    const { attrs } = vnode;
-    const { state, update, actions } = attrs;
-    const router: Router = attrs.router;
+export const App: m.Component<ViewAttrs> = {
+  view: ({ attrs: { state, update, actions, router } }): any => {
     const Component = componentMap[selectors.page(state)];
     const isActive = tab => (tab === Component ? ".active" : "");
 
@@ -52,7 +48,7 @@ export const App = {
         "div",
         {
           style: {
-            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
+            visibility: state.loading ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))

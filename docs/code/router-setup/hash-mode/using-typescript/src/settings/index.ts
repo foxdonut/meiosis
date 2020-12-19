@@ -1,9 +1,9 @@
 import { Actions } from "./actions";
-import { service } from "./service";
+import { Effect } from "./effect";
 
 export const settings = {
   Actions,
-  service
+  Effect
 };
 
 export { Settings } from "router-setup-common/src/settings/view";

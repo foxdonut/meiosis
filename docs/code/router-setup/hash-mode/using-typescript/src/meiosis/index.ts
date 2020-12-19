@@ -8,7 +8,6 @@ export type Effect<S> = (state: S) => void;
 
 export interface App<S, P, A> {
   initial: S;
-  services: Service<S, P>[];
   Actions: (update: Stream<P>, states?: Stream<S>) => A;
   Effects: (update: Stream<P>, actions?: A) => Effect<S>[];
 }
@@ -31,14 +30,10 @@ export const meiosis = <S, P, A>({
   app
 }: MeiosisConfig<S, P, A>): Meiosis<S, P, A> => {
   const update: Stream<P> = stream();
-  const services: Service<S, P>[] = app.services;
-
-  const runServices = (startingState: S) =>
-    services.reduce((state, service) => accumulator(state, service(state)), startingState);
 
   const states: Stream<S> = Stream.scan(
-    (state, patch) => runServices(accumulator(state, patch)),
-    runServices(app.initial),
+    (state, patch) => accumulator(state, patch),
+    app.initial,
     update
   );
 

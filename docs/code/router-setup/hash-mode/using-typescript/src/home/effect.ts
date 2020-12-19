@@ -1,9 +1,9 @@
-import { AppService } from "../app/types";
+import { EffectConstructor } from "../app/types";
 import { Route } from "router-setup-common/src/router";
 import { selectors } from "router-setup-common/src/selectors";
 
-export const service: AppService = state => {
+export const Effect: EffectConstructor = update => state => {
   if (selectors.page(state) !== Route.Home && state.message) {
-    return { message: undefined };
+    update({ message: undefined });
   }
 };

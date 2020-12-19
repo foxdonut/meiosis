@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "webpack",
-    "watch": "webpack --progress --colors --watch"
+    "watch": "webpack --progress --watch"
   },
   "repository": {
     "type": "git",
@@ -31,23 +31,23 @@
     "meiosis-router-setup": "file:../../../helpers/router-setup/meiosis-router-setup-1.0.0.tgz",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
-    "query-string": "^6.13.1",
+    "query-string": "^6.13.7",
     "router-setup-common": "./common",
     "router5": "^8.0.1",
     "superouter": "^0.3.2",
     "url-mapper": "^2.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/preset-env": "^7.11.5",
-    "@types/mithril": "^2.0.3",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@types/mithril": "^2.0.6",
     "awesome-typescript-loader": "^5.2.1",
-    "babel-loader": "^8.1.0",
-    "html-webpack-plugin": "^4.4.1",
+    "babel-loader": "^8.2.2",
+    "html-webpack-plugin": "^4.5.0",
     "meiosis-tracer": "^4.0.0",
-    "source-map-loader": "^1.1.0",
-    "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "source-map-loader": "^1.1.3",
+    "typescript": "^4.1.3",
+    "webpack": "^5.11.0",
+    "webpack-cli": "^4.2.0"
   }
 }

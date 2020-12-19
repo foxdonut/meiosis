@@ -16,16 +16,15 @@ export const createApp = router => ({
     settings: settings.Actions(update)
   }),
 
-  services: [
-    settings.service,
-    home.service,
-    login.service,
-    tea.service,
-    teaDetails.service,
-    teaSearch.service
-  ],
-
-  Effects: update => [tea.Effect(update), teaSearch.Effect(update), locationBar.Effect(router)]
+  Effects: update => [
+    home.Effect(update),
+    login.Effect(update),
+    settings.Effect(update),
+    tea.Effect(update),
+    teaDetails.Effect(update),
+    teaSearch.Effect(update),
+    locationBar.Effect(router)
+  ]
 });
 
 export { App } from "./view";

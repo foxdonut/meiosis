@@ -1,10 +1,22 @@
 import { EffectConstructor } from "../app/types";
 import { searchTeas } from "router-setup-common/src/teaSearch/data";
+import { Route } from "router-setup-common/src/router";
+import { selectors } from "router-setup-common/src/selectors";
 
 export const Effect: EffectConstructor = update => state => {
-  if (state.loadSearchTeas) {
-    setTimeout(() => {
-      update({ searchTeas, loadSearchTeas: false });
-    }, 1000);
+  if (selectors.page(state) === Route.TeaSearch) {
+    if (!state.searchTeas) {
+      // FIXME: update({ loading: true }, !state.loading)
+      if (!state.loading) {
+        update({ loading: true });
+      } else {
+        setTimeout(() => {
+          update({ searchTeas, loading: false });
+        }, 1000);
+      }
+    }
+  } else if (state.searchTeas) {
+    // FIXME: update({ searchTeas: undefined }, !state.searchTeas);
+    update({ searchTeas: undefined });
   }
 };
