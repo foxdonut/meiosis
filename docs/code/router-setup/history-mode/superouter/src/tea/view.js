@@ -1,8 +1,8 @@
 import m from "mithril";
 
 import { selectors } from "router-setup-common/src/selectors";
-import { Route, allRoutes } from "../router";
-import { TeaDetails } from "../teaDetails";
+import { Route, allRoutes } from "superouter-common/src/router";
+import { TeaDetails } from "../teaDetails/view";
 import { getLinkAttrs } from "../router/link";
 
 export const Tea = {

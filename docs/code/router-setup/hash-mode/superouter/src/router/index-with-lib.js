@@ -6,7 +6,7 @@ you can also npm install meiosis-router-setup and use it as shown below:
 
 import { createProgrammaticRouter } from "meiosis-router-setup";
 import queryString from "query-string";
-import { Route } from ".";
+import { Route } from "superouter-common/src/router";
 
 const routeMatcher = path => Route.matchOr(() => Route.of.NotFound({ any: null }), path);
 const convertMatchToRoute = (match, queryParams) => ({ page: match, queryParams });

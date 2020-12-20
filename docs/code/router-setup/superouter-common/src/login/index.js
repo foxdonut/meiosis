@@ -1,9 +1,9 @@
 import { Actions } from "./actions";
-import { service } from "./service";
+import { Effect } from "./effect";
 
 export const login = {
   Actions,
-  service
+  Effect
 };
 
 export { Login } from "router-setup-common/src/login/view";

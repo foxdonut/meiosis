@@ -2,12 +2,12 @@ import m from "mithril";
 
 import { selectors } from "router-setup-common/src/selectors";
 import { Home } from "router-setup-common/src/home";
-import { Login } from "../login";
-import { Settings } from "../settings";
-import { Tea } from "../tea";
+import { Login } from "superouter-common/src/login";
+import { Settings } from "superouter-common/src/settings";
+import { Tea } from "../tea/view";
 import { TeaSearch } from "../teaSearch/view";
 import { NotFound } from "router-setup-common/src/notFound";
-import { Route } from "../router";
+import { Route } from "superouter-common/src/router";
 
 const componentMap = Route.fold({
   Home: () => Home,
@@ -50,7 +50,7 @@ export const App = {
         "div",
         {
           style: {
-            visibility: state.loadTeas || state.loadSearchTeas ? "visible" : "hidden"
+            visibility: state.loading ? "visible" : "hidden"
           }
         },
         m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))

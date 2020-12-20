@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "../router";
+import { Route } from "superouter-common/src/router";
 import { selectors } from "router-setup-common/src/selectors";
 import { getLinkAttrs } from "../router/link";
 

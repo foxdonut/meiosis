@@ -35,6 +35,7 @@
     "router-setup-common": "./common",
     "router5": "^8.0.1",
     "superouter": "^0.3.2",
+    "superouter-common": "./superouter-common",
     "url-mapper": "^2.0.0"
   },
   "devDependencies": {

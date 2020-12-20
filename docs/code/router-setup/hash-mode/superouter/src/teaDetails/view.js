@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "../router";
+import { Route } from "superouter-common/src/router";
 
 export const TeaDetails = {
   view: ({ attrs: { state, id, router } }) =>

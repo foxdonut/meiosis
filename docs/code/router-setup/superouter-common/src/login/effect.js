@@ -1,7 +1,7 @@
 import { selectors } from "router-setup-common/src/selectors";
 import { Route, allRoutes } from "../router";
 
-export const service = state =>
+export const Effect = update => state =>
   Route.fold({
     ...allRoutes(() => {
       if (
@@ -10,19 +10,19 @@ export const service = state =>
         (state.login.username || state.login.password) &&
         !confirm("You have unsaved data. Continue?")
       ) {
-        return { route: () => Route.of.Login() };
+        update({ route: () => Route.of.Login() });
       } else if (state.login) {
-        return { login: undefined };
+        update({ login: undefined });
       }
     }),
     Login: () => {
       if (!state.login || state.login.username == null) {
-        return {
+        update({
           login: {
             username: "",
             password: ""
           }
-        };
+        });
       }
     }
   })(selectors.page(state));

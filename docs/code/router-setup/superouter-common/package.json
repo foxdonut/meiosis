@@ -1,0 +1,27 @@
+{
+  "name": "superouter-common",
+  "version": "1.0.0",
+  "private": true,
+  "description": "meiosis router setup example",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxdonut/meiosis.git"
+  },
+  "keywords": [
+    "meiosis",
+    "router",
+    "routing",
+    "state",
+    "state management"
+  ],
+  "author": "foxdonut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/foxdonut/meiosis/issues"
+  },
+  "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "peerDependencies": {
+    "mithril": "*"
+  }
+}
