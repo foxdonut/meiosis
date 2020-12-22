@@ -11,7 +11,7 @@ import { routeConfig } from "router-setup-common/src/router";
 
 const urlMapper = Mapper();
 const routeMatcher = path => urlMapper.map(path, routeConfig);
-const convertMatchToRoute = (match, queryParams) => ({
+const convertMatchToRoute = ({ match, queryParams }) => ({
   page: match.match,
   params: match.values,
   queryParams

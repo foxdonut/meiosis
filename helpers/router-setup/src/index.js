@@ -221,9 +221,41 @@
  */
 
 /**
- * Configuration to create a router.
+ * Configuration to create a hardcoded router.
  *
- * @typedef {Object} RouterConfig
+ * @typedef {Object} HardcodedRouterConfig
+ *
+ * @property {RouteMatcher} routeMatcher the function that matches routes.
+ * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
+ * are using history mode, you need to provide server side routing support.
+ * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
+ * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
+ * if `rootPath` is specified.
+ * @property {QueryStringLib} [queryString] the query string library to use. You only need to
+ * provide this if your application requires query string support.
+ * @property {Window} [wdw=window] the `window`, used for testing purposes.
+ */
+
+/**
+ * This is the router that is created by {@link createHardcodedRouter}.
+ *
+ * @typedef {Object} HardcodedRouter
+ *
+ * @property {Route} initialRoute the initial route as parsed from the location bar.
+ * @property {*} toRoute FIXME
+ * @property {*} replaceRoute FIXME
+ * @property {ToUrl} toUrl function to generate a URL.
+ * @property {Start} start function to start the router.
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
+ * state route.
+ * @property {GetLinkHandler} getLinkHandler when using history mode, ...
+ */
+
+/**
+ * Configuration to create a programmatic router.
+ *
+ * @typedef {Object} ProgrammaticRouterConfig
  *
  * @property {RouteMatcher} routeMatcher the function that matches routes.
  * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
@@ -242,7 +274,7 @@
 /**
  * This is the router that is created by {@link createProgrammaticRouter}.
  *
- * @typedef {Object} Router
+ * @typedef {Object} ProgrammaticRouter
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {ToUrl} toUrl function to generate a URL.
@@ -271,6 +303,12 @@ const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
+
+const createGetLinkHandler = wdw => url => evt => {
+  evt.preventDefault();
+  wdw.history.pushState({}, "", url);
+  wdw.onpopstate(null);
+};
 
 const emptyQueryString = {
   parse: _ => ({}),
@@ -311,24 +349,13 @@ const ToUrl = (routeConfig, getStatePath) => {
 
 /**
  * Creates a router that uses hardcoded URLs.
- */
-export const createHardcodedRouter = ({ routeMatcher }) => {
-  if (!routeMatcher) {
-    throw "routeMatcher is required";
-  }
-};
-
-/**
- * Creates a router that uses programmatic URLs.
  *
- * @param {RouterConfig} config
+ * @param {HardcodedRouterConfig} config
  *
- * @return {Router} the created router.
+ * @return {HardcodedRouter} the created router.
  */
-export const createProgrammaticRouter = ({
+export const createHardcodedRouter = ({
   routeMatcher,
-  routeConfig,
-  toUrl,
   convertMatchToRoute,
   rootPath,
   plainHash = false,
@@ -337,6 +364,71 @@ export const createProgrammaticRouter = ({
 }) => {
   if (!routeMatcher) {
     throw "routeMatcher is required";
+  }
+
+  if (!convertMatchToRoute) {
+    throw "convertMatchToRoute is required";
+  }
+
+  const historyMode = rootPath != null;
+  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
+
+  const toRoute = (path, options) => {
+    const matchPath = getPathWithoutQuery(path) || "/";
+    const match = routeMatcher(matchPath);
+    const queryParams = queryString.parse(getQuery(path));
+    const url = prefix + path;
+
+    return convertMatchToRoute({ match, queryParams, url, options });
+  };
+
+  const replaceRoute = path => toRoute(path, { replace: true });
+  const initialRoute = toRoute(getPath());
+  const toUrl = path => prefix + path;
+  const getLinkHandler = createGetLinkHandler(wdw);
+
+  const start = onRouteChange => {
+    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
+  };
+
+  const syncLocationBar = route => {
+    const url = route.url;
+
+    if (url !== getUrl()) {
+      const fn = route.replace ? "replaceState" : "pushState";
+      wdw.history[fn].call(wdw.history, {}, "", url);
+    }
+  };
+
+  return { initialRoute, toRoute, replaceRoute, toUrl, start, syncLocationBar, getLinkHandler };
+};
+
+/**
+ * Creates a router that uses programmatic URLs.
+ *
+ * @param {ProgrammaticRouterConfig} config
+ *
+ * @return {ProgrammaticRouter} the created router.
+ */
+export const createProgrammaticRouter = ({
+  routeMatcher,
+  convertMatchToRoute,
+  routeConfig,
+  toUrl,
+  rootPath,
+  plainHash = false,
+  queryString = emptyQueryString,
+  wdw = window
+}) => {
+  if (!routeMatcher) {
+    throw "routeMatcher is required";
+  }
+
+  if (!convertMatchToRoute) {
+    throw "convertMatchToRoute is required";
   }
 
   if (!routeConfig && !toUrl) {
@@ -355,7 +447,7 @@ export const createProgrammaticRouter = ({
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    return convertMatchToRoute(match, queryParams);
+    return convertMatchToRoute({ match, queryParams });
   };
 
   const initialRoute = toRoute(getPath());
@@ -372,11 +464,7 @@ export const createProgrammaticRouter = ({
     doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
   };
 
-  const getLinkHandler = url => evt => {
-    evt.preventDefault();
-    wdw.history.pushState({}, "", url);
-    wdw.onpopstate(null);
-  };
+  const getLinkHandler = createGetLinkHandler(wdw);
 
   return { initialRoute, toUrl, start, syncLocationBar, getLinkHandler };
 };

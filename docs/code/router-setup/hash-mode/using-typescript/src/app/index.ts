@@ -1,4 +1,4 @@
-import { Router } from "meiosis-router-setup";
+import { ProgrammaticRouter } from "meiosis-router-setup";
 
 import { State, Patch, AppActions } from "./types";
 import { App } from "../meiosis";
@@ -10,7 +10,7 @@ import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 import { locationBar } from "../locationBar";
 
-export const createApp = (router: Router): App<State, Patch, AppActions> => ({
+export const createApp = (router: ProgrammaticRouter): App<State, Patch, AppActions> => ({
   initial: {
     route: router.initialRoute
   },

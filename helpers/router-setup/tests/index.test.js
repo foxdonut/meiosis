@@ -36,7 +36,7 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertMatchToRoute = (match, queryParams) => ({
+const convertMatchToRoute = ({ match, queryParams }) => ({
   page: match.value,
   params: match.params,
   queryParams
@@ -244,13 +244,19 @@ describe("historyMode and plainHash", () => {
   });
 });
 
-describe("generic router", () => {
+describe("programmatic router", () => {
   test("requires routeMatcher", () => {
     expect(() => createProgrammaticRouter({})).toThrow("routeMatcher is required");
   });
 
-  test("requires routeConfig or toUrl", () => {
+  test("requires convertMatchToRoute", () => {
     expect(() => createProgrammaticRouter({ routeMatcher })).toThrow(
+      "convertMatchToRoute is required"
+    );
+  });
+
+  test("requires routeConfig or toUrl", () => {
+    expect(() => createProgrammaticRouter({ routeMatcher, convertMatchToRoute })).toThrow(
       "routeConfig or toUrl is required"
     );
   });
