@@ -388,7 +388,6 @@ export const createHardcodedRouter = ({
   const replaceRoute = path => toRoute(path, { replace: true });
   const initialRoute = toRoute(getPath());
   const toUrl = path => prefix + path;
-  const getLinkHandler = createGetLinkHandler(wdw);
 
   const start = onRouteChange => {
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
@@ -403,7 +402,9 @@ export const createHardcodedRouter = ({
     }
   };
 
-  return { initialRoute, toRoute, replaceRoute, toUrl, start, syncLocationBar, getLinkHandler };
+  const getLinkHandler = createGetLinkHandler(wdw);
+
+  return { initialRoute, toUrl, start, syncLocationBar, getLinkHandler, toRoute, replaceRoute };
 };
 
 /**

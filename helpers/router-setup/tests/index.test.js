@@ -5,7 +5,7 @@ import queryString from "query-string";
 import m from "mithril";
 import * as Superouter from "superouter";
 
-import { createProgrammaticRouter, createMithrilRouter } from "../src/index";
+import { createHardcodedRouter, createProgrammaticRouter, createMithrilRouter } from "../src/index";
 
 const pipe = (f, g) => a => g(f(a));
 
@@ -36,7 +36,15 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertMatchToRoute = ({ match, queryParams }) => ({
+const hardcodedConvertMatchToRoute = ({ match, queryParams, url, options }) => ({
+  page: match.value,
+  params: match.params,
+  queryParams,
+  url,
+  ...options
+});
+
+const programmaticConvertMatchToRoute = ({ match, queryParams }) => ({
   page: match.value,
   params: match.params,
   queryParams
@@ -54,26 +62,48 @@ describe("historyMode and plainHash", () => {
 
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
-    const createRouterConfig = config =>
-      Object.assign({ routeMatcher, convertMatchToRoute, routeConfig }, caseConfig, config);
+    const createHardcodedRouterConfig = config =>
+      Object.assign(
+        { routeMatcher, convertMatchToRoute: hardcodedConvertMatchToRoute },
+        caseConfig,
+        config
+      );
+
+    const createProgrammaticRouterConfig = config =>
+      Object.assign(
+        { routeMatcher, convertMatchToRoute: programmaticConvertMatchToRoute, routeConfig },
+        caseConfig,
+        config
+      );
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 
     const mPrefix = historyMode ? "" : prefix;
 
     const routerCases = [
-      ["generic router", pipe(createRouterConfig, createProgrammaticRouter), prefix],
-      ["mithril router", pipe(createMithrilConfig, createMithrilRouter), mPrefix]
+      [
+        "hardcoded router",
+        pipe(createHardcodedRouterConfig, createHardcodedRouter),
+        prefix,
+        "/login"
+      ],
+      [
+        "programmatic router",
+        pipe(createProgrammaticRouterConfig, createProgrammaticRouter),
+        prefix,
+        Route.Login
+      ],
+      ["mithril router", pipe(createMithrilConfig, createMithrilRouter), mPrefix, Route.Login]
     ];
 
-    describe.each(routerCases)("%s", (_label, createRouterFn, expectedPrefix) => {
+    describe.each(routerCases)("%s", (_label, createRouterFn, expectedPrefix, toUrlParam) => {
       describe("toUrl", () => {
         test("converts route to URL", () => {
           const path = "/login";
           const wdw = createWindow(path);
           const router = createRouterFn({ wdw });
 
-          expect(router.toUrl(Route.Login)).toEqual(expectedPrefix + path);
+          expect(router.toUrl(toUrlParam)).toEqual(expectedPrefix + path);
         });
       });
 
@@ -90,7 +120,12 @@ describe("historyMode and plainHash", () => {
           const router = createRouterFn({ queryString, wdw });
           const url = prefix + "/user/42?sport=tennis";
           const route = Object.assign(
-            { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } },
+            {
+              url,
+              page: Route.UserProfile,
+              params: { id: "42" },
+              queryParams: { sport: "tennis" }
+            },
             options
           );
 
@@ -106,63 +141,65 @@ describe("historyMode and plainHash", () => {
     });
 
     describe("generic router", () => {
-      describe("initial route", () => {
-        const initialRouteCases = [
-          ["slash", "/", {}, { page: Route.Home, params: {} }],
-          ["empty", "", {}, { page: Route.Home, params: {} }],
-          [
-            "slash with queryParams",
-            "/?sport=tennis",
-            { queryString },
-            {
-              page: Route.Home,
-              queryParams: { sport: "tennis" }
-            }
-          ],
-          [
-            "empty with queryParams",
-            "?sport=tennis",
-            { queryString },
-            {
-              page: Route.Home,
-              queryParams: { sport: "tennis" }
-            }
-          ],
-          ["just a route", "/login", {}, { page: Route.Login, params: {} }],
-          ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
-          [
-            "with queryParams",
-            "/login?sport=tennis",
-            { queryString },
-            { page: Route.Login, queryParams: { sport: "tennis" } }
-          ],
-          [
-            "with params and queryParams",
-            "/user/42?sport=tennis",
-            { queryString },
-            {
-              page: Route.UserProfile,
-              params: { id: "42" },
-              queryParams: { sport: "tennis" }
-            }
-          ]
-        ];
+      const genericRouterCases = [
+        ["hardcoded router", pipe(createHardcodedRouterConfig, createHardcodedRouter)],
+        ["programmatic router", pipe(createProgrammaticRouterConfig, createProgrammaticRouter)]
+      ];
 
-        test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
-          const routerConfig = createRouterConfig(
-            Object.assign({ wdw: createWindow(path) }, qsConfig)
-          );
-          const router = createProgrammaticRouter(routerConfig);
+      describe.each(genericRouterCases)("%s", (_label, createRouterFn) => {
+        describe("initial route", () => {
+          const initialRouteCases = [
+            ["slash", "/", {}, { page: Route.Home, params: {} }],
+            ["empty", "", {}, { page: Route.Home, params: {} }],
+            [
+              "slash with queryParams",
+              "/?sport=tennis",
+              { queryString },
+              {
+                page: Route.Home,
+                queryParams: { sport: "tennis" }
+              }
+            ],
+            [
+              "empty with queryParams",
+              "?sport=tennis",
+              { queryString },
+              {
+                page: Route.Home,
+                queryParams: { sport: "tennis" }
+              }
+            ],
+            ["just a route", "/login", {}, { page: Route.Login, params: {} }],
+            ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
+            [
+              "with queryParams",
+              "/login?sport=tennis",
+              { queryString },
+              { page: Route.Login, queryParams: { sport: "tennis" } }
+            ],
+            [
+              "with params and queryParams",
+              "/user/42?sport=tennis",
+              { queryString },
+              {
+                page: Route.UserProfile,
+                params: { id: "42" },
+                queryParams: { sport: "tennis" }
+              }
+            ]
+          ];
 
-          expect(router.initialRoute).toMatchObject(expectedResult);
+          test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
+            const router = createRouterFn(Object.assign({ wdw: createWindow(path) }, qsConfig));
+
+            expect(router.initialRoute).toMatchObject(expectedResult);
+          });
         });
-      });
 
-      describe("start", () => {
-        test("calls onRouteChange", () => {
+        test("start calls onRouteChange", () => {
           const path = "/login";
           const wdw = createWindow(path);
-          const router = createProgrammaticRouter(createRouterConfig({ wdw }));
+          const router = createRouterFn({ wdw });
 
           const onRouteChange = jest.fn();
 
@@ -178,11 +215,9 @@ describe("historyMode and plainHash", () => {
             params: {}
           });
         });
-      });
 
-      if (historyMode) {
-        describe("getLinkHandler", () => {
-          test("calls pushState and onpopstate", () => {
+        if (historyMode) {
+          test("getLinkHandler calls pushState and onpopstate", () => {
             const preventDefault = jest.fn();
             const pushState = jest.fn();
             const onpopstate = jest.fn();
@@ -191,7 +226,7 @@ describe("historyMode and plainHash", () => {
               onpopstate,
               history: { pushState }
             });
-            const router = createProgrammaticRouter(createRouterConfig({ wdw }));
+            const router = createRouterFn({ wdw });
             const url = prefix + "/user/42";
 
             const linkHandler = router.getLinkHandler(url);
@@ -207,30 +242,63 @@ describe("historyMode and plainHash", () => {
 
             expect(onpopstate.mock.calls.length).toBe(1);
           });
+        }
+      });
+
+      describe("hardcoded router", () => {
+        test("provides toRoute", () => {
+          const router = createHardcodedRouter(createHardcodedRouterConfig({ queryString }));
+
+          const path = "/user/42?duck=quack";
+          const result = router.toRoute(path);
+
+          expect(result).toEqual({
+            page: Route.UserProfile,
+            params: { id: "42" },
+            queryParams: { duck: "quack" },
+            url: prefix + path
+          });
         });
-      }
 
-      test("uses custom toUrl", () => {
-        const path = "/login";
-        const wdw = createWindow(path);
+        test("provides replaceRoute", () => {
+          const router = createHardcodedRouter(createHardcodedRouterConfig({ queryString }));
 
-        const superouterConfig = {
-          Home: "/",
-          Login: "/login",
-          UserProfile: "/user/:id"
-        };
+          const path = "/user/42?duck=quack";
+          const result = router.replaceRoute(path);
 
-        const Route = Superouter.type("Route", superouterConfig);
+          expect(result).toEqual({
+            page: Route.UserProfile,
+            params: { id: "42" },
+            queryParams: { duck: "quack" },
+            url: prefix + path,
+            replace: true
+          });
+        });
+      });
 
-        const toUrl = Route.toURL;
-        const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
-        const router = createProgrammaticRouter(
-          createRouterConfig({ routeMatcher, toUrl, queryString, wdw })
-        );
+      describe("programmatic router", () => {
+        test("uses custom toUrl", () => {
+          const path = "/login";
+          const wdw = createWindow(path);
 
-        const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
+          const superouterConfig = {
+            Home: "/",
+            Login: "/login",
+            UserProfile: "/user/:id"
+          };
 
-        expect(result).toBe(prefix + "/user/42?sport=tennis");
+          const Route = Superouter.type("Route", superouterConfig);
+
+          const toUrl = Route.toURL;
+          const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
+          const router = createProgrammaticRouter(
+            createProgrammaticRouterConfig({ routeMatcher, toUrl, queryString, wdw })
+          );
+
+          const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
+
+          expect(result).toBe(prefix + "/user/42?sport=tennis");
+        });
       });
     });
 
@@ -241,6 +309,18 @@ describe("historyMode and plainHash", () => {
         expect(mock_m.route.prefix).toBe(prefix);
       });
     });
+  });
+});
+
+describe("hardcoded router", () => {
+  test("requires routeMatcher", () => {
+    expect(() => createHardcodedRouter({})).toThrow("routeMatcher is required");
+  });
+
+  test("requires convertMatchToRoute", () => {
+    expect(() => createHardcodedRouter({ routeMatcher })).toThrow(
+      "convertMatchToRoute is required"
+    );
   });
 });
 
@@ -256,9 +336,12 @@ describe("programmatic router", () => {
   });
 
   test("requires routeConfig or toUrl", () => {
-    expect(() => createProgrammaticRouter({ routeMatcher, convertMatchToRoute })).toThrow(
-      "routeConfig or toUrl is required"
-    );
+    expect(() =>
+      createProgrammaticRouter({
+        routeMatcher,
+        convertMatchToRoute: programmaticConvertMatchToRoute
+      })
+    ).toThrow("routeConfig or toUrl is required");
   });
 });
 
