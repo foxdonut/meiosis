@@ -147,7 +147,7 @@ describe("historyMode and plainHash", () => {
       ];
 
       describe.each(genericRouterCases)("%s", (_label, createRouterFn) => {
-        describe("initial route", () => {
+        describe("start triggers initial route", () => {
           const initialRouteCases = [
             ["slash", "/", {}, { page: Route.Home, params: {} }],
             ["empty", "", {}, { page: Route.Home, params: {} }],
@@ -155,19 +155,13 @@ describe("historyMode and plainHash", () => {
               "slash with queryParams",
               "/?sport=tennis",
               { queryString },
-              {
-                page: Route.Home,
-                queryParams: { sport: "tennis" }
-              }
+              { page: Route.Home, queryParams: { sport: "tennis" } }
             ],
             [
               "empty with queryParams",
               "?sport=tennis",
               { queryString },
-              {
-                page: Route.Home,
-                queryParams: { sport: "tennis" }
-              }
+              { page: Route.Home, queryParams: { sport: "tennis" } }
             ],
             ["just a route", "/login", {}, { page: Route.Login, params: {} }],
             ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
@@ -181,11 +175,7 @@ describe("historyMode and plainHash", () => {
               "with params and queryParams",
               "/user/42?sport=tennis",
               { queryString },
-              {
-                page: Route.UserProfile,
-                params: { id: "42" },
-                queryParams: { sport: "tennis" }
-              }
+              { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } }
             ]
           ];
 
@@ -193,6 +183,14 @@ describe("historyMode and plainHash", () => {
             const router = createRouterFn(Object.assign({ wdw: createWindow(path) }, qsConfig));
 
             expect(router.initialRoute).toMatchObject(expectedResult);
+
+            const onRouteChange = jest.fn();
+
+            router.start(onRouteChange);
+
+            const calls = onRouteChange.mock.calls;
+            expect(calls.length).toBe(1);
+            expect(calls[0][0]).toMatchObject(expectedResult);
           });
         });
 
@@ -209,8 +207,8 @@ describe("historyMode and plainHash", () => {
           wdw.onpopstate();
 
           const calls = onRouteChange.mock.calls;
-          expect(calls.length).toBe(1);
-          expect(calls[0][0]).toMatchObject({
+          expect(calls.length).toBe(2);
+          expect(calls[1][0]).toMatchObject({
             page: Route.Login,
             params: {}
           });

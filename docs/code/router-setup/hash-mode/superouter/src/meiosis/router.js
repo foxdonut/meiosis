@@ -28,7 +28,9 @@ export const createRouter = (Route, defaultRoute) => {
   const initialRoute = routeMatcher(getPath());
 
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+    const routeChange = () => onRouteChange(routeMatcher(getPath()));
+    routeChange();
+    window.onpopstate = routeChange;
   };
 
   const syncLocationBar = route => {

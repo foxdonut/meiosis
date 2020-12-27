@@ -8,9 +8,12 @@ import meiosisTracer from "meiosis-tracer";
 import { meiosis } from "router-setup-common/src/meiosis";
 import { createApp, App } from "./app";
 import { router } from "./router/index-with-lib";
+import { syncLocationBar } from "router-setup-common/src/locationBar";
 
 const app = createApp(router);
 const { states, update, actions } = meiosis({ stream, merge, app });
+
+states.map(syncLocationBar(router));
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({

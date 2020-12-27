@@ -47,8 +47,6 @@ export const createRouter = routeConfig => {
     return { page: match.value, params: match.params, queryParams };
   };
 
-  const initialRoute = routeMatcher(getPath());
-
   const getLinkHandler = url => evt => {
     evt.preventDefault();
     window.history.pushState({}, "", url);
@@ -56,7 +54,9 @@ export const createRouter = routeConfig => {
   };
 
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+    const routeChange = () => onRouteChange(routeMatcher(getPath()));
+    routeChange();
+    window.onpopstate = routeChange;
   };
 
   const syncLocationBar = route => {
@@ -68,5 +68,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, toUrl, getLinkHandler, start, syncLocationBar };
+  return { toUrl, getLinkHandler, start, syncLocationBar };
 };

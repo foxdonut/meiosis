@@ -1,5 +1,3 @@
-import { ProgrammaticRouter } from "meiosis-router-setup";
-
 import { State, Patch, AppActions } from "./types";
 import { App } from "../meiosis";
 import { home } from "../home";
@@ -8,12 +6,9 @@ import { settings } from "../settings";
 import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
-import { locationBar } from "../locationBar";
 
-export const createApp = (router: ProgrammaticRouter): App<State, Patch, AppActions> => ({
-  initial: {
-    route: router.initialRoute
-  },
+export const createApp = (): App<State, Patch, AppActions> => ({
+  initial: {},
 
   Actions: (update): AppActions => ({
     login: login.Actions(update),
@@ -26,8 +21,7 @@ export const createApp = (router: ProgrammaticRouter): App<State, Patch, AppActi
     settings.Effect(update),
     tea.Effect(update),
     teaDetails.Effect(update),
-    teaSearch.Effect(update),
-    locationBar.Effect(router)
+    teaSearch.Effect(update)
   ]
 });
 

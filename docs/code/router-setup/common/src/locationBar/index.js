@@ -1,5 +1,3 @@
-import { Effect } from "./effect";
+import { selectors } from "../selectors";
 
-export const locationBar = {
-  Effect
-};
+export const syncLocationBar = router => state => router.syncLocationBar(selectors.route(state));

@@ -29,10 +29,10 @@ export const createRouter = routeConfig => {
 
   const replaceRoute = path => toRoute(path, { replace: true });
 
-  const initialRoute = toRoute(getPath());
-
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(toRoute(getPath()));
+    const routeChange = () => onRouteChange(toRoute(getPath()));
+    routeChange();
+    window.onpopstate = routeChange;
   };
 
   const syncLocationBar = route => {
@@ -44,5 +44,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { initialRoute, toRoute, replaceRoute, start, syncLocationBar };
+  return { toRoute, replaceRoute, start, syncLocationBar };
 };

@@ -38,7 +38,9 @@ export const createRouter = (Route, defaultRoute) => {
   };
 
   const start = onRouteChange => {
-    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
+    const routeChange = () => onRouteChange(routeMatcher(getPath()));
+    routeChange();
+    window.onpopstate = routeChange;
   };
 
   const syncLocationBar = route => {

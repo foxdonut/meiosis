@@ -10,12 +10,15 @@ import { createApp, App } from "./app";
 import { State, Patch, AppActions } from "./app/types";
 import { router } from "./router/index-with-lib";
 
-const app = createApp(router);
+const app = createApp();
 const { states, update, actions } = meiosis<State, Patch, AppActions>({
   stream: Stream,
   accumulator: merge,
   app
 });
+
+router.start(route => update({ route: () => route }));
+states.map(state => router.syncLocationBar(state.route));
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({
@@ -27,7 +30,5 @@ meiosisTracer({
 m.mount(document.getElementById("app") as Element, {
   view: () => m(App, { state: states(), update, actions, router })
 });
-
-router.start(route => update({ route: () => route }));
 
 states.map(() => m.redraw());

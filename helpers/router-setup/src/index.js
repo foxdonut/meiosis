@@ -390,7 +390,9 @@ export const createHardcodedRouter = ({
   const toUrl = path => prefix + path;
 
   const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
+    const routeChange = () => onRouteChange(toRoute(getPath()));
+    routeChange();
+    wdw.onpopstate = routeChange;
   };
 
   const syncLocationBar = route => {
@@ -454,7 +456,9 @@ export const createProgrammaticRouter = ({
   const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
-    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
+    const routeChange = () => onRouteChange(toRoute(getPath()));
+    routeChange();
+    wdw.onpopstate = routeChange;
   };
 
   const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath);

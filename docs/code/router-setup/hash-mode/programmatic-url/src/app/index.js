@@ -4,13 +4,8 @@ import { settings } from "router-setup-common/src/settings/index-route";
 import { tea } from "router-setup-common/src/tea";
 import { teaDetails } from "router-setup-common/src/teaDetails";
 import { teaSearch } from "router-setup-common/src/teaSearch";
-import { locationBar } from "router-setup-common/src/locationBar";
 
-export const createApp = router => ({
-  initial: {
-    route: router.initialRoute
-  },
-
+export const createApp = () => ({
   Actions: update => ({
     login: login.Actions(update),
     settings: settings.Actions(update)
@@ -22,8 +17,7 @@ export const createApp = router => ({
     settings.Effect(update),
     tea.Effect(update),
     teaDetails.Effect(update),
-    teaSearch.Effect(update),
-    locationBar.Effect(router)
+    teaSearch.Effect(update)
   ]
 });
 

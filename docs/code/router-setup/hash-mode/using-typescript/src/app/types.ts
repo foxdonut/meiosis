@@ -23,8 +23,7 @@ interface Tea {
 }
 
 export interface State {
-  // route: Route;
-  route: any; // FIXME
+  route?: any; // FIXME
   user?: string;
   message?: string;
   login?: Login;
