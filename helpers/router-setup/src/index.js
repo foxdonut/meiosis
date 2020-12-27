@@ -221,9 +221,9 @@
  */
 
 /**
- * Configuration to create a hardcoded router.
+ * Configuration to create a hardcoded URL router.
  *
- * @typedef {Object} HardcodedRouterConfig
+ * @typedef {Object} HardcodedUrlRouterConfig
  *
  * @property {RouteMatcher} routeMatcher the function that matches routes.
  * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
@@ -238,9 +238,9 @@
  */
 
 /**
- * This is the router that is created by {@link createHardcodedRouter}.
+ * This is the router that is created by {@link createHardcodedUrlRouter}.
  *
- * @typedef {Object} HardcodedRouter
+ * @typedef {Object} HardcodedUrlRouter
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {*} toRoute FIXME
@@ -253,9 +253,9 @@
  */
 
 /**
- * Configuration to create a programmatic router.
+ * Configuration to create a programmatic URL router.
  *
- * @typedef {Object} ProgrammaticRouterConfig
+ * @typedef {Object} ProgrammaticUrlRouterConfig
  *
  * @property {RouteMatcher} routeMatcher the function that matches routes.
  * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
@@ -272,9 +272,9 @@
  */
 
 /**
- * This is the router that is created by {@link createProgrammaticRouter}.
+ * This is the router that is created by {@link createProgrammaticUrlRouter}.
  *
- * @typedef {Object} ProgrammaticRouter
+ * @typedef {Object} ProgrammaticUrlRouter
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {ToUrl} toUrl function to generate a URL.
@@ -350,11 +350,11 @@ const ToUrl = (routeConfig, getStatePath) => {
 /**
  * Creates a router that uses hardcoded URLs.
  *
- * @param {HardcodedRouterConfig} config
+ * @param {HardcodedUrlRouterConfig} config
  *
- * @return {HardcodedRouter} the created router.
+ * @return {HardcodedUrlRouter} the created router.
  */
-export const createHardcodedRouter = ({
+export const createHardcodedUrlRouter = ({
   routeMatcher,
   convertMatchToRoute,
   rootPath,
@@ -412,11 +412,11 @@ export const createHardcodedRouter = ({
 /**
  * Creates a router that uses programmatic URLs.
  *
- * @param {ProgrammaticRouterConfig} config
+ * @param {ProgrammaticUrlRouterConfig} config
  *
- * @return {ProgrammaticRouter} the created router.
+ * @return {ProgrammaticUrlRouter} the created router.
  */
-export const createProgrammaticRouter = ({
+export const createProgrammaticUrlRouter = ({
   routeMatcher,
   convertMatchToRoute,
   routeConfig,

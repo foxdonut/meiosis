@@ -1,12 +1,28 @@
 # meiosis-router-setup
 
+**This is work-in-progress only!**
+
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
 demand and for your convenience, here are some reusable snippets of code that help setup and use
-Meiosis. This module provides support for setting up a router. Out-of-the-box support is provided
-for these router libraries:
+Meiosis. This module provides support for setting up a router. You will need a third-party router
+library for parsing URLs. You can use just about any library you like; examples of libraries that
+work well are:
 
 - [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
-- [Mithril Router](https://mithril.js.org/route.html)
+- [router5](https://router5.js.org)
+- [superouter](https://gitlab.com/harth/superouter)
+- [url-mapper](https://github.com/cerebral/url-mapper)
+
+Optionally, if you want to use query strings, add a query string library. The following work
+out-of-the-box:
+
+- [query-string](https://github.com/sindresorhus/query-string)
+- [qs](https://github.com/ljharb/qs)
+- [urlon](https://github.com/cerebral/urlon)
+
+If you are using [Mithril](https://mithril.js.org), special support is provided for
+[Mithril Router](https://mithril.js.org/route.html). Note that Mithril Router already supports query
+strings, so there is no need for a separate library.
 
 > This library sets up a router for you and this document explains how to use it. If you are
 interested in more details of how the router works and how you can implement it yourself, see the
@@ -30,7 +46,8 @@ Using a `script` tag:
 Using the `script` tag exposes a `MeiosisRouter` global, under which the helper functions are
 provided:
 
-- `createFeatherRouter`
+- `createHardcodedUrlRouter`
+- `createProgrammaticUrlRouter`
 - `createMithrilRouter`
 
 ## Route Configuration
@@ -62,7 +79,11 @@ const routeConfig = {
 };
 ```
 
-## Setup with Feather Route Matcher
+## Hardcoded vs Programmatic URLs
+
+_Coming soon_. This is work-in-progress!
+
+## Hardcoded URL Router Setup
 
 To use [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher), you of
 course need to install it:
@@ -85,12 +106,6 @@ const routeConfig = {
 
 const router = createFeatherRouter({ createRouteMatcher, routeConfig });
 ```
-
-To add query string support, add a query string library. The following work out-of-the-box:
-
-- [query-string](https://github.com/sindresorhus/query-string)
-- [qs](https://github.com/ljharb/qs)
-- [urlon](https://github.com/cerebral/urlon)
 
 Use `queryString` to specify the query string library. For example:
 
@@ -124,7 +139,7 @@ The example above uses Mergerino.
 
 Next, move on to [Using the Router](#using-the-router).
 
-## Setup with Mithril Router
+## Mithril Router Setup
 
 To use [Mithril Router](https://mithril.js.org/route.html), since you are already using Mithril for
 your application, there is no need to install any other dependency. Moreover, query string support

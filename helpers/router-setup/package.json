@@ -1,6 +1,6 @@
 {
   "name": "meiosis-router-setup",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "Meiosis Helpers - Router Setup",
   "main": "dist/meiosis-router-setup.js",
   "types": "dist/index.d.ts",
@@ -26,6 +26,7 @@
     "url": "https://github.com/foxdonut/meiosis/issues"
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {},
   "devDependencies": {
     "buble": "^0.20.0",
     "documentation": "^13.1.0",
@@ -41,6 +42,5 @@
     "superouter": "^0.3.2",
     "typescript": "^4.1.3",
     "url-mapper": "^2.0.0"
-  },
-  "dependencies": {}
+  }
 }

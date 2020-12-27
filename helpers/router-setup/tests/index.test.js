@@ -5,7 +5,11 @@ import queryString from "query-string";
 import m from "mithril";
 import * as Superouter from "superouter";
 
-import { createHardcodedRouter, createProgrammaticRouter, createMithrilRouter } from "../src/index";
+import {
+  createHardcodedUrlRouter,
+  createProgrammaticUrlRouter,
+  createMithrilRouter
+} from "../src/index";
 
 const pipe = (f, g) => a => g(f(a));
 
@@ -36,7 +40,7 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const hardcodedConvertMatchToRoute = ({ match, queryParams, url, options }) => ({
+const hardcodedUrlConvertMatchToRoute = ({ match, queryParams, url, options }) => ({
   page: match.value,
   params: match.params,
   queryParams,
@@ -44,7 +48,7 @@ const hardcodedConvertMatchToRoute = ({ match, queryParams, url, options }) => (
   ...options
 });
 
-const programmaticConvertMatchToRoute = ({ match, queryParams }) => ({
+const programmaticUrlConvertMatchToRoute = ({ match, queryParams }) => ({
   page: match.value,
   params: match.params,
   queryParams
@@ -62,16 +66,16 @@ describe("historyMode and plainHash", () => {
 
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
-    const createHardcodedRouterConfig = config =>
+    const createHardcodedUrlRouterConfig = config =>
       Object.assign(
-        { routeMatcher, convertMatchToRoute: hardcodedConvertMatchToRoute },
+        { routeMatcher, convertMatchToRoute: hardcodedUrlConvertMatchToRoute },
         caseConfig,
         config
       );
 
-    const createProgrammaticRouterConfig = config =>
+    const createProgrammaticUrlRouterConfig = config =>
       Object.assign(
-        { routeMatcher, convertMatchToRoute: programmaticConvertMatchToRoute, routeConfig },
+        { routeMatcher, convertMatchToRoute: programmaticUrlConvertMatchToRoute, routeConfig },
         caseConfig,
         config
       );
@@ -82,14 +86,14 @@ describe("historyMode and plainHash", () => {
 
     const routerCases = [
       [
-        "hardcoded router",
-        pipe(createHardcodedRouterConfig, createHardcodedRouter),
+        "hardcoded URL router",
+        pipe(createHardcodedUrlRouterConfig, createHardcodedUrlRouter),
         prefix,
         "/login"
       ],
       [
-        "programmatic router",
-        pipe(createProgrammaticRouterConfig, createProgrammaticRouter),
+        "programmatic URL router",
+        pipe(createProgrammaticUrlRouterConfig, createProgrammaticUrlRouter),
         prefix,
         Route.Login
       ],
@@ -142,8 +146,11 @@ describe("historyMode and plainHash", () => {
 
     describe("generic router", () => {
       const genericRouterCases = [
-        ["hardcoded router", pipe(createHardcodedRouterConfig, createHardcodedRouter)],
-        ["programmatic router", pipe(createProgrammaticRouterConfig, createProgrammaticRouter)]
+        ["hardcoded URL router", pipe(createHardcodedUrlRouterConfig, createHardcodedUrlRouter)],
+        [
+          "programmatic URL router",
+          pipe(createProgrammaticUrlRouterConfig, createProgrammaticUrlRouter)
+        ]
       ];
 
       describe.each(genericRouterCases)("%s", (_label, createRouterFn) => {
@@ -243,9 +250,9 @@ describe("historyMode and plainHash", () => {
         }
       });
 
-      describe("hardcoded router", () => {
+      describe("hardcoded URL router", () => {
         test("provides toRoute", () => {
-          const router = createHardcodedRouter(createHardcodedRouterConfig({ queryString }));
+          const router = createHardcodedUrlRouter(createHardcodedUrlRouterConfig({ queryString }));
 
           const path = "/user/42?duck=quack";
           const result = router.toRoute(path);
@@ -259,7 +266,7 @@ describe("historyMode and plainHash", () => {
         });
 
         test("provides replaceRoute", () => {
-          const router = createHardcodedRouter(createHardcodedRouterConfig({ queryString }));
+          const router = createHardcodedUrlRouter(createHardcodedUrlRouterConfig({ queryString }));
 
           const path = "/user/42?duck=quack";
           const result = router.replaceRoute(path);
@@ -274,7 +281,7 @@ describe("historyMode and plainHash", () => {
         });
       });
 
-      describe("programmatic router", () => {
+      describe("programmatic URL router", () => {
         test("uses custom toUrl", () => {
           const path = "/login";
           const wdw = createWindow(path);
@@ -289,8 +296,8 @@ describe("historyMode and plainHash", () => {
 
           const toUrl = Route.toURL;
           const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
-          const router = createProgrammaticRouter(
-            createProgrammaticRouterConfig({ routeMatcher, toUrl, queryString, wdw })
+          const router = createProgrammaticUrlRouter(
+            createProgrammaticUrlRouterConfig({ routeMatcher, toUrl, queryString, wdw })
           );
 
           const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
@@ -310,34 +317,34 @@ describe("historyMode and plainHash", () => {
   });
 });
 
-describe("hardcoded router", () => {
+describe("hardcoded URL router", () => {
   test("requires routeMatcher", () => {
-    expect(() => createHardcodedRouter({})).toThrow("routeMatcher is required");
+    expect(() => createHardcodedUrlRouter({})).toThrow("routeMatcher is required");
   });
 
   test("requires convertMatchToRoute", () => {
-    expect(() => createHardcodedRouter({ routeMatcher })).toThrow(
+    expect(() => createHardcodedUrlRouter({ routeMatcher })).toThrow(
       "convertMatchToRoute is required"
     );
   });
 });
 
-describe("programmatic router", () => {
+describe("programmatic URL router", () => {
   test("requires routeMatcher", () => {
-    expect(() => createProgrammaticRouter({})).toThrow("routeMatcher is required");
+    expect(() => createProgrammaticUrlRouter({})).toThrow("routeMatcher is required");
   });
 
   test("requires convertMatchToRoute", () => {
-    expect(() => createProgrammaticRouter({ routeMatcher })).toThrow(
+    expect(() => createProgrammaticUrlRouter({ routeMatcher })).toThrow(
       "convertMatchToRoute is required"
     );
   });
 
   test("requires routeConfig or toUrl", () => {
     expect(() =>
-      createProgrammaticRouter({
+      createProgrammaticUrlRouter({
         routeMatcher,
-        convertMatchToRoute: programmaticConvertMatchToRoute
+        convertMatchToRoute: programmaticUrlConvertMatchToRoute
       })
     ).toThrow("routeConfig or toUrl is required");
   });
