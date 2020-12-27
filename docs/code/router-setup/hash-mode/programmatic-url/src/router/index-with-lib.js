@@ -5,7 +5,7 @@ you can also npm install meiosis-router-setup and use it as shown below:
 */
 
 import createRouteMatcher from "feather-route-matcher";
-import { createProgrammaticRouter } from "meiosis-router-setup";
+import { createProgrammaticUrlRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
 
@@ -16,7 +16,7 @@ const convertMatchToRoute = ({ match, queryParams }) => ({
   queryParams
 });
 
-export const router = createProgrammaticRouter({
+export const router = createProgrammaticUrlRouter({
   routeMatcher,
   convertMatchToRoute,
   routeConfig,

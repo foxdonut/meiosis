@@ -5,7 +5,7 @@ you can also npm install meiosis-router-setup and use it as shown below:
 */
 
 import createRouteMatcher from "feather-route-matcher";
-import { createHardcodedRouter } from "meiosis-router-setup";
+import { createHardcodedUrlRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
 
@@ -18,11 +18,11 @@ const convertMatchToRoute = ({ match, queryParams, url, options }) => ({
   ...options
 });
 
-export const router = createHardcodedRouter({
+export const router = createHardcodedUrlRouter({
   routeMatcher,
   convertMatchToRoute,
   queryString,
-  rootPath: "/code/router-setup/history-mode/query-string/build-with-lib"
+  rootPath: "/code/router-setup/history-mode/hardcoded-url/build-with-lib"
 });
 
 /*
