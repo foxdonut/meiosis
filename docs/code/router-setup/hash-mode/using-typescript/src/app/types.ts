@@ -1,5 +1,5 @@
 import Stream from "mithril/stream";
-import { ProgrammaticUrlRouter } from "meiosis-router-setup";
+import { Router } from "meiosis-router-setup";
 import { Service, Effect } from "../meiosis";
 
 /*
@@ -57,5 +57,5 @@ export interface ViewAttrs {
   state: State;
   update: Update;
   actions: AppActions;
-  router: ProgrammaticUrlRouter;
+  router: Router;
 }

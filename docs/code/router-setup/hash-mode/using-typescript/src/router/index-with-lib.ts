@@ -4,12 +4,7 @@ you can also npm install meiosis-router-setup and use it as shown below:
 */
 
 import createRouter5 from "router5";
-import {
-  createProgrammaticUrlRouter,
-  ProgrammaticUrlRouter,
-  RouteMatcher,
-  ConvertMatchToRoute
-} from "meiosis-router-setup";
+import { createRouter, Router, RouteMatcher, ConvertMatchToRoute } from "meiosis-router-setup";
 import * as queryString from "query-string";
 import { router5Config } from "router-setup-common/src/router";
 
@@ -22,7 +17,7 @@ const convertMatchToRoute: ConvertMatchToRoute = ({ match, queryParams }) => ({
   queryParams
 });
 
-export const router: ProgrammaticUrlRouter = createProgrammaticUrlRouter({
+export const router: Router = createRouter({
   routeMatcher,
   convertMatchToRoute,
   toUrl: router5.buildPath,
