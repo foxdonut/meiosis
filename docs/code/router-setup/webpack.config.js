@@ -47,7 +47,11 @@ const createConfig = (mode, type, example) => ({
 
 modes.forEach(mode =>
   types.forEach(type =>
-    examples.forEach(example => configs.push(createConfig(mode, type, example)))
+    examples.forEach(example => {
+      if (!(type === "no-lib" && example === "superouter")) {
+        configs.push(createConfig(mode, type, example));
+      }
+    })
   )
 );
 
