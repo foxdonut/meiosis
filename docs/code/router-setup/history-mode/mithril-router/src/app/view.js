@@ -1,8 +1,8 @@
 import m from "mithril";
 
 import { Home } from "router-setup-common/src/home";
-import { Login } from "router-setup-common/src/login/index-route";
-import { Settings } from "router-setup-common/src/settings/index-route";
+import { Login } from "router-setup-common/src/login";
+import { Settings } from "router-setup-common/src/settings";
 import { Tea } from "../tea/view";
 import { TeaSearch } from "../teaSearch/view";
 import { NotFound } from "router-setup-common/src/notFound";

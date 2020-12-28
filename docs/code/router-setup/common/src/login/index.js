@@ -1,5 +1,5 @@
-import { Actions } from "./actions-url";
-import { Effect } from "./effect-url";
+import { Actions } from "./actions";
+import { Effect } from "./effect";
 
 export const login = {
   Actions,

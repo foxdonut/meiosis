@@ -1,5 +1,5 @@
-import { Actions } from "./actions-route";
-import { Effect } from "./effect-route";
+import { Actions } from "./actions";
+import { Effect } from "./effect";
 
 export const settings = {
   Actions,
