@@ -5,11 +5,7 @@ import queryString from "query-string";
 import m from "mithril";
 import * as Superouter from "superouter";
 
-import {
-  createHardcodedUrlRouter,
-  createProgrammaticUrlRouter,
-  createMithrilRouter
-} from "../src/index";
+import { createRouter, createMithrilRouter } from "../src/index";
 
 const pipe = (f, g) => a => g(f(a));
 
@@ -40,15 +36,7 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const hardcodedUrlConvertMatchToRoute = ({ match, queryParams, url, options }) => ({
-  page: match.value,
-  params: match.params,
-  queryParams,
-  url,
-  ...options
-});
-
-const programmaticUrlConvertMatchToRoute = ({ match, queryParams }) => ({
+const convertMatchToRoute = ({ match, queryParams }) => ({
   page: match.value,
   params: match.params,
   queryParams
@@ -66,37 +54,15 @@ describe("historyMode and plainHash", () => {
 
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
-    const createHardcodedUrlRouterConfig = config =>
-      Object.assign(
-        { routeMatcher, convertMatchToRoute: hardcodedUrlConvertMatchToRoute },
-        caseConfig,
-        config
-      );
-
-    const createProgrammaticUrlRouterConfig = config =>
-      Object.assign(
-        { routeMatcher, convertMatchToRoute: programmaticUrlConvertMatchToRoute, routeConfig },
-        caseConfig,
-        config
-      );
+    const createRouterConfig = config =>
+      Object.assign({ routeMatcher, convertMatchToRoute, routeConfig }, caseConfig, config);
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 
     const mPrefix = historyMode ? "" : prefix;
 
     const routerCases = [
-      [
-        "hardcoded URL router",
-        pipe(createHardcodedUrlRouterConfig, createHardcodedUrlRouter),
-        prefix,
-        "/login"
-      ],
-      [
-        "programmatic URL router",
-        pipe(createProgrammaticUrlRouterConfig, createProgrammaticUrlRouter),
-        prefix,
-        Route.Login
-      ],
+      ["generic router", pipe(createRouterConfig, createRouter), prefix, Route.Login],
       ["mithril router", pipe(createMithrilConfig, createMithrilRouter), mPrefix, Route.Login]
     ];
 
@@ -145,165 +111,122 @@ describe("historyMode and plainHash", () => {
     });
 
     describe("generic router", () => {
-      const genericRouterCases = [
-        ["hardcoded URL router", pipe(createHardcodedUrlRouterConfig, createHardcodedUrlRouter)],
-        [
-          "programmatic URL router",
-          pipe(createProgrammaticUrlRouterConfig, createProgrammaticUrlRouter)
-        ]
-      ];
+      const createRouterFn = pipe(createRouterConfig, createRouter);
 
-      describe.each(genericRouterCases)("%s", (_label, createRouterFn) => {
-        describe("start triggers initial route", () => {
-          const initialRouteCases = [
-            ["slash", "/", {}, { page: Route.Home, params: {} }],
-            ["empty", "", {}, { page: Route.Home, params: {} }],
-            [
-              "slash with queryParams",
-              "/?sport=tennis",
-              { queryString },
-              { page: Route.Home, queryParams: { sport: "tennis" } }
-            ],
-            [
-              "empty with queryParams",
-              "?sport=tennis",
-              { queryString },
-              { page: Route.Home, queryParams: { sport: "tennis" } }
-            ],
-            ["just a route", "/login", {}, { page: Route.Login, params: {} }],
-            ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
-            [
-              "with queryParams",
-              "/login?sport=tennis",
-              { queryString },
-              { page: Route.Login, queryParams: { sport: "tennis" } }
-            ],
-            [
-              "with params and queryParams",
-              "/user/42?sport=tennis",
-              { queryString },
-              { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } }
-            ]
-          ];
+      describe("start triggers initial route", () => {
+        const initialRouteCases = [
+          ["slash", "/", {}, { page: Route.Home, params: {} }],
+          ["empty", "", {}, { page: Route.Home, params: {} }],
+          [
+            "slash with queryParams",
+            "/?sport=tennis",
+            { queryString },
+            { page: Route.Home, queryParams: { sport: "tennis" } }
+          ],
+          [
+            "empty with queryParams",
+            "?sport=tennis",
+            { queryString },
+            { page: Route.Home, queryParams: { sport: "tennis" } }
+          ],
+          ["just a route", "/login", {}, { page: Route.Login, params: {} }],
+          ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
+          [
+            "with queryParams",
+            "/login?sport=tennis",
+            { queryString },
+            { page: Route.Login, queryParams: { sport: "tennis" } }
+          ],
+          [
+            "with params and queryParams",
+            "/user/42?sport=tennis",
+            { queryString },
+            { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } }
+          ]
+        ];
 
-          test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
-            const router = createRouterFn(Object.assign({ wdw: createWindow(path) }, qsConfig));
+        test.each(initialRouteCases)("%s", (_label, path, qsConfig, expectedResult) => {
+          const router = createRouterFn(Object.assign({ wdw: createWindow(path) }, qsConfig));
 
-            expect(router.initialRoute).toMatchObject(expectedResult);
-
-            const onRouteChange = jest.fn();
-
-            router.start(onRouteChange);
-
-            const calls = onRouteChange.mock.calls;
-            expect(calls.length).toBe(1);
-            expect(calls[0][0]).toMatchObject(expectedResult);
-          });
-        });
-
-        test("start calls onRouteChange", () => {
-          const path = "/login";
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+          expect(router.initialRoute).toMatchObject(expectedResult);
 
           const onRouteChange = jest.fn();
 
           router.start(onRouteChange);
 
-          wdw.location.pathname = prefix + path;
-          wdw.onpopstate();
-
           const calls = onRouteChange.mock.calls;
-          expect(calls.length).toBe(2);
-          expect(calls[1][0]).toMatchObject({
-            page: Route.Login,
-            params: {}
-          });
-        });
-
-        if (historyMode) {
-          test("getLinkHandler calls pushState and onpopstate", () => {
-            const preventDefault = jest.fn();
-            const pushState = jest.fn();
-            const onpopstate = jest.fn();
-
-            const wdw = Object.assign(createWindow("/"), {
-              onpopstate,
-              history: { pushState }
-            });
-            const router = createRouterFn({ wdw });
-            const url = prefix + "/user/42";
-
-            const linkHandler = router.getLinkHandler(url);
-            linkHandler({ preventDefault });
-
-            expect(preventDefault.mock.calls.length).toBe(1);
-
-            const calls = pushState.mock.calls;
-            expect(calls.length).toBe(1);
-            expect(calls[0][0]).toEqual({});
-            expect(calls[0][1]).toEqual("");
-            expect(calls[0][2]).toEqual(url);
-
-            expect(onpopstate.mock.calls.length).toBe(1);
-          });
-        }
-      });
-
-      describe("hardcoded URL router", () => {
-        test("provides toRoute", () => {
-          const router = createHardcodedUrlRouter(createHardcodedUrlRouterConfig({ queryString }));
-
-          const path = "/user/42?duck=quack";
-          const result = router.toRoute(path);
-
-          expect(result).toEqual({
-            page: Route.UserProfile,
-            params: { id: "42" },
-            queryParams: { duck: "quack" },
-            url: prefix + path
-          });
-        });
-
-        test("provides replaceRoute", () => {
-          const router = createHardcodedUrlRouter(createHardcodedUrlRouterConfig({ queryString }));
-
-          const path = "/user/42?duck=quack";
-          const result = router.replaceRoute(path);
-
-          expect(result).toEqual({
-            page: Route.UserProfile,
-            params: { id: "42" },
-            queryParams: { duck: "quack" },
-            url: prefix + path,
-            replace: true
-          });
+          expect(calls.length).toBe(1);
+          expect(calls[0][0]).toMatchObject(expectedResult);
         });
       });
 
-      describe("programmatic URL router", () => {
-        test("uses custom toUrl", () => {
-          const path = "/login";
-          const wdw = createWindow(path);
+      test("start calls onRouteChange", () => {
+        const path = "/login";
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          const superouterConfig = {
-            Home: "/",
-            Login: "/login",
-            UserProfile: "/user/:id"
-          };
+        const onRouteChange = jest.fn();
 
-          const Route = Superouter.type("Route", superouterConfig);
+        router.start(onRouteChange);
 
-          const toUrl = Route.toURL;
-          const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
-          const router = createProgrammaticUrlRouter(
-            createProgrammaticUrlRouterConfig({ routeMatcher, toUrl, queryString, wdw })
-          );
+        wdw.location.pathname = prefix + path;
+        wdw.onpopstate();
 
-          const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
-
-          expect(result).toBe(prefix + "/user/42?sport=tennis");
+        const calls = onRouteChange.mock.calls;
+        expect(calls.length).toBe(2);
+        expect(calls[1][0]).toMatchObject({
+          page: Route.Login,
+          params: {}
         });
+      });
+
+      if (historyMode) {
+        test("getLinkHandler calls pushState and onpopstate", () => {
+          const preventDefault = jest.fn();
+          const pushState = jest.fn();
+          const onpopstate = jest.fn();
+
+          const wdw = Object.assign(createWindow("/"), {
+            onpopstate,
+            history: { pushState }
+          });
+          const router = createRouterFn({ wdw });
+          const url = prefix + "/user/42";
+
+          const linkHandler = router.getLinkHandler(url);
+          linkHandler({ preventDefault });
+
+          expect(preventDefault.mock.calls.length).toBe(1);
+
+          const calls = pushState.mock.calls;
+          expect(calls.length).toBe(1);
+          expect(calls[0][0]).toEqual({});
+          expect(calls[0][1]).toEqual("");
+          expect(calls[0][2]).toEqual(url);
+
+          expect(onpopstate.mock.calls.length).toBe(1);
+        });
+      }
+
+      test("uses custom toUrl", () => {
+        const path = "/login";
+        const wdw = createWindow(path);
+
+        const superouterConfig = {
+          Home: "/",
+          Login: "/login",
+          UserProfile: "/user/:id"
+        };
+
+        const Route = Superouter.type("Route", superouterConfig);
+
+        const toUrl = Route.toURL;
+        const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
+        const router = createRouterFn({ routeMatcher, toUrl, queryString, wdw });
+
+        const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
+
+        expect(result).toBe(prefix + "/user/42?sport=tennis");
       });
     });
 
@@ -317,36 +240,19 @@ describe("historyMode and plainHash", () => {
   });
 });
 
-describe("hardcoded URL router", () => {
+describe("generic router", () => {
   test("requires routeMatcher", () => {
-    expect(() => createHardcodedUrlRouter({})).toThrow("routeMatcher is required");
+    expect(() => createRouter({})).toThrow("routeMatcher is required");
   });
 
   test("requires convertMatchToRoute", () => {
-    expect(() => createHardcodedUrlRouter({ routeMatcher })).toThrow(
-      "convertMatchToRoute is required"
-    );
-  });
-});
-
-describe("programmatic URL router", () => {
-  test("requires routeMatcher", () => {
-    expect(() => createProgrammaticUrlRouter({})).toThrow("routeMatcher is required");
-  });
-
-  test("requires convertMatchToRoute", () => {
-    expect(() => createProgrammaticUrlRouter({ routeMatcher })).toThrow(
-      "convertMatchToRoute is required"
-    );
+    expect(() => createRouter({ routeMatcher })).toThrow("convertMatchToRoute is required");
   });
 
   test("requires routeConfig or toUrl", () => {
-    expect(() =>
-      createProgrammaticUrlRouter({
-        routeMatcher,
-        convertMatchToRoute: programmaticUrlConvertMatchToRoute
-      })
-    ).toThrow("routeConfig or toUrl is required");
+    expect(() => createRouter({ routeMatcher, convertMatchToRoute })).toThrow(
+      "routeConfig or toUrl is required"
+    );
   });
 });
 
