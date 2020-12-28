@@ -21,7 +21,7 @@ export const router = createProgrammaticUrlRouter({
   routeMatcher,
   convertMatchToRoute,
   routeConfig,
-  rootPath: "/code/router-setup/history-mode/programmatic-url/build-with-lib",
+  rootPath: "/code/router-setup/history-mode/generic-router/build-with-lib",
   queryString
 });
 

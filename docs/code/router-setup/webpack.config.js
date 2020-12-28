@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const modes = ["hash", "history"];
 const types = ["no-lib", "with-lib"];
-const examples = ["hardcoded-url", "programmatic-url", "mithril-router", "superouter"];
+const examples = ["generic-router", "mithril-router", "superouter"];
 const configs = [];
 
 const createConfig = (mode, type, example) => ({
