@@ -11,9 +11,9 @@ import { router5Config } from "router-setup-common/src/router";
 const router5 = createRouter5(router5Config);
 
 const routeMatcher: RouteMatcher = router5.matchPath;
-const convertMatchToRoute: ConvertMatchToRoute = ({ match, queryParams }) => ({
-  page: match.name,
-  params: match.params,
+const convertMatchToRoute: ConvertMatchToRoute = ({ name, params, queryParams }) => ({
+  page: name,
+  params,
   queryParams
 });
 
