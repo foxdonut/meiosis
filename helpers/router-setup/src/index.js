@@ -40,8 +40,8 @@
  *
  * @callback ConvertMatchToRoute
  *
- * @param {*} match the route match.
- * @param {*} queryParams the query params.
+ * @param {*} match the route match returned by the router library, augmented with `queryParams` for
+ * the query params.
  *
  * @return {*} the converted route.
  */
@@ -174,9 +174,9 @@
  *
  * @callback PushState
  *
- * @param {*} somethingFIXME
- * @param {string} somethingElseFIXME
- * @param {string} uri
+ * @param {*} state the state object
+ * @param {string} title the document title - most browsers ignore this parameter
+ * @param {string} url the new history entry's URL
  *
  * @return {void}
  */
@@ -226,11 +226,14 @@
  * @typedef {Object} RouterConfig
  *
  * @property {RouteMatcher} routeMatcher the function that matches routes.
- * @property {ConvertMatchToRoute} convertMatchToRoute a function to convert a match to a route.
- * @property {RouteConfig} [routeConfig] the route configuration.
- * @property {ToUrl} [toUrl] the `toUrl` function.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
+ * @property {RouteConfig} [routeConfig] the route configuration. If not provided, `toUrl` must be
+ * provided.
+ * @property {ToUrl} [toUrl] the `toUrl` function. If not provided, `routeConfig` must be provided
+ * and `toUrl` is constructed from `routeConfig`.
+ * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you are
+ * using history mode, you need to provide server side routing support.
+ * @property {ConvertMatchToRoute} [convertMatchToRoute] a function to convert a match to a route.
+ * If not provided, defaults to the identity function.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `rootPath` is specified.
@@ -324,20 +327,16 @@ const ToUrl = (routeConfig, getStatePath) => {
  */
 export const createRouter = ({
   routeMatcher,
-  convertMatchToRoute,
   routeConfig,
   toUrl,
   rootPath,
+  convertMatchToRoute = I,
   plainHash = false,
   queryString = emptyQueryString,
   wdw = window
 }) => {
   if (!routeMatcher) {
     throw "routeMatcher is required";
-  }
-
-  if (!convertMatchToRoute) {
-    throw "convertMatchToRoute is required";
   }
 
   if (!routeConfig && !toUrl) {
@@ -356,7 +355,7 @@ export const createRouter = ({
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    return convertMatchToRoute({ match, queryParams });
+    return convertMatchToRoute(Object.assign({ queryParams }, match));
   };
 
   const initialRoute = toRoute(getPath());

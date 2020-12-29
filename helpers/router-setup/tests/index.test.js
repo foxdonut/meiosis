@@ -36,9 +36,9 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertMatchToRoute = ({ match, queryParams }) => ({
-  page: match.value,
-  params: match.params,
+const convertMatchToRoute = ({ value, params, queryParams }) => ({
+  page: value,
+  params,
   queryParams
 });
 
@@ -245,14 +245,24 @@ describe("generic router", () => {
     expect(() => createRouter({})).toThrow("routeMatcher is required");
   });
 
-  test("requires convertMatchToRoute", () => {
-    expect(() => createRouter({ routeMatcher })).toThrow("convertMatchToRoute is required");
+  test("requires routeConfig or toUrl", () => {
+    expect(() => createRouter({ routeMatcher })).toThrow("routeConfig or toUrl is required");
   });
 
-  test("requires routeConfig or toUrl", () => {
-    expect(() => createRouter({ routeMatcher, convertMatchToRoute })).toThrow(
-      "routeConfig or toUrl is required"
-    );
+  test("uses identity as default for convertMatchToRoute", () => {
+    const path = "/user/42?sport=tennis";
+    const router = createRouter({
+      routeMatcher,
+      routeConfig,
+      queryString,
+      wdw: mockWindow(null, "#!", path)
+    });
+
+    expect(router.initialRoute).toMatchObject({
+      value: Route.UserProfile,
+      params: { id: "42" },
+      queryParams: { sport: "tennis" }
+    });
   });
 });
 
