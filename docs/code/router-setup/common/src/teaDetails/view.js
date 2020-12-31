@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "router-setup-common/src/router";
+import { Route } from "../router";
 
 export const TeaDetails = {
   view: ({ attrs: { state, id, router } }) =>

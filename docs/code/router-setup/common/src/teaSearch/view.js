@@ -1,7 +1,7 @@
 import m from "mithril";
 
-import { Route } from "router-setup-common/src/router";
-import { selectors } from "router-setup-common/src/selectors";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
@@ -20,7 +20,7 @@ export const TeaSearch = () => ({
               "div",
               types.map(type => [
                 m(
-                  m.route.Link,
+                  "a",
                   {
                     style: { marginRight: "10px" },
                     href: router.toUrl(Route.TeaSearch, {}, { type })
@@ -28,7 +28,7 @@ export const TeaSearch = () => ({
                   type
                 )
               ]),
-              m(m.route.Link, { href: router.toUrl(Route.TeaSearch) }, "All")
+              m("a", { href: router.toUrl(Route.TeaSearch) }, "All")
             ),
             m(
               "table.table.table-bordered.table-striped",

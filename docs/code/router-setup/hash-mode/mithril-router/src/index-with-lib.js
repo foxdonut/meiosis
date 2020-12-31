@@ -6,7 +6,7 @@ import stream from "mithril/stream";
 import meiosisTracer from "meiosis-tracer";
 
 import { meiosis } from "router-setup-common/src/meiosis";
-import { createApp, App } from "./app";
+import { createApp, App } from "router-setup-common/src/app";
 import { router } from "./router/index-with-lib";
 
 const app = createApp(router);

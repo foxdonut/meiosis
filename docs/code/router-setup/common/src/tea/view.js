@@ -1,8 +1,8 @@
 import m from "mithril";
 
-import { TeaDetails } from "../teaDetails/view";
-import { Route } from "router-setup-common/src/router";
-import { selectors } from "router-setup-common/src/selectors";
+import { TeaDetails } from "../teaDetails";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
 export const Tea = {
   view: ({ attrs: { state, router } }) => [
@@ -16,7 +16,7 @@ export const Tea = {
             m(
               "div",
               { key: tea.id },
-              m(m.route.Link, { href: router.toUrl(Route.TeaDetails, { id: tea.id }) }, tea.title)
+              m("a", { href: router.toUrl(Route.TeaDetails, { id: tea.id }) }, tea.title)
             )
           )
       ),

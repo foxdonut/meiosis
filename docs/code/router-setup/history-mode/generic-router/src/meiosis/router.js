@@ -6,6 +6,7 @@ import queryString from "query-string";
 export const createRouter = routeConfig => {
   const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 
+  const origin = window.location.origin;
   const prefix = stripTrailingSlash(window.location.pathname);
 
   const getUrl = () => decodeURI(window.location.pathname + window.location.search);
@@ -30,12 +31,12 @@ export const createRouter = routeConfig => {
     const path = prefix + stripTrailingSlash(pathLookup[page]);
     const pathParams = [];
 
-    const result = (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
-      pathParams.push(pathParam.substring(1));
-      return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
-    }, path);
-
-    return result + getQueryString(queryParams);
+    return (
+      (path.match(/(:[^/]*)/g) || []).reduce((result, pathParam) => {
+        pathParams.push(pathParam.substring(1));
+        return result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)]));
+      }, path) + getQueryString(queryParams)
+    );
   };
 
   const matcher = createRouteMatcher(routeConfig);
@@ -57,6 +58,27 @@ export const createRouter = routeConfig => {
     const routeChange = () => onRouteChange(routeMatcher(getPath()));
     routeChange();
     window.onpopstate = routeChange;
+
+    window.addEventListener(
+      "click",
+      evt => {
+        let element = evt.target;
+        while (element && element.nodeName.toLowerCase() !== "a") {
+          element = element.parentNode;
+        }
+        if (
+          element &&
+          element.nodeName.toLowerCase() === "a" &&
+          element.href.startsWith(origin) &&
+          element.href.indexOf(prefix) >= 0
+        ) {
+          evt.preventDefault();
+          window.history.pushState({}, "", element.href);
+          window.onpopstate();
+        }
+      },
+      false
+    );
   };
 
   const syncLocationBar = route => {

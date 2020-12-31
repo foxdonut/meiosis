@@ -96,26 +96,6 @@
  */
 
 /**
- * Link handler function which calls `preventDefault` on the link event and emits the URL.
- *
- * @callback LinkHandler
- *
- * @param {Event} event
- *
- * @return {void}
- */
-
-/**
- * Function to generate an event handler for a link.
- *
- * @callback GetLinkHandler
- *
- * @param {string} url the URL of the link.
- *
- * @return {LinkHandler} the link handler.
- */
-
-/**
  * Callback function for when the route changes. Typically, this function updates the application
  * state with the route, for example:
  *
@@ -197,6 +177,7 @@
  * @typedef {Object} Location
  *
  * @property {string} hash
+ * @property {string} origin
  * @property {string} pathname
  * @property {string} search
  */
@@ -210,6 +191,16 @@
  */
 
 /**
+ * Built-in callback function to add an event listener.
+ *
+ * @callback AddEventListener
+ *
+ * @param {string} type
+ * @param {*} listener
+ * @param {*} options
+ */
+
+/**
  * Built-in `window` object, defined for testing purposes.
  *
  * @typedef {Object} Window
@@ -218,6 +209,7 @@
  * @property {Location} location the current location.
  * @property {History} history the window's history.
  * @property {Onpopstate} onpopstate callback function when the location changes.
+ * @property {AddEventListener} addEventListener function to add an event listener.
  */
 
 /**
@@ -252,7 +244,6 @@
  * @property {Start} start function to start the router.
  * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
- * @property {GetLinkHandler} getLinkHandler when using history mode, ...
  */
 
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
@@ -270,15 +261,23 @@ export const getQueryString = (queryString, queryParams = {}) => {
   return (query.length > 0 ? "?" : "") + query;
 };
 
+const getConfig = (rootPath, plainHash) => {
+  const historyMode = rootPath != null;
+  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+
+  return { prefix, historyMode };
+};
+
 const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
 
-const createGetLinkHandler = wdw => url => evt => {
-  evt.preventDefault();
-  wdw.history.pushState({}, "", url);
-  wdw.onpopstate(null);
+const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl) => {
+  const getStatePath = historyMode ? stripTrailingSlash : I;
+  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath);
+  return (page, params = {}, queryParams = {}) =>
+    prefix + toUrlFn(page, params) + getQueryString(queryString, queryParams);
 };
 
 const emptyQueryString = {
@@ -291,6 +290,36 @@ const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
     const fn = replace ? "replaceState" : "pushState";
     wdw.history[fn].call(wdw.history, {}, "", url);
   }
+};
+
+/**
+ * Helper to intercept link clicks in history mode.
+ *
+ * @param {Window} wdw
+ * @param {string} prefix
+ */
+const addEventListener = (wdw, prefix, setHref) => {
+  const origin = wdw.location.origin;
+
+  wdw.addEventListener(
+    "click",
+    evt => {
+      let element = evt.target;
+      while (element && element.nodeName.toLowerCase() !== "a") {
+        element = element.parentNode;
+      }
+      if (
+        element &&
+        element.nodeName.toLowerCase() === "a" &&
+        element.href.startsWith(origin) &&
+        element.href.indexOf(prefix) >= 0
+      ) {
+        evt.preventDefault();
+        setHref(element.href);
+      }
+    },
+    false
+  );
 };
 
 /**
@@ -343,12 +372,11 @@ export const createRouter = ({
     throw "routeConfig or toUrl is required";
   }
 
-  const historyMode = rootPath != null;
-  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+  const { prefix, historyMode } = getConfig(rootPath, plainHash);
 
-  const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || "/";
-  const getStatePath = historyMode ? stripTrailingSlash : I;
+  const getUrl = createGetUrl(prefix, historyMode, wdw);
+  toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
   const toRoute = path => {
     const matchPath = getPathWithoutQuery(path) || "/";
@@ -361,31 +389,23 @@ export const createRouter = ({
   const initialRoute = toRoute(getPath());
 
   const start = onRouteChange => {
+    if (historyMode) {
+      addEventListener(wdw, prefix, href => {
+        wdw.history.pushState({}, "", href);
+        wdw.onpopstate();
+      });
+    }
     const routeChange = () => onRouteChange(toRoute(getPath()));
     routeChange();
     wdw.onpopstate = routeChange;
   };
 
-  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath);
-  toUrl = (page, params = {}, queryParams = {}) =>
-    prefix + toUrlFn(page, params) + getQueryString(queryString, queryParams);
-
   const syncLocationBar = ({ page, params, queryParams, replace }) => {
     doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
   };
 
-  const getLinkHandler = createGetLinkHandler(wdw);
-
-  return { initialRoute, toUrl, start, syncLocationBar, getLinkHandler };
+  return { initialRoute, toUrl, start, syncLocationBar };
 };
-
-/* getLinkHandler usage: with a getLinkAttrs function
-export const getLinkAttrs = (router, page, params) => {
-  const url = router.toUrl(page, params);
-
-  return { href: url, onclick: router.getLinkHandler(url) };
-};
-*/
 
 // ----- Mithril
 
@@ -532,21 +552,23 @@ export const createMithrilRouter = ({
     throw "routeConfig is required";
   }
 
-  const historyMode = rootPath != null;
-  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+  const { prefix, historyMode } = getConfig(rootPath, plainHash);
 
   m.route.prefix = prefix;
 
   const queryString = { stringify: m.buildQueryString, parse: m.parseQueryString };
   const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const toUrl = createToUrl(routeConfig, prefix, queryString, historyMode);
 
-  const getStatePath = historyMode ? stripTrailingSlash : path => prefix + path;
-  const toUrlFn = ToUrl(routeConfig, getStatePath);
-  const toUrl = (page, params = {}, queryParams = {}) =>
-    toUrlFn(page, params) + getQueryString(queryString, queryParams);
+  const createMithrilRoutes = ({ onRouteChange, render }) => {
+    if (historyMode) {
+      const prefixLength = prefix.length;
+      addEventListener(wdw, prefix, href => {
+        m.route.set(href.substring(href.indexOf(prefix) + prefixLength));
+      });
+    }
 
-  const createMithrilRoutes = ({ onRouteChange, render }) =>
-    Object.keys(routeConfig).reduce((result, path) => {
+    return Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
         onmatch: params =>
@@ -555,12 +577,11 @@ export const createMithrilRouter = ({
       };
       return result;
     }, {});
-
-  const addPrefix = historyMode ? url => prefix + url : I;
+  };
 
   const syncLocationBar = ({ page, params, queryParams, replace }) => {
     if (page) {
-      doSyncLocationBar({ replace, url: addPrefix(toUrl(page, params, queryParams)), getUrl, wdw });
+      doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
     }
   };
 

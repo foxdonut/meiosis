@@ -1,9 +1,9 @@
-import { home } from "router-setup-common/src/home";
-import { login } from "router-setup-common/src/login";
-import { settings } from "router-setup-common/src/settings";
-import { tea } from "router-setup-common/src/tea";
-import { teaDetails } from "router-setup-common/src/teaDetails";
-import { teaSearch } from "router-setup-common/src/teaSearch";
+import { home } from "../home";
+import { login } from "../login";
+import { settings } from "../settings";
+import { tea } from "../tea";
+import { teaDetails } from "../teaDetails";
+import { teaSearch } from "../teaSearch";
 
 export const createApp = () => ({
   Actions: update => ({

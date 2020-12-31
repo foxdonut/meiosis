@@ -1,13 +1,13 @@
 import m from "mithril";
 
-import { Home } from "router-setup-common/src/home";
-import { Login } from "router-setup-common/src/login";
-import { Settings } from "router-setup-common/src/settings";
-import { Tea } from "../tea/view";
-import { TeaSearch } from "../teaSearch/view";
-import { NotFound } from "router-setup-common/src/notFound";
-import { selectors } from "router-setup-common/src/selectors";
-import { Route } from "router-setup-common/src/router";
+import { Home } from "../home";
+import { Login } from "../login";
+import { Settings } from "../settings";
+import { Tea } from "../tea";
+import { TeaSearch } from "../teaSearch";
+import { NotFound } from "../notFound";
+import { Route } from "../router";
+import { selectors } from "../selectors";
 
 const componentMap = {
   Home,

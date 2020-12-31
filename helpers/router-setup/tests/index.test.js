@@ -17,7 +17,8 @@ const mockWindow = (rootPath, prefix, path) => ({
     hash: prefix + path,
     pathname: rootPath + path,
     search: ""
-  }
+  },
+  addEventListener: jest.fn()
 });
 
 const rootPath = "/my-server/my-base-path";
@@ -59,22 +60,18 @@ describe("historyMode and plainHash", () => {
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 
-    const mPrefix = historyMode ? "" : prefix;
-
     const routerCases = [
-      ["generic router", pipe(createRouterConfig, createRouter), prefix, Route.Login],
-      ["mithril router", pipe(createMithrilConfig, createMithrilRouter), mPrefix, Route.Login]
+      ["generic router", pipe(createRouterConfig, createRouter)],
+      ["mithril router", pipe(createMithrilConfig, createMithrilRouter)]
     ];
 
-    describe.each(routerCases)("%s", (_label, createRouterFn, expectedPrefix, toUrlParam) => {
-      describe("toUrl", () => {
-        test("converts route to URL", () => {
-          const path = "/login";
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+    describe.each(routerCases)("%s", (_label, createRouterFn) => {
+      test("toUrl converts route to URL", () => {
+        const path = "/login";
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          expect(router.toUrl(toUrlParam)).toEqual(expectedPrefix + path);
-        });
+        expect(router.toUrl(Route.Login)).toEqual(prefix + path);
       });
 
       describe("syncLocationBar", () => {
@@ -107,6 +104,21 @@ describe("historyMode and plainHash", () => {
           expect(calls[0][1]).toEqual("");
           expect(calls[0][2]).toEqual(url);
         });
+      });
+
+      test("addEventListener in historyMode: " + historyMode, () => {
+        const path = "/login";
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        const onRouteChange = jest.fn();
+        if (router.start) {
+          router.start(onRouteChange);
+        } else {
+          router.createMithrilRoutes({ onRouteChange });
+        }
+
+        expect(wdw.addEventListener.mock.calls.length).toBe(historyMode ? 1 : 0);
       });
     });
 
@@ -179,34 +191,6 @@ describe("historyMode and plainHash", () => {
           params: {}
         });
       });
-
-      if (historyMode) {
-        test("getLinkHandler calls pushState and onpopstate", () => {
-          const preventDefault = jest.fn();
-          const pushState = jest.fn();
-          const onpopstate = jest.fn();
-
-          const wdw = Object.assign(createWindow("/"), {
-            onpopstate,
-            history: { pushState }
-          });
-          const router = createRouterFn({ wdw });
-          const url = prefix + "/user/42";
-
-          const linkHandler = router.getLinkHandler(url);
-          linkHandler({ preventDefault });
-
-          expect(preventDefault.mock.calls.length).toBe(1);
-
-          const calls = pushState.mock.calls;
-          expect(calls.length).toBe(1);
-          expect(calls[0][0]).toEqual({});
-          expect(calls[0][1]).toEqual("");
-          expect(calls[0][2]).toEqual(url);
-
-          expect(onpopstate.mock.calls.length).toBe(1);
-        });
-      }
 
       test("uses custom toUrl", () => {
         const path = "/login";

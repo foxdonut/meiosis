@@ -22,8 +22,8 @@ export const createMithrilRouter = routeConfig => {
     {}
   );
 
-  const toUrl = (page, params = {}, queryParams) => {
-    const path = stripTrailingSlash(pathLookup[page]);
+  const toUrl = (page, params = {}, queryParams = {}) => {
+    const path = prefix + stripTrailingSlash(pathLookup[page]);
     const pathParams = [];
 
     return (
@@ -47,8 +47,31 @@ export const createMithrilRouter = routeConfig => {
     );
   };
 
-  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) =>
-    Object.entries(routeConfig).reduce((result, [path, page]) => {
+  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) => {
+    const prefixLength = prefix.length;
+
+    window.addEventListener(
+      "click",
+      evt => {
+        let element = evt.target;
+        while (element && element.nodeName.toLowerCase() !== "a") {
+          element = element.parentNode;
+        }
+        if (
+          element &&
+          element.nodeName.toLowerCase() === "a" &&
+          element.href.startsWith(origin) &&
+          element.href.indexOf(prefix) >= 0
+        ) {
+          evt.preventDefault();
+          const href = element.href;
+          m.route.set(href.substring(href.indexOf(prefix) + prefixLength));
+        }
+      },
+      false
+    );
+
+    return Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
         onmatch: allParams => {
           const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
@@ -58,11 +81,12 @@ export const createMithrilRouter = routeConfig => {
       };
       return result;
     }, {});
+  };
 
   const syncLocationBar = route => {
     const { page, params } = route;
     if (page) {
-      const url = prefix + toUrl(page, params);
+      const url = toUrl(page, params);
       if (url !== getUrl()) {
         const fn = route.replace ? "replaceState" : "pushState";
         window.history[fn].call(window.history, {}, "", url);
