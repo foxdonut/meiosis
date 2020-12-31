@@ -59,26 +59,28 @@ export const createRouter = routeConfig => {
     routeChange();
     window.onpopstate = routeChange;
 
-    window.addEventListener(
-      "click",
-      evt => {
-        let element = evt.target;
-        while (element && element.nodeName.toLowerCase() !== "a") {
-          element = element.parentNode;
-        }
-        if (
-          element &&
-          element.nodeName.toLowerCase() === "a" &&
-          element.href.startsWith(origin) &&
-          element.href.indexOf(prefix) >= 0
-        ) {
-          evt.preventDefault();
-          window.history.pushState({}, "", element.href);
-          window.onpopstate();
-        }
-      },
-      false
-    );
+    const linkHandler = evt => {
+      let element = evt.target;
+      while (element && element.nodeName.toLowerCase() !== "a") {
+        element = element.parentNode;
+      }
+      if (
+        element &&
+        element.nodeName.toLowerCase() === "a" &&
+        element.href.startsWith(origin) &&
+        element.href.indexOf(prefix) >= 0
+      ) {
+        evt.preventDefault();
+        window.history.pushState({}, "", element.href);
+        window.onpopstate();
+      }
+    };
+
+    window.addEventListener("click", linkHandler, false);
+
+    window.addEventListener("beforeunload", () => {
+      window.removeEventListener("click", linkHandler);
+    });
   };
 
   const syncLocationBar = route => {

@@ -201,6 +201,15 @@
  */
 
 /**
+ * Built-in callback function to remove an event listener.
+ *
+ * @callback RemoveEventListener
+ *
+ * @param {string} type
+ * @param {*} listener
+ */
+
+/**
  * Built-in `window` object, defined for testing purposes.
  *
  * @typedef {Object} Window
@@ -210,6 +219,7 @@
  * @property {History} history the window's history.
  * @property {Onpopstate} onpopstate callback function when the location changes.
  * @property {AddEventListener} addEventListener function to add an event listener.
+ * @property {RemoveEventListener} removeEventListener function to remove an event listener.
  */
 
 /**
@@ -301,25 +311,27 @@ const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
 const addEventListener = (wdw, prefix, setHref) => {
   const origin = wdw.location.origin;
 
-  wdw.addEventListener(
-    "click",
-    evt => {
-      let element = evt.target;
-      while (element && element.nodeName.toLowerCase() !== "a") {
-        element = element.parentNode;
-      }
-      if (
-        element &&
-        element.nodeName.toLowerCase() === "a" &&
-        element.href.startsWith(origin) &&
-        element.href.indexOf(prefix) >= 0
-      ) {
-        evt.preventDefault();
-        setHref(element.href);
-      }
-    },
-    false
-  );
+  const linkHandler = evt => {
+    let element = evt.target;
+    while (element && element.nodeName.toLowerCase() !== "a") {
+      element = element.parentNode;
+    }
+    if (
+      element &&
+      element.nodeName.toLowerCase() === "a" &&
+      element.href.startsWith(origin) &&
+      element.href.indexOf(prefix) >= 0
+    ) {
+      evt.preventDefault();
+      setHref(element.href);
+    }
+  };
+
+  wdw.addEventListener("click", linkHandler, false);
+
+  wdw.addEventListener("beforeunload", () => {
+    wdw.removeEventListener("click", linkHandler);
+  });
 };
 
 /**

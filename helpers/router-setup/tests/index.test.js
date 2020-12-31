@@ -118,7 +118,7 @@ describe("historyMode and plainHash", () => {
           router.createMithrilRoutes({ onRouteChange });
         }
 
-        expect(wdw.addEventListener.mock.calls.length).toBe(historyMode ? 1 : 0);
+        expect(wdw.addEventListener.mock.calls.length).toBe(historyMode ? 2 : 0);
       });
     });
 

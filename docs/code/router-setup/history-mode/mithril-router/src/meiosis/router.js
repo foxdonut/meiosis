@@ -50,26 +50,28 @@ export const createMithrilRouter = routeConfig => {
   const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) => {
     const prefixLength = prefix.length;
 
-    window.addEventListener(
-      "click",
-      evt => {
-        let element = evt.target;
-        while (element && element.nodeName.toLowerCase() !== "a") {
-          element = element.parentNode;
-        }
-        if (
-          element &&
-          element.nodeName.toLowerCase() === "a" &&
-          element.href.startsWith(origin) &&
-          element.href.indexOf(prefix) >= 0
-        ) {
-          evt.preventDefault();
-          const href = element.href;
-          m.route.set(href.substring(href.indexOf(prefix) + prefixLength));
-        }
-      },
-      false
-    );
+    const linkHandler = evt => {
+      let element = evt.target;
+      while (element && element.nodeName.toLowerCase() !== "a") {
+        element = element.parentNode;
+      }
+      if (
+        element &&
+        element.nodeName.toLowerCase() === "a" &&
+        element.href.startsWith(origin) &&
+        element.href.indexOf(prefix) >= 0
+      ) {
+        evt.preventDefault();
+        const href = element.href;
+        m.route.set(href.substring(href.indexOf(prefix) + prefixLength));
+      }
+    };
+
+    window.addEventListener("click", linkHandler, false);
+
+    window.addEventListener("beforeunload", () => {
+      window.removeEventListener("click", linkHandler);
+    });
 
     return Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
