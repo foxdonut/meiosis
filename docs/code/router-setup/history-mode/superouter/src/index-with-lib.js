@@ -6,8 +6,7 @@ import stream from "mithril/stream";
 import meiosisTracer from "meiosis-tracer";
 
 import { meiosis } from "router-setup-common/src/meiosis";
-import { createApp } from "superouter-common/src/app";
-import { App } from "./app/view";
+import { createApp, App } from "superouter-common/src/app";
 import { router } from "./router/index-with-lib";
 import { syncLocationBar } from "router-setup-common/src/locationBar";
 

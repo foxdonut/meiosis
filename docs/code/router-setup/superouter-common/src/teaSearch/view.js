@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import { Route } from "superouter-common/src/router";
+import { Route } from "../router";
 import { selectors } from "router-setup-common/src/selectors";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];

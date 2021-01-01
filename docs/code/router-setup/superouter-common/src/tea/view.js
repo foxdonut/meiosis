@@ -1,9 +1,8 @@
 import m from "mithril";
 
 import { selectors } from "router-setup-common/src/selectors";
-import { Route, allRoutes } from "superouter-common/src/router";
-import { TeaDetails } from "../teaDetails/view";
-import { getLinkAttrs } from "../router/link";
+import { Route, allRoutes } from "../router";
+import { TeaDetails } from "../teaDetails";
 
 export const Tea = {
   view: ({ attrs: { state, router } }) => [
@@ -17,7 +16,7 @@ export const Tea = {
             m(
               "div",
               { key: tea.id },
-              m("a", getLinkAttrs(router, Route.of.TeaDetails({ id: tea.id })), tea.title)
+              m("a", { href: router.toUrl(Route.of.TeaDetails({ id: tea.id })) }, tea.title)
             )
           )
       ),

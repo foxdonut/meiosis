@@ -24,3 +24,5 @@ export const createApp = router => ({
     teaSearch.Effect(update)
   ]
 });
+
+export { App } from "./view";

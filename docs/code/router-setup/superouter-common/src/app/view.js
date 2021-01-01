@@ -2,10 +2,10 @@ import m from "mithril";
 
 import { selectors } from "router-setup-common/src/selectors";
 import { Home } from "router-setup-common/src/home";
-import { Login } from "superouter-common/src/login";
-import { Settings } from "superouter-common/src/settings";
-import { Tea } from "../tea/view";
-import { TeaSearch } from "../teaSearch/view";
+import { Login } from "../login";
+import { Settings } from "../settings";
+import { Tea } from "../tea";
+import { TeaSearch } from "../teaSearch";
 import { NotFound } from "router-setup-common/src/notFound";
 import { Route } from "superouter-common/src/router";
 
