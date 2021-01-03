@@ -54,10 +54,10 @@ export const createRouter = routeConfig => {
     window.onpopstate();
   };
 
+  const initialRoute = routeMatcher(getPath());
+
   const start = onRouteChange => {
-    const routeChange = () => onRouteChange(routeMatcher(getPath()));
-    routeChange();
-    window.onpopstate = routeChange;
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
 
     const linkHandler = evt => {
       let element = evt.target;
@@ -92,5 +92,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { toUrl, getLinkHandler, start, syncLocationBar };
+  return { initialRoute, toUrl, getLinkHandler, start, syncLocationBar };
 };

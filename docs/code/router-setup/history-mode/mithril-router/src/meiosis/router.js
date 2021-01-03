@@ -2,8 +2,6 @@
 /* See https://meiosis.js.org/router for details. */
 import m from "mithril";
 
-import { selectors } from "router-setup-common/src/selectors";
-
 export const createMithrilRouter = routeConfig => {
   const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 
@@ -47,7 +45,7 @@ export const createMithrilRouter = routeConfig => {
     );
   };
 
-  const createMithrilRoutes = ({ App, onRouteChange, states, update, actions, router }) => {
+  const createMithrilRoutes = ({ onRouteChange, render }) => {
     const prefixLength = prefix.length;
 
     const linkHandler = evt => {
@@ -75,11 +73,9 @@ export const createMithrilRouter = routeConfig => {
 
     return Object.entries(routeConfig).reduce((result, [path, page]) => {
       result[path] = {
-        onmatch: allParams => {
-          const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
-          return onRouteChange(selectors.toRoute(page, params, queryParams));
-        },
-        render: () => m(App, { state: states(), update, actions, router })
+        onmatch: params =>
+          onRouteChange(Object.assign({ page }, separateParamsAndQueryParams(path, params))),
+        render
       };
       return result;
     }, {});

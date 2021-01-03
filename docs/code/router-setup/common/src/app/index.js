@@ -5,7 +5,11 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-export const createApp = () => ({
+export const createApp = router => ({
+  initial: {
+    route: router.initialRoute
+  },
+
   Actions: update => ({
     login: login.Actions(update),
     settings: settings.Actions(update)

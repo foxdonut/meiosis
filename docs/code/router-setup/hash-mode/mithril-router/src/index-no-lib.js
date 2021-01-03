@@ -10,7 +10,7 @@ import { createApp, App } from "router-setup-common/src/app";
 import { router } from "./router/index-no-lib";
 import { syncLocationBar } from "router-setup-common/src/locationBar";
 
-const app = createApp();
+const app = createApp(router);
 const { states, update, actions } = meiosis({ stream, merge, app });
 
 states.map(syncLocationBar(router));
@@ -26,12 +26,8 @@ m.route(
   document.getElementById("app"),
   "/",
   router.createMithrilRoutes({
-    App,
     onRouteChange: route => update({ route: () => route }),
-    states,
-    update,
-    actions,
-    router
+    render: () => m(App, { state: states(), update, actions, router })
   })
 );
 

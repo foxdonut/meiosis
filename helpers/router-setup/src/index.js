@@ -124,9 +124,9 @@
  * @typedef {Object} SyncLocationBarParams
  *
  * @property {string} page
- * @property {*} params
- * @property {*} queryParams
- * @property {boolean} replace
+ * @property {*} [params]
+ * @property {*} [queryParams]
+ * @property {boolean} [replace]
  */
 
 /**
@@ -407,9 +407,7 @@ export const createRouter = ({
         wdw.onpopstate();
       });
     }
-    const routeChange = () => onRouteChange(toRoute(getPath()));
-    routeChange();
-    wdw.onpopstate = routeChange;
+    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
   const syncLocationBar = ({ page, params, queryParams, replace }) => {

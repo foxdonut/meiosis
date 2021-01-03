@@ -125,7 +125,7 @@ describe("historyMode and plainHash", () => {
     describe("generic router", () => {
       const createRouterFn = pipe(createRouterConfig, createRouter);
 
-      describe("start triggers initial route", () => {
+      describe("initial route", () => {
         const initialRouteCases = [
           ["slash", "/", {}, { page: Route.Home, params: {} }],
           ["empty", "", {}, { page: Route.Home, params: {} }],
@@ -161,14 +161,6 @@ describe("historyMode and plainHash", () => {
           const router = createRouterFn(Object.assign({ wdw: createWindow(path) }, qsConfig));
 
           expect(router.initialRoute).toMatchObject(expectedResult);
-
-          const onRouteChange = jest.fn();
-
-          router.start(onRouteChange);
-
-          const calls = onRouteChange.mock.calls;
-          expect(calls.length).toBe(1);
-          expect(calls[0][0]).toMatchObject(expectedResult);
         });
       });
 
@@ -185,8 +177,8 @@ describe("historyMode and plainHash", () => {
         wdw.onpopstate();
 
         const calls = onRouteChange.mock.calls;
-        expect(calls.length).toBe(2);
-        expect(calls[1][0]).toMatchObject({
+        expect(calls.length).toBe(1);
+        expect(calls[0][0]).toMatchObject({
           page: Route.Login,
           params: {}
         });

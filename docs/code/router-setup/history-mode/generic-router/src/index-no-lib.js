@@ -10,7 +10,7 @@ import { createApp, App } from "router-setup-common/src/app";
 import { router } from "./router/index-no-lib";
 import { syncLocationBar } from "router-setup-common/src/locationBar";
 
-const app = createApp();
+const app = createApp(router);
 const { states, update, actions } = meiosis({ stream, merge, app });
 
 router.start(route => update({ route: () => route }));

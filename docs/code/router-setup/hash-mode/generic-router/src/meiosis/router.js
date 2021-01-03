@@ -45,10 +45,10 @@ export const createRouter = routeConfig => {
     return { page: match.value, params: match.params, queryParams };
   };
 
+  const initialRoute = routeMatcher(getPath());
+
   const start = onRouteChange => {
-    const routeChange = () => onRouteChange(routeMatcher(getPath()));
-    routeChange();
-    window.onpopstate = routeChange;
+    window.onpopstate = () => onRouteChange(routeMatcher(getPath()));
   };
 
   const syncLocationBar = route => {
@@ -60,5 +60,5 @@ export const createRouter = routeConfig => {
     }
   };
 
-  return { toUrl, start, syncLocationBar };
+  return { initialRoute, toUrl, start, syncLocationBar };
 };
