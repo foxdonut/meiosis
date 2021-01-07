@@ -1,7 +1,7 @@
 /* Equivalent of this code, you can also npm install meiosis-setup */
 /* See https://meiosis.js.org/setup for details. */
 export const meiosis = ({ stream, merge, app }) => {
-  const update = stream();
+  const update = stream.stream();
 
   const states = stream.scan((state, patch) => merge(state, patch), app.initial || {}, update);
 

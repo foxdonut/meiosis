@@ -5,9 +5,9 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-export const createApp = router => ({
+export const createApp = initialRoute => ({
   initial: {
-    route: router.initialRoute
+    route: initialRoute
   },
 
   Actions: update => ({

@@ -82,9 +82,9 @@ export const createMithrilRouter = routeConfig => {
   };
 
   const syncLocationBar = route => {
-    const { page, params } = route;
+    const { page, params, queryParams } = route;
     if (page) {
-      const url = toUrl(page, params);
+      const url = toUrl(page, params, queryParams);
       if (url !== getUrl()) {
         const fn = route.replace ? "replaceState" : "pushState";
         window.history[fn].call(window.history, {}, "", url);

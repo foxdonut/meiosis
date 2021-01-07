@@ -7,8 +7,11 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-export const createApp = (): App<State, Patch, AppActions> => ({
-  initial: {},
+// FIXME
+export const createApp = (initialRoute: any): App<State, Patch, AppActions> => ({
+  initial: {
+    route: initialRoute
+  },
 
   Actions: (update): AppActions => ({
     login: login.Actions(update),

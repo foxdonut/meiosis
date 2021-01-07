@@ -28,6 +28,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "feather-route-matcher": "^4.0.0",
+    "flyd": "^0.2.8",
     "meiosis-router-setup": "^1.0.0-alpha.8",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",

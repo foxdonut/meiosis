@@ -5,9 +5,10 @@ import { selectors } from "router-setup-common/src/selectors";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
+// FIXME
 export const TeaSearch = () => ({
   view: ({ attrs: { state, router } }) => {
-    const teaType = selectors.teaType(state);
+    const teaType = selectors.queryParams(state).type;
 
     return [
       m("h3", "Tea Search Page"),

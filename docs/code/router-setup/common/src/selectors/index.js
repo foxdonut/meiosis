@@ -9,6 +9,5 @@ export const selectors = {
     params,
     queryParams,
     replace: true
-  }),
-  teaType: state => state.teaType || selectors.queryParams(state).type
+  })
 };

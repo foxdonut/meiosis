@@ -10,7 +10,7 @@ import { createApp, App } from "./app";
 import { State, Patch, AppActions } from "./app/types";
 import { router } from "./router/index-with-lib";
 
-const app = createApp();
+const app = createApp(router.initialRoute);
 const { states, update, actions } = meiosis<State, Patch, AppActions>({
   stream: Stream,
   accumulator: merge,
