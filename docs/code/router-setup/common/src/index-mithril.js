@@ -5,15 +5,15 @@ import flyd from "flyd";
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
 
-import { meiosis } from "router-setup-common/src/meiosis";
-import { createApp, App } from "router-setup-common/src/app";
-import { syncLocationBar } from "router-setup-common/src/locationBar";
+import { meiosis } from "./meiosis";
+import { createApp, App } from "./app";
+import { selectors } from "./selectors";
 
 export const setupApp = router => {
   const app = createApp(router.initialRoute);
   const { states, update, actions } = meiosis({ stream: flyd, merge, app });
 
-  states.map(syncLocationBar(router));
+  states.map(state => router.syncLocationBar(selectors.route(state)));
 
   // Only for using Meiosis Tracer in development.
   meiosisTracer({

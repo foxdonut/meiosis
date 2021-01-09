@@ -90,7 +90,7 @@
  *
  * @param {string} page the page ID.
  * @param {*} [params] the path parameters.
- * @param {*} [queryParams] the path parameters.
+ * @param {*} [queryParams] the query parameters.
  *
  * @return {string} the URL.
  */
@@ -307,6 +307,7 @@ const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
  *
  * @param {Window} wdw
  * @param {string} prefix
+ * @param {function(string):void} setHref
  */
 const addEventListener = (wdw, prefix, setHref) => {
   const origin = wdw.location.origin;
@@ -338,7 +339,7 @@ const addEventListener = (wdw, prefix, setHref) => {
  * Helper that creates a `toUrl` function.
  *
  * @param {RouteConfig} routeConfig
- * @param {*} getStatePath
+ * @param {function(string):string} getStatePath
  *
  * @return {ToUrl}
  */
@@ -415,6 +416,25 @@ export const createRouter = ({
   };
 
   return { initialRoute, toUrl, start, syncLocationBar };
+};
+
+/**
+ * Helper for route change effects.
+ */
+export const RouteChangeEffect = ({
+  update,
+  Effects,
+  isRouteChanged = state => state.routeChanged,
+  routeChangedPatch = { routeChanged: false }
+}) => {
+  const routeChangeUpdate = patch => update([patch, routeChangedPatch]);
+  const effects = Effects.map(Effect => Effect(routeChangeUpdate));
+
+  return state => {
+    if (isRouteChanged(state)) {
+      effects.forEach(effect => effect(state));
+    }
+  };
 };
 
 // ----- Mithril

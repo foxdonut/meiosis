@@ -3,9 +3,11 @@
 import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 import m from "mithril";
+import stream from "mithril/stream";
 import * as Superouter from "superouter";
+import merge from "mergerino";
 
-import { createRouter, createMithrilRouter } from "../src/index";
+import { createRouter, createMithrilRouter, RouteChangeEffect } from "../src/index";
 
 const pipe = (f, g) => a => g(f(a));
 
@@ -264,6 +266,42 @@ describe("mithril router", () => {
       page: Route.UserProfile,
       params: { id: "42" },
       queryParams: { sport: "tennis" }
+    });
+  });
+});
+
+describe("route change effect", () => {
+  test("creates an effect for route changes", () => {
+    const Effect1 = update => state => {
+      if (state.route.page === Route.Home) {
+        update({ effect1: true });
+      }
+    };
+
+    const Effect2 = update => state => {
+      if (state.route.page === Route.Login) {
+        update({ effect2: true });
+      }
+    };
+
+    const update = stream();
+    const states = stream.scan(merge, { route: { page: Route.UserProfile } }, update);
+    const effect = RouteChangeEffect({ update, Effects: [Effect1, Effect2] });
+    states.map(effect);
+
+    update({ route: { page: Route.Home }, routeChanged: true });
+    expect(states()).toMatchObject({
+      route: { page: Route.Home },
+      routeChanged: false,
+      effect1: true
+    });
+
+    update({ route: { page: Route.Login }, routeChanged: true });
+    expect(states()).toMatchObject({
+      route: { page: Route.Login },
+      routeChanged: false,
+      effect1: true,
+      effect2: true
     });
   });
 });
