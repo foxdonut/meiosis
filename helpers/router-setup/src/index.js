@@ -16,34 +16,48 @@
  */
 
 /**
+ * Route params.
+ *
+ * @typedef {Object.<string, string>} Params
+ */
+
+/**
+ * Route query params.
+ *
+ * @typedef {Object.<string, any>} QueryParams
+ */
+
+/**
  * A route in the application state.
  *
  * @typedef {Object} Route
  *
- * @property {*} match the match returned by the router.
- * @property {*} queryParams an object with the query parameters.
+ * @property {string} page the page corresponding to the route.
+ * @property {Params} params the match returned by the router.
+ * @property {QueryParams} queryParams an object with the query parameters.
  * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
 /**
  * A route matcher resolves a URL to a route.
  *
+ * @template M
  * @callback RouteMatcher
  *
  * @param {string} url the URL to resolve.
  *
- * @return {*} the matched route.
+ * @return {M} the matched route.
  */
 
 /**
- * A function to convert routes.
+ * A function to convert the match from the router library to an object with `page` and `params`.
  *
- * @callback ConvertMatchToRoute
+ * @template M
+ * @callback ConvertMatch
  *
- * @param {*} match the route match returned by the router library, augmented with `queryParams` for
- * the query params.
+ * @param {M} match the route match returned by the router library
  *
- * @return {*} the converted route.
+ * @return {{page: string, params: Params}} the converted object.
  */
 
 /**
@@ -53,7 +67,7 @@
  *
  * @param {string} query the query string to parse.
  *
- * @return {Object.<string,any>} the result of parsing the query string.
+ * @return {QueryParams} the result of parsing the query string.
  */
 
 /**
@@ -61,7 +75,7 @@
  *
  * @callback QueryStringStringify
  *
- * @param {Object.<string,any>} query the query string object.
+ * @param {QueryParams} query the query string object.
  *
  * @return {string} the stringified query string.
  */
@@ -89,8 +103,8 @@
  * @callback ToUrl
  *
  * @param {string} page the page ID.
- * @param {*} [params] the path parameters.
- * @param {*} [queryParams] the query parameters.
+ * @param {Params} [params] the path parameters.
+ * @param {QueryParams} [queryParams] the query parameters.
  *
  * @return {string} the URL.
  */
@@ -107,7 +121,7 @@
  *
  * @param {Route} route
  *
- * @return {void}
+ * @return {any}
  */
 
 /**
@@ -117,15 +131,15 @@
  *
  * @param {OnRouteChange} onRouteChange callback function for when the route changes.
  *
- * @return {void}
+ * @return {any}
  */
 
 /**
  * @typedef {Object} SyncLocationBarParams
  *
  * @property {string} page
- * @property {*} [params]
- * @property {*} [queryParams]
+ * @property {Params} [params]
+ * @property {QueryParams} [queryParams]
  * @property {boolean} [replace]
  */
 
@@ -154,7 +168,7 @@
  *
  * @callback PushState
  *
- * @param {*} state the state object
+ * @param {any} state the state object
  * @param {string} title the document title - most browsers ignore this parameter
  * @param {string} url the new history entry's URL
  *
@@ -166,7 +180,7 @@
  *
  * @callback Onpopstate
  *
- * @param {*} event the event.
+ * @param {any} event the event.
  *
  * @return {void}
  */
@@ -196,8 +210,8 @@
  * @callback AddEventListener
  *
  * @param {string} type
- * @param {*} listener
- * @param {*} options
+ * @param {any} listener
+ * @param {any} options
  */
 
 /**
@@ -206,7 +220,7 @@
  * @callback RemoveEventListener
  *
  * @param {string} type
- * @param {*} listener
+ * @param {any} listener
  */
 
 /**
@@ -225,17 +239,19 @@
 /**
  * Configuration to create a router.
  *
+ * @template M
  * @typedef {Object} RouterConfig
  *
- * @property {RouteMatcher} routeMatcher the function that matches routes.
- * @property {RouteConfig} [routeConfig] the route configuration. If not provided, `toUrl` must be
- * provided.
- * @property {ToUrl} [toUrl] the `toUrl` function. If not provided, `routeConfig` must be provided
- * and `toUrl` is constructed from `routeConfig`.
+ * @property {RouteMatcher<M>} routeMatcher the function that matches routes.
+ * @property {ConvertMatch<M>} convertMatch a function to convert a router library match to a
+ * route.
+ * @property {RouteConfig} [routeConfig] the route configuration. If not provided, `toUrl` must
+ * be provided.
+ * @property {ToUrl} [toUrl] the `toUrl` function. If not provided, `routeConfig` must be
+ * provided and `toUrl` is constructed from `routeConfig`.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you are
- * using history mode, you need to provide server side routing support.
- * @property {ConvertMatchToRoute} [convertMatchToRoute] a function to convert a match to a route.
- * If not provided, defaults to the identity function.
+ * using history mode, you need to provide server side routing support. If not provided, defaults to
+ * the identity function.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `rootPath` is specified.
@@ -252,8 +268,8 @@
  * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {Start} start function to start the router.
- * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
- * state route.
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with
+ * the state route.
  */
 
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
@@ -361,18 +377,19 @@ const ToUrl = (routeConfig, getStatePath) => {
 };
 
 /**
+ * @template M
  * Creates a router.
  *
- * @param {RouterConfig} config
+ * @param {RouterConfig<M>} config
  *
  * @return {Router} the created router.
  */
 export const createRouter = ({
   routeMatcher,
+  convertMatch,
   routeConfig,
   toUrl,
   rootPath,
-  convertMatchToRoute = I,
   plainHash = false,
   queryString = emptyQueryString,
   wdw = window
@@ -396,7 +413,7 @@ export const createRouter = ({
     const match = routeMatcher(matchPath);
     const queryParams = queryString.parse(getQuery(path));
 
-    return convertMatchToRoute(Object.assign({ queryParams }, match));
+    return Object.assign({ queryParams }, convertMatch(match));
   };
 
   const initialRoute = toRoute(getPath());
@@ -459,7 +476,7 @@ export const RouteChangeEffect = ({
  *
  * @callback MithrilOnmatch
  *
- * @param {*} params
+ * @param {any} params
  * @param {string} url
  *
  * @return {void}
@@ -470,7 +487,10 @@ export const RouteChangeEffect = ({
  *
  * @callback MithrilRender
  *
- * @return {void}
+ * @param {any} [vnode] vnode
+ * @param {any} [attrs] attrs
+ *
+ * @return {any} vnode
  */
 
 /**
@@ -494,7 +514,7 @@ export const RouteChangeEffect = ({
  * @typedef {Object} CreateMithrilRoutesConfig
  *
  * @property {OnRouteChange} onRouteChange
- * @property {*} render
+ * @property {any} render
  */
 
 /**
@@ -541,7 +561,7 @@ export const RouteChangeEffect = ({
 /**
  * Mithril instance.
  *
- * @typedef {*} m
+ * @typedef {any} m
  *
  * @property {MithrilDotRoute} route
  * @property {QueryStringStringify} buildQueryString

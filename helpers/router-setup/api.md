@@ -2,73 +2,80 @@
 
 ### Table of Contents
 
--   [Effect][1]
-    -   [Parameters][2]
--   [RouteConfig][3]
--   [RouteMatcher][4]
-    -   [Parameters][5]
--   [CreateRouteMatcher][6]
+-   [RouteConfig][1]
+-   [Params][2]
+-   [QueryParams][3]
+-   [Route][4]
+    -   [Properties][5]
+-   [RouteMatcher][6]
     -   [Parameters][7]
--   [QueryStringParse][8]
+-   [ConvertMatch][8]
     -   [Parameters][9]
--   [QueryStringStringify][10]
+-   [QueryStringParse][10]
     -   [Parameters][11]
--   [QueryStringLib][12]
-    -   [Properties][13]
--   [GetRoute][14]
-    -   [Parameters][15]
+-   [QueryStringStringify][12]
+    -   [Parameters][13]
+-   [QueryStringLib][14]
+    -   [Properties][15]
 -   [ToUrl][16]
     -   [Parameters][17]
--   [LinkHandler][18]
+-   [ToUrl][18]
     -   [Parameters][19]
--   [GetLinkHandler][20]
+-   [OnRouteChange][20]
     -   [Parameters][21]
--   [OnRouteChange][22]
+-   [Start][22]
     -   [Parameters][23]
--   [Start][24]
-    -   [Parameters][25]
--   [LocationBarSync][26]
+-   [SyncLocationBarParams][24]
+    -   [Properties][25]
+-   [SyncLocationBar][26]
     -   [Parameters][27]
--   [Route][28]
-    -   [Properties][29]
--   [FeatherRouterConfig][30]
-    -   [Properties][31]
--   [MithrilDotRoute][32]
-    -   [Properties][33]
--   [m][34]
+-   [DecodeURI][28]
+    -   [Parameters][29]
+-   [PushState][30]
+    -   [Parameters][31]
+-   [Onpopstate][32]
+    -   [Parameters][33]
+-   [Location][34]
     -   [Properties][35]
--   [FeatherRouter][36]
+-   [History][36]
     -   [Properties][37]
--   [MithrilRouterConfig][38]
-    -   [Properties][39]
--   [MithrilOnmatch][40]
+-   [AddEventListener][38]
+    -   [Parameters][39]
+-   [RemoveEventListener][40]
     -   [Parameters][41]
--   [MithrilRender][42]
--   [MithrilRoute][43]
-    -   [Properties][44]
--   [MithrilRoutes][45]
--   [CreateMithrilRoutesConfig][46]
+-   [Window][42]
+    -   [Properties][43]
+-   [RouterConfig][44]
+    -   [Properties][45]
+-   [Router][46]
     -   [Properties][47]
--   [CreateMithrilRoutes][48]
+-   [addEventListener][48]
     -   [Parameters][49]
--   [MithrilRouter][50]
-    -   [Properties][51]
--   [createFeatherRouter][52]
+-   [createRouter][50]
+    -   [Parameters][51]
+-   [RouteChangeEffect][52]
     -   [Parameters][53]
--   [createMithrilRouter][54]
-    -   [Parameters][55]
-
-## Effect
-
-Effect function to synchronize the location bar with the state route.
-
-Type: [Function][56]
-
-### Parameters
-
--   `state` **any** the application state.
-
-Returns **void** 
+-   [MithrilRouterConfig][54]
+    -   [Properties][55]
+-   [MithrilOnmatch][56]
+    -   [Parameters][57]
+-   [MithrilRender][58]
+    -   [Parameters][59]
+-   [MithrilRoute][60]
+    -   [Properties][61]
+-   [MithrilRoutes][62]
+-   [CreateMithrilRoutesConfig][63]
+    -   [Properties][64]
+-   [CreateMithrilRoutes][65]
+    -   [Parameters][66]
+-   [MithrilRouter][67]
+    -   [Properties][68]
+-   [MithrilDotRoute][69]
+    -   [Properties][70]
+-   [m][71]
+    -   [Properties][72]
+-   [createMithrilRouter][73]
+    -   [Parameters][74]
 
 ## RouteConfig
 
@@ -83,61 +90,80 @@ const routeConfig = {
 };
 ```
 
-Type: [Object][57]&lt;[string][58], [string][58]>
+Type: [Object][75]&lt;[string][76], [string][76]>
+
+## Params
+
+Route params.
+
+Type: [Object][75]&lt;[string][76], [string][76]>
+
+## QueryParams
+
+Route query params.
+
+Type: [Object][75]&lt;[string][76], any>
+
+## Route
+
+A route in the application state.
+
+Type: [Object][75]
+
+### Properties
+
+-   `page` **[string][76]** the page corresponding to the route.
+-   `params` **[Params][77]** the match returned by the router.
+-   `queryParams` **[QueryParams][78]** an object with the query parameters.
+-   `replace` **[boolean][79]?** indicates whether to replace the entry in the browser's history.
 
 ## RouteMatcher
 
-A route matcher is created by the [CreateRouteMatcher][6] function from a [RouteConfig][3]
-and resolves a URL to a route.
+A route matcher resolves a URL to a route.
 
-Type: [Function][56]
-
-### Parameters
-
--   `url` **[string][58]** the URL to resolve.
-
-Returns **[Route][59]** the resolved route.
-
-## CreateRouteMatcher
-
-This is the default function exported by
-[feather-route-matcher][60]:
-
-```javascript
-import createRouteMatcher from "feather-route-matcher";
-```
-
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `routeConfig` **[RouteConfig][61]** the route configuration.
+-   `url` **[string][76]** the URL to resolve.
 
-Returns **[RouteMatcher][62]** the created route matcher.
+Returns **M** the matched route.
+
+## ConvertMatch
+
+A function to convert the match from the router library to an object with `page` and `params`.
+
+Type: [Function][80]
+
+### Parameters
+
+-   `match` **M** the route match returned by the router library
+
+Returns **{page: [string][76], params: [Params][77]}** the converted object.
 
 ## QueryStringParse
 
 Query string parse function.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `query` **[string][58]** the query string to parse.
+-   `query` **[string][76]** the query string to parse.
 
-Returns **[Object][57]&lt;[string][58], any>** the result of parsing the query string.
+Returns **[QueryParams][78]** the result of parsing the query string.
 
 ## QueryStringStringify
 
 Query string stringify function.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `query` **[Object][57]&lt;[string][58], any>** the query string object.
+-   `query` **[QueryParams][78]** the query string object.
 
-Returns **[string][58]** the stringified query string.
+Returns **[string][76]** the stringified query string.
 
 ## QueryStringLib
 
@@ -145,70 +171,43 @@ Query string library that provides the `parse` and `stringify` functions. This i
 if your application needs query string support. Examples of query string libraries that work
 out-of-the-box are:
 
--   [query-string][63]
--   [qs][64]
--   [urlon][65]
+-   [query-string][81]
+-   [qs][82]
+-   [urlon][83]
 
 Note that each library supports different features for query strings.
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `parse` **[QueryStringParse][66]** 
--   `stringify` **[QueryStringStringify][67]** 
-
-## GetRoute
-
-Function to generate a [Route][28] from a URL, or from a page ID and params.
-
-Type: [Function][56]
-
-### Parameters
-
--   `page` **[string][58]** the page ID, or the URL.
--   `params` **any?** if using a page ID, the parameters. If using query string support, use
-    the `queryParams` property inside the params object for query string parameters.
-
-Returns **[Route][59]** the route.
+-   `parse` **[QueryStringParse][84]** 
+-   `stringify` **[QueryStringStringify][85]** 
 
 ## ToUrl
 
 Function to generate a URL from a page ID and params.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `page` **[string][58]** the page ID.
--   `params` **any?** the parameters. If using query string support, use the `queryParams`
-    property inside the params object for query string parameters.
+-   `page` **[string][76]** the page ID.
+-   `params` **[Params][77]?** the path parameters.
+-   `queryParams` **[QueryParams][78]?** the query parameters.
 
-Returns **[string][58]** the URL.
+Returns **[string][76]** the URL.
 
-## LinkHandler
+## ToUrl
 
-Link handler function which calls `preventDefault` on the link event and emits the URL.
-
-Type: [Function][56]
+Helper that creates a `toUrl` function.
 
 ### Parameters
 
--   `event` **[Event][68]** 
+-   `routeConfig` **[RouteConfig][86]** 
+-   `getStatePath` **function ([string][76]): [string][76]** 
 
-Returns **void** 
-
-## GetLinkHandler
-
-Function to generate an event handler for a link.
-
-Type: [Function][56]
-
-### Parameters
-
--   `url` **[string][58]** the URL of the link.
-
-Returns **[LinkHandler][69]** the link handler.
+Returns **[ToUrl][87]** 
 
 ## OnRouteChange
 
@@ -219,139 +218,252 @@ state with the route, for example:
 router.start(route => update({ route: () => route }));
 ```
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `route` **[Route][59]** 
+-   `route` **[Route][88]** 
 
-Returns **void** 
+Returns **any** 
 
 ## Start
 
 Function to start the router.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `onRouteChange` **[OnRouteChange][70]** callback function for when the route changes.
+-   `onRouteChange` **[OnRouteChange][89]** callback function for when the route changes.
 
-Returns **void** 
+Returns **any** 
 
-## LocationBarSync
+## SyncLocationBarParams
+
+Type: [Object][75]
+
+### Properties
+
+-   `page` **[string][76]** 
+-   `params` **[Params][77]?** 
+-   `queryParams` **[QueryParams][78]?** 
+-   `replace` **[boolean][79]?** 
+
+## SyncLocationBar
 
 Function that synchronizes the location bar with the state route.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `route` **[Route][59]** the route from the application state.
+-   `syncLocationBarParams` **[SyncLocationBarParams][90]** 
 
 Returns **void** 
 
-## Route
+## DecodeURI
 
-A route in the application state.
+Built-in function to decode a URI.
 
-Type: [Object][57]
+Type: [Function][80]
+
+### Parameters
+
+-   `uri` **[string][76]** the URI.
+
+Returns **[string][76]** the decoded URI.
+
+## PushState
+
+Built-in function to change the location.
+
+Type: [Function][80]
+
+### Parameters
+
+-   `state` **any** the state object
+-   `title` **[string][76]** the document title - most browsers ignore this parameter
+-   `url` **[string][76]** the new history entry's URL
+
+Returns **void** 
+
+## Onpopstate
+
+Built-in callback function when the location changes.
+
+Type: [Function][80]
+
+### Parameters
+
+-   `event` **any** the event.
+
+Returns **void** 
+
+## Location
+
+Built-in `location` object, defined for testing purposes.
+
+Type: [Object][75]
 
 ### Properties
 
--   `page` **[string][58]** the page ID.
--   `params` **any** an object with the path parameters, and query string parameters under
-    the `queryParams` property.
--   `url` **[string][58]** the URL of the route.
+-   `hash` **[string][76]** 
+-   `origin` **[string][76]** 
+-   `pathname` **[string][76]** 
+-   `search` **[string][76]** 
 
-## FeatherRouterConfig
+## History
 
-Configuration to create a Feather router.
+Built-in `history` object, defined for testing purposes.
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `createRouteMatcher` **[CreateRouteMatcher][71]** the feather route matcher function.
--   `routeConfig` **[RouteConfig][61]** the route configuration.
--   `queryString` **[QueryStringLib][72]?** the query string library to use. You only need to
-    provide this if your application requires query string support.
--   `plainHash` **[boolean][73]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
+-   `pushState` **[PushState][91]** 
+
+## AddEventListener
+
+Built-in callback function to add an event listener.
+
+Type: [Function][80]
+
+### Parameters
+
+-   `type` **[string][76]** 
+-   `listener` **any** 
+-   `options` **any** 
+
+## RemoveEventListener
+
+Built-in callback function to remove an event listener.
+
+Type: [Function][80]
+
+### Parameters
+
+-   `type` **[string][76]** 
+-   `listener` **any** 
+
+## Window
+
+Built-in `window` object, defined for testing purposes.
+
+Type: [Object][75]
+
+### Properties
+
+-   `decodeURI` **[DecodeURI][92]** function to decode a URI.
+-   `location` **[Location][93]** the current location.
+-   `history` **[History][94]** the window's history.
+-   `onpopstate` **[Onpopstate][95]** callback function when the location changes.
+-   `addEventListener` **[AddEventListener][96]** function to add an event listener.
+-   `removeEventListener` **[RemoveEventListener][97]** function to remove an event listener.
+
+## RouterConfig
+
+Configuration to create a router.
+
+Type: [Object][75]
+
+### Properties
+
+-   `routeMatcher` **[RouteMatcher][98]&lt;M>** the function that matches routes.
+-   `convertMatch` **[ConvertMatch][99]&lt;M>** a function to convert a router library match to a
+    route.
+-   `routeConfig` **[RouteConfig][86]?** the route configuration. If not provided, `toUrl` must
+    be provided.
+-   `toUrl` **[ToUrl][87]?** the `toUrl` function. If not provided, `routeConfig` must be
+    provided and `toUrl` is constructed from `routeConfig`.
+-   `rootPath` **[string][76]?** if specified, uses history mode instead of hash mode. If you are
+    using history mode, you need to provide server side routing support. If not provided, defaults to
+    the identity function.
+-   `plainHash` **[boolean][79]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
     `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
-    if `historyMode` is `true`.
--   `historyMode` **[boolean][73]?** if `true`, uses history mode instead of hash mode. If you
-    are using history mode, you need to provide server side routing support. By default,
-    `historyMode` is `false`.
--   `routeProp` **[string][58]?** this is the property in your state where the route is
-    stored. Defaults to `"route"`.
+    if `rootPath` is specified.
+-   `queryString` **[QueryStringLib][100]?** the query string library to use. You only need to
+    provide this if your application requires query string support.
+-   `wdw` **[Window][101]?** the `window`, used for testing purposes.
 
-## MithrilDotRoute
+## Router
 
-Mithril route property.
+This is the router that is created by [createRouter][50].
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `prefix` **[string][58]** 
+-   `initialRoute` **[Route][88]** the initial route as parsed from the location bar.
+-   `toUrl` **[ToUrl][87]** function to generate a URL.
+-   `start` **[Start][102]** function to start the router.
+-   `syncLocationBar` **[SyncLocationBar][103]** function that synchronizes the location bar with
+    the state route.
 
-## m
+## addEventListener
 
-Mithril instance.
+Helper to intercept link clicks in history mode.
 
-Type: any
+### Parameters
 
-### Properties
+-   `wdw` **[Window][101]** 
+-   `prefix` **[string][76]** 
+-   `setHref` **function ([string][76]): void** 
 
--   `route` **[MithrilDotRoute][74]** 
--   `buildQueryString` **[QueryStringStringify][67]** 
+## createRouter
 
-## FeatherRouter
+### Parameters
 
-This is the router that is created by [createFeatherRouter][52].
+-   `config` **[RouterConfig][104]&lt;M>** 
+    -   `config.routeMatcher`  
+    -   `config.convertMatch`  
+    -   `config.routeConfig`  
+    -   `config.toUrl`  
+    -   `config.rootPath`  
+    -   `config.plainHash`   (optional, default `false`)
+    -   `config.queryString`   (optional, default `emptyQueryString`)
+    -   `config.wdw`   (optional, default `window`)
 
-Type: [Object][57]
+Returns **[Router][105]** the created router.
 
-### Properties
+## RouteChangeEffect
 
--   `initialRoute` **[Route][59]** the initial route as parsed from the location bar.
--   `getRoute` **[GetRoute][75]** function to generate a route.
--   `toUrl` **[ToUrl][76]** function to generate a URL.
--   `getLinkHandler` **[GetLinkHandler][77]** when using history mode, ...
--   `start` **[Start][78]** function to start the router.
--   `locationBarSync` **[LocationBarSync][79]** function that synchronizes the location bar with the
-    state route.
--   `effect` **[Effect][80]** effect function to synchronize the location bar with the state route.
+Helper for route change effects.
+
+### Parameters
+
+-   `$0` **[Object][75]** 
+    -   `$0.update`  
+    -   `$0.Effects`  
+    -   `$0.isRouteChanged`   (optional, default `state=>state.routeChanged`)
+    -   `$0.routeChangedPatch`   (optional, default `{routeChanged:false}`)
 
 ## MithrilRouterConfig
 
 Configuration to create a Mithril router.
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `m` **[m][81]** the Mithril instance.
--   `routeConfig` **[RouteConfig][61]** the route configuration.
--   `plainHash` **[boolean][73]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
+-   `m` **[m][106]** the Mithril instance.
+-   `routeConfig` **[RouteConfig][86]** the route configuration.
+-   `rootPath` **[string][76]?** if specified, uses history mode instead of hash mode. If you
+    are using history mode, you need to provide server side routing support.
+-   `plainHash` **[boolean][79]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
     `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
     if `historyMode` is `true`.
--   `historyMode` **[boolean][73]?** if `true`, uses history mode instead of hash mode. If you
-    are using history mode, you need to provide server side routing support. By default,
-    `historyMode` is `false`.
--   `routeProp` **[string][58]?** this is the property in your state where the route is
-    stored. Defaults to `"route"`.
+-   `wdw` **[Window][101]?** the `window`, used for testing purposes.
 
 ## MithrilOnmatch
 
 Mithril `onmatch` function.
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
 -   `params` **any** 
--   `url` **[string][58]** 
+-   `url` **[string][76]** 
 
 Returns **void** 
 
@@ -359,40 +471,42 @@ Returns **void**
 
 Mithril `render` function.
 
-Type: [Function][56]
+Type: [Function][80]
 
-Returns **void** 
+### Parameters
+
+-   `vnode` **any?** vnode
+-   `attrs` **any?** attrs
+
+Returns **any** vnode
 
 ## MithrilRoute
 
 Mithril route.
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `onmatch` **[MithrilOnmatch][82]** 
--   `render` **[MithrilRender][83]** 
+-   `onmatch` **[MithrilOnmatch][107]** 
+-   `render` **[MithrilRender][108]** 
 
 ## MithrilRoutes
 
 Mithril routes.
 
-Type: [Object][57]&lt;[string][58], [MithrilRoute][84]>
+Type: [Object][75]&lt;[string][76], [MithrilRoute][109]>
 
 ## CreateMithrilRoutesConfig
 
 Parameters to `createMithrilRoutes`.
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `onRouteChange` **[OnRouteChange][70]** 
--   `App` **any** 
--   `states` **any** 
--   `update` **any** 
--   `actions` **any** 
+-   `onRouteChange` **[OnRouteChange][89]** 
+-   `render` **any** 
 
 ## CreateMithrilRoutes
 
@@ -409,244 +523,292 @@ m.route(
 );
 ```
 
-Type: [Function][56]
+Type: [Function][80]
 
 ### Parameters
 
--   `config` **[CreateMithrilRoutesConfig][85]** 
+-   `config` **[CreateMithrilRoutesConfig][110]** 
 
-Returns **[MithrilRoutes][86]** Mithril routes.
+Returns **[MithrilRoutes][111]** Mithril routes.
 
 ## MithrilRouter
 
-This is the router that is created by [createMithrilRouter][54].
+This is the router that is created by [createMithrilRouter][73].
 
-Type: [Object][57]
+Type: [Object][75]
 
 ### Properties
 
--   `initialRoute` **[Route][59]** the initial route as parsed from the location bar.
--   `createMithrilRoutes` **[CreateMithrilRoutes][87]** creates Mithril routes suitable for passing
+-   `createMithrilRoutes` **[CreateMithrilRoutes][112]** creates Mithril routes suitable for passing
     as the third argument to `m.route`.
--   `getRoute` **[GetRoute][75]** function to generate a route.
--   `toUrl` **[ToUrl][76]** function to generate a URL.
--   `locationBarSync` **[LocationBarSync][79]** function that synchronizes the location bar with the
+-   `toUrl` **[ToUrl][87]** function to generate a URL.
+-   `syncLocationBar` **[SyncLocationBar][103]** function that synchronizes the location bar with the
     state route.
--   `effect` **[Effect][80]** effect function to synchronize the location bar with the state route.
 
-## createFeatherRouter
+## MithrilDotRoute
 
-Sets up a router using
-[feather-route-matcher][60].
+Mithril route property.
 
-### Parameters
+Type: [Object][75]
 
--   `config` **[FeatherRouterConfig][88]** 
-    -   `config.createRouteMatcher`  
-    -   `config.routeConfig`  
-    -   `config.queryString`   (optional, default `emptyQueryString`)
-    -   `config.plainHash`   (optional, default `false`)
-    -   `config.historyMode`   (optional, default `false`)
-    -   `config.routeProp`   (optional, default `"route"`)
+### Properties
 
-Returns **[FeatherRouter][89]** 
+-   `prefix` **[string][76]** 
+
+## m
+
+Mithril instance.
+
+Type: any
+
+### Properties
+
+-   `route` **[MithrilDotRoute][113]** 
+-   `buildQueryString` **[QueryStringStringify][85]** 
 
 ## createMithrilRouter
 
-Sets up a router using
-[Mithril Router][90].
+Sets up a router using [Mithril Router][114].
 
 ### Parameters
 
--   `config` **[MithrilRouterConfig][91]** 
+-   `config` **[MithrilRouterConfig][115]** 
     -   `config.m`  
     -   `config.routeConfig`  
+    -   `config.rootPath`  
     -   `config.plainHash`   (optional, default `false`)
-    -   `config.historyMode`   (optional, default `false`)
-    -   `config.routeProp`   (optional, default `"route"`)
+    -   `config.wdw`   (optional, default `window`)
 
-Returns **[MithrilRouter][92]** 
+Returns **[MithrilRouter][116]** 
 
-[1]: #effect
+[1]: #routeconfig
 
-[2]: #parameters
+[2]: #params
 
-[3]: #routeconfig
+[3]: #queryparams
 
-[4]: #routematcher
+[4]: #route
 
-[5]: #parameters-1
+[5]: #properties
 
-[6]: #createroutematcher
+[6]: #routematcher
 
-[7]: #parameters-2
+[7]: #parameters
 
-[8]: #querystringparse
+[8]: #convertmatch
 
-[9]: #parameters-3
+[9]: #parameters-1
 
-[10]: #querystringstringify
+[10]: #querystringparse
 
-[11]: #parameters-4
+[11]: #parameters-2
 
-[12]: #querystringlib
+[12]: #querystringstringify
 
-[13]: #properties
+[13]: #parameters-3
 
-[14]: #getroute
+[14]: #querystringlib
 
-[15]: #parameters-5
+[15]: #properties-1
 
 [16]: #tourl
 
-[17]: #parameters-6
+[17]: #parameters-4
 
-[18]: #linkhandler
+[18]: #tourl-1
 
-[19]: #parameters-7
+[19]: #parameters-5
 
-[20]: #getlinkhandler
+[20]: #onroutechange
 
-[21]: #parameters-8
+[21]: #parameters-6
 
-[22]: #onroutechange
+[22]: #start
 
-[23]: #parameters-9
+[23]: #parameters-7
 
-[24]: #start
+[24]: #synclocationbarparams
 
-[25]: #parameters-10
+[25]: #properties-2
 
-[26]: #locationbarsync
+[26]: #synclocationbar
 
-[27]: #parameters-11
+[27]: #parameters-8
 
-[28]: #route
+[28]: #decodeuri
 
-[29]: #properties-1
+[29]: #parameters-9
 
-[30]: #featherrouterconfig
+[30]: #pushstate
 
-[31]: #properties-2
+[31]: #parameters-10
 
-[32]: #mithrildotroute
+[32]: #onpopstate
 
-[33]: #properties-3
+[33]: #parameters-11
 
-[34]: #m
+[34]: #location
 
-[35]: #properties-4
+[35]: #properties-3
 
-[36]: #featherrouter
+[36]: #history
 
-[37]: #properties-5
+[37]: #properties-4
 
-[38]: #mithrilrouterconfig
+[38]: #addeventlistener
 
-[39]: #properties-6
+[39]: #parameters-12
 
-[40]: #mithrilonmatch
+[40]: #removeeventlistener
 
-[41]: #parameters-12
+[41]: #parameters-13
 
-[42]: #mithrilrender
+[42]: #window
 
-[43]: #mithrilroute
+[43]: #properties-5
 
-[44]: #properties-7
+[44]: #routerconfig
 
-[45]: #mithrilroutes
+[45]: #properties-6
 
-[46]: #createmithrilroutesconfig
+[46]: #router
 
-[47]: #properties-8
+[47]: #properties-7
 
-[48]: #createmithrilroutes
+[48]: #addeventlistener-1
 
-[49]: #parameters-13
+[49]: #parameters-14
 
-[50]: #mithrilrouter
+[50]: #createrouter
 
-[51]: #properties-9
+[51]: #parameters-15
 
-[52]: #createfeatherrouter
+[52]: #routechangeeffect
 
-[53]: #parameters-14
+[53]: #parameters-16
 
-[54]: #createmithrilrouter
+[54]: #mithrilrouterconfig
 
-[55]: #parameters-15
+[55]: #properties-8
 
-[56]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[56]: #mithrilonmatch
 
-[57]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[57]: #parameters-17
 
-[58]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[58]: #mithrilrender
 
-[59]: #route
+[59]: #parameters-18
 
-[60]: https://github.com/HenrikJoreteg/feather-route-matcher
+[60]: #mithrilroute
 
-[61]: #routeconfig
+[61]: #properties-9
 
-[62]: #routematcher
+[62]: #mithrilroutes
 
-[63]: https://github.com/sindresorhus/query-string
+[63]: #createmithrilroutesconfig
 
-[64]: https://github.com/ljharb/qs
+[64]: #properties-10
 
-[65]: https://github.com/cerebral/urlon
+[65]: #createmithrilroutes
 
-[66]: #querystringparse
+[66]: #parameters-19
 
-[67]: #querystringstringify
+[67]: #mithrilrouter
 
-[68]: https://developer.mozilla.org/docs/Web/API/Event
+[68]: #properties-11
 
-[69]: #linkhandler
+[69]: #mithrildotroute
 
-[70]: #onroutechange
+[70]: #properties-12
 
-[71]: #createroutematcher
+[71]: #m
 
-[72]: #querystringlib
+[72]: #properties-13
 
-[73]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[73]: #createmithrilrouter
 
-[74]: #mithrildotroute
+[74]: #parameters-20
 
-[75]: #getroute
+[75]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[76]: #tourl
+[76]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[77]: #getlinkhandler
+[77]: #params
 
-[78]: #start
+[78]: #queryparams
 
-[79]: #locationbarsync
+[79]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[80]: #effect
+[80]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[81]: #m
+[81]: https://github.com/sindresorhus/query-string
 
-[82]: #mithrilonmatch
+[82]: https://github.com/ljharb/qs
 
-[83]: #mithrilrender
+[83]: https://github.com/cerebral/urlon
 
-[84]: #mithrilroute
+[84]: #querystringparse
 
-[85]: #createmithrilroutesconfig
+[85]: #querystringstringify
 
-[86]: #mithrilroutes
+[86]: #routeconfig
 
-[87]: #createmithrilroutes
+[87]: #tourl
 
-[88]: #featherrouterconfig
+[88]: #route
 
-[89]: #featherrouter
+[89]: #onroutechange
 
-[90]: https://mithril.js.org/route.html
+[90]: #synclocationbarparams
 
-[91]: #mithrilrouterconfig
+[91]: #pushstate
 
-[92]: #mithrilrouter
+[92]: #decodeuri
+
+[93]: #location
+
+[94]: #history
+
+[95]: #onpopstate
+
+[96]: #addeventlistener
+
+[97]: #removeeventlistener
+
+[98]: #routematcher
+
+[99]: #convertmatch
+
+[100]: #querystringlib
+
+[101]: #window
+
+[102]: #start
+
+[103]: #synclocationbar
+
+[104]: #routerconfig
+
+[105]: #router
+
+[106]: #m
+
+[107]: #mithrilonmatch
+
+[108]: #mithrilrender
+
+[109]: #mithrilroute
+
+[110]: #createmithrilroutesconfig
+
+[111]: #mithrilroutes
+
+[112]: #createmithrilroutes
+
+[113]: #mithrildotroute
+
+[114]: https://mithril.js.org/route.html
+
+[115]: #mithrilrouterconfig
+
+[116]: #mithrilrouter

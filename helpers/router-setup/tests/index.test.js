@@ -39,11 +39,7 @@ const routeConfig = {
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertMatchToRoute = ({ value, params, queryParams }) => ({
-  page: value,
-  params,
-  queryParams
-});
+const convertMatch = ({ value, params }) => ({ page: value, params });
 
 const plainHashAndHistoryModeCases = [
   ["default hash", {}, "#!"],
@@ -58,7 +54,7 @@ describe("historyMode and plainHash", () => {
     const createWindow = path => mockWindow(caseConfig.rootPath, prefix, path);
 
     const createRouterConfig = config =>
-      Object.assign({ routeMatcher, convertMatchToRoute, routeConfig }, caseConfig, config);
+      Object.assign({ routeMatcher, convertMatch, routeConfig }, caseConfig, config);
 
     const createMithrilConfig = config => Object.assign({ m, routeConfig }, caseConfig, config);
 
@@ -225,22 +221,6 @@ describe("generic router", () => {
 
   test("requires routeConfig or toUrl", () => {
     expect(() => createRouter({ routeMatcher })).toThrow("routeConfig or toUrl is required");
-  });
-
-  test("uses identity as default for convertMatchToRoute", () => {
-    const path = "/user/42?sport=tennis";
-    const router = createRouter({
-      routeMatcher,
-      routeConfig,
-      queryString,
-      wdw: mockWindow(null, "#!", path)
-    });
-
-    expect(router.initialRoute).toMatchObject({
-      value: Route.UserProfile,
-      params: { id: "42" },
-      queryParams: { sport: "tennis" }
-    });
   });
 });
 
