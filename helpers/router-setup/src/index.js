@@ -1,5 +1,7 @@
 // @ts-check
 
+// ----- Type definitions
+
 /**
  * Route configuration. This is a plain object that associates route path templates to string page
  * IDs. Route path templates may contain parameters by using `:` as a prefix. For example:
@@ -16,15 +18,9 @@
  */
 
 /**
- * Route params.
+ * Route and query string params.
  *
- * @typedef {Object.<string, string>} Params
- */
-
-/**
- * Route query params.
- *
- * @typedef {Object.<string, any>} QueryParams
+ * @typedef {Object.<string, any>} Params
  */
 
 /**
@@ -33,8 +29,7 @@
  * @typedef {Object} Route
  *
  * @property {string} page the page corresponding to the route.
- * @property {Params} params the match returned by the router.
- * @property {QueryParams} queryParams an object with the query parameters.
+ * @property {Params} params and object with route and query string params.
  * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
@@ -67,7 +62,7 @@
  *
  * @param {string} query the query string to parse.
  *
- * @return {QueryParams} the result of parsing the query string.
+ * @return {Params} the result of parsing the query string.
  */
 
 /**
@@ -75,7 +70,7 @@
  *
  * @callback QueryStringStringify
  *
- * @param {QueryParams} query the query string object.
+ * @param {Params} query the query string object.
  *
  * @return {string} the stringified query string.
  */
@@ -104,7 +99,6 @@
  *
  * @param {string} page the page ID.
  * @param {Params} [params] the path parameters.
- * @param {QueryParams} [queryParams] the query parameters.
  *
  * @return {string} the URL.
  */
@@ -139,7 +133,6 @@
  *
  * @property {string} page
  * @property {Params} [params]
- * @property {QueryParams} [queryParams]
  * @property {boolean} [replace]
  */
 
@@ -272,10 +265,10 @@
  * the state route.
  */
 
+// ----- Helpers
+
 const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
 const I = x => x;
-
-const getPathWithoutQuery = path => path.replace(/\?.*/, "");
 
 const getQuery = path => {
   const idx = path.indexOf("?");
@@ -285,6 +278,19 @@ const getQuery = path => {
 export const getQueryString = (queryString, queryParams = {}) => {
   const query = queryString.stringify(queryParams);
   return (query.length > 0 ? "?" : "") + query;
+};
+
+const separateParamsAndQueryParams = (path, allParams) => {
+  const pathParams = (path.match(/(:[^/]*)/g) || []).map(key => key.substring(1));
+
+  return Object.entries(allParams).reduce(
+    (result, [key, value]) => {
+      const slot = pathParams.indexOf(key) >= 0 ? "params" : "queryParams";
+      result[slot][key] = value;
+      return result;
+    },
+    { params: {}, queryParams: {} }
+  );
 };
 
 const getConfig = (rootPath, plainHash) => {
@@ -299,11 +305,39 @@ const createGetUrl = (prefix, historyMode, wdw) =>
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
 
+/**
+ * Helper that creates a `toUrl` function.
+ *
+ * @param {RouteConfig} routeConfig
+ * @param {function(string):string} getStatePath
+ * @param {QueryStringLib} queryString
+ *
+ * @return {ToUrl}
+ */
+const ToUrl = (routeConfig, getStatePath, queryString) => {
+  const pathLookup = Object.entries(routeConfig).reduce(
+    (result, [path, page]) => Object.assign(result, { [page]: path }),
+    {}
+  );
+
+  return (page, allParams = {}) => {
+    const path = getStatePath(pathLookup[page]);
+    const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
+
+    return (
+      (path.match(/(:[^/]*)/g) || []).reduce(
+        (result, pathParam) =>
+          result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
+        path
+      ) + getQueryString(queryString, queryParams)
+    );
+  };
+};
+
 const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl) => {
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath);
-  return (page, params = {}, queryParams = {}) =>
-    prefix + toUrlFn(page, params) + getQueryString(queryString, queryParams);
+  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath, queryString);
+  return (page, params = {}) => prefix + toUrlFn(page, params);
 };
 
 const emptyQueryString = {
@@ -351,30 +385,7 @@ const addEventListener = (wdw, prefix, setHref) => {
   });
 };
 
-/**
- * Helper that creates a `toUrl` function.
- *
- * @param {RouteConfig} routeConfig
- * @param {function(string):string} getStatePath
- *
- * @return {ToUrl}
- */
-const ToUrl = (routeConfig, getStatePath) => {
-  const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, page]) => Object.assign(result, { [page]: path }),
-    {}
-  );
-
-  return (page, params = {}) => {
-    const path = getStatePath(pathLookup[page]);
-
-    return (path.match(/(:[^/]*)/g) || []).reduce(
-      (result, pathParam) =>
-        result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
-      path
-    );
-  };
-};
+// ----- Generic router
 
 /**
  * @template M
@@ -398,6 +409,10 @@ export const createRouter = ({
     throw "routeMatcher is required";
   }
 
+  if (!convertMatch) {
+    throw "convertMatch is required";
+  }
+
   if (!routeConfig && !toUrl) {
     throw "routeConfig or toUrl is required";
   }
@@ -409,11 +424,16 @@ export const createRouter = ({
   toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
   const toRoute = path => {
-    const matchPath = getPathWithoutQuery(path) || "/";
+    let matchPath = path || "/";
+    if (matchPath.startsWith("?")) {
+      matchPath = "/" + matchPath;
+    }
     const match = routeMatcher(matchPath);
+    const converted = convertMatch(match);
     const queryParams = queryString.parse(getQuery(path));
+    const params = Object.assign(queryParams, converted.params);
 
-    return Object.assign({ queryParams }, convertMatch(match));
+    return Object.assign(converted, { params });
   };
 
   const initialRoute = toRoute(getPath());
@@ -428,8 +448,8 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
   };
 
-  const syncLocationBar = ({ page, params, queryParams, replace }) => {
-    doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
+  const syncLocationBar = ({ page, params, replace }) => {
+    doSyncLocationBar({ replace, url: toUrl(page, params), getUrl, wdw });
   };
 
   return { initialRoute, toUrl, start, syncLocationBar };
@@ -567,19 +587,6 @@ export const RouteChangeEffect = ({
  * @property {QueryStringStringify} buildQueryString
  */
 
-const separateParamsAndQueryParams = (path, allParams) => {
-  const pathParams = (path.match(/(:[^/]*)/g) || []).map(key => key.substring(1));
-
-  return Object.entries(allParams).reduce(
-    (result, [key, value]) => {
-      const slot = pathParams.indexOf(key) >= 0 ? "params" : "queryParams";
-      result[slot][key] = value;
-      return result;
-    },
-    { params: {}, queryParams: {} }
-  );
-};
-
 /**
  * Sets up a router using [Mithril Router](https://mithril.js.org/route.html).
  *
@@ -621,17 +628,16 @@ export const createMithrilRouter = ({
     return Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: params =>
-          onRouteChange(Object.assign({ page }, separateParamsAndQueryParams(path, params))),
+        onmatch: params => onRouteChange({ page, params }),
         render
       };
       return result;
     }, {});
   };
 
-  const syncLocationBar = ({ page, params, queryParams, replace }) => {
+  const syncLocationBar = ({ page, params, replace }) => {
     if (page) {
-      doSyncLocationBar({ replace, url: toUrl(page, params, queryParams), getUrl, wdw });
+      doSyncLocationBar({ replace, url: toUrl(page, params), getUrl, wdw });
     }
   };
 

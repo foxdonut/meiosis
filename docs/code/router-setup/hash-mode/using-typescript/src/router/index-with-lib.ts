@@ -8,9 +8,14 @@ import { createRouter, Router, RouteMatcher, ConvertMatchToRoute } from "meiosis
 import * as queryString from "query-string";
 import { router5Config } from "router-setup-common/src/router";
 
-const router5 = createRouter5(router5Config);
+const router5 = createRouter5(router5Config, { queryParamsMode: "loose" });
 
-const routeMatcher: RouteMatcher = router5.matchPath;
+// const routeMatcher: RouteMatcher = router5.matchPath;
+const routeMatcher: RouteMatcher = url => {
+  const result = router5.matchPath(url);
+  console.log("result:", JSON.stringify(result));
+  return result;
+};
 const convertMatchToRoute: ConvertMatchToRoute = ({ name, params, queryParams }) => ({
   page: name,
   params,

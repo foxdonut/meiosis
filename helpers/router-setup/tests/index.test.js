@@ -88,8 +88,7 @@ describe("historyMode and plainHash", () => {
             {
               url,
               page: Route.UserProfile,
-              params: { id: "42" },
-              queryParams: { sport: "tennis" }
+              params: { id: "42", sport: "tennis" }
             },
             options
           );
@@ -131,13 +130,13 @@ describe("historyMode and plainHash", () => {
             "slash with queryParams",
             "/?sport=tennis",
             { queryString },
-            { page: Route.Home, queryParams: { sport: "tennis" } }
+            { page: Route.Home, params: { sport: "tennis" } }
           ],
           [
             "empty with queryParams",
             "?sport=tennis",
             { queryString },
-            { page: Route.Home, queryParams: { sport: "tennis" } }
+            { page: Route.Home, params: { sport: "tennis" } }
           ],
           ["just a route", "/login", {}, { page: Route.Login, params: {} }],
           ["with params", "/user/42", {}, { page: Route.UserProfile, params: { id: "42" } }],
@@ -145,13 +144,13 @@ describe("historyMode and plainHash", () => {
             "with queryParams",
             "/login?sport=tennis",
             { queryString },
-            { page: Route.Login, queryParams: { sport: "tennis" } }
+            { page: Route.Login, params: { sport: "tennis" } }
           ],
           [
             "with params and queryParams",
             "/user/42?sport=tennis",
             { queryString },
-            { page: Route.UserProfile, params: { id: "42" }, queryParams: { sport: "tennis" } }
+            { page: Route.UserProfile, params: { id: "42", sport: "tennis" } }
           ]
         ];
 
@@ -198,9 +197,9 @@ describe("historyMode and plainHash", () => {
         const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
         const router = createRouterFn({ routeMatcher, toUrl, queryString, wdw });
 
-        const result = router.toUrl(Route.of.UserProfile({ id: "42" }), {}, { sport: "tennis" });
+        const result = router.toUrl(Route.of.UserProfile({ id: "42" }));
 
-        expect(result).toBe(prefix + "/user/42?sport=tennis");
+        expect(result).toBe(prefix + "/user/42");
       });
     });
 
@@ -219,8 +218,14 @@ describe("generic router", () => {
     expect(() => createRouter({})).toThrow("routeMatcher is required");
   });
 
+  test("requires convertMatch", () => {
+    expect(() => createRouter({ routeMatcher })).toThrow("convertMatch is required");
+  });
+
   test("requires routeConfig or toUrl", () => {
-    expect(() => createRouter({ routeMatcher })).toThrow("routeConfig or toUrl is required");
+    expect(() => createRouter({ routeMatcher, convertMatch })).toThrow(
+      "routeConfig or toUrl is required"
+    );
   });
 });
 
@@ -244,8 +249,7 @@ describe("mithril router", () => {
     expect(calls.length).toBe(1);
     expect(calls[0][0]).toEqual({
       page: Route.UserProfile,
-      params: { id: "42" },
-      queryParams: { sport: "tennis" }
+      params: { id: "42", sport: "tennis" }
     });
   });
 });

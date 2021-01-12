@@ -1,6 +1,6 @@
 import merge from "mergerino";
 import m from "mithril";
-import Stream from "mithril/stream";
+import flyd from "flyd";
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from "meiosis-tracer";
@@ -12,7 +12,7 @@ import { router } from "./router/index-with-lib";
 
 const app = createApp(router.initialRoute);
 const { states, update, actions } = meiosis<State, Patch, AppActions>({
-  stream: Stream,
+  stream: flyd.stream,
   accumulator: merge,
   app
 });

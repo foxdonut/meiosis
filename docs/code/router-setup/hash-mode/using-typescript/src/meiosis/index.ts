@@ -1,6 +1,8 @@
 /* Equivalent of this code, you can also npm install meiosis-setup */
 /* See https://meiosis.js.org/setup for details. */
-import Stream from "mithril/stream";
+import * as flyd from "flyd";
+
+type Stream<T> = flyd.Stream<T>;
 
 export type Accumulator<S, P> = (state: S, patch: P) => S;
 export type Service<S, P> = (state: S) => P;
@@ -31,7 +33,7 @@ export const meiosis = <S, P, A>({
 }: MeiosisConfig<S, P, A>): Meiosis<S, P, A> => {
   const update: Stream<P> = stream();
 
-  const states: Stream<S> = Stream.scan(
+  const states: Stream<S> = flyd.scan(
     (state, patch) => accumulator(state, patch),
     app.initial,
     update

@@ -1,3 +1,4 @@
+import { RouteChangeEffect } from "meiosis-router-setup";
 import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
@@ -16,6 +17,10 @@ export const createApp = initialRoute => ({
   }),
 
   Effects: update => [
+    RouteChangeEffect({
+      update,
+      Effects: []
+    }),
     home.Effect(update),
     login.Effect(update),
     settings.Effect(update),

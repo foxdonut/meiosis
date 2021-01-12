@@ -1,4 +1,7 @@
-import Stream from "mithril/stream";
+import * as flyd from "flyd";
+
+type Stream<T> = flyd.Stream<T>;
+
 import { Router } from "meiosis-router-setup";
 import { Service, Effect } from "../meiosis";
 
