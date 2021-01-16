@@ -94,6 +94,17 @@
  */
 
 /**
+ * Function to convert a page and params to a route.
+ *
+ * @callback ToRoute
+ *
+ * @param {string} page the page ID.
+ * @param {Params} [params] the path parameters.
+ *
+ * @return {Route} the route.
+ */
+
+/**
  * Function to generate a URL from a page ID and params.
  *
  * @callback ToUrl
@@ -260,6 +271,7 @@
  * @typedef {Object} Router
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
+ * @property {ToRoute} toRoute function to convert a page and params to a route.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {Start} start function to start the router.
  * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with
@@ -300,6 +312,8 @@ const getConfig = (rootPath, plainHash) => {
 
   return { prefix, historyMode };
 };
+
+const toRoute = (page, params = {}) => ({ page, params, routeChanged: true });
 
 const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
@@ -424,7 +438,7 @@ export const createRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
-  const toRoute = path => {
+  const getRoute = path => {
     let matchPath = path || "/";
     if (matchPath.startsWith("?")) {
       matchPath = "/" + matchPath;
@@ -437,7 +451,7 @@ export const createRouter = ({
     return Object.assign(converted, { params, routeChanged: true });
   };
 
-  const initialRoute = toRoute(getPath());
+  const initialRoute = getRoute(getPath());
 
   const start = onRouteChange => {
     if (historyMode) {
@@ -446,14 +460,14 @@ export const createRouter = ({
         wdw.onpopstate();
       });
     }
-    wdw.onpopstate = () => onRouteChange(toRoute(getPath()));
+    wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
   const syncLocationBar = ({ page, params, replace }) => {
     doSyncLocationBar({ replace, url: toUrl(page, params), getUrl, wdw });
   };
 
-  return { initialRoute, toUrl, start, syncLocationBar };
+  return { initialRoute, toRoute, toUrl, start, syncLocationBar };
 };
 
 /**
@@ -566,6 +580,7 @@ export const RouteChangeEffect = ({
  *
  * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
  * as the third argument to `m.route`.
+ * @property {ToRoute} toRoute function to convert a page and params to a route.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
@@ -642,5 +657,5 @@ export const createMithrilRouter = ({
     }
   };
 
-  return { createMithrilRoutes, toUrl, syncLocationBar };
+  return { createMithrilRoutes, toRoute, toUrl, syncLocationBar };
 };

@@ -64,6 +64,16 @@ describe("historyMode and plainHash", () => {
     ];
 
     describe.each(routerCases)("%s", (_label, createRouterFn) => {
+      test("toRoute converts a page and params to a route", () => {
+        const router = createRouterFn();
+
+        expect(router.toRoute(Route.Login)).toEqual({
+          page: Route.Login,
+          params: {},
+          routeChanged: true
+        });
+      });
+
       test("toUrl converts route to URL", () => {
         const path = "/login";
         const wdw = createWindow(path);
