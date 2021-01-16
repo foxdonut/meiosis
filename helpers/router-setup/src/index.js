@@ -30,6 +30,7 @@
  *
  * @property {string} page the page corresponding to the route.
  * @property {Params} params and object with route and query string params.
+ * @property {boolean} routeChanged indicates that the route changed.
  * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
@@ -433,7 +434,7 @@ export const createRouter = ({
     const queryParams = queryString.parse(getQuery(path));
     const params = Object.assign(queryParams, converted.params);
 
-    return Object.assign(converted, { params });
+    return Object.assign(converted, { params, routeChanged: true });
   };
 
   const initialRoute = toRoute(getPath());
@@ -461,8 +462,8 @@ export const createRouter = ({
 export const RouteChangeEffect = ({
   update,
   Effects,
-  isRouteChanged = state => state.routeChanged,
-  routeChangedPatch = { routeChanged: false }
+  isRouteChanged = state => state.route.routeChanged,
+  routeChangedPatch = { route: { routeChanged: false } }
 }) => {
   const routeChangeUpdate = patch => update([patch, routeChangedPatch]);
   const effects = Effects.map(Effect => Effect(routeChangeUpdate));

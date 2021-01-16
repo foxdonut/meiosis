@@ -273,17 +273,15 @@ describe("route change effect", () => {
     const effect = RouteChangeEffect({ update, Effects: [Effect1, Effect2] });
     states.map(effect);
 
-    update({ route: { page: Route.Home }, routeChanged: true });
+    update({ route: { page: Route.Home, routeChanged: true } });
     expect(states()).toMatchObject({
-      route: { page: Route.Home },
-      routeChanged: false,
+      route: { page: Route.Home, routeChanged: false },
       effect1: true
     });
 
-    update({ route: { page: Route.Login }, routeChanged: true });
+    update({ route: { page: Route.Login, routeChanged: true } });
     expect(states()).toMatchObject({
-      route: { page: Route.Login },
-      routeChanged: false,
+      route: { page: Route.Login, routeChanged: false },
       effect1: true,
       effect2: true
     });
