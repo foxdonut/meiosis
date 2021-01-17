@@ -8,7 +8,11 @@ import { teaSearch } from "../teaSearch";
 
 export const createApp = router => ({
   initial: {
-    route: router.initialRoute
+    route: router.initialRoute,
+    login: {
+      username: "",
+      password: ""
+    }
   },
 
   Actions: update => ({
@@ -19,10 +23,15 @@ export const createApp = router => ({
   Effects: update => [
     RouteChangeEffect({
       update,
-      Effects: [settings.Effect(router), tea.Effect, teaDetails.Effect, teaSearch.Effect]
+      Effects: [
+        login.Effect(router),
+        settings.Effect(router),
+        tea.Effect,
+        teaDetails.Effect,
+        teaSearch.Effect
+      ]
     }),
-    home.Effect(update),
-    login.Effect(update, router)
+    home.Effect(update)
   ]
 });
 

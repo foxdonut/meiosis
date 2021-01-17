@@ -3,7 +3,7 @@ import m from "mithril";
 export const Login = {
   view: ({ attrs: { state, actions } }) => [
     m("h3", "Login Page"),
-    state.login.message ? m("div", state.login.message) : null,
+    state.login.message && m("div", state.login.message),
     m(
       "form.form",
       m(
