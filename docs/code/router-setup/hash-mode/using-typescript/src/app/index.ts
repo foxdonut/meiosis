@@ -1,3 +1,4 @@
+import { Router } from "meiosis-router-setup";
 import { State, Patch, AppActions } from "./types";
 import { App } from "../meiosis";
 import { home } from "../home";
@@ -8,9 +9,9 @@ import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
 // FIXME
-export const createApp = (initialRoute: any): App<State, Patch, AppActions> => ({
+export const createApp = (router: Router): App<State, Patch, AppActions> => ({
   initial: {
-    route: initialRoute
+    route: router.initialRoute
   },
 
   Actions: (update): AppActions => ({

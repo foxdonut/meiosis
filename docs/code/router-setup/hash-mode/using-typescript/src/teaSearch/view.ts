@@ -1,14 +1,13 @@
 import m from "mithril";
 
 import { Route } from "router-setup-common/src/router";
-import { selectors } from "router-setup-common/src/selectors";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 // FIXME
 export const TeaSearch = () => ({
   view: ({ attrs: { state, router } }) => {
-    const teaType = selectors.queryParams(state).type;
+    const teaType = state.route.params.type;
 
     return [
       m("h3", "Tea Search Page"),
@@ -24,7 +23,7 @@ export const TeaSearch = () => ({
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, {}, { type })
+                    href: router.toUrl(Route.TeaSearch, { type })
                   },
                   type
                 )

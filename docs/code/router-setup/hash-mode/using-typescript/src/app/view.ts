@@ -6,7 +6,6 @@ import { Settings } from "router-setup-common/src/settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch";
 import { NotFound } from "router-setup-common/src/notFound";
-import { selectors } from "router-setup-common/src/selectors";
 import { Route } from "router-setup-common/src/router";
 import { ViewAttrs } from "./types";
 
@@ -22,7 +21,7 @@ const componentMap = {
 
 export const App: m.Component<ViewAttrs> = {
   view: ({ attrs: { state, update, actions, router } }): any => {
-    const Component = componentMap[selectors.page(state)];
+    const Component = componentMap[state.route.page];
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(

@@ -3,15 +3,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const modes = ["hash", "history"];
-const types = ["no-lib", "with-lib"];
 const examples = ["generic-router", "mithril-router", "superouter"];
 const configs = [];
 
-const createConfig = (mode, type, example) => ({
+const createConfig = (mode, example) => ({
   mode: "development",
-  entry: `./${mode}-mode/${example}/src/index-${type}.js`,
+  entry: `./${mode}-mode/${example}/src/index.js`,
   output: {
-    path: path.join(__dirname, `${mode}-mode/${example}/build-${type}`),
+    path: path.join(__dirname, `${mode}-mode/${example}/build`),
     filename: `generated-app.js`
   },
   plugins: [
@@ -21,7 +20,6 @@ const createConfig = (mode, type, example) => ({
       filename: "index.html",
       chunks: [],
       mode,
-      type,
       example
     })
   ],
@@ -46,18 +44,14 @@ const createConfig = (mode, type, example) => ({
 });
 
 modes.forEach(mode =>
-  types.forEach(type =>
-    examples.forEach(example => {
-      if (!(type === "no-lib" && example === "superouter")) {
-        configs.push(createConfig(mode, type, example));
-      }
-    })
-  )
+  examples.forEach(example => {
+    configs.push(createConfig(mode, example));
+  })
 );
 
 configs.push(
-  Object.assign(createConfig("hash", "with-lib", "using-typescript"), {
-    entry: "./hash-mode/using-typescript/src/index-with-lib.ts",
+  Object.assign(createConfig("hash", "using-typescript"), {
+    entry: "./hash-mode/using-typescript/src/index.ts",
     devtool: "source-map",
     resolve: {
       extensions: [".ts", ".js"],

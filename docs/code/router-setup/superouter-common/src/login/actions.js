@@ -1,4 +1,3 @@
-import { selectors } from "router-setup-common/src/selectors";
 import { Route } from "../router";
 
 export const Actions = update => ({

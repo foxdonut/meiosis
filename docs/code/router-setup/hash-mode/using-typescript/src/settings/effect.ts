@@ -1,14 +1,14 @@
 import { EffectConstructor } from "../app/types";
 import { Route } from "router-setup-common/src/router";
-import { selectors } from "router-setup-common/src/selectors";
+import { router } from "../router";
 
 export const Effect: EffectConstructor = update => state => {
-  if (selectors.page(state) === Route.Settings && !state.user) {
+  if (state.route.page === Route.Settings && !state.user) {
     update({
-      route: selectors.replaceRoute(Route.Login),
+      route: router.replaceRoute(Route.Login),
       login: {
         message: "Please login.",
-        returnTo: selectors.toRoute(Route.Settings)
+        returnTo: router.toRoute(Route.Settings)
       }
     });
   }

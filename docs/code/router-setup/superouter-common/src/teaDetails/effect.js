@@ -1,4 +1,3 @@
-import { selectors } from "router-setup-common/src/selectors";
 import { teaMap } from "router-setup-common/src/teaDetails/data";
 import { Route, allRoutes } from "../router";
 
@@ -14,4 +13,4 @@ export const Effect = update => state =>
         update({ tea: () => ({ [id]: teaMap[id].description }) });
       }
     }
-  })(selectors.page(state));
+  })(state.route.page);

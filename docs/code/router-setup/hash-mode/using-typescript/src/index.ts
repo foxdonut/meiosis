@@ -8,9 +8,9 @@ import meiosisTracer from "meiosis-tracer";
 import { meiosis } from "./meiosis";
 import { createApp, App } from "./app";
 import { State, Patch, AppActions } from "./app/types";
-import { router } from "./router/index-with-lib";
+import { router } from "./router";
 
-const app = createApp(router.initialRoute);
+const app = createApp(router);
 const { states, update, actions } = meiosis<State, Patch, AppActions>({
   stream: flyd.stream,
   accumulator: merge,

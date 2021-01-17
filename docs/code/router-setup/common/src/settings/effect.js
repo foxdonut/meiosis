@@ -1,13 +1,12 @@
 import { Route } from "../router";
-import { selectors } from "../selectors";
 
-export const Effect = update => state => {
-  if (selectors.page(state) === Route.Settings && !state.user) {
+export const Effect = router => update => state => {
+  if (state.route.page === Route.Settings && !state.user) {
     update({
-      route: selectors.replaceRoute(Route.Login),
+      route: router.replaceRoute(Route.Login),
       login: {
         message: "Please login.",
-        returnTo: selectors.toRoute(Route.Settings)
+        returnTo: router.toRoute(Route.Settings)
       }
     });
   }

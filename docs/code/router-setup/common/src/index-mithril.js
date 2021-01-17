@@ -7,13 +7,12 @@ import meiosisTracer from "meiosis-tracer";
 
 import { meiosis } from "./meiosis";
 import { createApp, App } from "./app";
-import { selectors } from "./selectors";
 
 export const setupApp = router => {
-  const app = createApp(router.initialRoute);
+  const app = createApp(router);
   const { states, update, actions } = meiosis({ stream: flyd, merge, app });
 
-  states.map(state => router.syncLocationBar(selectors.route(state)));
+  states.map(state => router.syncLocationBar(state.route));
 
   // Only for using Meiosis Tracer in development.
   meiosisTracer({

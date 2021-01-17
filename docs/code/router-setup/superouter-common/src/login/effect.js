@@ -1,4 +1,3 @@
-import { selectors } from "router-setup-common/src/selectors";
 import { Route, allRoutes } from "../router";
 
 export const Effect = update => state =>
@@ -25,4 +24,4 @@ export const Effect = update => state =>
         });
       }
     }
-  })(selectors.page(state));
+  })(state.route.page);

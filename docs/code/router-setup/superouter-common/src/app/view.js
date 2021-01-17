@@ -1,6 +1,5 @@
 import m from "mithril";
 
-import { selectors } from "router-setup-common/src/selectors";
 import { Home } from "router-setup-common/src/home";
 import { Login } from "../login";
 import { Settings } from "../settings";
@@ -21,7 +20,7 @@ const componentMap = Route.fold({
 
 export const App = {
   view: ({ attrs: { state, actions, router } }) => {
-    const Component = componentMap(selectors.page(state));
+    const Component = componentMap(state.route.page);
     const isActive = tab => (tab === Component ? ".active" : "");
 
     return m(

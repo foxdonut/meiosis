@@ -29,7 +29,7 @@
   "dependencies": {
     "feather-route-matcher": "^4.0.0",
     "flyd": "^0.2.8",
-    "meiosis-router-setup": "^1.0.0-alpha.9",
+    "meiosis-router-setup": "^1.0.0-alpha.13",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "page": "^1.11.6",

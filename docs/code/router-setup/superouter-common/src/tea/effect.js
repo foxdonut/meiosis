@@ -1,4 +1,3 @@
-import { selectors } from "router-setup-common/src/selectors";
 import { teas } from "router-setup-common/src/teaDetails/data";
 import { Route, allRoutes, routes } from "../router";
 
@@ -18,4 +17,4 @@ export const Effect = update => state =>
           update({ loading: true });
       }
     })
-  })(selectors.page(state));
+  })(state.route.page);

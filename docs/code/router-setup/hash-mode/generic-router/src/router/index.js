@@ -36,15 +36,11 @@ const routeMatcher = path => {
 page.configure({ popstate: false, click: false });
 END using page.js */
 
-const convertMatchToRoute = ({ value, params, queryParams }) => ({
-  page: value,
-  params,
-  queryParams
-});
+const convertMatch = ({ value, params }) => ({ page: value, params });
 
 export const router = createRouter({
   routeMatcher,
-  convertMatchToRoute,
+  convertMatch,
   routeConfig,
   queryString
 });

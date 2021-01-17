@@ -1,13 +1,13 @@
 import m from "mithril";
 
 import { Route } from "../router";
-import { selectors } from "../selectors";
+import { PleaseWait } from "../ui";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch = () => ({
   view: ({ attrs: { state, router } }) => {
-    const teaType = selectors.queryParams(state).type;
+    const teaType = state.route.params.type;
 
     return [
       m("h3", "Tea Search Page"),
@@ -23,7 +23,7 @@ export const TeaSearch = () => ({
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, {}, { type })
+                    href: router.toUrl(Route.TeaSearch, { type })
                   },
                   type
                 )
@@ -42,7 +42,8 @@ export const TeaSearch = () => ({
             )
           ]
         )
-      )
+      ),
+      m(PleaseWait, { state })
     ];
   }
 });

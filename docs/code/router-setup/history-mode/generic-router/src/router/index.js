@@ -11,17 +11,13 @@ import { routeConfig } from "router-setup-common/src/router";
 
 const urlMapper = Mapper();
 const routeMatcher = path => urlMapper.map(path, routeConfig);
-const convertMatchToRoute = ({ match, values, queryParams }) => ({
-  page: match,
-  params: values,
-  queryParams
-});
+const convertMatch = ({ match, values }) => ({ page: match, params: values });
 
 export const router = createRouter({
   routeMatcher,
-  convertMatchToRoute,
+  convertMatch,
   routeConfig,
-  rootPath: "/code/router-setup/history-mode/generic-router/build-with-lib",
+  rootPath: "/code/router-setup/history-mode/generic-router/build",
   queryString
 });
 

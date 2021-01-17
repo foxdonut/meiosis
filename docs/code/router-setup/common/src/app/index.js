@@ -6,27 +6,23 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-export const createApp = initialRoute => ({
+export const createApp = router => ({
   initial: {
-    route: initialRoute
+    route: router.initialRoute
   },
 
   Actions: update => ({
-    login: login.Actions(update),
-    settings: settings.Actions(update)
+    login: login.Actions(update, router),
+    settings: settings.Actions(update, router)
   }),
 
   Effects: update => [
     RouteChangeEffect({
       update,
-      Effects: []
+      Effects: [settings.Effect(router), tea.Effect, teaDetails.Effect, teaSearch.Effect]
     }),
     home.Effect(update),
-    login.Effect(update),
-    settings.Effect(update),
-    tea.Effect(update),
-    teaDetails.Effect(update),
-    teaSearch.Effect(update)
+    login.Effect(update, router)
   ]
 });
 

@@ -9,13 +9,13 @@ import queryString from "query-string";
 import { Route } from "superouter-common/src/router";
 
 const routeMatcher = path => Route.matchOr(() => Route.of.NotFound({ any: null }), path);
-const convertMatchToRoute = ({ queryParams, ...match }) => ({ page: match, queryParams });
+const convertMatch = match => ({ page: match, params: {} });
 
 export const router = createRouter({
   routeMatcher,
-  rootPath: "/code/router-setup/history-mode/superouter/build-with-lib",
+  rootPath: "/code/router-setup/history-mode/superouter/build",
   toUrl: Route.toURL,
-  convertMatchToRoute,
+  convertMatch,
   queryString
 });
 

@@ -1,8 +1,7 @@
 import { Route } from "../router";
-import { selectors } from "../selectors";
 
-export const Effect = update => state => {
-  if (selectors.page(state) === Route.Login) {
+export const Effect = (update, router) => state => {
+  if (state.route.page === Route.Login) {
     if (!state.login || state.login.username == null) {
       update({
         login: {
@@ -17,7 +16,7 @@ export const Effect = update => state => {
     (state.login.username || state.login.password) &&
     !confirm("You have unsaved data. Continue?")
   ) {
-    update({ route: () => selectors.toRoute(Route.Login) });
+    update({ route: () => router.toRoute(Route.Login) });
   } else if (state.login) {
     update({ login: undefined });
   }
