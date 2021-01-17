@@ -30,7 +30,7 @@
  *
  * @property {string} page the page corresponding to the route.
  * @property {Params} params and object with route and query string params.
- * @property {boolean} routeChanged indicates that the route changed.
+ * @property {boolean} changed indicates that the route changed.
  * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
  */
 
@@ -272,10 +272,12 @@
  *
  * @property {Route} initialRoute the initial route as parsed from the location bar.
  * @property {ToRoute} toRoute function to convert a page and params to a route.
+ * @property {ToRoute} replaceRoute function to convert a page and params to a route that will
+ * replace the current route in the browser history.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {Start} start function to start the router.
- * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with
- * the state route.
+ * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
+ * state route.
  */
 
 // ----- Helpers
@@ -313,7 +315,8 @@ const getConfig = (rootPath, plainHash) => {
   return { prefix, historyMode };
 };
 
-const toRoute = (page, params = {}) => ({ page, params, routeChanged: true });
+const toRoute = (page, params = {}) => ({ page, params, changed: true });
+const replaceRoute = (page, params = {}) => ({ page, params, changed: true, replace: true });
 
 const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
@@ -448,7 +451,7 @@ export const createRouter = ({
     const queryParams = queryString.parse(getQuery(path));
     const params = Object.assign(queryParams, converted.params);
 
-    return Object.assign(converted, { params, routeChanged: true });
+    return Object.assign(converted, { params, changed: true });
   };
 
   const initialRoute = getRoute(getPath());
@@ -467,7 +470,7 @@ export const createRouter = ({
     doSyncLocationBar({ replace, url: toUrl(page, params), getUrl, wdw });
   };
 
-  return { initialRoute, toRoute, toUrl, start, syncLocationBar };
+  return { initialRoute, toRoute, replaceRoute, toUrl, start, syncLocationBar };
 };
 
 /**
@@ -476,8 +479,8 @@ export const createRouter = ({
 export const RouteChangeEffect = ({
   update,
   Effects,
-  isRouteChanged = state => state.route.routeChanged,
-  routeChangedPatch = { route: { routeChanged: false } }
+  isRouteChanged = state => state.route.changed,
+  routeChangedPatch = { route: { changed: false } }
 }) => {
   const routeChangeUpdate = patch => update([patch, routeChangedPatch]);
   const effects = Effects.map(Effect => Effect(routeChangeUpdate));
@@ -581,6 +584,8 @@ export const RouteChangeEffect = ({
  * @property {CreateMithrilRoutes} createMithrilRoutes creates Mithril routes suitable for passing
  * as the third argument to `m.route`.
  * @property {ToRoute} toRoute function to convert a page and params to a route.
+ * @property {ToRoute} replaceRoute function to convert a page and params to a route that will
+ * replace the current route in the browser history.
  * @property {ToUrl} toUrl function to generate a URL.
  * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
  * state route.
@@ -657,5 +662,5 @@ export const createMithrilRouter = ({
     }
   };
 
-  return { createMithrilRoutes, toRoute, toUrl, syncLocationBar };
+  return { createMithrilRoutes, toRoute, replaceRoute, toUrl, syncLocationBar };
 };

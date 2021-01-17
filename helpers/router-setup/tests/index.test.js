@@ -64,13 +64,45 @@ describe("historyMode and plainHash", () => {
     ];
 
     describe.each(routerCases)("%s", (_label, createRouterFn) => {
-      test("toRoute converts a page and params to a route", () => {
+      test("toRoute converts a page to a route", () => {
         const router = createRouterFn();
 
         expect(router.toRoute(Route.Login)).toEqual({
           page: Route.Login,
           params: {},
-          routeChanged: true
+          changed: true
+        });
+      });
+
+      test("toRoute converts a page and params to a route", () => {
+        const router = createRouterFn();
+
+        expect(router.toRoute(Route.UserProfile, { id: "42" })).toEqual({
+          page: Route.UserProfile,
+          params: { id: "42" },
+          changed: true
+        });
+      });
+
+      test("replaceRoute converts a page to a replace route", () => {
+        const router = createRouterFn();
+
+        expect(router.replaceRoute(Route.Login)).toEqual({
+          page: Route.Login,
+          params: {},
+          changed: true,
+          replace: true
+        });
+      });
+
+      test("toRoute converts a page and params to a replace route", () => {
+        const router = createRouterFn();
+
+        expect(router.replaceRoute(Route.UserProfile, { id: "42" })).toEqual({
+          page: Route.UserProfile,
+          params: { id: "42" },
+          changed: true,
+          replace: true
         });
       });
 
@@ -283,15 +315,15 @@ describe("route change effect", () => {
     const effect = RouteChangeEffect({ update, Effects: [Effect1, Effect2] });
     states.map(effect);
 
-    update({ route: { page: Route.Home, routeChanged: true } });
+    update({ route: { page: Route.Home, changed: true } });
     expect(states()).toMatchObject({
-      route: { page: Route.Home, routeChanged: false },
+      route: { page: Route.Home, changed: false },
       effect1: true
     });
 
-    update({ route: { page: Route.Login, routeChanged: true } });
+    update({ route: { page: Route.Login, changed: true } });
     expect(states()).toMatchObject({
-      route: { page: Route.Login, routeChanged: false },
+      route: { page: Route.Login, changed: false },
       effect1: true,
       effect2: true
     });
