@@ -8,7 +8,7 @@ import { teaSearch } from "../teaSearch";
 
 export const createApp = router => ({
   initial: {
-    route: router.initialRoute,
+    route: router.initialRoute || {},
     login: {
       username: "",
       password: ""
