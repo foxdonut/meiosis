@@ -219,7 +219,8 @@ describe("historyMode and plainHash", () => {
         expect(calls.length).toBe(1);
         expect(calls[0][0]).toMatchObject({
           page: Route.Login,
-          params: {}
+          params: {},
+          changed: true
         });
       });
 
@@ -291,7 +292,8 @@ describe("mithril router", () => {
     expect(calls.length).toBe(1);
     expect(calls[0][0]).toEqual({
       page: Route.UserProfile,
-      params: { id: "42", sport: "tennis" }
+      params: { id: "42", sport: "tennis" },
+      changed: true
     });
   });
 });

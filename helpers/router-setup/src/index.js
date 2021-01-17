@@ -649,7 +649,7 @@ export const createMithrilRouter = ({
     return Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: params => onRouteChange({ page, params }),
+        onmatch: params => onRouteChange({ page, params, changed: true }),
         render
       };
       return result;
