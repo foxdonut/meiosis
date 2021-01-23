@@ -1,3 +1,4 @@
+import { RouteChangeEffect } from "meiosis-router-setup";
 import { home } from "../home";
 import { login } from "../login";
 import { settings } from "../settings";
@@ -7,21 +8,30 @@ import { teaSearch } from "../teaSearch";
 
 export const createApp = router => ({
   initial: {
-    route: router.initialRoute
+    route: router.initialRoute,
+    login: {
+      username: "",
+      password: ""
+    }
   },
 
   Actions: update => ({
-    login: login.Actions(update),
-    settings: settings.Actions(update)
+    login: login.Actions(update, router),
+    settings: settings.Actions(update, router)
   }),
 
   Effects: update => [
-    home.Effect(update),
-    login.Effect(update),
-    settings.Effect(update),
-    tea.Effect(update),
-    teaDetails.Effect(update),
-    teaSearch.Effect(update)
+    RouteChangeEffect({
+      update,
+      Effects: [
+        login.Effect(router),
+        settings.Effect(router),
+        tea.Effect,
+        teaDetails.Effect,
+        teaSearch.Effect
+      ]
+    }),
+    home.Effect(update)
   ]
 });
 

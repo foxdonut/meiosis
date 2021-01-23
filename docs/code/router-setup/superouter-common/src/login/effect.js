@@ -1,27 +1,15 @@
 import { Route, allRoutes } from "../router";
 
-export const Effect = update => state =>
+export const Effect = router => update => state =>
   Route.fold({
     ...allRoutes(() => {
-      if (
-        !state.user &&
-        state.login &&
-        (state.login.username || state.login.password) &&
-        !confirm("You have unsaved data. Continue?")
-      ) {
-        update({ route: () => Route.of.Login() });
-      } else if (state.login) {
-        update({ login: undefined });
+      if (state.login.username || state.login.password) {
+        if (!state.user && !confirm("You have unsaved data. Continue?")) {
+          update({ route: () => router.toRoute(Route.of.Login()) });
+        } else {
+          update({ login: { username: "", password: "" } });
+        }
       }
     }),
-    Login: () => {
-      if (!state.login || state.login.username == null) {
-        update({
-          login: {
-            username: "",
-            password: ""
-          }
-        });
-      }
-    }
+    Login: () => null
   })(state.route.page);

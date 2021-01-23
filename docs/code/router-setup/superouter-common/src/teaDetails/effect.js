@@ -3,14 +3,8 @@ import { Route, allRoutes } from "../router";
 
 export const Effect = update => state =>
   Route.fold({
-    ...allRoutes(() => {
-      if (state.tea) {
-        update({ tea: undefined });
-      }
-    }),
+    ...allRoutes(() => null),
     TeaDetails: ({ id }) => {
-      if (!state.tea || !state.tea[id]) {
-        update({ tea: () => ({ [id]: teaMap[id].description }) });
-      }
+      update({ tea: teaMap[id].description });
     }
   })(state.route.page);

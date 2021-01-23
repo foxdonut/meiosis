@@ -3,18 +3,10 @@ import { Route, allRoutes } from "../router";
 
 export const Effect = update => state =>
   Route.fold({
-    ...allRoutes(() => {
-      if (state.searchTeas) {
-        update({ searchTeas: undefined });
-      }
-    }),
+    ...allRoutes(() => null),
     TeaSearch: () => {
-      if (!state.searchTeas) {
-        (state.loading &&
-          setTimeout(() => {
-            update({ searchTeas, loading: false });
-          }, 1000)) ||
-          update({ loading: true });
-      }
+      setTimeout(() => {
+        update({ searchTeas });
+      }, 1000);
     }
   })(state.route.page);

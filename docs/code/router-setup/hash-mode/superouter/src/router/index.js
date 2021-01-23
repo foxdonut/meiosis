@@ -4,17 +4,23 @@ Instead of meiosis/router.js,
 you can also npm install meiosis-router-setup and use it as shown below:
 */
 
-import { createRouter } from "meiosis-router-setup";
+import { createRouter, getQueryString } from "meiosis-router-setup";
 import queryString from "query-string";
 import { Route } from "superouter-common/src/router";
 
-const routeMatcher = path => Route.matchOr(() => Route.of.NotFound({ any: null }), path);
-const convertMatchToRoute = ({ queryParams, ...match }) => ({ page: match, queryParams });
+const routeMatcher = path => {
+  const idx = path.indexOf("?");
+  return Route.matchOr(
+    () => Route.of.NotFound({ any: null }),
+    idx >= 0 ? path.substring(0, idx) : path
+  );
+};
+const convertMatch = match => ({ page: match, params: {} });
 
 export const router = createRouter({
   routeMatcher,
-  toUrl: Route.toURL,
-  convertMatchToRoute,
+  toUrl: (page, params) => Route.toURL(page) + getQueryString(queryString, params),
+  convertMatch,
   queryString
 });
 

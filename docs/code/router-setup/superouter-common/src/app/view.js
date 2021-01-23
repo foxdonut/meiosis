@@ -42,18 +42,7 @@ export const App = {
           )
         )
       ),
-      m(Component, { state, actions, router }),
-
-      /* Show or hide the Please Wait modal. See public/css/style.css */
-      m(
-        "div",
-        {
-          style: {
-            visibility: state.loading ? "visible" : "hidden"
-          }
-        },
-        m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
-      )
+      m(Component, { state, actions, router })
     );
   }
 };

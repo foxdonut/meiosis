@@ -1,5 +1,6 @@
 import m from "mithril";
 
+import { PleaseWait } from "router-setup-common/src/ui";
 import { Route, allRoutes } from "../router";
 import { TeaDetails } from "../teaDetails";
 
@@ -23,6 +24,7 @@ export const Tea = {
         ...allRoutes(() => null),
         TeaDetails: ({ id }) => m(".col-md-6", m(TeaDetails, { state, id, router }))
       })(state.route.page)
-    )
+    ),
+    m(PleaseWait, { state })
   ]
 };
