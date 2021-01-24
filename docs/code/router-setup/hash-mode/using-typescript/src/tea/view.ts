@@ -2,6 +2,7 @@ import m from "mithril";
 
 import { TeaDetails } from "../teaDetails";
 import { Route } from "router-setup-common/src/router";
+import { PleaseWait } from "router-setup-common/src/ui";
 
 export const Tea = {
   view: ({ attrs: { state, router } }) => [
@@ -21,6 +22,7 @@ export const Tea = {
       ),
       state.route.page === "TeaDetails" &&
         m(".col-md-6", m(TeaDetails, { state, id: state.route.params.id, router }))
-    )
+    ),
+    m(PleaseWait, { state })
   ]
 };

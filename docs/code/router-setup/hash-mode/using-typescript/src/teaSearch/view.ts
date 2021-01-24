@@ -1,6 +1,7 @@
 import m from "mithril";
 
 import { Route } from "router-setup-common/src/router";
+import { PleaseWait } from "router-setup-common/src/ui";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
@@ -42,7 +43,8 @@ export const TeaSearch = () => ({
             )
           ]
         )
-      )
+      ),
+      m(PleaseWait, { state })
     ];
   }
 });

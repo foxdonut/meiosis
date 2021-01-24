@@ -7,13 +7,13 @@ import { createRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
 
-/* BEGIN using feather-route-matcher */
+/* BEGIN using feather-route-matcher
 import createRouteMatcher from "feather-route-matcher";
 
 const routeMatcher = createRouteMatcher(routeConfig);
-/* END using feather-route-matcher */
+END using feather-route-matcher */
 
-/* BEGIN using page.js
+/* BEGIN using page.js */
 import page from "page";
 
 let lastMatch;
@@ -22,8 +22,7 @@ Object.keys(routeConfig).forEach(key => {
   page(key, ctx => {
     lastMatch = {
       value: routeConfig[key],
-      params: ctx.params,
-      queryParams: queryString.parse(ctx.querystring)
+      params: ctx.params
     };
   });
 });
@@ -34,7 +33,7 @@ const routeMatcher = path => {
 };
 
 page.configure({ popstate: false, click: false });
-END using page.js */
+/* END using page.js */
 
 const convertMatch = ({ value, params }) => ({ page: value, params });
 

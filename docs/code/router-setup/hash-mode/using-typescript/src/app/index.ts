@@ -1,4 +1,4 @@
-import { Router } from "meiosis-router-setup";
+import { Router, RouteChangeEffect } from "meiosis-router-setup";
 import { State, Patch, AppActions } from "./types";
 import { App } from "../meiosis";
 import { home } from "../home";
@@ -11,7 +11,11 @@ import { teaSearch } from "../teaSearch";
 // FIXME
 export const createApp = (router: Router): App<State, Patch, AppActions> => ({
   initial: {
-    route: router.initialRoute
+    route: router.initialRoute,
+    login: {
+      username: "",
+      password: ""
+    }
   },
 
   Actions: (update): AppActions => ({
@@ -20,12 +24,11 @@ export const createApp = (router: Router): App<State, Patch, AppActions> => ({
   }),
 
   Effects: update => [
-    home.Effect(update),
-    login.Effect(update),
-    settings.Effect(update),
-    tea.Effect(update),
-    teaDetails.Effect(update),
-    teaSearch.Effect(update)
+    RouteChangeEffect({
+      update,
+      Effects: [login.Effect, settings.Effect, tea.Effect, teaDetails.Effect, teaSearch.Effect]
+    }),
+    home.Effect(update)
   ]
 });
 

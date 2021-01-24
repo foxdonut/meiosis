@@ -1,18 +1,10 @@
 import * as flyd from "flyd";
+import { Route } from "meiosis-router-setup";
 
 type Stream<T> = flyd.Stream<T>;
 
 import { Router } from "meiosis-router-setup";
 import { Service, Effect } from "../meiosis";
-
-/*
-interface Route {
-  page: string;
-  params: any;
-  queryParams: any;
-  replace?: boolean;
-}
-*/
 
 interface Login {
   username: string;
@@ -26,10 +18,10 @@ interface Tea {
 }
 
 export interface State {
-  route?: any; // FIXME
+  route: Route; // FIXME
   user?: string;
   message?: string;
-  login?: Login;
+  login: Login;
   loading?: boolean;
   teas?: Tea[];
   tea?: Tea;
