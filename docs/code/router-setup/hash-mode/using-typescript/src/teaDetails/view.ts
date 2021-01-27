@@ -1,8 +1,9 @@
 import m from "mithril";
+import { ViewAttrs } from "../app/types";
 
-import { Route } from "router-setup-common/src/router";
+import { Route, router } from "../router";
 
-export const TeaDetails = {
-  view: ({ attrs: { state, id, router } }) =>
-    m("div", m("div", state.tea[id]), m("div", m("a", { href: router.toUrl(Route.Tea) }, "Close")))
+export const TeaDetails: m.Component<ViewAttrs> = {
+  view: ({ attrs: { state } }) =>
+    m("div", m("div", state.tea), m("div", m("a", { href: router.toUrl(Route.Tea) }, "Close")))
 };

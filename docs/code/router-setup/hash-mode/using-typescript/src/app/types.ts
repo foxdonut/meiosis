@@ -3,17 +3,19 @@ import { Route } from "meiosis-router-setup";
 
 type Stream<T> = flyd.Stream<T>;
 
-import { Router } from "meiosis-router-setup";
 import { Service, Effect } from "../meiosis";
 
 interface Login {
   username: string;
   password: string;
+  message?: string;
+  returnTo?: Route;
 }
 
 interface Tea {
   id: string;
   type: string;
+  title: string;
   description: string;
 }
 
@@ -24,8 +26,8 @@ export interface State {
   login: Login;
   loading?: boolean;
   teas?: Tea[];
-  tea?: Tea;
-  searchTeas?: Tea[];
+  tea?: string;
+  searchTeas: Tea[];
 }
 
 export type Patch = any;
@@ -52,5 +54,4 @@ export interface ViewAttrs {
   state: State;
   update: Update;
   actions: AppActions;
-  router: Router;
 }

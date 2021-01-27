@@ -1,13 +1,13 @@
 import m from "mithril";
 
-import { Route } from "router-setup-common/src/router";
 import { PleaseWait } from "router-setup-common/src/ui";
+import { ViewAttrs } from "../app/types";
+import { Route, router } from "../router";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
-// FIXME
-export const TeaSearch = () => ({
-  view: ({ attrs: { state, router } }) => {
+export const TeaSearch: m.Component<ViewAttrs> = {
+  view: ({ attrs: { state } }) => {
     const teaType = state.route.params.type;
 
     return [
@@ -47,4 +47,4 @@ export const TeaSearch = () => ({
       m(PleaseWait, { state })
     ];
   }
-});
+};

@@ -8,14 +8,14 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-// FIXME
 export const createApp = (router: Router): App<State, Patch, AppActions> => ({
   initial: {
     route: router.initialRoute,
     login: {
       username: "",
       password: ""
-    }
+    },
+    searchTeas: []
   },
 
   Actions: (update): AppActions => ({

@@ -6,4 +6,4 @@ export const login = {
   Effect
 };
 
-export { Login } from "router-setup-common/src/login/view";
+export { Login } from "./view";

@@ -4,4 +4,4 @@ export const home = {
   Effect
 };
 
-export { Home } from "router-setup-common/src/home/view";
+export { Home } from "./view";

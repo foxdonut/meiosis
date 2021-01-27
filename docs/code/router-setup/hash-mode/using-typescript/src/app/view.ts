@@ -1,13 +1,14 @@
 import m from "mithril";
 
 import { Home } from "../home";
-import { Login } from "router-setup-common/src/login";
-import { Settings } from "router-setup-common/src/settings";
+import { Login } from "../login";
+import { Settings } from "../settings";
 import { Tea } from "../tea";
 import { TeaSearch } from "../teaSearch";
-import { NotFound } from "router-setup-common/src/notFound";
-import { Route } from "router-setup-common/src/router";
+import { NotFound } from "../notFound";
+import { Route } from "../router";
 import { ViewAttrs } from "./types";
+import { router } from "../router";
 
 const componentMap = {
   Home,
@@ -20,9 +21,9 @@ const componentMap = {
 };
 
 export const App: m.Component<ViewAttrs> = {
-  view: ({ attrs: { state, update, actions, router } }): any => {
+  view: ({ attrs: { state, update, actions } }): any => {
     const Component = componentMap[state.route.page];
-    const isActive = tab => (tab === Component ? ".active" : "");
+    const isActive = (tab: m.Component<ViewAttrs>) => (tab === Component ? ".active" : "");
 
     return m(
       "div",
@@ -40,7 +41,7 @@ export const App: m.Component<ViewAttrs> = {
           )
         )
       ),
-      m(Component, { state, update, actions, router })
+      m(Component, { state, update, actions })
     );
   }
 };

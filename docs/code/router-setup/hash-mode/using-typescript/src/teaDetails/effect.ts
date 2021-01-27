@@ -1,6 +1,6 @@
 import { EffectConstructor } from "../app/types";
 import { teaMap } from "router-setup-common/src/teaDetails/data";
-import { Route } from "router-setup-common/src/router";
+import { Route } from "../router";
 
 export const Effect: EffectConstructor = update => state => {
   if (state.route.page === Route.TeaDetails) {

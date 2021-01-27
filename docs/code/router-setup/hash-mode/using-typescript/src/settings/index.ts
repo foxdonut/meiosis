@@ -6,4 +6,4 @@ export const settings = {
   Effect
 };
 
-export { Settings } from "router-setup-common/src/settings/view";
+export { Settings } from "./view";

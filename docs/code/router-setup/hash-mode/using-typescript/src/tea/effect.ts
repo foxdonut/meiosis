@@ -1,4 +1,4 @@
-import { Route } from "router-setup-common/src/router";
+import { Route } from "../router";
 import { EffectConstructor } from "../app/types";
 import { teas } from "router-setup-common/src/teaDetails/data";
 
