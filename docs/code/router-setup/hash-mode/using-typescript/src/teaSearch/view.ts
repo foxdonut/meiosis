@@ -1,13 +1,13 @@
 import m from "mithril";
 
-import { PleaseWait } from "router-setup-common/src/ui";
+import { PleaseWait } from "../ui";
 import { ViewAttrs } from "../app/types";
 import { Route, router } from "../router";
 
 const types = ["Black", "Green", "Herbal", "Oolong"];
 
 export const TeaSearch: m.Component<ViewAttrs> = {
-  view: ({ attrs: { state } }) => {
+  view: ({ attrs: { state, update, actions } }) => {
     const teaType = state.route.params.type;
 
     return [
@@ -44,7 +44,7 @@ export const TeaSearch: m.Component<ViewAttrs> = {
           ]
         )
       ),
-      m(PleaseWait, { state })
+      m(PleaseWait, { state, update, actions })
     ];
   }
 };

@@ -1,5 +1,5 @@
 import { EffectConstructor } from "../app/types";
-import { searchTeas } from "router-setup-common/src/teaSearch/data";
+import { searchTeas } from "../teaSearch/data";
 import { Route } from "../router";
 
 export const Effect: EffectConstructor = update => state => {
