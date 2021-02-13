@@ -566,12 +566,12 @@ describe("routeHelper", (): void => {
         setPath
       });
 
-      expect(router2.parsePath("#/search/42/details/author?filter=recent&page=2&sort=asc")).toEqual(
-        [
-          Route.Search({ id: "42", page: "2", sort: "asc" }),
-          Route.Details({ type: "author", filter: "recent" })
-        ]
-      );
+      expect(
+        router2.parsePath("#/search/42/details/author?filter=recent&page=2&sort=asc")
+      ).toEqual([
+        Route.Search({ id: "42", page: "2", sort: "asc" }),
+        Route.Details({ type: "author", filter: "recent" })
+      ]);
     });
 
     test("createUrlMapperRouter parsePath with parent params", (): void => {
