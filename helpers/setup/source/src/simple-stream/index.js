@@ -24,8 +24,8 @@ export const stream = initial => {
   // Keep track of mapped values so that they are sent to mapped streams in order.
   // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
   let mappedValues = [];
-  const createdStream = value => {
-    if (value !== undefined) {
+  function createdStream(value) {
+    if (arguments.length > 0) {
       latestValue = value;
       mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
@@ -34,7 +34,7 @@ export const stream = initial => {
       }
     }
     return latestValue;
-  };
+  }
   /**
    * @type {import("../common").Map}
    */

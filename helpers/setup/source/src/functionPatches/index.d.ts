@@ -1,5 +1,8 @@
 import { App, LocalPath, Local, Meiosis, StreamLib } from "../common";
 
+/**
+ * A function patch.
+ */
 export type FunctionPatch<S> = (state: S) => S;
 
 export type MeiosisFunctionPatchesConfig<S, A> = {
@@ -16,7 +19,7 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
   app: App<S, FunctionPatch<S>, A>;
 };
 
-declare function _default<S, A>({
+export function _default<S, A>({
   stream,
   app
 }: MeiosisFunctionPatchesConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;

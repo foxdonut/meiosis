@@ -1312,6 +1312,16 @@ describe("simpleStream", () => {
       }
     });
   });
+
+  test("set undefined", done => {
+    const s1 = meiosis.simpleStream.stream();
+
+    s1.map(_value => {
+      done();
+    });
+
+    s1(undefined);
+  });
 });
 
 describe("util", () => {

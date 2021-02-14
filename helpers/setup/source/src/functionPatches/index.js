@@ -7,11 +7,7 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
 /**
  * @template S
- * @callback FunctionPatch
- *
- * @param {S} state current state
- *
- * @return {S} the updated state
+ * @typedef {import("./index").FunctionPatch<S>} FunctionPatch
  */
 
 /**
@@ -38,6 +34,8 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
+
+/** @type {import("./index")._default} */
 export default ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: pipe, app });
 

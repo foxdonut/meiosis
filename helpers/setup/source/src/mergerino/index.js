@@ -1,7 +1,10 @@
 // @ts-check
 
 import commonSetup, { Nest } from "../common";
+// import commonSetup, { setupOne as commonSetupOne, Nest } from "../common";
 import { setMutate } from "../util";
+
+// const compose = (f, g) => x => f(g(x));
 
 /**
  * @template S, P, A
@@ -15,23 +18,28 @@ import { setMutate } from "../util";
  * @property {import("../common").App<S, P, A>} app the app, with optional properties.
  */
 
-/**
- * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
- *
- * @template S, P, A
- * @function meiosis.mergerino.setup
- *
- * @param {MeiosisMergerinoConfig<S, P, A>} config the Meiosis config for use with Mergerino
- *
- * @returns {import("../common").Meiosis<S, P, A>} `{ states, update, actions }`, where
- * `states` and `update` are streams, and `actions` are the created actions.
- */
-export default ({ stream, merge, app }) =>
+/** @type {import("./index")._default} */
+const setup = ({ stream, merge, app }) =>
   commonSetup({
     stream,
     accumulator: merge,
     combine: patches => patches,
     app
   });
+export default setup;
+
+/*
+const createNestPatch = prop => patch => ({ [prop]: patch });
+const nestUpdate = (update, prop) => compose(update, createNestPatch(prop));
+
+export const setupOne = ({ stream, merge, app }) =>
+  commonSetupOne({
+    stream,
+    accumulator: merge,
+    combine: patches => patches,
+    app,
+    nestUpdate
+  });
+*/
 
 export const nest = Nest(path => patch => setMutate({}, path, patch));

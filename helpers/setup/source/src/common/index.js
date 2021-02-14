@@ -4,11 +4,7 @@ import { get } from "../util";
 
 /**
  * @template T
- * @callback Stream
- *
- * @param {T} [value]
- *
- * @return {T} the value
+ * @typedef {import("./index").Stream} Stream<T>
  */
 
 /**
@@ -18,8 +14,6 @@ import { get } from "../util";
  * method.
  *
  * @typedef {(Object|Function)} StreamLib
- *
- * @param {*} [value] the stream's initial value.
  *
  * @property {Function<T>} stream the function to create a stream, if the stream library itself is
  * not a function.
@@ -124,6 +118,14 @@ import { get } from "../util";
  * @property {A} actions
  */
 
+/*
+ * @template S, P, A
+ * @typedef {Object} MeiosisOne
+ *
+ * @property {Stream<P>} update
+ * @property {A} actions
+ */
+
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
@@ -143,7 +145,7 @@ import { get } from "../util";
  * @returns {Meiosis<S, P, A>} `{ states, update, actions }`, where `states` and `update` are
  * streams, and `actions` are the created actions.
  */
-export default ({ stream, accumulator, combine, app }) => {
+const setup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -180,6 +182,45 @@ export default ({ stream, accumulator, combine, app }) => {
 
   return { states, update, actions };
 };
+
+export default setup;
+
+/*
+ * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
+ * use their respective `setup` function instead.
+ *
+ * Patch is merged in to the state by default. Services have access to the state and can return a
+ * patch that further updates the state. State changes by services are available to the next
+ * services in the list.
+ *
+ * After the services have run and the state has been updated, effects are executed and have the
+ * opportunity to trigger more updates.
+ *
+ * @template S, P, A
+ * @function meiosis.common.setup
+ *
+ * param {MeiosisOneConfig<S, P, A>} config the Meiosis config FIXME
+ *
+ * @returns {MeiosisOne<S, P, A>} FIXME
+ */
+/*
+export const setupOne = ({ stream, accumulator, combine, app, nestUpdate }) => {
+  const { states, update, actions } = setup({ stream, accumulator, combine, app });
+
+  const select = prop => {
+    const sub = states.map(state => state[prop]);
+
+    Object.assign(sub, {
+      update: nestUpdate(update, prop),
+      actions: actions ? actions[prop] : undefined
+    });
+
+    return sub;
+  };
+
+  return Object.assign(states, { update, actions, select });
+};
+*/
 
 /**
  * The `path` is stored on the local object for internal use.

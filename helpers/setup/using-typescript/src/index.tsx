@@ -5,10 +5,11 @@ import meiosis, {
   ImmerPatch,
   LocalPatch,
   Local,
+  // MeiosisOne,
+  MergerinoApp,
   MergerinoPatch,
   Stream
-} from "meiosis-setup";
-import { stream, scan } from "meiosis-setup/simple-stream";
+} from "../../source/dist";
 import flyd from "flyd";
 import merge from "mergerino";
 import produce from "immer";
@@ -20,11 +21,13 @@ import { useState } from "preact/hooks";
 import React from "react";
 import ReactDOM from "react-dom";
 
+const { stream, scan } = meiosis.simpleStream;
+
 // simple-stream
 (() => {
-  const s = stream(0);
-  const y = scan((x, y) => x + y, 0, s);
-  y.map(x => x);
+  const s1 = stream<number>(0);
+  const s2 = scan<number, number>((x, y) => x + y, 0, s1);
+  s2.map(x => x);
 })();
 
 // common code
@@ -367,7 +370,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const app: App<State, Patch, Actions> = {
+  const app: MergerinoApp<State, Actions> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -409,7 +412,7 @@ const InitialTemperature = (label: string): Temperature => ({
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const { states, actions } = meiosis.mergerino.setup({ stream, merge, app });
+  const { states, actions } = meiosis.mergerino.setup<State, Actions>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { state: states(), actions })
@@ -550,7 +553,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
     );
 
-  const app: App<State, Patch, Actions> = {
+  const app: MergerinoApp<State, Actions> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -584,7 +587,18 @@ const InitialTemperature = (label: string): Temperature => ({
 
   const App = meiosis.preact.setup<State, Patch, Actions>({ h, useState, Root });
 
-  const { states, actions } = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
+  const { states, update, actions } = meiosis.mergerino.setup<State, Actions>({
+    stream: meiosis.simpleStream,
+    merge,
+    app
+  });
+  // Just testing TypeScript support here.
+  const _test = meiosis.simpleStream.stream<number>();
+  const _init = _test();
+  _test(5);
+  update({ temperature: { air: { value: 21 } } });
+  update({ temperature: { air: { value: x => x + 1 } } });
+  update({ temperature: { air: { value: () => 21 } } });
 
   const element = document.getElementById("preactApp") as HTMLElement;
   preactRender(h(App, { states, actions }), element);
@@ -774,3 +788,190 @@ const InitialTemperature = (label: string): Temperature => ({
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(App, { states, update, actions }), element);
 })();
+
+/*
+// MeiosisOne + mithril + mergerino + mithril-stream
+(() => {
+  type Patch = MergerinoPatch<State>;
+  type ConditionsPatch = MergerinoPatch<Conditions>;
+  type TemperaturePatch = MergerinoPatch<Temperature>;
+  type Update = Stream<Patch>;
+  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
+  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+
+  interface Actions {
+    conditions: ConditionsActions<Patch, ConditionsPatch>;
+    temperature: TemperatureActions<Patch, TemperaturePatch>;
+  }
+
+  interface Attrs {
+    state: MeiosisOne<State, Patch, Actions>;
+  }
+
+  interface SkyOptionAttrs extends Attrs {
+    local: ConditionsLocal;
+    value: string;
+    label: string;
+  }
+
+  interface ConditionsAttrs extends Attrs {
+    local: ConditionsLocal;
+  }
+
+  interface TemperatureAttrs extends Attrs {
+    local: TemperatureLocal;
+  }
+
+  const nest = meiosis.mergerino.nest;
+
+  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+    initial: initialConditions,
+    Actions: (update: Update) => ({
+      togglePrecipitations: (local, value) => {
+        update(local.patch({ precipitations: value }));
+      },
+      changeSky: (local, value) => {
+        update(local.patch({ sky: value }));
+      }
+    })
+  };
+
+  const SkyOption: m.Component<SkyOptionAttrs> = {
+    view: ({ attrs: { state, local, value, label } }) =>
+      m(
+        "label",
+        m("input", {
+          type: "radio",
+          value,
+          checked: local.get(state()).sky === value,
+          // FIXME: evt type
+          onchange: evt => state.actions.conditions.changeSky(local, evt.target.value)
+        }),
+        label
+      )
+  };
+
+  const Conditions: m.Component<ConditionsAttrs> = {
+    view: ({ attrs: { state, local } }) =>
+      m(
+        "div",
+        m(
+          "label",
+          m("input", {
+            type: "checkbox",
+            checked: local.get(state()).precipitations,
+            onchange: evt =>
+              state.actions.conditions.togglePrecipitations(local, evt.target.checked)
+          }),
+          "Precipitations"
+        ),
+        m(
+          "div",
+          m(SkyOption, { state, local, value: "SUNNY", label: "Sunny" }),
+          m(SkyOption, { state, local, value: "CLOUDY", label: "Cloudy" }),
+          m(SkyOption, { state, local, value: "MIX", label: "Mix of sun/clouds" })
+        )
+      )
+  };
+
+  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+    Initial: InitialTemperature,
+    Actions: update => ({
+      increment: (local, amount) => {
+        update(local.patch({ value: x => x + amount }));
+      },
+      changeUnits: local => {
+        update(
+          local.patch(state => {
+            const value = state.value;
+            const newUnits = state.units === "C" ? "F" : "C";
+            const newValue = convert(value, newUnits);
+            return { ...state, value: newValue, units: newUnits };
+          })
+        );
+      }
+    })
+  };
+
+  const Temperature: m.Component<TemperatureAttrs> = {
+    view: ({ attrs: { state, local } }) =>
+      m(
+        "div",
+        local.get(state()).label,
+        " Temperature: ",
+        local.get(state()).value,
+        m.trust("&deg;"),
+        local.get(state()).units,
+        m(
+          "div",
+          m(
+            "button",
+            { onclick: () => state.actions.temperature.increment(local, 1) },
+            "Increment"
+          ),
+          m(
+            "button",
+            { onclick: () => state.actions.temperature.increment(local, -1) },
+            "Decrement"
+          )
+        ),
+        m(
+          "div",
+          m(
+            "button",
+            { onclick: () => state.actions.temperature.changeUnits(local) },
+            "Change Units"
+          )
+        )
+      )
+  };
+
+  const app: App<State, Patch, Actions> = {
+    initial: {
+      conditions: conditions.initial,
+      temperature: {
+        air: temperature.Initial("Air"),
+        water: temperature.Initial("Water")
+      }
+    },
+    Actions: update => ({
+      conditions: conditions.Actions(update),
+      temperature: temperature.Actions(update)
+    })
+  };
+
+  const App: m.Component<Attrs> = {
+    view: ({ attrs: { state } }) =>
+      m(
+        "div",
+        { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+        m(
+          "div",
+          m(Conditions, { state, local: nest("conditions") as ConditionsLocal }),
+          m(Temperature, {
+            state,
+            local: nest(["temperature", "air"]) as TemperatureLocal
+          }),
+          m(Temperature, {
+            state,
+            local: nest(["temperature", "water"]) as TemperatureLocal
+          })
+        ),
+        m("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
+      )
+  };
+
+  const stream = {
+    stream: (value: any) => MStream(value),
+    scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
+  };
+
+  const state = meiosis.mergerino.setupOne<State, Actions>({ stream, merge, app });
+
+  m.mount(document.getElementById("meiosisOneApp") as HTMLElement, {
+    view: () => m(App, { state })
+  });
+
+  state.map(() => m.redraw());
+})();
+*/

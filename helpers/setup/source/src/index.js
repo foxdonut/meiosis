@@ -1,5 +1,7 @@
 import commonSetup from "./common";
+// import commonSetup, { setupOne as commonSetupOne } from "./common";
 import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
+// import mergerinoSetup, { setupOne as mergerinoSetupOne, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
 import immerSetup, { nest as immerNest } from "./immer";
 import preactSetup from "./preact";
@@ -10,9 +12,11 @@ import { get, setMutate, setImmutable } from "./util";
 export default {
   common: {
     setup: commonSetup
+    // setupOne: commonSetupOne
   },
   mergerino: {
     setup: mergerinoSetup,
+    // setupOne: mergerinoSetupOne,
     nest: mergerinoNest
   },
   functionPatches: {

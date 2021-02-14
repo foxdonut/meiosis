@@ -12,12 +12,12 @@ interface StreamScan {
   scan: Scan;
 }
 
-interface StreamLibWithFunction extends StreamScan {
+export interface StreamLibWithFunction extends StreamScan {
   <T>(value?: T): Stream<T>;
 }
 
-interface StreamLibWithProperty extends StreamScan {
-  stream?<T>(value?: T): Stream<T>;
+export interface StreamLibWithProperty extends StreamScan {
+  stream<T>(value?: T): Stream<T>;
 }
 
 /**
@@ -98,6 +98,25 @@ declare function _default<S, P, A>({
 }: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
 
 export default _default;
+
+/*
+export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
+  nestUpdate: (update: Stream<P>, prop: string) => P;
+}
+
+export interface MeiosisOne<S, P, A> extends Stream<S> {
+  update: Stream<P>;
+  actions: A;
+  select: <K extends keyof S>(prop: K) => MeiosisOne<S[K], P, A>;
+}
+
+export function setupOne<S, P, A>({
+  stream,
+  accumulator,
+  combine,
+  app
+}: MeiosisOneConfig<S, P, A>): MeiosisOne<S, P, A>;
+*/
 
 export interface LocalPath {
   path: Array<string>;
