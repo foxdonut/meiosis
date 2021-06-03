@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "harp": "^0.32.0",
+    "harp": "^0.40.2",
     "http-server": "^0.12.3",
     "onchange": "^7.0.2",
     "reload": "^3.1.0",
