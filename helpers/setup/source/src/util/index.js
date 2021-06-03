@@ -1,3 +1,4 @@
+/** @type {import("./index").get} */
 export const get = (object, path) =>
   path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object);
 
@@ -5,6 +6,7 @@ const set = (object, rest, value, fn) => (rest.length > 0 ? fn(object, rest, val
 const safeObject = object =>
   object != null && typeof object === "object" && !Array.isArray(object) ? object : {};
 
+/** @type {import("./index").setMutate} */
 export const setMutate = (object, path, value) => {
   const first = path[0];
   const rest = path.slice(1);
@@ -15,6 +17,7 @@ export const setMutate = (object, path, value) => {
   return target;
 };
 
+/** @type {import("./index").setImmutable} */
 export const setImmutable = (object, path, value) => {
   const first = path[0];
   const rest = path.slice(1);

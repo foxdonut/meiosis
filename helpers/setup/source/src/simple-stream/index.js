@@ -2,20 +2,7 @@
 
 /**
  * Simple stream implementation.
- *
- * @template T, U
- * @typedef {Object} SimpleStream
- *
- * @property {import("../common").StreamConstructor} stream the stream constructor function.
- * @property {import("../common").Scan} scan the scan function.
- */
-
-/**
- * Creates a stream.
- *
- * @function meiosis.simpleStream.stream
- * @param {*} [initial] - the stream's initial value.
- * @returns {import("../common").Stream} the created stream.
+ * @type {import("../common/index").StreamConstructor}
  */
 export const stream = initial => {
   const mapFunctions = [];
@@ -24,8 +11,9 @@ export const stream = initial => {
   // Keep track of mapped values so that they are sent to mapped streams in order.
   // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
   let mappedValues = [];
-  function createdStream(value) {
-    if (arguments.length > 0) {
+  /** @type {import("../common/index").Stream} */
+  const createdStream = function (value) {
+    if (arguments.length > 0 && !createdStream.ended) {
       latestValue = value;
       mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
@@ -34,10 +22,7 @@ export const stream = initial => {
       }
     }
     return latestValue;
-  }
-  /**
-   * @type {import("../common").Map}
-   */
+  };
   createdStream.map = mapFunction => {
     const newStream = stream();
 
@@ -52,17 +37,13 @@ export const stream = initial => {
 
     return newStream;
   };
+  createdStream.end = () => {
+    createdStream.ended = true;
+  };
   return createdStream;
 };
 
-/**
- * Creates a new stream that starts with the initial value and, for each value arriving onto the
- * source stream, emits the result of calling the accumulator function with the latest result and
- * the source stream value.
- *
- * @template T, U
- * @type {import("../common").Scan}
- */
+/** @type {import("../common/index").Scan} */
 export const scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);
   let accumulated = initial;
@@ -75,11 +56,10 @@ export const scan = (accumulator, initial, sourceStream) => {
   return newStream;
 };
 
-/**
- * @template T, U
- * @type SimpleStream<T, U>
- */
-export default {
+/** @type {import("./index").streamLib} */
+const streamLib = {
   stream,
   scan
 };
+
+export default streamLib;

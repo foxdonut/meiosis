@@ -16,6 +16,9 @@ export interface ReactAppProps<S, P, A> {
   actions?: A;
 }
 
+/**
+ * Helper to setup the Meiosis pattern with [React](https://reactjs.org/).
+ */
 declare function _default<S, P, A>(setup: ReactSetup): (props: ReactAppProps<S, P, A>) => any;
 
 export default _default;

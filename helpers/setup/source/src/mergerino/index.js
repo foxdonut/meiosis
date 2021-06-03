@@ -18,15 +18,16 @@ import { setMutate } from "../util";
  * @property {import("../common").App<S, P, A>} app the app, with optional properties.
  */
 
-/** @type {import("./index")._default} */
-const setup = ({ stream, merge, app }) =>
+/** @type {import("./index").mergerinoSetup} */
+const mergerinoSetup = ({ stream, merge, app }) =>
   commonSetup({
     stream,
     accumulator: merge,
     combine: patches => patches,
     app
   });
-export default setup;
+
+export default mergerinoSetup;
 
 /*
 const createNestPatch = prop => patch => ({ [prop]: patch });

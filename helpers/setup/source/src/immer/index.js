@@ -3,40 +3,8 @@
 import commonSetup, { Nest } from "../common";
 import { get, setMutate } from "../util";
 
-/**
- * @template S
- * @callback ImmerPatch
- *
- * @param {S} state current state
- *
- * @return {S | void}
- */
-
-/**
- * @template S, A
- * @typedef {Object} MeiosisImmerConfig
- *
- * @property {import("../common").StreamLib} stream the stream library. This works with
- * `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for which you provide either a function
- * or an object with a `stream` function to create a stream. The function or object must also have a
- * `scan` property. The returned stream must have a `map` method.
- * @property {function(S, ImmerPatch<S>): S} produce the Immer `produce` function.
- * @property {import("../common").App<S, ImmerPatch<S>, A>} app the app, with optional properties.
- */
-
-/**
- * Helper to setup the Meiosis pattern with [Immer](https://github.com/immerjs/immer).
- *
- * @template S, A
- * @function meiosis.immer.setup
- *
- * @param {MeiosisImmerConfig<S, A>} config the Meiosis config for use with Mergerino
- *
- * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} meiosis
- * `{ states, update, actions }`, where `states` and `update` are streams, and `actions` are the
- * created actions.
- */
-export default ({ stream, produce, app }) =>
+/** @type {import("./index").immerSetup} */
+const immerSetup = ({ stream, produce, app }) =>
   commonSetup({
     stream,
     accumulator: produce,
@@ -44,6 +12,8 @@ export default ({ stream, produce, app }) =>
     combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
     app
   });
+
+export default immerSetup;
 
 export const nest = produce =>
   Nest(path => patch => state => {

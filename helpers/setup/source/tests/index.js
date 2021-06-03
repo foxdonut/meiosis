@@ -1322,6 +1322,34 @@ describe("simpleStream", () => {
 
     s1(undefined);
   });
+
+  test("end stream", () => {
+    const s1 = meiosis.simpleStream.stream();
+
+    let c2 = 0;
+    const s2 = s1.map(() => {
+      c2++;
+    });
+
+    let c3 = 0;
+    s2.map(() => {
+      c3++;
+    });
+
+    s1(1);
+    expect(c2).toEqual(1);
+    expect(c3).toEqual(1);
+
+    s2.end();
+    s1(1);
+    expect(c2).toEqual(2);
+    expect(c3).toEqual(1);
+
+    s1.end();
+    s1(1);
+    expect(c2).toEqual(2);
+    expect(c3).toEqual(1);
+  });
 });
 
 describe("util", () => {

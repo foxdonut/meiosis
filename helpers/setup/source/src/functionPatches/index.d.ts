@@ -19,12 +19,12 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
   app: App<S, FunctionPatch<S>, A>;
 };
 
-export function _default<S, A>({
+export function functionPatchesSetup<S, A>({
   stream,
   app
 }: MeiosisFunctionPatchesConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
-export default _default;
+export default functionPatchesSetup;
 
 export function nest<S1, P1, S2, P2>(
   path: string | Array<string>,

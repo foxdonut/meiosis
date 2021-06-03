@@ -22,13 +22,13 @@ export type MeiosisImmerConfig<S, A> = {
   app: App<S, ImmerPatch<S>, A>;
 };
 
-declare function _default<S, A>({
+export function immerSetup<S, A>({
   stream,
   produce,
   app
 }: MeiosisImmerConfig<S, A>): Meiosis<S, ImmerPatch<S>, A>;
 
-export default _default;
+export default immerSetup;
 
 export function nest<S1, P1, S2, P2>(
   produce: Produce<S1>

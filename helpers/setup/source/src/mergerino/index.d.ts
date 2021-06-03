@@ -45,13 +45,13 @@ export type MeiosisMergerinoConfig<S, A> = {
  * @returns {import("../common").Meiosis<S, MergerinoPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function _default<S, A>({
+export function mergerinoSetup<S, A>({
   stream,
   merge,
   app
 }: MeiosisMergerinoConfig<S, A>): Meiosis<S, MergerinoPatch<S>, A>;
 
-export default _default;
+export default mergerinoSetup;
 
 /*
 export function setupOne<S, A>({

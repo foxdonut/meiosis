@@ -3,12 +3,15 @@ export type Map = <T, U>(fn: (value: T) => U) => Stream<U>;
 export interface Stream<T> {
   (value?: T): T;
   map<U>(fn: (value: T) => U): Stream<U>;
+  end(): void;
+  ended?: boolean;
 }
 
 export type StreamConstructor = <T>(value?: T) => Stream<T>;
 export type Scan = <T, U>(acc: (result: U, next: T) => U, init: U, stream: Stream<T>) => Stream<U>;
 
 interface StreamScan {
+  /** the stream library's `scan` function. */
   scan: Scan;
 }
 
@@ -17,12 +20,13 @@ export interface StreamLibWithFunction extends StreamScan {
 }
 
 export interface StreamLibWithProperty extends StreamScan {
+  /** the function to create a stream, if the stream library itself is not a function. */
   stream<T>(value?: T): Stream<T>;
 }
 
 /**
- * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
- * which you provide either a function or an object with a `stream` function to create a stream. The
+ * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for which
+ * you provide either a function or an object with a `stream` function to create a stream. The
  * function or object must also have a `scan` property. The returned stream must have a `map`
  * method.
  */
@@ -62,6 +66,9 @@ export type App<S, P, A> = {
   Effects?: EffectConstructor<S, P, A>;
 };
 
+/**
+ * Meiosis configuration.
+ */
 export type MeiosisConfig<S, P, A> = {
   /**
    * the stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -84,20 +91,34 @@ export type MeiosisConfig<S, P, A> = {
   app: App<S, P, A>;
 };
 
+/**
+ * Returned by Meiosis setup.
+ */
 export type Meiosis<S, P, A> = {
   states: Stream<S>;
   update: Stream<P>;
   actions: A;
 };
 
-declare function _default<S, P, A>({
+/**
+ * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
+ * use their respective `setup` function instead.
+ *
+ * Patch is merged in to the state by default. Services have access to the state and can return a
+ * patch that further updates the state. State changes by services are available to the next
+ * services in the list.
+ *
+ * After the services have run and the state has been updated, effects are executed and have the
+ * opportunity to trigger more updates.
+ */
+export function Setup<S, P, A>({
   stream,
   accumulator,
   combine,
   app
 }: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
 
-export default _default;
+export default Setup;
 
 /*
 export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
