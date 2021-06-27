@@ -408,7 +408,7 @@ const InitialTemperature = (label: string): Temperature => ({
   };
 
   const stream = {
-    stream: (value: any) => MStream(value),
+    stream: (value?: any) => MStream(value),
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
@@ -773,7 +773,7 @@ const InitialTemperature = (label: string): Temperature => ({
   );
 
   const stream = {
-    stream: (value: any) => flyd.stream(value),
+    stream: (value?: any) => flyd.stream(value),
     scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
   };
 
@@ -962,7 +962,7 @@ const InitialTemperature = (label: string): Temperature => ({
   };
 
   const stream = {
-    stream: (value: any) => MStream(value),
+    stream: (value?: any) => MStream(value),
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 

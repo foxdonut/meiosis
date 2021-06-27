@@ -3,7 +3,7 @@ export type Map = <T, U>(fn: (value: T) => U) => Stream<U>;
 export interface Stream<T> {
   (value?: T): T;
   map<U>(fn: (value: T) => U): Stream<U>;
-  end(): void;
+  end(value?: boolean): void;
   ended?: boolean;
 }
 
