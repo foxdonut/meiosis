@@ -40,16 +40,16 @@ export type MeiosisMergerinoConfig<S, A> = {
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
+ * @template S the State type.
+ * @template A the Actions type.
  * @param {MeiosisMergerinoConfig<S, A>} config the Meiosis config for use with Mergerino
  *
  * @returns {import("../common").Meiosis<S, MergerinoPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function mergerinoSetup<S, A>({
-  stream,
-  merge,
-  app
-}: MeiosisMergerinoConfig<S, A>): Meiosis<S, MergerinoPatch<S>, A>;
+export function mergerinoSetup<S, A>(
+  config: MeiosisMergerinoConfig<S, A>
+): Meiosis<S, MergerinoPatch<S>, A>;
 
 export default mergerinoSetup;
 

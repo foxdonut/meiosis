@@ -49,3 +49,4 @@ helpers/router-setup/poc/build
 helpers/setup/source/dist
 helpers/setup/source/generated-d-ts
 helpers/setup/**/build
+helpers/setup/docs
