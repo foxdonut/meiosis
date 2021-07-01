@@ -22,6 +22,16 @@ export type MeiosisImmerConfig<S, A> = {
   app: App<S, ImmerPatch<S>, A>;
 };
 
+/**
+ * Helper to setup the Meiosis pattern with [Immer](https://immerjs.github.io/immer).
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ * @param {MeiosisImmerConfig<S, A>} config the Meiosis config for use with Immer
+ *
+ * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} `{ states, update, actions }`,
+ * where `states` and `update` are streams, and `actions` are the created actions.
+ */
 export function immerSetup<S, A>({
   stream,
   produce,

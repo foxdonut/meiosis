@@ -1,12 +1,24 @@
 import { App, Meiosis, LocalPath, Local, StreamLib } from "../common";
 // import { App, Meiosis, MeiosisOne, LocalPath, Local, Stream, StreamLib } from "../common";
 
-type MergerinoFunctionPatch<S> = (state: S) => S;
+export type MergerinoFunctionPatch<S> = (state: S) => S;
 
-type MergerinoObjectPatch<S> = {
+export type MergerinoObjectPatch<S> = {
   [K in keyof S]?: MergerinoPatch<S[K]> | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
 };
 
+/**
+ * A Mergerino patch.
+ *
+ * @template S the State type.
+ *
+ * Examples:
+ *
+ * ```typescript
+ * update({ count: 42 });
+ * update({ count: x => x + 1 });
+ * ```
+ */
 export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
 
 export type MergerinoApp<S, A> = App<S, MergerinoPatch<S>, A>;
