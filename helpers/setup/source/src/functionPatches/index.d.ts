@@ -26,8 +26,9 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
    * method.
    */
   stream: StreamLib;
+
   /**
-   * the app, with optional properties.
+   * The application object, with optional properties.
    */
   app: App<S, FunctionPatch<S>, A>;
 };
@@ -37,6 +38,7 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
  *
  * @template S the State type.
  * @template A the Actions type.
+ *
  * @param {MeiosisFunctionPatchesConfig<S, A>} config the Meiosis config for use with function patches
  *
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,

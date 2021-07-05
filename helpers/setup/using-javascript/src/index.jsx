@@ -491,8 +491,13 @@ const createApp = (conditions, temperature) => ({
 
   const app = createApp(conditions, temperature);
 
+  const stream = {
+    stream: flyd.stream,
+    scan: (acc, init, stream) => flyd.scan(acc, init, stream)
+  };
+
   const { states, update, actions } = meiosis.immer.setup({
-    stream: flyd,
+    stream,
     produce: (s, p) => produce(s, p),
     app
   });

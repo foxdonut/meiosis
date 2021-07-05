@@ -3,7 +3,10 @@ import { Stream, StreamLibWithProperty, Scan } from "../common";
 /**
  * Creates a stream.
  *
+ * @template T the type of the stream's values.
+ *
  * @param value the stream's initial value.
+ *
  * @returns the created stream.
  */
 export function stream<T>(value?: T): Stream<T>;

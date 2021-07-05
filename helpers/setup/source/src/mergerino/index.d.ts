@@ -39,10 +39,12 @@ export type MeiosisMergerinoConfig<S, A> = {
    * method.
    */
   stream: StreamLib;
+
   /**
    * The Mergerino `merge` function.
    */
   merge: (state: S, patch: MergerinoPatch<S>) => S;
+
   /**
    * The app, with optional properties.
    */
@@ -54,6 +56,7 @@ export type MeiosisMergerinoConfig<S, A> = {
  *
  * @template S the State type.
  * @template A the Actions type.
+ *
  * @param {MeiosisMergerinoConfig<S, A>} config the Meiosis config for use with Mergerino
  *
  * @returns {import("../common").Meiosis<S, MergerinoPatch<S>, A>} `{ states, update, actions }`,

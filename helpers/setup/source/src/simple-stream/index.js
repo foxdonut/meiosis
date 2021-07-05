@@ -2,6 +2,7 @@
 
 /**
  * Simple stream implementation.
+ *
  * @type {import("../common/index").StreamConstructor}
  */
 export const stream = initial => {

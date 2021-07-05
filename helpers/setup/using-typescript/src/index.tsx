@@ -16,7 +16,7 @@ import produce from "immer";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
 import m from "mithril";
 import MStream from "mithril/stream";
-import { h, render as preactRender } from "preact";
+import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -470,13 +470,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
   // file, we'll use h here.
-  const SkyOption: (attrs: SkyOptionAttrs) => preact.VNode = ({
-    state,
-    local,
-    actions,
-    value,
-    label
-  }) =>
+  const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ state, local, actions, value, label }) =>
     h(
       "label",
       {},
@@ -489,7 +483,7 @@ const InitialTemperature = (label: string): Temperature => ({
       label
     );
 
-  const Conditions: (attrs: ConditionsAttrs) => preact.VNode = ({ state, local, actions }) =>
+  const Conditions: (attrs: ConditionsAttrs) => VNode = ({ state, local, actions }) =>
     h(
       "div",
       {},
@@ -531,7 +525,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Temperature: (attrs: TemperatureAttrs) => preact.VNode = ({ state, local, actions }) =>
+  const Temperature: (attrs: TemperatureAttrs) => VNode = ({ state, local, actions }) =>
     h(
       "div",
       {},
@@ -567,7 +561,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Root: (attrs: Attrs) => preact.VNode = ({ state, actions }) =>
+  const Root: (attrs: Attrs) => VNode = ({ state, actions }) =>
     h(
       "div",
       { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
