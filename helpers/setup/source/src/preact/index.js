@@ -1,8 +1,8 @@
 // @ts-check
 
-export default ({ h, useState, Root }) => ({ states, update, actions }) => {
+export default ({ h, useState, Root }) => ({ states, ...props }) => {
   const [state, setState] = useState(states());
   states.map(setState);
 
-  return h(Root, { state, update, actions });
+  return h(Root, Object.assign({ state }, props));
 };

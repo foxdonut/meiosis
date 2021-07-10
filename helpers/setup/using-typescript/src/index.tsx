@@ -579,7 +579,7 @@ const InitialTemperature = (label: string): Temperature => ({
       h("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
     );
 
-  const App = meiosis.preact.setup<State, Patch, Actions>({ h, useState, Root });
+  const App = meiosis.preact.setup<State, Attrs, VNode>({ h, useState, Root });
 
   const { states, update, actions } = meiosis.mergerino.setup<State, Actions>({
     stream: meiosis.simpleStream,

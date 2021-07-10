@@ -4,23 +4,18 @@ import { Stream } from "../common";
  * Properties passed to the Preact application.
  *
  * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface PreactAppProps<S, P, A> {
+export interface PreactAppProps<S> {
   states: Stream<S>;
-  update?: Stream<P>;
-  actions?: A;
 }
 
 /**
  * Parameters for Preact setup.
  *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
+ * @template R the Root properties.
+ * @template V the View type returned by the Root component.
  */
-export interface PreactSetup<S, P, A> {
+export interface PreactSetup<R, V> {
   /** The Preact `h` function. */
   h: any;
 
@@ -28,20 +23,20 @@ export interface PreactSetup<S, P, A> {
   useState: any;
 
   /** The root view component of the application. */
-  Root: (props: PreactAppProps<S, P, A>) => any;
+  Root: (props: R) => V;
 }
 
 /**
  * Helper to setup the Meiosis pattern with [Preact](https://preactjs.com/).
  *
  * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
+ * @template R the Root properties.
+ * @template V the View type returned by the Root component.
  *
  * @param {PreactSetup} setup the Preact setup, including `h`, `useState`, and `Root`.
  *
- * @returns an application component that accepts `states`, `update`, `actions` and passes `state`,
- * `update`, `actions` to the `Root` component.
+ * @returns an application component that accepts `states` and other props of your choice, and
+ * passes `state` and your other props to the `Root` component.
  *
  * Example:
  *
@@ -64,8 +59,6 @@ export interface PreactSetup<S, P, A> {
  * render(<App states="states" update="update" actions="actions"/>, element);
  * ```
  */
-export function preactSetup<S, P, A>(
-  setup: PreactSetup<S, P, A>
-): (props: PreactAppProps<S, P, A>) => any;
+export function preactSetup<S, R, V>(setup: PreactSetup<R, V>): (props: PreactAppProps<S>) => any;
 
 export default preactSetup;
