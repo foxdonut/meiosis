@@ -4,7 +4,9 @@ import { App, LocalPath, Local, Meiosis, StreamLib } from "../common";
  * A function patch.
  *
  * @template S the State type.
+ *
  * @param {S} state the current state.
+ *
  * @returns {S} the updated state.
  *
  * Examples:
@@ -18,6 +20,12 @@ import { App, LocalPath, Local, Meiosis, StreamLib } from "../common";
  */
 export type FunctionPatch<S> = (state: S) => S;
 
+/**
+ * Config for setting up Meiosis with function patches.
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ */
 export type MeiosisFunctionPatchesConfig<S, A> = {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -39,7 +47,8 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MeiosisFunctionPatchesConfig<S, A>} config the Meiosis config for use with function patches
+ * @param {MeiosisFunctionPatchesConfig<S, A>} config the Meiosis config for use with function
+ * patches.
  *
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.

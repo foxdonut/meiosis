@@ -1,6 +1,6 @@
 // @ts-check
 
-export default ({ React, Root }) => ({ states, update, actions }) => {
+export default ({ React, Root }) => ({ states, ...props }) => {
   const [init, setInit] = React.useState(false);
   const [state, setState] = React.useState(states());
 
@@ -9,5 +9,5 @@ export default ({ React, Root }) => ({ states, update, actions }) => {
     states.map(setState);
   }
 
-  return React.createElement(Root, { state, update, actions });
+  return React.createElement(Root, Object.assign({ state }, props));
 };

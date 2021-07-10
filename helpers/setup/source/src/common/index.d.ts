@@ -333,27 +333,67 @@ export function setupOne<S, P, A>({
 }: MeiosisOneConfig<S, P, A>): MeiosisOne<S, P, A>;
 */
 
+/**
+ * A local path.
+ */
 export interface LocalPath {
+  /** The `path` which is stored on the local object for internal use. */
   path: Array<string>;
 }
 
-type NestPatchFunction<P2, P1> = (patch: P2) => P1;
+/**
+ * Function that nests a patch `P2` within a parent patch `P1`.
+ *
+ * @template P1 the type of the parent patch.
+ * @template P2 the type of the patch to be nested.
+ *
+ * @param {P2} patch the nested patch.
+ *
+ * @returns {P1} the parent patch with `P2` nested within.
+ */
+type NestPatchFunction<P1, P2> = (patch: P2) => P1;
 
+/**
+ * A local object with a `patch` function to create a nested patch.
+ *
+ * @template P1 the type of the parent patch.
+ * @template P2 the type of the patch to be nested.
+ */
 export interface LocalPatch<P1, P2> {
-  patch: NestPatchFunction<P2, P1>;
+  /** Creates a nested patch. */
+  patch: NestPatchFunction<P1, P2>;
 }
 
+/**
+ * @template S1 the type of the parent state.
+ * @template P1 the type of the parent patch.
+ * @template S2 the type of the nested state.
+ * @template P2 the type of the patch to be nested.
+ */
 export interface Local<S1, P1, S2, P2> extends LocalPath, LocalPatch<P1, P2> {
+  /** Function to get the local state from the global state. */
   get: (state: S1) => S2;
 }
 
+/**
+ * Function that creates a local object from the specified nest path and, optionally, another
+ * local object.
+ */
 type NestFunction<S1, P1, S2, P2> = (
   path: string | Array<string>,
   local?: LocalPath
 ) => Local<S1, P1, S2, P2>;
 
+/**
+ * Constructor to create a `nest` function.
+ *
+ * @template S1 the type of the parent state.
+ * @template P1 the type of the parent patch.
+ * @template S2 the type of the nested state.
+ * @template P2 the type of the patch to be nested.
+ */
 declare function Nest<S1, P1, S2, P2>(
-  createNestPatchFunction: (path: Array<string>) => NestPatchFunction<P2, P1>
+  createNestPatchFunction: (path: Array<string>) => NestPatchFunction<P1, P2>
 ): NestFunction<S1, P1, S2, P2>;
 
 export { Nest };

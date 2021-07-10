@@ -77,66 +77,61 @@ export const setupOne = ({ stream, accumulator, combine, app, nestUpdate }) => {
 
   return Object.assign(states, { update, actions, select });
 };
+
+export const meiosisOne = ({ stream, merge, app }) => {
+  const update = stream()
+
+  const states = stream.scan((state, patch) => merge(state, patch), app.initial, update)
+
+  const pathGet = (object, path) =>
+    path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object)
+
+  const nestPatch = (path, value) => ({
+    [path[0]]: path.length === 1 ? value : nestPatch(path.slice(1), value)
+  })
+
+  const contextCache = {}
+
+  const root = {
+    getState: () => states(),
+    update
+  }
+
+  // actions should be optional
+  const actions = app.Actions(root)
+  root.actions = actions
+
+  const nest = propOrPath => {
+    if (propOrPath) {
+      const path = [].concat(propOrPath)
+
+      if (!contextCache[path]) {
+        const getState = () => pathGet(states(), path)
+        const localUpdate = patch => update(nestPatch(path, patch))
+
+        const localContext = {
+          getState,
+          update: localUpdate,
+          nest: next => nest(path.concat(next)),
+          root
+        }
+        const localActions = app.Actions(localContext)
+        localContext.actions = localActions
+
+        contextCache[path] = localContext
+      }
+      return contextCache[path]
+    }
+    return root
+  }
+
+  root.nest = nest
+
+  return { states, context: root }
+}
+
 */
 
-/**
- * The `path` is stored on the local object for internal use.
- *
- * @typedef {Object} LocalPath
- *
- * @property {string[]} path
- */
-
-/**
- * Function that nests a patch `P2`
- *
- * @template P2, P1
- * @callback NestPatchFunction
- *
- * @param {P2} patch the nested patch
- *
- * @return {P1} the top-level patch with `P2` nested within
- */
-
-/**
- * A local object with a `patch` function to create a nested patch.
- *
- * @template P1, P2
- * @typedef {Object} LocalPatch
- *
- * @property {NestPatchFunction<P2, P1>} patch
- */
-
-/**
- * Function to get the local state from the global state.
- *
- * @template S1, P1, S2, P2
- * @typedef {LocalPath & LocalPatch<P1, P2>} Local
- *
- * @property {function(S1): S2} get
- */
-
-/**
- * Function that creates a local object from the specified nest path and, optionally, another
- * local object.
- *
- * @template S1, P1, S2, P2
- * @callback NestFunction
- *
- * @param {string|string[]} path
- * @param {LocalPath} [local]
- *
- * @return {Local<S1, P1, S2, P2>}
- */
-
-/**
- * Constructor to create a `nest` function.
- *
- * @template S1, P1, S2, P2
- * @param {function(string[]): NestPatchFunction<P2, P1>} createNestPatchFunction
- *
- * @return {NestFunction<S1, P1, S2, P2>}
- */
 export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
   const nestedPath = local.path.concat(path);
 

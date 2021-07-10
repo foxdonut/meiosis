@@ -771,16 +771,16 @@ const InitialTemperature = (label: string): Temperature => ({
     scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
   };
 
-  const { states, update, actions } = meiosis.immer.setup<State, Actions>({
+  const { states, actions } = meiosis.immer.setup<State, Actions>({
     stream,
     produce: (s, p) => produce(s, p),
     app
   });
 
-  const App = meiosis.react.setup<State, ImmerPatch<State>, Actions>({ React, Root });
+  const App = meiosis.react.setup<State, Attrs, JSX.Element>({ React, Root });
 
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(App, { states, update, actions }), element);
+  ReactDOM.render(React.createElement(App, { states, actions }), element);
 })();
 
 /*

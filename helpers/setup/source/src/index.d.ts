@@ -8,7 +8,7 @@ import preactSetup from "./preact";
 import reactSetup from "./react";
 import { get, setMutate, setImmutable } from "./util";
 
-declare namespace _default {
+declare namespace meiosisSetup {
   export namespace common {
     export { commonSetup as setup, Nest };
     // export { commonSetup as setup, commonSetupOne as setupOn, Nest };
@@ -39,7 +39,7 @@ export * from "./common";
 export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
 export { ImmerPatch, MeiosisImmerConfig } from "./immer";
 export { MergerinoApp, MergerinoPatch, MeiosisMergerinoConfig } from "./mergerino";
-export { PreactSetup, PreactAppProps } from "./preact";
-export { ReactFunctions, ReactSetup, ReactAppProps } from "./react";
+export { PreactSetup } from "./preact";
+export { ReactFunctions, ReactSetup } from "./react";
 
-export default _default;
+export default meiosisSetup;

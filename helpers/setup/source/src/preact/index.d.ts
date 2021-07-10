@@ -1,15 +1,6 @@
 import { Stream } from "../common";
 
 /**
- * Properties passed to the Preact application.
- *
- * @template S the State type.
- */
-export interface PreactAppProps<S> {
-  states: Stream<S>;
-}
-
-/**
  * Parameters for Preact setup.
  *
  * @template R the Root properties.
@@ -38,7 +29,9 @@ export interface PreactSetup<R, V> {
  * @returns an application component that accepts `states` and other props of your choice, and
  * passes `state` and your other props to the `Root` component.
  *
- * Example:
+ * Examples:
+ *
+ * - JavaScript
  *
  * ```javascript
  * import meiosis from "meiosis-setup";
@@ -58,7 +51,41 @@ export interface PreactSetup<R, V> {
  * const element = document.getElementById("app");
  * render(<App states="states" update="update" actions="actions"/>, element);
  * ```
+ *
+ * - TypeScript
+ *
+ * ```typescript
+ * import meiosis from "meiosis-setup";
+ * import { h, render, VNode } from "preact";
+ * import { useState } from "preact/hooks";
+ *
+ * interface State {
+ *   // ...
+ * }
+ *
+ * interface Actions {
+ *   // ...
+ * }
+ *
+ * interface Attrs {
+ *   state: State;
+ *   actions: Actions;
+ * }
+ *
+ * // This does not have to be `meiosis.mergerino.setup`, it could be
+ * // `meiosis.functionPatches.setup`, `meiosis.immer.setup`, `meiosis.common.setup`,
+ * // or even your own setup code.
+ * const { states, actions } = meiosis.mergerino.setup<State, Actions>({ ... });
+ *
+ * const Root: (attrs: Attrs) => VNode = ({ state, actions }) =>
+ *   <div>...</div>
+ * )
+ *
+ * const App = meiosis.preact.setup<State, Attrs, VNode>({ h, useState, Root });
+ * const element = document.getElementById("app");
+ * render(<App states="states" actions="actions"/>, element);
+ * ```
  */
-export function preactSetup<S, R, V>(setup: PreactSetup<R, V>): (props: PreactAppProps<S>) => any;
+export function preactSetup<S, R, V>(setup: PreactSetup<R, V>): (props: { states: Stream<S> }) => V;
 
 export default preactSetup;
