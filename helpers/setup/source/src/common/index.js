@@ -42,96 +42,6 @@ const setup = ({ stream, accumulator, combine, app }) => {
 
 export default setup;
 
-/*
- * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
- * use their respective `setup` function instead.
- *
- * Patch is merged in to the state by default. Services have access to the state and can return a
- * patch that further updates the state. State changes by services are available to the next
- * services in the list.
- *
- * After the services have run and the state has been updated, effects are executed and have the
- * opportunity to trigger more updates.
- *
- * @template S, P, A
- * @function meiosis.common.setup
- *
- * param {MeiosisOneConfig<S, P, A>} config the Meiosis config FIXME
- *
- * @returns {MeiosisOne<S, P, A>} FIXME
- */
-/*
-export const setupOne = ({ stream, accumulator, combine, app, nestUpdate }) => {
-  const { states, update, actions } = setup({ stream, accumulator, combine, app });
-
-  const select = prop => {
-    const sub = states.map(state => state[prop]);
-
-    Object.assign(sub, {
-      update: nestUpdate(update, prop),
-      actions: actions ? actions[prop] : undefined
-    });
-
-    return sub;
-  };
-
-  return Object.assign(states, { update, actions, select });
-};
-
-export const meiosisOne = ({ stream, merge, app }) => {
-  const update = stream()
-
-  const states = stream.scan((state, patch) => merge(state, patch), app.initial, update)
-
-  const pathGet = (object, path) =>
-    path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object)
-
-  const nestPatch = (path, value) => ({
-    [path[0]]: path.length === 1 ? value : nestPatch(path.slice(1), value)
-  })
-
-  const contextCache = {}
-
-  const root = {
-    getState: () => states(),
-    update
-  }
-
-  // actions should be optional
-  const actions = app.Actions(root)
-  root.actions = actions
-
-  const nest = propOrPath => {
-    if (propOrPath) {
-      const path = [].concat(propOrPath)
-
-      if (!contextCache[path]) {
-        const getState = () => pathGet(states(), path)
-        const localUpdate = patch => update(nestPatch(path, patch))
-
-        const localContext = {
-          getState,
-          update: localUpdate,
-          nest: next => nest(path.concat(next)),
-          root
-        }
-        const localActions = app.Actions(localContext)
-        localContext.actions = localActions
-
-        contextCache[path] = localContext
-      }
-      return contextCache[path]
-    }
-    return root
-  }
-
-  root.nest = nest
-
-  return { states, context: root }
-}
-
-*/
-
 export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
   const nestedPath = local.path.concat(path);
 
@@ -140,4 +50,54 @@ export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
     patch: createNestPatchFunction(nestedPath),
     path: nestedPath
   };
+};
+
+export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchFunction }) => {
+  const { states, update } = setup({ stream, accumulator, combine, app });
+
+  const contextCache = {};
+
+  const meiosis = {
+    states,
+    getState: () => states(),
+    update
+  };
+
+  const attachActionsTo = context => {
+    if (app.Actions) {
+      const actions = app.Actions(context);
+      context.actions = actions;
+    }
+  };
+
+  attachActionsTo(meiosis);
+
+  const nest = propOrPath => {
+    if (propOrPath) {
+      const path = [].concat(propOrPath);
+
+      if (!contextCache[path]) {
+        const getState = () => get(states(), path);
+        const nestPatch = createNestPatchFunction(path);
+        const localUpdate = patch => update(nestPatch(patch));
+
+        const localContext = {
+          getState,
+          update: localUpdate,
+          nest: next => nest(path.concat(next)),
+          root: meiosis
+        };
+
+        attachActionsTo(localContext);
+
+        contextCache[path] = localContext;
+      }
+      return contextCache[path];
+    }
+    return meiosis;
+  };
+
+  meiosis.nest = nest;
+
+  return meiosis;
 };
