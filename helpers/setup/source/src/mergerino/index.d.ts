@@ -2,9 +2,9 @@ import {
   App,
   CreateNestPatchFunction,
   Meiosis,
-  MeiosisOne,
   LocalPath,
   Local,
+  Stream,
   StreamLib
 } from "../common";
 
@@ -83,7 +83,23 @@ export interface MergerinoMeiosisOneConfig<S, A>
     CreateNestPatchFunction {}
 
 /**
- * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
+ * Returned by Mergerino Meiosis One setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MergerinoMeiosisOne<S, A> {
+  states: Stream<S>;
+  getState: () => S;
+  update: Stream<MergerinoPatch<S>>;
+  actions: A;
+  root: MergerinoMeiosisOne<S, A>;
+  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<S[K], A>;
+}
+
+/**
+ * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
  * @template A the Actions type.
@@ -96,4 +112,4 @@ export function meiosisOne<S, A>({
   stream,
   merge,
   app
-}: MergerinoMeiosisConfig<S, A>): MeiosisOne<S, MergerinoPatch<S>, A>;
+}: MergerinoMeiosisConfig<S, A>): MergerinoMeiosisOne<S, A>;

@@ -412,7 +412,7 @@ export interface MeiosisOne<S, P, A> {
   states: Stream<S>;
   getState: () => S;
   update: Stream<P>;
-  actions?: A;
+  actions: A;
   root: MeiosisOne<S, P, A>;
   nest: <K extends keyof S>(prop: K) => MeiosisOne<S[K], P, A>;
 }

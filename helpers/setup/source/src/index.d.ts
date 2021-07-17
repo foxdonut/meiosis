@@ -37,7 +37,12 @@ declare namespace meiosisSetup {
 export * from "./common";
 export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
 export { ImmerPatch, MeiosisImmerConfig } from "./immer";
-export { MergerinoApp, MergerinoPatch, MergerinoMeiosisConfig } from "./mergerino";
+export {
+  MergerinoApp,
+  MergerinoPatch,
+  MergerinoMeiosisConfig,
+  MergerinoMeiosisOne
+} from "./mergerino";
 export { PreactSetup } from "./preact";
 export { ReactFunctions, ReactSetup } from "./react";
 
