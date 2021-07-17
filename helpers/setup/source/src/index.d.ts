@@ -1,6 +1,8 @@
 import commonSetup, { meiosisOne as commonMeiosisOne, Nest, StreamLibWithProperty } from "./common";
-import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
-// import mergerinoSetup, { setupOne as mergerinoSetupOne, nest as mergerinoNest } from "./mergerino";
+import mergerinoSetup, {
+  nest as mergerinoNest,
+  meiosisOne as mergerinoMeiosisOne
+} from "./mergerino";
 import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
 import immerSetup, { nest as immerNest } from "./immer";
 import preactSetup from "./preact";
@@ -12,8 +14,7 @@ declare namespace meiosisSetup {
     export { commonSetup as setup, commonMeiosisOne as setupOne, Nest };
   }
   export namespace mergerino {
-    export { mergerinoSetup as setup, mergerinoNest as nest };
-    // export { mergerinoSetup as setup, mergerinoSetupOne as setupOne, mergerinoNest as nest };
+    export { mergerinoSetup as setup, mergerinoNest as nest, mergerinoMeiosisOne as meiosisOne };
   }
   export namespace functionPatches {
     export { functionPatchesSetup as setup, functionPatchesNest as nest };
@@ -36,7 +37,7 @@ declare namespace meiosisSetup {
 export * from "./common";
 export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
 export { ImmerPatch, MeiosisImmerConfig } from "./immer";
-export { MergerinoApp, MergerinoPatch, MeiosisMergerinoConfig } from "./mergerino";
+export { MergerinoApp, MergerinoPatch, MergerinoMeiosisConfig } from "./mergerino";
 export { PreactSetup } from "./preact";
 export { ReactFunctions, ReactSetup } from "./react";
 

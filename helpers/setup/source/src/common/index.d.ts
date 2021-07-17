@@ -379,14 +379,7 @@ declare function Nest<S1, P1, S2, P2>(
 
 export { Nest };
 
-/**
- * Meiosis One configuration.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
+export interface CreateNestPatchFunction {
   /**
    * Creates a function that nests a patch at a given path.
    *
@@ -396,6 +389,17 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
    */
   createNestPatchFunction: <P1, P2>(path: Array<string>) => NestPatchFunction<P1, P2>;
 }
+
+/**
+ * Meiosis One configuration.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisOneConfig<S, P, A>
+  extends MeiosisConfig<S, P, A>,
+    CreateNestPatchFunction {}
 
 /**
  * Returned by Meiosis One setup.

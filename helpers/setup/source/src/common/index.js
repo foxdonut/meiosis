@@ -98,6 +98,7 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchF
   };
 
   meiosis.nest = nest;
+  meiosis.root = meiosis;
 
   return meiosis;
 };
