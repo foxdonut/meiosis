@@ -1,5 +1,4 @@
-import commonSetup, { Nest, StreamLibWithProperty } from "./common";
-// import commonSetup, { setupOne as commonSetupOne, Nest, StreamLibWithProperty } from "./common";
+import commonSetup, { meiosisOne as commonMeiosisOne, Nest, StreamLibWithProperty } from "./common";
 import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
 // import mergerinoSetup, { setupOne as mergerinoSetupOne, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
@@ -10,8 +9,7 @@ import { get, setMutate, setImmutable } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
-    export { commonSetup as setup, Nest };
-    // export { commonSetup as setup, commonSetupOne as setupOn, Nest };
+    export { commonSetup as setup, commonMeiosisOne as setupOne, Nest };
   }
   export namespace mergerino {
     export { mergerinoSetup as setup, mergerinoNest as nest };

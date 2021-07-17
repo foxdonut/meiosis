@@ -55,7 +55,7 @@ export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
 export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchFunction }) => {
   const { states, update } = setup({ stream, accumulator, combine, app });
 
-  const contextCache = {};
+  const meiosisCache = {};
 
   const meiosis = {
     states,
@@ -63,10 +63,10 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchF
     update
   };
 
-  const attachActionsTo = context => {
+  const attachActionsTo = meiosis => {
     if (app.Actions) {
-      const actions = app.Actions(context);
-      context.actions = actions;
+      const actions = app.Actions(meiosis);
+      meiosis.actions = actions;
     }
   };
 
@@ -76,23 +76,23 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchF
     if (propOrPath) {
       const path = [].concat(propOrPath);
 
-      if (!contextCache[path]) {
+      if (!meiosisCache[path]) {
         const getState = () => get(states(), path);
         const nestPatch = createNestPatchFunction(path);
         const localUpdate = patch => update(nestPatch(patch));
 
-        const localContext = {
+        const localMeiosis = {
           getState,
           update: localUpdate,
           nest: next => nest(path.concat(next)),
           root: meiosis
         };
 
-        attachActionsTo(localContext);
+        attachActionsTo(localMeiosis);
 
-        contextCache[path] = localContext;
+        meiosisCache[path] = localMeiosis;
       }
-      return contextCache[path];
+      return meiosisCache[path];
     }
     return meiosis;
   };

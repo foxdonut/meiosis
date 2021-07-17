@@ -314,25 +314,6 @@ export function Setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>
 
 export default Setup;
 
-/*
-export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
-  nestUpdate: (update: Stream<P>, prop: string) => P;
-}
-
-export interface MeiosisOne<S, P, A> extends Stream<S> {
-  update: Stream<P>;
-  actions: A;
-  select: <K extends keyof S>(prop: K) => MeiosisOne<S[K], P, A>;
-}
-
-export function setupOne<S, P, A>({
-  stream,
-  accumulator,
-  combine,
-  app
-}: MeiosisOneConfig<S, P, A>): MeiosisOne<S, P, A>;
-*/
-
 /**
  * A local path.
  */
@@ -397,3 +378,51 @@ declare function Nest<S1, P1, S2, P2>(
 ): NestFunction<S1, P1, S2, P2>;
 
 export { Nest };
+
+/**
+ * Meiosis One configuration.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisOneConfig<S, P, A> extends MeiosisConfig<S, P, A> {
+  /**
+   * Creates a function that nests a patch at a given path.
+   *
+   * @param {Array<String>} path the path at which to nest.
+   *
+   * @returns {NestPatchFunction<P1, P2>} the nest patch function.
+   */
+  createNestPatchFunction: <P1, P2>(path: Array<string>) => NestPatchFunction<P1, P2>;
+}
+
+/**
+ * Returned by Meiosis One setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisOne<S, P, A> {
+  states: Stream<S>;
+  getState: () => S;
+  update: Stream<P>;
+  actions?: A;
+  root: MeiosisOne<S, P, A>;
+  nest: <K extends keyof S>(prop: K) => MeiosisOne<S[K], P, A>;
+}
+
+/**
+ * Base helper to setup Meiosis One. If you are using Mergerino, Function Patches, or Immer,
+ * use their respective `meiosisOne` function instead.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ *
+ * @param {MeiosisOneConfig<S, P, A>} config the Meiosis One config.
+ *
+ * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
+ */
+export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOne<S, P, A>;
