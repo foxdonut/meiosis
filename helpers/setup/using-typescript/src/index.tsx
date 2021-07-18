@@ -813,8 +813,6 @@ const InitialTemperature = (label: string): Temperature => ({
     context: MergerinoMeiosisOne<Temperature, Actions>;
   }
 
-  const nest = meiosis.mergerino.nest;
-
   const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
     initial: initialConditions,
     Actions: (update: Update) => ({
