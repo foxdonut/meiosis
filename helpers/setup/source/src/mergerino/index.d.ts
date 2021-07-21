@@ -1,11 +1,11 @@
 import {
-  App,
-  CreateNestPatchFunction,
+  BaseMeiosisConfig,
   Meiosis,
+  MeiosisOneAppBase,
+  MeiosisOneBase,
+  MeiosisOneConfig,
   LocalPath,
-  Local,
-  Stream,
-  StreamLib
+  Local
 } from "../common";
 
 export type MergerinoFunctionPatch<S> = (state: S) => S;
@@ -28,27 +28,12 @@ export type MergerinoObjectPatch<S> = {
  */
 export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
 
-export type MergerinoApp<S, A> = App<S, MergerinoPatch<S>, A>;
-
-export type MergerinoMeiosisConfig<S, A> = {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
-  stream: StreamLib;
-
+export interface MergerinoMeiosisConfig<S, A> extends BaseMeiosisConfig<S, MergerinoPatch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
   merge: (state: S, patch: MergerinoPatch<S>) => S;
-
-  /**
-   * The app, with optional properties.
-   */
-  app: MergerinoApp<S, A>;
-};
+}
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -67,10 +52,46 @@ export function mergerinoSetup<S, A>(
 
 export default mergerinoSetup;
 
-export function nest<S1, P1, S2, P2>(
-  path: string | Array<string>,
-  local?: LocalPath
-): Local<S1, P1, S2, P2>;
+export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): Local<S1, S2>;
+
+// -------- Meiosis One
+
+/**
+ * Returned by Mergerino Meiosis One setup.
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ */
+export interface MergerinoMeiosisOne<S, A> extends MeiosisOneBase<S, MergerinoPatch<S>, A> {
+  root: MergerinoMeiosisOne<S, A>;
+  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<S[K], A>;
+}
+
+/**
+ * Constructor of application actions.
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ *
+ * @param {MeiosisOne<S, P, A>} context the Meiosis One context.
+ *
+ * @returns {A} the application's actions.
+ */
+export type MergerinoMeiosisOneActionConstructor<S, A> = (context: MergerinoMeiosisOne<S, A>) => A;
+
+/**
+ * Application object that provides the application's initial state, the service functions, the
+ * application's actions, and the effects, all of which are optional.
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ */
+export interface MergerinoMeiosisOneApp<S, P, A> extends MeiosisOneAppBase<S, P, A> {
+  /**
+   * A function that creates the application's actions.
+   */
+  Actions?: MergerinoMeiosisOneActionConstructor<S, A>;
+}
 
 /**
  * Mergerino Meiosis One configuration.
@@ -78,25 +99,7 @@ export function nest<S1, P1, S2, P2>(
  * @template S the State type.
  * @template A the Actions type.
  */
-export interface MergerinoMeiosisOneConfig<S, A>
-  extends MergerinoMeiosisConfig<S, A>,
-    CreateNestPatchFunction {}
-
-/**
- * Returned by Mergerino Meiosis One setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface MergerinoMeiosisOne<S, A> {
-  states: Stream<S>;
-  getState: () => S;
-  update: Stream<MergerinoPatch<S>>;
-  actions: A;
-  root: MergerinoMeiosisOne<S, A>;
-  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<S[K], A>;
-}
+export type MergerinoMeiosisOneConfig<S, A> = MeiosisOneConfig<S, MergerinoPatch<S>, A>;
 
 /**
  * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -108,8 +111,4 @@ export interface MergerinoMeiosisOne<S, A> {
  *
  * @returns {MeiosisOne<S, MergerinoPatch<S>, A>} Mergerino Meiosis One.
  */
-export function meiosisOne<S, A>({
-  stream,
-  merge,
-  app
-}: MergerinoMeiosisConfig<S, A>): MergerinoMeiosisOne<S, A>;
+export function meiosisOne<S, A>(config: MergerinoMeiosisConfig<S, A>): MergerinoMeiosisOne<S, A>;

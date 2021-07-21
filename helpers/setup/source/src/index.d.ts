@@ -38,10 +38,12 @@ export * from "./common";
 export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
 export { ImmerPatch, MeiosisImmerConfig } from "./immer";
 export {
-  MergerinoApp,
-  MergerinoPatch,
   MergerinoMeiosisConfig,
-  MergerinoMeiosisOne
+  MergerinoMeiosisOne,
+  MergerinoMeiosisOneActionConstructor,
+  MergerinoMeiosisOneApp,
+  MergerinoMeiosisOneConfig,
+  MergerinoPatch
 } from "./mergerino";
 export { PreactSetup } from "./preact";
 export { ReactFunctions, ReactSetup } from "./react";

@@ -43,6 +43,6 @@ export function immerSetup<S, A>({
 
 export default immerSetup;
 
-export function nest<S1, P1, S2, P2>(
+export function nest<S1, S2>(
   produce: Produce<S1>
-): (path: string | Array<string>, local?: LocalPath) => Local<S1, P1, S2, P2>;
+): (path: string | Array<string>, local?: LocalPath) => Local<S1, S2>;

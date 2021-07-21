@@ -5,8 +5,9 @@ import meiosis, {
   ImmerPatch,
   LocalPatch,
   Local,
-  MergerinoApp,
   MergerinoMeiosisOne,
+  MergerinoMeiosisOneActionConstructor,
+  MergerinoMeiosisOneApp,
   MergerinoPatch,
   Stream
 } from "../../source/dist";
@@ -38,14 +39,14 @@ interface Conditions {
   sky: Sky;
 }
 
-interface ConditionsActions<P1, P2> {
-  togglePrecipitations: (local: LocalPatch<P1, P2>, value: boolean) => void;
-  changeSky: (local: LocalPatch<P1, P2>, value: Sky) => void;
+interface ConditionsActions {
+  togglePrecipitations: (local: LocalPatch, value: boolean) => void;
+  changeSky: (local: LocalPatch, value: Sky) => void;
 }
 
-interface ConditionsComponent<P1, P2> {
+interface ConditionsComponent<P> {
   initial: Conditions;
-  Actions: ActionConstructor<Conditions, P1, ConditionsActions<P1, P2>>;
+  Actions: ActionConstructor<Conditions, P, ConditionsActions>;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -56,14 +57,14 @@ interface Temperature {
   units: TemperatureUnits;
 }
 
-interface TemperatureActions<P1, P2> {
-  increment: (local: LocalPatch<P1, P2>, amount: number) => void;
-  changeUnits: (local: LocalPatch<P1, P2>) => void;
+interface TemperatureActions {
+  increment: (local: LocalPatch, amount: number) => void;
+  changeUnits: (local: LocalPatch) => void;
 }
 
-interface TemperatureComponent<P1, P2> {
+interface TemperatureComponent<P> {
   Initial: (label: string) => Temperature;
-  Actions: ActionConstructor<Temperature, P1, TemperatureActions<P1, P2>>;
+  Actions: ActionConstructor<Temperature, P, TemperatureActions>;
 }
 
 interface State {
@@ -92,15 +93,13 @@ const InitialTemperature = (label: string): Temperature => ({
 // lit-html + functionPatches + simple-stream
 (() => {
   type Patch = FunctionPatch<State>;
-  type ConditionsPatch = FunctionPatch<Conditions>;
-  type TemperaturePatch = FunctionPatch<Temperature>;
   type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
-  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+  type ConditionsLocal = Local<State, Conditions>;
+  type TemperatureLocal = Local<State, Temperature>;
 
   interface Actions {
-    conditions: ConditionsActions<Patch, ConditionsPatch>;
-    temperature: TemperatureActions<Patch, TemperaturePatch>;
+    conditions: ConditionsActions;
+    temperature: TemperatureActions;
   }
 
   interface Attrs {
@@ -124,7 +123,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   const nest = meiosis.functionPatches.nest;
 
-  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+  const conditions: ConditionsComponent<Patch> = {
     initial: initialConditions,
     Actions: (update: Update) => ({
       togglePrecipitations: (local, value) => {
@@ -176,7 +175,7 @@ const InitialTemperature = (label: string): Temperature => ({
     </div>
   `;
 
-  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+  const temperature: TemperatureComponent<Patch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -249,15 +248,13 @@ const InitialTemperature = (label: string): Temperature => ({
 // mithril + mergerino + mithril-stream
 (() => {
   type Patch = MergerinoPatch<State>;
-  type ConditionsPatch = MergerinoPatch<Conditions>;
-  type TemperaturePatch = MergerinoPatch<Temperature>;
   type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
-  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+  type ConditionsLocal = Local<State, Conditions>;
+  type TemperatureLocal = Local<State, Temperature>;
 
   interface Actions {
-    conditions: ConditionsActions<Patch, ConditionsPatch>;
-    temperature: TemperatureActions<Patch, TemperaturePatch>;
+    conditions: ConditionsActions;
+    temperature: TemperatureActions;
   }
 
   interface Attrs {
@@ -281,7 +278,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   const nest = meiosis.mergerino.nest;
 
-  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+  const conditions: ConditionsComponent<Patch> = {
     initial: initialConditions,
     Actions: (update: Update) => ({
       togglePrecipitations: (local, value) => {
@@ -330,7 +327,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+  const temperature: TemperatureComponent<Patch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -370,7 +367,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const app: MergerinoApp<State, Actions> = {
+  const app: App<State, Patch, Actions> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -424,15 +421,13 @@ const InitialTemperature = (label: string): Temperature => ({
 // preact + mergerino + simple-stream
 (() => {
   type Patch = MergerinoPatch<State>;
-  type ConditionsPatch = MergerinoPatch<Conditions>;
-  type TemperaturePatch = MergerinoPatch<Temperature>;
   type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
-  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+  type ConditionsLocal = Local<State, Conditions>;
+  type TemperatureLocal = Local<State, Temperature>;
 
   interface Actions {
-    conditions: ConditionsActions<Patch, ConditionsPatch>;
-    temperature: TemperatureActions<Patch, TemperaturePatch>;
+    conditions: ConditionsActions;
+    temperature: TemperatureActions;
   }
 
   interface Attrs {
@@ -456,7 +451,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   const nest = meiosis.mergerino.nest;
 
-  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+  const conditions: ConditionsComponent<Patch> = {
     initial: initialConditions,
     Actions: (update: Update) => ({
       togglePrecipitations: (local, value) => {
@@ -506,7 +501,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
     );
 
-  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+  const temperature: TemperatureComponent<Patch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -547,7 +542,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
     );
 
-  const app: MergerinoApp<State, Actions> = {
+  const app: App<State, Patch, Actions> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -601,15 +596,13 @@ const InitialTemperature = (label: string): Temperature => ({
 // react + immer + flyd
 (() => {
   type Patch = ImmerPatch<State>;
-  type ConditionsPatch = ImmerPatch<Conditions>;
-  type TemperaturePatch = ImmerPatch<Temperature>;
   type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Patch, Conditions, ConditionsPatch>;
-  type TemperatureLocal = Local<State, Patch, Temperature, TemperaturePatch>;
+  type ConditionsLocal = Local<State, Conditions>;
+  type TemperatureLocal = Local<State, Temperature>;
 
   interface Actions {
-    conditions: ConditionsActions<Patch, ConditionsPatch>;
-    temperature: TemperatureActions<Patch, TemperaturePatch>;
+    conditions: ConditionsActions;
+    temperature: TemperatureActions;
   }
 
   interface Attrs {
@@ -633,7 +626,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
   const nest = meiosis.immer.nest(produce);
 
-  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+  const conditions: ConditionsComponent<Patch> = {
     initial: initialConditions,
     Actions: (update: Update) => ({
       togglePrecipitations: (local, value) => {
@@ -695,7 +688,7 @@ const InitialTemperature = (label: string): Temperature => ({
     </div>
   );
 
-  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+  const temperature: TemperatureComponent<Patch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -786,13 +779,25 @@ const InitialTemperature = (label: string): Temperature => ({
 // MeiosisOne + mergerino + mithril + mithril-stream
 (() => {
   type Patch = MergerinoPatch<State>;
-  type ConditionsPatch = MergerinoPatch<Conditions>;
-  type TemperaturePatch = MergerinoPatch<Temperature>;
-  type Update = Stream<Patch>;
+
+  interface ConditionsActions {
+    togglePrecipitations: (value: boolean) => void;
+    changeSky: (value: Sky) => void;
+  }
+
+  interface TemperatureActions {
+    increment: (amount: number) => void;
+    changeUnits: () => void;
+  }
+
+  interface ConditionsComponent {
+    initial: Conditions;
+    Actions: MergerinoMeiosisOneActionConstructor<Conditions, ConditionsActions>;
+  }
 
   interface Actions {
-    conditions: ConditionsActions<Patch, ConditionsPatch>;
-    temperature: TemperatureActions<Patch, TemperaturePatch>;
+    conditions: ConditionsActions;
+    temperature: TemperatureActions;
   }
 
   interface Attrs {
@@ -813,14 +818,14 @@ const InitialTemperature = (label: string): Temperature => ({
     context: MergerinoMeiosisOne<Temperature, Actions>;
   }
 
-  const conditions: ConditionsComponent<Patch, ConditionsPatch> = {
+  const conditions: ConditionsComponent = {
     initial: initialConditions,
-    Actions: (update: Update) => ({
-      togglePrecipitations: (local, value) => {
-        update(local.patch({ precipitations: value }));
+    Actions: (context: MergerinoMeiosisOne<Conditions, ConditionsActions>) => ({
+      togglePrecipitations: (value: boolean) => {
+        context.update({ precipitations: value });
       },
-      changeSky: (local, value) => {
-        update(local.patch({ sky: value }));
+      changeSky: (value: Sky) => {
+        context.update({ sky: value });
       }
     })
   };
@@ -861,7 +866,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const temperature: TemperatureComponent<Patch, TemperaturePatch> = {
+  const temperature: TemperatureComponent<Patch> = {
     Initial: InitialTemperature,
     Actions: update => ({
       increment: (local, amount) => {
@@ -901,7 +906,7 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const app: App<State, Patch, Actions> = {
+  const app: MergerinoMeiosisOneApp<State, Patch, Actions> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -909,9 +914,9 @@ const InitialTemperature = (label: string): Temperature => ({
         water: temperature.Initial("Water")
       }
     },
-    Actions: update => ({
-      conditions: conditions.Actions(update),
-      temperature: temperature.Actions(update)
+    Actions: context => ({
+      conditions: conditions.Actions(context),
+      temperature: temperature.Actions(context)
     })
   };
 
