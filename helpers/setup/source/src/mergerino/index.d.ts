@@ -1,9 +1,9 @@
 import {
-  BaseMeiosisConfig,
   Meiosis,
-  MeiosisOneAppBase,
+  MeiosisConfigBase,
+  MeiosisOneApp,
   MeiosisOneBase,
-  MeiosisOneConfig,
+  MeiosisOneConfigBase,
   LocalPath,
   Local
 } from "../common";
@@ -28,7 +28,7 @@ export type MergerinoObjectPatch<S> = {
  */
 export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
 
-export interface MergerinoMeiosisConfig<S, A> extends BaseMeiosisConfig<S, MergerinoPatch<S>, A> {
+export interface MergerinoMeiosisConfig<S, A> extends MeiosisConfigBase<S, MergerinoPatch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
@@ -60,55 +60,38 @@ export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): L
  * Returned by Mergerino Meiosis One setup.
  *
  * @template S the State type.
- * @template A the Actions type.
  */
-export interface MergerinoMeiosisOne<S, A> extends MeiosisOneBase<S, MergerinoPatch<S>, A> {
-  root: MergerinoMeiosisOne<S, A>;
-  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<S[K], A>;
+export interface MergerinoMeiosisOne<RS, S = RS> extends MeiosisOneBase<S, MergerinoPatch<S>> {
+  root: MergerinoMeiosisOne<RS>;
+  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<RS, S[K]>;
 }
 
-/**
- * Constructor of application actions.
- *
- * @template S the State type.
- * @template A the Actions type.
- *
- * @param {MeiosisOne<S, P, A>} context the Meiosis One context.
- *
- * @returns {A} the application's actions.
- */
-export type MergerinoMeiosisOneActionConstructor<S, A> = (context: MergerinoMeiosisOne<S, A>) => A;
-
-/**
- * Application object that provides the application's initial state, the service functions, the
- * application's actions, and the effects, all of which are optional.
- *
- * @template S the State type.
- * @template A the Actions type.
- */
-export interface MergerinoMeiosisOneApp<S, P, A> extends MeiosisOneAppBase<S, P, A> {
-  /**
-   * A function that creates the application's actions.
-   */
-  Actions?: MergerinoMeiosisOneActionConstructor<S, A>;
-}
+export type MergerinoMeiosisOneApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
 
 /**
  * Mergerino Meiosis One configuration.
  *
  * @template S the State type.
- * @template A the Actions type.
  */
-export type MergerinoMeiosisOneConfig<S, A> = MeiosisOneConfig<S, MergerinoPatch<S>, A>;
+export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
+  /**
+   * The Mergerino `merge` function.
+   */
+  merge: (state: S, patch: MergerinoPatch<S>) => S;
+
+  /**
+   * The application object, with optional properties.
+   */
+  app: MergerinoMeiosisOneApp<S>;
+}
 
 /**
  * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
- * @template A the Actions type.
  *
- * @param {MergerinoMeiosisConfig<S, A>} config the Meiosis One config for use with Mergerino
+ * @param {MergerinoMeiosisConfig<S>} config the Meiosis One config for use with Mergerino
  *
- * @returns {MeiosisOne<S, MergerinoPatch<S>, A>} Mergerino Meiosis One.
+ * @returns {MeiosisOne<S, MergerinoPatch<S>>} Mergerino Meiosis One.
  */
-export function meiosisOne<S, A>(config: MergerinoMeiosisConfig<S, A>): MergerinoMeiosisOne<S, A>;
+export function meiosisOne<S>(config: MergerinoMeiosisOneConfig<S>): MergerinoMeiosisOne<S>;

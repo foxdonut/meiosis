@@ -6,7 +6,6 @@ import meiosis, {
   LocalPatch,
   Local,
   MergerinoMeiosisOne,
-  MergerinoMeiosisOneActionConstructor,
   MergerinoMeiosisOneApp,
   MergerinoPatch,
   Stream
@@ -778,56 +777,56 @@ const InitialTemperature = (label: string): Temperature => ({
 
 // MeiosisOne + mergerino + mithril + mithril-stream
 (() => {
-  type Patch = MergerinoPatch<State>;
+  type MeiosisOneSubState<T> = MergerinoMeiosisOne<State, T>;
 
-  interface ConditionsActions {
-    togglePrecipitations: (value: boolean) => void;
-    changeSky: (value: Sky) => void;
+  interface Attrs {
+    context: MergerinoMeiosisOne<State>;
   }
 
-  interface TemperatureActions {
-    increment: (amount: number) => void;
-    changeUnits: () => void;
+  interface ConditionsActions {
+    togglePrecipitations: (context: MeiosisOneSubState<Conditions>, value: boolean) => void;
+    changeSky: (context: MeiosisOneSubState<Conditions>, value: Sky) => void;
   }
 
   interface ConditionsComponent {
     initial: Conditions;
-    Actions: MergerinoMeiosisOneActionConstructor<Conditions, ConditionsActions>;
-  }
-
-  interface Actions {
-    conditions: ConditionsActions;
-    temperature: TemperatureActions;
-  }
-
-  interface Attrs {
-    context: MergerinoMeiosisOne<State, Actions>;
+    actions: ConditionsActions;
   }
 
   interface SkyOptionAttrs {
-    context: MergerinoMeiosisOne<Conditions, Actions>;
+    context: MeiosisOneSubState<Conditions>;
     value: string;
     label: string;
   }
 
   interface ConditionsAttrs {
-    context: MergerinoMeiosisOne<Conditions, Actions>;
+    context: MeiosisOneSubState<Conditions>;
+  }
+
+  interface TemperatureActions {
+    increment: (context: MeiosisOneSubState<Temperature>, amount: number) => void;
+    changeUnits: (context: MeiosisOneSubState<Temperature>) => void;
+  }
+
+  interface TemperatureComponent {
+    Initial: (label: string) => Temperature;
+    actions: TemperatureActions;
   }
 
   interface TemperatureAttrs {
-    context: MergerinoMeiosisOne<Temperature, Actions>;
+    context: MeiosisOneSubState<Temperature>;
   }
 
   const conditions: ConditionsComponent = {
     initial: initialConditions,
-    Actions: (context: MergerinoMeiosisOne<Conditions, ConditionsActions>) => ({
-      togglePrecipitations: (value: boolean) => {
+    actions: {
+      togglePrecipitations: (context, value: boolean) => {
         context.update({ precipitations: value });
       },
-      changeSky: (value: Sky) => {
+      changeSky: (context, value: Sky) => {
         context.update({ sky: value });
       }
-    })
+    }
   };
 
   const SkyOption: m.Component<SkyOptionAttrs> = {
@@ -838,7 +837,7 @@ const InitialTemperature = (label: string): Temperature => ({
           type: "radio",
           value,
           checked: context.getState().sky === value,
-          onchange: evt => context.actions.conditions.changeSky(evt.target.value)
+          onchange: evt => conditions.actions.changeSky(context, evt.target.value)
         }),
         label
       )
@@ -853,7 +852,7 @@ const InitialTemperature = (label: string): Temperature => ({
           m("input", {
             type: "checkbox",
             checked: context.getState().precipitations,
-            onchange: evt => context.actions.conditions.togglePrecipitations(evt.target.checked)
+            onchange: evt => conditions.actions.togglePrecipitations(context, evt.target.checked)
           }),
           "Precipitations"
         ),
@@ -866,23 +865,22 @@ const InitialTemperature = (label: string): Temperature => ({
       )
   };
 
-  const temperature: TemperatureComponent<Patch> = {
+  const temperature: TemperatureComponent = {
     Initial: InitialTemperature,
-    Actions: update => ({
-      increment: (local, amount) => {
-        update(local.patch({ value: x => x + amount }));
+    actions: {
+      increment: (context, amount) => {
+        context.update({ value: x => x + amount });
       },
-      changeUnits: local => {
-        update(
-          local.patch(state => {
-            const value = state.value;
-            const newUnits = state.units === "C" ? "F" : "C";
-            const newValue = convert(value, newUnits);
-            return { ...state, value: newValue, units: newUnits };
-          })
-        );
+      changeUnits: context => {
+        context.update(state => {
+          const value = state.value;
+          const newUnits = state.units === "C" ? "F" : "C";
+          const newValue = convert(value, newUnits);
+          return { ...state, value: newValue, units: newUnits };
+          // TODO: check if there is a way to signal an error on extra properties
+        });
       }
-    })
+    }
   };
 
   const Temperature: m.Component<TemperatureAttrs> = {
@@ -896,28 +894,24 @@ const InitialTemperature = (label: string): Temperature => ({
         context.getState().units,
         m(
           "div",
-          m("button", { onclick: () => context.actions.temperature.increment(1) }, "Increment"),
-          m("button", { onclick: () => context.actions.temperature.increment(-1) }, "Decrement")
+          m("button", { onclick: () => temperature.actions.increment(context, 1) }, "Increment"),
+          m("button", { onclick: () => temperature.actions.increment(context, -1) }, "Decrement")
         ),
         m(
           "div",
-          m("button", { onclick: () => context.actions.temperature.changeUnits() }, "Change Units")
+          m("button", { onclick: () => temperature.actions.changeUnits(context) }, "Change Units")
         )
       )
   };
 
-  const app: MergerinoMeiosisOneApp<State, Patch, Actions> = {
+  const app: MergerinoMeiosisOneApp<State> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
         air: temperature.Initial("Air"),
         water: temperature.Initial("Water")
       }
-    },
-    Actions: context => ({
-      conditions: conditions.Actions(context),
-      temperature: temperature.Actions(context)
-    })
+    }
   };
 
   const App: m.Component<Attrs> = {
@@ -940,7 +934,7 @@ const InitialTemperature = (label: string): Temperature => ({
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const context = meiosis.mergerino.meiosisOne<State, Actions>({ stream, merge, app });
+  const context = meiosis.mergerino.meiosisOne<State>({ stream, merge, app });
 
   m.mount(document.getElementById("mergerinoMeiosisOneApp") as HTMLElement, {
     view: () => m(App, { context })

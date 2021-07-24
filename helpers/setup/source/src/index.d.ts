@@ -40,7 +40,6 @@ export { ImmerPatch, MeiosisImmerConfig } from "./immer";
 export {
   MergerinoMeiosisConfig,
   MergerinoMeiosisOne,
-  MergerinoMeiosisOneActionConstructor,
   MergerinoMeiosisOneApp,
   MergerinoMeiosisOneConfig,
   MergerinoPatch
