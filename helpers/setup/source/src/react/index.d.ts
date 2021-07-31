@@ -37,6 +37,8 @@ export interface ReactSetup<R, V> {
  * @returns an application component that accepts `states` and other props of your choice, and
  * passes `state` and your other props to the `Root` component.
  */
-declare function reactSetup<S, R, V>(setup: ReactSetup<R, V>): (props: { states: Stream<S> }) => V;
+declare function reactSetup<S, R, V>(
+  setup: ReactSetup<R, V>
+): (props: { states: Stream<S>; [k: string]: any }) => V;
 
 export default reactSetup;

@@ -86,6 +86,8 @@ export interface PreactSetup<R, V> {
  * render(<App states="states" actions="actions"/>, element);
  * ```
  */
-export function preactSetup<S, R, V>(setup: PreactSetup<R, V>): (props: { states: Stream<S> }) => V;
+export function preactSetup<S, R, V>(
+  setup: PreactSetup<R, V>
+): (props: { states: Stream<S>; [k: string]: any }) => V;
 
 export default preactSetup;

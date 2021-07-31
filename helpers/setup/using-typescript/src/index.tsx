@@ -19,7 +19,7 @@ import MStream from "mithril/stream";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM, { ReactElement } from "react-dom";
 
 const { stream, scan } = meiosis.simpleStream;
 
@@ -645,7 +645,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const SkyOption: (attrs: SkyOptionAttrs) => JSX.Element = ({
+  const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({
     state,
     local,
     actions,
@@ -663,7 +663,7 @@ const InitialTemperature = (label: string): Temperature => ({
     </label>
   );
 
-  const Conditions: (attrs: ConditionsAttrs) => JSX.Element = ({ state, local, actions }) => (
+  const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ state, local, actions }) => (
     <div>
       <label>
         <input
@@ -711,7 +711,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Temperature: (attrs: TemperatureAttrs) => JSX.Element = ({ state, local, actions }) => (
+  const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ state, local, actions }) => (
     <div>
       {local.get(state).label} Temperature:
       {local.get(state).value}&deg;{local.get(state).units}
@@ -739,7 +739,7 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Root: (attrs: Attrs) => JSX.Element = ({ state, actions }) => (
+  const Root: (attrs: Attrs) => ReactElement = ({ state, actions }) => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div>
         <Conditions state={state} local={nest("conditions") as ConditionsLocal} actions={actions} />
@@ -769,7 +769,7 @@ const InitialTemperature = (label: string): Temperature => ({
     app
   });
 
-  const App = meiosis.react.setup<State, Attrs, JSX.Element>({ React, Root });
+  const App = meiosis.react.setup<State, Attrs, ReactElement>({ React, Root });
 
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(App, { states, actions }), element);
@@ -884,14 +884,16 @@ const InitialTemperature = (label: string): Temperature => ({
   };
 
   const Temperature: m.Component<TemperatureAttrs> = {
-    view: ({ attrs: { context } }) =>
-      m(
+    view: ({ attrs: { context } }) => {
+      const state = context.getState();
+
+      return m(
         "div",
-        context.getState().label,
+        state.label,
         " Temperature: ",
-        context.getState().value,
+        state.value,
         m.trust("&deg;"),
-        context.getState().units,
+        state.units,
         m(
           "div",
           m("button", { onclick: () => temperature.actions.increment(context, 1) }, "Increment"),
@@ -901,7 +903,8 @@ const InitialTemperature = (label: string): Temperature => ({
           "div",
           m("button", { onclick: () => temperature.actions.changeUnits(context) }, "Change Units")
         )
-      )
+      );
+    }
   };
 
   const app: MergerinoMeiosisOneApp<State> = {
