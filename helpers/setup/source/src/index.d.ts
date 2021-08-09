@@ -3,11 +3,12 @@ import mergerinoSetup, {
   nest as mergerinoNest,
   meiosisOne as mergerinoMeiosisOne
 } from "./mergerino";
-import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
+import functionPatchesSetup, {
+  nest as functionPatchesNest,
+  meiosisOne as functionPatchesMeiosisOne
+} from "./functionPatches";
 import immerSetup, { nest as immerNest } from "./immer";
-import preactSetup from "./preact";
-import reactSetup from "./react";
-import { get, setMutate, setImmutable } from "./util";
+import { get, setImmutable, setMutate } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
@@ -17,26 +18,36 @@ declare namespace meiosisSetup {
     export { mergerinoSetup as setup, mergerinoNest as nest, mergerinoMeiosisOne as meiosisOne };
   }
   export namespace functionPatches {
-    export { functionPatchesSetup as setup, functionPatchesNest as nest };
+    export {
+      functionPatchesSetup as setup,
+      functionPatchesNest as nest,
+      functionPatchesMeiosisOne as meiosisOne
+    };
   }
   export namespace immer {
     export { immerSetup as setup, immerNest as nest };
   }
-  export namespace preact {
-    export { preactSetup as setup };
-  }
-  export namespace react {
-    export { reactSetup as setup };
-  }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
-    export { get, setMutate, setImmutable };
+    export { get, setImmutable, setMutate };
   }
 }
 
 export * from "./common";
-export { FunctionPatch, MeiosisFunctionPatchesConfig } from "./functionPatches";
-export { ImmerPatch, MeiosisImmerConfig } from "./immer";
+export {
+  FunctionPatch,
+  FunctionPatchesMeiosisConfig,
+  FunctionPatchesMeiosisOne,
+  FunctionPatchesMeiosisOneApp,
+  FunctionPatchesMeiosisOneConfig
+} from "./functionPatches";
+export {
+  ImmerMeiosisConfig,
+  ImmerMeiosisOne,
+  ImmerMeiosisOneApp,
+  ImmerMeiosisOneConfig,
+  ImmerPatch
+} from "./immer";
 export {
   MergerinoMeiosisConfig,
   MergerinoMeiosisOne,
@@ -44,7 +55,5 @@ export {
   MergerinoMeiosisOneConfig,
   MergerinoPatch
 } from "./mergerino";
-export { PreactSetup } from "./preact";
-export { ReactFunctions, ReactSetup } from "./react";
 
 export default meiosisSetup;
