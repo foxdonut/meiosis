@@ -3,7 +3,7 @@
 /**
  * Simple stream implementation.
  *
- * @type {import("../common/index").StreamConstructor}
+ * @type {import("./index").stream}
  */
 export const stream = initial => {
   const mapFunctions = [];
@@ -12,7 +12,7 @@ export const stream = initial => {
   // Keep track of mapped values so that they are sent to mapped streams in order.
   // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
   let mappedValues = [];
-  /** @type {import("../common/index").Stream} */
+  /** @type {import("../common").Stream} */
   const createdStream = function (value) {
     if (arguments.length > 0 && !createdStream.ended) {
       latestValue = value;
@@ -44,7 +44,7 @@ export const stream = initial => {
   return createdStream;
 };
 
-/** @type {import("../common/index").Scan} */
+/** @type {import("./index").scan} */
 export const scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);
   let accumulated = initial;
