@@ -212,7 +212,7 @@ export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>)
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export type App<S, P, A> = {
+export type App<S, P, A = never> = {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -311,9 +311,9 @@ export type Meiosis<S, P, A> = {
  *
  * @returns {Meiosis<S, P, A>} the Meiosis setup.
  */
-export function Setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
+export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
 
-export default Setup;
+export default setup;
 
 /**
  * A local path.
@@ -374,16 +374,19 @@ export interface Local<S1, S2> extends LocalPath, LocalPatch {
  * local object.
  */
 // type NestFunction<S1, P1, S2, P2> = (
-type NestFunction<S1, S2> = (path: string | Array<string>, local?: LocalPath) => Local<S1, S2>;
+export type NestFunction<S1, S2> = (
+  path: string | Array<string>,
+  local?: LocalPath
+) => Local<S1, S2>;
 
 /**
- * Creates a function that nests a patch at a given path.
+ * Creates a function that nests a patch at a given property.
  *
- * @param {Array<String>} path the path at which to nest.
+ * @param {string} property the property at which to nest.
  *
  * @returns {NestPatchFunction<P1, P2>} the nest patch function.
  */
-export type CreateNestPatchFunction = (path: Array<string>) => NestPatchFunction;
+export type CreateNestPatchFunction = (prop: string) => NestPatchFunction;
 
 /**
  * Constructor to create a `nest` function.
@@ -410,7 +413,6 @@ export interface MeiosisOneBase<S, P> {
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
 export interface MeiosisOne<RS, RP, S = RS, P = RP> extends MeiosisOneBase<S, P> {
   root: MeiosisOneBase<RS, RP>;
