@@ -1249,6 +1249,47 @@ describe("meiosis setup with generic common", () => {
   });
 });
 
+describe("Meiosis One", () => {
+  const streamLib = meiosis.simpleStream;
+
+  const applyPatchCases = [
+    ["mergerino", app => meiosis.mergerino.meiosisOne({ stream: streamLib, merge, app })],
+    ["functionPatches", app => meiosis.functionPatches.meiosisOne({ stream: streamLib, app })],
+    ["immer", app => meiosis.immer.meiosisOne({ stream: streamLib, produce, app })]
+  ];
+
+  const createTestCases = (label, arr = [[], [], []]) => {
+    const result = [];
+    for (let i = 0; i < applyPatchCases.length; i++) {
+      result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
+    }
+    return result;
+  };
+
+  test.each(
+    createTestCases("minimal", [
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, patch1, patch2) => {
+    const context = setupFn();
+    expect(context.getState()).toEqual({});
+
+    context.update(patch1);
+    context.update(patch2);
+
+    expect(context.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+  });
+});
+
 describe("simpleStream", () => {
   test("basic", () => {
     const s1 = meiosis.simpleStream.stream();
