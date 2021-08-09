@@ -14,10 +14,12 @@ const mergerinoSetup = ({ stream, merge, app }) =>
 
 export default mergerinoSetup;
 
+/** @type {import("../common").CreateNestPatchFunction} */
 const createNestPatchFunction = path => patch => setMutate({}, path, patch);
 
 export const nest = Nest(createNestPatchFunction);
 
+/** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, merge, app }) =>
   commonMeiosisOne({
     stream,
