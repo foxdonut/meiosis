@@ -1,6 +1,7 @@
 // @ts-check
 
 import commonSetup, { meiosisOne as commonMeiosisOne, Nest } from "../common";
+import { get, setImmutable } from "../util";
 
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
@@ -10,8 +11,8 @@ const functionPatchesSetup = ({ stream, app }) =>
 
 export default functionPatchesSetup;
 
-const createNestPatchFunction = prop => patch => state =>
-  Object.assign({}, state, { prop: patch(state[prop]) }); // FIXME: test this, should be [prop]
+const createNestPatchFunction = path => patch => state =>
+  setImmutable(state, path, patch(get(state, path)));
 
 export const nest = Nest(createNestPatchFunction);
 

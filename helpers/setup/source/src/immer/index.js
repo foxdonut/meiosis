@@ -1,6 +1,7 @@
 // @ts-check
 
 import commonSetup, { meiosisOne as commonMeiosisOne, Nest } from "../common";
+import { get, setMutate } from "../util";
 
 /** @type {import("./index").immerSetup} */
 const immerSetup = ({ stream, produce, app }) =>
@@ -14,8 +15,8 @@ const immerSetup = ({ stream, produce, app }) =>
 
 export default immerSetup;
 
-const createNestPatchFunction = produce => prop => patch => state => {
-  state[prop] = produce(state[prop], patch);
+const createNestPatchFunction = produce => path => patch => state => {
+  setMutate(state, path, produce(get(state, path), patch));
 };
 
 export const nest = produce => Nest(createNestPatchFunction(produce));

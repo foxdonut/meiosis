@@ -54,7 +54,7 @@ export default immerSetup;
 
 export function nest<S1, S2>(
   produce: Produce<S1>
-): (prop: string, local?: LocalPath) => Local<S1, S2>;
+): (path: string | Array<string>, local?: LocalPath) => Local<S1, S2>;
 
 // -------- Meiosis One
 

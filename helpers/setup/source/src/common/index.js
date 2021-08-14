@@ -2,7 +2,7 @@
 
 import { get } from "../util";
 
-const setup = ({ stream, accumulator, combine, app }) => {
+const baseSetup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -13,7 +13,9 @@ const setup = ({ stream, accumulator, combine, app }) => {
     throw new Error("No combine function was specified.");
   }
 
-  app = Object.assign({ initial: {}, Actions: () => ({}), services: [], Effects: () => [] }, app);
+  const safeApp = app || {};
+  const initial = safeApp.initial || {};
+  const services = safeApp.services || [];
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -24,16 +26,26 @@ const setup = ({ stream, accumulator, combine, app }) => {
   const update = createStream();
 
   const runServices = startingState =>
-    app.services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
+    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
   const states = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
-    runServices(app.initial),
+    runServices(initial),
     update
   );
 
-  const actions = app.Actions(update, states);
-  const effects = app.Effects(update, actions);
+  return { states, update };
+};
+
+/** @type {import("./index").setup} */
+const setup = ({ stream, accumulator, combine, app }) => {
+  const { states, update } = baseSetup({ stream, accumulator, combine, app });
+
+  const Actions = Object.assign({ Actions: (_update, _states) => undefined }, app).Actions;
+  const Effects = Object.assign({ Effects: (_update, _actions) => [] }, app).Effects;
+
+  const actions = Actions(update, states);
+  const effects = Effects(update, actions);
 
   states.map(state => effects.forEach(effect => effect(state)));
 
@@ -42,8 +54,8 @@ const setup = ({ stream, accumulator, combine, app }) => {
 
 export default setup;
 
-export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
-  const nestedPath = local.path.concat(path);
+export const Nest = createNestPatchFunction => (prop, local = { path: [] }) => {
+  const nestedPath = local.path.concat(prop);
 
   return {
     get: state => get(state, nestedPath),
@@ -52,26 +64,14 @@ export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
   };
 };
 
+/** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchFunction }) => {
-  const { states, update } = setup({ stream, accumulator, combine, app });
+  const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
-  const contextCache = {};
+  // const contextCache = {};
 
-  const root = {
-    states,
-    getState: () => states(),
-    update
-  };
-
-  const attachActionsTo = context => {
-    if (app.Actions) {
-      context.actions = app.Actions(context);
-    }
-  };
-
-  attachActionsTo(root);
-
-  const nest = propOrPath => {
+  /*
+  const nest = root => propOrPath => {
     if (propOrPath) {
       const path = [].concat(propOrPath);
 
@@ -83,11 +83,9 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchF
         const localContext = {
           getState,
           update: localUpdate,
-          nest: next => nest(path.concat(next)),
+          nest: next => nest(root)(path.concat(next)),
           root
         };
-
-        attachActionsTo(localContext);
 
         contextCache[path] = localContext;
       }
@@ -95,9 +93,37 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchF
     }
     return root;
   };
+  */
 
-  root.nest = nest;
-  root.root = root;
+  const nest = (root, nested) => prop => {
+    if (prop) {
+      const getState = () => nested.getState()[prop];
+      const nestPatch = createNestPatchFunction(prop);
+      const nestedUpdate = patch => nested.update(nestPatch(patch));
+
+      const nestedContext = {
+        getState,
+        update: nestedUpdate,
+        root
+      };
+
+      nestedContext.nest = nextProp => nest(root, nestedContext)(nextProp);
+
+      return nestedContext;
+    }
+    return root;
+  };
+
+  const baseRoot = {
+    states,
+    getState: () => states(),
+    update
+  };
+
+  const root = Object.assign(baseRoot, {
+    root: baseRoot,
+    nest: nest(baseRoot, baseRoot)
+  });
 
   return root;
 };

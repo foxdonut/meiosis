@@ -24,7 +24,8 @@ describe("meiosis setup with library for applying patches", () => {
 
     const createTestCases = (label, arr = [[], [], []]) => {
       const result = [];
-      for (let i = 0; i < applyPatchCases.length; i++) {
+      const total = Math.min(arr.length, applyPatchCases.length);
+      for (let i = 0; i < total; i++) {
         result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
       }
       return result;
@@ -1260,7 +1261,8 @@ describe("Meiosis One", () => {
 
   const createTestCases = (label, arr = [[], [], []]) => {
     const result = [];
-    for (let i = 0; i < applyPatchCases.length; i++) {
+    const total = Math.min(arr.length, applyPatchCases.length);
+    for (let i = 0; i < total; i++) {
       result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
     }
     return result;

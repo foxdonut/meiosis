@@ -382,11 +382,11 @@ export type NestFunction<S1, S2> = (
 /**
  * Creates a function that nests a patch at a given property.
  *
- * @param {string} property the property at which to nest.
+ * @param {Array<string>} path the property path at which to nest.
  *
  * @returns {NestPatchFunction<P1, P2>} the nest patch function.
  */
-export type CreateNestPatchFunction = (prop: string) => NestPatchFunction;
+export type CreateNestPatchFunction = (path: string | Array<string>) => NestPatchFunction;
 
 /**
  * Constructor to create a `nest` function.
