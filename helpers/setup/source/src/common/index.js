@@ -64,66 +64,34 @@ export const Nest = createNestPatchFunction => (prop, local = { path: [] }) => {
   };
 };
 
-/** @type {import("./index").meiosisOne} */
-export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchFunction }) => {
-  const { states, update } = baseSetup({ stream, accumulator, combine, app });
+/** type {import("./index").meiosisOne} */
+export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatch }) => {
+  const { states, update, actions } = baseSetup({ stream, accumulator, combine, app });
 
-  // const contextCache = {};
-
-  /*
-  const nest = root => propOrPath => {
-    if (propOrPath) {
-      const path = [].concat(propOrPath);
-
-      if (!contextCache[path]) {
-        const getState = () => get(states(), path);
-        const nestPatch = createNestPatchFunction(path);
-        const localUpdate = patch => update(nestPatch(patch));
-
-        const localContext = {
-          getState,
-          update: localUpdate,
-          nest: next => nest(root)(path.concat(next)),
-          root
-        };
-
-        contextCache[path] = localContext;
-      }
-      return contextCache[path];
-    }
-    return root;
-  };
-  */
-
-  const nest = (root, nested) => prop => {
-    if (prop) {
-      const getState = () => nested.getState()[prop];
-      const nestPatch = createNestPatchFunction(prop);
-      const nestedUpdate = patch => nested.update(nestPatch(patch));
-
-      const nestedContext = {
-        getState,
-        update: nestedUpdate,
-        root
-      };
-
-      nestedContext.nest = nextProp => nest(root, nestedContext)(nextProp);
-
-      return nestedContext;
-    }
-    return root;
+  const root = {
+    getState: states,
+    update,
+    actions
   };
 
-  const baseRoot = {
-    states,
-    getState: () => states(),
-    update
+  const nest = (prop, Actions, parentState = states, parentPatch = createNestPatch(prop)) => {
+    const getState = () => parentState()[prop];
+    const nestPatch = patch => parentPatch(patch);
+
+    const nested = {
+      root,
+      getState,
+      update: patch => update(nestPatch(patch)),
+      nest: (nextProp, Actions) =>
+        nest(nextProp, Actions, getState, patch => parentPatch(createNestPatch(nextProp)(patch)))
+    };
+
+    nested.actions = Actions ? Actions(nested) : undefined;
+
+    return nested;
   };
 
-  const root = Object.assign(baseRoot, {
-    root: baseRoot,
-    nest: nest(baseRoot, baseRoot)
-  });
+  root.nest = nest;
 
   return root;
 };

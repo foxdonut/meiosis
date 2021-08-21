@@ -488,7 +488,7 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
    *
    * @returns {NestPatchFunction<P1, P2>} the nest patch function.
    */
-  createNestPatchFunction: CreateNestPatchFunction;
+  createNestPatch: CreateNestPatchFunction;
 }
 
 /**

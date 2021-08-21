@@ -21,6 +21,10 @@ const createNestPatchFunction = produce => path => patch => state => {
 
 export const nest = produce => Nest(createNestPatchFunction(produce));
 
+const createNestPatch = produce => prop => patch => state => {
+  state[prop] = produce(state[prop], patch);
+};
+
 export const meiosisOne = ({ stream, produce, app }) =>
   commonMeiosisOne({
     stream,
@@ -28,5 +32,5 @@ export const meiosisOne = ({ stream, produce, app }) =>
     // can't use patches.reduce(produce, state) because that would send a third argument to produce
     combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
     app,
-    createNestPatchFunction: createNestPatchFunction(produce)
+    createNestPatch: createNestPatch(produce)
   });

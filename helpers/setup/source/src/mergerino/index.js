@@ -19,6 +19,17 @@ const createNestPatchFunction = path => patch => setMutate({}, path, patch);
 
 export const nest = Nest(createNestPatchFunction);
 
+const createNestPatch = prop => patch => ({ [prop]: patch });
+
+/*
+const nnest = (prop, parent = nestPatch(prop)) => ({
+  patch: patch => parent(patch),
+  nest: nextProp => nnest(nextProp, patch => parent(nestPatch(nextProp)(patch)))
+});
+
+nnest("temperature").nest("air").patch({});
+*/
+
 /** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, merge, app }) =>
   commonMeiosisOne({
@@ -26,5 +37,5 @@ export const meiosisOne = ({ stream, merge, app }) =>
     accumulator: merge,
     combine: patches => patches,
     app,
-    createNestPatchFunction
+    createNestPatch
   });

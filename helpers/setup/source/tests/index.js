@@ -1290,6 +1290,56 @@ describe("Meiosis One", () => {
 
     expect(context.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
   });
+
+  test.each(
+    createTestCases("nest", [
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, patch1, patch2) => {
+    const context = setupFn({ initial: { feathers: { duck: {} } } });
+    const nested = context.nest("feathers");
+
+    nested.update(patch1);
+    nested.update(patch2);
+
+    expect(nested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(context.getState()).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
+  });
+
+  test.each(
+    createTestCases("deep nest", [
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, patch1, patch2) => {
+    const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+    const nested = context.nest("fowl").nest("feathers");
+
+    nested.update(patch1);
+    nested.update(patch2);
+
+    expect(nested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(context.getState()).toEqual({
+      fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
+    });
+  });
 });
 
 describe("simpleStream", () => {

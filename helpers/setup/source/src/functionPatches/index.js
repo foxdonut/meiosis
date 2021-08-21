@@ -16,11 +16,14 @@ const createNestPatchFunction = path => patch => state =>
 
 export const nest = Nest(createNestPatchFunction);
 
+const createNestPatch = prop => patch => state =>
+  Object.assign({}, state, { [prop]: patch(state[prop]) });
+
 export const meiosisOne = ({ stream, app }) =>
   commonMeiosisOne({
     stream,
     accumulator: (x, f) => f(x),
     combine: pipe,
     app,
-    createNestPatchFunction
+    createNestPatch
   });
