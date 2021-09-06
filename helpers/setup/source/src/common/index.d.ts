@@ -410,11 +410,20 @@ export { Nest };
  * @template RS the root State type.
  * @template RP the root Patch type.
  */
-export interface MeiosisOneBase<RS, RP, S = RS, P = RP> {
+export interface MeiosisOneBase<RS, RP, RA, S = RS, P = RP, A = RA> {
   getState: Stream<S>;
   update: Stream<P>;
-  root: MeiosisOneBase<RS, RP, RS, RP>;
+  actions: A;
+  root: MeiosisOneBase<RS, RP, RA>;
+  nest: <K extends keyof S, NP, NA>(
+    prop: K,
+    Actions?: MeiosisOneActionConstructor<RS, RP, RA, S[K], NP, NA>
+  ) => MeiosisOneBase<RS, RP, RA, S[K], NP, NA>;
 }
+
+export type MeiosisOneActionConstructor<RS, RP, RA, S = RS, P = RP, A = RA> = (
+  context: MeiosisOneBase<RS, RP, RA, S, P, A>
+) => A;
 
 /**
  * An effects constructor.
@@ -422,13 +431,15 @@ export interface MeiosisOneBase<RS, RP, S = RS, P = RP> {
  * @template S the State type.
  * @template P the Patch type.
  *
- * @param {MeiosisOneBase<S, P>} context the Meiosis One context.
+ * @param {MeiosisOneBase<S, P, A>} context the Meiosis One context.
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisOneEffectConstructor<S, P> = (context: MeiosisOneBase<S, P>) => Effect<S>[];
+export type MeiosisOneEffectConstructor<S, P, A> = (
+  context: MeiosisOneBase<S, P, A>
+) => Effect<S>[];
 
-export interface MeiosisOneApp<S, P> {
+export interface MeiosisOneApp<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -440,9 +451,14 @@ export interface MeiosisOneApp<S, P> {
   services?: Service<S, P>[];
 
   /**
+   * A function that creates the application's actions.
+   */
+  Actions?: MeiosisOneActionConstructor<S, P, A>;
+
+  /**
    * A function that creates the application's effects.
    */
-  Effects?: MeiosisOneEffectConstructor<S, P>;
+  Effects?: MeiosisOneEffectConstructor<S, P, A>;
 }
 
 export interface MeiosisOneConfigBase {
@@ -461,7 +477,7 @@ export interface MeiosisOneConfigBase {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
+export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
   /*
    * The accumulator function.
    */
@@ -476,7 +492,7 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MeiosisOneApp<S, P>;
+  app: MeiosisOneApp<S, P, A>;
 
   /**
    * Creates a function that nests a patch at a given path.
@@ -494,9 +510,10 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
  *
  * @template S the State type.
  * @template P the Patch type.
+ * @template A the Actions type.
  *
- * @param {MeiosisOneConfig<S, P>} config the Meiosis One config.
+ * @param {MeiosisOneConfig<S, P, A>} config the Meiosis One config.
  *
- * @returns {MeiosisOne<S, P>} the Meiosis One setup.
+ * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P>(config: MeiosisOneConfig<S, P>): MeiosisOneBase<S, P>;
+export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOneBase<S, P, A>;
