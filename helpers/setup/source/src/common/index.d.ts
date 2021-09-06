@@ -315,69 +315,7 @@ export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>
 
 export default setup;
 
-/**
- * A local path.
- */
-export interface LocalPath {
-  /** The `path` which is stored on the local object for internal use. */
-  path: Array<string>;
-}
-
-/**
- * Function that nests a patch `P2` within a parent patch `P1`.
- *
- * @template P1 the type of the parent patch.
- * @template P2 the type of the patch to be nested.
- *
- * @param {P2} patch the nested patch.
- *
- * @returns {P1} the parent patch with `P2` nested within.
- */
-type NestPatchFunctionXYZ<P1, P2> = (patch: P2) => P1;
-
-type NestPatchFunction = (patch: any) => any;
-
-/**
- * A local object with a `patch` function to create a nested patch.
- *
- * @template P1 the type of the parent patch.
- * @template P2 the type of the patch to be nested.
- */
-export interface LocalPatchXYZ<P1, P2> {
-  /** Creates a nested patch. */
-  patch: NestPatchFunctionXYZ<P1, P2>;
-}
-
-export interface LocalPatch {
-  /** Creates a nested patch. */
-  patch: NestPatchFunction;
-}
-
-/**
- * @template S1 the type of the parent state.
- * @template P1 the type of the parent patch.
- * @template S2 the type of the nested state.
- * @template P2 the type of the patch to be nested.
- */
-export interface LocalXYZ<S1, P1, S2, P2> extends LocalPath, LocalPatchXYZ<P1, P2> {
-  /** Function to get the local state from the global state. */
-  get: (state: S1) => S2;
-}
-
-export interface Local<S1, S2> extends LocalPath, LocalPatch {
-  /** Function to get the local state from the global state. */
-  get: (state: S1) => S2;
-}
-
-/**
- * Function that creates a local object from the specified nest path and, optionally, another
- * local object.
- */
-// type NestFunction<S1, P1, S2, P2> = (
-export type NestFunction<S1, S2> = (
-  path: string | Array<string>,
-  local?: LocalPath
-) => Local<S1, S2>;
+// -------- Meiosis One
 
 /**
  * Creates a function that nests a patch at a given property.
@@ -387,20 +325,6 @@ export type NestFunction<S1, S2> = (
  * @returns {NestPatchFunction<P1, P2>} the nest patch function.
  */
 export type CreateNestPatchFunction = (path: string | Array<string>) => NestPatchFunction;
-
-/**
- * Constructor to create a `nest` function.
- *
- * @template S1 the type of the parent state.
- * @template S2 the type of the nested state.
- */
-declare function Nest<S1, S2>(
-  createNestPatchFunction: CreateNestPatchFunction
-): NestFunction<S1, S2>;
-
-export { Nest };
-
-// -------- Meiosis One
 
 /**
  * Returned by Meiosis One setup.

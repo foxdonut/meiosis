@@ -1,7 +1,5 @@
 import {
   App,
-  LocalPath,
-  Local,
   Meiosis,
   MeiosisOneApp,
   MeiosisOneBase,
@@ -68,8 +66,6 @@ export function functionPatchesSetup<S, A>({
 }: FunctionPatchesMeiosisConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
 export default functionPatchesSetup;
-
-export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): Local<S1, S2>;
 
 // -------- Meiosis One
 

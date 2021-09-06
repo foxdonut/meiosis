@@ -1,35 +1,25 @@
-import commonSetup, { meiosisOne as commonMeiosisOne, Nest, StreamLibWithProperty } from "./common";
-import mergerinoSetup, {
-  nest as mergerinoNest,
-  meiosisOne as mergerinoMeiosisOne
-} from "./mergerino";
-import functionPatchesSetup, {
-  nest as functionPatchesNest,
-  meiosisOne as functionPatchesMeiosisOne
-} from "./functionPatches";
-import immerSetup, { nest as immerNest } from "./immer";
-import { get, setImmutable, setMutate } from "./util";
+import commonSetup, { meiosisOne as commonMeiosisOne, StreamLibWithProperty } from "./common";
+import mergerinoSetup, { meiosisOne as mergerinoMeiosisOne } from "./mergerino";
+import functionPatchesSetup, { meiosisOne as functionPatchesMeiosisOne } from "./functionPatches";
+import immerSetup, { meiosisOne as immerMeiosisOne } from "./immer";
+import { get } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
-    export { commonSetup as setup, commonMeiosisOne as setupOne, Nest };
+    export { commonSetup as setup, commonMeiosisOne as setupOne };
   }
   export namespace mergerino {
-    export { mergerinoSetup as setup, mergerinoNest as nest, mergerinoMeiosisOne as meiosisOne };
+    export { mergerinoSetup as setup, mergerinoMeiosisOne as meiosisOne };
   }
   export namespace functionPatches {
-    export {
-      functionPatchesSetup as setup,
-      functionPatchesNest as nest,
-      functionPatchesMeiosisOne as meiosisOne
-    };
+    export { functionPatchesSetup as setup, functionPatchesMeiosisOne as meiosisOne };
   }
   export namespace immer {
-    export { immerSetup as setup, immerNest as nest };
+    export { immerSetup as setup, immerMeiosisOne as meiosisOne };
   }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
-    export { get, setImmutable, setMutate };
+    export { get };
   }
 }
 

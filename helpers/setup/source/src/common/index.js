@@ -1,7 +1,5 @@
 // @ts-check
 
-import { get } from "../util";
-
 const baseSetup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
@@ -53,16 +51,6 @@ const setup = ({ stream, accumulator, combine, app }) => {
 };
 
 export default setup;
-
-export const Nest = createNestPatchFunction => (prop, local = { path: [] }) => {
-  const nestedPath = local.path.concat(prop);
-
-  return {
-    get: state => get(state, nestedPath),
-    patch: createNestPatchFunction(nestedPath),
-    path: nestedPath
-  };
-};
 
 /** type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatch }) => {

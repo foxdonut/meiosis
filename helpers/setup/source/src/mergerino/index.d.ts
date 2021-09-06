@@ -3,9 +3,7 @@ import {
   MeiosisConfigBase,
   MeiosisOneApp,
   MeiosisOneBase,
-  MeiosisOneConfigBase,
-  LocalPath,
-  Local
+  MeiosisOneConfigBase
 } from "../common";
 
 export type MergerinoFunctionPatch<S> = (state: S) => S;

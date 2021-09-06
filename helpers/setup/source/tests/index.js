@@ -1453,29 +1453,4 @@ describe("util", () => {
     expect(meiosis.util.get({ a: 42 }, ["a", "b"])).toBeUndefined();
     expect(meiosis.util.get({ a: { b: 42 } }, ["a", "b"])).toEqual(42);
   });
-
-  test("setMutate", () => {
-    const obj = { a: { b: 24 } };
-    const result = meiosis.util.setMutate(obj, ["a", "b"], 42);
-    expect(result.a.b).toEqual(42);
-    expect(result).toBe(obj);
-
-    expect(meiosis.util.setMutate(null, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate(undefined, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate({}, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate({ a: 24 }, ["a", "b"], 42).a.b).toEqual(42);
-  });
-
-  test("setImmutable", () => {
-    const obj = { a: { b: 24 } };
-    const result = meiosis.util.setImmutable(obj, ["a", "b"], 42);
-    expect(result.a.b).toEqual(42);
-    expect(result).not.toBe(obj);
-    expect(obj.a.b).toEqual(24);
-
-    expect(meiosis.util.setImmutable(null, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable(undefined, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable({}, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable({ a: 24 }, ["a", "b"], 42).a.b).toEqual(42);
-  });
 });

@@ -4,8 +4,6 @@ import {
   MeiosisOneApp,
   MeiosisOneBase,
   MeiosisOneConfigBase,
-  LocalPath,
-  Local,
   StreamLib
 } from "../common";
 
@@ -51,10 +49,6 @@ export function immerSetup<S, A>({
 }: ImmerMeiosisConfig<S, A>): Meiosis<S, ImmerPatch<S>, A>;
 
 export default immerSetup;
-
-export function nest<S1, S2>(
-  produce: Produce<S1>
-): (path: string | Array<string>, local?: LocalPath) => Local<S1, S2>;
 
 // -------- Meiosis One
 
