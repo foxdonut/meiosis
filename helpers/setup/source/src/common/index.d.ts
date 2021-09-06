@@ -402,21 +402,18 @@ export { Nest };
 
 // -------- Meiosis One
 
-export interface MeiosisOneBase<S, P> {
-  states: Stream<S>;
-  getState: () => S;
-  update: Stream<P>;
-}
-
 /**
  * Returned by Meiosis One setup.
  *
  * @template S the State type.
  * @template P the Patch type.
+ * @template RS the root State type.
+ * @template RP the root Patch type.
  */
-export interface MeiosisOne<RS, RP, S = RS, P = RP> extends MeiosisOneBase<S, P> {
-  root: MeiosisOneBase<RS, RP>;
-  nest: <K extends keyof S>(prop: K) => MeiosisOne<RS, RP, S[K], P>;
+export interface MeiosisOneBase<RS, RP, S = RS, P = RP> {
+  getState: Stream<S>;
+  update: Stream<P>;
+  root: MeiosisOneBase<RS, RP, RS, RP>;
 }
 
 /**
@@ -502,4 +499,4 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
  *
  * @returns {MeiosisOne<S, P>} the Meiosis One setup.
  */
-export function meiosisOne<S, P>(config: MeiosisOneConfig<S, P>): MeiosisOne<S, P>;
+export function meiosisOne<S, P>(config: MeiosisOneConfig<S, P>): MeiosisOneBase<S, P>;

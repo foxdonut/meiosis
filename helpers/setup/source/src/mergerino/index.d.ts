@@ -61,8 +61,8 @@ export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): L
  *
  * @template S the State type.
  */
-export interface MergerinoMeiosisOne<RS, S = RS> extends MeiosisOneBase<S, MergerinoPatch<S>> {
-  root: MeiosisOneBase<RS, MergerinoPatch<RS>>;
+export interface MergerinoMeiosisOne<RS, S = RS>
+  extends MeiosisOneBase<RS, MergerinoPatch<RS>, S, MergerinoPatch<S>> {
   nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<RS, S[K]>;
 }
 
