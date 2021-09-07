@@ -52,6 +52,8 @@ const setup = ({ stream, accumulator, combine, app }) => {
 
 export default setup;
 
+// -------- Meiosis One
+
 /** type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatch }) => {
   const { states, update, actions } = baseSetup({ stream, accumulator, combine, app });

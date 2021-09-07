@@ -14,6 +14,8 @@ const immerSetup = ({ stream, produce, app }) =>
 
 export default immerSetup;
 
+// -------- Meiosis One
+
 const createNestPatch = produce => prop => patch => state => {
   state[prop] = produce(state[prop], patch);
 };

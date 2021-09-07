@@ -1,6 +1,7 @@
 import {
   Meiosis,
   MeiosisConfigBase,
+  MeiosisOneActionConstructor,
   MeiosisOneApp,
   MeiosisOneBase,
   MeiosisOneConfigBase
@@ -50,8 +51,6 @@ export function mergerinoSetup<S, A>(
 
 export default mergerinoSetup;
 
-export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): Local<S1, S2>;
-
 // -------- Meiosis One
 
 /**
@@ -59,19 +58,22 @@ export function nest<S1, S2>(path: string | Array<string>, local?: LocalPath): L
  *
  * @template S the State type.
  */
-export interface MergerinoMeiosisOne<RS, S = RS>
-  extends MeiosisOneBase<RS, MergerinoPatch<RS>, S, MergerinoPatch<S>> {
-  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<RS, S[K]>;
+export interface MergerinoMeiosisOne<RS, RA, S = RS, A = RA>
+  extends MeiosisOneBase<RS, MergerinoPatch<RS>, RA, S, MergerinoPatch<S>, A> {
+  nest: <K extends keyof S, NA>(
+    prop: K,
+    Actions?: MeiosisOneActionConstructor<RS, MergerinoPatch<RS>, RA, S[K], MergerinoPatch<S>, NA>
+  ) => MergerinoMeiosisOne<RS, RA, S[K], NA>;
 }
 
-export type MergerinoMeiosisOneApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
+export type MergerinoMeiosisOneApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
 
 /**
  * Mergerino Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
+export interface MergerinoMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * The Mergerino `merge` function.
    */
@@ -80,16 +82,19 @@ export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MergerinoMeiosisOneApp<S>;
+  app: MergerinoMeiosisOneApp<S, A>;
 }
 
 /**
  * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
+ * @template A the Actions type.
  *
  * @param {MergerinoMeiosisConfig<S>} config the Meiosis One config for use with Mergerino
  *
  * @returns {MergerinoMeiosisOne<S>} Mergerino Meiosis One.
  */
-export function meiosisOne<S>(config: MergerinoMeiosisOneConfig<S>): MergerinoMeiosisOne<S>;
+export function meiosisOne<S, A>(
+  config: MergerinoMeiosisOneConfig<S, A>
+): MergerinoMeiosisOne<S, A>;

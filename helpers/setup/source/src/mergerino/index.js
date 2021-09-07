@@ -13,6 +13,8 @@ const mergerinoSetup = ({ stream, merge, app }) =>
 
 export default mergerinoSetup;
 
+// -------- Meiosis One
+
 const createNestPatch = prop => patch => ({ [prop]: patch });
 
 /** @type {import("./index").meiosisOne} */
