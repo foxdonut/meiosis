@@ -10,6 +10,8 @@ const functionPatchesSetup = ({ stream, app }) =>
 
 export default functionPatchesSetup;
 
+// -------- Meiosis One
+
 const createNestPatch = prop => patch => state =>
   Object.assign({}, state, { [prop]: patch(state[prop]) });
 

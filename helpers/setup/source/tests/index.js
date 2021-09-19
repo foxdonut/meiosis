@@ -1129,68 +1129,6 @@ describe("meiosis setup with library for applying patches", () => {
         update(updatePatch);
       });
     });
-
-    test.each(
-      createTestCases("nesting", [
-        [
-          meiosis.mergerino.nest,
-          { color: "orange" },
-          { feathers: x => x + 100 },
-          { other: "test" },
-          { test: "success" }
-        ],
-        [
-          meiosis.functionPatches.nest,
-          R.assoc("color", "orange"),
-          R.over(R.lensProp("feathers"), R.add(100)),
-          R.assoc("other", "test"),
-          R.assoc("test", "success")
-        ],
-        [
-          meiosis.immer.nest(produce),
-          state => {
-            state.color = "orange";
-          },
-          state => {
-            state.feathers += 100;
-          },
-          state => {
-            state.other = "test";
-          },
-          state => {
-            state.test = "success";
-          }
-        ]
-      ])
-    )("%s", (_label, setupFn, nest, patch1, patch2, patch3, patch4) => {
-      const { update, states } = setupFn({
-        initial: { duck: { attrs: { color: "yellow", sound: "quack", feathers: 150, more: {} } } }
-      });
-
-      const local = nest(["duck", "attrs"]);
-      expect(local.get(states()).color).toEqual("yellow");
-      expect(local.get(states()).sound).toEqual("quack");
-
-      update(local.patch(patch1));
-      expect(states()).toEqual({
-        duck: { attrs: { color: "orange", sound: "quack", feathers: 150, more: {} } }
-      });
-
-      update([local.patch(patch2), patch3]);
-      expect(states()).toEqual({
-        duck: { attrs: { color: "orange", sound: "quack", feathers: 250, more: {} } },
-        other: "test"
-      });
-
-      const nestedLocal = nest("more", local);
-      update(nestedLocal.patch(patch4));
-      expect(states()).toEqual({
-        duck: {
-          attrs: { color: "orange", sound: "quack", feathers: 250, more: { test: "success" } }
-        },
-        other: "test"
-      });
-    });
   });
 });
 
