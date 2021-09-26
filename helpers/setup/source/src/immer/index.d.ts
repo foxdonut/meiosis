@@ -5,6 +5,7 @@ import {
   MeiosisOneApp,
   MeiosisOneBase,
   MeiosisOneConfigBase,
+  MeiosisOneContext,
   StreamLib
 } from "../common";
 
@@ -58,6 +59,7 @@ export default immerSetup;
  *
  * @template S the State type.
  */
+/*
 export interface ImmerMeiosisOne<RS, RA, S = RS, A = RA>
   extends MeiosisOneBase<RS, ImmerPatch<RS>, RA, S, ImmerPatch<S>, A> {
   nest: <K extends keyof S, NA>(
@@ -65,8 +67,15 @@ export interface ImmerMeiosisOne<RS, RA, S = RS, A = RA>
     Actions?: MeiosisOneActionConstructor<RS, ImmerPatch<RS>, RA, S[K], ImmerPatch<S>, NA>
   ) => ImmerMeiosisOne<RS, RA, S[K], NA>;
 }
+*/
 
 export type ImmerMeiosisOneApp<S, A> = MeiosisOneApp<S, ImmerPatch<S>, A>;
+
+export function nest<S, K extends keyof S, A>(
+  context: MeiosisOneBase<S, ImmerPatch<S>>,
+  prop: K,
+  Actions?: MeiosisOneActionConstructor<S[K], ImmerPatch<S[K]>, A>
+): MeiosisOneContext<S[K], ImmerPatch<S[K]>, A>;
 
 /**
  * Immer Meiosis One configuration.
@@ -95,4 +104,6 @@ export interface ImmerMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
  *
  * @returns {ImmerMeiosisOne<S>} Immer Meiosis One.
  */
-export function meiosisOne<S, A>(config: ImmerMeiosisOneConfig<S, A>): ImmerMeiosisOne<S, A>;
+export function meiosisOne<S, A>(
+  config: ImmerMeiosisOneConfig<S, A>
+): MeiosisOneContext<S, ImmerPatch<S>, A>;

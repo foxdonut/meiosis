@@ -2,9 +2,9 @@ import meiosis, {
   ActionConstructor,
   App,
   FunctionPatch,
+  FunctionPatchesMeiosisOne,
+  FunctionPatchesMeiosisOneActionConstructor,
   ImmerPatch,
-  LocalPatch,
-  Local,
   MergerinoMeiosisOne,
   MergerinoMeiosisOneApp,
   MergerinoPatch,
@@ -39,13 +39,8 @@ interface Conditions {
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (local: LocalPatch, value: boolean) => void;
-  changeSky: (local: LocalPatch, value: Sky) => void;
-}
-
-interface ConditionsComponent<P> {
-  initial: Conditions;
-  Actions: ActionConstructor<Conditions, P, ConditionsActions>;
+  togglePrecipitations: (value: boolean) => void;
+  changeSky: (value: Sky) => void;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -57,8 +52,8 @@ interface Temperature {
 }
 
 interface TemperatureActions {
-  increment: (local: LocalPatch, amount: number) => void;
-  changeUnits: (local: LocalPatch) => void;
+  increment: (amount: number) => void;
+  changeUnits: () => void;
 }
 
 interface TemperatureComponent<P> {
@@ -72,6 +67,16 @@ interface State {
     air: Temperature;
     water: Temperature;
   };
+}
+
+interface Actions {
+  conditions: ConditionsActions;
+  temperature: TemperatureActions;
+}
+
+interface ConditionsComponent<AC> {
+  initial: Conditions;
+  Actions: AC;
 }
 
 const initialConditions: Conditions = {
@@ -92,84 +97,62 @@ const InitialTemperature = (label: string): Temperature => ({
 // lit-html + functionPatches + simple-stream
 (() => {
   type Patch = FunctionPatch<State>;
-  type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Conditions>;
-  type TemperatureLocal = Local<State, Temperature>;
 
-  interface Actions {
-    conditions: ConditionsActions;
-    temperature: TemperatureActions;
+  interface ConditionsAttrs {
+    context: any; // FIXME
   }
 
-  interface Attrs {
-    state: State;
-    actions: Actions;
-  }
-
-  interface SkyOptionAttrs extends Attrs {
-    local: ConditionsLocal;
+  interface SkyOptionAttrs {
+    context: any; // FIXME
     value: string;
     label: string;
   }
 
-  interface ConditionsAttrs extends Attrs {
-    local: ConditionsLocal;
-  }
-
-  interface TemperatureAttrs extends Attrs {
-    local: TemperatureLocal;
-  }
-
-  const nest = meiosis.functionPatches.nest;
-
-  const conditions: ConditionsComponent<Patch> = {
+  const conditions: ConditionsComponent<FunctionPatchesMeiosisOneActionConstructor<
+    State,
+    Actions,
+    Conditions,
+    ConditionsActions
+  >> = {
     initial: initialConditions,
-    Actions: (update: Update) => ({
-      togglePrecipitations: (local, value) => {
-        update(local.patch(state => ({ ...state, precipitations: value })));
+    Actions: (
+      context: FunctionPatchesMeiosisOne<State, Actions, Conditions, ConditionsActions>
+    ) => ({
+      togglePrecipitations: value => {
+        context.update(state => ({ ...state, precipitations: value }));
       },
-      changeSky: (local, value) => {
-        update(local.patch(state => ({ ...state, sky: value })));
+      changeSky: value => {
+        context.update(state => ({ ...state, sky: value }));
       }
     })
   };
 
-  const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({
-    state,
-    local,
-    actions,
-    value,
-    label
-  }) => html`
+  const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ context, value, label }) => html`
     <label>
       <input
         type="radio"
         value=${value}
-        .checked=${local.get(state).sky === value}
-        @change=${evt => actions.conditions.changeSky(local, evt.target.value)}
+        .checked=${context.getState().sky === value}
+        @change=${evt => actions.conditions.changeSky(evt.target.value)}
       />
       ${label}
     </label>
   `;
 
-  const Conditions: (attrs: ConditionsAttrs) => TemplateResult = ({
-    state,
-    local,
-    actions
-  }) => html`
+  const Conditions: (attrs: ConditionsAttrs) => TemplateResult = ({ context }) => html`
     <div>
       <label>
         <input
           type="checkbox"
-          .checked=${local.get(state).precipitations}
-          @change=${evt => actions.conditions.togglePrecipitations(local, evt.target.checked)}
+          .checked=${context.getState().precipitations}
+          @change=${evt => context.actions.togglePrecipitations(evt.target.checked)}
         />
         Precipitations
       </label>
       <div>
-        ${skyOption({ state, local, actions, value: "SUNNY", label: "Sunny" })}
-        ${skyOption({ state, local, actions, value: "CLOUDY", label: "Cloudy" })}
-        ${skyOption({ state, local, actions, value: "MIX", label: "Mix of sun/clouds" })}
+        ${skyOption({ context, value: "SUNNY", label: "Sunny" })}
+        ${skyOption({ context, value: "CLOUDY", label: "Cloudy" })}
+        ${skyOption({ context, value: "MIX", label: "Mix of sun/clouds" })}
       </div>
     </div>
   `;
@@ -250,11 +233,6 @@ const InitialTemperature = (label: string): Temperature => ({
   type Update = Stream<Patch>;
   type ConditionsLocal = Local<State, Conditions>;
   type TemperatureLocal = Local<State, Temperature>;
-
-  interface Actions {
-    conditions: ConditionsActions;
-    temperature: TemperatureActions;
-  }
 
   interface Attrs {
     state: State;
@@ -423,11 +401,6 @@ const InitialTemperature = (label: string): Temperature => ({
   type Update = Stream<Patch>;
   type ConditionsLocal = Local<State, Conditions>;
   type TemperatureLocal = Local<State, Temperature>;
-
-  interface Actions {
-    conditions: ConditionsActions;
-    temperature: TemperatureActions;
-  }
 
   interface Attrs {
     state: State;
@@ -598,11 +571,6 @@ const InitialTemperature = (label: string): Temperature => ({
   type Update = Stream<Patch>;
   type ConditionsLocal = Local<State, Conditions>;
   type TemperatureLocal = Local<State, Temperature>;
-
-  interface Actions {
-    conditions: ConditionsActions;
-    temperature: TemperatureActions;
-  }
 
   interface Attrs {
     state: State;

@@ -336,6 +336,7 @@ export type CreateNestPatch<S> = <K extends keyof S>(prop: K) => NestPatch;
  * @template RS the root State type.
  * @template RP the root Patch type.
  */
+/*
 export interface MeiosisOneBase<RS, RP, RA, S = RS, P = RP, A = RA> {
   getState: Stream<S>;
   update: Stream<P>;
@@ -343,10 +344,34 @@ export interface MeiosisOneBase<RS, RP, RA, S = RS, P = RP, A = RA> {
   root: MeiosisOneBase<RS, RP, RA>;
   nest: <K extends keyof S>(prop: K, Actions?: any) => any;
 }
+*/
 
-export type MeiosisOneActionConstructor<RS, RP, RA, S = RS, P = RP, A = RA> = (
-  context: MeiosisOneBase<RS, RP, RA, S, P, A>
-) => A;
+/**
+ * Returned by Meiosis One setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ */
+export interface MeiosisOneBase<S, P> {
+  getState: Stream<S>;
+  update: Stream<P>;
+}
+
+export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneBase<S, P>) => A;
+
+export interface MeiosisOneContext<S, P, A> extends MeiosisOneBase<S, P> {
+  actions: A;
+}
+
+export type Nest<S, K extends keyof S, P1, P2, A> = (
+  context: MeiosisOneBase<S, P1>,
+  prop: K,
+  Actions?: MeiosisOneActionConstructor<S[K], P2, A>
+) => MeiosisOneContext<S[K], P2, A>;
+
+export function createNest<S, K extends keyof S, P1, P2, A>(
+  createNestPatch: CreateNestPatch<S>
+): Nest<S, K, P1, P2, A>;
 
 /**
  * An effects constructor.
@@ -359,7 +384,7 @@ export type MeiosisOneActionConstructor<RS, RP, RA, S = RS, P = RP, A = RA> = (
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
 export type MeiosisOneEffectConstructor<S, P, A> = (
-  context: MeiosisOneBase<S, P, A>
+  context: MeiosisOneContext<S, P, A>
 ) => Effect<S>[];
 
 export interface MeiosisOneApp<S, P, A> {
@@ -416,15 +441,6 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
    * The application object, with optional properties.
    */
   app: MeiosisOneApp<S, P, A>;
-
-  /**
-   * Creates a function that nests a patch at a given path.
-   *
-   * @param {Array<String>} path the path at which to nest.
-   *
-   * @returns {NestPatchFunction<P1, P2>} the nest patch function.
-   */
-  createNestPatch: CreateNestPatch<S>;
 }
 
 /**
@@ -439,4 +455,4 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
  *
  * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOneBase<S, P, A>;
+export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOneContext<S, P, A>;

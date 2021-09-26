@@ -1,28 +1,38 @@
 // @ts-check
 
-import commonSetup, { meiosisOne as commonMeiosisOne } from "./common";
-import mergerinoSetup, { meiosisOne as mergerinoMeiosisOne } from "./mergerino";
-import functionPatchesSetup, { meiosisOne as functionPatchesMeiosisOne } from "./functionPatches";
-import immerSetup, { meiosisOne as immerMeiosisOne } from "./immer";
+import commonSetup, { createNest, meiosisOne as commonMeiosisOne } from "./common";
+import mergerinoSetup, {
+  meiosisOne as mergerinoMeiosisOne,
+  nest as mergerinoNest
+} from "./mergerino";
+import functionPatchesSetup, {
+  meiosisOne as functionPatchesMeiosisOne,
+  nest as functionPatchesNest
+} from "./functionPatches";
+import immerSetup, { meiosisOne as immerMeiosisOne, nest as immerNest } from "./immer";
 import simpleStream from "./simple-stream";
 import { get } from "./util";
 
 export default {
   common: {
     setup: commonSetup,
-    meiosisOne: commonMeiosisOne
+    meiosisOne: commonMeiosisOne,
+    createNest
   },
   mergerino: {
     setup: mergerinoSetup,
-    meiosisOne: mergerinoMeiosisOne
+    meiosisOne: mergerinoMeiosisOne,
+    nest: mergerinoNest
   },
   functionPatches: {
     setup: functionPatchesSetup,
-    meiosisOne: functionPatchesMeiosisOne
+    meiosisOne: functionPatchesMeiosisOne,
+    nest: functionPatchesNest
   },
   immer: {
     setup: immerSetup,
-    meiosisOne: immerMeiosisOne
+    meiosisOne: immerMeiosisOne,
+    nest: immerNest
   },
   simpleStream,
   util: {

@@ -54,8 +54,23 @@ export default setup;
 
 // -------- Meiosis One
 
+/** type {import("./index").createNest} */
+export const createNest = createNestPatch => (context, prop, Actions) => {
+  const getState = () => context.getState()[prop];
+  const nestPatch = createNestPatch(prop);
+
+  const nested = {
+    getState,
+    update: patch => context.update(nestPatch(patch))
+  };
+
+  nested.actions = Actions ? Actions(nested) : undefined;
+
+  return nested;
+};
+
 /** type {import("./index").meiosisOne} */
-export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatch }) => {
+export const meiosisOne = ({ stream, accumulator, combine, app }) => {
   const { states, update, actions } = baseSetup({ stream, accumulator, combine, app });
 
   const root = {
@@ -63,25 +78,6 @@ export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatch 
     update,
     actions
   };
-
-  const nest = (prop, Actions, parentState = states, parentPatch = createNestPatch(prop)) => {
-    const getState = () => parentState()[prop];
-    const nestPatch = patch => parentPatch(patch);
-
-    const nested = {
-      root,
-      getState,
-      update: patch => update(nestPatch(patch)),
-      nest: (nextProp, Actions) =>
-        nest(nextProp, Actions, getState, patch => parentPatch(createNestPatch(nextProp)(patch)))
-    };
-
-    nested.actions = Actions ? Actions(nested) : undefined;
-
-    return nested;
-  };
-
-  root.nest = nest;
 
   return root;
 };

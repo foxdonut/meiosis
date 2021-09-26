@@ -5,6 +5,7 @@ import {
   MeiosisOneApp,
   MeiosisOneBase,
   MeiosisOneConfigBase,
+  MeiosisOneContext,
   StreamLib
 } from "../common";
 
@@ -70,20 +71,34 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
+/*
+export type FunctionPatchesMeiosisOneActionConstructor<RS, RA, S = RS, A = RA> = (
+  context: FunctionPatchesMeiosisOne<RS, RA, S, A>
+) => A;
+*/
+
 /**
  * Returned by Function Patches Meiosis One setup.
  *
  * @template S the State type.
  */
+/*
 export interface FunctionPatchesMeiosisOne<RS, RA, S = RS, A = RA>
   extends MeiosisOneBase<RS, FunctionPatch<RS>, RA, S, FunctionPatch<S>, A> {
   nest: <K extends keyof S, NA>(
     prop: K,
-    Actions?: MeiosisOneActionConstructor<RS, FunctionPatch<RS>, RA, S[K], FunctionPatch<S>, NA>
+    Actions?: FunctionPatchesMeiosisOneActionConstructor<RS, RA, S[K], NA>
   ) => FunctionPatchesMeiosisOne<RS, RA, S[K], NA>;
 }
+*/
 
 export type FunctionPatchesMeiosisOneApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+
+export function nest<S, K extends keyof S, A>(
+  context: MeiosisOneBase<S, FunctionPatch<S>>,
+  prop: K,
+  Actions?: MeiosisOneActionConstructor<S[K], FunctionPatch<S[K]>, A>
+): MeiosisOneContext<S[K], FunctionPatch<S[K]>, A>;
 
 /**
  * Function Patches Meiosis One configuration.
@@ -109,4 +124,4 @@ export interface FunctionPatchesMeiosisOneConfig<S, A> extends MeiosisOneConfigB
  */
 export function meiosisOne<S, A>(
   config: FunctionPatchesMeiosisOneConfig<S, A>
-): FunctionPatchesMeiosisOne<S, A>;
+): MeiosisOneContext<S, FunctionPatch<S>, A>;

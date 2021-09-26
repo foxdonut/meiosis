@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { meiosisOne as commonMeiosisOne } from "../common";
+import commonSetup, { createNest, meiosisOne as commonMeiosisOne } from "../common";
 
 /** @type {import("./index").mergerinoSetup} */
 const mergerinoSetup = ({ stream, merge, app }) =>
@@ -17,12 +17,14 @@ export default mergerinoSetup;
 
 const createNestPatch = prop => patch => ({ [prop]: patch });
 
+/** type {import("./index").nest} */
+export const nest = createNest(createNestPatch);
+
 /** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, merge, app }) =>
   commonMeiosisOne({
     stream,
     accumulator: merge,
     combine: patches => patches,
-    app,
-    createNestPatch
+    app
   });

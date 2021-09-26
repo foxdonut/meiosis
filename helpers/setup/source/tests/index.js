@@ -1231,9 +1231,14 @@ describe("Meiosis One", () => {
 
   test.each(
     createTestCases("nest", [
-      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
       [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow")
+      ],
+      [
+        meiosis.immer.nest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1242,9 +1247,9 @@ describe("Meiosis One", () => {
         }
       ]
     ])
-  )("%s", (_label, setupFn, patch1, patch2) => {
+  )("%s", (_label, setupFn, nest, patch1, patch2) => {
     const context = setupFn({ initial: { feathers: { duck: {} } } });
-    const nested = context.nest("feathers");
+    const nested = nest(context, "feathers");
 
     nested.update(patch1);
     nested.update(patch2);
@@ -1255,9 +1260,14 @@ describe("Meiosis One", () => {
 
   test.each(
     createTestCases("deep nest", [
-      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
       [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow")
+      ],
+      [
+        meiosis.immer.nest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1266,14 +1276,53 @@ describe("Meiosis One", () => {
         }
       ]
     ])
-  )("%s", (_label, setupFn, patch1, patch2) => {
+  )("%s", (_label, setupFn, nest, patch1, patch2) => {
     const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
-    const nested = context.nest("fowl").nest("feathers");
+    const nested = nest(context, "fowl");
+    const deepNested = nest(nested, "feathers");
 
-    nested.update(patch1);
-    nested.update(patch2);
+    deepNested.update(patch1);
+    deepNested.update(patch2);
 
-    expect(nested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(context.getState()).toEqual({
+      fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
+    });
+  });
+
+  test.each(
+    createTestCases("actions", [
+      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow")
+      ],
+      [
+        meiosis.immer.nest(produce),
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, nest, patch1, patch2) => {
+    const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+
+    const Actions = context => ({
+      action1: () => context.update(patch1),
+      action2: () => context.update(patch2)
+    });
+
+    const nested = nest(context, "fowl");
+    const deepNested = nest(nested, "feathers", Actions);
+
+    deepNested.actions.action1();
+    deepNested.actions.action2();
+
+    expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
     expect(context.getState()).toEqual({
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });
