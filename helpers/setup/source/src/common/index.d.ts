@@ -333,24 +333,6 @@ export type CreateNestPatch<S> = <K extends keyof S>(prop: K) => NestPatch;
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template RS the root State type.
- * @template RP the root Patch type.
- */
-/*
-export interface MeiosisOneBase<RS, RP, RA, S = RS, P = RP, A = RA> {
-  getState: Stream<S>;
-  update: Stream<P>;
-  actions: A;
-  root: MeiosisOneBase<RS, RP, RA>;
-  nest: <K extends keyof S>(prop: K, Actions?: any) => any;
-}
-*/
-
-/**
- * Returned by Meiosis One setup.
- *
- * @template S the State type.
- * @template P the Patch type.
  */
 export interface MeiosisOneBase<S, P> {
   getState: Stream<S>;
@@ -363,7 +345,7 @@ export interface MeiosisOneContext<S, P, A> extends MeiosisOneBase<S, P> {
   actions: A;
 }
 
-export type Nest<S, K extends keyof S, P1, P2, A> = (
+export type Nest<S, K extends keyof S, P1, P2, A = never> = (
   context: MeiosisOneBase<S, P1>,
   prop: K,
   Actions?: MeiosisOneActionConstructor<S[K], P2, A>
@@ -383,7 +365,7 @@ export function createNest<S, K extends keyof S, P1, P2, A>(
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisOneEffectConstructor<S, P, A> = (
+export type MeiosisOneEffectConstructor<S, P, A = never> = (
   context: MeiosisOneContext<S, P, A>
 ) => Effect<S>[];
 
@@ -455,4 +437,6 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
  *
  * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOneContext<S, P, A>;
+export function meiosisOne<S, P, A = never>(
+  config: MeiosisOneConfig<S, P, A>
+): MeiosisOneContext<S, P, A>;

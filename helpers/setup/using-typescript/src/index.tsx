@@ -1,25 +1,25 @@
 import meiosis, {
-  ActionConstructor,
-  App,
   FunctionPatch,
-  FunctionPatchesMeiosisOne,
   FunctionPatchesMeiosisOneActionConstructor,
-  ImmerPatch,
-  MergerinoMeiosisOne,
-  MergerinoMeiosisOneApp,
-  MergerinoPatch,
-  Stream
+  FunctionPatchesMeiosisOneApp,
+  FunctionPatchesMeiosisOneBase,
+  FunctionPatchesMeiosisOneContext,
+  // ImmerPatch,
+  MeiosisOneActionConstructor // ,
+  // MergerinoMeiosisOneApp,
+  // MergerinoPatch,
+  // Stream
 } from "../../source/dist";
-import flyd from "flyd";
-import merge from "mergerino";
-import produce from "immer";
+// import flyd from "flyd";
+// import merge from "mergerino";
+// import produce from "immer";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
-import m from "mithril";
-import MStream from "mithril/stream";
-import { h, render as preactRender, VNode } from "preact";
-import { useState } from "preact/hooks";
-import React from "react";
-import ReactDOM, { ReactElement } from "react-dom";
+// import m from "mithril";
+// import MStream from "mithril/stream";
+// import { h, render as preactRender, VNode } from "preact";
+// import { useState } from "preact/hooks";
+// import React from "react";
+// import ReactDOM, { ReactElement } from "react-dom";
 
 const { stream, scan } = meiosis.simpleStream;
 
@@ -58,7 +58,7 @@ interface TemperatureActions {
 
 interface TemperatureComponent<P> {
   Initial: (label: string) => Temperature;
-  Actions: ActionConstructor<Temperature, P, TemperatureActions>;
+  Actions: MeiosisOneActionConstructor<Temperature, P, TemperatureActions>;
 }
 
 interface State {
@@ -98,26 +98,18 @@ const InitialTemperature = (label: string): Temperature => ({
 (() => {
   type Patch = FunctionPatch<State>;
 
-  interface ConditionsAttrs {
-    context: any; // FIXME
-  }
-
   interface SkyOptionAttrs {
-    context: any; // FIXME
+    context: FunctionPatchesMeiosisOneContext<Conditions, ConditionsActions>;
     value: string;
     label: string;
   }
 
   const conditions: ConditionsComponent<FunctionPatchesMeiosisOneActionConstructor<
-    State,
-    Actions,
     Conditions,
     ConditionsActions
   >> = {
     initial: initialConditions,
-    Actions: (
-      context: FunctionPatchesMeiosisOne<State, Actions, Conditions, ConditionsActions>
-    ) => ({
+    Actions: (context: FunctionPatchesMeiosisOneBase<Conditions>) => ({
       togglePrecipitations: value => {
         context.update(state => ({ ...state, precipitations: value }));
       },
@@ -133,13 +125,15 @@ const InitialTemperature = (label: string): Temperature => ({
         type="radio"
         value=${value}
         .checked=${context.getState().sky === value}
-        @change=${evt => actions.conditions.changeSky(evt.target.value)}
+        @change=${evt => context.actions.changeSky(evt.target.value)}
       />
       ${label}
     </label>
   `;
 
-  const Conditions: (attrs: ConditionsAttrs) => TemplateResult = ({ context }) => html`
+  const Conditions: (
+    context: FunctionPatchesMeiosisOneContext<Conditions, ConditionsActions>
+  ) => TemplateResult = context => html`
     <div>
       <label>
         <input
@@ -157,54 +151,45 @@ const InitialTemperature = (label: string): Temperature => ({
     </div>
   `;
 
-  const temperature: TemperatureComponent<Patch> = {
+  const temperature: TemperatureComponent<FunctionPatch<Temperature>> = {
     Initial: InitialTemperature,
-    Actions: update => ({
-      increment: (local, amount) => {
-        update(local.patch(state => ({ ...state, value: state.value + amount })));
+    Actions: context => ({
+      increment: amount => {
+        context.update(state => ({ ...state, value: state.value + amount }));
       },
-      changeUnits: local => {
-        update(
-          local.patch(state => {
-            const value = state.value;
-            const newUnits = state.units === "C" ? "F" : "C";
-            const newValue = convert(value, newUnits);
-            return { ...state, value: newValue, units: newUnits };
-          })
-        );
+      changeUnits: () => {
+        context.update(state => {
+          const value = state.value;
+          const newUnits = state.units === "C" ? "F" : "C";
+          const newValue = convert(value, newUnits);
+          return { ...state, value: newValue, units: newUnits };
+        });
       }
     })
   };
 
-  const Temperature: (attrs: TemperatureAttrs) => TemplateResult = ({
-    state,
-    local,
-    actions
-  }) => html`
+  const Temperature: (context: TemperatureAttrs) => TemplateResult = context => html`
     <div>
-      ${local.get(state).label} Temperature: ${local.get(state).value}&deg;${local.get(state).units}
+      ${context.getState().label} Temperature:
+      ${context.getState().value}&deg;${context.getState().units}
       <div>
-        <button @click=${() => actions.temperature.increment(local, 1)}>Increment</button>
-        <button @click=${() => actions.temperature.increment(local, -1)}>Decrement</button>
+        <button @click=${() => context.actions.increment(1)}>Increment</button>
+        <button @click=${() => context.actions.increment(-1)}>Decrement</button>
       </div>
       <div>
-        <button @click=${() => actions.temperature.changeUnits(local)}>Change Units</button>
+        <button @click=${() => context.actions.changeUnits()}>Change Units</button>
       </div>
     </div>
   `;
 
-  const app: App<State, Patch, Actions> = {
+  const app: FunctionPatchesMeiosisOneApp<State> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
         air: temperature.Initial("Air"),
         water: temperature.Initial("Water")
       }
-    },
-    Actions: update => ({
-      conditions: conditions.Actions(update),
-      temperature: temperature.Actions(update)
-    })
+    }
   };
 
   const App: (attrs: Attrs) => TemplateResult = ({ state, actions }) => html`
@@ -228,6 +213,7 @@ const InitialTemperature = (label: string): Temperature => ({
 })();
 
 // mithril + mergerino + mithril-stream
+/*
 (() => {
   type Patch = MergerinoPatch<State>;
   type Update = Stream<Patch>;
@@ -913,3 +899,4 @@ const InitialTemperature = (label: string): Temperature => ({
 
   context.states.map(() => m.redraw());
 })();
+*/

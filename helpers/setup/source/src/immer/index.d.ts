@@ -71,6 +71,12 @@ export interface ImmerMeiosisOne<RS, RA, S = RS, A = RA>
 
 export type ImmerMeiosisOneApp<S, A> = MeiosisOneApp<S, ImmerPatch<S>, A>;
 
+export type ImmerMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
+  S,
+  ImmerPatch<S>,
+  A
+>;
+
 export function nest<S, K extends keyof S, A>(
   context: MeiosisOneBase<S, ImmerPatch<S>>,
   prop: K,

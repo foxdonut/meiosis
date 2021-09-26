@@ -15,9 +15,10 @@ export default functionPatchesSetup;
 const createNestPatch = prop => patch => state =>
   Object.assign({}, state, { [prop]: patch(state[prop]) });
 
-/** type {import("./index").nest} */
+/** @type {import("./index").nest} */
 export const nest = createNest(createNestPatch);
 
+/** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, app }) =>
   commonMeiosisOne({
     stream,

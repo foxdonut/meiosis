@@ -92,13 +92,22 @@ export interface FunctionPatchesMeiosisOne<RS, RA, S = RS, A = RA>
 }
 */
 
-export type FunctionPatchesMeiosisOneApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+export type FunctionPatchesMeiosisOneApp<S, A = never> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+
+export type FunctionPatchesMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
+  S,
+  FunctionPatch<S>,
+  A
+>;
+
+export type FunctionPatchesMeiosisOneBase<S> = MeiosisOneBase<S, FunctionPatch<S>>;
+export type FunctionPatchesMeiosisOneContext<S, A> = MeiosisOneContext<S, FunctionPatch<S>, A>;
 
 export function nest<S, K extends keyof S, A>(
   context: MeiosisOneBase<S, FunctionPatch<S>>,
   prop: K,
   Actions?: MeiosisOneActionConstructor<S[K], FunctionPatch<S[K]>, A>
-): MeiosisOneContext<S[K], FunctionPatch<S[K]>, A>;
+): FunctionPatchesMeiosisOneContext<S[K], A>;
 
 /**
  * Function Patches Meiosis One configuration.
@@ -122,6 +131,6 @@ export interface FunctionPatchesMeiosisOneConfig<S, A> extends MeiosisOneConfigB
  *
  * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
  */
-export function meiosisOne<S, A>(
+export function meiosisOne<S, A = never>(
   config: FunctionPatchesMeiosisOneConfig<S, A>
-): MeiosisOneContext<S, FunctionPatch<S>, A>;
+): FunctionPatchesMeiosisOneContext<S, A>;

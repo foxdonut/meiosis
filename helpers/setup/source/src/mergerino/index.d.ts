@@ -71,6 +71,12 @@ export interface MergerinoMeiosisOne<RS, RA, S = RS, A = RA>
 
 export type MergerinoMeiosisOneApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
 
+export type MergerinoMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
+  S,
+  MergerinoPatch<S>,
+  A
+>;
+
 export function nest<S, K extends keyof S, A>(
   context: MeiosisOneBase<S, MergerinoPatch<S>>,
   prop: K,
