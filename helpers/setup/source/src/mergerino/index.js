@@ -17,7 +17,7 @@ export default mergerinoSetup;
 
 const createNestPatch = prop => patch => ({ [prop]: patch });
 
-/** type {import("./index").nest} */
+/** @type {import("./index").nest} */
 export const nest = createNest(createNestPatch);
 
 /** @type {import("./index").meiosisOne} */

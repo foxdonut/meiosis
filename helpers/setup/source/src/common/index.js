@@ -61,7 +61,8 @@ export const createNest = createNestPatch => (context, prop, Actions) => {
 
   const nested = {
     getState,
-    update: context.update.map(patch => nestPatch(patch))
+    update: context.update.map(patch => nestPatch(patch)),
+    actions: undefined
   };
 
   nested.actions = Actions ? Actions(nested) : undefined;

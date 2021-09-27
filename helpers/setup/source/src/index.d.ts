@@ -43,7 +43,6 @@ export {
   FunctionPatchesMeiosisConfig,
   FunctionPatchesMeiosisOneActionConstructor,
   FunctionPatchesMeiosisOneApp,
-  FunctionPatchesMeiosisOneBase,
   FunctionPatchesMeiosisOneConfig,
   FunctionPatchesMeiosisOneContext
 } from "./functionPatches";

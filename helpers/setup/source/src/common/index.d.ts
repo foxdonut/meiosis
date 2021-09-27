@@ -212,7 +212,7 @@ export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>)
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export type App<S, P, A = never> = {
+export type App<S, P, A = DefaultActions> = {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -328,25 +328,24 @@ export type NestPatch = (patch: any) => any;
  */
 export type CreateNestPatch<S> = <K extends keyof S>(prop: K) => NestPatch;
 
+export type DefaultActions = Record<string, (...args: any[]) => void>;
+
 /**
  * Returned by Meiosis One setup.
  *
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneBase<S, P> {
+export interface MeiosisOneContext<S, P, A = DefaultActions> {
   getState: Stream<S>;
   update: Stream<P>;
-}
-
-export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneBase<S, P>) => A;
-
-export interface MeiosisOneContext<S, P, A> extends MeiosisOneBase<S, P> {
   actions: A;
 }
 
-export type Nest<S, K extends keyof S, P1, P2, A = never> = (
-  context: MeiosisOneBase<S, P1>,
+export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S, P>) => A;
+
+export type Nest<S, K extends keyof S, P1, P2, A = DefaultActions> = (
+  context: MeiosisOneContext<S, P1>,
   prop: K,
   Actions?: MeiosisOneActionConstructor<S[K], P2, A>
 ) => MeiosisOneContext<S[K], P2, A>;
@@ -365,7 +364,7 @@ export function createNest<S, K extends keyof S, P1, P2, A>(
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisOneEffectConstructor<S, P, A = never> = (
+export type MeiosisOneEffectConstructor<S, P, A = DefaultActions> = (
   context: MeiosisOneContext<S, P, A>
 ) => Effect<S>[];
 
@@ -437,6 +436,6 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
  *
  * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P, A = never>(
+export function meiosisOne<S, P, A = DefaultActions>(
   config: MeiosisOneConfig<S, P, A>
 ): MeiosisOneContext<S, P, A>;

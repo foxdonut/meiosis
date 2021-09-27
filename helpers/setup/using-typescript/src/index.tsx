@@ -2,7 +2,6 @@ import meiosis, {
   FunctionPatch,
   FunctionPatchesMeiosisOneActionConstructor,
   FunctionPatchesMeiosisOneApp,
-  FunctionPatchesMeiosisOneBase,
   FunctionPatchesMeiosisOneContext,
   // ImmerPatch,
   MeiosisOneActionConstructor // ,
@@ -69,11 +68,6 @@ interface State {
   };
 }
 
-interface Actions {
-  conditions: ConditionsActions;
-  temperature: TemperatureActions;
-}
-
 interface ConditionsComponent<AC> {
   initial: Conditions;
   Actions: AC;
@@ -96,7 +90,7 @@ const InitialTemperature = (label: string): Temperature => ({
 
 // lit-html + functionPatches + simple-stream
 (() => {
-  type Patch = FunctionPatch<State>;
+  const nest = meiosis.functionPatches.nest;
 
   interface SkyOptionAttrs {
     context: FunctionPatchesMeiosisOneContext<Conditions, ConditionsActions>;
@@ -109,7 +103,7 @@ const InitialTemperature = (label: string): Temperature => ({
     ConditionsActions
   >> = {
     initial: initialConditions,
-    Actions: (context: FunctionPatchesMeiosisOneBase<Conditions>) => ({
+    Actions: (context: FunctionPatchesMeiosisOneContext<Conditions>) => ({
       togglePrecipitations: value => {
         context.update(state => ({ ...state, precipitations: value }));
       },
@@ -168,7 +162,9 @@ const InitialTemperature = (label: string): Temperature => ({
     })
   };
 
-  const Temperature: (context: TemperatureAttrs) => TemplateResult = context => html`
+  const Temperature: (
+    context: FunctionPatchesMeiosisOneContext<Temperature, TemperatureActions>
+  ) => TemplateResult = context => html`
     <div>
       ${context.getState().label} Temperature:
       ${context.getState().value}&deg;${context.getState().units}
@@ -192,24 +188,26 @@ const InitialTemperature = (label: string): Temperature => ({
     }
   };
 
-  const App: (attrs: Attrs) => TemplateResult = ({ state, actions }) => html`
-    <div style="display: grid; grid-template-columns: 1fr 1fr">
-      <div>
-        ${Conditions({ state, local: nest("conditions"), actions })}
-        ${Temperature({ state, local: nest(["temperature", "air"]), actions })}
-        ${Temperature({ state, local: nest(["temperature", "water"]), actions })}
+  const App: (context: FunctionPatchesMeiosisOneContext<State>) => TemplateResult = context => {
+    return html`
+      <div style="display: grid; grid-template-columns: 1fr 1fr">
+        <div>
+          ${Conditions(nest(context, "conditions", conditions.Actions))}
+          ${Temperature(nest(nest(context, "temperature"), "air", temperature.Actions))}
+          ${Temperature(nest(nest(context, "temperature"), "water", temperature.Actions))}
+        </div>
+        <pre style="margin: 0">${JSON.stringify(context.getState(), null, 4)}</pre>
       </div>
-      <pre style="margin: 0">${JSON.stringify(state, null, 4)}</pre>
-    </div>
-  `;
+    `;
+  };
 
-  const { states, actions } = meiosis.functionPatches.setup<State, Actions>({
+  const context = meiosis.functionPatches.meiosisOne<State>({
     stream: meiosis.simpleStream,
     app
   });
 
   const element = document.getElementById("litHtmlApp") as HTMLElement;
-  states.map(state => litHtmlRender(App({ state, actions }), element));
+  context.getState.map(() => litHtmlRender(App(context), element));
 })();
 
 // mithril + mergerino + mithril-stream

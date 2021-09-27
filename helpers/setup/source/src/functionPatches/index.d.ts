@@ -1,9 +1,9 @@
 import {
   App,
+  DefaultActions,
   Meiosis,
   MeiosisOneActionConstructor,
   MeiosisOneApp,
-  MeiosisOneBase,
   MeiosisOneConfigBase,
   MeiosisOneContext,
   StreamLib
@@ -71,28 +71,11 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
-/*
-export type FunctionPatchesMeiosisOneActionConstructor<RS, RA, S = RS, A = RA> = (
-  context: FunctionPatchesMeiosisOne<RS, RA, S, A>
-) => A;
-*/
-
-/**
- * Returned by Function Patches Meiosis One setup.
- *
- * @template S the State type.
- */
-/*
-export interface FunctionPatchesMeiosisOne<RS, RA, S = RS, A = RA>
-  extends MeiosisOneBase<RS, FunctionPatch<RS>, RA, S, FunctionPatch<S>, A> {
-  nest: <K extends keyof S, NA>(
-    prop: K,
-    Actions?: FunctionPatchesMeiosisOneActionConstructor<RS, RA, S[K], NA>
-  ) => FunctionPatchesMeiosisOne<RS, RA, S[K], NA>;
-}
-*/
-
-export type FunctionPatchesMeiosisOneApp<S, A = never> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+export type FunctionPatchesMeiosisOneApp<S, A = DefaultActions> = MeiosisOneApp<
+  S,
+  FunctionPatch<S>,
+  A
+>;
 
 export type FunctionPatchesMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
   S,
@@ -100,11 +83,14 @@ export type FunctionPatchesMeiosisOneActionConstructor<S, A> = MeiosisOneActionC
   A
 >;
 
-export type FunctionPatchesMeiosisOneBase<S> = MeiosisOneBase<S, FunctionPatch<S>>;
-export type FunctionPatchesMeiosisOneContext<S, A> = MeiosisOneContext<S, FunctionPatch<S>, A>;
+export type FunctionPatchesMeiosisOneContext<S, A = DefaultActions> = MeiosisOneContext<
+  S,
+  FunctionPatch<S>,
+  A
+>;
 
-export function nest<S, K extends keyof S, A>(
-  context: MeiosisOneBase<S, FunctionPatch<S>>,
+export function nest<S, K extends keyof S, A = DefaultActions>(
+  context: MeiosisOneContext<S, FunctionPatch<S>>,
   prop: K,
   Actions?: MeiosisOneActionConstructor<S[K], FunctionPatch<S[K]>, A>
 ): FunctionPatchesMeiosisOneContext<S[K], A>;
@@ -131,6 +117,6 @@ export interface FunctionPatchesMeiosisOneConfig<S, A> extends MeiosisOneConfigB
  *
  * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
  */
-export function meiosisOne<S, A = never>(
+export function meiosisOne<S, A = DefaultActions>(
   config: FunctionPatchesMeiosisOneConfig<S, A>
 ): FunctionPatchesMeiosisOneContext<S, A>;

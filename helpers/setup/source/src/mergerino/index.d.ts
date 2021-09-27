@@ -3,7 +3,6 @@ import {
   MeiosisConfigBase,
   MeiosisOneActionConstructor,
   MeiosisOneApp,
-  MeiosisOneBase,
   MeiosisOneConfigBase,
   MeiosisOneContext
 } from "../common";
@@ -54,21 +53,6 @@ export default mergerinoSetup;
 
 // -------- Meiosis One
 
-/**
- * Returned by Mergerino Meiosis One setup.
- *
- * @template S the State type.
- */
-/*
-export interface MergerinoMeiosisOne<RS, RA, S = RS, A = RA>
-  extends MeiosisOneBase<RS, MergerinoPatch<RS>, RA, S, MergerinoPatch<S>, A> {
-  nest: <K extends keyof S, NA>(
-    prop: K,
-    Actions?: MeiosisOneActionConstructor<RS, MergerinoPatch<RS>, RA, S[K], MergerinoPatch<S>, NA>
-  ) => MergerinoMeiosisOne<RS, RA, S[K], NA>;
-}
-*/
-
 export type MergerinoMeiosisOneApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
 
 export type MergerinoMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
@@ -77,8 +61,8 @@ export type MergerinoMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstru
   A
 >;
 
-export function nest<S, K extends keyof S, A>(
-  context: MeiosisOneBase<S, MergerinoPatch<S>>,
+export function nest<S, K extends keyof S, A = never>(
+  context: MeiosisOneContext<S, MergerinoPatch<S>>,
   prop: K,
   Actions?: MeiosisOneActionConstructor<S[K], MergerinoPatch<S[K]>, A>
 ): MeiosisOneContext<S[K], MergerinoPatch<S[K]>, A>;
@@ -110,6 +94,6 @@ export interface MergerinoMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
  *
  * @returns {MergerinoMeiosisOne<S>} Mergerino Meiosis One.
  */
-export function meiosisOne<S, A>(
+export function meiosisOne<S, A = never>(
   config: MergerinoMeiosisOneConfig<S, A>
 ): MeiosisOneContext<S, MergerinoPatch<S>, A>;
