@@ -317,7 +317,10 @@ export default setup;
 
 // -------- Meiosis One
 
-export type NestPatch = (patch: any) => any;
+/*
+export type NestPatch<P1, P2> = (patch: P1) => P2;
+*/
+export type NestPatch = (patch: unknown) => unknown;
 
 /**
  * Creates a function that nests a patch at a given property.
@@ -326,9 +329,12 @@ export type NestPatch = (patch: any) => any;
  *
  * @returns {NestPatch} the nest patch function.
  */
-export type CreateNestPatch<S> = <K extends keyof S>(prop: K) => NestPatch;
+/*
+export type CreateNestPatch<S, P1, P2> = <K extends keyof S>(prop: K) => NestPatch<P1, P2>;
+*/
+export type CreateNestPatch = (prop: string) => NestPatch;
 
-export type DefaultActions = Record<string, (...args: any[]) => void>;
+export type DefaultActions = Record<string, (...args: unknown[]) => void>;
 
 /**
  * Returned by Meiosis One setup.
@@ -338,12 +344,13 @@ export type DefaultActions = Record<string, (...args: any[]) => void>;
  */
 export interface MeiosisOneContext<S, P, A = DefaultActions> {
   getState: Stream<S>;
-  update: Stream<P>;
+  update: (patch: P) => P;
   actions: A;
 }
 
 export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S, P>) => A;
 
+/*
 export type Nest<S, K extends keyof S, P1, P2, A = DefaultActions> = (
   context: MeiosisOneContext<S, P1>,
   prop: K,
@@ -351,8 +358,18 @@ export type Nest<S, K extends keyof S, P1, P2, A = DefaultActions> = (
 ) => MeiosisOneContext<S[K], P2, A>;
 
 export function createNest<S, K extends keyof S, P1, P2, A>(
-  createNestPatch: CreateNestPatch<S>
+  createNestPatch: CreateNestPatch<S, P1, P2>
 ): Nest<S, K, P1, P2, A>;
+*/
+export type Nest<S, P, A = DefaultActions> = (
+  context: unknown,
+  prop: string | number | symbol,
+  Actions?: unknown
+) => MeiosisOneContext<S, P, A>;
+
+export function createNest<S, P, A = DefaultActions>(
+  createNestPatch: CreateNestPatch
+): Nest<S, P, A>;
 
 /**
  * An effects constructor.

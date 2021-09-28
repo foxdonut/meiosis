@@ -1,12 +1,11 @@
 import {
-  App,
   DefaultActions,
   Meiosis,
+  MeiosisConfigBase,
   MeiosisOneActionConstructor,
   MeiosisOneApp,
   MeiosisOneConfigBase,
-  MeiosisOneContext,
-  StreamLib
+  MeiosisOneContext
 } from "../common";
 
 /**
@@ -35,20 +34,11 @@ export type FunctionPatch<S> = (state: S) => S;
  * @template S the State type.
  * @template A the Actions type.
  */
-export type FunctionPatchesMeiosisConfig<S, A> = {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
-  stream: StreamLib;
-
-  /**
-   * The application object, with optional properties.
-   */
-  app: App<S, FunctionPatch<S>, A>;
-};
+export type FunctionPatchesMeiosisConfig<S, A = DefaultActions> = MeiosisConfigBase<
+  S,
+  FunctionPatch<S>,
+  A
+>;
 
 /**
  * Helper to setup the Meiosis pattern with function patches.
@@ -62,7 +52,7 @@ export type FunctionPatchesMeiosisConfig<S, A> = {
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function functionPatchesSetup<S, A>({
+export function functionPatchesSetup<S, A = DefaultActions>({
   stream,
   app
 }: FunctionPatchesMeiosisConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
@@ -92,7 +82,7 @@ export type FunctionPatchesMeiosisOneContext<S, A = DefaultActions> = MeiosisOne
 export function nest<S, K extends keyof S, A = DefaultActions>(
   context: MeiosisOneContext<S, FunctionPatch<S>>,
   prop: K,
-  Actions?: MeiosisOneActionConstructor<S[K], FunctionPatch<S[K]>, A>
+  Actions?: FunctionPatchesMeiosisOneActionConstructor<S[K], A>
 ): FunctionPatchesMeiosisOneContext<S[K], A>;
 
 /**
