@@ -54,18 +54,20 @@ export default setup;
 
 // -------- Meiosis One
 
-/** attype {import("./index").createNest} */
-export const createNest = createNestPatch => (context, prop, Actions) => {
+/** @type {import("./index").createNest} */
+export const createNest = nestPatch => (context, prop, Actions) => {
   const getState = context.getState.map(state => state[prop]);
-  const nestPatch = createNestPatch(prop);
 
+  /** @type {import("./index").MeiosisOneContext} */
   const nested = {
     getState,
-    update: patch => context.update(nestPatch(patch)),
-    actions: undefined
+    update: patch => context.update(nestPatch(patch, prop)),
+    actions: {}
   };
 
-  nested.actions = Actions ? Actions(nested) : undefined;
+  if (Actions) {
+    nested.actions = Actions(nested);
+  }
 
   return nested;
 };

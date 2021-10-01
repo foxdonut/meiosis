@@ -212,7 +212,7 @@ export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>)
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export type App<S, P, A = DefaultActions> = {
+export type App<S, P, A> = {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -317,24 +317,15 @@ export default setup;
 
 // -------- Meiosis One
 
-/*
-export type NestPatch<P1, P2> = (patch: P1) => P2;
-*/
-export type NestPatch = (patch: unknown) => unknown;
-
 /**
- * Creates a function that nests a patch at a given property.
- *
- * @param {string} prop the property at which to nest.
- *
- * @returns {NestPatch} the nest patch function.
+ * Function that nests a patch at a given property.
  */
-/*
-export type CreateNestPatch<S, P1, P2> = <K extends keyof S>(prop: K) => NestPatch<P1, P2>;
-*/
-export type CreateNestPatch = (prop: string) => NestPatch;
+export type NestPatch = (patch: any, prop: any) => any;
 
-export type DefaultActions = Record<string, (...args: unknown[]) => void>;
+export interface MeiosisOneBase<S, P> {
+  getState: Stream<S>;
+  update: (patch: P) => P;
+}
 
 /**
  * Returned by Meiosis One setup.
@@ -342,34 +333,21 @@ export type DefaultActions = Record<string, (...args: unknown[]) => void>;
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneContext<S, P, A = DefaultActions> {
-  getState: Stream<S>;
-  update: (patch: P) => P;
+export interface MeiosisOneContext<S, P, A> extends MeiosisOneBase<S, P> {
   actions: A;
 }
 
-export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S, P>) => A;
+export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneBase<S, P>) => A;
 
-/*
-export type Nest<S, K extends keyof S, P1, P2, A = DefaultActions> = (
-  context: MeiosisOneContext<S, P1>,
+export type Nest<S, P, K extends keyof S, N, A> = (
+  context: MeiosisOneBase<S, P>,
   prop: K,
-  Actions?: MeiosisOneActionConstructor<S[K], P2, A>
-) => MeiosisOneContext<S[K], P2, A>;
+  Actions?: MeiosisOneActionConstructor<S[K], N, A>
+) => MeiosisOneContext<S[K], N, A>;
 
-export function createNest<S, K extends keyof S, P1, P2, A>(
-  createNestPatch: CreateNestPatch<S, P1, P2>
-): Nest<S, K, P1, P2, A>;
-*/
-export type Nest<S, P, A = DefaultActions> = (
-  context: unknown,
-  prop: string | number | symbol,
-  Actions?: unknown
-) => MeiosisOneContext<S, P, A>;
-
-export function createNest<S, P, A = DefaultActions>(
-  createNestPatch: CreateNestPatch
-): Nest<S, P, A>;
+export function createNest<S, K extends keyof S, A>(
+  nestPatch: NestPatch
+): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0], A>;
 
 /**
  * An effects constructor.
@@ -381,7 +359,7 @@ export function createNest<S, P, A = DefaultActions>(
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisOneEffectConstructor<S, P, A = DefaultActions> = (
+export type MeiosisOneEffectConstructor<S, P, A> = (
   context: MeiosisOneContext<S, P, A>
 ) => Effect<S>[];
 
@@ -453,6 +431,4 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
  *
  * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P, A = DefaultActions>(
-  config: MeiosisOneConfig<S, P, A>
-): MeiosisOneContext<S, P, A>;
+export function meiosisOne<S, P, A>(config: MeiosisOneConfig<S, P, A>): MeiosisOneContext<S, P, A>;
