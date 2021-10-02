@@ -36,7 +36,7 @@ export default mergerinoSetup;
  *
  * @type {import("../common/index").NestPatch}
  *
- * @param {import("../index").MergerinoPatch<S[K]>} patch
+ * @param {import("./index").MergerinoPatch<S[K]>} patch
  * @param {K} prop
  */
 const nestPatch = (patch, prop) => ({ [prop]: patch });
@@ -46,7 +46,7 @@ const nestPatch = (patch, prop) => ({ [prop]: patch });
  * @template {keyof S} K
  * @template A
  *
- * @type {import("./index").nest<S, K, A>}
+ * @type {import("./index").MergerinoNest<S, K, A>}
  */
 export const nest = createNest(nestPatch);
 

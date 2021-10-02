@@ -3,6 +3,7 @@ import {
   MeiosisConfigBase,
   MeiosisOneActionConstructor,
   MeiosisOneApp,
+  MeiosisOneBase,
   MeiosisOneConfigBase,
   MeiosisOneContext,
   Nest
@@ -64,7 +65,19 @@ export type MergerinoMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstru
 
 export type MergerinoMeiosisOneContext<S, A> = MeiosisOneContext<S, MergerinoPatch<S>, A>;
 
-export type nest<S, K extends keyof S, A> = Nest<S, MergerinoPatch<S>, K, MergerinoPatch<S[K]>, A>;
+export type MergerinoNest<S, K extends keyof S, A> = Nest<
+  S,
+  MergerinoPatch<S>,
+  K,
+  MergerinoPatch<S[K]>,
+  A
+>;
+
+export function nest<S, K extends keyof S, A>(
+  context: MeiosisOneBase<S, MergerinoPatch<S>>,
+  prop: K,
+  Actions?: MeiosisOneActionConstructor<S[K], MergerinoPatch<S[K]>, A>
+): MeiosisOneContext<S[K], MergerinoPatch<S[K]>, A>;
 
 /**
  * Mergerino Meiosis One configuration.

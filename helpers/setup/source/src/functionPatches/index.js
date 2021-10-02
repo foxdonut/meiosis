@@ -12,11 +12,26 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
-const createNestPatch = prop => patch => state =>
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("../common/index").NestPatch}
+ *
+ * @param {import("./index").FunctionPatch<S[K]>} patch
+ * @param {K} prop
+ */
+const nestPatch = (patch, prop) => state =>
   Object.assign({}, state, { [prop]: patch(state[prop]) });
 
-/** @type {import("./index").nest} */
-export const nest = createNest(createNestPatch);
+/**
+ * @template S
+ * @template {keyof S} K
+ * @template A
+ *
+ * @type {import("./index").FunctionPatchesNest<S, K, A>}
+ */
+export const nest = createNest(nestPatch);
 
 /** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, app }) =>

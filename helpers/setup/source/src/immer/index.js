@@ -16,12 +16,24 @@ export default immerSetup;
 
 // -------- Meiosis One
 
-const createNestPatch = produce => prop => patch => state => {
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("./index").ProduceNestPatch}
+ */
+const nestPatch = produce => (patch, prop) => state => {
   state[prop] = produce(state[prop], patch);
 };
 
-/** type {import("./index").nest} */
-export const nest = produce => createNest(createNestPatch(produce));
+/**
+ * @template S
+ * @template {keyof S} K
+ * @template A
+ *
+ * @type {import("./index").ProduceNest<S, K, A>}
+ */
+export const nest = produce => createNest(nestPatch(produce));
 
 export const meiosisOne = ({ stream, produce, app }) =>
   commonMeiosisOne({

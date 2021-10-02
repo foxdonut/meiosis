@@ -1,19 +1,20 @@
 import {
-  DefaultActions,
   Meiosis,
   MeiosisConfigBase,
   MeiosisOneActionConstructor,
   MeiosisOneApp,
+  MeiosisOneBase,
   MeiosisOneConfigBase,
-  MeiosisOneContext
+  MeiosisOneContext,
+  Nest,
+  NestPatch
 } from "../common";
 
 export type ImmerPatch<S> = (state: S) => S | void;
 
 export type Produce<S> = (state: S, patch: ImmerPatch<S>) => S;
 
-export interface ImmerMeiosisConfig<S, A = DefaultActions>
-  extends MeiosisConfigBase<S, ImmerPatch<S>, A> {
+export interface ImmerMeiosisConfig<S, A> extends MeiosisConfigBase<S, ImmerPatch<S>, A> {
   /**
    * the Immer `produce` function.
    */
@@ -31,7 +32,7 @@ export interface ImmerMeiosisConfig<S, A = DefaultActions>
  * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function immerSetup<S, A = DefaultActions>({
+export function immerSetup<S, A>({
   stream,
   produce,
   app
@@ -49,20 +50,24 @@ export type ImmerMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor
   A
 >;
 
-export type ImmerMeiosisOneContext<S, A = DefaultActions> = MeiosisOneContext<S, ImmerPatch<S>, A>;
+export type ImmerMeiosisOneContext<S, A> = MeiosisOneContext<S, ImmerPatch<S>, A>;
 
-export function nest<S, K extends keyof S, A = DefaultActions>(
-  context: MeiosisOneContext<S, ImmerPatch<S>>,
+export type ProduceNestPatch = (produce: Produce<any>) => NestPatch;
+export type ImmerNest<S, K extends keyof S, A> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>, A>;
+export type ProduceNest<S, K extends keyof S, A> = (produce: Produce<any>) => ImmerNest<S, K, A>;
+
+export function nest<S, K extends keyof S, A>(
+  context: MeiosisOneBase<S, ImmerPatch<S>>,
   prop: K,
-  Actions?: ImmerMeiosisOneActionConstructor<S[K], A>
-): ImmerMeiosisOneContext<S[K], A>;
+  Actions?: MeiosisOneActionConstructor<S[K], ImmerPatch<S[K]>, A>
+): MeiosisOneContext<S[K], ImmerPatch<S[K]>, A>;
 
 /**
  * Immer Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface ImmerMeiosisOneConfig<S, A = DefaultActions> extends MeiosisOneConfigBase {
+export interface ImmerMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * the Immer `produce` function.
    */
@@ -84,6 +89,6 @@ export interface ImmerMeiosisOneConfig<S, A = DefaultActions> extends MeiosisOne
  *
  * @returns {ImmerMeiosisOne<S>} Immer Meiosis One.
  */
-export function meiosisOne<S, A = DefaultActions>(
+export function meiosisOne<S, A>(
   config: ImmerMeiosisOneConfig<S, A>
 ): MeiosisOneContext<S, ImmerPatch<S>, A>;
