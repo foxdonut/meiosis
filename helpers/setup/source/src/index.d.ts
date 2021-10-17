@@ -41,21 +41,13 @@ export * from "./common";
 export {
   FunctionPatch,
   FunctionPatchesMeiosisConfig,
-  FunctionPatchesMeiosisOneActionConstructor,
   FunctionPatchesMeiosisOneApp,
   FunctionPatchesMeiosisOneConfig,
   FunctionPatchesMeiosisOneContext
 } from "./functionPatches";
-export {
-  ImmerMeiosisConfig,
-  ImmerMeiosisOneActionConstructor,
-  ImmerMeiosisOneApp,
-  ImmerMeiosisOneConfig,
-  ImmerPatch
-} from "./immer";
+export { ImmerMeiosisConfig, ImmerMeiosisOneApp, ImmerMeiosisOneConfig, ImmerPatch } from "./immer";
 export {
   MergerinoMeiosisConfig,
-  MergerinoMeiosisOneActionConstructor,
   MergerinoMeiosisOneApp,
   MergerinoMeiosisOneConfig,
   MergerinoPatch

@@ -1,10 +1,7 @@
 import meiosis, {
-  FunctionPatch,
-  FunctionPatchesMeiosisOneActionConstructor,
   FunctionPatchesMeiosisOneApp,
-  FunctionPatchesMeiosisOneContext,
+  FunctionPatchesMeiosisOneContext
   // ImmerPatch,
-  MeiosisOneActionConstructor // ,
   // MergerinoMeiosisOneApp,
   // MergerinoPatch,
   // Stream
@@ -38,8 +35,11 @@ interface Conditions {
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (value: boolean) => void;
-  changeSky: (value: Sky) => void;
+  togglePrecipitations: (
+    context: FunctionPatchesMeiosisOneContext<Conditions>,
+    value: boolean
+  ) => void;
+  changeSky: (context: FunctionPatchesMeiosisOneContext<Conditions>, value: Sky) => void;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -51,13 +51,12 @@ interface Temperature {
 }
 
 interface TemperatureActions {
-  increment: (amount: number) => void;
-  changeUnits: () => void;
+  increment: (context: FunctionPatchesMeiosisOneContext<Temperature>, amount: number) => void;
+  changeUnits: (context: FunctionPatchesMeiosisOneContext<Temperature>) => void;
 }
 
-interface TemperatureComponent<P> {
+interface TemperatureComponent {
   Initial: (label: string) => Temperature;
-  Actions: MeiosisOneActionConstructor<Temperature, P, TemperatureActions>;
 }
 
 interface State {
@@ -68,9 +67,8 @@ interface State {
   };
 }
 
-interface ConditionsComponent<AC> {
+interface ConditionsComponent {
   initial: Conditions;
-  Actions: AC;
 }
 
 const initialConditions: Conditions = {
@@ -93,24 +91,22 @@ const InitialTemperature = (label: string): Temperature => ({
   const nest = meiosis.functionPatches.nest;
 
   interface SkyOptionAttrs {
-    context: FunctionPatchesMeiosisOneContext<Conditions, ConditionsActions>;
+    context: FunctionPatchesMeiosisOneContext<Conditions>;
     value: string;
     label: string;
   }
 
-  const conditions: ConditionsComponent<FunctionPatchesMeiosisOneActionConstructor<
-    Conditions,
-    ConditionsActions
-  >> = {
-    initial: initialConditions,
-    Actions: (context: FunctionPatchesMeiosisOneContext<Conditions>) => ({
-      togglePrecipitations: value => {
-        context.update(state => ({ ...state, precipitations: value }));
-      },
-      changeSky: value => {
-        context.update(state => ({ ...state, sky: value }));
-      }
-    })
+  const conditionsActions: ConditionsActions = {
+    togglePrecipitations: (context, value) => {
+      context.update(state => ({ ...state, precipitations: value }));
+    },
+    changeSky: (context, value) => {
+      context.update(state => ({ ...state, sky: value }));
+    }
+  };
+
+  const conditions: ConditionsComponent = {
+    initial: initialConditions
   };
 
   const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ context, value, label }) => html`
@@ -119,21 +115,21 @@ const InitialTemperature = (label: string): Temperature => ({
         type="radio"
         value=${value}
         .checked=${context.getState().sky === value}
-        @change=${evt => context.actions.changeSky(evt.target.value)}
+        @change=${evt => conditionsActions.changeSky(context, evt.target.value)}
       />
       ${label}
     </label>
   `;
 
   const Conditions: (
-    context: FunctionPatchesMeiosisOneContext<Conditions, ConditionsActions>
+    context: FunctionPatchesMeiosisOneContext<Conditions>
   ) => TemplateResult = context => html`
     <div>
       <label>
         <input
           type="checkbox"
           .checked=${context.getState().precipitations}
-          @change=${evt => context.actions.togglePrecipitations(evt.target.checked)}
+          @change=${evt => conditionsActions.togglePrecipitations(context, evt.target.checked)}
         />
         Precipitations
       </label>
@@ -145,35 +141,36 @@ const InitialTemperature = (label: string): Temperature => ({
     </div>
   `;
 
-  const temperature: TemperatureComponent<FunctionPatch<Temperature>> = {
-    Initial: InitialTemperature,
-    Actions: context => ({
-      increment: amount => {
-        context.update(state => ({ ...state, value: state.value + amount }));
-      },
-      changeUnits: () => {
-        context.update(state => {
-          const value = state.value;
-          const newUnits = state.units === "C" ? "F" : "C";
-          const newValue = convert(value, newUnits);
-          return { ...state, value: newValue, units: newUnits };
-        });
-      }
-    })
+  const temperature: TemperatureComponent = {
+    Initial: InitialTemperature
+  };
+
+  const temperatureActions: TemperatureActions = {
+    increment: (context, amount) => {
+      context.update(state => ({ ...state, value: state.value + amount }));
+    },
+    changeUnits: context => {
+      context.update(state => {
+        const value = state.value;
+        const newUnits = state.units === "C" ? "F" : "C";
+        const newValue = convert(value, newUnits);
+        return { ...state, value: newValue, units: newUnits };
+      });
+    }
   };
 
   const Temperature: (
-    context: FunctionPatchesMeiosisOneContext<Temperature, TemperatureActions>
+    context: FunctionPatchesMeiosisOneContext<Temperature>
   ) => TemplateResult = context => html`
     <div>
       ${context.getState().label} Temperature:
       ${context.getState().value}&deg;${context.getState().units}
       <div>
-        <button @click=${() => context.actions.increment(1)}>Increment</button>
-        <button @click=${() => context.actions.increment(-1)}>Decrement</button>
+        <button @click=${() => temperatureActions.increment(context, 1)}>Increment</button>
+        <button @click=${() => temperatureActions.increment(context, -1)}>Decrement</button>
       </div>
       <div>
-        <button @click=${() => context.actions.changeUnits()}>Change Units</button>
+        <button @click=${() => temperatureActions.changeUnits(context)}>Change Units</button>
       </div>
     </div>
   `;
@@ -192,9 +189,9 @@ const InitialTemperature = (label: string): Temperature => ({
     return html`
       <div style="display: grid; grid-template-columns: 1fr 1fr">
         <div>
-          ${Conditions(nest(context, "conditions", conditions.Actions))}
-          ${Temperature(nest(nest(context, "temperature"), "air", temperature.Actions))}
-          ${Temperature(nest(nest(context, "temperature"), "water", temperature.Actions))}
+          ${Conditions(nest(context, "conditions"))}
+          ${Temperature(nest(nest(context, "temperature"), "air"))}
+          ${Temperature(nest(nest(context, "temperature"), "water"))}
         </div>
         <pre style="margin: 0">${JSON.stringify(context.getState(), null, 4)}</pre>
       </div>

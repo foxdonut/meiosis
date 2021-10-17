@@ -1,9 +1,7 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisOneActionConstructor,
   MeiosisOneApp,
-  MeiosisOneBase,
   MeiosisOneConfigBase,
   MeiosisOneContext,
   Nest
@@ -58,40 +56,32 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
-export type FunctionPatchesMeiosisOneApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+export type FunctionPatchesMeiosisOneApp<S> = MeiosisOneApp<S, FunctionPatch<S>>;
 
-export type FunctionPatchesMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
-  S,
-  FunctionPatch<S>,
-  A
->;
+export type FunctionPatchesMeiosisOneContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
 
-export type FunctionPatchesMeiosisOneContext<S, A> = MeiosisOneContext<S, FunctionPatch<S>, A>;
-
-export type FunctionPatchesNest<S, K extends keyof S, A> = Nest<
+export type FunctionPatchesNest<S, K extends keyof S> = Nest<
   S,
   FunctionPatch<S>,
   K,
-  FunctionPatch<S[K]>,
-  A
+  FunctionPatch<S[K]>
 >;
 
-export function nest<S, K extends keyof S, A>(
-  context: MeiosisOneBase<S, FunctionPatch<S>>,
-  prop: K,
-  Actions?: MeiosisOneActionConstructor<S[K], FunctionPatch<S[K]>, A>
-): MeiosisOneContext<S[K], FunctionPatch<S[K]>, A>;
+export function nest<S, K extends keyof S>(
+  context: MeiosisOneContext<S, FunctionPatch<S>>,
+  prop: K
+): MeiosisOneContext<S[K], FunctionPatch<S[K]>>;
 
 /**
  * Function Patches Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface FunctionPatchesMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
+export interface FunctionPatchesMeiosisOneConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: FunctionPatchesMeiosisOneApp<S, A>;
+  app: FunctionPatchesMeiosisOneApp<S>;
 }
 
 /**
@@ -104,6 +94,6 @@ export interface FunctionPatchesMeiosisOneConfig<S, A> extends MeiosisOneConfigB
  *
  * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
  */
-export function meiosisOne<S, A>(
-  config: FunctionPatchesMeiosisOneConfig<S, A>
-): FunctionPatchesMeiosisOneContext<S, A>;
+export function meiosisOne<S>(
+  config: FunctionPatchesMeiosisOneConfig<S>
+): FunctionPatchesMeiosisOneContext<S>;

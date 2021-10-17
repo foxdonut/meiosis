@@ -27,9 +27,8 @@ const nestPatch = (patch, prop) => state =>
 /**
  * @template S
  * @template {keyof S} K
- * @template A
  *
- * @type {import("./index").FunctionPatchesNest<S, K, A>}
+ * @type {import("./index").FunctionPatchesNest<S, K>}
  */
 export const nest = createNest(nestPatch);
 

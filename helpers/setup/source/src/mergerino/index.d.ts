@@ -1,9 +1,7 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisOneActionConstructor,
   MeiosisOneApp,
-  MeiosisOneBase,
   MeiosisOneConfigBase,
   MeiosisOneContext,
   Nest
@@ -55,36 +53,28 @@ export default mergerinoSetup;
 
 // -------- Meiosis One
 
-export type MergerinoMeiosisOneApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
+export type MergerinoMeiosisOneApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
 
-export type MergerinoMeiosisOneActionConstructor<S, A> = MeiosisOneActionConstructor<
-  S,
-  MergerinoPatch<S>,
-  A
->;
+export type MergerinoMeiosisOneContext<S> = MeiosisOneContext<S, MergerinoPatch<S>>;
 
-export type MergerinoMeiosisOneContext<S, A> = MeiosisOneContext<S, MergerinoPatch<S>, A>;
-
-export type MergerinoNest<S, K extends keyof S, A> = Nest<
+export type MergerinoNest<S, K extends keyof S> = Nest<
   S,
   MergerinoPatch<S>,
   K,
-  MergerinoPatch<S[K]>,
-  A
+  MergerinoPatch<S[K]>
 >;
 
-export function nest<S, K extends keyof S, A>(
-  context: MeiosisOneBase<S, MergerinoPatch<S>>,
-  prop: K,
-  Actions?: MeiosisOneActionConstructor<S[K], MergerinoPatch<S[K]>, A>
-): MeiosisOneContext<S[K], MergerinoPatch<S[K]>, A>;
+export function nest<S, K extends keyof S>(
+  context: MeiosisOneContext<S, MergerinoPatch<S>>,
+  prop: K
+): MeiosisOneContext<S[K], MergerinoPatch<S[K]>>;
 
 /**
  * Mergerino Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface MergerinoMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
+export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
   /**
    * The Mergerino `merge` function.
    */
@@ -93,7 +83,7 @@ export interface MergerinoMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MergerinoMeiosisOneApp<S, A>;
+  app: MergerinoMeiosisOneApp<S>;
 }
 
 /**
@@ -106,6 +96,4 @@ export interface MergerinoMeiosisOneConfig<S, A> extends MeiosisOneConfigBase {
  *
  * @returns {MergerinoMeiosisOne<S>} Mergerino Meiosis One.
  */
-export function meiosisOne<S, A>(
-  config: MergerinoMeiosisOneConfig<S, A>
-): MergerinoMeiosisOneContext<S, A>;
+export function meiosisOne<S>(config: MergerinoMeiosisOneConfig<S>): MergerinoMeiosisOneContext<S>;

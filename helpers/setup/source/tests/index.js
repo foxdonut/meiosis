@@ -1311,16 +1311,16 @@ describe("Meiosis One", () => {
   )("%s", (_label, setupFn, nest, patch1, patch2) => {
     const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
 
-    const Actions = context => ({
-      action1: () => context.update(patch1),
-      action2: () => context.update(patch2)
-    });
+    const actions = {
+      action1: context => context.update(patch1),
+      action2: context => context.update(patch2)
+    };
 
     const nested = nest(context, "fowl");
-    const deepNested = nest(nested, "feathers", Actions);
+    const deepNested = nest(nested, "feathers");
 
-    deepNested.actions.action1();
-    deepNested.actions.action2();
+    actions.action1(deepNested);
+    actions.action2(deepNested);
 
     expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
     expect(context.getState()).toEqual({

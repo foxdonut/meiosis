@@ -44,9 +44,8 @@ const nestPatch = (patch, prop) => ({ [prop]: patch });
 /**
  * @template S
  * @template {keyof S} K
- * @template A
  *
- * @type {import("./index").MergerinoNest<S, K, A>}
+ * @type {import("./index").MergerinoNest<S, K>}
  */
 export const nest = createNest(nestPatch);
 

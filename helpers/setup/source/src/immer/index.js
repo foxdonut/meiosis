@@ -29,9 +29,8 @@ const nestPatch = produce => (patch, prop) => state => {
 /**
  * @template S
  * @template {keyof S} K
- * @template A
  *
- * @type {import("./index").ProduceNest<S, K, A>}
+ * @type {import("./index").ProduceNest<S, K>}
  */
 export const nest = produce => createNest(nestPatch(produce));
 
