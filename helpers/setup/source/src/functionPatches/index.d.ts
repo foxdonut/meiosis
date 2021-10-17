@@ -56,9 +56,9 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
-export type FunctionPatchesMeiosisOneApp<S> = MeiosisOneApp<S, FunctionPatch<S>>;
+export type FunctionPatchesApp<S> = MeiosisOneApp<S, FunctionPatch<S>>;
 
-export type FunctionPatchesMeiosisOneContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
+export type FunctionPatchesContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
 
 export type FunctionPatchesNest<S, K extends keyof S> = Nest<
   S,
@@ -68,20 +68,20 @@ export type FunctionPatchesNest<S, K extends keyof S> = Nest<
 >;
 
 export function nest<S, K extends keyof S>(
-  context: MeiosisOneContext<S, FunctionPatch<S>>,
+  context: FunctionPatchesContext<S>,
   prop: K
-): MeiosisOneContext<S[K], FunctionPatch<S[K]>>;
+): FunctionPatchesContext<S[K]>;
 
 /**
  * Function Patches Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface FunctionPatchesMeiosisOneConfig<S> extends MeiosisOneConfigBase {
+export interface FunctionPatchesConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: FunctionPatchesMeiosisOneApp<S>;
+  app: FunctionPatchesApp<S>;
 }
 
 /**
@@ -89,11 +89,9 @@ export interface FunctionPatchesMeiosisOneConfig<S> extends MeiosisOneConfigBase
  *
  * @template S the State type.
  *
- * @param {FunctionPatchesMeiosisConfig<S>} config the Meiosis One config for use with Function
+ * @param {FunctionPatchesConfig<S>} config the Meiosis One config for use with Function
  * Patches
  *
  * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
  */
-export function meiosisOne<S>(
-  config: FunctionPatchesMeiosisOneConfig<S>
-): FunctionPatchesMeiosisOneContext<S>;
+export function meiosisOne<S>(config: FunctionPatchesConfig<S>): FunctionPatchesContext<S>;

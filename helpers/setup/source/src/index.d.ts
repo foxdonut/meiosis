@@ -40,17 +40,12 @@ declare namespace meiosisSetup {
 export * from "./common";
 export {
   FunctionPatch,
-  FunctionPatchesMeiosisConfig,
-  FunctionPatchesMeiosisOneApp,
-  FunctionPatchesMeiosisOneConfig,
-  FunctionPatchesMeiosisOneContext
+  FunctionPatchesApp,
+  FunctionPatchesConfig,
+  FunctionPatchesContext,
+  FunctionPatchesMeiosisConfig
 } from "./functionPatches";
-export { ImmerMeiosisConfig, ImmerMeiosisOneApp, ImmerMeiosisOneConfig, ImmerPatch } from "./immer";
-export {
-  MergerinoMeiosisConfig,
-  MergerinoMeiosisOneApp,
-  MergerinoMeiosisOneConfig,
-  MergerinoPatch
-} from "./mergerino";
+export { ImmerApp, ImmerConfig, ImmerMeiosisConfig, ImmerPatch } from "./immer";
+export { MergerinoMeiosisConfig, MergerinoApp, MergerinoConfig, MergerinoPatch } from "./mergerino";
 
 export default meiosisSetup;

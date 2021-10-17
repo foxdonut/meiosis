@@ -53,9 +53,9 @@ export default mergerinoSetup;
 
 // -------- Meiosis One
 
-export type MergerinoMeiosisOneApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
+export type MergerinoApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
 
-export type MergerinoMeiosisOneContext<S> = MeiosisOneContext<S, MergerinoPatch<S>>;
+export type MergerinoContext<S> = MeiosisOneContext<S, MergerinoPatch<S>>;
 
 export type MergerinoNest<S, K extends keyof S> = Nest<
   S,
@@ -65,16 +65,16 @@ export type MergerinoNest<S, K extends keyof S> = Nest<
 >;
 
 export function nest<S, K extends keyof S>(
-  context: MeiosisOneContext<S, MergerinoPatch<S>>,
+  context: MergerinoContext<S>,
   prop: K
-): MeiosisOneContext<S[K], MergerinoPatch<S[K]>>;
+): MergerinoContext<S[K]>;
 
 /**
  * Mergerino Meiosis One configuration.
  *
  * @template S the State type.
  */
-export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
+export interface MergerinoConfig<S> extends MeiosisOneConfigBase {
   /**
    * The Mergerino `merge` function.
    */
@@ -83,7 +83,7 @@ export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MergerinoMeiosisOneApp<S>;
+  app: MergerinoApp<S>;
 }
 
 /**
@@ -92,8 +92,8 @@ export interface MergerinoMeiosisOneConfig<S> extends MeiosisOneConfigBase {
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MergerinoMeiosisConfig<S>} config the Meiosis One config for use with Mergerino
+ * @param {MergerinoConfig<S>} config the Meiosis One config for use with Mergerino
  *
- * @returns {MergerinoMeiosisOne<S>} Mergerino Meiosis One.
+ * @returns {MergerinoContext<S>} Mergerino Meiosis One.
  */
-export function meiosisOne<S>(config: MergerinoMeiosisOneConfig<S>): MergerinoMeiosisOneContext<S>;
+export function meiosisOne<S>(config: MergerinoConfig<S>): MergerinoContext<S>;

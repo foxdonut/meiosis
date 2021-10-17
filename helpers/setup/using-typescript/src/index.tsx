@@ -1,8 +1,8 @@
 import meiosis, {
-  FunctionPatchesMeiosisOneApp,
-  FunctionPatchesMeiosisOneContext
+  FunctionPatchesApp,
+  FunctionPatchesContext
   // ImmerPatch,
-  // MergerinoMeiosisOneApp,
+  // MergerinoApp,
   // MergerinoPatch,
   // Stream
 } from "../../source/dist";
@@ -35,11 +35,8 @@ interface Conditions {
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (
-    context: FunctionPatchesMeiosisOneContext<Conditions>,
-    value: boolean
-  ) => void;
-  changeSky: (context: FunctionPatchesMeiosisOneContext<Conditions>, value: Sky) => void;
+  togglePrecipitations: (context: FunctionPatchesContext<Conditions>, value: boolean) => void;
+  changeSky: (context: FunctionPatchesContext<Conditions>, value: Sky) => void;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -51,8 +48,8 @@ interface Temperature {
 }
 
 interface TemperatureActions {
-  increment: (context: FunctionPatchesMeiosisOneContext<Temperature>, amount: number) => void;
-  changeUnits: (context: FunctionPatchesMeiosisOneContext<Temperature>) => void;
+  increment: (context: FunctionPatchesContext<Temperature>, amount: number) => void;
+  changeUnits: (context: FunctionPatchesContext<Temperature>) => void;
 }
 
 interface TemperatureComponent {
@@ -91,7 +88,7 @@ const InitialTemperature = (label: string): Temperature => ({
   const nest = meiosis.functionPatches.nest;
 
   interface SkyOptionAttrs {
-    context: FunctionPatchesMeiosisOneContext<Conditions>;
+    context: FunctionPatchesContext<Conditions>;
     value: string;
     label: string;
   }
@@ -122,7 +119,7 @@ const InitialTemperature = (label: string): Temperature => ({
   `;
 
   const Conditions: (
-    context: FunctionPatchesMeiosisOneContext<Conditions>
+    context: FunctionPatchesContext<Conditions>
   ) => TemplateResult = context => html`
     <div>
       <label>
@@ -160,7 +157,7 @@ const InitialTemperature = (label: string): Temperature => ({
   };
 
   const Temperature: (
-    context: FunctionPatchesMeiosisOneContext<Temperature>
+    context: FunctionPatchesContext<Temperature>
   ) => TemplateResult = context => html`
     <div>
       ${context.getState().label} Temperature:
@@ -175,7 +172,7 @@ const InitialTemperature = (label: string): Temperature => ({
     </div>
   `;
 
-  const app: FunctionPatchesMeiosisOneApp<State> = {
+  const app: FunctionPatchesApp<State> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
@@ -185,7 +182,7 @@ const InitialTemperature = (label: string): Temperature => ({
     }
   };
 
-  const App: (context: FunctionPatchesMeiosisOneContext<State>) => TemplateResult = context => {
+  const App: (context: FunctionPatchesContext<State>) => TemplateResult = context => {
     return html`
       <div style="display: grid; grid-template-columns: 1fr 1fr">
         <div>
