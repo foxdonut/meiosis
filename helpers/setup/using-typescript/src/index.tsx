@@ -1,17 +1,16 @@
 import meiosis, {
   FunctionPatchesApp,
-  FunctionPatchesContext
+  FunctionPatchesContext,
   // ImmerPatch,
-  // MergerinoApp,
-  // MergerinoPatch,
-  // Stream
+  MergerinoApp,
+  MergerinoContext
 } from "../../source/dist";
 // import flyd from "flyd";
-// import merge from "mergerino";
+import merge from "mergerino";
 // import produce from "immer";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
-// import m from "mithril";
-// import MStream from "mithril/stream";
+import m from "mithril";
+import MStream from "mithril/stream";
 // import { h, render as preactRender, VNode } from "preact";
 // import { useState } from "preact/hooks";
 // import React from "react";
@@ -34,9 +33,9 @@ interface Conditions {
   sky: Sky;
 }
 
-interface ConditionsActions {
-  togglePrecipitations: (context: FunctionPatchesContext<Conditions>, value: boolean) => void;
-  changeSky: (context: FunctionPatchesContext<Conditions>, value: Sky) => void;
+interface ConditionsActions<T> {
+  togglePrecipitations: (context: T, value: boolean) => void;
+  changeSky: (context: T, value: Sky) => void;
 }
 
 type TemperatureUnits = "C" | "F";
@@ -47,9 +46,9 @@ interface Temperature {
   units: TemperatureUnits;
 }
 
-interface TemperatureActions {
-  increment: (context: FunctionPatchesContext<Temperature>, amount: number) => void;
-  changeUnits: (context: FunctionPatchesContext<Temperature>) => void;
+interface TemperatureActions<T> {
+  increment: (context: T, amount: number) => void;
+  changeUnits: (context: T) => void;
 }
 
 interface TemperatureComponent {
@@ -93,17 +92,17 @@ const InitialTemperature = (label: string): Temperature => ({
     label: string;
   }
 
-  const conditionsActions: ConditionsActions = {
+  const conditions: ConditionsComponent = {
+    initial: initialConditions
+  };
+
+  const conditionsActions: ConditionsActions<FunctionPatchesContext<Conditions>> = {
     togglePrecipitations: (context, value) => {
       context.update(state => ({ ...state, precipitations: value }));
     },
     changeSky: (context, value) => {
       context.update(state => ({ ...state, sky: value }));
     }
-  };
-
-  const conditions: ConditionsComponent = {
-    initial: initialConditions
   };
 
   const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ context, value, label }) => html`
@@ -142,7 +141,7 @@ const InitialTemperature = (label: string): Temperature => ({
     Initial: InitialTemperature
   };
 
-  const temperatureActions: TemperatureActions = {
+  const temperatureActions: TemperatureActions<FunctionPatchesContext<Temperature>> = {
     increment: (context, amount) => {
       context.update(state => ({ ...state, value: state.value + amount }));
     },
@@ -205,157 +204,138 @@ const InitialTemperature = (label: string): Temperature => ({
 })();
 
 // mithril + mergerino + mithril-stream
-/*
 (() => {
-  type Patch = MergerinoPatch<State>;
-  type Update = Stream<Patch>;
-  type ConditionsLocal = Local<State, Conditions>;
-  type TemperatureLocal = Local<State, Temperature>;
-
   interface Attrs {
-    state: State;
-    actions: Actions;
+    context: MergerinoContext<State>;
   }
 
-  interface SkyOptionAttrs extends Attrs {
-    local: ConditionsLocal;
+  interface ConditionsAttrs {
+    context: MergerinoContext<Conditions>;
+  }
+
+  interface SkyOptionAttrs extends ConditionsAttrs {
+    context: MergerinoContext<Conditions>;
     value: string;
     label: string;
   }
 
-  interface ConditionsAttrs extends Attrs {
-    local: ConditionsLocal;
-  }
-
-  interface TemperatureAttrs extends Attrs {
-    local: TemperatureLocal;
+  interface TemperatureAttrs {
+    context: MergerinoContext<Temperature>;
   }
 
   const nest = meiosis.mergerino.nest;
 
-  const conditions: ConditionsComponent<Patch> = {
-    initial: initialConditions,
-    Actions: (update: Update) => ({
-      togglePrecipitations: (local, value) => {
-        update(local.patch({ precipitations: value }));
-      },
-      changeSky: (local, value) => {
-        update(local.patch({ sky: value }));
-      }
-    })
+  const conditions: ConditionsComponent = {
+    initial: initialConditions
+  };
+
+  const conditionsActions: ConditionsActions<MergerinoContext<Conditions>> = {
+    togglePrecipitations: (context, value) => {
+      context.update({ precipitations: value });
+    },
+    changeSky: (context, value) => {
+      context.update({ sky: value });
+    }
   };
 
   const SkyOption: m.Component<SkyOptionAttrs> = {
-    view: ({ attrs: { state, local, actions, value, label } }) =>
+    view: ({ attrs: { context, value, label } }) =>
       m(
         "label",
         m("input", {
           type: "radio",
           value,
-          checked: local.get(state).sky === value,
+          checked: context.getState().sky === value,
           // FIXME: evt type
-          onchange: evt => actions.conditions.changeSky(local, evt.target.value)
+          onchange: evt => conditionsActions.changeSky(context, evt.target.value)
         }),
         label
       )
   };
 
   const Conditions: m.Component<ConditionsAttrs> = {
-    view: ({ attrs: { state, local, actions } }) =>
+    view: ({ attrs: { context } }) =>
       m(
         "div",
         m(
           "label",
           m("input", {
             type: "checkbox",
-            checked: local.get(state).precipitations,
-            onchange: evt => actions.conditions.togglePrecipitations(local, evt.target.checked)
+            checked: context.getState().precipitations,
+            onchange: evt => conditionsActions.togglePrecipitations(context, evt.target.checked)
           }),
           "Precipitations"
         ),
         m(
           "div",
-          m(SkyOption, { state, local, actions, value: "SUNNY", label: "Sunny" }),
-          m(SkyOption, { state, local, actions, value: "CLOUDY", label: "Cloudy" }),
-          m(SkyOption, { state, local, actions, value: "MIX", label: "Mix of sun/clouds" })
+          m(SkyOption, { context, value: "SUNNY", label: "Sunny" }),
+          m(SkyOption, { context, value: "CLOUDY", label: "Cloudy" }),
+          m(SkyOption, { context, value: "MIX", label: "Mix of sun/clouds" })
         )
       )
   };
 
-  const temperature: TemperatureComponent<Patch> = {
-    Initial: InitialTemperature,
-    Actions: update => ({
-      increment: (local, amount) => {
-        update(local.patch({ value: x => x + amount }));
-      },
-      changeUnits: local => {
-        update(
-          local.patch(state => {
-            const value = state.value;
-            const newUnits = state.units === "C" ? "F" : "C";
-            const newValue = convert(value, newUnits);
-            return { ...state, value: newValue, units: newUnits };
-          })
-        );
-      }
-    })
+  const temperature: TemperatureComponent = {
+    Initial: InitialTemperature
+  };
+
+  const temperatureActions: TemperatureActions<MergerinoContext<Temperature>> = {
+    increment: (context, amount) => {
+      context.update({ value: x => x + amount });
+    },
+    changeUnits: context => {
+      context.update(state => {
+        const value = state.value;
+        const newUnits = state.units === "C" ? "F" : "C";
+        const newValue = convert(value, newUnits);
+        return { ...state, value: newValue, units: newUnits };
+      });
+    }
   };
 
   const Temperature: m.Component<TemperatureAttrs> = {
-    view: ({ attrs: { state, local, actions } }) =>
+    view: ({ attrs: { context } }) =>
       m(
         "div",
-        local.get(state).label,
+        context.getState().label,
         " Temperature: ",
-        local.get(state).value,
+        context.getState().value,
         m.trust("&deg;"),
-        local.get(state).units,
+        context.getState().units,
         m(
           "div",
-          m("button", { onclick: () => actions.temperature.increment(local, 1) }, "Increment"),
-          m("button", { onclick: () => actions.temperature.increment(local, -1) }, "Decrement")
+          m("button", { onclick: () => temperatureActions.increment(context, 1) }, "Increment"),
+          m("button", { onclick: () => temperatureActions.increment(context, -1) }, "Decrement")
         ),
         m(
           "div",
-          m("button", { onclick: () => actions.temperature.changeUnits(local) }, "Change Units")
+          m("button", { onclick: () => temperatureActions.changeUnits(context) }, "Change Units")
         )
       )
   };
 
-  const app: App<State, Patch, Actions> = {
+  const app: MergerinoApp<State> = {
     initial: {
       conditions: conditions.initial,
       temperature: {
         air: temperature.Initial("Air"),
         water: temperature.Initial("Water")
       }
-    },
-    Actions: update => ({
-      conditions: conditions.Actions(update),
-      temperature: temperature.Actions(update)
-    })
+    }
   };
 
   const App: m.Component<Attrs> = {
-    view: ({ attrs: { state, actions } }) =>
+    view: ({ attrs: { context } }) =>
       m(
         "div",
         { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
         m(
           "div",
-          m(Conditions, { state, local: nest("conditions") as ConditionsLocal, actions }),
-          m(Temperature, {
-            state,
-            local: nest(["temperature", "air"]) as TemperatureLocal,
-            actions
-          }),
-          m(Temperature, {
-            state,
-            local: nest(["temperature", "water"]) as TemperatureLocal,
-            actions
-          })
+          m(Conditions, { context: nest(context, "conditions") }),
+          m(Temperature, { context: nest(nest(context, "temperature"), "air") }),
+          m(Temperature, { context: nest(nest(context, "temperature"), "water") })
         ),
-        m("pre", { style: { margin: "0" } }, JSON.stringify(state, null, 4))
+        m("pre", { style: { margin: "0" } }, JSON.stringify(context.getState(), null, 4))
       )
   };
 
@@ -364,15 +344,16 @@ const InitialTemperature = (label: string): Temperature => ({
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const { states, actions } = meiosis.mergerino.setup<State, Actions>({ stream, merge, app });
+  const context = meiosis.mergerino.meiosisOne<State>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
-    view: () => m(App, { state: states(), actions })
+    view: () => m(App, { context })
   });
 
-  states.map(() => m.redraw());
+  context.getState.map(() => m.redraw());
 })();
 
+/*
 // preact + mergerino + simple-stream
 (() => {
   type Patch = MergerinoPatch<State>;

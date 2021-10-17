@@ -45,7 +45,13 @@ export {
   FunctionPatchesContext,
   FunctionPatchesMeiosisConfig
 } from "./functionPatches";
-export { ImmerApp, ImmerConfig, ImmerMeiosisConfig, ImmerPatch } from "./immer";
-export { MergerinoMeiosisConfig, MergerinoApp, MergerinoConfig, MergerinoPatch } from "./mergerino";
+export { ImmerApp, ImmerConfig, ImmerContext, ImmerMeiosisConfig, ImmerPatch } from "./immer";
+export {
+  MergerinoMeiosisConfig,
+  MergerinoApp,
+  MergerinoConfig,
+  MergerinoContext,
+  MergerinoPatch
+} from "./mergerino";
 
 export default meiosisSetup;
