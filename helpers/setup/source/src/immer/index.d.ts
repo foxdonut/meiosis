@@ -48,7 +48,9 @@ export type ProduceNestPatch = (produce: Produce<any>) => NestPatch;
 export type ImmerNest<S, K extends keyof S> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>>;
 export type ProduceNest<S, K extends keyof S> = (produce: Produce<any>) => ImmerNest<S, K>;
 
-export function nest<S, K extends keyof S>(context: ImmerContext<S>, prop: K): ImmerContext<S[K]>;
+export function nestFn<S, K extends keyof S>(context: ImmerContext<S>, prop: K): ImmerContext<S[K]>;
+
+export function nest<S>(produce: Produce<S>): typeof nestFn;
 
 /**
  * Immer Meiosis One configuration.
