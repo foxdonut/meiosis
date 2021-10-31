@@ -1,4 +1,4 @@
-import { Stream } from "../common";
+// import { Stream } from "../common";
 
 /**
  * Parameters for Preact setup.
@@ -86,8 +86,10 @@ export interface PreactSetup<R, V> {
  * render(<App states="states" actions="actions"/>, element);
  * ```
  */
-export function preactSetup<S, R, V>(
+// export function preactSetup<S, R, V>(
+export function preactSetup<R, V>(
   setup: PreactSetup<R, V>
-): (props: { states: Stream<S>; [k: string]: any }) => V;
+  // ): (props: { states: Stream<S>; [k: string]: any }) => V;
+): (props: { states: any; [k: string]: any }) => V;
 
 export default preactSetup;

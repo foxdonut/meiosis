@@ -4,6 +4,7 @@ import {
   MeiosisOneApp,
   MeiosisOneConfigBase,
   MeiosisOneContext,
+  MeiosisOneRootContext,
   Nest,
   NestPatch
 } from "../common";
@@ -40,9 +41,10 @@ export default immerSetup;
 
 // -------- Meiosis One
 
-export type ImmerApp<S> = MeiosisOneApp<S, ImmerPatch<S>>;
+export type ImmerApp<S, A> = MeiosisOneApp<S, ImmerPatch<S>, A>;
 
 export type ImmerContext<S> = MeiosisOneContext<S, ImmerPatch<S>>;
+export type ImmerRootContext<S, A> = MeiosisOneRootContext<S, ImmerPatch<S>, A>;
 
 export type ProduceNestPatch = (produce: Produce<any>) => NestPatch;
 export type ImmerNest<S, K extends keyof S> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>>;
@@ -57,7 +59,7 @@ export function nest<S>(produce: Produce<S>): typeof nestFn;
  *
  * @template S the State type.
  */
-export interface ImmerConfig<S> extends MeiosisOneConfigBase {
+export interface ImmerConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * the Immer `produce` function.
    */
@@ -66,7 +68,7 @@ export interface ImmerConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: ImmerApp<S>;
+  app: ImmerApp<S, A>;
 }
 
 /**
@@ -78,4 +80,4 @@ export interface ImmerConfig<S> extends MeiosisOneConfigBase {
  *
  * @returns {ImmerContext<S>} Immer Meiosis One.
  */
-export function meiosisOne<S>(config: ImmerConfig<S>): ImmerContext<S>;
+export function meiosisOne<S, A>(config: ImmerConfig<S, A>): ImmerRootContext<S, A>;

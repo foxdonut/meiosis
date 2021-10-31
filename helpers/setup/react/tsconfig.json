@@ -1,0 +1,10 @@
+{
+  "include": ["src/**/*"],
+
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "outDir": "generated-d-ts"
+  }
+}

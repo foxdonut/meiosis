@@ -4,6 +4,7 @@ import {
   MeiosisOneApp,
   MeiosisOneConfigBase,
   MeiosisOneContext,
+  MeiosisOneRootContext,
   Nest
 } from "../common";
 
@@ -56,9 +57,11 @@ export default functionPatchesSetup;
 
 // -------- Meiosis One
 
-export type FunctionPatchesApp<S> = MeiosisOneApp<S, FunctionPatch<S>>;
+export type FunctionPatchesApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
+
+export type FunctionPatchesRootContext<S, A> = MeiosisOneRootContext<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesNest<S, K extends keyof S> = Nest<
   S,
@@ -77,11 +80,11 @@ export function nest<S, K extends keyof S>(
  *
  * @template S the State type.
  */
-export interface FunctionPatchesConfig<S> extends MeiosisOneConfigBase {
+export interface FunctionPatchesConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: FunctionPatchesApp<S>;
+  app: FunctionPatchesApp<S, A>;
 }
 
 /**
@@ -94,4 +97,6 @@ export interface FunctionPatchesConfig<S> extends MeiosisOneConfigBase {
  *
  * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
  */
-export function meiosisOne<S>(config: FunctionPatchesConfig<S>): FunctionPatchesContext<S>;
+export function meiosisOne<S, A>(
+  config: FunctionPatchesConfig<S, A>
+): FunctionPatchesRootContext<S, A>;

@@ -322,15 +322,19 @@ export default setup;
  */
 export type NestPatch = (patch: any, prop: any) => any;
 
+export interface MeiosisOneContext<S, P> {
+  getState: Stream<S>;
+  update: (patch: P) => P;
+}
+
 /**
  * Returned by Meiosis One setup.
  *
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneContext<S, P> {
-  getState: Stream<S>;
-  update: (patch: P) => P;
+export interface MeiosisOneRootContext<S, P, A> extends MeiosisOneContext<S, P> {
+  actions: A;
 }
 
 export type Nest<S, P, K extends keyof S, N> = (
@@ -341,6 +345,8 @@ export type Nest<S, P, K extends keyof S, N> = (
 export function createNest<S, K extends keyof S>(
   nestPatch: NestPatch
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
+
+export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S, P>) => A;
 
 /**
  * An effects constructor.
@@ -354,7 +360,7 @@ export function createNest<S, K extends keyof S>(
  */
 export type MeiosisOneEffectConstructor<S, P> = (context: MeiosisOneContext<S, P>) => Effect<S>[];
 
-export interface MeiosisOneApp<S, P> {
+export interface MeiosisOneApp<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -364,6 +370,11 @@ export interface MeiosisOneApp<S, P> {
    * An array of service functions.
    */
   services?: Service<S, P>[];
+
+  /**
+   * A function that creates the application's actions.
+   */
+  Actions?: MeiosisOneActionConstructor<S, P, A>;
 
   /**
    * A function that creates the application's effects.
@@ -387,7 +398,7 @@ export interface MeiosisOneConfigBase {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
+export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
   /*
    * The accumulator function.
    */
@@ -402,7 +413,7 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MeiosisOneApp<S, P>;
+  app: MeiosisOneApp<S, P, A>;
 }
 
 /**
@@ -415,6 +426,8 @@ export interface MeiosisOneConfig<S, P> extends MeiosisOneConfigBase {
  *
  * @param {MeiosisOneConfig<S, P>} config the Meiosis One config.
  *
- * @returns {MeiosisOne<S, P>} the Meiosis One setup.
+ * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
  */
-export function meiosisOne<S, P>(config: MeiosisOneConfig<S, P>): MeiosisOneContext<S, P>;
+export function meiosisOne<S, P, A>(
+  config: MeiosisOneConfig<S, P, A>
+): MeiosisOneRootContext<S, P, A>;

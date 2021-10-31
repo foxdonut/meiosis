@@ -69,13 +69,18 @@ export const createNest = nestPatch => (context, prop) => {
 
 /** @type {import("./index").meiosisOne} */
 export const meiosisOne = ({ stream, accumulator, combine, app }) => {
-  const { states, update, actions } = baseSetup({ stream, accumulator, combine, app });
+  const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
   const root = {
     getState: states,
-    update,
-    actions
+    update
   };
 
-  return root;
+  const actions = app && app.Actions ? app.Actions(root) : undefined;
+
+  return {
+    getState: root.getState,
+    update: root.update,
+    actions
+  };
 };

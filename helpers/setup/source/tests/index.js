@@ -1292,11 +1292,17 @@ describe("Meiosis One", () => {
 
   test.each(
     createTestCases("actions", [
-      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [
+        meiosis.mergerino.nest,
+        { duck: { sound: "quack" } },
+        { duck: { color: "yellow" } },
+        { done: true }
+      ],
       [
         meiosis.functionPatches.nest,
         () => ({ duck: { sound: "quack" } }),
-        R.assocPath(["duck", "color"], "yellow")
+        R.assocPath(["duck", "color"], "yellow"),
+        R.assoc("done", true)
       ],
       [
         meiosis.immer.nest(produce),
@@ -1305,11 +1311,19 @@ describe("Meiosis One", () => {
         },
         state => {
           state.duck.color = "yellow";
+        },
+        state => {
+          state.done = true;
         }
       ]
     ])
-  )("%s", (_label, setupFn, nest, patch1, patch2) => {
-    const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+  )("%s", (_label, setupFn, nest, patch1, patch2, patch3) => {
+    const context = setupFn({
+      initial: { fowl: { feathers: { duck: {} } } },
+      Actions: context => ({
+        done: () => context.update(patch3)
+      })
+    });
 
     const actions = {
       action1: context => context.update(patch1),
@@ -1321,9 +1335,11 @@ describe("Meiosis One", () => {
 
     actions.action1(deepNested);
     actions.action2(deepNested);
+    context.actions.done();
 
     expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
     expect(context.getState()).toEqual({
+      done: true,
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });
   });

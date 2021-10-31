@@ -6,6 +6,8 @@ import meiosis, {
   MergerinoApp,
   MergerinoContext
 } from "../../source/dist";
+import meiosisReact from "../../react/dist";
+import meiosisPreact from "../../preact/dist";
 import flyd from "flyd";
 import merge from "mergerino";
 import produce from "immer";
@@ -182,18 +184,16 @@ const InitialTemperature = (label: string): Temperature => ({
     }
   };
 
-  const App: (context: FunctionPatchesContext<State>) => TemplateResult = context => {
-    return html`
-      <div style="display: grid; grid-template-columns: 1fr 1fr">
-        <div>
-          ${Conditions(nest(context, "conditions"))}
-          ${Temperature(nest(nest(context, "temperature"), "air"))}
-          ${Temperature(nest(nest(context, "temperature"), "water"))}
-        </div>
-        <pre style="margin: 0">${JSON.stringify(context.getState(), null, 4)}</pre>
+  const App: (context: FunctionPatchesContext<State>) => TemplateResult = context => html`
+    <div style="display: grid; grid-template-columns: 1fr 1fr">
+      <div>
+        ${Conditions(nest(context, "conditions"))}
+        ${Temperature(nest(nest(context, "temperature"), "air"))}
+        ${Temperature(nest(nest(context, "temperature"), "water"))}
       </div>
-    `;
-  };
+      <pre style="margin: 0">${JSON.stringify(context.getState(), null, 4)}</pre>
+    </div>
+  `;
 
   const context = meiosis.functionPatches.meiosisOne<State>({
     stream: meiosis.simpleStream,
@@ -489,7 +489,8 @@ const InitialTemperature = (label: string): Temperature => ({
       h("pre", { style: { margin: "0" } }, JSON.stringify(context.getState(), null, 4))
     );
 
-  const App = meiosis.preact.setup<State, Attrs, VNode>({ h, useState, Root });
+  // const App = meiosisPreact<State, Attrs, VNode>({ h, useState, Root });
+  const App = meiosisPreact<Attrs, VNode>({ h, useState, Root });
 
   const context = meiosis.mergerino.meiosisOne<State>({
     stream: meiosis.simpleStream,
@@ -505,7 +506,7 @@ const InitialTemperature = (label: string): Temperature => ({
   context.update({ temperature: { air: { value: () => 21 } } });
 
   const element = document.getElementById("preactApp") as HTMLElement;
-  preactRender(h(App, { context }), element);
+  preactRender(h(App, { states: context.getState, context }), element);
 })();
 
 // react + immer + flyd
@@ -643,8 +644,9 @@ const InitialTemperature = (label: string): Temperature => ({
     app
   });
 
-  const App = meiosis.react.setup<State, Attrs, ReactElement>({ React, Root });
+  // const App = meiosisReact<State, Attrs, ReactElement>({ React, Root });
+  const App = meiosisReact<Attrs, ReactElement>({ React, Root });
 
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(App, { context }), element);
+  ReactDOM.render(React.createElement(App, { states: context.getState, context }), element);
 })();

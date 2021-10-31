@@ -4,6 +4,7 @@ import {
   MeiosisOneApp,
   MeiosisOneConfigBase,
   MeiosisOneContext,
+  MeiosisOneRootContext,
   Nest
 } from "../common";
 
@@ -53,9 +54,10 @@ export default mergerinoSetup;
 
 // -------- Meiosis One
 
-export type MergerinoApp<S> = MeiosisOneApp<S, MergerinoPatch<S>>;
+export type MergerinoApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
 
 export type MergerinoContext<S> = MeiosisOneContext<S, MergerinoPatch<S>>;
+export type MergerinoRootContext<S, A> = MeiosisOneRootContext<S, MergerinoPatch<S>, A>;
 
 export type MergerinoNest<S, K extends keyof S> = Nest<
   S,
@@ -74,7 +76,7 @@ export function nest<S, K extends keyof S>(
  *
  * @template S the State type.
  */
-export interface MergerinoConfig<S> extends MeiosisOneConfigBase {
+export interface MergerinoConfig<S, A> extends MeiosisOneConfigBase {
   /**
    * The Mergerino `merge` function.
    */
@@ -83,7 +85,7 @@ export interface MergerinoConfig<S> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MergerinoApp<S>;
+  app: MergerinoApp<S, A>;
 }
 
 /**
@@ -96,4 +98,4 @@ export interface MergerinoConfig<S> extends MeiosisOneConfigBase {
  *
  * @returns {MergerinoContext<S>} Mergerino Meiosis One.
  */
-export function meiosisOne<S>(config: MergerinoConfig<S>): MergerinoContext<S>;
+export function meiosisOne<S, A>(config: MergerinoConfig<S, A>): MergerinoRootContext<S, A>;
