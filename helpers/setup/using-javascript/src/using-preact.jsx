@@ -2,7 +2,7 @@
 
 import meiosis from "../../source/dist/index";
 import merge from "mergerino";
-import meiosisPreact from "../../preact/dist";
+import meiosisPreact from "meiosis-setup-preact";
 import { h, render as preactRender } from "preact";
 import { useState } from "preact/hooks";
 import { app, convert } from "./common";

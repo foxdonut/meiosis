@@ -60,7 +60,6 @@ export default functionPatchesSetup;
 export type FunctionPatchesApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
-
 export type FunctionPatchesRootContext<S, A> = MeiosisOneRootContext<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesNest<S, K extends keyof S> = Nest<

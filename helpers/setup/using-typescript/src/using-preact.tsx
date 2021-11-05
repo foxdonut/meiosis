@@ -1,5 +1,5 @@
 import meiosis, { MergerinoApp, MergerinoContext } from "../../source/dist";
-import meiosisPreact from "../../preact/dist";
+import meiosisPreact from "meiosis-setup-preact";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";

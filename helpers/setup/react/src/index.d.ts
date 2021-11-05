@@ -29,9 +29,7 @@ export interface ReactSetup<R> {
 /**
  * Helper to setup the Meiosis pattern with [React](https://reactjs.org/).
  *
- * @template S the State type.
  * @template R the Root properties.
- * @template V the View type returned by the Root component.
  *
  * @param {ReactSetup} setup the React setup, including `React` and `Root`.
  *

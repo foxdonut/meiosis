@@ -5,7 +5,7 @@ import flyd from "flyd";
 import produce from "immer";
 import React from "react";
 import ReactDOM from "react-dom";
-import meiosisReact from "../../react/dist";
+import meiosisReact from "meiosis-setup-react";
 import { app, convert } from "./common";
 
 // react + immer + flyd

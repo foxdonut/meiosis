@@ -1,5 +1,5 @@
 import meiosis, { ImmerApp, ImmerContext } from "../../source/dist";
-import meiosisReact from "../../react/dist";
+import meiosisReact from "meiosis-setup-react";
 import flyd from "flyd";
 import produce from "immer";
 import React from "react";
@@ -152,7 +152,7 @@ const context = meiosis.immer.meiosisOne<State, never>({
 });
 
 // const App = meiosisReact<State, Attrs, ReactElement>({ React, Root });
-const App = meiosisReact<Attrs, ReactElement>({ React, Root });
+const App = meiosisReact<Attrs>({ React, Root });
 
 export const setupReactExample = (): void => {
   const element = document.getElementById("reactApp");
