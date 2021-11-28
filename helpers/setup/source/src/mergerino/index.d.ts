@@ -1,10 +1,10 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisOneApp,
-  MeiosisOneConfigBase,
-  MeiosisOneContext,
-  MeiosisOneRootContext,
+  MeiosisCellApp,
+  MeiosisCellConfigBase,
+  MeiosisCell,
+  MeiosisRootCell,
   Nest
 } from "../common";
 
@@ -52,12 +52,12 @@ export function mergerinoSetup<S, A>(
 
 export default mergerinoSetup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
-export type MergerinoApp<S, A> = MeiosisOneApp<S, MergerinoPatch<S>, A>;
+export type MergerinoApp<S, A> = MeiosisCellApp<S, MergerinoPatch<S>, A>;
 
-export type MergerinoContext<S> = MeiosisOneContext<S, MergerinoPatch<S>>;
-export type MergerinoRootContext<S, A> = MeiosisOneRootContext<S, MergerinoPatch<S>, A>;
+export type MergerinoCell<S> = MeiosisCell<S, MergerinoPatch<S>>;
+export type MergerinoRootCell<S, A> = MeiosisRootCell<S, MergerinoPatch<S>, A>;
 
 export type MergerinoNest<S, K extends keyof S> = Nest<
   S,
@@ -66,17 +66,14 @@ export type MergerinoNest<S, K extends keyof S> = Nest<
   MergerinoPatch<S[K]>
 >;
 
-export function nest<S, K extends keyof S>(
-  context: MergerinoContext<S>,
-  prop: K
-): MergerinoContext<S[K]>;
+export function nest<S, K extends keyof S>(cell: MergerinoCell<S>, prop: K): MergerinoCell<S[K]>;
 
 /**
- * Mergerino Meiosis One configuration.
+ * Mergerino Meiosis Cell configuration.
  *
  * @template S the State type.
  */
-export interface MergerinoConfig<S, A> extends MeiosisOneConfigBase {
+export interface MergerinoConfig<S, A> extends MeiosisCellConfigBase {
   /**
    * The Mergerino `merge` function.
    */
@@ -89,13 +86,13 @@ export interface MergerinoConfig<S, A> extends MeiosisOneConfigBase {
 }
 
 /**
- * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
+ * Helper to setup Meiosis Cell with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MergerinoConfig<S>} config the Meiosis One config for use with Mergerino
+ * @param {MergerinoConfig<S>} config the Meiosis Cell config for use with Mergerino
  *
- * @returns {MergerinoContext<S>} Mergerino Meiosis One.
+ * @returns {MergerinoCell<S>} Mergerino Meiosis Cell.
  */
-export function meiosisOne<S, A>(config: MergerinoConfig<S, A>): MergerinoRootContext<S, A>;
+export function meiosisCell<S, A>(config: MergerinoConfig<S, A>): MergerinoRootCell<S, A>;

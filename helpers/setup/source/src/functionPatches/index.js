@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, meiosisOne as commonMeiosisOne } from "../common";
+import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../common";
 
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
@@ -10,7 +10,7 @@ const functionPatchesSetup = ({ stream, app }) =>
 
 export default functionPatchesSetup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
 /**
  * @template S
@@ -32,9 +32,9 @@ const nestPatch = (patch, prop) => state =>
  */
 export const nest = createNest(nestPatch);
 
-/** @type {import("./index").meiosisOne} */
-export const meiosisOne = ({ stream, app }) =>
-  commonMeiosisOne({
+/** @type {import("./index").meiosisCell} */
+export const meiosisCell = ({ stream, app }) =>
+  commonMeiosisCell({
     stream,
     accumulator: (x, f) => f(x),
     combine: pipe,

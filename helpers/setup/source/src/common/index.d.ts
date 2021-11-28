@@ -315,38 +315,38 @@ export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>
 
 export default setup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
 /**
  * Function that nests a patch at a given property.
  */
 export type NestPatch = (patch: any, prop: any) => any;
 
-export interface MeiosisOneContext<S, P> {
+export interface MeiosisCell<S, P> {
   getState: Stream<S>;
   update: (patch: P) => P;
 }
 
 /**
- * Returned by Meiosis One setup.
+ * Returned by Meiosis Cell setup.
  *
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneRootContext<S, P, A> extends MeiosisOneContext<S, P> {
+export interface MeiosisRootCell<S, P, A> extends MeiosisCell<S, P> {
   actions: A;
 }
 
 export type Nest<S, P, K extends keyof S, N> = (
-  context: MeiosisOneContext<S, P>,
+  cell: MeiosisCell<S, P>,
   prop: K
-) => MeiosisOneContext<S[K], N>;
+) => MeiosisCell<S[K], N>;
 
 export function createNest<S, K extends keyof S>(
   nestPatch: NestPatch
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
 
-export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S, P>) => A;
+export type MeiosisCellActionConstructor<S, P, A> = (cell: MeiosisCell<S, P>) => A;
 
 /**
  * An effects constructor.
@@ -354,13 +354,13 @@ export type MeiosisOneActionConstructor<S, P, A> = (context: MeiosisOneContext<S
  * @template S the State type.
  * @template P the Patch type.
  *
- * @param {MeiosisOneBase<S, P>} context the Meiosis One context.
+ * @param {MeiosisCell<S, P>} cell the Meiosis cell.
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisOneEffectConstructor<S, P> = (context: MeiosisOneContext<S, P>) => Effect<S>[];
+export type MeiosisCellEffectConstructor<S, P> = (cell: MeiosisCell<S, P>) => Effect<S>[];
 
-export interface MeiosisOneApp<S, P, A> {
+export interface MeiosisCellApp<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -374,15 +374,15 @@ export interface MeiosisOneApp<S, P, A> {
   /**
    * A function that creates the application's actions.
    */
-  Actions?: MeiosisOneActionConstructor<S, P, A>;
+  Actions?: MeiosisCellActionConstructor<S, P, A>;
 
   /**
    * A function that creates the application's effects.
    */
-  Effects?: MeiosisOneEffectConstructor<S, P>;
+  Effects?: MeiosisCellEffectConstructor<S, P>;
 }
 
-export interface MeiosisOneConfigBase {
+export interface MeiosisCellConfigBase {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -398,7 +398,7 @@ export interface MeiosisOneConfigBase {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
+export interface MeiosisCellConfig<S, P, A> extends MeiosisCellConfigBase {
   /*
    * The accumulator function.
    */
@@ -413,7 +413,7 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MeiosisOneApp<S, P, A>;
+  app: MeiosisCellApp<S, P, A>;
 }
 
 /**
@@ -424,10 +424,8 @@ export interface MeiosisOneConfig<S, P, A> extends MeiosisOneConfigBase {
  * @template P the Patch type.
  * @template A the Actions type.
  *
- * @param {MeiosisOneConfig<S, P>} config the Meiosis One config.
+ * @param {MeiosisCellConfig<S, P>} config the Meiosis Cell config.
  *
- * @returns {MeiosisOne<S, P, A>} the Meiosis One setup.
+ * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
  */
-export function meiosisOne<S, P, A>(
-  config: MeiosisOneConfig<S, P, A>
-): MeiosisOneRootContext<S, P, A>;
+export function meiosisCell<S, P, A>(config: MeiosisCellConfig<S, P, A>): MeiosisRootCell<S, P, A>;

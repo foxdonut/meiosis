@@ -1,10 +1,10 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisOneApp,
-  MeiosisOneConfigBase,
-  MeiosisOneContext,
-  MeiosisOneRootContext,
+  MeiosisCellApp,
+  MeiosisCellConfigBase,
+  MeiosisCell,
+  MeiosisRootCell,
   Nest
 } from "../common";
 
@@ -55,12 +55,12 @@ export function functionPatchesSetup<S, A>({
 
 export default functionPatchesSetup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
-export type FunctionPatchesApp<S, A> = MeiosisOneApp<S, FunctionPatch<S>, A>;
+export type FunctionPatchesApp<S, A> = MeiosisCellApp<S, FunctionPatch<S>, A>;
 
-export type FunctionPatchesContext<S> = MeiosisOneContext<S, FunctionPatch<S>>;
-export type FunctionPatchesRootContext<S, A> = MeiosisOneRootContext<S, FunctionPatch<S>, A>;
+export type FunctionPatchesCell<S> = MeiosisCell<S, FunctionPatch<S>>;
+export type FunctionPatchesRootCell<S, A> = MeiosisRootCell<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesNest<S, K extends keyof S> = Nest<
   S,
@@ -70,16 +70,16 @@ export type FunctionPatchesNest<S, K extends keyof S> = Nest<
 >;
 
 export function nest<S, K extends keyof S>(
-  context: FunctionPatchesContext<S>,
+  cell: FunctionPatchesCell<S>,
   prop: K
-): FunctionPatchesContext<S[K]>;
+): FunctionPatchesCell<S[K]>;
 
 /**
- * Function Patches Meiosis One configuration.
+ * Function Patches Meiosis Cell configuration.
  *
  * @template S the State type.
  */
-export interface FunctionPatchesConfig<S, A> extends MeiosisOneConfigBase {
+export interface FunctionPatchesConfig<S, A> extends MeiosisCellConfigBase {
   /**
    * The application object, with optional properties.
    */
@@ -87,15 +87,15 @@ export interface FunctionPatchesConfig<S, A> extends MeiosisOneConfigBase {
 }
 
 /**
- * Helper to setup Meiosis One with Function Patches.
+ * Helper to setup Meiosis Cell with Function Patches.
  *
  * @template S the State type.
  *
- * @param {FunctionPatchesConfig<S>} config the Meiosis One config for use with Function
+ * @param {FunctionPatchesConfig<S>} config the Meiosis Cell config for use with Function
  * Patches
  *
- * @returns {FunctionPatchesMeiosisOne<S>} Function Patches Meiosis One.
+ * @returns {FunctionPatchesMeiosisCell<S>} Function Patches Meiosis Cell.
  */
-export function meiosisOne<S, A>(
+export function meiosisCell<S, A>(
   config: FunctionPatchesConfig<S, A>
-): FunctionPatchesRootContext<S, A>;
+): FunctionPatchesRootCell<S, A>;

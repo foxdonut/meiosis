@@ -52,23 +52,23 @@ const setup = ({ stream, accumulator, combine, app }) => {
 
 export default setup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
 /** @type {import("./index").createNest} */
-export const createNest = nestPatch => (context, prop) => {
-  const getState = context.getState.map(state => state[prop]);
+export const createNest = nestPatch => (cell, prop) => {
+  const getState = cell.getState.map(state => state[prop]);
 
-  /** @type {import("./index").MeiosisOneContext} */
+  /** @type {import("./index").MeiosisCell} */
   const nested = {
     getState,
-    update: patch => context.update(nestPatch(patch, prop))
+    update: patch => cell.update(nestPatch(patch, prop))
   };
 
   return nested;
 };
 
-/** @type {import("./index").meiosisOne} */
-export const meiosisOne = ({ stream, accumulator, combine, app }) => {
+/** @type {import("./index").meiosisCell} */
+export const meiosisCell = ({ stream, accumulator, combine, app }) => {
   const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
   const root = {

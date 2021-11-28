@@ -29,9 +29,11 @@
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/preset-env": "^7.15.6",
+    "@babel/preset-typescript": "^7.16.0",
     "@rollup/plugin-buble": "^0.21.3",
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
+    "@types/jest": "^27.0.3",
     "buble": "^0.20.0",
     "flyd": "^0.2.8",
     "immer": "^9.0.6",

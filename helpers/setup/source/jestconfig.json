@@ -1,5 +1,5 @@
 {
-  "testRegex": "tests/.*\\.js$",
-  "testPathIgnorePatterns": ["/dist/"],
-  "moduleFileExtensions": ["js"]
+  "testRegex": "tests/.*\\.[jt]s$",
+  "testPathIgnorePatterns": ["/dist/", "/generated-d-ts/"],
+  "moduleFileExtensions": ["js", "ts"]
 }

@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, meiosisOne as commonMeiosisOne } from "../common";
+import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../common";
 
 /** @type {import("./index").immerSetup} */
 const immerSetup = ({ stream, produce, app }) =>
@@ -14,7 +14,7 @@ const immerSetup = ({ stream, produce, app }) =>
 
 export default immerSetup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
 /**
  * @template S
@@ -34,8 +34,8 @@ const nestPatch = produce => (patch, prop) => state => {
  */
 export const nest = produce => createNest(nestPatch(produce));
 
-export const meiosisOne = ({ stream, produce, app }) =>
-  commonMeiosisOne({
+export const meiosisCell = ({ stream, produce, app }) =>
+  commonMeiosisCell({
     stream,
     accumulator: produce,
     // can't use patches.reduce(produce, state) because that would send a third argument to produce

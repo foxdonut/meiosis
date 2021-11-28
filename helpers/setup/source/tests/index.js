@@ -1188,13 +1188,13 @@ describe("meiosis setup with generic common", () => {
   });
 });
 
-describe("Meiosis One", () => {
+describe("Meiosis Cell", () => {
   const streamLib = meiosis.simpleStream;
 
   const applyPatchCases = [
-    ["mergerino", app => meiosis.mergerino.meiosisOne({ stream: streamLib, merge, app })],
-    ["functionPatches", app => meiosis.functionPatches.meiosisOne({ stream: streamLib, app })],
-    ["immer", app => meiosis.immer.meiosisOne({ stream: streamLib, produce, app })]
+    ["mergerino", app => meiosis.mergerino.meiosisCell({ stream: streamLib, merge, app })],
+    ["functionPatches", app => meiosis.functionPatches.meiosisCell({ stream: streamLib, app })],
+    ["immer", app => meiosis.immer.meiosisCell({ stream: streamLib, produce, app })]
   ];
 
   const createTestCases = (label, arr = [[], [], []]) => {
@@ -1220,13 +1220,13 @@ describe("Meiosis One", () => {
       ]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
-    const context = setupFn();
-    expect(context.getState()).toEqual({});
+    const cell = setupFn();
+    expect(cell.getState()).toEqual({});
 
-    context.update(patch1);
-    context.update(patch2);
+    cell.update(patch1);
+    cell.update(patch2);
 
-    expect(context.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(cell.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
   });
 
   test.each(
@@ -1248,14 +1248,14 @@ describe("Meiosis One", () => {
       ]
     ])
   )("%s", (_label, setupFn, nest, patch1, patch2) => {
-    const context = setupFn({ initial: { feathers: { duck: {} } } });
-    const nested = nest(context, "feathers");
+    const cell = setupFn({ initial: { feathers: { duck: {} } } });
+    const nested = nest(cell, "feathers");
 
     nested.update(patch1);
     nested.update(patch2);
 
     expect(nested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
-    expect(context.getState()).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
+    expect(cell.getState()).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
   });
 
   test.each(
@@ -1277,15 +1277,15 @@ describe("Meiosis One", () => {
       ]
     ])
   )("%s", (_label, setupFn, nest, patch1, patch2) => {
-    const context = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
-    const nested = nest(context, "fowl");
+    const cell = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+    const nested = nest(cell, "fowl");
     const deepNested = nest(nested, "feathers");
 
     deepNested.update(patch1);
     deepNested.update(patch2);
 
     expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
-    expect(context.getState()).toEqual({
+    expect(cell.getState()).toEqual({
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });
   });
@@ -1318,27 +1318,27 @@ describe("Meiosis One", () => {
       ]
     ])
   )("%s", (_label, setupFn, nest, patch1, patch2, patch3) => {
-    const context = setupFn({
+    const cell = setupFn({
       initial: { fowl: { feathers: { duck: {} } } },
-      Actions: context => ({
-        done: () => context.update(patch3)
+      Actions: cell => ({
+        done: () => cell.update(patch3)
       })
     });
 
     const actions = {
-      action1: context => context.update(patch1),
-      action2: context => context.update(patch2)
+      action1: cell => cell.update(patch1),
+      action2: cell => cell.update(patch2)
     };
 
-    const nested = nest(context, "fowl");
+    const nested = nest(cell, "fowl");
     const deepNested = nest(nested, "feathers");
 
     actions.action1(deepNested);
     actions.action2(deepNested);
-    context.actions.done();
+    cell.actions.done();
 
     expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
-    expect(context.getState()).toEqual({
+    expect(cell.getState()).toEqual({
       done: true,
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });

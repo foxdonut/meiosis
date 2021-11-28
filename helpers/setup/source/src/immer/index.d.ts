@@ -1,10 +1,10 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisOneApp,
-  MeiosisOneConfigBase,
-  MeiosisOneContext,
-  MeiosisOneRootContext,
+  MeiosisCellApp,
+  MeiosisCellConfigBase,
+  MeiosisCell,
+  MeiosisRootCell,
   Nest,
   NestPatch
 } from "../common";
@@ -39,27 +39,27 @@ export function immerSetup<S, A>({
 
 export default immerSetup;
 
-// -------- Meiosis One
+// -------- Meiosis Cell
 
-export type ImmerApp<S, A> = MeiosisOneApp<S, ImmerPatch<S>, A>;
+export type ImmerApp<S, A> = MeiosisCellApp<S, ImmerPatch<S>, A>;
 
-export type ImmerContext<S> = MeiosisOneContext<S, ImmerPatch<S>>;
-export type ImmerRootContext<S, A> = MeiosisOneRootContext<S, ImmerPatch<S>, A>;
+export type ImmerCell<S> = MeiosisCell<S, ImmerPatch<S>>;
+export type ImmerRootCell<S, A> = MeiosisRootCell<S, ImmerPatch<S>, A>;
 
 export type ProduceNestPatch = (produce: Produce<any>) => NestPatch;
 export type ImmerNest<S, K extends keyof S> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>>;
 export type ProduceNest<S, K extends keyof S> = (produce: Produce<any>) => ImmerNest<S, K>;
 
-export function nestFn<S, K extends keyof S>(context: ImmerContext<S>, prop: K): ImmerContext<S[K]>;
+export function nestFn<S, K extends keyof S>(cell: ImmerCell<S>, prop: K): ImmerCell<S[K]>;
 
 export function nest<S>(produce: Produce<S>): typeof nestFn;
 
 /**
- * Immer Meiosis One configuration.
+ * Immer Meiosis Cell configuration.
  *
  * @template S the State type.
  */
-export interface ImmerConfig<S, A> extends MeiosisOneConfigBase {
+export interface ImmerConfig<S, A> extends MeiosisCellConfigBase {
   /**
    * the Immer `produce` function.
    */
@@ -72,12 +72,12 @@ export interface ImmerConfig<S, A> extends MeiosisOneConfigBase {
 }
 
 /**
- * Helper to setup Meiosis One with [Immer](https://immerjs.github.io/immer/).
+ * Helper to setup Meiosis Cell with [Immer](https://immerjs.github.io/immer/).
  *
  * @template S the State type.
  *
- * @param {ImmerMeiosisConfig<S>} config the Meiosis One config for use with Immer
+ * @param {ImmerMeiosisConfig<S>} config the Meiosis Cell config for use with Immer
  *
- * @returns {ImmerContext<S>} Immer Meiosis One.
+ * @returns {ImmerCell<S>} Immer Meiosis Cell.
  */
-export function meiosisOne<S, A>(config: ImmerConfig<S, A>): ImmerRootContext<S, A>;
+export function meiosisCell<S, A>(config: ImmerConfig<S, A>): ImmerRootCell<S, A>;
