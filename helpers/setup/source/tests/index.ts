@@ -1,7 +1,11 @@
 // import meiosis from "../src/index";
 
-describe("meiosis with TypeScript", () => {
-  test("something", () => {
-    expect(2 + 2).toEqual(4);
+describe("Meiosis with TypeScript", () => {
+  describe("Meiosis Cell", () => {
+    describe("Mergerino", () => {
+      test("basic with no actions", () => {
+        expect(2 + 2).toEqual(4);
+      });
+    });
   });
 });

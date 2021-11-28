@@ -8,50 +8,50 @@ import { app, convert } from "./common";
 const nest = meiosis.functionPatches.nest;
 
 const conditionsActions = {
-  togglePrecipitations: (context, value) => {
-    context.update(state => ({ ...state, precipitations: value }));
+  togglePrecipitations: (cell, value) => {
+    cell.update(state => ({ ...state, precipitations: value }));
   },
-  changeSky: (context, value) => {
-    context.update(state => ({ ...state, sky: value }));
+  changeSky: (cell, value) => {
+    cell.update(state => ({ ...state, sky: value }));
   }
 };
 
-const skyOption = ({ context, value, label }) => html`
+const skyOption = ({ cell, value, label }) => html`
   <label>
     <input
       type="radio"
       value=${value}
-      .checked=${context.getState().sky === value}
-      @change=${evt => conditionsActions.changeSky(context, evt.target.value)}
+      .checked=${cell.getState().sky === value}
+      @change=${evt => conditionsActions.changeSky(cell, evt.target.value)}
     />
     ${label}
   </label>
 `;
 
-const Conditions = context => html`
+const Conditions = cell => html`
   <div>
     <label>
       <input
         type="checkbox"
-        .checked=${context.getState().precipitations}
-        @change=${evt => conditionsActions.togglePrecipitations(context, evt.target.checked)}
+        .checked=${cell.getState().precipitations}
+        @change=${evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
     </label>
     <div>
-      ${skyOption({ context, value: "SUNNY", label: "Sunny" })}
-      ${skyOption({ context, value: "CLOUDY", label: "Cloudy" })}
-      ${skyOption({ context, value: "MIX", label: "Mix of sun/clouds" })}
+      ${skyOption({ cell, value: "SUNNY", label: "Sunny" })}
+      ${skyOption({ cell, value: "CLOUDY", label: "Cloudy" })}
+      ${skyOption({ cell, value: "MIX", label: "Mix of sun/clouds" })}
     </div>
   </div>
 `;
 
 const temperatureActions = {
-  increment: (context, amount) => {
-    context.update(state => ({ ...state, value: state.value + amount }));
+  increment: (cell, amount) => {
+    cell.update(state => ({ ...state, value: state.value + amount }));
   },
-  changeUnits: context => {
-    context.update(state => {
+  changeUnits: cell => {
+    cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
       const newValue = convert(value, newUnits);
@@ -60,33 +60,31 @@ const temperatureActions = {
   }
 };
 
-const Temperature = context => html`
+const Temperature = cell => html`
   <div>
-    ${context.getState().label} Temperature:
-    ${context.getState().value}&deg;${context.getState().units}
+    ${cell.getState().label} Temperature: ${cell.getState().value}&deg;${cell.getState().units}
     <div>
-      <button @click=${() => temperatureActions.increment(context, 1)}>Increment</button>
-      <button @click=${() => temperatureActions.increment(context, -1)}>Decrement</button>
+      <button @click=${() => temperatureActions.increment(cell, 1)}>Increment</button>
+      <button @click=${() => temperatureActions.increment(cell, -1)}>Decrement</button>
     </div>
     <div>
-      <button @click=${() => temperatureActions.changeUnits(context)}>Change Units</button>
+      <button @click=${() => temperatureActions.changeUnits(cell)}>Change Units</button>
     </div>
   </div>
 `;
 
-const App = context => html`
+const App = cell => html`
   <div style="display: grid; grid-template-columns: 1fr 1fr">
     <div>
-      ${Conditions(nest(context, "conditions"))}
-      ${Temperature(nest(nest(context, "temperature"), "air"))}
-      ${Temperature(nest(nest(context, "temperature"), "water"))}
+      ${Conditions(nest(cell, "conditions"))} ${Temperature(nest(nest(cell, "temperature"), "air"))}
+      ${Temperature(nest(nest(cell, "temperature"), "water"))}
     </div>
-    <pre style="margin: 0">${JSON.stringify(context.getState(), null, 4)}</pre>
+    <pre style="margin: 0">${JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>
 `;
 
 export const setupLitHtmlExample = () => {
-  const context = meiosis.functionPatches.meiosisOne({ stream: meiosis.simpleStream, app });
+  const cell = meiosis.functionPatches.meiosisCell({ stream: meiosis.simpleStream, app });
   const element = document.getElementById("litHtmlApp");
-  context.getState.map(() => litHtmlRender(App(context), element));
+  cell.getState.map(() => litHtmlRender(App(cell), element));
 };

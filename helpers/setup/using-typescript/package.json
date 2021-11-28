@@ -29,8 +29,6 @@
     "flyd": "^0.2.8",
     "immer": "^9.0.6",
     "lit-html": "^2.0.1",
-    "meiosis-setup-preact": "^1.0.0-beta.1",
-    "meiosis-setup-react": "^1.0.0-beta.1",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "preact": "^10.5.15",

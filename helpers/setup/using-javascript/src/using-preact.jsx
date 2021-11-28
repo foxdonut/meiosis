@@ -1,8 +1,8 @@
 // @ts-check
 
 import meiosis from "../../source/dist/index";
+import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
-import meiosisPreact from "meiosis-setup-preact";
 import { h, render as preactRender } from "preact";
 import { useState } from "preact/hooks";
 import { app, convert } from "./common";
@@ -11,30 +11,30 @@ import { app, convert } from "./common";
 const nest = meiosis.mergerino.nest;
 
 const conditionsActions = {
-  togglePrecipitations: (context, value) => {
-    context.update({ precipitations: value });
+  togglePrecipitations: (cell, value) => {
+    cell.update({ precipitations: value });
   },
-  changeSky: (context, value) => {
-    context.update({ sky: value });
+  changeSky: (cell, value) => {
+    cell.update({ sky: value });
   }
 };
 
 // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
 // project, we'll use h here.
-const SkyOption = ({ context, value, label }) =>
+const SkyOption = ({ cell, value, label }) =>
   h(
     "label",
     {},
     h("input", {
       type: "radio",
       value,
-      checked: context.getState().sky === value,
-      onchange: evt => conditionsActions.changeSky(context, evt.target.value)
+      checked: cell.getState().sky === value,
+      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
   );
 
-const Conditions = ({ context }) =>
+const Conditions = ({ cell }) =>
   h(
     "div",
     {},
@@ -43,26 +43,26 @@ const Conditions = ({ context }) =>
       {},
       h("input", {
         type: "checkbox",
-        checked: context.getState().precipitations,
-        onchange: evt => conditionsActions.togglePrecipitations(context, evt.target.checked)
+        checked: cell.getState().precipitations,
+        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       "Precipitations"
     ),
     h(
       "div",
       {},
-      h(SkyOption, { context, value: "SUNNY", label: "Sunny" }),
-      h(SkyOption, { context, value: "CLOUDY", label: "Cloudy" }),
-      h(SkyOption, { context, value: "MIX", label: "Mix of sun/clouds" })
+      h(SkyOption, { cell, value: "SUNNY", label: "Sunny" }),
+      h(SkyOption, { cell, value: "CLOUDY", label: "Cloudy" }),
+      h(SkyOption, { cell, value: "MIX", label: "Mix of sun/clouds" })
     )
   );
 
 const temperatureActions = {
-  increment: (context, amount) => {
-    context.update({ value: x => x + amount });
+  increment: (cell, amount) => {
+    cell.update({ value: x => x + amount });
   },
-  changeUnits: context => {
-    context.update(state => {
+  changeUnits: cell => {
+    cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
       const newValue = convert(value, newUnits);
@@ -71,46 +71,46 @@ const temperatureActions = {
   }
 };
 
-const Temperature = ({ context }) =>
+const Temperature = ({ cell }) =>
   h(
     "div",
     {},
-    context.getState().label,
+    cell.getState().label,
     " Temperature: ",
-    context.getState().value,
+    cell.getState().value,
     h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
-    context.getState().units,
+    cell.getState().units,
     h(
       "div",
       {},
-      h("button", { onclick: () => temperatureActions.increment(context, 1) }, "Increment"),
-      h("button", { onclick: () => temperatureActions.increment(context, -1) }, "Decrement")
+      h("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
+      h("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
     ),
     h(
       "div",
       {},
-      h("button", { onclick: () => temperatureActions.changeUnits(context) }, "Change Units")
+      h("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units")
     )
   );
 
-const Root = ({ context }) =>
+const Root = ({ cell }) =>
   h(
     "div",
     { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
     h(
       "div",
       {},
-      h(Conditions, { context: nest(context, "conditions") }),
-      h(Temperature, { context: nest(nest(context, "temperature"), "air") }),
-      h(Temperature, { context: nest(nest(context, "temperature"), "water") })
+      h(Conditions, { cell: nest(cell, "conditions") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
     ),
-    h("pre", { style: { margin: "0" } }, JSON.stringify(context.getState(), null, 4))
+    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );
 
 const App = meiosisPreact({ h, useState, Root });
 
 export const setupPreactExample = () => {
-  const context = meiosis.mergerino.meiosisOne({ stream: meiosis.simpleStream, merge, app });
+  const cell = meiosis.mergerino.meiosisCell({ stream: meiosis.simpleStream, merge, app });
   const element = document.getElementById("preactApp");
-  preactRender(h(App, { states: context.getState, context }), element);
+  preactRender(h(App, { states: cell.getState, cell }), element);
 };
