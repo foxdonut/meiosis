@@ -216,7 +216,7 @@ export type App<S, P, A> = {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
-  initial?: S;
+  initial?: Partial<S>;
 
   /**
    * An array of service functions.
@@ -364,7 +364,7 @@ export interface MeiosisCellApp<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
-  initial?: S;
+  initial?: Partial<S>;
 
   /**
    * An array of service functions.
