@@ -24,7 +24,8 @@ describe("meiosis setup with library for applying patches", () => {
 
     const createTestCases = (label, arr = [[], [], []]) => {
       const result = [];
-      for (let i = 0; i < applyPatchCases.length; i++) {
+      const total = Math.min(arr.length, applyPatchCases.length);
+      for (let i = 0; i < total; i++) {
         result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
       }
       return result;
@@ -1128,68 +1129,6 @@ describe("meiosis setup with library for applying patches", () => {
         update(updatePatch);
       });
     });
-
-    test.each(
-      createTestCases("nesting", [
-        [
-          meiosis.mergerino.nest,
-          { color: "orange" },
-          { feathers: x => x + 100 },
-          { other: "test" },
-          { test: "success" }
-        ],
-        [
-          meiosis.functionPatches.nest,
-          R.assoc("color", "orange"),
-          R.over(R.lensProp("feathers"), R.add(100)),
-          R.assoc("other", "test"),
-          R.assoc("test", "success")
-        ],
-        [
-          meiosis.immer.nest(produce),
-          state => {
-            state.color = "orange";
-          },
-          state => {
-            state.feathers += 100;
-          },
-          state => {
-            state.other = "test";
-          },
-          state => {
-            state.test = "success";
-          }
-        ]
-      ])
-    )("%s", (_label, setupFn, nest, patch1, patch2, patch3, patch4) => {
-      const { update, states } = setupFn({
-        initial: { duck: { attrs: { color: "yellow", sound: "quack", feathers: 150, more: {} } } }
-      });
-
-      const local = nest(["duck", "attrs"]);
-      expect(local.get(states()).color).toEqual("yellow");
-      expect(local.get(states()).sound).toEqual("quack");
-
-      update(local.patch(patch1));
-      expect(states()).toEqual({
-        duck: { attrs: { color: "orange", sound: "quack", feathers: 150, more: {} } }
-      });
-
-      update([local.patch(patch2), patch3]);
-      expect(states()).toEqual({
-        duck: { attrs: { color: "orange", sound: "quack", feathers: 250, more: {} } },
-        other: "test"
-      });
-
-      const nestedLocal = nest("more", local);
-      update(nestedLocal.patch(patch4));
-      expect(states()).toEqual({
-        duck: {
-          attrs: { color: "orange", sound: "quack", feathers: 250, more: { test: "success" } }
-        },
-        other: "test"
-      });
-    });
   });
 });
 
@@ -1245,6 +1184,163 @@ describe("meiosis setup with generic common", () => {
       actions.increment(2);
 
       expect(states()).toEqual({ count: 2 });
+    });
+  });
+});
+
+describe("Meiosis Cell", () => {
+  const streamLib = meiosis.simpleStream;
+
+  const applyPatchCases = [
+    ["mergerino", app => meiosis.mergerino.meiosisCell({ stream: streamLib, merge, app })],
+    ["functionPatches", app => meiosis.functionPatches.meiosisCell({ stream: streamLib, app })],
+    ["immer", app => meiosis.immer.meiosisCell({ stream: streamLib, produce, app })]
+  ];
+
+  const createTestCases = (label, arr = [[], [], []]) => {
+    const result = [];
+    const total = Math.min(arr.length, applyPatchCases.length);
+    for (let i = 0; i < total; i++) {
+      result.push([applyPatchCases[i][0] + " / " + label, applyPatchCases[i][1], ...arr[i]]);
+    }
+    return result;
+  };
+
+  test.each(
+    createTestCases("minimal", [
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
+      [
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, patch1, patch2) => {
+    const cell = setupFn();
+    expect(cell.getState()).toEqual({});
+
+    cell.update(patch1);
+    cell.update(patch2);
+
+    expect(cell.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+  });
+
+  test.each(
+    createTestCases("nest", [
+      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow")
+      ],
+      [
+        meiosis.immer.nest(produce),
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, nest, patch1, patch2) => {
+    const cell = setupFn({ initial: { feathers: { duck: {} } } });
+    const nested = nest(cell, "feathers");
+
+    nested.update(patch1);
+    nested.update(patch2);
+
+    expect(nested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(cell.getState()).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
+  });
+
+  test.each(
+    createTestCases("deep nest", [
+      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow")
+      ],
+      [
+        meiosis.immer.nest(produce),
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, nest, patch1, patch2) => {
+    const cell = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+    const nested = nest(cell, "fowl");
+    const deepNested = nest(nested, "feathers");
+
+    deepNested.update(patch1);
+    deepNested.update(patch2);
+
+    expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(cell.getState()).toEqual({
+      fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
+    });
+  });
+
+  test.each(
+    createTestCases("actions", [
+      [
+        meiosis.mergerino.nest,
+        { duck: { sound: "quack" } },
+        { duck: { color: "yellow" } },
+        { done: true }
+      ],
+      [
+        meiosis.functionPatches.nest,
+        () => ({ duck: { sound: "quack" } }),
+        R.assocPath(["duck", "color"], "yellow"),
+        R.assoc("done", true)
+      ],
+      [
+        meiosis.immer.nest(produce),
+        state => {
+          state.duck = { sound: "quack" };
+        },
+        state => {
+          state.duck.color = "yellow";
+        },
+        state => {
+          state.done = true;
+        }
+      ]
+    ])
+  )("%s", (_label, setupFn, nest, patch1, patch2, patch3) => {
+    const cell = setupFn({
+      initial: { fowl: { feathers: { duck: {} } } },
+      Actions: cell => ({
+        done: () => cell.update(patch3)
+      })
+    });
+
+    const actions = {
+      action1: cell => cell.update(patch1),
+      action2: cell => cell.update(patch2)
+    };
+
+    const nested = nest(cell, "fowl");
+    const deepNested = nest(nested, "feathers");
+
+    actions.action1(deepNested);
+    actions.action2(deepNested);
+    cell.actions.done();
+
+    expect(deepNested.getState()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(cell.getState()).toEqual({
+      done: true,
+      fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });
   });
 });
@@ -1359,30 +1455,5 @@ describe("util", () => {
     expect(meiosis.util.get({}, ["a", "b"])).toBeUndefined();
     expect(meiosis.util.get({ a: 42 }, ["a", "b"])).toBeUndefined();
     expect(meiosis.util.get({ a: { b: 42 } }, ["a", "b"])).toEqual(42);
-  });
-
-  test("setMutate", () => {
-    const obj = { a: { b: 24 } };
-    const result = meiosis.util.setMutate(obj, ["a", "b"], 42);
-    expect(result.a.b).toEqual(42);
-    expect(result).toBe(obj);
-
-    expect(meiosis.util.setMutate(null, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate(undefined, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate({}, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setMutate({ a: 24 }, ["a", "b"], 42).a.b).toEqual(42);
-  });
-
-  test("setImmutable", () => {
-    const obj = { a: { b: 24 } };
-    const result = meiosis.util.setImmutable(obj, ["a", "b"], 42);
-    expect(result.a.b).toEqual(42);
-    expect(result).not.toBe(obj);
-    expect(obj.a.b).toEqual(24);
-
-    expect(meiosis.util.setImmutable(null, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable(undefined, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable({}, ["a", "b"], 42).a.b).toEqual(42);
-    expect(meiosis.util.setImmutable({ a: 24 }, ["a", "b"], 42).a.b).toEqual(42);
   });
 });

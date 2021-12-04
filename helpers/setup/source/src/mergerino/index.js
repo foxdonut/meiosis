@@ -1,7 +1,21 @@
 // @ts-check
 
-import commonSetup, { meiosisOne as commonMeiosisOne, Nest } from "../common";
-import { setMutate } from "../util";
+import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../common";
+
+/*
+ * @template S
+ *
+ * @typedef {import("./index").MergerinoPatch<S>} MergerinoPatch
+ */
+
+/*
+ * @template S
+ * @template K
+ * @template N
+ * @template P
+ *
+ * @typedef {import("../common/index").NestPatch<S, K, N, P>} NestPatch
+ */
 
 /** @type {import("./index").mergerinoSetup} */
 const mergerinoSetup = ({ stream, merge, app }) =>
@@ -14,15 +28,32 @@ const mergerinoSetup = ({ stream, merge, app }) =>
 
 export default mergerinoSetup;
 
-const createNestPatchFunction = path => patch => setMutate({}, path, patch);
+// -------- Meiosis Cell
 
-export const nest = Nest(createNestPatchFunction);
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("../common/index").NestPatch}
+ *
+ * @param {import("./index").MergerinoPatch<S[K]>} patch
+ * @param {K} prop
+ */
+const nestPatch = (patch, prop) => ({ [prop]: patch });
 
-export const meiosisOne = ({ stream, merge, app }) =>
-  commonMeiosisOne({
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("./index").MergerinoNest<S, K>}
+ */
+export const nest = createNest(nestPatch);
+
+/** @type {import("./index").meiosisCell} */
+export const meiosisCell = ({ stream, merge, app }) =>
+  commonMeiosisCell({
     stream,
     accumulator: merge,
     combine: patches => patches,
-    app,
-    createNestPatchFunction
+    app
   });

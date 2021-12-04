@@ -1,44 +1,38 @@
-import commonSetup, { Nest, meiosisOne as commonMeiosisOne } from "./common";
-import mergerinoSetup, {
-  nest as mergerinoNest,
-  meiosisOne as mergerinoMeiosisOne
-} from "./mergerino";
-import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
-import immerSetup, { nest as immerNest } from "./immer";
-import preactSetup from "./preact";
-import reactSetup from "./react";
+// @ts-check
+
+import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "./common";
+import mergerinoSetup, { meiosisCell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
+import functionPatchesSetup, {
+  meiosisCell as functionPatchesCell,
+  nest as functionPatchesNest
+} from "./functionPatches";
+import immerSetup, { meiosisCell as immerCell, nest as immerNest } from "./immer";
 import simpleStream from "./simple-stream";
-import { get, setMutate, setImmutable } from "./util";
+import { get } from "./util";
 
 export default {
   common: {
     setup: commonSetup,
-    Nest,
-    meiosisOne: commonMeiosisOne
+    meiosisCell: commonMeiosisCell,
+    createNest
   },
   mergerino: {
     setup: mergerinoSetup,
-    nest: mergerinoNest,
-    meiosisOne: mergerinoMeiosisOne
+    meiosisCell: mergerinoCell,
+    nest: mergerinoNest
   },
   functionPatches: {
     setup: functionPatchesSetup,
+    meiosisCell: functionPatchesCell,
     nest: functionPatchesNest
   },
   immer: {
     setup: immerSetup,
+    meiosisCell: immerCell,
     nest: immerNest
-  },
-  preact: {
-    setup: preactSetup
-  },
-  react: {
-    setup: reactSetup
   },
   simpleStream,
   util: {
-    get,
-    setMutate,
-    setImmutable
+    get
   }
 };

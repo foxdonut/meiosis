@@ -1,7 +1,6 @@
 // @ts-check
 
-import commonSetup, { Nest } from "../common";
-import { get, setMutate } from "../util";
+import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../common";
 
 /** @type {import("./index").immerSetup} */
 const immerSetup = ({ stream, produce, app }) =>
@@ -15,7 +14,31 @@ const immerSetup = ({ stream, produce, app }) =>
 
 export default immerSetup;
 
-export const nest = produce =>
-  Nest(path => patch => state => {
-    setMutate(state, path, produce(get(state, path), patch));
+// -------- Meiosis Cell
+
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("./index").ProduceNestPatch}
+ */
+const nestPatch = produce => (patch, prop) => state => {
+  state[prop] = produce(state[prop], patch);
+};
+
+/**
+ * @template S
+ * @template {keyof S} K
+ *
+ * @type {import("./index").ProduceNest<S, K>}
+ */
+export const nest = produce => createNest(nestPatch(produce));
+
+export const meiosisCell = ({ stream, produce, app }) =>
+  commonMeiosisCell({
+    stream,
+    accumulator: produce,
+    // can't use patches.reduce(produce, state) because that would send a third argument to produce
+    combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
+    app
   });

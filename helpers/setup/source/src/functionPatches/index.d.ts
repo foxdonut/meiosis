@@ -1,4 +1,12 @@
-import { App, LocalPath, Local, Meiosis, StreamLib } from "../common";
+import {
+  Meiosis,
+  MeiosisConfigBase,
+  MeiosisCellApp,
+  MeiosisCellConfigBase,
+  MeiosisCell,
+  MeiosisRootCell,
+  Nest
+} from "../common";
 
 /**
  * A function patch.
@@ -26,20 +34,7 @@ export type FunctionPatch<S> = (state: S) => S;
  * @template S the State type.
  * @template A the Actions type.
  */
-export type MeiosisFunctionPatchesConfig<S, A> = {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
-  stream: StreamLib;
-
-  /**
-   * The application object, with optional properties.
-   */
-  app: App<S, FunctionPatch<S>, A>;
-};
+export type FunctionPatchesMeiosisConfig<S, A> = MeiosisConfigBase<S, FunctionPatch<S>, A>;
 
 /**
  * Helper to setup the Meiosis pattern with function patches.
@@ -47,7 +42,7 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MeiosisFunctionPatchesConfig<S, A>} config the Meiosis config for use with function
+ * @param {FunctionPatchesMeiosisConfig<S, A>} config the Meiosis config for use with function
  * patches.
  *
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
@@ -56,11 +51,51 @@ export type MeiosisFunctionPatchesConfig<S, A> = {
 export function functionPatchesSetup<S, A>({
   stream,
   app
-}: MeiosisFunctionPatchesConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
+}: FunctionPatchesMeiosisConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
 export default functionPatchesSetup;
 
-export function nest<S1, P1, S2, P2>(
-  path: string | Array<string>,
-  local?: LocalPath
-): Local<S1, P1, S2, P2>;
+// -------- Meiosis Cell
+
+export type FunctionPatchesApp<S, A> = MeiosisCellApp<S, FunctionPatch<S>, A>;
+
+export type FunctionPatchesCell<S> = MeiosisCell<S, FunctionPatch<S>>;
+export type FunctionPatchesRootCell<S, A> = MeiosisRootCell<S, FunctionPatch<S>, A>;
+
+export type FunctionPatchesNest<S, K extends keyof S> = Nest<
+  S,
+  FunctionPatch<S>,
+  K,
+  FunctionPatch<S[K]>
+>;
+
+export function nest<S, K extends keyof S>(
+  cell: FunctionPatchesCell<S>,
+  prop: K
+): FunctionPatchesCell<S[K]>;
+
+/**
+ * Function Patches Meiosis Cell configuration.
+ *
+ * @template S the State type.
+ */
+export interface FunctionPatchesConfig<S, A> extends MeiosisCellConfigBase {
+  /**
+   * The application object, with optional properties.
+   */
+  app: FunctionPatchesApp<S, A>;
+}
+
+/**
+ * Helper to setup Meiosis Cell with Function Patches.
+ *
+ * @template S the State type.
+ *
+ * @param {FunctionPatchesConfig<S>} config the Meiosis Cell config for use with Function
+ * Patches
+ *
+ * @returns {FunctionPatchesMeiosisCell<S>} Function Patches Meiosis Cell.
+ */
+export function meiosisCell<S, A>(
+  config: FunctionPatchesConfig<S, A>
+): FunctionPatchesRootCell<S, A>;

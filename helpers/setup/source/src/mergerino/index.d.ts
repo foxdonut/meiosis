@@ -1,11 +1,11 @@
 import {
-  App,
-  CreateNestPatchFunction,
   Meiosis,
-  LocalPath,
-  Local,
-  Stream,
-  StreamLib
+  MeiosisConfigBase,
+  MeiosisCellApp,
+  MeiosisCellConfigBase,
+  MeiosisCell,
+  MeiosisRootCell,
+  Nest
 } from "../common";
 
 export type MergerinoFunctionPatch<S> = (state: S) => S;
@@ -28,27 +28,12 @@ export type MergerinoObjectPatch<S> = {
  */
 export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
 
-export type MergerinoApp<S, A> = App<S, MergerinoPatch<S>, A>;
-
-export type MergerinoMeiosisConfig<S, A> = {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
-  stream: StreamLib;
-
+export interface MergerinoMeiosisConfig<S, A> extends MeiosisConfigBase<S, MergerinoPatch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
   merge: (state: S, patch: MergerinoPatch<S>) => S;
-
-  /**
-   * The app, with optional properties.
-   */
-  app: MergerinoApp<S, A>;
-};
+}
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -67,49 +52,47 @@ export function mergerinoSetup<S, A>(
 
 export default mergerinoSetup;
 
-export function nest<S1, P1, S2, P2>(
-  path: string | Array<string>,
-  local?: LocalPath
-): Local<S1, P1, S2, P2>;
+// -------- Meiosis Cell
+
+export type MergerinoApp<S, A> = MeiosisCellApp<S, MergerinoPatch<S>, A>;
+
+export type MergerinoCell<S> = MeiosisCell<S, MergerinoPatch<S>>;
+export type MergerinoRootCell<S, A> = MeiosisRootCell<S, MergerinoPatch<S>, A>;
+
+export type MergerinoNest<S, K extends keyof S> = Nest<
+  S,
+  MergerinoPatch<S>,
+  K,
+  MergerinoPatch<S[K]>
+>;
+
+export function nest<S, K extends keyof S>(cell: MergerinoCell<S>, prop: K): MergerinoCell<S[K]>;
 
 /**
- * Mergerino Meiosis One configuration.
+ * Mergerino Meiosis Cell configuration.
  *
  * @template S the State type.
- * @template A the Actions type.
  */
-export interface MergerinoMeiosisOneConfig<S, A>
-  extends MergerinoMeiosisConfig<S, A>,
-    CreateNestPatchFunction {}
+export interface MergerinoConfig<S, A> extends MeiosisCellConfigBase {
+  /**
+   * The Mergerino `merge` function.
+   */
+  merge: (state: S, patch: MergerinoPatch<S>) => S;
 
-/**
- * Returned by Mergerino Meiosis One setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface MergerinoMeiosisOne<S, A> {
-  states: Stream<S>;
-  getState: () => S;
-  update: Stream<MergerinoPatch<S>>;
-  actions: A;
-  root: MergerinoMeiosisOne<S, A>;
-  nest: <K extends keyof S>(prop: K) => MergerinoMeiosisOne<S[K], A>;
+  /**
+   * The application object, with optional properties.
+   */
+  app: MergerinoApp<S, A>;
 }
 
 /**
- * Helper to setup Meiosis One with [Mergerino](https://github.com/fuzetsu/mergerino).
+ * Helper to setup Meiosis Cell with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MergerinoMeiosisConfig<S, A>} config the Meiosis One config for use with Mergerino
+ * @param {MergerinoConfig<S>} config the Meiosis Cell config for use with Mergerino
  *
- * @returns {MeiosisOne<S, MergerinoPatch<S>, A>} Mergerino Meiosis One.
+ * @returns {MergerinoCell<S>} Mergerino Meiosis Cell.
  */
-export function meiosisOne<S, A>({
-  stream,
-  merge,
-  app
-}: MergerinoMeiosisConfig<S, A>): MergerinoMeiosisOne<S, A>;
+export function meiosisCell<S, A>(config: MergerinoConfig<S, A>): MergerinoRootCell<S, A>;

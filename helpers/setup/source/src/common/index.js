@@ -1,8 +1,6 @@
 // @ts-check
 
-import { get } from "../util";
-
-const setup = ({ stream, accumulator, combine, app }) => {
+const baseSetup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -13,7 +11,9 @@ const setup = ({ stream, accumulator, combine, app }) => {
     throw new Error("No combine function was specified.");
   }
 
-  app = Object.assign({ initial: {}, Actions: () => ({}), services: [], Effects: () => [] }, app);
+  const safeApp = app || {};
+  const initial = safeApp.initial || {};
+  const services = safeApp.services || [];
 
   const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
@@ -24,16 +24,26 @@ const setup = ({ stream, accumulator, combine, app }) => {
   const update = createStream();
 
   const runServices = startingState =>
-    app.services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
+    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
   const states = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
-    runServices(app.initial),
+    runServices(initial),
     update
   );
 
-  const actions = app.Actions(update, states);
-  const effects = app.Effects(update, actions);
+  return { states, update };
+};
+
+/** @type {import("./index").setup} */
+const setup = ({ stream, accumulator, combine, app }) => {
+  const { states, update } = baseSetup({ stream, accumulator, combine, app });
+
+  const Actions = Object.assign({ Actions: (_update, _states) => undefined }, app).Actions;
+  const Effects = Object.assign({ Effects: (_update, _actions) => [] }, app).Effects;
+
+  const actions = Actions(update, states);
+  const effects = Effects(update, actions);
 
   states.map(state => effects.forEach(effect => effect(state)));
 
@@ -42,63 +52,35 @@ const setup = ({ stream, accumulator, combine, app }) => {
 
 export default setup;
 
-export const Nest = createNestPatchFunction => (path, local = { path: [] }) => {
-  const nestedPath = local.path.concat(path);
+// -------- Meiosis Cell
 
-  return {
-    get: state => get(state, nestedPath),
-    patch: createNestPatchFunction(nestedPath),
-    path: nestedPath
+/** @type {import("./index").createNest} */
+export const createNest = nestPatch => (cell, prop) => {
+  const getState = cell.getState.map(state => state[prop]);
+
+  /** @type {import("./index").MeiosisCell} */
+  const nested = {
+    getState,
+    update: patch => cell.update(nestPatch(patch, prop))
   };
+
+  return nested;
 };
 
-export const meiosisOne = ({ stream, accumulator, combine, app, createNestPatchFunction }) => {
-  const { states, update } = setup({ stream, accumulator, combine, app });
+/** @type {import("./index").meiosisCell} */
+export const meiosisCell = ({ stream, accumulator, combine, app }) => {
+  const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
-  const meiosisCache = {};
-
-  const meiosis = {
-    states,
-    getState: () => states(),
+  const root = {
+    getState: states,
     update
   };
 
-  const attachActionsTo = meiosis => {
-    if (app.Actions) {
-      const actions = app.Actions(meiosis);
-      meiosis.actions = actions;
-    }
+  const actions = app && app.Actions ? app.Actions(root) : undefined;
+
+  return {
+    getState: root.getState,
+    update: root.update,
+    actions
   };
-
-  attachActionsTo(meiosis);
-
-  const nest = propOrPath => {
-    if (propOrPath) {
-      const path = [].concat(propOrPath);
-
-      if (!meiosisCache[path]) {
-        const getState = () => get(states(), path);
-        const nestPatch = createNestPatchFunction(path);
-        const localUpdate = patch => update(nestPatch(patch));
-
-        const localMeiosis = {
-          getState,
-          update: localUpdate,
-          nest: next => nest(path.concat(next)),
-          root: meiosis
-        };
-
-        attachActionsTo(localMeiosis);
-
-        meiosisCache[path] = localMeiosis;
-      }
-      return meiosisCache[path];
-    }
-    return meiosis;
-  };
-
-  meiosis.nest = nest;
-  meiosis.root = meiosis;
-
-  return meiosis;
 };
