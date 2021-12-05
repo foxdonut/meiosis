@@ -117,7 +117,7 @@ const App: (cell: FunctionPatchesCell<State>) => TemplateResult = cell => html`
 `;
 
 export const setupLitHtmlExample = (): void => {
-  const cell = meiosis.functionPatches.meiosisCell<State, never>({
+  const cell = meiosis.functionPatches.cell<State, never>({
     stream: meiosis.simpleStream,
     app
   });

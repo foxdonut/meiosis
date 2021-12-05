@@ -105,7 +105,7 @@ const stream = {
   scan: (acc, init, stream) => flyd.scan(acc, init, stream)
 };
 
-const cell = meiosis.immer.meiosisCell({
+const cell = meiosis.immer.cell({
   stream,
   produce: (s, p) => produce(s, p),
   app

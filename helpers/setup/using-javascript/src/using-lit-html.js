@@ -84,7 +84,7 @@ const App = cell => html`
 `;
 
 export const setupLitHtmlExample = () => {
-  const cell = meiosis.functionPatches.meiosisCell({ stream: meiosis.simpleStream, app });
+  const cell = meiosis.functionPatches.cell({ stream: meiosis.simpleStream, app });
   const element = document.getElementById("litHtmlApp");
   cell.getState.map(() => litHtmlRender(App(cell), element));
 };

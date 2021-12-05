@@ -152,7 +152,7 @@ export const setupMithrilExample = (): void => {
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const cell = meiosis.mergerino.meiosisCell<State, never>({ stream, merge, app });
+  const cell = meiosis.mergerino.cell<State, never>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { cell })

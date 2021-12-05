@@ -155,7 +155,7 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
 const App = meiosisPreact<Attrs, VNode>({ h, useState, Root });
 
 export const setupPreactExample = (): void => {
-  const cell = meiosis.mergerino.meiosisCell<State, never>({
+  const cell = meiosis.mergerino.cell<State, never>({
     stream: meiosis.simpleStream,
     merge,
     app
