@@ -1,17 +1,21 @@
 import {
   Meiosis,
   MeiosisConfigBase,
-  MeiosisCellApp,
-  MeiosisCellConfigBase,
+  CellApp,
+  CellConfigBase,
   MeiosisCell,
   MeiosisRootCell,
   Nest,
   NestPatch
 } from "../common";
 
-export type ImmerPatch<S> = (state: S) => S | void;
+export interface ImmerPatch<S> {
+  (state: S): S | void;
+}
 
-export type Produce<S> = (state: S, patch: ImmerPatch<S>) => S;
+export interface Produce<S> {
+  (state: S, patch: ImmerPatch<S>): S;
+}
 
 export interface ImmerMeiosisConfig<S, A> extends MeiosisConfigBase<S, ImmerPatch<S>, A> {
   /**
@@ -41,25 +45,30 @@ export default immerSetup;
 
 // -------- Meiosis Cell
 
-export type ImmerApp<S, A> = MeiosisCellApp<S, ImmerPatch<S>, A>;
+export type ImmerApp<S, A> = CellApp<S, ImmerPatch<S>, A>;
 
 export type ImmerCell<S> = MeiosisCell<S, ImmerPatch<S>>;
 export type ImmerRootCell<S, A> = MeiosisRootCell<S, ImmerPatch<S>, A>;
 
-export type ProduceNestPatch = (produce: Produce<any>) => NestPatch;
+export interface ProduceNestPatch {
+  (produce: Produce<any>): NestPatch;
+}
 export type ImmerNest<S, K extends keyof S> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>>;
-export type ProduceNest<S, K extends keyof S> = (produce: Produce<any>) => ImmerNest<S, K>;
 
-export function nestFn<S, K extends keyof S>(cell: ImmerCell<S>, prop: K): ImmerCell<S[K]>;
+export interface ProduceNest<S, K extends keyof S> {
+  (produce: Produce<any>): ImmerNest<S, K>;
+}
 
-export function nest<S>(produce: Produce<S>): typeof nestFn;
+export function nest<S, K extends keyof S>(
+  produce: Produce<S>
+): (cell: ImmerCell<S>, prop: K) => ImmerCell<S[K]>;
 
 /**
  * Immer Meiosis Cell configuration.
  *
  * @template S the State type.
  */
-export interface ImmerConfig<S, A> extends MeiosisCellConfigBase {
+export interface ImmerConfig<S, A> extends CellConfigBase {
   /**
    * the Immer `produce` function.
    */

@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../common";
+import commonSetup, { createNest, cell as commonCell } from "../common";
 
 /*
  * @template S
@@ -17,8 +17,8 @@ import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "../co
  * @typedef {import("../common/index").NestPatch<S, K, N, P>} NestPatch
  */
 
-/** @type {import("./index").mergerinoSetup} */
-const mergerinoSetup = ({ stream, merge, app }) =>
+/** @type {import("./index").setup} */
+const setup = ({ stream, merge, app }) =>
   commonSetup({
     stream,
     accumulator: merge,
@@ -26,7 +26,7 @@ const mergerinoSetup = ({ stream, merge, app }) =>
     app
   });
 
-export default mergerinoSetup;
+export default setup;
 
 // -------- Meiosis Cell
 
@@ -49,9 +49,9 @@ const nestPatch = (patch, prop) => ({ [prop]: patch });
  */
 export const nest = createNest(nestPatch);
 
-/** @type {import("./index").meiosisCell} */
-export const meiosisCell = ({ stream, merge, app }) =>
-  commonMeiosisCell({
+/** @type {import("./index").cell} */
+export const cell = ({ stream, merge, app }) =>
+  commonCell({
     stream,
     accumulator: merge,
     combine: patches => patches,

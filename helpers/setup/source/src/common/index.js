@@ -67,8 +67,8 @@ export const createNest = nestPatch => (cell, prop) => {
   return nested;
 };
 
-/** @type {import("./index").meiosisCell} */
-export const meiosisCell = ({ stream, accumulator, combine, app }) => {
+/** @type {import("./index").cell} */
+export const cell = ({ stream, accumulator, combine, app }) => {
   const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
   const root = {

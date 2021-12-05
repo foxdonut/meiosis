@@ -1,9 +1,9 @@
 import commonSetup, {
   createNest,
-  meiosisCell as commonMeiosisCell,
+  cell as commonMeiosisCell,
   StreamLibWithProperty
 } from "./common";
-import mergerinoSetup, { meiosisCell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
+import mergerinoSetup, { cell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, {
   meiosisCell as functionPatchesCell,
   nest as functionPatchesNest
@@ -16,17 +16,17 @@ declare namespace meiosisSetup {
     export { commonSetup as setup, commonMeiosisCell as setupCell, createNest };
   }
   export namespace mergerino {
-    export { mergerinoSetup as setup, mergerinoCell as meiosisCell, mergerinoNest as nest };
+    export { mergerinoSetup as setup, mergerinoCell as cell, mergerinoNest as nest };
   }
   export namespace functionPatches {
     export {
       functionPatchesSetup as setup,
-      functionPatchesCell as meiosisCell,
+      functionPatchesCell as cell,
       functionPatchesNest as nest
     };
   }
   export namespace immer {
-    export { immerSetup as setup, immerCell as meiosisCell, immerNest as nest };
+    export { immerSetup as setup, immerCell as cell, immerNest as nest };
   }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
@@ -35,20 +35,37 @@ declare namespace meiosisSetup {
 }
 
 export * from "./common";
+
 export {
   FunctionPatch,
   FunctionPatchesApp,
   FunctionPatchesConfig,
   FunctionPatchesCell,
-  FunctionPatchesMeiosisConfig
+  FunctionPatchesMeiosisConfig,
+  FunctionPatchesNest,
+  FunctionPatchesRootCell
 } from "./functionPatches";
-export { ImmerApp, ImmerConfig, ImmerCell, ImmerMeiosisConfig, ImmerPatch } from "./immer";
+
 export {
+  ImmerApp,
+  ImmerConfig,
+  ImmerCell,
+  ImmerMeiosisConfig,
+  ImmerRootCell,
+  ImmerPatch,
+  Produce
+} from "./immer";
+
+export {
+  MergerinoFunctionPatch,
+  MergerinoObjectPatch,
+  MergerinoPatch,
   MergerinoMeiosisConfig,
   MergerinoApp,
-  MergerinoConfig,
   MergerinoCell,
-  MergerinoPatch
+  MergerinoRootCell,
+  MergerinoNest,
+  MergerinoConfig
 } from "./mergerino";
 
 export default meiosisSetup;

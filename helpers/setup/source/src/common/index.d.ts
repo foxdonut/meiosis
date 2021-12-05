@@ -3,12 +3,15 @@
  *
  * @template T the type of the source value.
  * @template R the type of the returned value.
- *
- * @param {T} value the source value.
- *
- * @returns {R} the result of callnng the map function on the source value.
  */
-export type MapFunction<T, R> = (value: T) => R;
+export interface MapFunction<T, R> {
+  /**
+   * @param {T} value the source value.
+   *
+   * @returns {R} the result of calling the map function on the source value.
+   */
+  (value: T): R;
+}
 
 /**
  * A stream of values.
@@ -57,39 +60,48 @@ export interface Stream<T> {
  * Function that creates a stream.
  *
  * @template T the type of the stream's values.
- *
- * @param {T} [value] the stream's initial value.
- *
- * @returns {Stream<T>} the created stream.
  */
-export type StreamConstructor = <T>(value?: T) => Stream<T>;
+export interface StreamConstructor {
+  /**
+   * @param {T} [value] the stream's initial value.
+   *
+   * @returns {Stream<T>} the created stream.
+   */
+  <T>(value?: T): Stream<T>;
+}
 
 /**
  * Accumulator function.
  *
  * @template R the type of the result value.
  * @template T the type of the source value.
- *
- * @param {R} result the current accumulated result value.
- * @param {T} next the next source value.
- *
- * @returns {R} the accumulated result value.
  */
-export type Accumulator<R, T> = (result: R, next: T) => R;
+export interface Accumulator<R, T> {
+  /**
+   * @param {R} result the current accumulated result value.
+   * @param {T} next the next source value.
+   *
+   * @returns {R} the accumulated result value.
+   */
+  (result: R, next: T): R;
+}
 
 /**
  * Stream library `scan` function.
  *
  * @template T the type of the source stream's values.
  * @template R the type of the returned stream's values.
- *
- * @param {Accumulator<R, T>} acc the accumulator function.
- * @param {R} init the returned stream's initial value.
- * @param {Stream<T>} stream the source stream.
- *
- * @returns {Stream<R>} a stream resulting from scanning the source stream.
  */
-export type Scan = <T, R>(acc: Accumulator<R, T>, init: R, stream: Stream<T>) => Stream<R>;
+export interface Scan {
+  /**
+   * @param {Accumulator<R, T>} acc the accumulator function.
+   * @param {R} init the returned stream's initial value.
+   * @param {Stream<T>} stream the source stream.
+   *
+   * @returns {Stream<R>} a stream resulting from scanning the source stream.
+   */
+  <T, R>(acc: Accumulator<R, T>, init: R, stream: Stream<T>): Stream<R>;
+}
 
 /**
  * Defines the stream library's `scan` function.
@@ -145,24 +157,30 @@ export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
  * Combines an array of patches into a single patch.
  *
  * @template P the Patch type.
- *
- * @param {P[]} patches the array of patches.
- *
- * @returns {P | P[]} the result of combining the array of patches.
  */
-export type Combine<P> = (patches: P[]) => P | P[];
+export interface Combine<P> {
+  /**
+   * @param {P[]} patches the array of patches.
+   *
+   * @returns {P | P[]} the result of combining the array of patches.
+   */
+  (patches: P[]): P | P[];
+}
 
 /**
  * A service function. Receives the current state and returns a patch to be applied to the state.
  *
  * @template S the State type.
  * @template P the Patch type.
- *
- * @param {S} state the current state.
- *
- * @returns {P} the patch to be applied to the state.
  */
-export type Service<S, P> = (state: S) => P;
+export interface Service<S, P> {
+  /**
+   * @param {S} state the current state.
+   *
+   * @returns {P} the patch to be applied to the state.
+   */
+  (state: S): P;
+}
 
 /**
  * An effect function. Receives the current state and optionally performs a side effects, including
@@ -170,10 +188,13 @@ export type Service<S, P> = (state: S) => P;
  * constructor.
  *
  * @template S the State type.
- *
- * @param {S} state the current state.
  */
-export type Effect<S> = (state: S) => void;
+export interface Effect<S> {
+  /**
+   * @param {S} state the current state.
+   */
+  (state: S): void;
+}
 
 /**
  * An effects constructor. Receives the `update` stream and the `actions`, and returns an array of
@@ -182,13 +203,16 @@ export type Effect<S> = (state: S) => void;
  * @template S the State type.
  * @template P the Patch type.
  * @template A the Actions type.
- *
- * @param {Stream<P>} update the `update` stream.
- * @param {A} [actions] the application's `actions`.
- *
- * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type EffectConstructor<S, P, A> = (update: Stream<P>, actions?: A) => Effect<S>[];
+export interface EffectConstructor<S, P, A> {
+  /**
+   * @param {Stream<P>} update the `update` stream.
+   * @param {A} [actions] the application's `actions`.
+   *
+   * @returns {Effect<S>} the array of effect functions that will get called on state changes.
+   */
+  (update: Stream<P>, actions?: A): Effect<S>[];
+}
 
 /**
  * Constructor of application actions.
@@ -196,13 +220,16 @@ export type EffectConstructor<S, P, A> = (update: Stream<P>, actions?: A) => Eff
  * @template S the State type.
  * @template P the Patch type.
  * @template A the Actions type.
- *
- * @param {Stream<P>} update the `update` stream.
- * @param {Stream<S>} [states] the stream of application states.
- *
- * @returns {A} the application's actions.
  */
-export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>) => A;
+export interface ActionConstructor<S, P, A> {
+  /**
+   * @param {Stream<P>} update the `update` stream.
+   * @param {Stream<S>} [states] the stream of application states.
+   *
+   * @returns {A} the application's actions.
+   */
+  (update: Stream<P>, states?: Stream<S>): A;
+}
 
 /**
  * Application object that provides the application's initial state, the service functions, the
@@ -212,11 +239,11 @@ export type ActionConstructor<S, P, A> = (update: Stream<P>, states?: Stream<S>)
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export type App<S, P, A> = {
+export interface App<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
-  initial?: Partial<S>;
+  initial?: S;
 
   /**
    * An array of service functions.
@@ -232,8 +259,13 @@ export type App<S, P, A> = {
    * A function that creates the application's effects.
    */
   Effects?: EffectConstructor<S, P, A>;
-};
+}
 
+/**
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
 export interface MeiosisConfigBase<S, P, A> {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
@@ -275,7 +307,7 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export type Meiosis<S, P, A> = {
+export interface Meiosis<S, P, A> {
   /**
    * The stream of application states.
    */
@@ -290,7 +322,7 @@ export type Meiosis<S, P, A> = {
    * The application's actions.
    */
   actions: A;
-};
+}
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -337,16 +369,17 @@ export interface MeiosisRootCell<S, P, A> extends MeiosisCell<S, P> {
   actions: A;
 }
 
-export type Nest<S, P, K extends keyof S, N> = (
-  cell: MeiosisCell<S, P>,
-  prop: K
-) => MeiosisCell<S[K], N>;
+export interface Nest<S, P, K extends keyof S, N> {
+  (cell: MeiosisCell<S, P>, prop: K): MeiosisCell<S[K], N>;
+}
 
 export function createNest<S, K extends keyof S>(
   nestPatch: NestPatch
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
 
-export type MeiosisCellActionConstructor<S, P, A> = (cell: MeiosisCell<S, P>) => A;
+export interface CellActionConstructor<S, P, A> {
+  (cell: MeiosisCell<S, P>): A;
+}
 
 /**
  * An effects constructor.
@@ -358,13 +391,15 @@ export type MeiosisCellActionConstructor<S, P, A> = (cell: MeiosisCell<S, P>) =>
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export type MeiosisCellEffectConstructor<S, P> = (cell: MeiosisCell<S, P>) => Effect<S>[];
+export interface CellEffectConstructor<S, P> {
+  (cell: MeiosisCell<S, P>): Effect<S>[];
+}
 
-export interface MeiosisCellApp<S, P, A> {
+export interface CellApp<S, P, A> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
-  initial?: Partial<S>;
+  initial?: S;
 
   /**
    * An array of service functions.
@@ -374,15 +409,15 @@ export interface MeiosisCellApp<S, P, A> {
   /**
    * A function that creates the application's actions.
    */
-  Actions?: MeiosisCellActionConstructor<S, P, A>;
+  Actions?: CellActionConstructor<S, P, A>;
 
   /**
    * A function that creates the application's effects.
    */
-  Effects?: MeiosisCellEffectConstructor<S, P>;
+  Effects?: CellEffectConstructor<S, P>;
 }
 
-export interface MeiosisCellConfigBase {
+export interface CellConfigBase {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -398,7 +433,7 @@ export interface MeiosisCellConfigBase {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisCellConfig<S, P, A> extends MeiosisCellConfigBase {
+export interface CellConfig<S, P, A> extends CellConfigBase {
   /*
    * The accumulator function.
    */
@@ -413,7 +448,7 @@ export interface MeiosisCellConfig<S, P, A> extends MeiosisCellConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: MeiosisCellApp<S, P, A>;
+  app: CellApp<S, P, A>;
 }
 
 /**
@@ -424,8 +459,8 @@ export interface MeiosisCellConfig<S, P, A> extends MeiosisCellConfigBase {
  * @template P the Patch type.
  * @template A the Actions type.
  *
- * @param {MeiosisCellConfig<S, P>} config the Meiosis Cell config.
+ * @param {CellConfig<S, P>} config the Meiosis Cell config.
  *
  * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
  */
-export function meiosisCell<S, P, A>(config: MeiosisCellConfig<S, P, A>): MeiosisRootCell<S, P, A>;
+export function cell<S, P, A>(config: CellConfig<S, P, A>): MeiosisRootCell<S, P, A>;

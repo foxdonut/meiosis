@@ -1,7 +1,7 @@
 // @ts-check
 
-import commonSetup, { createNest, meiosisCell as commonMeiosisCell } from "./common";
-import mergerinoSetup, { meiosisCell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
+import commonSetup, { createNest, cell as commonCell } from "./common";
+import mergerinoSetup, { cell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, {
   meiosisCell as functionPatchesCell,
   nest as functionPatchesNest
@@ -13,22 +13,22 @@ import { get } from "./util";
 export default {
   common: {
     setup: commonSetup,
-    meiosisCell: commonMeiosisCell,
+    cell: commonCell,
     createNest
   },
   mergerino: {
     setup: mergerinoSetup,
-    meiosisCell: mergerinoCell,
+    cell: mergerinoCell,
     nest: mergerinoNest
   },
   functionPatches: {
     setup: functionPatchesSetup,
-    meiosisCell: functionPatchesCell,
+    cell: functionPatchesCell,
     nest: functionPatchesNest
   },
   immer: {
     setup: immerSetup,
-    meiosisCell: immerCell,
+    cell: immerCell,
     nest: immerNest
   },
   simpleStream,
