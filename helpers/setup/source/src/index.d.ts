@@ -5,10 +5,10 @@ import commonSetup, {
 } from "./common";
 import mergerinoSetup, { cell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, {
-  meiosisCell as functionPatchesCell,
+  cell as functionPatchesCell,
   nest as functionPatchesNest
 } from "./functionPatches";
-import immerSetup, { meiosisCell as immerCell, nest as immerNest } from "./immer";
+import immerSetup, { cell as immerCell, nest as immerNest } from "./immer";
 import { get } from "./util";
 
 declare namespace meiosisSetup {

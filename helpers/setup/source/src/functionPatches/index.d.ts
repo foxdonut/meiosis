@@ -48,12 +48,12 @@ export type FunctionPatchesMeiosisConfig<S, A> = MeiosisConfigBase<S, FunctionPa
  * @returns {import("../common").Meiosis<S, FunctionPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function functionPatchesSetup<S, A>({
+export function setup<S, A>({
   stream,
   app
 }: FunctionPatchesMeiosisConfig<S, A>): Meiosis<S, FunctionPatch<S>, A>;
 
-export default functionPatchesSetup;
+export default setup;
 
 // -------- Meiosis Cell
 
@@ -96,6 +96,4 @@ export interface FunctionPatchesConfig<S, A> extends CellConfigBase {
  *
  * @returns {FunctionPatchesCell<S>} Function Patches Meiosis Cell.
  */
-export function meiosisCell<S, A>(
-  config: FunctionPatchesConfig<S, A>
-): FunctionPatchesRootCell<S, A>;
+export function cell<S, A>(config: FunctionPatchesConfig<S, A>): FunctionPatchesRootCell<S, A>;

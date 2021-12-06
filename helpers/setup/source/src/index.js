@@ -3,10 +3,10 @@
 import commonSetup, { createNest, cell as commonCell } from "./common";
 import mergerinoSetup, { cell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, {
-  meiosisCell as functionPatchesCell,
+  cell as functionPatchesCell,
   nest as functionPatchesNest
 } from "./functionPatches";
-import immerSetup, { meiosisCell as immerCell, nest as immerNest } from "./immer";
+import immerSetup, { cell as immerCell, nest as immerNest } from "./immer";
 import simpleStream from "./simple-stream";
 import { get } from "./util";
 

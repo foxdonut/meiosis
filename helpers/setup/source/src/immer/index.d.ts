@@ -1,8 +1,8 @@
 import {
-  Meiosis,
-  MeiosisConfigBase,
   CellApp,
   CellConfigBase,
+  Meiosis,
+  MeiosisConfigBase,
   MeiosisCell,
   MeiosisRootCell,
   Nest,
@@ -35,13 +35,13 @@ export interface ImmerMeiosisConfig<S, A> extends MeiosisConfigBase<S, ImmerPatc
  * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function immerSetup<S, A>({
+export function setup<S, A>({
   stream,
   produce,
   app
 }: ImmerMeiosisConfig<S, A>): Meiosis<S, ImmerPatch<S>, A>;
 
-export default immerSetup;
+export default setup;
 
 // -------- Meiosis Cell
 
@@ -59,9 +59,9 @@ export interface ProduceNest<S, K extends keyof S> {
   (produce: Produce<any>): ImmerNest<S, K>;
 }
 
-export function nest<S, K extends keyof S>(
-  produce: Produce<S>
-): (cell: ImmerCell<S>, prop: K) => ImmerCell<S[K]>;
+export function nestFn<S, K extends keyof S>(cell: ImmerCell<S>, prop: K): ImmerCell<S[K]>;
+
+export function nest<S>(produce: Produce<S>): typeof nestFn;
 
 /**
  * Immer Meiosis Cell configuration.
@@ -89,4 +89,4 @@ export interface ImmerConfig<S, A> extends CellConfigBase {
  *
  * @returns {ImmerCell<S>} Immer Meiosis Cell.
  */
-export function meiosisCell<S, A>(config: ImmerConfig<S, A>): ImmerRootCell<S, A>;
+export function cell<S, A>(config: ImmerConfig<S, A>): ImmerRootCell<S, A>;

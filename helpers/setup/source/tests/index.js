@@ -1192,9 +1192,9 @@ describe("Meiosis Cell", () => {
   const streamLib = meiosis.simpleStream;
 
   const applyPatchCases = [
-    ["mergerino", app => meiosis.mergerino.meiosisCell({ stream: streamLib, merge, app })],
-    ["functionPatches", app => meiosis.functionPatches.meiosisCell({ stream: streamLib, app })],
-    ["immer", app => meiosis.immer.meiosisCell({ stream: streamLib, produce, app })]
+    ["mergerino", app => meiosis.mergerino.cell({ stream: streamLib, merge, app })],
+    ["functionPatches", app => meiosis.functionPatches.cell({ stream: streamLib, app })],
+    ["immer", app => meiosis.immer.cell({ stream: streamLib, produce, app })]
   ];
 
   const createTestCases = (label, arr = [[], [], []]) => {

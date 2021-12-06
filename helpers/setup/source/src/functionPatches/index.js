@@ -4,11 +4,11 @@ import commonSetup, { createNest, cell as commonCell } from "../common";
 
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
-/** @type {import("./index").functionPatchesSetup} */
-const functionPatchesSetup = ({ stream, app }) =>
+/** @type {import("./index").setup} */
+const setup = ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: pipe, app });
 
-export default functionPatchesSetup;
+export default setup;
 
 // -------- Meiosis Cell
 
@@ -32,8 +32,8 @@ const nestPatch = (patch, prop) => state =>
  */
 export const nest = createNest(nestPatch);
 
-/** @type {import("./index").meiosisCell} */
-export const meiosisCell = ({ stream, app }) =>
+/** @type {import("./index").cell} */
+export const cell = ({ stream, app }) =>
   commonCell({
     stream,
     accumulator: (x, f) => f(x),

@@ -2,8 +2,8 @@
 
 import commonSetup, { createNest, cell as commonCell } from "../common";
 
-/** @type {import("./index").immerSetup} */
-const immerSetup = ({ stream, produce, app }) =>
+/** @type {import("./index").setup} */
+const setup = ({ stream, produce, app }) =>
   commonSetup({
     stream,
     accumulator: produce,
@@ -12,7 +12,7 @@ const immerSetup = ({ stream, produce, app }) =>
     app
   });
 
-export default immerSetup;
+export default setup;
 
 // -------- Meiosis Cell
 
@@ -34,7 +34,8 @@ const nestPatch = produce => (patch, prop) => state => {
  */
 export const nest = produce => createNest(nestPatch(produce));
 
-export const meiosisCell = ({ stream, produce, app }) =>
+/** @type {import("./index").cell} */
+export const cell = ({ stream, produce, app }) =>
   commonCell({
     stream,
     accumulator: produce,
