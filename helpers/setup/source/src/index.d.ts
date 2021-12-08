@@ -63,6 +63,7 @@ export {
   MergerinoMeiosisConfig,
   MergerinoApp,
   MergerinoCell,
+  MergerinoCellActionConstructor,
   MergerinoRootCell,
   MergerinoNest,
   MergerinoConfig

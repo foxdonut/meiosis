@@ -1,8 +1,9 @@
 import {
-  Meiosis,
-  MeiosisConfigBase,
+  CellActionConstructor,
   CellApp,
   CellConfigBase,
+  Meiosis,
+  MeiosisConfigBase,
   MeiosisCell,
   MeiosisRootCell,
   Nest
@@ -80,6 +81,8 @@ export type MergerinoApp<S, A> = CellApp<S, MergerinoPatch<S>, A>;
 export type MergerinoCell<S> = MeiosisCell<S, MergerinoPatch<S>>;
 export type MergerinoRootCell<S, A> = MeiosisRootCell<S, MergerinoPatch<S>, A>;
 
+export type MergerinoCellActionConstructor<S, A> = CellActionConstructor<S, MergerinoPatch<S>, A>;
+
 export type MergerinoNest<S, K extends keyof S> = Nest<
   S,
   MergerinoPatch<S>,
@@ -87,7 +90,11 @@ export type MergerinoNest<S, K extends keyof S> = Nest<
   MergerinoPatch<S[K]>
 >;
 
-export function nest<S, K extends keyof S>(cell: MergerinoCell<S>, prop: K): MergerinoCell<S[K]>;
+export function nest<S, K extends keyof S, A>(
+  cell: MergerinoCell<S>,
+  prop: K,
+  Actions?: MergerinoCellActionConstructor<S[K], A>
+): MergerinoRootCell<S[K], A>;
 
 /**
  * Mergerino Meiosis Cell configuration.

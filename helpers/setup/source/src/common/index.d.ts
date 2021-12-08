@@ -369,17 +369,21 @@ export interface MeiosisRootCell<S, P, A> extends MeiosisCell<S, P> {
   actions: A;
 }
 
+export interface CellActionConstructor<S, P, A> {
+  (cell: MeiosisCell<S, P>): A;
+}
+
 export interface Nest<S, P, K extends keyof S, N> {
-  (cell: MeiosisCell<S, P>, prop: K): MeiosisCell<S[K], N>;
+  <A>(
+    cell: MeiosisCell<S, P>,
+    prop: K,
+    Actions?: CellActionConstructor<S[K], N, A>
+  ): MeiosisRootCell<S[K], N, A>;
 }
 
 export function createNest<S, K extends keyof S>(
   nestPatch: NestPatch
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
-
-export interface CellActionConstructor<S, P, A> {
-  (cell: MeiosisCell<S, P>): A;
-}
 
 /**
  * An effects constructor.
