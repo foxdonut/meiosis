@@ -26,7 +26,6 @@
     "url": "https://github.com/foxdonut/meiosis/issues"
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
-  "dependencies": {},
   "devDependencies": {
     "buble": "^0.20.0",
     "documentation": "^13.1.0",
