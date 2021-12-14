@@ -4,7 +4,6 @@ import {
   Meiosis,
   MeiosisConfigBase,
   MeiosisCell,
-  MeiosisRootCell,
   Nest,
   NestPatch
 } from "../common";
@@ -47,8 +46,7 @@ export default setup;
 
 export type ImmerApp<S, A> = CellApp<S, ImmerPatch<S>, A>;
 
-export type ImmerCell<S> = MeiosisCell<S, ImmerPatch<S>>;
-export type ImmerRootCell<S, A> = MeiosisRootCell<S, ImmerPatch<S>, A>;
+export type ImmerCell<S, A = unknown> = MeiosisCell<S, ImmerPatch<S>, A>;
 
 export interface ProduceNestPatch {
   (produce: Produce<any>): NestPatch;
@@ -89,4 +87,4 @@ export interface ImmerConfig<S, A> extends CellConfigBase {
  *
  * @returns {ImmerCell<S>} Immer Meiosis Cell.
  */
-export function cell<S, A>(config: ImmerConfig<S, A>): ImmerRootCell<S, A>;
+export function cell<S, A>(config: ImmerConfig<S, A>): ImmerCell<S, A>;

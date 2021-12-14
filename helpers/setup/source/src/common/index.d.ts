@@ -354,18 +354,16 @@ export default setup;
  */
 export type NestPatch = (patch: any, prop: any) => any;
 
-export interface MeiosisCell<S, P> {
-  getState: Stream<S>;
-  update: (patch: P) => P;
-}
-
 /**
  * Returned by Meiosis Cell setup.
  *
  * @template S the State type.
  * @template P the Patch type.
+ * @template A the Actions type.
  */
-export interface MeiosisRootCell<S, P, A> extends MeiosisCell<S, P> {
+export interface MeiosisCell<S, P, A = unknown> {
+  getState: Stream<S>;
+  update: (patch: P) => P;
   actions: A;
 }
 
@@ -374,11 +372,11 @@ export interface CellActionConstructor<S, P, A> {
 }
 
 export interface Nest<S, P, K extends keyof S, N> {
-  <A>(
-    cell: MeiosisCell<S, P>,
-    prop: K,
-    Actions?: CellActionConstructor<S[K], N, A>
-  ): MeiosisRootCell<S[K], N, A>;
+  <A>(cell: MeiosisCell<S, P>, prop: K, Actions?: CellActionConstructor<S[K], N, A>): MeiosisCell<
+    S[K],
+    N,
+    A
+  >;
 }
 
 export function createNest<S, K extends keyof S>(
@@ -467,4 +465,4 @@ export interface CellConfig<S, P, A> extends CellConfigBase {
  *
  * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
  */
-export function cell<S, P, A>(config: CellConfig<S, P, A>): MeiosisRootCell<S, P, A>;
+export function cell<S, P, A>(config: CellConfig<S, P, A>): MeiosisCell<S, P, A>;

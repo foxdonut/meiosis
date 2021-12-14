@@ -58,7 +58,7 @@ export default setup;
 export const createNest = nestPatch => (cell, prop, Actions) => {
   const getState = cell.getState.map(state => state[prop]);
 
-  /** @type {import("./index").MeiosisRootCell} */
+  /** @type {import("./index").MeiosisCell} */
   const nested = {
     getState,
     update: patch => cell.update(nestPatch(patch, prop)),
@@ -78,7 +78,8 @@ export const cell = ({ stream, accumulator, combine, app }) => {
 
   const root = {
     getState: states,
-    update
+    update,
+    actions: undefined
   };
 
   const actions = app && app.Actions ? app.Actions(root) : undefined;

@@ -42,19 +42,10 @@ export {
   FunctionPatchesConfig,
   FunctionPatchesCell,
   FunctionPatchesMeiosisConfig,
-  FunctionPatchesNest,
-  FunctionPatchesRootCell
+  FunctionPatchesNest
 } from "./functionPatches";
 
-export {
-  ImmerApp,
-  ImmerConfig,
-  ImmerCell,
-  ImmerMeiosisConfig,
-  ImmerRootCell,
-  ImmerPatch,
-  Produce
-} from "./immer";
+export { ImmerApp, ImmerConfig, ImmerCell, ImmerMeiosisConfig, ImmerPatch, Produce } from "./immer";
 
 export {
   MergerinoFunctionPatch,
@@ -64,7 +55,6 @@ export {
   MergerinoApp,
   MergerinoCell,
   MergerinoCellActionConstructor,
-  MergerinoRootCell,
   MergerinoNest,
   MergerinoConfig
 } from "./mergerino";
