@@ -8,7 +8,7 @@ import functionPatchesSetup, {
   cell as functionPatchesCell,
   nest as functionPatchesNest
 } from "./functionPatches";
-import immerSetup, { cell as immerCell, nest as immerNest } from "./immer";
+import immerSetup, { cell as immerCell, produceNest } from "./immer";
 import { get } from "./util";
 
 declare namespace meiosisSetup {
@@ -26,7 +26,7 @@ declare namespace meiosisSetup {
     };
   }
   export namespace immer {
-    export { immerSetup as setup, immerCell as cell, immerNest as nest };
+    export { immerSetup as setup, immerCell as cell, produceNest };
   }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
@@ -41,11 +41,20 @@ export {
   FunctionPatchesApp,
   FunctionPatchesConfig,
   FunctionPatchesCell,
+  FunctionPatchesCellActionConstructor,
   FunctionPatchesMeiosisConfig,
   FunctionPatchesNest
 } from "./functionPatches";
 
-export { ImmerApp, ImmerConfig, ImmerCell, ImmerMeiosisConfig, ImmerPatch, Produce } from "./immer";
+export {
+  ImmerApp,
+  ImmerConfig,
+  ImmerCell,
+  ImmerCellActionConstructor,
+  ImmerMeiosisConfig,
+  ImmerPatch,
+  Produce
+} from "./immer";
 
 export {
   MergerinoFunctionPatch,

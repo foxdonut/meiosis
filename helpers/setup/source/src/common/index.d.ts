@@ -371,8 +371,8 @@ export interface CellActionConstructor<S, P, A> {
   (cell: MeiosisCell<S, P>): A;
 }
 
-export interface Nest<S, P, K extends keyof S, N> {
-  <A>(cell: MeiosisCell<S, P>, prop: K, Actions?: CellActionConstructor<S[K], N, A>): MeiosisCell<
+export interface Nest<S, P, K extends keyof S, N, A = unknown> {
+  (cell: MeiosisCell<S, P>, prop: K, Actions?: CellActionConstructor<S[K], N, A>): MeiosisCell<
     S[K],
     N,
     A

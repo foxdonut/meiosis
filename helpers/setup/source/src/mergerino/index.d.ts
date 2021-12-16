@@ -81,11 +81,12 @@ export type MergerinoCell<S, A = unknown> = MeiosisCell<S, MergerinoPatch<S>, A>
 
 export type MergerinoCellActionConstructor<S, A> = CellActionConstructor<S, MergerinoPatch<S>, A>;
 
-export type MergerinoNest<S, K extends keyof S> = Nest<
+export type MergerinoNest<S, K extends keyof S, A = unknown> = Nest<
   S,
   MergerinoPatch<S>,
   K,
-  MergerinoPatch<S[K]>
+  MergerinoPatch<S[K]>,
+  A
 >;
 
 export function nest<S, K extends keyof S, A>(

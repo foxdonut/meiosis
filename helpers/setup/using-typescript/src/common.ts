@@ -17,9 +17,9 @@ export interface Conditions {
   sky: Sky;
 }
 
-export interface ConditionsActions<T> {
-  togglePrecipitations: (context: T, value: boolean) => void;
-  changeSky: (context: T, value: Sky) => void;
+export interface ConditionsActions {
+  togglePrecipitations: (value: boolean) => void;
+  changeSky: (value: Sky) => void;
 }
 
 export type TemperatureUnits = "C" | "F";
@@ -30,9 +30,9 @@ export interface Temperature {
   units: TemperatureUnits;
 }
 
-export interface TemperatureActions<T> {
-  increment: (context: T, amount: number) => void;
-  changeUnits: (context: T) => void;
+export interface TemperatureActions {
+  increment: (amount: number) => void;
+  changeUnits: () => void;
 }
 
 export interface TemperatureComponent {

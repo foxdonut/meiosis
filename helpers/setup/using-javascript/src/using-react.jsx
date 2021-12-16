@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import { app, convert } from "./common";
 
 // react + immer + flyd
-const nest = meiosis.immer.nest(produce);
+const nest = meiosis.immer.produceNest(produce);
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {

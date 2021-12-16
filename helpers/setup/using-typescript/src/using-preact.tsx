@@ -1,4 +1,8 @@
-import meiosis, { MergerinoApp, MergerinoCell } from "../../source/dist";
+import meiosis, {
+  MergerinoApp,
+  MergerinoCell,
+  MergerinoCellActionConstructor
+} from "../../source/dist";
 import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
@@ -22,7 +26,7 @@ interface Attrs {
 }
 
 interface ConditionsAttrs {
-  cell: MergerinoCell<Conditions>;
+  cell: MergerinoCell<Conditions, ConditionsActions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -31,7 +35,7 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: MergerinoCell<Temperature>;
+  cell: MergerinoCell<Temperature, TemperatureActions>;
 }
 
 const nest = meiosis.mergerino.nest;
@@ -40,14 +44,17 @@ const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const conditionsActions: ConditionsActions<MergerinoCell<Conditions>> = {
-  togglePrecipitations: (cell, value) => {
+const ConditionsActionsConstr: MergerinoCellActionConstructor<
+  Conditions,
+  ConditionsActions
+> = cell => ({
+  togglePrecipitations: value => {
     cell.update({ precipitations: value });
   },
-  changeSky: (cell, value) => {
+  changeSky: value => {
     cell.update({ sky: value });
   }
-};
+});
 
 // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
 // file, we'll use h here.
@@ -59,7 +66,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
       type: "radio",
       value,
       checked: cell.getState().sky === value,
-      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+      onchange: evt => cell.actions.changeSky(evt.target.value)
     }),
     label
   );
@@ -74,7 +81,7 @@ const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
       h("input", {
         type: "checkbox",
         checked: cell.getState().precipitations,
-        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+        onchange: evt => cell.actions.togglePrecipitations(evt.target.checked)
       }),
       "Precipitations"
     ),
@@ -91,11 +98,14 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const temperatureActions: TemperatureActions<MergerinoCell<Temperature>> = {
-  increment: (cell, amount) => {
+const TemperatureActionsConstr: MergerinoCellActionConstructor<
+  Temperature,
+  TemperatureActions
+> = cell => ({
+  increment: amount => {
     cell.update({ value: x => x + amount });
   },
-  changeUnits: cell => {
+  changeUnits: () => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -103,7 +113,7 @@ const temperatureActions: TemperatureActions<MergerinoCell<Temperature>> = {
       return { ...state, value: newValue, units: newUnits };
     });
   }
-};
+});
 
 const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
   h(
@@ -117,14 +127,10 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
     h(
       "div",
       {},
-      h("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
-      h("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
+      h("button", { onclick: () => cell.actions.increment(1) }, "Increment"),
+      h("button", { onclick: () => cell.actions.increment(-1) }, "Decrement")
     ),
-    h(
-      "div",
-      {},
-      h("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units")
-    )
+    h("div", {}, h("button", { onclick: () => cell.actions.changeUnits() }, "Change Units"))
   );
 
 const app: MergerinoApp<State, never> = {
@@ -144,9 +150,9 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
     h(
       "div",
       {},
-      h(Conditions, { cell: nest(cell, "conditions") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+      h(Conditions, { cell: nest(cell, "conditions", ConditionsActionsConstr) }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "air", TemperatureActionsConstr) }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "water", TemperatureActionsConstr) })
     ),
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );

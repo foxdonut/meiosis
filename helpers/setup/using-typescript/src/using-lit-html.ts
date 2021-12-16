@@ -1,4 +1,8 @@
-import meiosis, { FunctionPatchesApp, FunctionPatchesCell } from "../../source/dist";
+import meiosis, {
+  FunctionPatchesApp,
+  FunctionPatchesCell,
+  FunctionPatchesCellActionConstructor
+} from "../../source/dist";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
 import {
   Conditions,
@@ -17,7 +21,7 @@ import {
 const nest = meiosis.functionPatches.nest;
 
 interface SkyOptionAttrs {
-  cell: FunctionPatchesCell<Conditions>;
+  cell: FunctionPatchesCell<Conditions, ConditionsActions>;
   value: string;
   label: string;
 }
@@ -26,14 +30,17 @@ const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const conditionsActions: ConditionsActions<FunctionPatchesCell<Conditions>> = {
-  togglePrecipitations: (cell, value) => {
+const ConditionsActionsConstr: FunctionPatchesCellActionConstructor<
+  Conditions,
+  ConditionsActions
+> = cell => ({
+  togglePrecipitations: value => {
     cell.update(state => ({ ...state, precipitations: value }));
   },
-  changeSky: (cell, value) => {
+  changeSky: value => {
     cell.update(state => ({ ...state, sky: value }));
   }
-};
+});
 
 const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ cell, value, label }) => html`
   <label>
@@ -41,19 +48,21 @@ const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ cell, value, lab
       type="radio"
       value=${value}
       .checked=${cell.getState().sky === value}
-      @change=${evt => conditionsActions.changeSky(cell, evt.target.value)}
+      @change=${evt => cell.actions.changeSky(evt.target.value)}
     />
     ${label}
   </label>
 `;
 
-const Conditions: (cell: FunctionPatchesCell<Conditions>) => TemplateResult = cell => html`
+const Conditions: (
+  cell: FunctionPatchesCell<Conditions, ConditionsActions>
+) => TemplateResult = cell => html`
   <div>
     <label>
       <input
         type="checkbox"
         .checked=${cell.getState().precipitations}
-        @change=${evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
+        @change=${evt => cell.actions.togglePrecipitations(evt.target.checked)}
       />
       Precipitations
     </label>
@@ -69,11 +78,14 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const temperatureActions: TemperatureActions<FunctionPatchesCell<Temperature>> = {
-  increment: (cell, amount) => {
+const TemperatureActionsConstr: FunctionPatchesCellActionConstructor<
+  Temperature,
+  TemperatureActions
+> = cell => ({
+  increment: amount => {
     cell.update(state => ({ ...state, value: state.value + amount }));
   },
-  changeUnits: cell => {
+  changeUnits: () => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -81,17 +93,19 @@ const temperatureActions: TemperatureActions<FunctionPatchesCell<Temperature>> =
       return { ...state, value: newValue, units: newUnits };
     });
   }
-};
+});
 
-const Temperature: (cell: FunctionPatchesCell<Temperature>) => TemplateResult = cell => html`
+const Temperature: (
+  cell: FunctionPatchesCell<Temperature, TemperatureActions>
+) => TemplateResult = cell => html`
   <div>
     ${cell.getState().label} Temperature: ${cell.getState().value}&deg;${cell.getState().units}
     <div>
-      <button @click=${() => temperatureActions.increment(cell, 1)}>Increment</button>
-      <button @click=${() => temperatureActions.increment(cell, -1)}>Decrement</button>
+      <button @click=${() => cell.actions.increment(1)}>Increment</button>
+      <button @click=${() => cell.actions.increment(-1)}>Decrement</button>
     </div>
     <div>
-      <button @click=${() => temperatureActions.changeUnits(cell)}>Change Units</button>
+      <button @click=${() => cell.actions.changeUnits()}>Change Units</button>
     </div>
   </div>
 `;
@@ -109,8 +123,9 @@ const app: FunctionPatchesApp<State, never> = {
 const App: (cell: FunctionPatchesCell<State>) => TemplateResult = cell => html`
   <div style="display: grid; grid-template-columns: 1fr 1fr">
     <div>
-      ${Conditions(nest(cell, "conditions"))} ${Temperature(nest(nest(cell, "temperature"), "air"))}
-      ${Temperature(nest(nest(cell, "temperature"), "water"))}
+      ${Conditions(nest(cell, "conditions", ConditionsActionsConstr))}
+      ${Temperature(nest(nest(cell, "temperature"), "air", TemperatureActionsConstr))}
+      ${Temperature(nest(nest(cell, "temperature"), "water", TemperatureActionsConstr))}
     </div>
     <pre style="margin: 0">${JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>

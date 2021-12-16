@@ -1,4 +1,12 @@
-import { CellApp, CellConfigBase, Meiosis, MeiosisConfigBase, MeiosisCell, Nest } from "../common";
+import {
+  CellActionConstructor,
+  CellApp,
+  CellConfigBase,
+  Meiosis,
+  MeiosisConfigBase,
+  MeiosisCell,
+  Nest
+} from "../common";
 
 /**
  * @template S the State type.
@@ -53,17 +61,25 @@ export type FunctionPatchesApp<S, A> = CellApp<S, FunctionPatch<S>, A>;
 
 export type FunctionPatchesCell<S, A = unknown> = MeiosisCell<S, FunctionPatch<S>, A>;
 
-export type FunctionPatchesNest<S, K extends keyof S> = Nest<
+export type FunctionPatchesCellActionConstructor<S, A> = CellActionConstructor<
+  S,
+  FunctionPatch<S>,
+  A
+>;
+
+export type FunctionPatchesNest<S, K extends keyof S, A = unknown> = Nest<
   S,
   FunctionPatch<S>,
   K,
-  FunctionPatch<S[K]>
+  FunctionPatch<S[K]>,
+  A
 >;
 
-export function nest<S, K extends keyof S>(
+export function nest<S, K extends keyof S, A>(
   cell: FunctionPatchesCell<S>,
-  prop: K
-): FunctionPatchesCell<S[K]>;
+  prop: K,
+  Actions?: FunctionPatchesCellActionConstructor<S[K], A>
+): FunctionPatchesCell<S[K], A>;
 
 /**
  * Function Patches Meiosis Cell configuration.

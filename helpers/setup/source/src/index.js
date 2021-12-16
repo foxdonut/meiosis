@@ -6,7 +6,7 @@ import functionPatchesSetup, {
   cell as functionPatchesCell,
   nest as functionPatchesNest
 } from "./functionPatches";
-import immerSetup, { cell as immerCell, nest as immerNest } from "./immer";
+import immerSetup, { cell as immerCell, produceNest } from "./immer";
 import simpleStream from "./simple-stream";
 import { get } from "./util";
 
@@ -29,7 +29,7 @@ export default {
   immer: {
     setup: immerSetup,
     cell: immerCell,
-    nest: immerNest
+    produceNest
   },
   simpleStream,
   util: {

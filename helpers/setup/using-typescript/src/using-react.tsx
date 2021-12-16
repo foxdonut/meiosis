@@ -1,4 +1,4 @@
-import meiosis, { ImmerApp, ImmerCell } from "../../source/dist";
+import meiosis, { ImmerCellActionConstructor, ImmerApp, ImmerCell } from "../../source/dist";
 import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
@@ -23,7 +23,7 @@ interface Attrs {
 }
 
 interface ConditionsAttrs {
-  cell: ImmerCell<Conditions>;
+  cell: ImmerCell<Conditions, ConditionsActions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -32,27 +32,30 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: ImmerCell<Temperature>;
+  cell: ImmerCell<Temperature, TemperatureActions>;
 }
 
-const nest = meiosis.immer.nest(produce);
+const nest = meiosis.immer.produceNest(produce);
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const conditionsActions: ConditionsActions<ImmerCell<Conditions>> = {
-  togglePrecipitations: (cell, value) => {
+const ConditionsActionsConstr: ImmerCellActionConstructor<
+  Conditions,
+  ConditionsActions
+> = cell => ({
+  togglePrecipitations: value => {
     cell.update(state => {
       state.precipitations = value;
     });
   },
-  changeSky: (cell, value) => {
+  changeSky: value => {
     cell.update(state => {
       state.sky = value;
     });
   }
-};
+});
 
 const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label }) => (
   <label>
@@ -60,7 +63,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label
       type="radio"
       value={value}
       checked={cell.getState().sky === value}
-      onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
+      onChange={evt => cell.actions.changeSky(evt.target.value)}
     />
     {label}
   </label>
@@ -72,7 +75,7 @@ const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
       <input
         type="checkbox"
         checked={cell.getState().precipitations}
-        onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
+        onChange={evt => cell.actions.togglePrecipitations(evt.target.checked)}
       />
       Precipitations
     </label>
@@ -88,13 +91,16 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const temperatureActions: TemperatureActions<ImmerCell<Temperature>> = {
-  increment: (cell, amount) => {
+const TemperatureActionsConstr: ImmerCellActionConstructor<
+  Temperature,
+  TemperatureActions
+> = cell => ({
+  increment: amount => {
     cell.update(state => {
       state.value += amount;
     });
   },
-  changeUnits: cell => {
+  changeUnits: () => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -103,18 +109,18 @@ const temperatureActions: TemperatureActions<ImmerCell<Temperature>> = {
       state.units = newUnits;
     });
   }
-};
+});
 
 const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
   <div>
     {cell.getState().label} Temperature:
     {cell.getState().value}&deg;{cell.getState().units}
     <div>
-      <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
-      <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
+      <button onClick={() => cell.actions.increment(1)}>Increment</button>
+      <button onClick={() => cell.actions.increment(-1)}>Decrement</button>
     </div>
     <div>
-      <button onClick={() => temperatureActions.changeUnits(cell)}>Change Units</button>
+      <button onClick={() => cell.actions.changeUnits()}>Change Units</button>
     </div>
   </div>
 );
@@ -132,9 +138,9 @@ const app: ImmerApp<State, never> = {
 const Root: (attrs: Attrs) => ReactElement = ({ cell }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
     <div>
-      <Conditions cell={nest(cell, "conditions")} />
-      <Temperature cell={nest(nest(cell, "temperature"), "air")} />
-      <Temperature cell={nest(nest(cell, "temperature"), "water")} />
+      <Conditions cell={nest(cell, "conditions", ConditionsActionsConstr)} />
+      <Temperature cell={nest(nest(cell, "temperature"), "air", TemperatureActionsConstr)} />
+      <Temperature cell={nest(nest(cell, "temperature"), "water", TemperatureActionsConstr)} />
     </div>
     <pre style={{ margin: "0" }}>{JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>

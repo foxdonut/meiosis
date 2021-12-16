@@ -1,4 +1,5 @@
 import {
+  CellActionConstructor,
   CellApp,
   CellConfigBase,
   Meiosis,
@@ -48,18 +49,30 @@ export type ImmerApp<S, A> = CellApp<S, ImmerPatch<S>, A>;
 
 export type ImmerCell<S, A = unknown> = MeiosisCell<S, ImmerPatch<S>, A>;
 
+export type ImmerCellActionConstructor<S, A> = CellActionConstructor<S, ImmerPatch<S>, A>;
+
 export interface ProduceNestPatch {
   (produce: Produce<any>): NestPatch;
 }
-export type ImmerNest<S, K extends keyof S> = Nest<S, ImmerPatch<S>, K, ImmerPatch<S[K]>>;
+export type ImmerNest<S, K extends keyof S, A = unknown> = Nest<
+  S,
+  ImmerPatch<S>,
+  K,
+  ImmerPatch<S[K]>,
+  A
+>;
 
-export interface ProduceNest<S, K extends keyof S> {
-  (produce: Produce<any>): ImmerNest<S, K>;
+export interface ProduceNest<S, K extends keyof S, A> {
+  (produce: Produce<any>): ImmerNest<S, K, A>;
 }
 
-export function nestFn<S, K extends keyof S>(cell: ImmerCell<S>, prop: K): ImmerCell<S[K]>;
+export function nest<S, K extends keyof S, A>(
+  cell: ImmerCell<S>,
+  prop: K,
+  Actions?: ImmerCellActionConstructor<S[K], A>
+): ImmerCell<S[K], A>;
 
-export function nest<S>(produce: Produce<S>): typeof nestFn;
+export function produceNest<S>(produce: Produce<S>): typeof nest;
 
 /**
  * Immer Meiosis Cell configuration.

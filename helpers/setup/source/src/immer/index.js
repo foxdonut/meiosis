@@ -17,12 +17,9 @@ export default setup;
 // -------- Meiosis Cell
 
 /**
- * @template S
- * @template {keyof S} K
- *
  * @type {import("./index").ProduceNestPatch}
  */
-const nestPatch = produce => (patch, prop) => state => {
+const produceNestPatch = produce => (patch, prop) => state => {
   state[prop] = produce(state[prop], patch);
 };
 
@@ -32,7 +29,7 @@ const nestPatch = produce => (patch, prop) => state => {
  *
  * @type {import("./index").ProduceNest<S, K>}
  */
-export const nest = produce => createNest(nestPatch(produce));
+export const produceNest = produce => createNest(produceNestPatch(produce));
 
 /** @type {import("./index").cell} */
 export const cell = ({ stream, produce, app }) =>

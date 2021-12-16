@@ -1238,7 +1238,7 @@ describe("Meiosis Cell", () => {
         R.assocPath(["duck", "color"], "yellow")
       ],
       [
-        meiosis.immer.nest(produce),
+        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1267,7 +1267,7 @@ describe("Meiosis Cell", () => {
         R.assocPath(["duck", "color"], "yellow")
       ],
       [
-        meiosis.immer.nest(produce),
+        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1305,7 +1305,7 @@ describe("Meiosis Cell", () => {
         R.assoc("done", true)
       ],
       [
-        meiosis.immer.nest(produce),
+        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },

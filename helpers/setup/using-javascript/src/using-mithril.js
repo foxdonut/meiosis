@@ -1,4 +1,5 @@
 // @ts-check
+// mithril + mergerino + mithril-stream
 
 import meiosis from "../../source/dist/index";
 import merge from "mergerino";
@@ -6,17 +7,16 @@ import m from "mithril";
 import Stream from "mithril/stream";
 import { app, convert } from "./common";
 
-// mithril + mergerino + mithril-stream
 const nest = meiosis.mergerino.nest;
 
-const conditionsActions = {
-  togglePrecipitations: (cell, value) => {
+const ConditionsActions = cell => ({
+  togglePrecipitations: value => {
     cell.update({ precipitations: value });
   },
-  changeSky: (cell, value) => {
+  changeSky: value => {
     cell.update({ sky: value });
   }
-};
+});
 
 const SkyOption = {
   view: ({ attrs: { cell, value, label } }) =>
@@ -26,7 +26,7 @@ const SkyOption = {
         type: "radio",
         value,
         checked: cell.getState().sky === value,
-        onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+        onchange: evt => cell.actions.changeSky(evt.target.value)
       }),
       label
     )
@@ -41,7 +41,7 @@ const Conditions = {
         m("input", {
           type: "checkbox",
           checked: cell.getState().precipitations,
-          onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+          onchange: evt => cell.actions.togglePrecipitations(evt.target.checked)
         }),
         "Precipitations"
       ),
@@ -54,11 +54,11 @@ const Conditions = {
     )
 };
 
-const temperatureActions = {
-  increment: (cell, amount) => {
+const TemperatureActions = cell => ({
+  increment: amount => {
     cell.update({ value: x => x + amount });
   },
-  changeUnits: cell => {
+  changeUnits: () => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -66,7 +66,7 @@ const temperatureActions = {
       return { ...state, value: newValue, units: newUnits };
     });
   }
-};
+});
 
 const Temperature = {
   view: ({ attrs: { cell } }) =>
@@ -79,10 +79,10 @@ const Temperature = {
       cell.getState().units,
       m(
         "div",
-        m("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
-        m("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
+        m("button", { onclick: () => cell.actions.increment(1) }, "Increment"),
+        m("button", { onclick: () => cell.actions.increment(-1) }, "Decrement")
       ),
-      m("div", m("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units"))
+      m("div", m("button", { onclick: () => cell.actions.changeUnits() }, "Change Units"))
     )
 };
 
@@ -93,9 +93,9 @@ const App = {
       { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
       m(
         "div",
-        m(Conditions, { cell: nest(cell, "conditions") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+        m(Conditions, { cell: nest(cell, "conditions", ConditionsActions) }),
+        m(Temperature, { cell: nest(nest(cell, "temperature"), "air", TemperatureActions) }),
+        m(Temperature, { cell: nest(nest(cell, "temperature"), "water", TemperatureActions) })
       ),
       m("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
     )
