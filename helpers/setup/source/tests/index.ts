@@ -1,5 +1,5 @@
 import simpleStream from "../src/simple-stream";
-import { MergerinoApp, MergerinoCellActionConstructor, cell, nest } from "../src/mergerino";
+import { CellActionConstructor, CellApp, nest, setupCell } from "../src/mergerino";
 import merge from "mergerino";
 
 describe("Meiosis with TypeScript", () => {
@@ -12,7 +12,7 @@ describe("Meiosis with TypeScript", () => {
         }
 
         const app = { initial: { ducks: 1, sound: "silent" } };
-        const rootCell = cell<State, never>({ stream: simpleStream, merge, app });
+        const rootCell = setupCell<State, never>({ stream: simpleStream, merge, app });
 
         expect(rootCell.actions).toBeUndefined();
         expect(rootCell.getState()).toEqual({ ducks: 1, sound: "silent" });
@@ -32,7 +32,7 @@ describe("Meiosis with TypeScript", () => {
         }
 
         const app = {};
-        const rootCell = cell<State, never>({ stream: simpleStream, merge, app });
+        const rootCell = setupCell<State, never>({ stream: simpleStream, merge, app });
 
         expect(rootCell.actions).toBeUndefined();
         expect(rootCell.getState()).toEqual({});
@@ -58,7 +58,7 @@ describe("Meiosis with TypeScript", () => {
           addDucks: (amount: number) => void;
         }
 
-        const app: MergerinoApp<State, Actions> = {
+        const app: CellApp<State, Actions> = {
           initial: { ducks: 1, sound: "quack" },
           Actions: rootCell => ({
             addDucks: (amount: number) => {
@@ -67,7 +67,7 @@ describe("Meiosis with TypeScript", () => {
           })
         };
 
-        const rootCell = cell<State, Actions>({ stream: simpleStream, merge, app });
+        const rootCell = setupCell<State, Actions>({ stream: simpleStream, merge, app });
 
         expect(rootCell.actions).toBeDefined();
         expect(rootCell.getState()).toEqual({ ducks: 1, sound: "quack" });
@@ -90,7 +90,7 @@ describe("Meiosis with TypeScript", () => {
           changeDuckColor: (color: string) => void;
         }
 
-        const DuckActionsConstructor: MergerinoCellActionConstructor<Duck, DuckActions> = cell => ({
+        const DuckActionsConstructor: CellActionConstructor<Duck, DuckActions> = cell => ({
           changeDuckColor: color => {
             cell.update({ color });
           }
@@ -100,7 +100,7 @@ describe("Meiosis with TypeScript", () => {
           initial: { duck: { color: "white" }, sound: "quack" }
         };
 
-        const rootCell = cell<State, never>({ stream: simpleStream, merge, app });
+        const rootCell = setupCell<State, never>({ stream: simpleStream, merge, app });
 
         expect(rootCell.actions).toBeUndefined();
 

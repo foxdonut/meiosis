@@ -1,11 +1,11 @@
 import {
-  CellActionConstructor,
-  CellApp,
+  CellActionConstructor as CommonCellActionConstructor,
+  CellApp as CommonCellApp,
   CellConfigBase,
   Meiosis,
   MeiosisConfigBase,
-  MeiosisCell,
-  Nest
+  MeiosisCell as CommonMeiosisCell,
+  Nest as CommonNest
 } from "../common";
 
 /**
@@ -20,7 +20,7 @@ import {
  *
  * @template S the State type.
  */
-export type MergerinoFunctionPatch<S> = (state: S) => S;
+export type FunctionPatch<S> = (state: S) => S;
 
 /**
  * A Mergerino object patch. This is an object that contains updates to state properties.
@@ -33,8 +33,8 @@ export type MergerinoFunctionPatch<S> = (state: S) => S;
  *
  * @template S the State type.
  */
-export type MergerinoObjectPatch<S> = {
-  [K in keyof S]?: MergerinoPatch<S[K]> | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
+export type ObjectPatch<S> = {
+  [K in keyof S]?: Patch<S[K]> | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
 };
 
 /**
@@ -49,13 +49,13 @@ export type MergerinoObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type MergerinoPatch<S> = MergerinoFunctionPatch<S> | MergerinoObjectPatch<S>;
+export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
 
-export interface MergerinoMeiosisConfig<S, A> extends MeiosisConfigBase<S, MergerinoPatch<S>, A> {
+export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
-  merge: (state: S, patch: MergerinoPatch<S>) => S;
+  merge: (state: S, patch: Patch<S>) => S;
 }
 
 /**
@@ -64,52 +64,46 @@ export interface MergerinoMeiosisConfig<S, A> extends MeiosisConfigBase<S, Merge
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MergerinoMeiosisConfig<S, A>} config the Meiosis config for use with Mergerino
+ * @param {MeiosisConfig<S, A>} config the Meiosis config for use with Mergerino
  *
- * @returns {Meiosis<S, MergerinoPatch<S>, A>} `{ states, update, actions }`,
+ * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A>(config: MergerinoMeiosisConfig<S, A>): Meiosis<S, MergerinoPatch<S>, A>;
+export function setup<S, A>(config: MeiosisConfig<S, A>): Meiosis<S, Patch<S>, A>;
 
 export default setup;
 
 // -------- Meiosis Cell
 
-export type MergerinoApp<S, A> = CellApp<S, MergerinoPatch<S>, A>;
+export type CellApp<S, A> = CommonCellApp<S, Patch<S>, A>;
 
-export type MergerinoCell<S, A = unknown> = MeiosisCell<S, MergerinoPatch<S>, A>;
+export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
 
-export type MergerinoCellActionConstructor<S, A> = CellActionConstructor<S, MergerinoPatch<S>, A>;
+export type CellActionConstructor<S, A> = CommonCellActionConstructor<S, Patch<S>, A>;
 
-export type MergerinoNest<S, K extends keyof S, A = unknown> = Nest<
-  S,
-  MergerinoPatch<S>,
-  K,
-  MergerinoPatch<S[K]>,
-  A
->;
+export type Nest<S, K extends keyof S, A = unknown> = CommonNest<S, Patch<S>, K, Patch<S[K]>, A>;
 
 export function nest<S, K extends keyof S, A>(
-  cell: MergerinoCell<S>,
+  cell: MeiosisCell<S>,
   prop: K,
-  Actions?: MergerinoCellActionConstructor<S[K], A>
-): MergerinoCell<S[K], A>;
+  Actions?: CellActionConstructor<S[K], A>
+): MeiosisCell<S[K], A>;
 
 /**
  * Mergerino Meiosis Cell configuration.
  *
  * @template S the State type.
  */
-export interface MergerinoConfig<S, A> extends CellConfigBase {
+export interface CellConfig<S, A> extends CellConfigBase {
   /**
    * The Mergerino `merge` function.
    */
-  merge: (state: S, patch: MergerinoPatch<S>) => S;
+  merge: (state: S, patch: Patch<S>) => S;
 
   /**
    * The application object, with optional properties.
    */
-  app: MergerinoApp<S, A>;
+  app: CellApp<S, A>;
 }
 
 /**
@@ -118,8 +112,8 @@ export interface MergerinoConfig<S, A> extends CellConfigBase {
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MergerinoConfig<S>} config the Meiosis Cell config for use with Mergerino
+ * @param {CellConfig<S>} config the Meiosis Cell config for use with Mergerino
  *
- * @returns {MergerinoCell<S>} Mergerino Meiosis Cell.
+ * @returns {MeiosisCell<S>} Mergerino Meiosis Cell.
  */
-export function cell<S, A>(config: MergerinoConfig<S, A>): MergerinoCell<S, A>;
+export function setupCell<S, A>(config: CellConfig<S, A>): MeiosisCell<S, A>;

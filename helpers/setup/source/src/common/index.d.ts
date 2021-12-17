@@ -393,8 +393,8 @@ export function createNest<S, K extends keyof S>(
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export interface CellEffectConstructor<S, P> {
-  (cell: MeiosisCell<S, P>): Effect<S>[];
+export interface CellEffectConstructor<S, P, A> {
+  (cell: MeiosisCell<S, P, A>): Effect<S>[];
 }
 
 export interface CellApp<S, P, A> {
@@ -416,7 +416,7 @@ export interface CellApp<S, P, A> {
   /**
    * A function that creates the application's effects.
    */
-  Effects?: CellEffectConstructor<S, P>;
+  Effects?: CellEffectConstructor<S, P, A>;
 }
 
 export interface CellConfigBase {
@@ -465,4 +465,4 @@ export interface CellConfig<S, P, A> extends CellConfigBase {
  *
  * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
  */
-export function cell<S, P, A>(config: CellConfig<S, P, A>): MeiosisCell<S, P, A>;
+export function setupCell<S, P, A>(config: CellConfig<S, P, A>): MeiosisCell<S, P, A>;

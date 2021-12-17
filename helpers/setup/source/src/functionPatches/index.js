@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, cell as commonCell } from "../common";
+import commonSetup, { createNest, setupCell as commonCell } from "../common";
 
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
@@ -18,7 +18,7 @@ export default setup;
  *
  * @type {import("../common/index").NestPatch}
  *
- * @param {import("./index").FunctionPatch<S[K]>} patch
+ * @param {import("./index").Patch<S[K]>} patch
  * @param {K} prop
  */
 const nestPatch = (patch, prop) => state =>
@@ -28,12 +28,12 @@ const nestPatch = (patch, prop) => state =>
  * @template S
  * @template {keyof S} K
  *
- * @type {import("./index").FunctionPatchesNest<S, K>}
+ * @type {import("./index").Nest<S, K>}
  */
 export const nest = createNest(nestPatch);
 
-/** @type {import("./index").cell} */
-export const cell = ({ stream, app }) =>
+/** @type {import("./index").setupCell} */
+export const setupCell = ({ stream, app }) =>
   commonCell({
     stream,
     accumulator: (x, f) => f(x),

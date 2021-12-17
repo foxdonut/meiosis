@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, cell as commonCell } from "../common";
+import commonSetup, { createNest, setupCell as commonCell } from "../common";
 
 /*
  * @template S
@@ -36,7 +36,7 @@ export default setup;
  *
  * @type {import("../common/index").NestPatch}
  *
- * @param {import("./index").MergerinoPatch<S[K]>} patch
+ * @param {import("./index").Patch<S[K]>} patch
  * @param {K} prop
  */
 const nestPatch = (patch, prop) => ({ [prop]: patch });
@@ -45,12 +45,12 @@ const nestPatch = (patch, prop) => ({ [prop]: patch });
  * @template S
  * @template {keyof S} K
  *
- * @type {import("./index").MergerinoNest<S, K>}
+ * @type {import("./index").Nest<S, K>}
  */
 export const nest = createNest(nestPatch);
 
-/** @type {import("./index").cell} */
-export const cell = ({ stream, merge, app }) =>
+/** @type {import("./index").setupCell} */
+export const setupCell = ({ stream, merge, app }) =>
   commonCell({
     stream,
     accumulator: merge,

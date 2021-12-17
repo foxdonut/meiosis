@@ -1,71 +1,33 @@
-import commonSetup, {
-  createNest,
-  cell as commonMeiosisCell,
-  StreamLibWithProperty
-} from "./common";
-import mergerinoSetup, { cell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
+import commonSetup, { createNest, setupCell as commonCell, StreamLibWithProperty } from "./common";
+import mergerinoSetup, { setupCell as mergerinoCell, nest as mergerinoNest } from "./mergerino";
 import functionPatchesSetup, {
-  cell as functionPatchesCell,
+  setupCell as functionPatchesCell,
   nest as functionPatchesNest
 } from "./functionPatches";
-import immerSetup, { cell as immerCell, produceNest } from "./immer";
+import immerSetup, { setupCell as immerCell, produceNest } from "./immer";
 import { get } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
-    export { commonSetup as setup, commonMeiosisCell as setupCell, createNest };
+    export { commonSetup as setup, commonCell as setupCell, createNest };
   }
   export namespace mergerino {
-    export { mergerinoSetup as setup, mergerinoCell as cell, mergerinoNest as nest };
+    export { mergerinoSetup as setup, mergerinoCell as setupCell, mergerinoNest as nest };
   }
   export namespace functionPatches {
     export {
       functionPatchesSetup as setup,
-      functionPatchesCell as cell,
+      functionPatchesCell as setupCell,
       functionPatchesNest as nest
     };
   }
   export namespace immer {
-    export { immerSetup as setup, immerCell as cell, produceNest };
+    export { immerSetup as setup, immerCell as setupCell, produceNest };
   }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
     export { get };
   }
 }
-
-export * from "./common";
-
-export {
-  FunctionPatch,
-  FunctionPatchesApp,
-  FunctionPatchesConfig,
-  FunctionPatchesCell,
-  FunctionPatchesCellActionConstructor,
-  FunctionPatchesMeiosisConfig,
-  FunctionPatchesNest
-} from "./functionPatches";
-
-export {
-  ImmerApp,
-  ImmerConfig,
-  ImmerCell,
-  ImmerCellActionConstructor,
-  ImmerMeiosisConfig,
-  ImmerPatch,
-  Produce
-} from "./immer";
-
-export {
-  MergerinoFunctionPatch,
-  MergerinoObjectPatch,
-  MergerinoPatch,
-  MergerinoMeiosisConfig,
-  MergerinoApp,
-  MergerinoCell,
-  MergerinoCellActionConstructor,
-  MergerinoNest,
-  MergerinoConfig
-} from "./mergerino";
 
 export default meiosisSetup;

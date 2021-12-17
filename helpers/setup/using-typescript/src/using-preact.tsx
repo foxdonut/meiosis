@@ -1,8 +1,12 @@
-import meiosis, {
-  MergerinoApp,
-  MergerinoCell,
-  MergerinoCellActionConstructor
-} from "../../source/dist";
+// preact + mergerino + simple-stream
+import simpleStream from "../../source/dist/simple-stream";
+import {
+  CellActionConstructor,
+  CellApp,
+  MeiosisCell,
+  nest,
+  setupCell
+} from "../../source/dist/mergerino";
 import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
@@ -20,13 +24,12 @@ import {
   initialConditions
 } from "./common";
 
-// preact + mergerino + simple-stream
 interface Attrs {
-  cell: MergerinoCell<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsAttrs {
-  cell: MergerinoCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions, ConditionsActions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -35,19 +38,14 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: MergerinoCell<Temperature, TemperatureActions>;
+  cell: MeiosisCell<Temperature, TemperatureActions>;
 }
-
-const nest = meiosis.mergerino.nest;
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: MergerinoCellActionConstructor<
-  Conditions,
-  ConditionsActions
-> = cell => ({
+const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
   togglePrecipitations: value => {
     cell.update({ precipitations: value });
   },
@@ -98,10 +96,7 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: MergerinoCellActionConstructor<
-  Temperature,
-  TemperatureActions
-> = cell => ({
+const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
   increment: amount => {
     cell.update({ value: x => x + amount });
   },
@@ -133,7 +128,7 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
     h("div", {}, h("button", { onclick: () => cell.actions.changeUnits() }, "Change Units"))
   );
 
-const app: MergerinoApp<State, never> = {
+const app: CellApp<State, never> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -161,14 +156,10 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
 const App = meiosisPreact<Attrs, VNode>({ h, useState, Root });
 
 export const setupPreactExample = (): void => {
-  const cell = meiosis.mergerino.cell<State, never>({
-    stream: meiosis.simpleStream,
-    merge,
-    app
-  });
+  const cell = setupCell<State, never>({ stream: simpleStream, merge, app });
 
   // Just testing TypeScript support here.
-  const _test = meiosis.simpleStream.stream<number>();
+  const _test = simpleStream.stream<number>();
   const _init = _test();
   _test(5);
   cell.update({ temperature: { air: { value: 21 } } });

@@ -72,8 +72,8 @@ export const createNest = nestPatch => (cell, prop, Actions) => {
   return nested;
 };
 
-/** @type {import("./index").cell} */
-export const cell = ({ stream, accumulator, combine, app }) => {
+/** @type {import("./index").setupCell} */
+export const setupCell = ({ stream, accumulator, combine, app }) => {
   const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
   const root = {

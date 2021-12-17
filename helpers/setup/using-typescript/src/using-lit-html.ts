@@ -1,8 +1,12 @@
-import meiosis, {
-  FunctionPatchesApp,
-  FunctionPatchesCell,
-  FunctionPatchesCellActionConstructor
-} from "../../source/dist";
+// lit-html + functionPatches + simple-stream
+import simpleStream from "../../source/dist/simple-stream";
+import {
+  CellActionConstructor,
+  CellApp,
+  MeiosisCell,
+  nest,
+  setupCell
+} from "../../source/dist/functionPatches";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
 import {
   Conditions,
@@ -17,11 +21,8 @@ import {
   initialConditions
 } from "./common";
 
-// lit-html + functionPatches + simple-stream
-const nest = meiosis.functionPatches.nest;
-
 interface SkyOptionAttrs {
-  cell: FunctionPatchesCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions, ConditionsActions>;
   value: string;
   label: string;
 }
@@ -30,10 +31,7 @@ const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: FunctionPatchesCellActionConstructor<
-  Conditions,
-  ConditionsActions
-> = cell => ({
+const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
   togglePrecipitations: value => {
     cell.update(state => ({ ...state, precipitations: value }));
   },
@@ -55,7 +53,7 @@ const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ cell, value, lab
 `;
 
 const Conditions: (
-  cell: FunctionPatchesCell<Conditions, ConditionsActions>
+  cell: MeiosisCell<Conditions, ConditionsActions>
 ) => TemplateResult = cell => html`
   <div>
     <label>
@@ -78,10 +76,7 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: FunctionPatchesCellActionConstructor<
-  Temperature,
-  TemperatureActions
-> = cell => ({
+const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
   increment: amount => {
     cell.update(state => ({ ...state, value: state.value + amount }));
   },
@@ -96,7 +91,7 @@ const TemperatureActionsConstr: FunctionPatchesCellActionConstructor<
 });
 
 const Temperature: (
-  cell: FunctionPatchesCell<Temperature, TemperatureActions>
+  cell: MeiosisCell<Temperature, TemperatureActions>
 ) => TemplateResult = cell => html`
   <div>
     ${cell.getState().label} Temperature: ${cell.getState().value}&deg;${cell.getState().units}
@@ -110,7 +105,7 @@ const Temperature: (
   </div>
 `;
 
-const app: FunctionPatchesApp<State, never> = {
+const app: CellApp<State, never> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -120,7 +115,7 @@ const app: FunctionPatchesApp<State, never> = {
   }
 };
 
-const App: (cell: FunctionPatchesCell<State>) => TemplateResult = cell => html`
+const App: (cell: MeiosisCell<State>) => TemplateResult = cell => html`
   <div style="display: grid; grid-template-columns: 1fr 1fr">
     <div>
       ${Conditions(nest(cell, "conditions", ConditionsActionsConstr))}
@@ -132,11 +127,7 @@ const App: (cell: FunctionPatchesCell<State>) => TemplateResult = cell => html`
 `;
 
 export const setupLitHtmlExample = (): void => {
-  const cell = meiosis.functionPatches.cell<State, never>({
-    stream: meiosis.simpleStream,
-    app
-  });
-
+  const cell = setupCell<State, never>({ stream: simpleStream, app });
   const element = document.getElementById("litHtmlApp") as HTMLElement;
   cell.getState.map(() => litHtmlRender(App(cell), element));
 };

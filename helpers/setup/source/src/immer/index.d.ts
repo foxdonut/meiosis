@@ -1,23 +1,23 @@
 import {
-  CellActionConstructor,
-  CellApp,
+  CellActionConstructor as CommonCellActionConstructor,
+  CellApp as CommonCellApp,
   CellConfigBase,
   Meiosis,
   MeiosisConfigBase,
-  MeiosisCell,
-  Nest,
+  MeiosisCell as CommonMeiosisCell,
+  Nest as CommonNest,
   NestPatch
 } from "../common";
 
-export interface ImmerPatch<S> {
+export interface Patch<S> {
   (state: S): S | void;
 }
 
 export interface Produce<S> {
-  (state: S, patch: ImmerPatch<S>): S;
+  (state: S, patch: Patch<S>): S;
 }
 
-export interface ImmerMeiosisConfig<S, A> extends MeiosisConfigBase<S, ImmerPatch<S>, A> {
+export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**
    * the Immer `produce` function.
    */
@@ -30,47 +30,38 @@ export interface ImmerMeiosisConfig<S, A> extends MeiosisConfigBase<S, ImmerPatc
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {ImmerMeiosisConfig<S, A>} config the Meiosis config for use with Immer
+ * @param {MeiosisConfig<S, A>} config the Meiosis config for use with Immer
  *
- * @returns {import("../common").Meiosis<S, ImmerPatch<S>, A>} `{ states, update, actions }`,
+ * @returns {import("../common").Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A>({
-  stream,
-  produce,
-  app
-}: ImmerMeiosisConfig<S, A>): Meiosis<S, ImmerPatch<S>, A>;
+export function setup<S, A>({ stream, produce, app }: MeiosisConfig<S, A>): Meiosis<S, Patch<S>, A>;
 
 export default setup;
 
 // -------- Meiosis Cell
 
-export type ImmerApp<S, A> = CellApp<S, ImmerPatch<S>, A>;
+export type CellApp<S, A> = CommonCellApp<S, Patch<S>, A>;
 
-export type ImmerCell<S, A = unknown> = MeiosisCell<S, ImmerPatch<S>, A>;
+export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
 
-export type ImmerCellActionConstructor<S, A> = CellActionConstructor<S, ImmerPatch<S>, A>;
+export type CellActionConstructor<S, A> = CommonCellActionConstructor<S, Patch<S>, A>;
 
 export interface ProduceNestPatch {
   (produce: Produce<any>): NestPatch;
 }
-export type ImmerNest<S, K extends keyof S, A = unknown> = Nest<
-  S,
-  ImmerPatch<S>,
-  K,
-  ImmerPatch<S[K]>,
-  A
->;
+
+export type Nest<S, K extends keyof S, A = unknown> = CommonNest<S, Patch<S>, K, Patch<S[K]>, A>;
 
 export interface ProduceNest<S, K extends keyof S, A> {
-  (produce: Produce<any>): ImmerNest<S, K, A>;
+  (produce: Produce<any>): Nest<S, K, A>;
 }
 
 export function nest<S, K extends keyof S, A>(
-  cell: ImmerCell<S>,
+  cell: MeiosisCell<S>,
   prop: K,
-  Actions?: ImmerCellActionConstructor<S[K], A>
-): ImmerCell<S[K], A>;
+  Actions?: CellActionConstructor<S[K], A>
+): MeiosisCell<S[K], A>;
 
 export function produceNest<S>(produce: Produce<S>): typeof nest;
 
@@ -79,7 +70,7 @@ export function produceNest<S>(produce: Produce<S>): typeof nest;
  *
  * @template S the State type.
  */
-export interface ImmerConfig<S, A> extends CellConfigBase {
+export interface CellConfig<S, A> extends CellConfigBase {
   /**
    * the Immer `produce` function.
    */
@@ -88,7 +79,7 @@ export interface ImmerConfig<S, A> extends CellConfigBase {
   /**
    * The application object, with optional properties.
    */
-  app: ImmerApp<S, A>;
+  app: CellApp<S, A>;
 }
 
 /**
@@ -96,8 +87,8 @@ export interface ImmerConfig<S, A> extends CellConfigBase {
  *
  * @template S the State type.
  *
- * @param {ImmerMeiosisConfig<S>} config the Meiosis Cell config for use with Immer
+ * @param {CellConfig<S>} config the Meiosis Cell config for use with Immer
  *
- * @returns {ImmerCell<S>} Immer Meiosis Cell.
+ * @returns {MeiosisCell<S>} Immer Meiosis Cell.
  */
-export function cell<S, A>(config: ImmerConfig<S, A>): ImmerCell<S, A>;
+export function setupCell<S, A>(config: CellConfig<S, A>): MeiosisCell<S, A>;

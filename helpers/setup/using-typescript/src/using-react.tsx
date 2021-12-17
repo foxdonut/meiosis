@@ -1,4 +1,11 @@
-import meiosis, { ImmerCellActionConstructor, ImmerApp, ImmerCell } from "../../source/dist";
+// react + immer + flyd
+import {
+  CellActionConstructor,
+  CellApp,
+  MeiosisCell,
+  produceNest,
+  setupCell
+} from "../../source/dist/immer";
 import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
@@ -17,13 +24,12 @@ import {
   initialConditions
 } from "./common";
 
-// react + immer + flyd
 interface Attrs {
-  cell: ImmerCell<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsAttrs {
-  cell: ImmerCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions, ConditionsActions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -32,19 +38,16 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: ImmerCell<Temperature, TemperatureActions>;
+  cell: MeiosisCell<Temperature, TemperatureActions>;
 }
 
-const nest = meiosis.immer.produceNest(produce);
+const nest = produceNest(produce);
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: ImmerCellActionConstructor<
-  Conditions,
-  ConditionsActions
-> = cell => ({
+const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
   togglePrecipitations: value => {
     cell.update(state => {
       state.precipitations = value;
@@ -91,10 +94,7 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: ImmerCellActionConstructor<
-  Temperature,
-  TemperatureActions
-> = cell => ({
+const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
   increment: amount => {
     cell.update(state => {
       state.value += amount;
@@ -125,7 +125,7 @@ const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
   </div>
 );
 
-const app: ImmerApp<State, never> = {
+const app: CellApp<State, never> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -151,12 +151,7 @@ const stream = {
   scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
 };
 
-const cell = meiosis.immer.cell<State, never>({
-  stream,
-  produce: (s, p) => produce(s, p),
-  app
-});
-
+const cell = setupCell<State, never>({ stream, produce: (s, p) => produce(s, p), app });
 const App = meiosisReact<Attrs>({ React, Root });
 
 export const setupReactExample = (): void => {

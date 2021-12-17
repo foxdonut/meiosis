@@ -1,8 +1,10 @@
-import meiosis, {
-  MergerinoApp,
-  MergerinoCell,
-  MergerinoCellActionConstructor
-} from "../../source/dist";
+import {
+  CellActionConstructor,
+  CellApp,
+  MeiosisCell,
+  nest,
+  setupCell
+} from "../../source/dist/mergerino";
 import merge from "mergerino";
 import m from "mithril";
 import MStream from "mithril/stream";
@@ -21,11 +23,11 @@ import {
 
 // mithril + mergerino + mithril-stream
 interface Attrs {
-  cell: MergerinoCell<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsAttrs {
-  cell: MergerinoCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions, ConditionsActions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -34,19 +36,14 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: MergerinoCell<Temperature, TemperatureActions>;
+  cell: MeiosisCell<Temperature, TemperatureActions>;
 }
-
-const nest = meiosis.mergerino.nest;
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: MergerinoCellActionConstructor<
-  Conditions,
-  ConditionsActions
-> = cell => ({
+const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
   togglePrecipitations: value => {
     cell.update({ precipitations: value });
   },
@@ -96,10 +93,7 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: MergerinoCellActionConstructor<
-  Temperature,
-  TemperatureActions
-> = cell => ({
+const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
   increment: amount => {
     cell.update({ value: x => x + amount });
   },
@@ -131,7 +125,7 @@ const Temperature: m.Component<TemperatureAttrs> = {
     )
 };
 
-const app: MergerinoApp<State, never> = {
+const app: CellApp<State, never> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -162,7 +156,7 @@ export const setupMithrilExample = (): void => {
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const cell = meiosis.mergerino.cell<State, never>({ stream, merge, app });
+  const cell = setupCell<State, never>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { cell })

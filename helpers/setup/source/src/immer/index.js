@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest, cell as commonCell } from "../common";
+import commonSetup, { createNest, setupCell as commonCell } from "../common";
 
 /** @type {import("./index").setup} */
 const setup = ({ stream, produce, app }) =>
@@ -31,8 +31,8 @@ const produceNestPatch = produce => (patch, prop) => state => {
  */
 export const produceNest = produce => createNest(produceNestPatch(produce));
 
-/** @type {import("./index").cell} */
-export const cell = ({ stream, produce, app }) =>
+/** @type {import("./index").setupCell} */
+export const setupCell = ({ stream, produce, app }) =>
   commonCell({
     stream,
     accumulator: produce,
