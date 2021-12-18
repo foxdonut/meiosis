@@ -106,7 +106,7 @@ const Root = ({ cell }) =>
 const App = meiosisPreact({ h, useState, Root });
 
 export const setupPreactExample = () => {
-  const cell = meiosis.mergerino.cell({ stream: meiosis.simpleStream, merge, app });
+  const cell = meiosis.mergerino.setupCell({ stream: meiosis.simpleStream, merge, app });
   const element = document.getElementById("preactApp");
   preactRender(h(App, { states: cell.getState, cell }), element);
 };

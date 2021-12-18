@@ -86,7 +86,6 @@ const Temperature = ({ cell }) => (
 );
 
 const Root = ({ cells }) => {
-  /** @type {import("react").ReactElement} */
   const result = (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div>
@@ -105,7 +104,7 @@ const stream = {
   scan: (acc, init, stream) => flyd.scan(acc, init, stream)
 };
 
-const cell = meiosis.immer.cell({
+const cell = meiosis.immer.setupCell({
   stream,
   produce: (s, p) => produce(s, p),
   app
