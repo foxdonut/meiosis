@@ -1,3 +1,4 @@
+// mithril + mergerino + mithril-stream
 import {
   CellActionConstructor,
   CellApp,
@@ -21,7 +22,6 @@ import {
   initialConditions
 } from "./common";
 
-// mithril + mergerino + mithril-stream
 interface Attrs {
   cell: MeiosisCell<State>;
 }
