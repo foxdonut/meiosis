@@ -1,6 +1,4 @@
-import meiosis from "../../source/dist";
-
-const { stream, scan } = meiosis.simpleStream;
+import { stream, scan } from "../../source/dist/simple-stream";
 
 // simple-stream
 (() => {
