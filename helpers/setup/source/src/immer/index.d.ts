@@ -57,7 +57,7 @@ export interface ProduceNest<S, K extends keyof S, A> {
   (produce: Produce<any>): Nest<S, K, A>;
 }
 
-export function nest<S, K extends keyof S, A>(
+declare function nest<S, K extends keyof S, A>(
   cell: MeiosisCell<S>,
   prop: K,
   Actions?: CellActionConstructor<S[K], A>
