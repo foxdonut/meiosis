@@ -43,9 +43,14 @@ export default setup;
 
 export type CellApp<S, A> = CommonCellApp<S, Patch<S>, A>;
 
-export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
+export type MeiosisCell<S, RA = unknown, A = RA> = CommonMeiosisCell<S, Patch<S>, RA, A>;
 
-export type CellActionConstructor<S, A> = CommonCellActionConstructor<S, Patch<S>, A>;
+export type CellActionConstructor<S, A, RA = unknown> = CommonCellActionConstructor<
+  S,
+  Patch<S>,
+  A,
+  RA
+>;
 
 export interface ProduceNestPatch {
   (produce: Produce<any>): NestPatch;
@@ -57,11 +62,11 @@ export interface ProduceNest<S, K extends keyof S, A> {
   (produce: Produce<any>): Nest<S, K, A>;
 }
 
-declare function nest<S, K extends keyof S, A>(
-  cell: MeiosisCell<S>,
+declare function nest<S, K extends keyof S, RA, A>(
+  cell: MeiosisCell<S, RA>,
   prop: K,
-  Actions?: CellActionConstructor<S[K], A>
-): MeiosisCell<S[K], A>;
+  Actions?: CellActionConstructor<S[K], A, RA>
+): MeiosisCell<S[K], RA, A>;
 
 export function produceNest<S>(produce: Produce<S>): typeof nest;
 

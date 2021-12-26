@@ -361,22 +361,23 @@ export type NestPatch = (patch: any, prop: any) => any;
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export interface MeiosisCell<S, P, A = unknown> {
+export interface MeiosisCell<S, P, RA = unknown, A = RA> {
   getState: Stream<S>;
   update: (patch: P) => P;
   actions: A;
+  root: MeiosisCell<S, P, RA>;
 }
 
-export interface CellActionConstructor<S, P, A> {
-  (cell: MeiosisCell<S, P>): A;
+export interface CellActionConstructor<S, P, A, RA = unknown> {
+  (cell: MeiosisCell<S, P, RA>): A;
 }
 
 export interface Nest<S, P, K extends keyof S, N, A = unknown> {
-  (cell: MeiosisCell<S, P>, prop: K, Actions?: CellActionConstructor<S[K], N, A>): MeiosisCell<
-    S[K],
-    N,
-    A
-  >;
+  <RA>(
+    cell: MeiosisCell<S, P, RA>,
+    prop: K,
+    Actions?: CellActionConstructor<S[K], N, RA, A>
+  ): MeiosisCell<S[K], N, A, RA>;
 }
 
 export function createNest<S, K extends keyof S>(
@@ -388,13 +389,15 @@ export function createNest<S, K extends keyof S>(
  *
  * @template S the State type.
  * @template P the Patch type.
+ * @template RA the Root Actions type.
+ * @template A the Actions type.
  *
- * @param {MeiosisCell<S, P>} cell the Meiosis cell.
+ * @param {MeiosisCell<S, P, RA, A>} cell the Meiosis cell.
  *
  * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export interface CellEffectConstructor<S, P, A> {
-  (cell: MeiosisCell<S, P, A>): Effect<S>[];
+export interface CellEffectConstructor<S, P, RA, A> {
+  (cell: MeiosisCell<S, P, RA, A>): Effect<S>[];
 }
 
 export interface CellApp<S, P, A> {
@@ -411,12 +414,12 @@ export interface CellApp<S, P, A> {
   /**
    * A function that creates the application's actions.
    */
-  Actions?: CellActionConstructor<S, P, A>;
+  Actions?: CellActionConstructor<S, P, A, A>;
 
   /**
    * A function that creates the application's effects.
    */
-  Effects?: CellEffectConstructor<S, P, A>;
+  Effects?: CellEffectConstructor<S, P, A, A>;
 }
 
 export interface CellConfigBase {
@@ -434,6 +437,7 @@ export interface CellConfigBase {
  *
  * @template S the State type.
  * @template P the Patch type.
+ * @template A the Actions type.
  */
 export interface CellConfig<S, P, A> extends CellConfigBase {
   /*
@@ -461,7 +465,7 @@ export interface CellConfig<S, P, A> extends CellConfigBase {
  * @template P the Patch type.
  * @template A the Actions type.
  *
- * @param {CellConfig<S, P>} config the Meiosis Cell config.
+ * @param {CellConfig<S, P, A>} config the Meiosis Cell config.
  *
  * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
  */
