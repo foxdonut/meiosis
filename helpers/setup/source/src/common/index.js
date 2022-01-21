@@ -55,7 +55,7 @@ export default setup;
 // -------- Meiosis Cell
 
 /** @type {import("./index").createNest} */
-export const createNest = nestPatch => (cell, prop, Actions) => {
+export const createNest = nestPatch => (cell, prop) => {
   const getState = cell.getState.map(state => state[prop]);
 
   /** @type {import("./index").MeiosisCell} */
@@ -65,10 +65,6 @@ export const createNest = nestPatch => (cell, prop, Actions) => {
     actions: null,
     root: cell.root
   };
-
-  if (Actions) {
-    nested.actions = Actions(nested);
-  }
 
   return nested;
 };
