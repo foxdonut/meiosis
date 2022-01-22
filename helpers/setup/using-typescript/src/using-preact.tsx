@@ -1,24 +1,17 @@
 // preact + mergerino + simple-stream
 import simpleStream from "../../source/dist/simple-stream";
-import {
-  CellActionConstructor,
-  CellApp,
-  MeiosisCell,
-  nest,
-  setupCell
-} from "../../source/dist/mergerino";
+import { CellApp, MeiosisCell, nest, setupCell } from "../../source/dist/mergerino";
 import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
 import {
   Conditions,
-  ConditionsActions,
   ConditionsComponent,
   InitialTemperature,
+  Sky,
   State,
   Temperature,
-  TemperatureActions,
   TemperatureComponent,
   convert,
   initialConditions
@@ -28,8 +21,13 @@ interface Attrs {
   cell: MeiosisCell<State>;
 }
 
+interface ConditionsActions {
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+}
+
 interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -37,22 +35,27 @@ interface SkyOptionAttrs extends ConditionsAttrs {
   label: string;
 }
 
+interface TemperatureActions {
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+}
+
 interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature, TemperatureActions>;
+  cell: MeiosisCell<Temperature>;
 }
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
-  togglePrecipitations: value => {
+const conditionsActions: ConditionsActions = {
+  togglePrecipitations: (cell, value) => {
     cell.update({ precipitations: value });
   },
-  changeSky: value => {
+  changeSky: (cell, value) => {
     cell.update({ sky: value });
   }
-});
+};
 
 // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
 // file, we'll use h here.
@@ -64,7 +67,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
       type: "radio",
       value,
       checked: cell.getState().sky === value,
-      onchange: evt => cell.actions.changeSky(evt.target.value)
+      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
   );
@@ -79,7 +82,7 @@ const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
       h("input", {
         type: "checkbox",
         checked: cell.getState().precipitations,
-        onchange: evt => cell.actions.togglePrecipitations(evt.target.checked)
+        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       "Precipitations"
     ),
@@ -96,11 +99,11 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
-  increment: amount => {
+const temperatureActions: TemperatureActions = {
+  increment: (cell, amount) => {
     cell.update({ value: x => x + amount });
   },
-  changeUnits: () => {
+  changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -108,7 +111,7 @@ const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureAc
       return { ...state, value: newValue, units: newUnits };
     });
   }
-});
+};
 
 const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
   h(
@@ -122,10 +125,14 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
     h(
       "div",
       {},
-      h("button", { onclick: () => cell.actions.increment(1) }, "Increment"),
-      h("button", { onclick: () => cell.actions.increment(-1) }, "Decrement")
+      h("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
+      h("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
     ),
-    h("div", {}, h("button", { onclick: () => cell.actions.changeUnits() }, "Change Units"))
+    h(
+      "div",
+      {},
+      h("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units")
+    )
   );
 
 const app: CellApp<State, never> = {
@@ -145,9 +152,9 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
     h(
       "div",
       {},
-      h(Conditions, { cell: nest(cell, "conditions", ConditionsActionsConstr) }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "air", TemperatureActionsConstr) }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "water", TemperatureActionsConstr) })
+      h(Conditions, { cell: nest(cell, "conditions") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
     ),
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );

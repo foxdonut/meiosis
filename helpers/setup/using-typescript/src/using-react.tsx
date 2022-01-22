@@ -1,11 +1,5 @@
 // react + immer + flyd
-import {
-  CellActionConstructor,
-  CellApp,
-  MeiosisCell,
-  produceNest,
-  setupCell
-} from "../../source/dist/immer";
+import { CellApp, MeiosisCell, produceNest, setupCell } from "../../source/dist/immer";
 import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
@@ -13,12 +7,11 @@ import React, { ReactElement } from "react";
 import ReactDOM from "react-dom";
 import {
   Conditions,
-  ConditionsActions,
   ConditionsComponent,
   InitialTemperature,
+  Sky,
   State,
   Temperature,
-  TemperatureActions,
   TemperatureComponent,
   convert,
   initialConditions
@@ -28,8 +21,13 @@ interface Attrs {
   cell: MeiosisCell<State>;
 }
 
+interface ConditionsActions {
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+}
+
 interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions, ConditionsActions>;
+  cell: MeiosisCell<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -37,8 +35,13 @@ interface SkyOptionAttrs extends ConditionsAttrs {
   label: string;
 }
 
+interface TemperatureActions {
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+}
+
 interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature, TemperatureActions>;
+  cell: MeiosisCell<Temperature>;
 }
 
 const nest = produceNest(produce);
@@ -47,18 +50,18 @@ const conditions: ConditionsComponent = {
   initial: initialConditions
 };
 
-const ConditionsActionsConstr: CellActionConstructor<Conditions, ConditionsActions> = cell => ({
-  togglePrecipitations: value => {
+const conditionsActions: ConditionsActions = {
+  togglePrecipitations: (cell, value) => {
     cell.update(state => {
       state.precipitations = value;
     });
   },
-  changeSky: value => {
+  changeSky: (cell, value) => {
     cell.update(state => {
       state.sky = value;
     });
   }
-});
+};
 
 const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label }) => (
   <label>
@@ -66,7 +69,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label
       type="radio"
       value={value}
       checked={cell.getState().sky === value}
-      onChange={evt => cell.actions.changeSky(evt.target.value)}
+      onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
     />
     {label}
   </label>
@@ -78,7 +81,7 @@ const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
       <input
         type="checkbox"
         checked={cell.getState().precipitations}
-        onChange={evt => cell.actions.togglePrecipitations(evt.target.checked)}
+        onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
     </label>
@@ -94,13 +97,13 @@ const temperature: TemperatureComponent = {
   Initial: InitialTemperature
 };
 
-const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureActions> = cell => ({
-  increment: amount => {
+const temperatureActions: TemperatureActions = {
+  increment: (cell, amount) => {
     cell.update(state => {
       state.value += amount;
     });
   },
-  changeUnits: () => {
+  changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -109,18 +112,18 @@ const TemperatureActionsConstr: CellActionConstructor<Temperature, TemperatureAc
       state.units = newUnits;
     });
   }
-});
+};
 
 const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
   <div>
     {cell.getState().label} Temperature:
     {cell.getState().value}&deg;{cell.getState().units}
     <div>
-      <button onClick={() => cell.actions.increment(1)}>Increment</button>
-      <button onClick={() => cell.actions.increment(-1)}>Decrement</button>
+      <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
+      <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
     </div>
     <div>
-      <button onClick={() => cell.actions.changeUnits()}>Change Units</button>
+      <button onClick={() => temperatureActions.changeUnits(cell)}>Change Units</button>
     </div>
   </div>
 );
@@ -138,9 +141,9 @@ const app: CellApp<State, never> = {
 const Root: (attrs: Attrs) => ReactElement = ({ cell }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
     <div>
-      <Conditions cell={nest(cell, "conditions", ConditionsActionsConstr)} />
-      <Temperature cell={nest(nest(cell, "temperature"), "air", TemperatureActionsConstr)} />
-      <Temperature cell={nest(nest(cell, "temperature"), "water", TemperatureActionsConstr)} />
+      <Conditions cell={nest(cell, "conditions")} />
+      <Temperature cell={nest(nest(cell, "temperature"), "air")} />
+      <Temperature cell={nest(nest(cell, "temperature"), "water")} />
     </div>
     <pre style={{ margin: "0" }}>{JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>

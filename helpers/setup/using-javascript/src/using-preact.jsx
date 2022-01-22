@@ -10,14 +10,14 @@ import { app, convert } from "./common";
 
 const nest = meiosis.mergerino.nest;
 
-const ConditionsActions = cell => ({
-  togglePrecipitations: value => {
+const conditionsActions = {
+  togglePrecipitations: (cell, value) => {
     cell.update({ precipitations: value });
   },
-  changeSky: value => {
+  changeSky: (cell, value) => {
     cell.update({ sky: value });
   }
-});
+};
 
 // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
 // project, we'll use h here.
@@ -29,7 +29,7 @@ const SkyOption = ({ cell, value, label }) =>
       type: "radio",
       value,
       checked: cell.getState().sky === value,
-      onchange: evt => cell.actions.changeSky(evt.target.value)
+      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
   );
@@ -44,7 +44,7 @@ const Conditions = ({ cell }) =>
       h("input", {
         type: "checkbox",
         checked: cell.getState().precipitations,
-        onchange: evt => cell.actions.togglePrecipitations(evt.target.checked)
+        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       "Precipitations"
     ),
@@ -57,11 +57,11 @@ const Conditions = ({ cell }) =>
     )
   );
 
-const TemperatureActions = cell => ({
-  increment: amount => {
+const temperatureActions = {
+  increment: (cell, amount) => {
     cell.update({ value: x => x + amount });
   },
-  changeUnits: () => {
+  changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -69,7 +69,7 @@ const TemperatureActions = cell => ({
       return { ...state, value: newValue, units: newUnits };
     });
   }
-});
+};
 
 const Temperature = ({ cell }) =>
   h(
@@ -83,10 +83,14 @@ const Temperature = ({ cell }) =>
     h(
       "div",
       {},
-      h("button", { onclick: () => cell.actions.increment(1) }, "Increment"),
-      h("button", { onclick: () => cell.actions.increment(-1) }, "Decrement")
+      h("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
+      h("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
     ),
-    h("div", {}, h("button", { onclick: () => cell.actions.changeUnits() }, "Change Units"))
+    h(
+      "div",
+      {},
+      h("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units")
+    )
   );
 
 const Root = ({ cell }) =>
@@ -96,9 +100,9 @@ const Root = ({ cell }) =>
     h(
       "div",
       {},
-      h(Conditions, { cell: nest(cell, "conditions", ConditionsActions) }),
-      h(Temperature, { cell: nest(nest(cell, "temperature", TemperatureActions), "air") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature", TemperatureActions), "water") })
+      h(Conditions, { cell: nest(cell, "conditions") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
+      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
     ),
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );

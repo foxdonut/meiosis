@@ -11,18 +11,18 @@ import { app, convert } from "./common";
 
 const nest = meiosis.immer.produceNest(produce);
 
-const ConditionsActions = cell => ({
-  togglePrecipitations: value => {
+const conditionsActions = {
+  togglePrecipitations: (cell, value) => {
     cell.update(state => {
       state.precipitations = value;
     });
   },
-  changeSky: value => {
+  changeSky: (cell, value) => {
     cell.update(state => {
       state.sky = value;
     });
   }
-});
+};
 
 const SkyOption = ({ cell, value, label }) => (
   <label>
@@ -30,7 +30,7 @@ const SkyOption = ({ cell, value, label }) => (
       type="radio"
       value={value}
       checked={cell.getState().sky === value}
-      onChange={evt => cell.actions.changeSky(evt.target.value)}
+      onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
     />
     {label}
   </label>
@@ -42,7 +42,7 @@ const Conditions = ({ cell }) => (
       <input
         type="checkbox"
         checked={cell.getState().precipitations}
-        onChange={evt => cell.actions.togglePrecipitations(evt.target.checked)}
+        onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
     </label>
@@ -54,13 +54,13 @@ const Conditions = ({ cell }) => (
   </div>
 );
 
-const TemperatureActions = cell => ({
-  increment: amount => {
+const temperatureActions = {
+  increment: (cell, amount) => {
     cell.update(state => {
       state.value += amount;
     });
   },
-  changeUnits: () => {
+  changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
@@ -69,18 +69,18 @@ const TemperatureActions = cell => ({
       state.units = newUnits;
     });
   }
-});
+};
 
 const Temperature = ({ cell }) => (
   <div>
     {cell.getState().label} Temperature:
     {cell.getState().value}&deg;{cell.getState().units}
     <div>
-      <button onClick={() => cell.actions.increment(1)}>Increment</button>
-      <button onClick={() => cell.actions.increment(-1)}>Decrement</button>
+      <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
+      <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
     </div>
     <div>
-      <button onClick={() => cell.actions.changeUnits()}>Change Units</button>
+      <button onClick={() => temperatureActions.changeUnits(cell)}>Change Units</button>
     </div>
   </div>
 );
@@ -114,10 +114,10 @@ const temperatureCell = nest(cell, "temperature");
 
 const cells = {
   root: cell,
-  conditions: nest(cell, "conditions", ConditionsActions),
+  conditions: nest(cell, "conditions"),
   temperature: {
-    air: nest(temperatureCell, "air", TemperatureActions),
-    water: nest(temperatureCell, "water", TemperatureActions)
+    air: nest(temperatureCell, "air"),
+    water: nest(temperatureCell, "water")
   }
 };
 

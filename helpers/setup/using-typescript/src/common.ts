@@ -8,16 +8,11 @@ import { stream, scan } from "../../source/dist/simple-stream";
 })();
 
 // common code
-type Sky = "SUNNY" | "CLOUDY" | "MIX";
+export type Sky = "SUNNY" | "CLOUDY" | "MIX";
 
 export interface Conditions {
   precipitations: boolean;
   sky: Sky;
-}
-
-export interface ConditionsActions {
-  togglePrecipitations: (value: boolean) => void;
-  changeSky: (value: Sky) => void;
 }
 
 export type TemperatureUnits = "C" | "F";
@@ -26,11 +21,6 @@ export interface Temperature {
   label: string;
   value: number;
   units: TemperatureUnits;
-}
-
-export interface TemperatureActions {
-  increment: (amount: number) => void;
-  changeUnits: () => void;
 }
 
 export interface TemperatureComponent {
