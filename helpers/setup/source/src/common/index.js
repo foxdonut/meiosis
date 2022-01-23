@@ -44,7 +44,6 @@ const setup = ({ stream, accumulator, combine, app }) => {
   const actions = Actions(update, states);
 
   const effects = Object.assign({ effects: [] }, app).effects;
-
   states.map(state => effects.forEach(effect => effect(state, update, actions)));
 
   return { states, update, actions };
@@ -85,6 +84,9 @@ export const setupCell = ({ stream, accumulator, combine, app }) => {
 
   root.actions = actions;
   root.root = root;
+
+  const effects = Object.assign({ effects: [] }, app).effects;
+  states.map(() => effects.forEach(effect => effect(root)));
 
   return root;
 };

@@ -1,5 +1,12 @@
 import simpleStream from "../src/simple-stream";
-import { CellApp, MeiosisCell, nest, setupCell } from "../src/functionPatches";
+import {
+  CellActionConstructor,
+  CellApp,
+  CellEffect,
+  MeiosisCell,
+  nest,
+  setupCell
+} from "../src/functionPatches";
 import { add, assoc, lensProp, over } from "ramda";
 
 describe("Meiosis with TypeScript", () => {
@@ -107,6 +114,49 @@ describe("Meiosis with TypeScript", () => {
         const duckCell = nest(rootCell, "duck");
         duckActions.changeDuckColor(duckCell, "yellow");
         expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      });
+
+      test("effects", () => {
+        interface Counter {
+          count: number;
+          service: boolean;
+        }
+
+        interface CounterActions {
+          increment: (value: number) => void;
+        }
+
+        const Actions: CellActionConstructor<Counter, CounterActions> = cell => ({
+          increment: value => {
+            cell.update(over(lensProp("count"), add(value)));
+          }
+        });
+
+        const effects: CellEffect<Counter, CounterActions>[] = [
+          cell => {
+            // effect on state affects state seen by the next effect
+            if (cell.getState().count === 1) {
+              cell.actions.increment(1);
+            }
+          },
+          cell => {
+            if (cell.getState().count === 2 && !cell.getState().service) {
+              cell.update(assoc("service", true));
+            }
+          }
+        ];
+
+        const app: CellApp<Counter, CounterActions> = {
+          initial: { count: 0, service: false },
+          effects,
+          Actions
+        };
+
+        const cell = setupCell<Counter, CounterActions>({ stream: simpleStream, app });
+        expect(typeof cell.actions.increment).toEqual("function");
+
+        cell.update(assoc("count", 1));
+        expect(cell.getState()).toEqual({ count: 2, service: true });
       });
     });
   });
