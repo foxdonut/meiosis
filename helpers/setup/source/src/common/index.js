@@ -1,5 +1,6 @@
 // @ts-check
 
+/** @type {import("./index").baseSetup} */
 const baseSetup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
@@ -40,12 +41,11 @@ const setup = ({ stream, accumulator, combine, app }) => {
   const { states, update } = baseSetup({ stream, accumulator, combine, app });
 
   const Actions = Object.assign({ Actions: (_update, _states) => undefined }, app).Actions;
-  const Effects = Object.assign({ Effects: (_update, _actions) => [] }, app).Effects;
-
   const actions = Actions(update, states);
-  const effects = Effects(update, actions);
 
-  states.map(state => effects.forEach(effect => effect(state)));
+  const effects = Object.assign({ effects: [] }, app).effects;
+
+  states.map(state => effects.forEach(effect => effect(state, update, actions)));
 
   return { states, update, actions };
 };

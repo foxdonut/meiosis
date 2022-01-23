@@ -183,35 +183,20 @@ export interface Service<S, P> {
 }
 
 /**
- * An effect function. Receives the current state and optionally performs a side effects, including
- * but not limited to, calling `update` and/or `actions` which are provided to the effect
- * constructor.
- *
- * @template S the State type.
- */
-export interface Effect<S> {
-  /**
-   * @param {S} state the current state.
-   */
-  (state: S): void;
-}
-
-/**
- * An effects constructor. Receives the `update` stream and the `actions`, and returns an array of
- * effect functions to be called when the application state changes.
+ * An effect function. Receives the current state, the `update` stream, and the `actions`, and
+ * optionally performs side effects.
  *
  * @template S the State type.
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export interface EffectConstructor<S, P, A> {
+export interface Effect<S, P, A> {
   /**
-   * @param {Stream<P>} update the `update` stream.
-   * @param {A} [actions] the application's `actions`.
-   *
-   * @returns {Effect<S>} the array of effect functions that will get called on state changes.
+   * @param {S} state the current state.
+   * @param {P} update the update stream.
+   * @param {A} actions the application actions.
    */
-  (update: Stream<P>, actions?: A): Effect<S>[];
+  (state: S, update: Stream<P>, actions: A): void;
 }
 
 /**
@@ -231,15 +216,7 @@ export interface ActionConstructor<S, P, A> {
   (update: Stream<P>, states?: Stream<S>): A;
 }
 
-/**
- * Application object that provides the application's initial state, the service functions, the
- * application's actions, and the effects, all of which are optional.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface App<S, P, A> {
+export interface BaseApp<S, P> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -249,7 +226,24 @@ export interface App<S, P, A> {
    * An array of service functions.
    */
   services?: Service<S, P>[];
+}
 
+export interface BaseConfig<S, P> {
+  stream: StreamLib;
+  app: BaseApp<S, P>;
+  accumulator: Accumulator<S, P>;
+  combine: Combine<P>;
+}
+
+/**
+ * Application object that provides the application's initial state, the service functions, the
+ * application's actions, and the effects, all of which are optional.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface App<S, P, A> extends BaseApp<S, P> {
   /**
    * A function that creates the application's actions.
    */
@@ -258,7 +252,7 @@ export interface App<S, P, A> {
   /**
    * A function that creates the application's effects.
    */
-  Effects?: EffectConstructor<S, P, A>;
+  effects?: Effect<S, P, A>[];
 }
 
 /**
@@ -300,14 +294,7 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
   combine: Combine<P>;
 }
 
-/**
- * Returned by Meiosis setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface Meiosis<S, P, A> {
+export interface BaseMeiosis<S, P> {
   /**
    * The stream of application states.
    */
@@ -317,12 +304,23 @@ export interface Meiosis<S, P, A> {
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
   update: Stream<P>;
+}
 
+/**
+ * Returned by Meiosis setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface Meiosis<S, P, A> extends BaseMeiosis<S, P> {
   /**
    * The application's actions.
    */
   actions: A;
 }
+
+export function baseSetup<S, P>(config: BaseConfig<S, P>): BaseMeiosis<S, P>;
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -381,18 +379,16 @@ export function createNest<S, K extends keyof S>(
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
 
 /**
- * An effects constructor.
+ * An effect function. Receives the Meiosis cell and* optionally performs side effects.
  *
  * @template S the State type.
  * @template P the Patch type.
  * @template A the Actions type.
  *
  * @param {MeiosisCell<S, P, A>} cell the Meiosis cell.
- *
- * @returns {Effect<S>} the array of effect functions that will get called on state changes.
  */
-export interface CellEffectConstructor<S, P, A = unknown> {
-  (cell: MeiosisCell<S, P, A>): Effect<S>[];
+export interface CellEffect<S, P, A = unknown> {
+  (cell: MeiosisCell<S, P, A>): void;
 }
 
 export interface CellApp<S, P, A = unknown> {
@@ -414,7 +410,7 @@ export interface CellApp<S, P, A = unknown> {
   /**
    * A function that creates the application's effects.
    */
-  Effects?: CellEffectConstructor<S, P, A>;
+  effects?: CellEffect<S, P, A>[];
 }
 
 export interface CellConfigBase {

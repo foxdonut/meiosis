@@ -209,8 +209,8 @@ describe("meiosis setup with library for applying patches", () => {
         increment: () => update(actionPatch)
       });
 
-      const Effects = (update, actions) => [
-        state => {
+      const effects = [
+        (state, _update, actions) => {
           // effect should not affect state seen by the other
           if (state.count === 1) {
             actions.increment(1);
@@ -223,7 +223,7 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { update, states, actions } = setupFn({ initial: { count: 0 }, Effects, Actions });
+      const { update, states, actions } = setupFn({ initial: { count: 0 }, effects, Actions });
 
       expect(typeof actions.increment).toEqual("function");
 
@@ -371,22 +371,22 @@ describe("meiosis setup with library for applying patches", () => {
     )("%s", (_label, setupFn, incr, effect1, effect2, init) => {
       let effectCalls = 0;
 
-      const Effects = update => [
-        state => {
+      const effects = [
+        (state, update) => {
           effectCalls++;
           if (state.count === 1) {
             update(incr);
             update(effect1);
           }
         },
-        state => {
+        (state, update) => {
           if (state.count === 1) {
             update(effect2);
           }
         }
       ];
 
-      const { update, states } = setupFn({ Effects });
+      const { update, states } = setupFn({ effects });
 
       update(init);
 
@@ -411,8 +411,8 @@ describe("meiosis setup with library for applying patches", () => {
     )("%s", (_label, setupFn, effect, init) => {
       let effectCalls = 0;
 
-      const Effects = update => [
-        state => {
+      const effects = [
+        (state, update) => {
           if (state.count === 1 && effectCalls < 5) {
             effectCalls++;
             update(effect);
@@ -420,7 +420,7 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { update, states } = setupFn({ Effects });
+      const { update, states } = setupFn({ effects });
 
       update(init);
 
@@ -439,15 +439,15 @@ describe("meiosis setup with library for applying patches", () => {
         ]
       ])
     )("%s", (_label, setupFn, effect) => {
-      const Effects = update => [
-        state => {
+      const effects = [
+        (state, update) => {
           if (!state.effect) {
             update(effect);
           }
         }
       ];
 
-      const { states } = setupFn({ Effects });
+      const { states } = setupFn({ effects });
 
       expect(states()).toEqual({ effect: true });
     });
@@ -545,15 +545,15 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const Effects = update => [
-        state => {
+      const effects = [
+        (state, update) => {
           if (state.patch) {
             update(effectPatch);
           }
         }
       ];
 
-      const { update, states } = setupFn({ services, Effects });
+      const { update, states } = setupFn({ services, effects });
 
       let ticks = 0;
       states.map(() => ticks++);
@@ -592,8 +592,8 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const Effects = update => [
-          state => {
+        const effects = [
+          (state, update) => {
             if (state.data === "Loading") {
               setTimeout(() => {
                 update(effectPatch);
@@ -602,7 +602,7 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const { update, states } = setupFn({ initial, services, Effects });
+        const { update, states } = setupFn({ initial, services, effects });
 
         states.map(state => {
           try {
@@ -663,8 +663,8 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const Effects = update => [
-          state => {
+        const effects = [
+          (state, update) => {
             if (state.data === "Loading") {
               setTimeout(() => {
                 update(effectPatch(state));
@@ -673,7 +673,7 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const { update, states } = setupFn({ initial, services, Effects });
+        const { update, states } = setupFn({ initial, services, effects });
 
         states.map(state => {
           try {
@@ -744,15 +744,15 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const Effects = update => [
-        state => {
+      const effects = [
+        (state, update) => {
           if (state.redirect) {
             update(effectPatch(state));
           }
         }
       ];
 
-      const { update, states } = setupFn({ initial, services, Effects });
+      const { update, states } = setupFn({ initial, services, effects });
 
       states.map(state => {
         expect(state.route).not.toEqual("PageB");
@@ -925,7 +925,7 @@ describe("meiosis setup with library for applying patches", () => {
         ]
       ])
     )("%s", (_label, setupFn, patch1, patch2) => {
-      const appEffects = (_update, actions) => state => {
+      const appEffects = (state, _update, actions) => {
         if (state.flag === null && state.data.length > 0) {
           actions.action2();
         }
@@ -944,7 +944,7 @@ describe("meiosis setup with library for applying patches", () => {
             update(patch2);
           }
         }),
-        Effects: (update, actions) => [appEffects(update, actions)]
+        effects: [appEffects]
       };
 
       const { states, actions } = setupFn(app);
@@ -1075,32 +1075,32 @@ describe("meiosis setup with library for applying patches", () => {
       ])
     )("%s", (_label, setupFn, updatePatch, appEffectPatch, effectPatch1, effectPatch2) => {
       test("async", done => {
-        const AppEffect = update => state => {
+        const appEffect = (state, update) => {
           if (state.events.event1) {
             setTimeout(() => update(appEffectPatch), 1);
           }
         };
 
-        const Effect1 = update => state => {
+        const effect1 = (state, update) => {
           if (state.triggers.trigger1) {
             setTimeout(() => update(effectPatch1), 1);
           }
         };
 
-        const Effect2 = update => state => {
+        const effect2 = (state, update) => {
           if (state.triggers.trigger2) {
             setTimeout(() => update(effectPatch2), 1);
           }
         };
 
-        const Effects = update => [AppEffect(update), Effect1(update), Effect2(update)];
+        const effects = [appEffect, effect1, effect2];
 
         const app = {
           initial: {
             events: {},
             triggers: {}
           },
-          Effects
+          effects
         };
 
         const { states, update } = setupFn(app);

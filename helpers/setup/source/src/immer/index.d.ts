@@ -2,6 +2,7 @@ import {
   CellActionConstructor as CommonCellActionConstructor,
   CellApp as CommonCellApp,
   CellConfigBase,
+  CellEffect as CommonCellEffect,
   Meiosis,
   MeiosisConfigBase,
   MeiosisCell as CommonMeiosisCell,
@@ -46,6 +47,8 @@ export type CellApp<S, A = unknown> = CommonCellApp<S, Patch<S>, A>;
 export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
 
 export type CellActionConstructor<S, A = unknown> = CommonCellActionConstructor<S, Patch<S>, A>;
+
+export type CellEffect<S, A = unknown> = CommonCellEffect<S, Patch<S>, A>;
 
 export interface ProduceNestPatch {
   (produce: Produce<any>): NestPatch;
