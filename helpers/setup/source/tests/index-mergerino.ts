@@ -4,6 +4,8 @@ import {
   CellApp,
   CellEffect,
   MeiosisCell,
+  Patch,
+  Service,
   nest,
   setupCell
 } from "../src/mergerino";
@@ -114,6 +116,60 @@ describe("Meiosis with TypeScript", () => {
         const duckCell = nest(rootCell, "duck");
         duckActions.changeDuckColor(duckCell, "yellow");
         expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      });
+
+      test("services", () => {
+        interface State {
+          count: number;
+          combined?: boolean;
+          increment?: number;
+          invalid?: boolean;
+          sequence?: boolean;
+          sequenced?: boolean;
+          received?: boolean;
+        }
+
+        const servicePatches: Patch<State>[] = [
+          { count: x => x + 1 },
+          { increment: undefined },
+          [{ invalid: undefined }, { combined: true }],
+          { sequenced: true },
+          { received: true }
+        ];
+
+        const updatePatches: Patch<State>[] = [
+          { increment: 1 },
+          { increment: 10 },
+          { invalid: true },
+          { sequence: true }
+        ];
+
+        const services: Service<State>[] = [
+          state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
+          state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+          state => (state.invalid ? servicePatches[2] : null),
+          state => (state.sequence ? servicePatches[3] : null),
+          state => (state.sequenced ? servicePatches[4] : null)
+        ];
+
+        const cell = setupCell<State>({
+          stream: simpleStream,
+          merge,
+          app: { initial: { count: 0 }, services }
+        });
+
+        cell.update(updatePatches[0]);
+        cell.update(updatePatches[1]);
+        cell.update(updatePatches[2]);
+        cell.update(updatePatches[3]);
+
+        expect(cell.getState()).toEqual({
+          count: 1,
+          combined: true,
+          sequence: true,
+          sequenced: true,
+          received: true
+        });
       });
 
       test("effects", () => {

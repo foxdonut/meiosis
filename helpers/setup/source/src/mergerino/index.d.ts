@@ -6,7 +6,8 @@ import {
   Meiosis,
   MeiosisConfigBase,
   MeiosisCell as CommonMeiosisCell,
-  Nest as CommonNest
+  Nest as CommonNest,
+  Service as CommonService
 } from "../common";
 
 /**
@@ -50,7 +51,9 @@ export type ObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
+export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
+
+export type Service<S> = CommonService<S, Patch<S>>;
 
 export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**

@@ -4,6 +4,8 @@ import {
   CellApp,
   CellEffect,
   MeiosisCell,
+  Patch,
+  Service,
   produceNest,
   setupCell
 } from "../src/immer";
@@ -127,6 +129,83 @@ describe("Meiosis with TypeScript", () => {
         const duckCell = nest(rootCell, "duck");
         duckActions.changeDuckColor(duckCell, "yellow");
         expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      });
+
+      test("services", () => {
+        interface State {
+          count: number;
+          combined?: boolean;
+          increment?: number;
+          invalid?: boolean;
+          sequence?: boolean;
+          sequenced?: boolean;
+          received?: boolean;
+        }
+
+        const servicePatches: Patch<State>[] = [
+          draft => {
+            draft.count++;
+          },
+          draft => {
+            delete draft.increment;
+          },
+          [
+            draft => {
+              delete draft.invalid;
+            },
+            draft => {
+              draft.combined = true;
+            }
+          ],
+          draft => {
+            draft.sequenced = true;
+          },
+          draft => {
+            draft.received = true;
+          }
+        ];
+
+        const updatePatches: Patch<State>[] = [
+          state => {
+            state.increment = 1;
+          },
+          state => {
+            state.increment = 10;
+          },
+          state => {
+            state.invalid = true;
+          },
+          state => {
+            state.sequence = true;
+          }
+        ];
+
+        const services: Service<State>[] = [
+          state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
+          state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+          state => (state.invalid ? servicePatches[2] : null),
+          state => (state.sequence ? servicePatches[3] : null),
+          state => (state.sequenced ? servicePatches[4] : null)
+        ];
+
+        const cell = setupCell<State>({
+          stream: simpleStream,
+          produce,
+          app: { initial: { count: 0 }, services }
+        });
+
+        cell.update(updatePatches[0]);
+        cell.update(updatePatches[1]);
+        cell.update(updatePatches[2]);
+        cell.update(updatePatches[3]);
+
+        expect(cell.getState()).toEqual({
+          count: 1,
+          combined: true,
+          sequence: true,
+          sequenced: true,
+          received: true
+        });
       });
 
       test("effects", () => {

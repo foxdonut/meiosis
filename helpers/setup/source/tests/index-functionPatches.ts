@@ -4,10 +4,12 @@ import {
   CellApp,
   CellEffect,
   MeiosisCell,
+  Patch,
+  Service,
   nest,
   setupCell
 } from "../src/functionPatches";
-import { add, assoc, lensProp, over } from "ramda";
+import { add, assoc, dissoc, lensProp, over } from "ramda";
 
 describe("Meiosis with TypeScript", () => {
   describe("Meiosis Cell", () => {
@@ -114,6 +116,59 @@ describe("Meiosis with TypeScript", () => {
         const duckCell = nest(rootCell, "duck");
         duckActions.changeDuckColor(duckCell, "yellow");
         expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      });
+
+      test("services", () => {
+        interface State {
+          count: number;
+          combined?: boolean;
+          increment?: number;
+          invalid?: boolean;
+          sequence?: boolean;
+          sequenced?: boolean;
+          received?: boolean;
+        }
+
+        const servicePatches: Patch<State>[] = [
+          over(lensProp("count"), add(1)),
+          dissoc("increment"),
+          [dissoc("invalid"), assoc("combined", true)],
+          assoc("sequenced", true),
+          assoc("received", true)
+        ];
+
+        const updatePatches: Patch<State>[] = [
+          assoc("increment", 1),
+          assoc("increment", 10),
+          assoc("invalid", true),
+          assoc("sequence", true)
+        ];
+
+        const services: Service<State>[] = [
+          state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
+          state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+          state => (state.invalid ? servicePatches[2] : null),
+          state => (state.sequence ? servicePatches[3] : null),
+          state => (state.sequenced ? servicePatches[4] : null)
+        ];
+
+        const cell = setupCell<State>({
+          stream: simpleStream,
+          app: { initial: { count: 0 }, services }
+        });
+
+        cell.update(updatePatches[0]);
+        cell.update(updatePatches[1]);
+        cell.update(updatePatches[2]);
+        cell.update(updatePatches[3]);
+
+        expect(cell.getState()).toEqual({
+          count: 1,
+          combined: true,
+          sequence: true,
+          sequenced: true,
+          received: true
+        });
       });
 
       test("effects", () => {

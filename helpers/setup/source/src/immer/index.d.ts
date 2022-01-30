@@ -7,12 +7,17 @@ import {
   MeiosisConfigBase,
   MeiosisCell as CommonMeiosisCell,
   Nest as CommonNest,
-  NestPatch
+  NestPatch,
+  Service as CommonService
 } from "../common";
 
-export interface Patch<S> {
+export interface PatchFn<S> {
   (state: S): S | void;
 }
+
+export type Patch<S> = PatchFn<S> | Patch<S>[];
+
+export type Service<S> = CommonService<S, Patch<S>>;
 
 export interface Produce<S> {
   (state: S, patch: Patch<S>): S;
