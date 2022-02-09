@@ -153,6 +153,8 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
+export type Patch<P> = P | P[];
+
 /**
  * Combines an array of patches into a single patch.
  *
@@ -162,9 +164,9 @@ export interface Combine<P> {
   /**
    * @param {P[]} patches the array of patches.
    *
-   * @returns {P | P[]} the result of combining the array of patches.
+   * @returns {P} the result of combining the array of patches.
    */
-  (patches: P[]): P | P[];
+  (patches: P[]): P;
 }
 
 /**
@@ -177,9 +179,9 @@ export interface Service<S, P> {
   /**
    * @param {S} state the current state.
    *
-   * @returns {P} the patch to be applied to the state.
+   * @returns {Patch<P>} the patch to be applied to the state.
    */
-  (state: S): P;
+  (state: S): Patch<P>;
 }
 
 /**
@@ -196,7 +198,7 @@ export interface Effect<S, P, A> {
    * @param {P} update the update stream.
    * @param {A} actions the application actions.
    */
-  (state: S, update: Stream<P>, actions: A): void;
+  (state: S, update: Stream<Patch<P>>, actions: A): void;
 }
 
 /**
@@ -208,12 +210,12 @@ export interface Effect<S, P, A> {
  */
 export interface ActionConstructor<S, P, A> {
   /**
-   * @param {Stream<P>} update the `update` stream.
+   * @param {Stream<Patch<P>>} update the `update` stream.
    * @param {Stream<S>} [states] the stream of application states.
    *
    * @returns {A} the application's actions.
    */
-  (update: Stream<P>, states?: Stream<S>): A;
+  (update: Stream<Patch<P>>, states?: Stream<S>): A;
 }
 
 export interface BaseApp<S, P> {
@@ -303,7 +305,7 @@ export interface BaseMeiosis<S, P> {
   /**
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
-  update: Stream<P>;
+  update: Stream<Patch<P>>;
 }
 
 /**
@@ -361,7 +363,7 @@ export type NestPatch = (patch: any, prop: any) => any;
  */
 export interface MeiosisCell<S, P, A = unknown> {
   getState: Stream<S>;
-  update: (patch: P) => P;
+  update: (patch: Patch<P>) => Patch<P>;
   actions: A;
   root: MeiosisCell<S, P, A>;
 }

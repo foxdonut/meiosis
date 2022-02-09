@@ -5,7 +5,7 @@ import commonSetup, { createNest, setupCell as commonCell } from "../common";
 const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
 
 /** @type {import("./index").setup} */
-const setup = ({ stream, app }) =>
+export const setup = ({ stream, app }) =>
   commonSetup({ stream, accumulator: (x, f) => f(x), combine: pipe, app });
 
 export default setup;

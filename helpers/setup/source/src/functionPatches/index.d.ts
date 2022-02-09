@@ -1,8 +1,11 @@
 import {
+  ActionConstructor as CommonActionConstructor,
+  App as CommonApp,
   CellActionConstructor as CommonCellActionConstructor,
   CellApp as CommonCellApp,
   CellConfigBase,
   CellEffect as CommonCellEffect,
+  Effect as CommonEffect,
   Meiosis,
   MeiosisConfigBase,
   MeiosisCell as CommonMeiosisCell,
@@ -13,7 +16,7 @@ import {
 /**
  * @template S the State type.
  */
-export interface PatchFn<S> {
+export interface Patch<S> {
   /**
    * A function patch.
    *
@@ -33,9 +36,13 @@ export interface PatchFn<S> {
   (state: S): S;
 }
 
-export type Patch<S> = PatchFn<S> | Patch<S>[];
+export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
 
 export type Service<S> = CommonService<S, Patch<S>>;
+
+export type Effect<S, A> = CommonEffect<S, Patch<S>, A>;
+
+export type App<S, A> = CommonApp<S, Patch<S>, A>;
 
 /**
  * Config for setting up Meiosis with function patches.

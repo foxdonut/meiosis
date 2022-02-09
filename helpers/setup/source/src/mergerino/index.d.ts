@@ -3,6 +3,7 @@ import {
   CellApp as CommonCellApp,
   CellConfigBase,
   CellEffect as CommonCellEffect,
+  Effect as CommonEffect,
   Meiosis,
   MeiosisConfigBase,
   MeiosisCell as CommonMeiosisCell,
@@ -54,6 +55,8 @@ export type ObjectPatch<S> = {
 export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 export type Service<S> = CommonService<S, Patch<S>>;
+
+export type Effect<S, A> = CommonEffect<S, Patch<S>, A>;
 
 export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**
