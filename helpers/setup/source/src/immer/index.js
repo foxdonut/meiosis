@@ -1,9 +1,9 @@
 // @ts-check
 
-import commonSetup, { createNest, setupCell as commonCell } from "../common";
+import commonSetup, { createNest } from "../common";
 
 /** @type {import("./index").setup} */
-const setup = ({ stream, produce, app }) =>
+export const setup = ({ stream, produce, app }) =>
   commonSetup({
     stream,
     accumulator: produce,
@@ -13,8 +13,6 @@ const setup = ({ stream, produce, app }) =>
   });
 
 export default setup;
-
-// -------- Meiosis Cell
 
 /**
  * @type {import("./index").ProduceNestPatch}
@@ -30,13 +28,3 @@ const produceNestPatch = produce => (patch, prop) => state => {
  * @type {import("./index").ProduceNest<S, K>}
  */
 export const produceNest = produce => createNest(produceNestPatch(produce));
-
-/** @type {import("./index").setupCell} */
-export const setupCell = ({ stream, produce, app }) =>
-  commonCell({
-    stream,
-    accumulator: produce,
-    // can't use patches.reduce(produce, state) because that would send a third argument to produce
-    combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
-    app
-  });

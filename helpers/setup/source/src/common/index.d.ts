@@ -170,6 +170,35 @@ export interface Combine<P> {
 }
 
 /**
+ * Returned by Meiosis setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface Meiosis<S, P, A = unknown> {
+  /**
+   * The stream of application states.
+   */
+  getState: Stream<S>;
+
+  /**
+   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
+   */
+  update: (patch: Patch<P>) => P;
+
+  /**
+   * The application's actions.
+   */
+  actions: A;
+
+  /**
+   * The root cell, useful when using nested cells.
+   */
+  root: Meiosis<S, P, A>;
+}
+
+/**
  * A service function. Receives the current state and returns a patch to be applied to the state.
  *
  * @template S the State type.
@@ -198,7 +227,7 @@ export interface Effect<S, P, A> {
    * @param {P} update the update stream.
    * @param {A} actions the application actions.
    */
-  (state: S, update: Stream<Patch<P>>, actions: A): void;
+  (cell: Meiosis<S, P, A>): void;
 }
 
 /**
@@ -210,31 +239,11 @@ export interface Effect<S, P, A> {
  */
 export interface ActionConstructor<S, P, A> {
   /**
-   * @param {Stream<Patch<P>>} update the `update` stream.
-   * @param {Stream<S>} [states] the stream of application states.
+   * @param {Meiosis<S, P, A>} cell the Meiosis cell.
    *
    * @returns {A} the application's actions.
    */
-  (update: Stream<Patch<P>>, states?: Stream<S>): A;
-}
-
-export interface BaseApp<S, P> {
-  /**
-   * An object that represents the initial state. If not specified, the initial state will be `{}`.
-   */
-  initial?: S;
-
-  /**
-   * An array of service functions.
-   */
-  services?: Service<S, P>[];
-}
-
-export interface BaseConfig<S, P> {
-  stream: StreamLib;
-  app: BaseApp<S, P>;
-  accumulator: Accumulator<S, P>;
-  combine: Combine<P>;
+  (cell: Meiosis<S, P, A>): A;
 }
 
 /**
@@ -245,7 +254,17 @@ export interface BaseConfig<S, P> {
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export interface App<S, P, A> extends BaseApp<S, P> {
+export interface App<S, P, A> {
+  /**
+   * An object that represents the initial state. If not specified, the initial state will be `{}`.
+   */
+  initial?: S;
+
+  /**
+   * An array of service functions.
+   */
+  services?: Service<S, P>[];
+
   /**
    * A function that creates the application's actions.
    */
@@ -296,34 +315,6 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
   combine: Combine<P>;
 }
 
-export interface BaseMeiosis<S, P> {
-  /**
-   * The stream of application states.
-   */
-  states: Stream<S>;
-
-  /**
-   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
-   */
-  update: Stream<Patch<P>>;
-}
-
-/**
- * Returned by Meiosis setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface Meiosis<S, P, A> extends BaseMeiosis<S, P> {
-  /**
-   * The application's actions.
-   */
-  actions: A;
-}
-
-export function baseSetup<S, P>(config: BaseConfig<S, P>): BaseMeiosis<S, P>;
-
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
@@ -347,119 +338,15 @@ export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>
 
 export default setup;
 
-// -------- Meiosis Cell
-
 /**
  * Function that nests a patch at a given property.
  */
 export type NestPatch = (patch: any, prop: any) => any;
 
-/**
- * Returned by Meiosis Cell setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface MeiosisCell<S, P, A = unknown> {
-  getState: Stream<S>;
-  update: (patch: Patch<P>) => Patch<P>;
-  actions: A;
-  root: MeiosisCell<S, P, A>;
-}
-
-export interface CellActionConstructor<S, P, A> {
-  (cell: MeiosisCell<S, P>): A;
-}
-
 export interface Nest<S, P, K extends keyof S, N, A = unknown> {
-  (cell: MeiosisCell<S, P, A>, prop: K): MeiosisCell<S[K], N>;
+  (cell: Meiosis<S, P, A>, prop: K): Meiosis<S[K], N>;
 }
 
 export function createNest<S, K extends keyof S>(
   nestPatch: NestPatch
 ): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;
-
-/**
- * An effect function. Receives the Meiosis cell and* optionally performs side effects.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- *
- * @param {MeiosisCell<S, P, A>} cell the Meiosis cell.
- */
-export interface CellEffect<S, P, A = unknown> {
-  (cell: MeiosisCell<S, P, A>): void;
-}
-
-export interface CellApp<S, P, A = unknown> {
-  /**
-   * An object that represents the initial state. If not specified, the initial state will be `{}`.
-   */
-  initial?: S;
-
-  /**
-   * An array of service functions.
-   */
-  services?: Service<S, P>[];
-
-  /**
-   * A function that creates the application's actions.
-   */
-  Actions?: CellActionConstructor<S, P, A>;
-
-  /**
-   * A function that creates the application's effects.
-   */
-  effects?: CellEffect<S, P, A>[];
-}
-
-export interface CellConfigBase {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
-  stream: StreamLib;
-}
-
-/**
- * Meiosis One configuration.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface CellConfig<S, P, A = unknown> extends CellConfigBase {
-  /*
-   * The accumulator function.
-   */
-  accumulator: Accumulator<S, P>;
-
-  /**
-   * The function that combines an array of patches into one patch.
-   */
-
-  combine: Combine<P>;
-
-  /**
-   * The application object, with optional properties.
-   */
-  app: CellApp<S, P, A>;
-}
-
-/**
- * Base helper to setup Meiosis One. If you are using Mergerino, Function Patches, or Immer,
- * use their respective `meiosisOne` function instead.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- *
- * @param {CellConfig<S, P, A>} config the Meiosis Cell config.
- *
- * @returns {MeiosisCell<S, P, A>} the Meiosis Cell setup.
- */
-export function setupCell<S, P, A = unknown>(config: CellConfig<S, P, A>): MeiosisCell<S, P, A>;

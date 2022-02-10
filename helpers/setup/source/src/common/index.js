@@ -1,7 +1,7 @@
 // @ts-check
 
-/** @type {import("./index").baseSetup} */
-const baseSetup = ({ stream, accumulator, combine, app }) => {
+/** @type {import("./index").setup} */
+export const setup = ({ stream, accumulator, combine, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -27,37 +27,38 @@ const baseSetup = ({ stream, accumulator, combine, app }) => {
   const runServices = startingState =>
     services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
-  const states = scan(
+  const getState = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
     runServices(initial),
     update
   );
 
-  return { states, update };
-};
+  /** @type {import("./index").Meiosis} */
+  const cell = {
+    getState,
+    update,
+    actions: undefined,
+    root: undefined
+  };
 
-/** @type {import("./index").setup} */
-const setup = ({ stream, accumulator, combine, app }) => {
-  const { states, update } = baseSetup({ stream, accumulator, combine, app });
+  const actions = safeApp.Actions ? safeApp.Actions(cell) : undefined;
 
-  const Actions = Object.assign({ Actions: (_update, _states) => undefined }, app).Actions;
-  const actions = Actions(update, states);
+  cell.actions = actions;
+  cell.root = cell;
 
   const effects = Object.assign({ effects: [] }, app).effects;
-  states.map(state => effects.forEach(effect => effect(state, update, actions)));
+  getState.map(() => effects.forEach(effect => effect(cell)));
 
-  return { states, update, actions };
+  return cell;
 };
 
 export default setup;
-
-// -------- Meiosis Cell
 
 /** @type {import("./index").createNest} */
 export const createNest = nestPatch => (cell, prop) => {
   const getState = cell.getState.map(state => state[prop]);
 
-  /** @type {import("./index").MeiosisCell} */
+  /** @type {import("./index").Meiosis} */
   const nested = {
     getState,
     update: patch => cell.update(nestPatch(patch, prop)),
@@ -66,27 +67,4 @@ export const createNest = nestPatch => (cell, prop) => {
   };
 
   return nested;
-};
-
-/** @type {import("./index").setupCell} */
-export const setupCell = ({ stream, accumulator, combine, app }) => {
-  const { states, update } = baseSetup({ stream, accumulator, combine, app });
-
-  /** @type {import("./index").MeiosisCell} */
-  const root = {
-    getState: states,
-    update,
-    actions: undefined,
-    root: undefined
-  };
-
-  const actions = app && app.Actions ? app.Actions(root) : undefined;
-
-  root.actions = actions;
-  root.root = root;
-
-  const effects = Object.assign({ effects: [] }, app).effects;
-  states.map(() => effects.forEach(effect => effect(root)));
-
-  return root;
 };

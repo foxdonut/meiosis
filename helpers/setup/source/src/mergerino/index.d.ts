@@ -1,12 +1,9 @@
 import {
-  CellActionConstructor as CommonCellActionConstructor,
-  CellApp as CommonCellApp,
-  CellConfigBase,
-  CellEffect as CommonCellEffect,
+  ActionConstructor as CommonActionConstructor,
+  App as CommonApp,
   Effect as CommonEffect,
-  Meiosis,
+  Meiosis as CommonMeiosis,
   MeiosisConfigBase,
-  MeiosisCell as CommonMeiosisCell,
   Nest as CommonNest,
   Service as CommonService
 } from "../common";
@@ -52,13 +49,19 @@ export type ObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
+export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
+
+export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
 
 export type Service<S> = CommonService<S, Patch<S>>;
 
 export type Effect<S, A> = CommonEffect<S, Patch<S>, A>;
 
-export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
+export type App<S, A> = CommonApp<S, Patch<S>, A>;
+
+export type Meiosis<S, A = unknown> = CommonMeiosis<S, Patch<S>, A>;
+
+export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
@@ -76,52 +79,13 @@ export interface MeiosisConfig<S, A> extends MeiosisConfigBase<S, Patch<S>, A> {
  * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A>(config: MeiosisConfig<S, A>): Meiosis<S, Patch<S>, A>;
+export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): Meiosis<S, A>;
 
 export default setup;
-
-// -------- Meiosis Cell
-
-export type CellApp<S, A = unknown> = CommonCellApp<S, Patch<S>, A>;
-
-export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
-
-export type CellActionConstructor<S, A> = CommonCellActionConstructor<S, Patch<S>, A>;
-
-export type CellEffect<S, A = unknown> = CommonCellEffect<S, Patch<S>, A>;
 
 export type Nest<S, K extends keyof S, A = unknown> = CommonNest<S, Patch<S>, K, Patch<S[K]>, A>;
 
 export function nest<S, K extends keyof S, A = unknown>(
-  cell: MeiosisCell<S, A>,
+  cell: Meiosis<S, A>,
   prop: K
-): MeiosisCell<S[K], A>;
-
-/**
- * Mergerino Meiosis Cell configuration.
- *
- * @template S the State type.
- */
-export interface CellConfig<S, A = unknown> extends CellConfigBase {
-  /**
-   * The Mergerino `merge` function.
-   */
-  merge: (state: S, patch: Patch<S>) => S;
-
-  /**
-   * The application object, with optional properties.
-   */
-  app: CellApp<S, A>;
-}
-
-/**
- * Helper to setup Meiosis Cell with [Mergerino](https://github.com/fuzetsu/mergerino).
- *
- * @template S the State type.
- * @template A the Actions type.
- *
- * @param {CellConfig<S>} config the Meiosis Cell config for use with Mergerino
- *
- * @returns {MeiosisCell<S>} Mergerino Meiosis Cell.
- */
-export function setupCell<S, A = unknown>(config: CellConfig<S, A>): MeiosisCell<S, A>;
+): Meiosis<S[K], A>;
