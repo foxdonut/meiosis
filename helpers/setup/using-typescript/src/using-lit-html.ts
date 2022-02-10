@@ -1,6 +1,6 @@
 // lit-html + functionPatches + simple-stream
 import simpleStream from "../../source/dist/simple-stream";
-import { CellApp, MeiosisCell, nest, setupCell } from "../../source/dist/functionPatches";
+import { App, Meiosis, setup } from "../../source/dist/functionPatches";
 import { html, render as litHtmlRender, TemplateResult } from "lit-html";
 import {
   Conditions,
@@ -15,19 +15,19 @@ import {
 } from "./common";
 
 interface SkyOptionAttrs {
-  cell: MeiosisCell<Conditions>;
+  cell: Meiosis<Conditions>;
   value: string;
   label: string;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
+  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+  increment: (cell: Meiosis<Temperature>, amount: number) => void;
+  changeUnits: (cell: Meiosis<Temperature>) => void;
 }
 
 const conditions: ConditionsComponent = {
@@ -55,7 +55,7 @@ const skyOption: (attrs: SkyOptionAttrs) => TemplateResult = ({ cell, value, lab
   </label>
 `;
 
-const Conditions: (cell: MeiosisCell<Conditions>) => TemplateResult = cell => html`
+const Conditions: (cell: Meiosis<Conditions>) => TemplateResult = cell => html`
   <div>
     <label>
       <input
@@ -91,7 +91,7 @@ const temperatureActions: TemperatureActions = {
   }
 };
 
-const Temperature: (cell: MeiosisCell<Temperature>) => TemplateResult = cell => html`
+const Temperature: (cell: Meiosis<Temperature>) => TemplateResult = cell => html`
   <div>
     ${cell.getState().label} Temperature: ${cell.getState().value}&deg;${cell.getState().units}
     <div>
@@ -104,7 +104,7 @@ const Temperature: (cell: MeiosisCell<Temperature>) => TemplateResult = cell => 
   </div>
 `;
 
-const app: CellApp<State, never> = {
+const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -114,18 +114,18 @@ const app: CellApp<State, never> = {
   }
 };
 
-const App: (cell: MeiosisCell<State>) => TemplateResult = cell => html`
+const App: (cell: Meiosis<State>) => TemplateResult = cell => html`
   <div style="display: grid; grid-template-columns: 1fr 1fr">
     <div>
-      ${Conditions(nest(cell, "conditions"))} ${Temperature(nest(nest(cell, "temperature"), "air"))}
-      ${Temperature(nest(nest(cell, "temperature"), "water"))}
+      ${Conditions(cell.nest("conditions"))} ${Temperature(cell.nest("temperature").nest("air"))}
+      ${Temperature(cell.nest("temperature").nest("water"))}
     </div>
     <pre style="margin: 0">${JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>
 `;
 
 export const setupLitHtmlExample = (): void => {
-  const cell = setupCell<State, never>({ stream: simpleStream, app });
+  const cell = setup<State>({ stream: simpleStream, app });
   const element = document.getElementById("litHtmlApp") as HTMLElement;
   cell.getState.map(() => litHtmlRender(App(cell), element));
 };

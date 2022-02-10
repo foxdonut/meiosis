@@ -153,7 +153,7 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
-export type Patch<P> = P | P[];
+export type PatchOrPatches<P> = P | P[];
 
 /**
  * Combines an array of patches into a single patch.
@@ -168,6 +168,20 @@ export interface Combine<P> {
    */
   (patches: P[]): P;
 }
+
+/**
+ * Function that nests a patch at a given property.
+ */
+export type NestPatch = (patch: any, prop: string | number | symbol) => any;
+
+export interface NestProp<S, K extends keyof S, N> {
+  (prop: K): Meiosis<S[K], N>;
+}
+
+export function nest<S, K extends keyof S>(
+  nestPatch: NestPatch,
+  cell: Meiosis<S, ReturnType<typeof nestPatch>>
+): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 
 /**
  * Returned by Meiosis setup.
@@ -185,7 +199,7 @@ export interface Meiosis<S, P, A = unknown> {
   /**
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
-  update: (patch: Patch<P>) => P;
+  update: (patch: PatchOrPatches<P>) => P;
 
   /**
    * The application's actions.
@@ -196,6 +210,8 @@ export interface Meiosis<S, P, A = unknown> {
    * The root cell, useful when using nested cells.
    */
   root: Meiosis<S, P, A>;
+
+  nest: <K extends keyof S>(prop: K) => Meiosis<S[K], any>;
 }
 
 /**
@@ -210,7 +226,7 @@ export interface Service<S, P> {
    *
    * @returns {Patch<P>} the patch to be applied to the state.
    */
-  (state: S): Patch<P>;
+  (state: S): PatchOrPatches<P>;
 }
 
 /**
@@ -313,6 +329,11 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
    * The function that combines an array of patches into one patch.
    */
   combine: Combine<P>;
+
+  /**
+   * How to nest a patch.
+   */
+  nestPatch: NestPatch;
 }
 
 /**
@@ -337,16 +358,3 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
 export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
 
 export default setup;
-
-/**
- * Function that nests a patch at a given property.
- */
-export type NestPatch = (patch: any, prop: any) => any;
-
-export interface Nest<S, P, K extends keyof S, N, A = unknown> {
-  (cell: Meiosis<S, P, A>, prop: K): Meiosis<S[K], N>;
-}
-
-export function createNest<S, K extends keyof S>(
-  nestPatch: NestPatch
-): Nest<S, ReturnType<typeof nestPatch>, K, Parameters<typeof nestPatch>[0]>;

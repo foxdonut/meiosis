@@ -7,8 +7,6 @@ import m from "mithril";
 import Stream from "mithril/stream";
 import { app, convert } from "./common";
 
-const nest = meiosis.mergerino.nest;
-
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
     cell.update({ precipitations: value });
@@ -93,9 +91,9 @@ const App = {
       { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
       m(
         "div",
-        m(Conditions, { cell: nest(cell, "conditions") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+        m(Conditions, { cell: cell.nest("conditions") }),
+        m(Temperature, { cell: cell.nest("temperature").nest("air") }),
+        m(Temperature, { cell: cell.nest("temperature").nest("water") })
       ),
       m("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
     )
@@ -107,7 +105,7 @@ export const setupMithrilExample = () => {
     scan: (acc, init, stream) => Stream.scan(acc, init, stream)
   };
 
-  const cell = meiosis.mergerino.setupCell({ stream, merge, app });
+  const cell = meiosis.mergerino.setup({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp"), {
     view: () => m(App, { cell })

@@ -1,5 +1,5 @@
 // react + immer + flyd
-import { CellApp, MeiosisCell, produceNest, setupCell } from "../../source/dist/immer";
+import { App, Meiosis, setup } from "../../source/dist/immer";
 import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
@@ -18,16 +18,16 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisCell<State>;
+  cell: Meiosis<State>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
+  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
+  cell: Meiosis<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -36,15 +36,13 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+  increment: (cell: Meiosis<Temperature>, amount: number) => void;
+  changeUnits: (cell: Meiosis<Temperature>) => void;
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
+  cell: Meiosis<Temperature>;
 }
-
-const nest = produceNest(produce);
 
 const conditions: ConditionsComponent = {
   initial: initialConditions
@@ -128,7 +126,7 @@ const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
   </div>
 );
 
-const app: CellApp<State, never> = {
+const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -141,9 +139,9 @@ const app: CellApp<State, never> = {
 const Root: (attrs: Attrs) => ReactElement = ({ cell }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
     <div>
-      <Conditions cell={nest(cell, "conditions")} />
-      <Temperature cell={nest(nest(cell, "temperature"), "air")} />
-      <Temperature cell={nest(nest(cell, "temperature"), "water")} />
+      <Conditions cell={cell.nest("conditions")} />
+      <Temperature cell={cell.nest("temperature").nest("air")} />
+      <Temperature cell={cell.nest("temperature").nest("water")} />
     </div>
     <pre style={{ margin: "0" }}>{JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>
@@ -154,7 +152,7 @@ const stream = {
   scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
 };
 
-const cell = setupCell<State, never>({ stream, produce: (s, p) => produce(s, p), app });
+const cell = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
 const App = meiosisReact<Attrs>({ React, Root });
 
 export const setupReactExample = (): void => {

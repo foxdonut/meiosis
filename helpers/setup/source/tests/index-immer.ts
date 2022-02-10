@@ -1,14 +1,5 @@
 import simpleStream from "../src/simple-stream";
-import {
-  ActionConstructor,
-  App,
-  Effect,
-  Meiosis,
-  Patch,
-  Service,
-  produceNest,
-  setup
-} from "../src/immer";
+import { ActionConstructor, App, Effect, Meiosis, Patch, Service, setup } from "../src/immer";
 import produce from "immer";
 
 describe("Meiosis with TypeScript - Immer", () => {
@@ -105,8 +96,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       });
       expect(rootCell.getState()).toEqual({ duck: { color: "" }, sound: "quack" });
 
-      const nest = produceNest(produce);
-      const duckCell = nest(rootCell, "duck");
+      const duckCell = rootCell.nest("duck");
       expect(duckCell.getState()).not.toBeUndefined();
 
       duckCell.update(state => {
@@ -176,8 +166,7 @@ describe("Meiosis with TypeScript - Immer", () => {
 
       expect(rootCell.actions).toBeUndefined();
 
-      const nest = produceNest(produce);
-      const duckCell = nest(rootCell, "duck");
+      const duckCell = rootCell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
       expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
     });

@@ -8,8 +8,6 @@ import { h, render as preactRender } from "preact";
 import { useState } from "preact/hooks";
 import { app, convert } from "./common";
 
-const nest = meiosis.mergerino.nest;
-
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
     cell.update({ precipitations: value });
@@ -100,9 +98,9 @@ const Root = ({ cell }) =>
     h(
       "div",
       {},
-      h(Conditions, { cell: nest(cell, "conditions") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+      h(Conditions, { cell: cell.nest("conditions") }),
+      h(Temperature, { cell: cell.nest("temperature").nest("air") }),
+      h(Temperature, { cell: cell.nest("temperature").nest("water") })
     ),
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );
@@ -110,7 +108,7 @@ const Root = ({ cell }) =>
 const App = meiosisPreact({ h, useState, Root });
 
 export const setupPreactExample = () => {
-  const cell = meiosis.mergerino.setupCell({ stream: meiosis.simpleStream, merge, app });
+  const cell = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
   const element = document.getElementById("preactApp");
   preactRender(h(App, { states: cell.getState, cell }), element);
 };

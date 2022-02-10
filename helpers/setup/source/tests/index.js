@@ -1225,14 +1225,9 @@ describe("Meiosis cell", () => {
 
   test.each(
     createTestCases("nest", [
-      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
       [
-        meiosis.functionPatches.nest,
-        () => ({ duck: { sound: "quack" } }),
-        R.assocPath(["duck", "color"], "yellow")
-      ],
-      [
-        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1241,9 +1236,9 @@ describe("Meiosis cell", () => {
         }
       ]
     ])
-  )("%s", (_label, setupFn, nest, patch1, patch2) => {
+  )("%s", (_label, setupFn, patch1, patch2) => {
     const cell = setupFn({ initial: { feathers: { duck: {} } } });
-    const nested = nest(cell, "feathers");
+    const nested = cell.nest("feathers");
 
     nested.update(patch1);
     nested.update(patch2);
@@ -1254,14 +1249,9 @@ describe("Meiosis cell", () => {
 
   test.each(
     createTestCases("deep nest", [
-      [meiosis.mergerino.nest, { duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
       [
-        meiosis.functionPatches.nest,
-        () => ({ duck: { sound: "quack" } }),
-        R.assocPath(["duck", "color"], "yellow")
-      ],
-      [
-        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1270,10 +1260,9 @@ describe("Meiosis cell", () => {
         }
       ]
     ])
-  )("%s", (_label, setupFn, nest, patch1, patch2) => {
+  )("%s", (_label, setupFn, patch1, patch2) => {
     const cell = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
-    const nested = nest(cell, "fowl");
-    const deepNested = nest(nested, "feathers");
+    const deepNested = cell.nest("fowl").nest("feathers");
 
     deepNested.update(patch1);
     deepNested.update(patch2);
@@ -1286,20 +1275,13 @@ describe("Meiosis cell", () => {
 
   test.each(
     createTestCases("actions", [
+      [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }, { done: true }],
       [
-        meiosis.mergerino.nest,
-        { duck: { sound: "quack" } },
-        { duck: { color: "yellow" } },
-        { done: true }
-      ],
-      [
-        meiosis.functionPatches.nest,
         () => ({ duck: { sound: "quack" } }),
         R.assocPath(["duck", "color"], "yellow"),
         R.assoc("done", true)
       ],
       [
-        meiosis.immer.produceNest(produce),
         state => {
           state.duck = { sound: "quack" };
         },
@@ -1311,7 +1293,7 @@ describe("Meiosis cell", () => {
         }
       ]
     ])
-  )("%s", (_label, setupFn, nest, patch1, patch2, patch3) => {
+  )("%s", (_label, setupFn, patch1, patch2, patch3) => {
     const cell = setupFn({
       initial: { fowl: { feathers: { duck: {} } } },
       Actions: cell => ({
@@ -1324,8 +1306,7 @@ describe("Meiosis cell", () => {
       action2: cell => cell.update(patch2)
     };
 
-    const nested = nest(cell, "fowl");
-    const deepNested = nest(nested, "feathers");
+    const deepNested = cell.nest("fowl").nest("feathers");
 
     actions.action1(deepNested);
     actions.action2(deepNested);

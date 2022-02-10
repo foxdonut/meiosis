@@ -1,28 +1,24 @@
 // @ts-check
 
-import commonSetup, { createNest } from "./common";
-import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
-import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
-import immerSetup, { produceNest } from "./immer";
+import commonSetup from "./common";
+import mergerinoSetup from "./mergerino";
+import functionPatchesSetup from "./functionPatches";
+import immerSetup from "./immer";
 import simpleStream from "./simple-stream";
 import { get } from "./util";
 
 export default {
   common: {
-    setup: commonSetup,
-    createNest
+    setup: commonSetup
   },
   mergerino: {
-    setup: mergerinoSetup,
-    nest: mergerinoNest
+    setup: mergerinoSetup
   },
   functionPatches: {
-    setup: functionPatchesSetup,
-    nest: functionPatchesNest
+    setup: functionPatchesSetup
   },
   immer: {
-    setup: immerSetup,
-    produceNest
+    setup: immerSetup
   },
   simpleStream,
   util: {

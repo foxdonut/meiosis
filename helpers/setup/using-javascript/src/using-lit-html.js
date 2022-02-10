@@ -5,8 +5,6 @@ import meiosis from "../../source/dist/index";
 import { html, render as litHtmlRender } from "lit-html";
 import { app, convert } from "./common";
 
-const nest = meiosis.functionPatches.nest;
-
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
     cell.update(state => ({ ...state, precipitations: value }));
@@ -76,15 +74,15 @@ const Temperature = cell => html`
 const App = cell => html`
   <div style="display: grid; grid-template-columns: 1fr 1fr">
     <div>
-      ${Conditions(nest(cell, "conditions"))} ${Temperature(nest(nest(cell, "temperature"), "air"))}
-      ${Temperature(nest(nest(cell, "temperature"), "water"))}
+      ${Conditions(cell.nest("conditions"))} ${Temperature(cell.nest("temperature").nest("air"))}
+      ${Temperature(cell.nest("temperature").nest("water"))}
     </div>
     <pre style="margin: 0">${JSON.stringify(cell.getState(), null, 4)}</pre>
   </div>
 `;
 
 export const setupLitHtmlExample = () => {
-  const cell = meiosis.functionPatches.setupCell({ stream: meiosis.simpleStream, app });
+  const cell = meiosis.functionPatches.setup({ stream: meiosis.simpleStream, app });
   const element = document.getElementById("litHtmlApp");
   cell.getState.map(() => litHtmlRender(App(cell), element));
 };

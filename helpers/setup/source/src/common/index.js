@@ -1,7 +1,7 @@
 // @ts-check
 
 /** @type {import("./index").setup} */
-export const setup = ({ stream, accumulator, combine, app }) => {
+export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -33,18 +33,38 @@ export const setup = ({ stream, accumulator, combine, app }) => {
     update
   );
 
+  /** @type {import("./index").nest} */
+  const nest = (nestPatch, cell) => prop => {
+    const getState = cell.getState.map(state => state[prop]);
+
+    /** @type {import("./index").Meiosis} */
+    const nested = {
+      getState,
+      update: patch => cell.update(nestPatch(patch, prop)),
+      actions: undefined,
+      root: cell.root,
+      nest: undefined
+    };
+
+    nested.nest = nest(nestPatch, nested);
+
+    return nested;
+  };
+
   /** @type {import("./index").Meiosis} */
   const cell = {
     getState,
     update,
     actions: undefined,
-    root: undefined
+    root: undefined,
+    nest: undefined
   };
 
   const actions = safeApp.Actions ? safeApp.Actions(cell) : undefined;
 
   cell.actions = actions;
   cell.root = cell;
+  cell.nest = nest(nestPatch, cell);
 
   const effects = Object.assign({ effects: [] }, app).effects;
   getState.map(() => effects.forEach(effect => effect(cell)));
@@ -53,18 +73,3 @@ export const setup = ({ stream, accumulator, combine, app }) => {
 };
 
 export default setup;
-
-/** @type {import("./index").createNest} */
-export const createNest = nestPatch => (cell, prop) => {
-  const getState = cell.getState.map(state => state[prop]);
-
-  /** @type {import("./index").Meiosis} */
-  const nested = {
-    getState,
-    update: patch => cell.update(nestPatch(patch, prop)),
-    actions: null,
-    root: cell.root
-  };
-
-  return nested;
-};

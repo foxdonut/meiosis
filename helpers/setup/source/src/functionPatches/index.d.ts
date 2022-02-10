@@ -4,7 +4,6 @@ import {
   Effect as CommonEffect,
   Meiosis as CommonMeiosis,
   MeiosisConfigBase,
-  Nest as CommonNest,
   Service as CommonService
 } from "../common";
 
@@ -35,11 +34,13 @@ export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
 
 export type Service<S> = CommonService<S, Patch<S>>;
 
-export type Effect<S, A> = CommonEffect<S, Patch<S>, A>;
+export type Effect<S, A = unknown> = CommonEffect<S, Patch<S>, A>;
 
-export type App<S, A> = CommonApp<S, Patch<S>, A>;
+export type App<S, A = unknown> = CommonApp<S, Patch<S>, A>;
 
-export type Meiosis<S, A = unknown> = CommonMeiosis<S, Patch<S>, A>;
+export interface Meiosis<S, A = unknown> extends CommonMeiosis<S, Patch<S>, A> {
+  nest: <K extends keyof S>(prop: K) => Meiosis<S[K]>;
+}
 
 /**
  * Config for setting up Meiosis with function patches.
@@ -61,10 +62,3 @@ export type MeiosisConfig<S, A = unknown> = MeiosisConfigBase<S, Patch<S>, A>;
 export function setup<S, A = unknown>({ stream, app }: MeiosisConfig<S, A>): Meiosis<S, A>;
 
 export default setup;
-
-export type Nest<S, K extends keyof S, A = unknown> = CommonNest<S, Patch<S>, K, Patch<S[K]>, A>;
-
-export function nest<S, K extends keyof S, A = unknown>(
-  cell: Meiosis<S, A>,
-  prop: K
-): Meiosis<S[K], A>;

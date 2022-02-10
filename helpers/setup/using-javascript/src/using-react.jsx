@@ -9,8 +9,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { app, convert } from "./common";
 
-const nest = meiosis.immer.produceNest(produce);
-
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
     cell.update(state => {
@@ -86,6 +84,7 @@ const Temperature = ({ cell }) => (
 );
 
 const Root = ({ cells }) => {
+  /** @type {import("react").ReactElement} */
   const result = (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div>
@@ -104,20 +103,20 @@ const stream = {
   scan: (acc, init, stream) => flyd.scan(acc, init, stream)
 };
 
-const cell = meiosis.immer.setupCell({
+const cell = meiosis.immer.setup({
   stream,
   produce: (s, p) => produce(s, p),
   app
 });
 
-const temperatureCell = nest(cell, "temperature");
+const temperatureCell = cell.nest("temperature");
 
 const cells = {
   root: cell,
-  conditions: nest(cell, "conditions"),
+  conditions: cell.nest("conditions"),
   temperature: {
-    air: nest(temperatureCell, "air"),
-    water: nest(temperatureCell, "water")
+    air: temperatureCell.nest("air"),
+    water: temperatureCell.nest("water")
   }
 };
 

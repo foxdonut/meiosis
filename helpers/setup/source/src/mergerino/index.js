@@ -1,17 +1,6 @@
 // @ts-check
 
-import commonSetup, { createNest } from "../common";
-
-/** @type {import("./index").setup} */
-export const setup = ({ stream, merge, app }) =>
-  commonSetup({
-    stream,
-    accumulator: merge,
-    combine: patches => patches,
-    app
-  });
-
-export default setup;
+import commonSetup from "../common";
 
 /**
  * @template S
@@ -24,10 +13,14 @@ export default setup;
  */
 const nestPatch = (patch, prop) => ({ [prop]: patch });
 
-/**
- * @template S
- * @template {keyof S} K
- *
- * @type {import("./index").Nest<S, K>}
- */
-export const nest = createNest(nestPatch);
+/** @type {import("./index").setup} */
+export const setup = ({ stream, merge, app }) =>
+  commonSetup({
+    stream,
+    accumulator: merge,
+    combine: patches => patches,
+    nestPatch,
+    app
+  });
+
+export default setup;

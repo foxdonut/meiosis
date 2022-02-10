@@ -1,6 +1,6 @@
 // preact + mergerino + simple-stream
 import simpleStream from "../../source/dist/simple-stream";
-import { CellApp, MeiosisCell, nest, setupCell } from "../../source/dist/mergerino";
+import { App, Meiosis, setup } from "../../source/dist/mergerino";
 import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
@@ -18,16 +18,16 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisCell<State>;
+  cell: Meiosis<State>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
+  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
+  cell: Meiosis<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -36,12 +36,12 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+  increment: (cell: Meiosis<Temperature>, amount: number) => void;
+  changeUnits: (cell: Meiosis<Temperature>) => void;
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
+  cell: Meiosis<Temperature>;
 }
 
 const conditions: ConditionsComponent = {
@@ -135,7 +135,7 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
     )
   );
 
-const app: CellApp<State, never> = {
+const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -152,9 +152,9 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
     h(
       "div",
       {},
-      h(Conditions, { cell: nest(cell, "conditions") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-      h(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+      h(Conditions, { cell: cell.nest("conditions") }),
+      h(Temperature, { cell: cell.nest("temperature").nest("air") }),
+      h(Temperature, { cell: cell.nest("temperature").nest("water") })
     ),
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
   );
@@ -163,7 +163,7 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
 const App = meiosisPreact<Attrs, VNode>({ h, useState, Root });
 
 export const setupPreactExample = (): void => {
-  const cell = setupCell<State, never>({ stream: simpleStream, merge, app });
+  const cell = setup<State>({ stream: simpleStream, merge, app });
 
   // Just testing TypeScript support here.
   const _test = simpleStream.stream<number>();

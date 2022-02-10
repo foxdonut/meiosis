@@ -1,5 +1,5 @@
 // mithril + mergerino + mithril-stream
-import { CellApp, MeiosisCell, nest, setupCell } from "../../source/dist/mergerino";
+import { App, Meiosis, setup } from "../../source/dist/mergerino";
 import merge from "mergerino";
 import m from "mithril";
 import MStream from "mithril/stream";
@@ -16,11 +16,11 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisCell<State>;
+  cell: Meiosis<State>;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
+  cell: Meiosis<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -29,17 +29,17 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
+  cell: Meiosis<Temperature>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
+  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
+  increment: (cell: Meiosis<Temperature>, amount: number) => void;
+  changeUnits: (cell: Meiosis<Temperature>) => void;
 }
 
 const conditions: ConditionsComponent = {
@@ -128,7 +128,7 @@ const Temperature: m.Component<TemperatureAttrs> = {
     )
 };
 
-const app: CellApp<State, never> = {
+const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
@@ -145,9 +145,9 @@ const App: m.Component<Attrs> = {
       { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
       m(
         "div",
-        m(Conditions, { cell: nest(cell, "conditions") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "air") }),
-        m(Temperature, { cell: nest(nest(cell, "temperature"), "water") })
+        m(Conditions, { cell: cell.nest("conditions") }),
+        m(Temperature, { cell: cell.nest("temperature").nest("air") }),
+        m(Temperature, { cell: cell.nest("temperature").nest("water") })
       ),
       m("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
     )
@@ -159,7 +159,7 @@ export const setupMithrilExample = (): void => {
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const cell = setupCell<State, never>({ stream, merge, app });
+  const cell = setup<State>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { cell })

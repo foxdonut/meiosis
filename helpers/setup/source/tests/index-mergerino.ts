@@ -1,14 +1,5 @@
 import simpleStream from "../src/simple-stream";
-import {
-  ActionConstructor,
-  App,
-  Effect,
-  Meiosis,
-  Patch,
-  Service,
-  nest,
-  setup
-} from "../src/mergerino";
+import { ActionConstructor, App, Effect, Meiosis, Patch, Service, setup } from "../src/mergerino";
 import merge from "mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
@@ -101,7 +92,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       rootCell.update({ sound: "quack" });
       expect(rootCell.getState()).toEqual({ sound: "quack" });
 
-      const duckCell = nest(rootCell, "duck");
+      const duckCell = rootCell.nest("duck");
       expect(duckCell.getState()).toBeUndefined();
 
       duckCell.update({ color: "yellow" });
@@ -165,7 +156,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       expect(rootCell.actions).toBeUndefined();
 
-      const duckCell = nest(rootCell, "duck");
+      const duckCell = rootCell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
       expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
     });

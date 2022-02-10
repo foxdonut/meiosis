@@ -1,21 +1,21 @@
-import commonSetup, { createNest, StreamLibWithProperty } from "./common";
-import mergerinoSetup, { nest as mergerinoNest } from "./mergerino";
-import functionPatchesSetup, { nest as functionPatchesNest } from "./functionPatches";
-import immerSetup, { produceNest } from "./immer";
+import commonSetup, { StreamLibWithProperty } from "./common";
+import mergerinoSetup from "./mergerino";
+import functionPatchesSetup from "./functionPatches";
+import immerSetup from "./immer";
 import { get } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
-    export { commonSetup as setup, createNest };
+    export { commonSetup as setup };
   }
   export namespace mergerino {
-    export { mergerinoSetup as setup, mergerinoNest as nest };
+    export { mergerinoSetup as setup };
   }
   export namespace functionPatches {
-    export { functionPatchesSetup as setup, functionPatchesNest as nest };
+    export { functionPatchesSetup as setup };
   }
   export namespace immer {
-    export { immerSetup as setup, produceNest };
+    export { immerSetup as setup };
   }
   let simpleStream: StreamLibWithProperty;
   export namespace util {
