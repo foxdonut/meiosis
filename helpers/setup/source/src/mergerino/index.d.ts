@@ -62,6 +62,12 @@ export interface Meiosis<S, A = unknown> extends CommonMeiosis<S, Patch<S>, A> {
   nest: <K extends keyof S>(prop: K) => Meiosis<S[K]>;
 }
 
+/**
+ * Meiosis Config.
+ *
+ * @template S the State type.
+ * @template A the Actions type.
+ */
 export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patch<S>, A> {
   /**
    * The Mergerino `merge` function.

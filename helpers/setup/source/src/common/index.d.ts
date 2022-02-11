@@ -153,7 +153,7 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
-export type PatchOrPatches<P> = P | P[];
+export type PatchOrPatches<P> = P | P[] | null | undefined | void;
 
 /**
  * Combines an array of patches into a single patch.
@@ -168,20 +168,6 @@ export interface Combine<P> {
    */
   (patches: P[]): P;
 }
-
-/**
- * Function that nests a patch at a given property.
- */
-export type NestPatch = (patch: any, prop: string | number | symbol) => any;
-
-export interface NestProp<S, K extends keyof S, N> {
-  (prop: K): Meiosis<S[K], N>;
-}
-
-export function nest<S, K extends keyof S>(
-  nestPatch: NestPatch,
-  cell: Meiosis<S, ReturnType<typeof nestPatch>>
-): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 
 /**
  * Returned by Meiosis setup.
@@ -213,6 +199,20 @@ export interface Meiosis<S, P, A = unknown> {
 
   nest: <K extends keyof S>(prop: K) => Meiosis<S[K], any>;
 }
+
+/**
+ * Function that nests a patch at a given property.
+ */
+export type NestPatch = (patch: any, prop: string | number | symbol) => any;
+
+export interface NestProp<S, K extends keyof S, N> {
+  (prop: K): Meiosis<S[K], N>;
+}
+
+export function nest<S, K extends keyof S>(
+  nestPatch: NestPatch,
+  cell: Meiosis<S, ReturnType<typeof nestPatch>>
+): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 
 /**
  * A service function. Receives the current state and returns a patch to be applied to the state.
