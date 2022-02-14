@@ -28,7 +28,6 @@
   "dependencies": {
     "flyd": "^0.2.8",
     "immer": "^9.0.12",
-    "lit-html": "^2.1.3",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "preact": "^10.6.5",

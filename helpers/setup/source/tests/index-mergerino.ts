@@ -1,5 +1,13 @@
 import simpleStream from "../src/simple-stream";
-import { ActionConstructor, App, Effect, Meiosis, Patch, Service, setup } from "../src/mergerino";
+import {
+  ActionConstructor,
+  App,
+  Effect,
+  MeiosisCell,
+  Patch,
+  Service,
+  setup
+} from "../src/mergerino";
 import merge from "mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
@@ -64,13 +72,14 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const rootCell = setup<State>({ stream: simpleStream, merge, app });
+      const cells = setup<State>({ stream: simpleStream, merge, app });
+      const cell = cells();
 
-      expect(rootCell.actions).toBeUndefined();
-      expect(rootCell.getState()).toEqual({ ducks: 1, sound: "silent" });
+      expect(cell.actions).toBeUndefined();
+      expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
-      rootCell.update({ sound: "quack" });
-      expect(rootCell.getState()).toEqual({ ducks: 1, sound: "quack" });
+      cell.update({ sound: "quack" });
+      expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
     });
 
     test("with nesting and no actions", () => {
@@ -84,20 +93,20 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = {};
-      const rootCell = setup<State>({ stream: simpleStream, merge, app });
+      const cells = setup<State>({ stream: simpleStream, merge, app });
+      const cell = cells();
 
-      expect(rootCell.actions).toBeUndefined();
-      expect(rootCell.getState()).toEqual({});
+      expect(cell.actions).toBeUndefined();
+      expect(cell.state).toEqual({});
 
-      rootCell.update({ sound: "quack" });
-      expect(rootCell.getState()).toEqual({ sound: "quack" });
+      cell.update({ sound: "quack" });
+      expect(cells().state).toEqual({ sound: "quack" });
 
-      const duckCell = rootCell.nest("duck");
-      expect(duckCell.getState()).toBeUndefined();
+      const duckCell = cell.nest("duck");
+      expect(duckCell.state).toBeUndefined();
 
       duckCell.update({ color: "yellow" });
-      expect(duckCell.getState()).toEqual({ color: "yellow" });
-      expect(rootCell.getState()).toEqual({ sound: "quack", duck: { color: "yellow" } });
+      expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
     });
 
     test("with actions", () => {
@@ -119,13 +128,14 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         })
       };
 
-      const rootCell = setup<State, Actions>({ stream: simpleStream, merge, app });
+      const cells = setup<State, Actions>({ stream: simpleStream, merge, app });
+      const cell = cells();
 
-      expect(rootCell.actions).toBeDefined();
-      expect(rootCell.getState()).toEqual({ ducks: 1, sound: "quack" });
+      expect(cell.actions).toBeDefined();
+      expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
-      rootCell.actions.addDucks(4);
-      expect(rootCell.getState()).toEqual({ ducks: 5, sound: "quack" });
+      cell.actions.addDucks(4);
+      expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
     });
 
     test("with actions and nesting", () => {
@@ -139,7 +149,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       interface DuckActions {
-        changeDuckColor: (cell: Meiosis<Duck>, color: string) => void;
+        changeDuckColor: (cell: MeiosisCell<Duck>, color: string) => void;
       }
 
       const duckActions: DuckActions = {
@@ -152,13 +162,14 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const rootCell = setup<State>({ stream: simpleStream, merge, app });
+      const cells = setup<State>({ stream: simpleStream, merge, app });
+      const cell = cells();
 
-      expect(rootCell.actions).toBeUndefined();
+      expect(cell.actions).toBeUndefined();
 
-      const duckCell = rootCell.nest("duck");
+      const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
-      expect(rootCell.getState()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
     });
 
     test("services", () => {
@@ -195,18 +206,19 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const cell = setup<State>({
+      const cells = setup<State>({
         stream: simpleStream,
         merge,
         app: { initial: { count: 0 }, services }
       });
+      const cell = cells();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
       cell.update(updatePatches[2]);
       cell.update(updatePatches[3]);
 
-      expect(cell.getState()).toEqual({
+      expect(cells().state).toEqual({
         count: 1,
         combined: true,
         sequence: true,
@@ -233,13 +245,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const effects: Effect<Counter, CounterActions>[] = [
         cell => {
-          // effect on state affects state seen by the next effect
-          if (cell.getState().count === 1) {
+          // effect on state does not affect state seen by the next effect
+          if (cell.state.count === 1) {
             cell.actions.increment(1);
           }
         },
         cell => {
-          if (cell.getState().count === 2 && !cell.getState().service) {
+          if (cell.state.count === 1) {
             cell.update({ service: true });
           }
         }
@@ -251,11 +263,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         Actions
       };
 
-      const cell = setup<Counter, CounterActions>({ stream: simpleStream, merge, app });
+      const cells = setup<Counter, CounterActions>({ stream: simpleStream, merge, app });
+      const cell = cells();
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update({ count: 1 });
-      expect(cell.getState()).toEqual({ count: 2, service: true });
+      expect(cells().state).toEqual({ count: 2, service: true });
     });
   });
 });

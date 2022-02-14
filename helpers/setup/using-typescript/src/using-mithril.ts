@@ -1,5 +1,5 @@
 // mithril + mergerino + mithril-stream
-import { App, Meiosis, setup } from "../../source/dist/mergerino";
+import { App, MeiosisContext, setup } from "../../source/dist/mergerino";
 import merge from "mergerino";
 import m from "mithril";
 import MStream from "mithril/stream";
@@ -16,11 +16,11 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: Meiosis<State>;
+  cell: MeiosisContext<State>;
 }
 
 interface ConditionsAttrs {
-  cell: Meiosis<Conditions>;
+  cell: MeiosisContext<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -29,17 +29,17 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: Meiosis<Temperature>;
+  cell: MeiosisContext<Temperature>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
-  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: MeiosisContext<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisContext<Conditions>, value: Sky) => void;
 }
 
 interface TemperatureActions {
-  increment: (cell: Meiosis<Temperature>, amount: number) => void;
-  changeUnits: (cell: Meiosis<Temperature>) => void;
+  increment: (cell: MeiosisContext<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisContext<Temperature>) => void;
 }
 
 const conditions: ConditionsComponent = {

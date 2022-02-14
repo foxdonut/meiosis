@@ -176,14 +176,69 @@ export interface Combine<P> {
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export interface Meiosis<S, P, A = unknown> {
+export interface MeiosisBase<P, A> {
+  /**
+   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
+   */
+  update: (patch: PatchOrPatches<P>) => P;
+
+  /**
+   * The application's actions.
+   */
+  actions: A;
+}
+
+/**
+ * Returned by Meiosis setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisContext<S, P, A = unknown> extends MeiosisBase<P, A> {
   /**
    * The stream of application states.
    */
   getState: Stream<S>;
+}
+
+/**
+ * Returned by Meiosis setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
+  /**
+   * The stream of application states.
+   */
+  state: S;
 
   /**
-   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
+   * The root cell, useful when using nested cells.
+   */
+  root: MeiosisCell<S, P, A>;
+
+  nest: <K extends keyof S>(prop: K) => MeiosisCell<S[K], any>;
+}
+
+/**
+ * Returned by Meiosis setup.
+ *
+ * @template S the State type.
+ * @template P the Patch type.
+ * @template A the Actions type.
+ */
+export interface MeiosisCell<S, P, A = unknown> {
+  /**
+   * The current state.
+   */
+  state: S;
+
+  /**
+   * The `update` function. Patches should be sent by calling `update(patch)` or
+   * `update([patch1, patch2, ...]).
    */
   update: (patch: PatchOrPatches<P>) => P;
 
@@ -195,9 +250,9 @@ export interface Meiosis<S, P, A = unknown> {
   /**
    * The root cell, useful when using nested cells.
    */
-  root: Meiosis<S, P, A>;
+  root: MeiosisCell<S, P, A>;
 
-  nest: <K extends keyof S>(prop: K) => Meiosis<S[K], any>;
+  nest: <K extends keyof S>(prop: K) => MeiosisCell<S[K], any>;
 }
 
 /**
@@ -206,12 +261,12 @@ export interface Meiosis<S, P, A = unknown> {
 export type NestPatch = (patch: any, prop: string | number | symbol) => any;
 
 export interface NestProp<S, K extends keyof S, N> {
-  (prop: K): Meiosis<S[K], N>;
+  (prop: K): MeiosisCell<S[K], N>;
 }
 
-export function nest<S, K extends keyof S>(
+export function nestCell<S, K extends keyof S>(
   nestPatch: NestPatch,
-  cell: Meiosis<S, ReturnType<typeof nestPatch>>
+  cell: MeiosisCell<S, ReturnType<typeof nestPatch>>
 ): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 
 /**
@@ -243,7 +298,7 @@ export interface Effect<S, P, A> {
    * @param {P} update the update stream.
    * @param {A} actions the application actions.
    */
-  (cell: Meiosis<S, P, A>): void;
+  (cell: MeiosisCell<S, P, A>): void;
 }
 
 /**
@@ -259,7 +314,7 @@ export interface ActionConstructor<S, P, A> {
    *
    * @returns {A} the application's actions.
    */
-  (cell: Meiosis<S, P, A>): A;
+  (cell: MeiosisContext<S, P, A>): A;
 }
 
 /**
@@ -355,6 +410,8 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
  *
  * @returns {Meiosis<S, P, A>} the Meiosis setup.
  */
-export function setup<S, P, A>(config: MeiosisConfig<S, P, A>): Meiosis<S, P, A>;
+export function setup<S, P, A = unknown>(
+  config: MeiosisConfig<S, P, A>
+): Stream<MeiosisCell<S, P, A>>;
 
 export default setup;

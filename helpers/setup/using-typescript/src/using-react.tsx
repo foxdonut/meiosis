@@ -1,5 +1,5 @@
 // react + immer + flyd
-import { App, Meiosis, setup } from "../../source/dist/immer";
+import { App, MeiosisContext, setup } from "../../source/dist/immer";
 import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
@@ -18,16 +18,16 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: Meiosis<State>;
+  cell: MeiosisContext<State>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: Meiosis<Conditions>, value: boolean) => void;
-  changeSky: (cell: Meiosis<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: MeiosisContext<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisContext<Conditions>, value: Sky) => void;
 }
 
 interface ConditionsAttrs {
-  cell: Meiosis<Conditions>;
+  cell: MeiosisContext<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -36,12 +36,12 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureActions {
-  increment: (cell: Meiosis<Temperature>, amount: number) => void;
-  changeUnits: (cell: Meiosis<Temperature>) => void;
+  increment: (cell: MeiosisContext<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisContext<Temperature>) => void;
 }
 
 interface TemperatureAttrs {
-  cell: Meiosis<Temperature>;
+  cell: MeiosisContext<Temperature>;
 }
 
 const conditions: ConditionsComponent = {
