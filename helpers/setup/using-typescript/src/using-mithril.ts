@@ -1,5 +1,5 @@
 // mithril + mergerino + mithril-stream
-import { App, MeiosisContext, setup } from "../../source/dist/mergerino";
+import { App, MeiosisCell, setup } from "../../source/dist/mergerino";
 import merge from "mergerino";
 import m from "mithril";
 import MStream from "mithril/stream";
@@ -16,11 +16,11 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisContext<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisContext<Conditions>;
+  cell: MeiosisCell<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -29,17 +29,17 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisContext<Temperature>;
+  cell: MeiosisCell<Temperature>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisContext<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisContext<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisContext<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisContext<Temperature>) => void;
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisCell<Temperature>) => void;
 }
 
 const conditions: ConditionsComponent = {
@@ -62,7 +62,7 @@ const SkyOption: m.Component<SkyOptionAttrs> = {
       m("input", {
         type: "radio",
         value,
-        checked: cell.getState().sky === value,
+        checked: cell.state.sky === value,
         // FIXME: evt type
         onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
       }),
@@ -78,7 +78,7 @@ const Conditions: m.Component<ConditionsAttrs> = {
         "label",
         m("input", {
           type: "checkbox",
-          checked: cell.getState().precipitations,
+          checked: cell.state.precipitations,
           onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
         }),
         "Precipitations"
@@ -114,11 +114,11 @@ const Temperature: m.Component<TemperatureAttrs> = {
   view: ({ attrs: { cell } }) =>
     m(
       "div",
-      cell.getState().label,
+      cell.state.label,
       " Temperature: ",
-      cell.getState().value,
+      cell.state.value,
       m.trust("&deg;"),
-      cell.getState().units,
+      cell.state.units,
       m(
         "div",
         m("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
@@ -149,7 +149,7 @@ const App: m.Component<Attrs> = {
         m(Temperature, { cell: cell.nest("temperature").nest("air") }),
         m(Temperature, { cell: cell.nest("temperature").nest("water") })
       ),
-      m("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
+      m("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
     )
 };
 
@@ -159,11 +159,11 @@ export const setupMithrilExample = (): void => {
     scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
   };
 
-  const cell = setup<State>({ stream, merge, app });
+  const cells = setup<State>({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
-    view: () => m(App, { cell })
+    view: () => m(App, { cell: cells() })
   });
 
-  cell.getState.map(() => m.redraw());
+  cells.map(() => m.redraw());
 };

@@ -53,8 +53,7 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
       state,
       update: patch => cell.update(nestPatch(patch, prop)),
       actions: undefined,
-      // root: cell.root,
-      root: undefined,
+      root: cell.root,
       nest: undefined
     };
 
@@ -72,7 +71,7 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
       nest: undefined
     };
 
-    // cell.root = cell;
+    cell.root = cell;
     cell.nest = nestCell(nestPatch, cell);
 
     return cell;

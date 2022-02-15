@@ -2,7 +2,6 @@
 // react + immer + flyd
 
 import meiosis from "../../source/dist/index";
-import meiosisReact from "../../react/dist";
 import flyd from "flyd";
 import produce from "immer";
 import React from "react";
@@ -27,7 +26,7 @@ const SkyOption = ({ cell, value, label }) => (
     <input
       type="radio"
       value={value}
-      checked={cell.getState().sky === value}
+      checked={cell.state.sky === value}
       onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
     />
     {label}
@@ -39,7 +38,7 @@ const Conditions = ({ cell }) => (
     <label>
       <input
         type="checkbox"
-        checked={cell.getState().precipitations}
+        checked={cell.state.precipitations}
         onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
@@ -71,8 +70,8 @@ const temperatureActions = {
 
 const Temperature = ({ cell }) => (
   <div>
-    {cell.getState().label} Temperature:
-    {cell.getState().value}&deg;{cell.getState().units}
+    {cell.state.label} Temperature:
+    {cell.state.value}&deg;{cell.state.units}
     <div>
       <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
       <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
@@ -83,16 +82,17 @@ const Temperature = ({ cell }) => (
   </div>
 );
 
-const Root = ({ cells }) => {
+/** @type {import("react").FunctionComponent} */
+const App = ({ cell }) => {
   /** @type {import("react").ReactElement} */
   const result = (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div>
-        <Conditions cell={cells.conditions} />
-        <Temperature cell={cells.temperature.air} />
-        <Temperature cell={cells.temperature.water} />
+        <Conditions cell={cell.nest("conditions")} />
+        <Temperature cell={cell.nest("temperature").nest("air")} />
+        <Temperature cell={cell.nest("temperature").nest("water")} />
       </div>
-      <pre style={{ margin: "0" }}>{JSON.stringify(cells.root.getState(), null, 4)}</pre>
+      <pre style={{ margin: "0" }}>{JSON.stringify(cell.root.state, null, 4)}</pre>
     </div>
   );
   return result;
@@ -103,26 +103,25 @@ const stream = {
   scan: (acc, init, stream) => flyd.scan(acc, init, stream)
 };
 
-const cell = meiosis.immer.setup({
+const cells = meiosis.immer.setup({
   stream,
   produce: (s, p) => produce(s, p),
   app
 });
 
-const temperatureCell = cell.nest("temperature");
+const Root = ({ cells }) => {
+  const [init, setInit] = React.useState(false);
+  const [cell, setCell] = React.useState(cells());
 
-const cells = {
-  root: cell,
-  conditions: cell.nest("conditions"),
-  temperature: {
-    air: temperatureCell.nest("air"),
-    water: temperatureCell.nest("water")
+  if (!init) {
+    setInit(true);
+    cells.map(setCell);
   }
-};
 
-const App = meiosisReact({ React, Root });
+  return React.createElement(App, { cell });
+};
 
 export const setupReactExample = () => {
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(App, { states: cell.getState, cells }), element);
+  ReactDOM.render(React.createElement(Root, { cells }), element);
 };

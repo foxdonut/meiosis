@@ -23,7 +23,7 @@ const SkyOption = {
       m("input", {
         type: "radio",
         value,
-        checked: cell.getState().sky === value,
+        checked: cell.state.sky === value,
         onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
       }),
       label
@@ -38,7 +38,7 @@ const Conditions = {
         "label",
         m("input", {
           type: "checkbox",
-          checked: cell.getState().precipitations,
+          checked: cell.state.precipitations,
           onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
         }),
         "Precipitations"
@@ -70,11 +70,11 @@ const Temperature = {
   view: ({ attrs: { cell } }) =>
     m(
       "div",
-      cell.getState().label,
+      cell.state.label,
       " Temperature: ",
-      cell.getState().value,
+      cell.state.value,
       m.trust("&deg;"),
-      cell.getState().units,
+      cell.state.units,
       m(
         "div",
         m("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
@@ -95,7 +95,7 @@ const App = {
         m(Temperature, { cell: cell.nest("temperature").nest("air") }),
         m(Temperature, { cell: cell.nest("temperature").nest("water") })
       ),
-      m("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
+      m("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
     )
 };
 
@@ -105,11 +105,11 @@ export const setupMithrilExample = () => {
     scan: (acc, init, stream) => Stream.scan(acc, init, stream)
   };
 
-  const cell = meiosis.mergerino.setup({ stream, merge, app });
+  const cells = meiosis.mergerino.setup({ stream, merge, app });
 
   m.mount(document.getElementById("mithrilApp"), {
-    view: () => m(App, { cell })
+    view: () => m(App, { cell: cells() })
   });
 
-  cell.getState.map(() => m.redraw());
+  cells.map(() => m.redraw());
 };

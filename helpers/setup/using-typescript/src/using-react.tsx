@@ -1,6 +1,5 @@
 // react + immer + flyd
-import { App, MeiosisContext, setup } from "../../source/dist/immer";
-import meiosisReact from "../../react/dist";
+import { App, MeiosisCell, setup } from "../../source/dist/immer";
 import flyd from "flyd";
 import produce from "immer";
 import React, { ReactElement } from "react";
@@ -18,16 +17,16 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisContext<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisContext<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisContext<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisContext<Conditions>;
+  cell: MeiosisCell<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -36,12 +35,12 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisContext<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisContext<Temperature>) => void;
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisCell<Temperature>) => void;
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisContext<Temperature>;
+  cell: MeiosisCell<Temperature>;
 }
 
 const conditions: ConditionsComponent = {
@@ -66,7 +65,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label
     <input
       type="radio"
       value={value}
-      checked={cell.getState().sky === value}
+      checked={cell.state.sky === value}
       onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
     />
     {label}
@@ -78,7 +77,7 @@ const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
     <label>
       <input
         type="checkbox"
-        checked={cell.getState().precipitations}
+        checked={cell.state.precipitations}
         onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
@@ -114,8 +113,8 @@ const temperatureActions: TemperatureActions = {
 
 const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
   <div>
-    {cell.getState().label} Temperature:
-    {cell.getState().value}&deg;{cell.getState().units}
+    {cell.state.label} Temperature:
+    {cell.state.value}&deg;{cell.state.units}
     <div>
       <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
       <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
@@ -136,14 +135,14 @@ const app: App<State> = {
   }
 };
 
-const Root: (attrs: Attrs) => ReactElement = ({ cell }) => (
+const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
     <div>
       <Conditions cell={cell.nest("conditions")} />
       <Temperature cell={cell.nest("temperature").nest("air")} />
       <Temperature cell={cell.nest("temperature").nest("water")} />
     </div>
-    <pre style={{ margin: "0" }}>{JSON.stringify(cell.getState(), null, 4)}</pre>
+    <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
   </div>
 );
 
@@ -152,10 +151,21 @@ const stream = {
   scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
 };
 
-const cell = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
-const App = meiosisReact<Attrs>({ React, Root });
+const cells = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
+
+const Root = ({ cells }) => {
+  const [init, setInit] = React.useState(false);
+  const [cell, setCell] = React.useState(cells());
+
+  if (!init) {
+    setInit(true);
+    cells.map(setCell);
+  }
+
+  return React.createElement(App, { cell });
+};
 
 export const setupReactExample = (): void => {
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(App, { states: cell.getState, cell }), element);
+  ReactDOM.render(React.createElement(Root, { cells }), element);
 };

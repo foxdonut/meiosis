@@ -2,7 +2,6 @@
 // preact + mergerino + simple-stream
 
 import meiosis from "../../source/dist/index";
-import meiosisPreact from "../../preact/dist";
 import merge from "mergerino";
 import { h, render as preactRender } from "preact";
 import { useState } from "preact/hooks";
@@ -26,7 +25,7 @@ const SkyOption = ({ cell, value, label }) =>
     h("input", {
       type: "radio",
       value,
-      checked: cell.getState().sky === value,
+      checked: cell.state.sky === value,
       onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
@@ -41,7 +40,7 @@ const Conditions = ({ cell }) =>
       {},
       h("input", {
         type: "checkbox",
-        checked: cell.getState().precipitations,
+        checked: cell.state.precipitations,
         onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       "Precipitations"
@@ -73,11 +72,11 @@ const Temperature = ({ cell }) =>
   h(
     "div",
     {},
-    cell.getState().label,
+    cell.state.label,
     " Temperature: ",
-    cell.getState().value,
+    cell.state.value,
     h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
-    cell.getState().units,
+    cell.state.units,
     h(
       "div",
       {},
@@ -91,7 +90,7 @@ const Temperature = ({ cell }) =>
     )
   );
 
-const Root = ({ cell }) =>
+const App = ({ cell }) =>
   h(
     "div",
     { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
@@ -102,13 +101,18 @@ const Root = ({ cell }) =>
       h(Temperature, { cell: cell.nest("temperature").nest("air") }),
       h(Temperature, { cell: cell.nest("temperature").nest("water") })
     ),
-    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
+    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
   );
 
-const App = meiosisPreact({ h, useState, Root });
+const Root = ({ cells }) => {
+  const [cell, setCell] = useState(cells());
+  cells.map(setCell);
+
+  return h(App, { cell });
+};
 
 export const setupPreactExample = () => {
-  const cell = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
+  const cells = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
   const element = document.getElementById("preactApp");
-  preactRender(h(App, { states: cell.getState, cell }), element);
+  preactRender(h(Root, { cells }), element);
 };

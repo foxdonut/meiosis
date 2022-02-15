@@ -1,7 +1,6 @@
 // preact + mergerino + simple-stream
 import simpleStream from "../../source/dist/simple-stream";
-import { App, MeiosisContext, setup } from "../../source/dist/mergerino";
-import meiosisPreact from "../../preact/dist";
+import { App, MeiosisCell, setup } from "../../source/dist/mergerino";
 import merge from "mergerino";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
@@ -18,16 +17,16 @@ import {
 } from "./common";
 
 interface Attrs {
-  cell: MeiosisContext<State>;
+  cell: MeiosisCell<State>;
 }
 
 interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisContext<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisContext<Conditions>, value: Sky) => void;
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
 }
 
 interface ConditionsAttrs {
-  cell: MeiosisContext<Conditions>;
+  cell: MeiosisCell<Conditions>;
 }
 
 interface SkyOptionAttrs extends ConditionsAttrs {
@@ -36,12 +35,12 @@ interface SkyOptionAttrs extends ConditionsAttrs {
 }
 
 interface TemperatureActions {
-  increment: (cell: MeiosisContext<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisContext<Temperature>) => void;
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
+  changeUnits: (cell: MeiosisCell<Temperature>) => void;
 }
 
 interface TemperatureAttrs {
-  cell: MeiosisContext<Temperature>;
+  cell: MeiosisCell<Temperature>;
 }
 
 const conditions: ConditionsComponent = {
@@ -66,7 +65,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
     h("input", {
       type: "radio",
       value,
-      checked: cell.getState().sky === value,
+      checked: cell.state.sky === value,
       onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
@@ -81,7 +80,7 @@ const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
       {},
       h("input", {
         type: "checkbox",
-        checked: cell.getState().precipitations,
+        checked: cell.state.precipitations,
         onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       "Precipitations"
@@ -117,11 +116,11 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
   h(
     "div",
     {},
-    cell.getState().label,
+    cell.state.label,
     " Temperature: ",
-    cell.getState().value,
+    cell.state.value,
     h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
-    cell.getState().units,
+    cell.state.units,
     h(
       "div",
       {},
@@ -145,7 +144,7 @@ const app: App<State> = {
   }
 };
 
-const Root: (attrs: Attrs) => VNode = ({ cell }) =>
+const App: (attrs: Attrs) => VNode = ({ cell }) =>
   h(
     "div",
     { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
@@ -156,23 +155,28 @@ const Root: (attrs: Attrs) => VNode = ({ cell }) =>
       h(Temperature, { cell: cell.nest("temperature").nest("air") }),
       h(Temperature, { cell: cell.nest("temperature").nest("water") })
     ),
-    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.getState(), null, 4))
+    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
   );
 
-// const App = meiosisPreact<State, Attrs, VNode>({ h, useState, Root });
-const App = meiosisPreact<Attrs, VNode>({ h, useState, Root });
+const Root = ({ cells }) => {
+  const [cell, setCell] = useState(cells());
+  cells.map(setCell);
+
+  return h(App, { cell });
+};
 
 export const setupPreactExample = (): void => {
-  const cell = setup<State>({ stream: simpleStream, merge, app });
+  const cells = setup<State>({ stream: simpleStream, merge, app });
 
   // Just testing TypeScript support here.
   const _test = simpleStream.stream<number>();
   const _init = _test();
   _test(5);
+  const cell = cells();
   cell.update({ temperature: { air: { value: 21 } } });
   cell.update({ temperature: { air: { value: x => x + 1 } } });
   cell.update({ temperature: { air: { value: () => 21 } } });
 
   const element = document.getElementById("preactApp") as HTMLElement;
-  preactRender(h(App, { states: cell.getState, cell }), element);
+  preactRender(h(Root, { cells }), element);
 };
