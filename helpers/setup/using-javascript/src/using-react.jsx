@@ -98,30 +98,25 @@ const App = ({ cell }) => {
   return result;
 };
 
-const stream = {
-  stream: flyd.stream,
-  scan: (acc, init, stream) => flyd.scan(acc, init, stream)
-};
-
-const cells = meiosis.immer.setup({
-  stream,
-  produce: (s, p) => produce(s, p),
-  app
-});
-
-const Root = ({ cells }) => {
-  const [init, setInit] = React.useState(false);
-  const [cell, setCell] = React.useState(cells());
-
-  if (!init) {
-    setInit(true);
-    cells.map(setCell);
-  }
-
-  return React.createElement(App, { cell });
-};
-
 export const setupReactExample = () => {
+  const stream = {
+    stream: flyd.stream,
+    scan: (acc, init, stream) => flyd.scan(acc, init, stream)
+  };
+
+  const Root = ({ cells }) => {
+    const [init, setInit] = React.useState(false);
+    const [cell, setCell] = React.useState(cells());
+
+    if (!init) {
+      setInit(true);
+      cells.map(setCell);
+    }
+
+    return React.createElement(App, { cell });
+  };
+
+  const cells = meiosis.immer.setup({ stream, produce: (s, p) => produce(s, p), app });
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(Root, { cells }), element);
 };

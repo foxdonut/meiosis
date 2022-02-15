@@ -158,25 +158,15 @@ const App: (attrs: Attrs) => VNode = ({ cell }) =>
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
   );
 
-const Root = ({ cells }) => {
-  const [cell, setCell] = useState(cells());
-  cells.map(setCell);
-
-  return h(App, { cell });
-};
-
 export const setupPreactExample = (): void => {
+  const Root = ({ cells }) => {
+    const [cell, setCell] = useState(cells());
+    cells.map(setCell);
+
+    return h(App, { cell });
+  };
+
   const cells = setup<State>({ stream: simpleStream, merge, app });
-
-  // Just testing TypeScript support here.
-  const _test = simpleStream.stream<number>();
-  const _init = _test();
-  _test(5);
-  const cell = cells();
-  cell.update({ temperature: { air: { value: 21 } } });
-  cell.update({ temperature: { air: { value: x => x + 1 } } });
-  cell.update({ temperature: { air: { value: () => 21 } } });
-
   const element = document.getElementById("preactApp") as HTMLElement;
   preactRender(h(Root, { cells }), element);
 };

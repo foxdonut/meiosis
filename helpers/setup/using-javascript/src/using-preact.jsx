@@ -104,14 +104,14 @@ const App = ({ cell }) =>
     h("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
   );
 
-const Root = ({ cells }) => {
-  const [cell, setCell] = useState(cells());
-  cells.map(setCell);
-
-  return h(App, { cell });
-};
-
 export const setupPreactExample = () => {
+  const Root = ({ cells }) => {
+    const [cell, setCell] = useState(cells());
+    cells.map(setCell);
+
+    return h(App, { cell });
+  };
+
   const cells = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
   const element = document.getElementById("preactApp");
   preactRender(h(Root, { cells }), element);

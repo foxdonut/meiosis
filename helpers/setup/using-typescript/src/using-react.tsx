@@ -146,26 +146,25 @@ const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
   </div>
 );
 
-const stream = {
-  stream: (value?: any) => flyd.stream(value),
-  scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
-};
-
-const cells = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
-
-const Root = ({ cells }) => {
-  const [init, setInit] = React.useState(false);
-  const [cell, setCell] = React.useState(cells());
-
-  if (!init) {
-    setInit(true);
-    cells.map(setCell);
-  }
-
-  return React.createElement(App, { cell });
-};
-
 export const setupReactExample = (): void => {
+  const stream = {
+    stream: (value?: any) => flyd.stream(value),
+    scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
+  };
+
+  const Root = ({ cells }) => {
+    const [init, setInit] = React.useState(false);
+    const [cell, setCell] = React.useState(cells());
+
+    if (!init) {
+      setInit(true);
+      cells.map(setCell);
+    }
+
+    return React.createElement(App, { cell });
+  };
+
+  const cells = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(Root, { cells }), element);
 };
