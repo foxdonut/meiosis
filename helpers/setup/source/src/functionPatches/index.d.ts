@@ -6,7 +6,8 @@ import {
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
   Service as CommonService,
-  Stream
+  Stream,
+  Update as CommonUpdate
 } from "../common";
 
 /**
@@ -31,6 +32,8 @@ export interface Patch<S> {
    */
   (state: S): S;
 }
+
+export type Update<S> = CommonUpdate<Patch<S>>;
 
 export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
 

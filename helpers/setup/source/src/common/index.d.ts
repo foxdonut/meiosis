@@ -153,6 +153,11 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
+/**
+ * Convenience function to convert flyd or mithril-stream to `StreamLib` with TypeScript.
+ */
+export function toStream(stream: any): StreamLib;
+
 export type PatchOrPatches<P> = P | P[] | null | undefined | void;
 
 /**
@@ -169,6 +174,8 @@ export interface Combine<P> {
   (patches: P[]): P;
 }
 
+export type Update<P> = (patch: PatchOrPatches<P>) => P;
+
 /**
  * Returned by Meiosis setup.
  *
@@ -180,7 +187,7 @@ export interface MeiosisBase<P, A> {
   /**
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
-  update: (patch: PatchOrPatches<P>) => P;
+  update: Update<P>;
 
   /**
    * The application's actions.
@@ -240,7 +247,7 @@ export interface MeiosisCell<S, P, A = unknown> {
    * The `update` function. Patches should be sent by calling `update(patch)` or
    * `update([patch1, patch2, ...]).
    */
-  update: (patch: PatchOrPatches<P>) => P;
+  update: Update<P>;
 
   /**
    * The application's actions.

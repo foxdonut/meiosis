@@ -1,8 +1,9 @@
 // mithril + mergerino + mithril-stream
+import { toStream } from "../../source/dist/common";
 import { App, MeiosisCell, setup } from "../../source/dist/mergerino";
 import merge from "mergerino";
 import m from "mithril";
-import MStream from "mithril/stream";
+import Stream from "mithril/stream";
 import {
   Conditions,
   ConditionsComponent,
@@ -154,12 +155,7 @@ const App: m.Component<Attrs> = {
 };
 
 export const setupMithrilExample = (): void => {
-  const stream = {
-    stream: (value?: any) => MStream(value),
-    scan: (acc: any, init: any, stream: any) => MStream.scan(acc, init, stream)
-  };
-
-  const cells = setup<State>({ stream, merge, app });
+  const cells = setup<State>({ stream: toStream(Stream), merge, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { cell: cells() })

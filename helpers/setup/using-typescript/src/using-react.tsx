@@ -1,4 +1,5 @@
 // react + immer + flyd
+import { toStream } from "../../source/dist/common";
 import { App, MeiosisCell, setup } from "../../source/dist/immer";
 import flyd from "flyd";
 import produce from "immer";
@@ -147,11 +148,6 @@ const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
 );
 
 export const setupReactExample = (): void => {
-  const stream = {
-    stream: (value?: any) => flyd.stream(value),
-    scan: (acc: any, init: any, stream: any) => flyd.scan(acc, init, stream)
-  };
-
   const Root = ({ cells }) => {
     const [init, setInit] = React.useState(false);
     const [cell, setCell] = React.useState(cells());
@@ -164,7 +160,7 @@ export const setupReactExample = (): void => {
     return React.createElement(App, { cell });
   };
 
-  const cells = setup<State>({ stream, produce: (s, p) => produce(s, p), app });
+  const cells = setup<State>({ stream: toStream(flyd), produce: (s, p) => produce(s, p), app });
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(Root, { cells }), element);
 };

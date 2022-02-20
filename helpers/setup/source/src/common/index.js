@@ -1,5 +1,11 @@
 // @ts-check
 
+/** @type {import("./index").toStream} */
+export const toStream = Stream => ({
+  stream: value => Stream(value),
+  scan: (acc, init, stream) => Stream.scan(acc, init, stream)
+});
+
 /** @type {import("./index").setup} */
 export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   if (!stream) {

@@ -6,7 +6,8 @@ import {
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
   Service as CommonService,
-  Stream
+  Stream,
+  Update as CommonUpdate
 } from "../common";
 
 /**
@@ -51,6 +52,8 @@ export type ObjectPatch<S> = {
  * @template S the State type.
  */
 export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
+
+export type Update<S> = CommonUpdate<Patch<S>>;
 
 export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
 
