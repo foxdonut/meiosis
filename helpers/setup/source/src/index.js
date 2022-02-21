@@ -1,6 +1,6 @@
 // @ts-check
 
-import commonSetup from "./common";
+import commonSetup, { toStream } from "./common";
 import mergerinoSetup from "./mergerino";
 import functionPatchesSetup from "./functionPatches";
 import immerSetup from "./immer";
@@ -9,7 +9,8 @@ import { get } from "./util";
 
 export default {
   common: {
-    setup: commonSetup
+    setup: commonSetup,
+    toStream
   },
   mergerino: {
     setup: mergerinoSetup

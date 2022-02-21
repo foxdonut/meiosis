@@ -206,11 +206,11 @@ export interface MeiosisContext<S, P, A = unknown> extends MeiosisBase<P, A> {
   /**
    * The stream of application states.
    */
-  getState: Stream<S>;
+  getState: () => S;
 }
 
 /**
- * Returned by Meiosis setup.
+ * Meiosis Cell.
  *
  * @template S the State type.
  * @template P the Patch type.
@@ -218,7 +218,7 @@ export interface MeiosisContext<S, P, A = unknown> extends MeiosisBase<P, A> {
  */
 export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
   /**
-   * The stream of application states.
+   * The application states.
    */
   state: S;
 
@@ -237,29 +237,13 @@ export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
  * @template P the Patch type.
  * @template A the Actions type.
  */
-export interface MeiosisCell<S, P, A = unknown> {
+export interface MeiosisSetup<S, P, A = unknown> {
   /**
-   * The current state.
+   * The stream of application states.
    */
-  state: S;
+  states: Stream<S>;
 
-  /**
-   * The `update` function. Patches should be sent by calling `update(patch)` or
-   * `update([patch1, patch2, ...]).
-   */
-  update: Update<P>;
-
-  /**
-   * The application's actions.
-   */
-  actions: A;
-
-  /**
-   * The root cell, useful when using nested cells.
-   */
-  root: MeiosisCell<S, P, A>;
-
-  nest: <K extends keyof S>(prop: K) => MeiosisCell<S[K], any>;
+  cell: MeiosisCell<S, P, A>;
 }
 
 /**
@@ -273,7 +257,8 @@ export interface NestProp<S, K extends keyof S, N> {
 
 export function nestCell<S, K extends keyof S>(
   nestPatch: NestPatch,
-  cell: MeiosisCell<S, ReturnType<typeof nestPatch>>
+  cell: MeiosisCell<S, ReturnType<typeof nestPatch>>,
+  getState: () => S
 ): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 
 /**
@@ -417,8 +402,6 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
  *
  * @returns {Meiosis<S, P, A>} the Meiosis setup.
  */
-export function setup<S, P, A = unknown>(
-  config: MeiosisConfig<S, P, A>
-): Stream<MeiosisCell<S, P, A>>;
+export function setup<S, P, A = unknown>(config: MeiosisConfig<S, P, A>): MeiosisSetup<S, P, A>;
 
 export default setup;

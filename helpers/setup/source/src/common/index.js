@@ -1,10 +1,14 @@
 // @ts-check
 
 /** @type {import("./index").toStream} */
-export const toStream = Stream => ({
-  stream: value => Stream(value),
-  scan: (acc, init, stream) => Stream.scan(acc, init, stream)
-});
+export const toStream = Stream => {
+  const streamFn = Stream.stream || Stream;
+
+  return {
+    stream: value => streamFn(value),
+    scan: (acc, init, stream) => Stream.scan(acc, init, stream)
+  };
+};
 
 /** @type {import("./index").setup} */
 export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
@@ -33,7 +37,7 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   const runServices = startingState =>
     services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
-  const getState = scan(
+  const states = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
     runServices(initial),
     update
@@ -41,52 +45,49 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
 
   /** @type {import("./index").MeiosisContext} */
   const context = {
-    getState,
+    getState: () => states(),
     update,
     actions: undefined
   };
 
   const actions = safeApp.Actions ? safeApp.Actions(context) : undefined;
-
   context.actions = actions;
 
+  const cell = {
+    state: states(),
+    update,
+    actions,
+    root: undefined,
+    nest: undefined
+  };
+
   /** @type {import("./index").nestCell} */
-  const nestCell = (nestPatch, cell) => prop => {
-    const state = cell.state[prop];
+  const nestCell = (nestPatch, cell, getState) => prop => {
+    const getNestedState = () => getState()[prop];
 
     /** @type {import("./index").MeiosisCell} */
     const nested = {
-      state,
+      state: getNestedState(),
       update: patch => cell.update(nestPatch(patch, prop)),
       actions: undefined,
       root: cell.root,
       nest: undefined
     };
 
-    nested.nest = nestCell(nestPatch, nested);
+    nested.nest = nestCell(nestPatch, nested, getNestedState);
 
     return nested;
   };
 
-  const cells = getState.map(state => {
-    const cell = {
-      state,
-      update,
-      actions,
-      root: undefined,
-      nest: undefined
-    };
-
-    cell.root = cell;
-    cell.nest = nestCell(nestPatch, cell);
-
-    return cell;
-  });
+  cell.nest = nestCell(nestPatch, cell, states);
 
   const effects = Object.assign({ effects: [] }, app).effects;
-  cells.map(cell => effects.forEach(effect => effect(cell)));
+  states.map(state => effects.forEach(effect => effect(Object.assign(cell, { state }))));
 
-  return cells;
+  return {
+    states,
+    cell
+  };
 };
 
 export default setup;

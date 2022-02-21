@@ -1,4 +1,4 @@
-import commonSetup, { StreamLibWithProperty } from "./common";
+import commonSetup, { toStream, StreamLibWithProperty } from "./common";
 import mergerinoSetup from "./mergerino";
 import functionPatchesSetup from "./functionPatches";
 import immerSetup from "./immer";
@@ -6,7 +6,7 @@ import { get } from "./util";
 
 declare namespace meiosisSetup {
   export namespace common {
-    export { commonSetup as setup };
+    export { commonSetup as setup, toStream };
   }
   export namespace mergerino {
     export { mergerinoSetup as setup };

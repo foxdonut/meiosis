@@ -5,8 +5,8 @@ import {
   MeiosisCell as CommonMeiosisCell,
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
+  MeiosisSetup as CommonMeiosisSetup,
   Service as CommonService,
-  Stream,
   Update as CommonUpdate
 } from "../common";
 
@@ -52,6 +52,8 @@ export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
  */
 export type MeiosisConfig<S, A = unknown> = MeiosisConfigBase<S, Patch<S>, A>;
 
+export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
+
 /**
  * Helper to setup the Meiosis pattern with function patches.
  *
@@ -64,6 +66,6 @@ export type MeiosisConfig<S, A = unknown> = MeiosisConfigBase<S, Patch<S>, A>;
  * @returns {import("../common").Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): Stream<MeiosisCell<S, A>>;
+export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): MeiosisSetup<S, A>;
 
 export default setup;

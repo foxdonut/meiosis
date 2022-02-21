@@ -100,16 +100,17 @@ const App = {
 };
 
 export const setupMithrilExample = () => {
-  const stream = {
-    stream: Stream,
-    scan: (acc, init, stream) => Stream.scan(acc, init, stream)
-  };
-
-  const cells = meiosis.mergerino.setup({ stream, merge, app });
-
-  m.mount(document.getElementById("mithrilApp"), {
-    view: () => m(App, { cell: cells() })
+  const { states, cell } = meiosis.mergerino.setup({
+    stream: meiosis.common.toStream(Stream),
+    merge,
+    app
   });
 
-  cells.map(() => m.redraw());
+  const getCell = () => ({ ...cell, state: states() });
+
+  m.mount(document.getElementById("mithrilApp"), {
+    view: () => m(App, { cell: getCell() })
+  });
+
+  states.map(() => m.redraw());
 };

@@ -5,8 +5,8 @@ import {
   MeiosisCell as CommonMeiosisCell,
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
+  MeiosisSetup as CommonMeiosisSetup,
   Service as CommonService,
-  Stream,
   Update as CommonUpdate
 } from "../common";
 
@@ -86,6 +86,8 @@ export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patc
   merge: (state: S, patch: Patch<S>) => S;
 }
 
+export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
+
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
@@ -97,6 +99,6 @@ export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patc
  * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): Stream<MeiosisCell<S, A>>;
+export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): MeiosisSetup<S, A>;
 
 export default setup;

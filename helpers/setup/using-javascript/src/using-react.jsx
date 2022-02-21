@@ -92,31 +92,30 @@ const App = ({ cell }) => {
         <Temperature cell={cell.nest("temperature").nest("air")} />
         <Temperature cell={cell.nest("temperature").nest("water")} />
       </div>
-      <pre style={{ margin: "0" }}>{JSON.stringify(cell.root.state, null, 4)}</pre>
+      <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
     </div>
   );
   return result;
 };
 
 export const setupReactExample = () => {
-  const stream = {
-    stream: flyd.stream,
-    scan: (acc, init, stream) => flyd.scan(acc, init, stream)
-  };
-
-  const Root = ({ cells }) => {
+  const Root = ({ states, cell }) => {
     const [init, setInit] = React.useState(false);
-    const [cell, setCell] = React.useState(cells());
+    const [state, setState] = React.useState(states());
 
     if (!init) {
       setInit(true);
-      cells.map(setCell);
+      states.map(setState);
     }
 
-    return React.createElement(App, { cell });
+    return React.createElement(App, { cell: Object.assign(cell, { state }) });
   };
 
-  const cells = meiosis.immer.setup({ stream, produce: (s, p) => produce(s, p), app });
+  const { states, cell } = meiosis.immer.setup({
+    stream: meiosis.common.toStream(flyd),
+    produce: (s, p) => produce(s, p),
+    app
+  });
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(Root, { cells }), element);
+  ReactDOM.render(React.createElement(Root, { states, cell }), element);
 };

@@ -19,14 +19,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const cells = setup<State>({ stream: simpleStream, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, app });
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
       cell.update(assoc("sound", "quack"));
-      expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
+      expect(states()).toEqual({ ducks: 1, sound: "quack" });
     });
 
     test("with nesting and no actions", () => {
@@ -40,20 +39,19 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
 
       const app = {};
-      const cells = setup<State>({ stream: simpleStream, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, app });
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({});
 
       cell.update(assoc("sound", "quack"));
-      expect(cells().state).toEqual({ sound: "quack" });
+      expect(states()).toEqual({ sound: "quack" });
 
       const duckCell = cell.nest("duck");
       expect(duckCell.state).toBeUndefined();
 
       duckCell.update(assoc("color", "yellow"));
-      expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
+      expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });
     });
 
     test("with actions", () => {
@@ -75,14 +73,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         })
       };
 
-      const cells = setup<State, Actions>({ stream: simpleStream, app });
-      const cell = cells();
+      const { states, cell } = setup<State, Actions>({ stream: simpleStream, app });
 
       expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
       cell.actions.addDucks(4);
-      expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
+      expect(states()).toEqual({ ducks: 5, sound: "quack" });
     });
 
     test("with actions and nesting", () => {
@@ -109,14 +106,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const cells = setup<State>({ stream: simpleStream, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, app });
 
       expect(cell.actions).toBeUndefined();
 
       const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
-      expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      expect(states()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
     });
 
     test("services", () => {
@@ -153,18 +149,17 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const cells = setup<State>({
+      const { states, cell } = setup<State>({
         stream: simpleStream,
         app: { initial: { count: 0 }, services }
       });
-      const cell = cells();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
       cell.update(updatePatches[2]);
       cell.update(updatePatches[3]);
 
-      expect(cells().state).toEqual({
+      expect(states()).toEqual({
         count: 1,
         combined: true,
         sequence: true,
@@ -209,18 +204,17 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         Actions
       };
 
-      const cells = setup<Counter, CounterActions>({
+      const { states, cell } = setup<Counter, CounterActions>({
         stream: simpleStream,
         app
       });
-      const cell = cells();
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update(assoc("count", 1));
-      expect(cells().state).toEqual({ count: 2, service: true });
+      expect(states()).toEqual({ count: 2, service: true });
 
       cell.update([assoc("count", 3), assoc("service", false)]);
-      expect(cells().state).toEqual({ count: 3, service: false });
+      expect(states()).toEqual({ count: 3, service: false });
     });
   });
 });

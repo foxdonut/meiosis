@@ -63,8 +63,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const cells = setup<State>({ stream: simpleStream, produce, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -72,7 +71,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       cell.update(state => {
         state.sound = "quack";
       });
-      expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
+      expect(states()).toEqual({ ducks: 1, sound: "quack" });
     });
 
     test("with nesting and no actions", () => {
@@ -87,8 +86,7 @@ describe("Meiosis with TypeScript - Immer", () => {
 
       const initial = { duck: { color: "" }, sound: "" };
       const app = { initial };
-      const cells = setup<State>({ stream: simpleStream, produce, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual(initial);
@@ -96,7 +94,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       cell.update(state => {
         state.sound = "quack";
       });
-      expect(cells().state).toEqual({ duck: { color: "" }, sound: "quack" });
+      expect(states()).toEqual({ duck: { color: "" }, sound: "quack" });
 
       const duckCell = cell.nest("duck");
       expect(duckCell.state).not.toBeUndefined();
@@ -104,7 +102,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       duckCell.update(state => {
         state.color = "yellow";
       });
-      expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
+      expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });
     });
 
     test("with actions", () => {
@@ -128,14 +126,13 @@ describe("Meiosis with TypeScript - Immer", () => {
         })
       };
 
-      const cells = setup<State, Actions>({ stream: simpleStream, produce, app });
-      const cell = cells();
+      const { states, cell } = setup<State, Actions>({ stream: simpleStream, produce, app });
 
       expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
       cell.actions.addDucks(4);
-      expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
+      expect(states()).toEqual({ ducks: 5, sound: "quack" });
     });
 
     test("with actions and nesting", () => {
@@ -164,14 +161,13 @@ describe("Meiosis with TypeScript - Immer", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const cells = setup<State>({ stream: simpleStream, produce, app });
-      const cell = cells();
+      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
 
       expect(cell.actions).toBeUndefined();
 
       const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
-      expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+      expect(states()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
     });
 
     test("services", () => {
@@ -231,19 +227,18 @@ describe("Meiosis with TypeScript - Immer", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const cells = setup<State>({
+      const { states, cell } = setup<State>({
         stream: simpleStream,
         produce,
         app: { initial: { count: 0 }, services }
       });
-      const cell = cells();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
       cell.update(updatePatches[2]);
       cell.update(updatePatches[3]);
 
-      expect(cells().state).toEqual({
+      expect(states()).toEqual({
         count: 1,
         combined: true,
         sequence: true,
@@ -292,14 +287,17 @@ describe("Meiosis with TypeScript - Immer", () => {
         Actions
       };
 
-      const cells = setup<Counter, CounterActions>({ stream: simpleStream, produce, app });
-      const cell = cells();
+      const { states, cell } = setup<Counter, CounterActions>({
+        stream: simpleStream,
+        produce,
+        app
+      });
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update(state => {
         state.count = 1;
       });
-      expect(cells().state).toEqual({ count: 2, service: true });
+      expect(states()).toEqual({ count: 2, service: true });
     });
   });
 });
