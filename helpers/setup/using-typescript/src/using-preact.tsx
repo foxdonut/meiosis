@@ -159,14 +159,14 @@ const App: (attrs: Attrs) => VNode = ({ cell }) =>
   );
 
 export const setupPreactExample = (): void => {
-  const Root = ({ cells }) => {
-    const [cell, setCell] = useState(cells());
-    cells.map(setCell);
+  const Root = ({ states, getCell }) => {
+    const [, setState] = useState(states());
+    states.map(setState);
 
-    return h(App, { cell });
+    return h(App, { cell: getCell() });
   };
 
-  const cells = setup<State>({ stream: simpleStream, merge, app });
+  const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
   const element = document.getElementById("preactApp") as HTMLElement;
-  preactRender(h(Root, { cells }), element);
+  preactRender(h(Root, { states, getCell }), element);
 };

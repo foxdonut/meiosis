@@ -148,19 +148,23 @@ const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
 );
 
 export const setupReactExample = (): void => {
-  const Root = ({ cells }) => {
+  const Root = ({ states, getCell }) => {
     const [init, setInit] = React.useState(false);
-    const [cell, setCell] = React.useState(cells());
+    const [, setState] = React.useState(states());
 
     if (!init) {
       setInit(true);
-      cells.map(setCell);
+      states.map(setState);
     }
 
-    return React.createElement(App, { cell });
+    return React.createElement(App, { cell: getCell() });
   };
 
-  const cells = setup<State>({ stream: toStream(flyd), produce: (s, p) => produce(s, p), app });
+  const { states, getCell } = setup<State>({
+    stream: toStream(flyd),
+    produce: (s, p) => produce(s, p),
+    app
+  });
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(Root, { cells }), element);
+  ReactDOM.render(React.createElement(Root, { states, getCell }), element);
 };

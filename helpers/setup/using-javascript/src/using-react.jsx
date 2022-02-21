@@ -85,6 +85,7 @@ const Temperature = ({ cell }) => (
 /** @type {import("react").FunctionComponent} */
 const App = ({ cell }) => {
   /** @type {import("react").ReactElement} */
+  /// @ts-ignore
   const result = (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div>
@@ -99,23 +100,23 @@ const App = ({ cell }) => {
 };
 
 export const setupReactExample = () => {
-  const Root = ({ states, cell }) => {
+  const Root = ({ states, getCell }) => {
     const [init, setInit] = React.useState(false);
-    const [state, setState] = React.useState(states());
+    const [, setState] = React.useState(states());
 
     if (!init) {
       setInit(true);
       states.map(setState);
     }
 
-    return React.createElement(App, { cell: Object.assign(cell, { state }) });
+    return React.createElement(App, { cell: getCell() });
   };
 
-  const { states, cell } = meiosis.immer.setup({
+  const { states, getCell } = meiosis.immer.setup({
     stream: meiosis.common.toStream(flyd),
     produce: (s, p) => produce(s, p),
     app
   });
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(Root, { states, cell }), element);
+  ReactDOM.render(React.createElement(Root, { states, getCell }), element);
 };

@@ -100,13 +100,11 @@ const App = {
 };
 
 export const setupMithrilExample = () => {
-  const { states, cell } = meiosis.mergerino.setup({
+  const { states, getCell } = meiosis.mergerino.setup({
     stream: meiosis.common.toStream(Stream),
     merge,
     app
   });
-
-  const getCell = () => ({ ...cell, state: states() });
 
   m.mount(document.getElementById("mithrilApp"), {
     view: () => m(App, { cell: getCell() })
