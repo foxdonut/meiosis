@@ -32,6 +32,10 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
 
+  /**
+   * @template P
+   * @type {import("./index").Stream<P>}
+   */
   const update = createStream();
 
   const runServices = startingState =>
@@ -53,40 +57,39 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   const actions = safeApp.Actions ? safeApp.Actions(context) : undefined;
   context.actions = actions;
 
-  const cell = {
-    state: states(),
-    update,
-    actions,
-    root: undefined,
-    nest: undefined
-  };
-
-  /** @type {import("./index").nestCell} */
-  const nestCell = (nestPatch, cell, getState) => prop => {
+  // FIXME
+  /* @type {import("./index").nestCell} */
+  const nestCell = (nestPatch, parentUpdate, getState) => prop => {
     const getNestedState = () => getState()[prop];
+    const nestedUpdate = patch => parentUpdate(nestPatch(patch, prop));
 
     /** @type {import("./index").MeiosisCell} */
     const nested = {
       state: getNestedState(),
-      update: patch => cell.update(nestPatch(patch, prop)),
+      update: nestedUpdate,
       actions: undefined,
-      root: cell.root,
-      nest: undefined
+      nest: nestCell(nestPatch, nestedUpdate, getNestedState)
     };
-
-    nested.nest = nestCell(nestPatch, nested, getNestedState);
 
     return nested;
   };
 
-  cell.nest = nestCell(nestPatch, cell, states);
+  const updateFn = patch => update(patch);
+  const nest = nestCell(nestPatch, update, states);
+
+  const getCell = () => ({
+    state: states(),
+    update: updateFn,
+    actions,
+    nest
+  });
 
   const effects = Object.assign({ effects: [] }, app).effects;
-  states.map(state => effects.forEach(effect => effect(Object.assign(cell, { state }))));
+  states.map(() => effects.forEach(effect => effect(getCell())));
 
   return {
     states,
-    cell
+    getCell
   };
 };
 

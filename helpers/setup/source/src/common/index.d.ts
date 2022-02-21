@@ -174,7 +174,7 @@ export interface Combine<P> {
   (patches: P[]): P;
 }
 
-export type Update<P> = (patch: PatchOrPatches<P>) => P;
+export type Update<P> = (patch: PatchOrPatches<P>) => any;
 
 /**
  * Returned by Meiosis setup.
@@ -222,11 +222,6 @@ export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
    */
   state: S;
 
-  /**
-   * The root cell, useful when using nested cells.
-   */
-  root: MeiosisCell<S, P, A>;
-
   nest: <K extends keyof S>(prop: K) => MeiosisCell<S[K], any>;
 }
 
@@ -243,7 +238,7 @@ export interface MeiosisSetup<S, P, A = unknown> {
    */
   states: Stream<S>;
 
-  cell: MeiosisCell<S, P, A>;
+  getCell: () => MeiosisCell<S, P, A>;
 }
 
 /**
@@ -257,7 +252,7 @@ export interface NestProp<S, K extends keyof S, N> {
 
 export function nestCell<S, K extends keyof S>(
   nestPatch: NestPatch,
-  cell: MeiosisCell<S, ReturnType<typeof nestPatch>>,
+  update: Update<ReturnType<typeof nestPatch>>,
   getState: () => S
 ): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
 

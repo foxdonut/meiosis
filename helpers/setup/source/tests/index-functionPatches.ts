@@ -19,7 +19,8 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const { states, cell } = setup<State>({ stream: simpleStream, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -39,7 +40,8 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
 
       const app = {};
-      const { states, cell } = setup<State>({ stream: simpleStream, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({});
@@ -73,7 +75,8 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         })
       };
 
-      const { states, cell } = setup<State, Actions>({ stream: simpleStream, app });
+      const { states, getCell } = setup<State, Actions>({ stream: simpleStream, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -106,7 +109,8 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const { states, cell } = setup<State>({ stream: simpleStream, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
 
@@ -149,10 +153,11 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const { states, cell } = setup<State>({
+      const { states, getCell } = setup<State>({
         stream: simpleStream,
         app: { initial: { count: 0 }, services }
       });
+      const cell = getCell();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
@@ -186,13 +191,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
 
       const effects: Effect<Counter, CounterActions>[] = [
         cell => {
-          // effect on state does not affect state seen by the next effect
+          // effect on state is seen by the next effect
           if (cell.state.count === 1) {
             cell.actions.increment(1);
           }
         },
         cell => {
-          if (cell.state.count === 1) {
+          if (cell.state.count === 2 && !cell.state.service) {
             cell.update(assoc("service", true));
           }
         }
@@ -204,10 +209,11 @@ describe("Meiosis with TypeScript - Function Patches", () => {
         Actions
       };
 
-      const { states, cell } = setup<Counter, CounterActions>({
+      const { states, getCell } = setup<Counter, CounterActions>({
         stream: simpleStream,
         app
       });
+      const cell = getCell();
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update(assoc("count", 1));

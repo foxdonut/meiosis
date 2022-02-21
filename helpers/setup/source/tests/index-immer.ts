@@ -3,58 +3,6 @@ import { ActionConstructor, App, Effect, MeiosisCell, Patch, Service, setup } fr
 import produce from "immer";
 
 describe("Meiosis with TypeScript - Immer", () => {
-  /*
-  describe("Meiosis", () => {
-    test("effects", () => {
-      interface Counter {
-        count: number;
-        service: boolean;
-      }
-
-      interface CounterActions {
-        increment: (value: number) => void;
-      }
-
-      const Actions: ActionConstructor<Counter, CounterActions> = update => ({
-        increment: value => {
-          update(over(lensProp("count"), add(value)));
-        }
-      });
-
-      const effects: Effect<Counter, CounterActions>[] = [
-        (state, _update, actions) => {
-          // effect on state affects state seen by the next effect
-          if (state.count === 1) {
-            actions.increment(1);
-          }
-        },
-        (state, update) => {
-          if (state.count === 2 && !state.service) {
-            update(assoc("service", true));
-          }
-        }
-      ];
-
-      const app: App<Counter, CounterActions> = {
-        initial: { count: 0, service: false },
-        effects,
-        Actions
-      };
-
-      const { states, update, actions } = setup<Counter, CounterActions>({
-        stream: simpleStream,
-        app
-      });
-      expect(typeof actions.increment).toEqual("function");
-
-      update(assoc("count", 1));
-      expect(states()).toEqual({ count: 2, service: true });
-
-      update([assoc("count", 3), assoc("service", false)]);
-      expect(states()).toEqual({ count: 3, service: false });
-    });
-  */
-
   describe("Meiosis", () => {
     test("with no actions", () => {
       interface State {
@@ -63,7 +11,8 @@ describe("Meiosis with TypeScript - Immer", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -86,7 +35,8 @@ describe("Meiosis with TypeScript - Immer", () => {
 
       const initial = { duck: { color: "" }, sound: "" };
       const app = { initial };
-      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual(initial);
@@ -126,7 +76,8 @@ describe("Meiosis with TypeScript - Immer", () => {
         })
       };
 
-      const { states, cell } = setup<State, Actions>({ stream: simpleStream, produce, app });
+      const { states, getCell } = setup<State, Actions>({ stream: simpleStream, produce, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -161,7 +112,8 @@ describe("Meiosis with TypeScript - Immer", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const { states, cell } = setup<State>({ stream: simpleStream, produce, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
 
@@ -227,11 +179,12 @@ describe("Meiosis with TypeScript - Immer", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const { states, cell } = setup<State>({
+      const { states, getCell } = setup<State>({
         stream: simpleStream,
         produce,
         app: { initial: { count: 0 }, services }
       });
+      const cell = getCell();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
@@ -267,13 +220,13 @@ describe("Meiosis with TypeScript - Immer", () => {
 
       const effects: Effect<Counter, CounterActions>[] = [
         cell => {
-          // effect on state does not affect state seen by the next effect
+          // effect on state is seen by the next effect
           if (cell.state.count === 1) {
             cell.actions.increment(1);
           }
         },
         cell => {
-          if (cell.state.count === 1) {
+          if (cell.state.count === 2 && !cell.state.service) {
             cell.update(state => {
               state.service = true;
             });
@@ -287,11 +240,12 @@ describe("Meiosis with TypeScript - Immer", () => {
         Actions
       };
 
-      const { states, cell } = setup<Counter, CounterActions>({
+      const { states, getCell } = setup<Counter, CounterActions>({
         stream: simpleStream,
         produce,
         app
       });
+      const cell = getCell();
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update(state => {

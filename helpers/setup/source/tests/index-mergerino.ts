@@ -11,59 +11,6 @@ import {
 import merge from "mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
-  /*
-  describe("Meiosis", () => {
-    test("effects", () => {
-      interface Counter {
-        count: number;
-        service: boolean;
-      }
-
-      interface CounterActions {
-        increment: (value: number) => void;
-      }
-
-      const Actions: ActionConstructor<Counter, CounterActions> = update => ({
-        increment: value => {
-          update(over(lensProp("count"), add(value)));
-        }
-      });
-
-      const effects: Effect<Counter, CounterActions>[] = [
-        (state, _update, actions) => {
-          // effect on state affects state seen by the next effect
-          if (state.count === 1) {
-            actions.increment(1);
-          }
-        },
-        (state, update) => {
-          if (state.count === 2 && !state.service) {
-            update(assoc("service", true));
-          }
-        }
-      ];
-
-      const app: App<Counter, CounterActions> = {
-        initial: { count: 0, service: false },
-        effects,
-        Actions
-      };
-
-      const { states, update, actions } = setup<Counter, CounterActions>({
-        stream: simpleStream,
-        app
-      });
-      expect(typeof actions.increment).toEqual("function");
-
-      update(assoc("count", 1));
-      expect(states()).toEqual({ count: 2, service: true });
-
-      update([assoc("count", 3), assoc("service", false)]);
-      expect(states()).toEqual({ count: 3, service: false });
-    });
-  });
-  */
-
   describe("Meiosis", () => {
     test("with no actions", () => {
       interface State {
@@ -72,7 +19,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const { states, cell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -92,7 +40,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = {};
-      const { states, cell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
       expect(cell.state).toEqual({});
@@ -126,7 +75,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         })
       };
 
-      const { states, cell } = setup<State, Actions>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State, Actions>({ stream: simpleStream, merge, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -159,7 +109,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const { states, cell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const cell = getCell();
 
       expect(cell.actions).toBeUndefined();
 
@@ -202,11 +153,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         state => (state.sequenced ? servicePatches[4] : null)
       ];
 
-      const { states, cell } = setup<State>({
+      const { states, getCell } = setup<State>({
         stream: simpleStream,
         merge,
         app: { initial: { count: 0 }, services }
       });
+      const cell = getCell();
 
       cell.update(updatePatches[0]);
       cell.update(updatePatches[1]);
@@ -240,13 +192,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const effects: Effect<Counter, CounterActions>[] = [
         cell => {
-          // effect on state does not affect state seen by the next effect
+          // effect on state is seen by the next effect
           if (cell.state.count === 1) {
             cell.actions.increment(1);
           }
         },
         cell => {
-          if (cell.state.count === 1) {
+          if (cell.state.count === 2 && !cell.state.service) {
             cell.update({ service: true });
           }
         }
@@ -258,7 +210,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         Actions
       };
 
-      const { states, cell } = setup<Counter, CounterActions>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<Counter, CounterActions>({
+        stream: simpleStream,
+        merge,
+        app
+      });
+      const cell = getCell();
       expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update({ count: 1 });
