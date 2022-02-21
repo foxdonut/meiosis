@@ -4,12 +4,14 @@ import commonSetup from "../common";
 
 /**
  * @template S
- * @template {keyof S} K
+ * @template {Extract<keyof S, string>} K
  *
  * @type {import("../common/index").NestPatch<any, any, any>}
  *
- * @param {import("./index").Patch<S[K]>} patch
- * @param {K} prop
+ * param {import("./index").Patch<S[K]>} patch
+ * param {K} prop
+ *
+ * returns {import("./index").Patch<S>}
  */
 const nestPatch = (patch, prop) => ({ [prop]: patch });
 
