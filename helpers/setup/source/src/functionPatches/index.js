@@ -8,7 +8,7 @@ const pipe = fns => args => fns.reduce((arg, fn) => fn(arg), args);
  * @template S
  * @template {keyof S} K
  *
- * @type {import("../common/index").NestPatch}
+ * @type {import("../common/index").NestPatch<any, any, any>}
  *
  * @param {import("./index").Patch<S[K]>} patch
  * @param {K} prop

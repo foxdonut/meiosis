@@ -57,10 +57,14 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   const actions = safeApp.Actions ? safeApp.Actions(context) : undefined;
   context.actions = actions;
 
-  // FIXME
-  /* @type {import("./index").nestCell} */
+  /** @type {import("./index").nestCell} */
   const nestCell = (nestPatch, parentUpdate, getState) => prop => {
     const getNestedState = () => getState()[prop];
+
+    /**
+     * @template P
+     * @type {import("./index").Update<P>}
+     */
     const nestedUpdate = patch => parentUpdate(nestPatch(patch, prop));
 
     /** @type {import("./index").MeiosisCell} */
@@ -68,6 +72,7 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
       state: getNestedState(),
       update: nestedUpdate,
       actions: undefined,
+      /** @type {import("./index").NestProp} */
       nest: nestCell(nestPatch, nestedUpdate, getNestedState)
     };
 
@@ -75,7 +80,7 @@ export const setup = ({ stream, accumulator, combine, nestPatch, app }) => {
   };
 
   const updateFn = patch => update(patch);
-  const nest = nestCell(nestPatch, update, states);
+  const nest = nestCell(nestPatch, updateFn, states);
 
   const getCell = () => ({
     state: states(),

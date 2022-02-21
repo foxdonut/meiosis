@@ -65,12 +65,6 @@ export type App<S, A = unknown> = CommonApp<S, Patch<S>, A>;
 
 export type MeiosisContext<S, A = unknown> = CommonMeiosisContext<S, Patch<S>, A>;
 
-/*
-export interface MeiosisContext<S, A = unknown> extends CommonMeiosis<S, Patch<S>, A> {
-  nest: <K extends keyof S>(prop: K) => MeiosisContext<S[K]>;
-}
-*/
-
 export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
 
 /**

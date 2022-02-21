@@ -222,7 +222,7 @@ export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
    */
   state: S;
 
-  nest: <K extends keyof S>(prop: K) => MeiosisCell<S[K], any>;
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K], any>;
 }
 
 /**
@@ -244,14 +244,14 @@ export interface MeiosisSetup<S, P, A = unknown> {
 /**
  * Function that nests a patch at a given property.
  */
-export type NestPatch = (patch: any, prop: string | number | symbol) => any;
+export type NestPatch<N, K, P> = (patch: N, prop: K) => P;
 
-export interface NestProp<S, K extends keyof S, N> {
+export interface NestProp<S, K extends Extract<keyof S, string>, N> {
   (prop: K): MeiosisCell<S[K], N>;
 }
 
-export function nestCell<S, K extends keyof S>(
-  nestPatch: NestPatch,
+export function nestCell<S, K extends Extract<keyof S, string>>(
+  nestPatch: NestPatch<any, any, any>,
   update: Update<ReturnType<typeof nestPatch>>,
   getState: () => S
 ): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
@@ -375,7 +375,7 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
   /**
    * How to nest a patch.
    */
-  nestPatch: NestPatch;
+  nestPatch: NestPatch<any, any, any>;
 }
 
 /**

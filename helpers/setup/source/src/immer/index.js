@@ -4,6 +4,7 @@ import commonSetup from "../common";
 
 /** @type {import("./index").setup} */
 export const setup = ({ stream, produce, app }) => {
+  /** @type {import("../common/index").NestPatch<any, any, any>} */
   const nestPatch = (patch, prop) => state => {
     state[prop] = produce(state[prop], patch);
   };
