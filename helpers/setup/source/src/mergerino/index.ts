@@ -1,4 +1,4 @@
-import {
+import commonSetup, {
   ActionConstructor as CommonActionConstructor,
   App as CommonApp,
   Effect as CommonEffect,
@@ -51,7 +51,7 @@ export type ObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
+export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[] | null | undefined | void;
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
@@ -82,6 +82,11 @@ export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patc
 
 export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
 
+function nestPatch<S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> {
+  const nestedPatch = { [prop]: patch } as unknown;
+  return nestedPatch as Patch<S>;
+}
+
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
@@ -93,6 +98,17 @@ export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
  * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
  * where `states` and `update` are streams, and `actions` are the created actions.
  */
-export function setup<S, A = unknown>(config: MeiosisConfig<S, A>): MeiosisSetup<S, A>;
+export const setup = <S, A = unknown>({
+  stream,
+  merge,
+  app
+}: MeiosisConfig<S, A>): MeiosisSetup<S, A> =>
+  commonSetup({
+    stream,
+    accumulator: merge,
+    combine: patches => patches,
+    nestPatch: () => nestPatch,
+    app
+  });
 
 export default setup;

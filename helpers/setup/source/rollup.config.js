@@ -1,38 +1,45 @@
-import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import buble from "@rollup/plugin-buble";
+import resolve from "@rollup/plugin-node-resolve";
+import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
+
+const name = "Meiosis";
+const input = "./src/index.ts";
+const extensions = [".js", ".ts"];
+
+const plugins = [
+  resolve({ extensions }),
+  commonjs(),
+  babel({
+    extensions,
+    include: ["src/**"]
+  })
+];
+
+const output = {
+  name,
+  format: "umd"
+};
 
 export default [
   {
-    input: "./src/index.js",
-    output: {
-      file: "dist/meiosis-setup.js",
-      name: "Meiosis",
-      format: "umd"
-    },
-    plugins: [
-      resolve(),
-      commonjs(),
-      buble({
-        exclude: ["node_modules/**"]
-      })
-    ]
+    input,
+    plugins,
+    output: Object.assign(
+      {
+        file: "dist/meiosis-setup.js"
+      },
+      output
+    )
   },
   {
-    input: "./src/index.js",
-    output: {
-      file: "dist/meiosis-setup.min.js",
-      name: "Meiosis",
-      format: "umd"
-    },
-    plugins: [
-      resolve(),
-      commonjs(),
-      buble({
-        exclude: ["node_modules/**"]
-      }),
-      terser()
-    ]
+    input,
+    plugins: plugins.concat(terser()),
+    output: Object.assign(
+      {
+        file: "dist/meiosis-setup.min.js"
+      },
+      output
+    )
   }
 ];

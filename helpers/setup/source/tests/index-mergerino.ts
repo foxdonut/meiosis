@@ -51,6 +51,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const duckCell = cell.nest("duck");
       expect(duckCell.state).toBeUndefined();
+      // FIXME: this should show an error
+      duckCell.update({ QUACK: "DUCK" });
 
       duckCell.update({ color: "yellow" });
       expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });
@@ -146,8 +148,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       ];
 
       const services: Service<State>[] = [
-        state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
-        state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+        state =>
+          state.increment && state.increment > 0 && state.increment < 10 ? servicePatches[0] : null,
+        state =>
+          state.increment && (state.increment <= 0 || state.increment >= 10)
+            ? servicePatches[1]
+            : null,
         state => (state.invalid ? servicePatches[2] : null),
         state => (state.sequence ? servicePatches[3] : null),
         state => (state.sequenced ? servicePatches[4] : null)

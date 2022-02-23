@@ -154,13 +154,6 @@ export interface StreamLibWithProperty extends StreamScan {
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
 /**
- * Convenience function to convert flyd or mithril-stream to `StreamLib` with TypeScript.
- */
-export function toStream(stream: any): StreamLib;
-
-export type PatchOrPatches<P> = P | P[] | null | undefined | void;
-
-/**
  * Combines an array of patches into a single patch.
  *
  * @template P the Patch type.
@@ -174,7 +167,7 @@ export interface Combine<P> {
   (patches: P[]): P;
 }
 
-export type Update<P> = (patch: PatchOrPatches<P>) => any;
+export type Update<P> = (patch: P) => any;
 
 /**
  * Returned by Meiosis setup.
@@ -222,7 +215,7 @@ export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
    */
   state: S;
 
-  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K], any>;
+  nest: <K extends Extract<keyof S, string>, N>(prop: K) => MeiosisCell<S[K], N>;
 }
 
 /**
@@ -250,12 +243,6 @@ export interface NestProp<S, K extends Extract<keyof S, string>, N> {
   (prop: K): MeiosisCell<S[K], N>;
 }
 
-export function nestCell<S, K extends Extract<keyof S, string>>(
-  nestPatch: NestPatch<any, any, any>,
-  update: Update<ReturnType<typeof nestPatch>>,
-  getState: () => S
-): NestProp<S, K, Parameters<typeof nestPatch>[0]>;
-
 /**
  * A service function. Receives the current state and returns a patch to be applied to the state.
  *
@@ -266,9 +253,9 @@ export interface Service<S, P> {
   /**
    * @param {S} state the current state.
    *
-   * @returns {Patch<P>} the patch to be applied to the state.
+   * @returns {P} the patch to be applied to the state.
    */
-  (state: S): PatchOrPatches<P>;
+  (state: S): P;
 }
 
 /**
@@ -375,8 +362,20 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
   /**
    * How to nest a patch.
    */
-  nestPatch: NestPatch<any, any, any>;
+  nestPatch: NestPatch<unknown, unknown, unknown>;
 }
+
+/**
+ * Convenience function to convert flyd or mithril-stream to `StreamLib` with TypeScript.
+ */
+export const toStream = (streamLib: StreamLibWithProperty): StreamLib => {
+  const streamFn = streamLib.stream || streamLib;
+
+  return {
+    stream: value => streamFn(value),
+    scan: (acc, init, stream) => streamLib.scan(acc, init, stream)
+  };
+};
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -397,6 +396,91 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
  *
  * @returns {Meiosis<S, P, A>} the Meiosis setup.
  */
-export function setup<S, P, A = unknown>(config: MeiosisConfig<S, P, A>): MeiosisSetup<S, P, A>;
+export const setup = <S, P, A = unknown>({
+  stream,
+  accumulator,
+  combine,
+  nestPatch,
+  app
+}: MeiosisConfig<S, P, A>): MeiosisSetup<S, P, A> => {
+  if (!stream) {
+    throw new Error("No stream library was specified.");
+  }
+  if (!accumulator) {
+    throw new Error("No accumulator function was specified.");
+  }
+  if (!combine) {
+    throw new Error("No combine function was specified.");
+  }
+
+  const safeApp = app || {};
+  const initial = safeApp.initial || {};
+  const services = safeApp.services || [];
+
+  const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
+  const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
+
+  const createStream = typeof stream === "function" ? stream : stream.stream;
+  const scan = stream.scan;
+
+  const update: Stream<P> = createStream();
+  const updateFn = patch => update(patch);
+
+  const runServices = startingState =>
+    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
+
+  const states = scan(
+    (state, patch) => runServices(accumulatorFn(state, patch)),
+    runServices(initial),
+    update
+  );
+
+  const defaultActions = {} as A;
+  const context: MeiosisContext<S, P, A> = {
+    getState: () => states(),
+    update: updateFn,
+    actions: defaultActions
+  };
+
+  if (safeApp.Actions) {
+    context.actions = safeApp.Actions(context);
+  }
+
+  const nestCell = <S, K extends Extract<keyof S, string>, N, P>(
+    nestPatch: NestPatch<N, K, P>,
+    parentUpdate: Update<P>,
+    getState: () => S
+  ): NestProp<S, K, N> => (prop: K): MeiosisCell<S[K], N> => {
+    const getNestedState = () => getState()[prop];
+
+    const nestedUpdate: Update<N> = patch => parentUpdate(nestPatch(patch, prop));
+
+    const nested: MeiosisCell<S[K], N> = {
+      state: getNestedState(),
+      update: nestedUpdate,
+      actions: defaultActions,
+      nest: nestCell(nestPatch as NestPatch<any, any, any>, nestedUpdate, getNestedState)
+    };
+
+    return nested;
+  };
+
+  const nest = nestCell(nestPatch, updateFn, states);
+
+  const getCell = () => ({
+    state: states(),
+    update: updateFn,
+    actions: context.actions,
+    nest
+  });
+
+  const effects = safeApp.effects || [];
+  states.map(() => effects.forEach(effect => effect(getCell())));
+
+  return {
+    states,
+    getCell
+  };
+};
 
 export default setup;

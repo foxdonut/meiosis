@@ -1,10 +1,23 @@
 {
-  "include": ["src/**/*", "tests/*.ts"],
+  "include": [
+    "src/**/*",
+    "tests/*.ts"
+  ],
 
   "compilerOptions": {
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "emitDeclarationOnly": false,
-    "outDir": "generated-d-ts"
+    "esModuleInterop": true,
+    "isolatedModules": false,
+    "lib": ["es2016"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "target": "es6"
   }
 }
