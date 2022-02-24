@@ -237,7 +237,9 @@ export interface MeiosisSetup<S, P, A = unknown> {
 /**
  * Function that nests a patch at a given property.
  */
-export type NestPatch<N, K, P> = (patch: N, prop: K) => P;
+export interface NestPatch {
+  <N, K, P>(patch: N, prop: K): P;
+}
 
 export interface NestProp<S, K extends Extract<keyof S, string>, N> {
   (prop: K): MeiosisCell<S[K], N>;
@@ -362,7 +364,7 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
   /**
    * How to nest a patch.
    */
-  nestPatch: NestPatch<unknown, unknown, unknown>;
+  nestPatch: NestPatch;
 }
 
 /**
@@ -447,7 +449,7 @@ export const setup = <S, P, A = unknown>({
   }
 
   const nestCell = <S, K extends Extract<keyof S, string>, N, P>(
-    nestPatch: NestPatch<N, K, P>,
+    nestPatch: NestPatch,
     parentUpdate: Update<P>,
     getState: () => S
   ): NestProp<S, K, N> => (prop: K): MeiosisCell<S[K], N> => {
@@ -459,19 +461,17 @@ export const setup = <S, P, A = unknown>({
       state: getNestedState(),
       update: nestedUpdate,
       actions: defaultActions,
-      nest: nestCell(nestPatch as NestPatch<any, any, any>, nestedUpdate, getNestedState)
+      nest: nestCell(nestPatch, nestedUpdate, getNestedState)
     };
 
     return nested;
   };
 
-  const nest = nestCell(nestPatch, updateFn, states);
-
   const getCell = () => ({
     state: states(),
     update: updateFn,
     actions: context.actions,
-    nest
+    nest: nestCell(nestPatch, updateFn, states)
   });
 
   const effects = safeApp.effects || [];

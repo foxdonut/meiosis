@@ -6,6 +6,7 @@ import commonSetup, {
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
   MeiosisSetup as CommonMeiosisSetup,
+  NestPatch,
   Service as CommonService,
   Update as CommonUpdate
 } from "../common";
@@ -82,10 +83,13 @@ export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patc
 
 export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
 
-function nestPatch<S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> {
+const nestPatch: NestPatch = <S, K extends Extract<keyof S, string>>(
+  patch: Patch<S[K]>,
+  prop: K
+): Patch<S> => {
   const nestedPatch = { [prop]: patch } as unknown;
   return nestedPatch as Patch<S>;
-}
+};
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -107,7 +111,7 @@ export const setup = <S, A = unknown>({
     stream,
     accumulator: merge,
     combine: patches => patches,
-    nestPatch: () => nestPatch,
+    nestPatch,
     app
   });
 
