@@ -172,8 +172,12 @@ describe("Meiosis with TypeScript - Immer", () => {
       ];
 
       const services: Service<State>[] = [
-        state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
-        state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
+        state =>
+          state.increment && state.increment > 0 && state.increment < 10 ? servicePatches[0] : null,
+        state =>
+          state.increment && (state.increment <= 0 || state.increment >= 10)
+            ? servicePatches[1]
+            : null,
         state => (state.invalid ? servicePatches[2] : null),
         state => (state.sequence ? servicePatches[3] : null),
         state => (state.sequenced ? servicePatches[4] : null)
