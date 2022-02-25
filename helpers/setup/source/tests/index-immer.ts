@@ -1,5 +1,14 @@
 import simpleStream from "../src/simple-stream";
-import { ActionConstructor, App, Effect, MeiosisCell, Patch, Service, setup } from "../src/immer";
+import {
+  ActionConstructor,
+  App,
+  Effect,
+  MeiosisCell,
+  Patch,
+  Service,
+  combinePatches,
+  setup
+} from "../src/immer";
 import produce from "immer";
 
 describe("Meiosis with TypeScript - Immer", () => {
@@ -133,21 +142,21 @@ describe("Meiosis with TypeScript - Immer", () => {
         received?: boolean;
       }
 
-      const servicePatches = [
+      const servicePatches: Patch<State>[] = [
         draft => {
           draft.count++;
         },
         draft => {
           delete draft.increment;
         },
-        [
+        combinePatches<State>(produce, [
           draft => {
             delete draft.invalid;
           },
           draft => {
             draft.combined = true;
           }
-        ],
+        ]),
         draft => {
           draft.sequenced = true;
         },
@@ -256,6 +265,8 @@ describe("Meiosis with TypeScript - Immer", () => {
         state.count = 1;
       });
       expect(states()).toEqual({ count: 2, service: true });
+
+      // FIXME: add rest of test
     });
   });
 });

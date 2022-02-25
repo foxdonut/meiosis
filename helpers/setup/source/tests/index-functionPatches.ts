@@ -6,6 +6,7 @@ import {
   MeiosisCell,
   Patch,
   Service,
+  combinePatches,
   setup
 } from "../src/functionPatches";
 import { add, assoc, dissoc, lensProp, over } from "ramda";
@@ -133,7 +134,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       const servicePatches: Patch<State>[] = [
         over(lensProp("count"), add(1)),
         dissoc("increment"),
-        [dissoc("invalid"), assoc("combined", true)],
+        combinePatches<State>([dissoc("invalid"), assoc("combined", true)]),
         assoc("sequenced", true),
         assoc("received", true)
       ];
@@ -223,7 +224,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       cell.update(assoc("count", 1));
       expect(states()).toEqual({ count: 2, service: true });
 
-      cell.update([assoc("count", 3), assoc("service", false)]);
+      cell.update(combinePatches([assoc("count", 3), assoc("service", false)]));
       expect(states()).toEqual({ count: 3, service: false });
     });
   });

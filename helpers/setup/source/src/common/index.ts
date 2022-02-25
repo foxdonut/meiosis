@@ -153,20 +153,6 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
-/**
- * Combines an array of patches into a single patch.
- *
- * @template P the Patch type.
- */
-export interface Combine<P> {
-  /**
-   * @param {P[]} patches the array of patches.
-   *
-   * @returns {P} the result of combining the array of patches.
-   */
-  (patches: P[]): P;
-}
-
 export type CommonUpdate<P> = (patch: P) => any;
 
 /**
@@ -244,7 +230,7 @@ export interface CommonService<S, P> {
    *
    * @returns {P} the patch to be applied to the state.
    */
-  (state: S): P;
+  (state: S): P | null | undefined | void;
 }
 
 /**
@@ -337,11 +323,6 @@ export interface MeiosisConfig<S, P, A> extends CommonMeiosisConfig<S, P, A> {
    * The accumulator function.
    */
   accumulator: Accumulator<S, P>;
-
-  /**
-   * The function that combines an array of patches into one patch.
-   */
-  combine: Combine<P>;
 }
 
 /**
@@ -378,7 +359,6 @@ export const toStream = (streamLib: StreamLibWithProperty): StreamLib => {
 export const setup = <S, P, A = unknown>({
   stream,
   accumulator,
-  combine,
   app
 }: MeiosisConfig<S, P, A>): CommonMeiosisSetup<S, P, A> => {
   if (!stream) {
@@ -387,16 +367,12 @@ export const setup = <S, P, A = unknown>({
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");
   }
-  if (!combine) {
-    throw new Error("No combine function was specified.");
-  }
 
   const safeApp = app || {};
   const initial = safeApp.initial || {};
   const services = safeApp.services || [];
 
-  const singlePatch = patch => (Array.isArray(patch) ? combine(patch) : patch);
-  const accumulatorFn = (state, patch) => (patch ? accumulator(state, singlePatch(patch)) : state);
+  const accumulatorFn = (state, patch) => (patch ? accumulator(state, patch) : state);
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;

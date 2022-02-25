@@ -89,6 +89,15 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
 };
 
 /**
+ * Combines an array of patches into a single patch.
+ *
+ * @template S the State type.
+ */
+export const combinePatches = <S>(produce: Produce<S>, patches: Patch<S>[]): Patch<S> => state =>
+  // can't use patches.reduce(produce, state) because that would send a third argument to produce
+  patches.reduce((result, patch) => produce(result, patch), state);
+
+/**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
@@ -107,8 +116,6 @@ export const setup = <S, A = unknown>({
   const { states, getCell } = commonSetup({
     stream,
     accumulator: produce,
-    // can't use patches.reduce(produce, state) because that would send a third argument to produce
-    combine: patches => state => patches.reduce((result, patch) => produce(result, patch), state),
     app
   });
 

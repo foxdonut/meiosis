@@ -61,9 +61,6 @@ export interface MeiosisSetup<S, A = unknown> extends CommonMeiosisSetup<S, Patc
   getCell: () => MeiosisCell<S, A>;
 }
 
-const pipe = <S>(patches: Array<Patch<S>>) => (initialState: S) =>
-  patches.reduce((state, patch) => patch(state), initialState);
-
 const nestPatch = <S, K extends Extract<keyof S, string>>(
   patch: Patch<S[K]>,
   prop: K
@@ -97,6 +94,14 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
 };
 
 /**
+ * Combines an array of patches into a single patch.
+ *
+ * @template S the State type.
+ */
+export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => (initialState: S) =>
+  patches.reduce((state, patch) => patch(state), initialState);
+
+/**
  * Helper to setup the Meiosis pattern with function patches.
  *
  * @template S the State type.
@@ -111,7 +116,6 @@ export const setup = <S, A = unknown>({ stream, app }: MeiosisConfig<S, A>): Mei
   const { states, getCell } = commonSetup({
     stream,
     accumulator: (state, patch) => patch(state),
-    combine: pipe,
     app
   });
 

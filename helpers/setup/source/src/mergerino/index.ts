@@ -36,7 +36,11 @@ export type FunctionPatch<S> = (state: S) => S;
  * @template S the State type.
  */
 export type ObjectPatch<S> = {
-  [K in keyof S]?: Patch<S[K]> | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
+  [K in Extract<keyof S, string>]?:
+    | Patch<S[K]>
+    | ((a: S[K]) => S[K] | null | undefined)
+    | null
+    | undefined;
 };
 
 /**
@@ -51,7 +55,7 @@ export type ObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S>;
+export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
@@ -120,6 +124,13 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
 };
 
 /**
+ * Combines an array of patches into a single patch.
+ *
+ * @template S the State type.
+ */
+export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
+
+/**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
@@ -138,7 +149,6 @@ export const setup = <S, A = unknown>({
   const { states, getCell } = commonSetup({
     stream,
     accumulator: merge,
-    combine: patches => patches,
     app
   });
 

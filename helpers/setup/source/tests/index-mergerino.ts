@@ -6,6 +6,7 @@ import {
   MeiosisCell,
   Patch,
   Service,
+  combinePatches,
   setup
 } from "../src/mergerino";
 import merge from "mergerino";
@@ -130,10 +131,10 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         received?: boolean;
       }
 
-      const servicePatches = [
+      const servicePatches: Patch<State>[] = [
         { count: x => x + 1 },
         { increment: undefined },
-        [{ invalid: undefined }, { combined: true }],
+        combinePatches([{ invalid: undefined }, { combined: true }]),
         { sequenced: true },
         { received: true }
       ];
@@ -224,6 +225,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       cell.update({ count: 1 });
       expect(states()).toEqual({ count: 2, service: true });
+
+      // FIIXME: add rest of test
     });
   });
 });
