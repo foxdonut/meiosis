@@ -1,13 +1,13 @@
 import commonSetup, {
-  ActionConstructor as CommonActionConstructor,
-  App as CommonApp,
-  Effect as CommonEffect,
-  MeiosisCell as CommonMeiosisCell,
-  MeiosisContext as CommonMeiosisContext,
-  MeiosisConfigBase,
-  MeiosisSetup as CommonMeiosisSetup,
-  Service as CommonService,
-  Update as CommonUpdate
+  CommonActionConstructor,
+  CommonApp,
+  CommonEffect,
+  CommonMeiosisCell,
+  CommonMeiosisConfig,
+  CommonMeiosisContext,
+  CommonMeiosisSetup,
+  CommonService,
+  CommonUpdate
 } from "../common";
 
 /**
@@ -75,7 +75,7 @@ export interface MeiosisCell<S, A = unknown> extends CommonMeiosisCell<S, Patch<
  * @template S the State type.
  * @template A the Actions type.
  */
-export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patch<S>, A> {
+export interface MeiosisConfig<S, A = unknown> extends CommonMeiosisConfig<S, Patch<S>, A> {
   /**
    * The Mergerino `merge` function.
    */
