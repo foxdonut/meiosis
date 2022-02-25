@@ -437,8 +437,8 @@ export const createRouter = ({
 
   const { prefix, historyMode } = getConfig(rootPath, plainHash);
 
-  const getPath = () => getUrl().substring(prefix.length) || "/";
   const getUrl = createGetUrl(prefix, historyMode, wdw);
+  const getPath = () => getUrl().substring(prefix.length) || "/";
   toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
   const getRoute = path => {

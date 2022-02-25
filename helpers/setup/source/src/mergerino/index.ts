@@ -6,7 +6,6 @@ import commonSetup, {
   MeiosisContext as CommonMeiosisContext,
   MeiosisConfigBase,
   MeiosisSetup as CommonMeiosisSetup,
-  NestPatch,
   Service as CommonService,
   Update as CommonUpdate
 } from "../common";
@@ -66,7 +65,9 @@ export type App<S, A = unknown> = CommonApp<S, Patch<S>, A>;
 
 export type MeiosisContext<S, A = unknown> = CommonMeiosisContext<S, Patch<S>, A>;
 
-export type MeiosisCell<S, A = unknown> = CommonMeiosisCell<S, Patch<S>, A>;
+export interface MeiosisCell<S, A = unknown> extends CommonMeiosisCell<S, Patch<S>, A> {
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+}
 
 /**
  * Meiosis Config.
@@ -81,14 +82,35 @@ export interface MeiosisConfig<S, A = unknown> extends MeiosisConfigBase<S, Patc
   merge: (state: S, patch: Patch<S>) => S;
 }
 
-export type MeiosisSetup<S, A = unknown> = CommonMeiosisSetup<S, Patch<S>, A>;
+export interface MeiosisSetup<S, A = unknown> extends CommonMeiosisSetup<S, Patch<S>, A> {
+  getCell: () => MeiosisCell<S, A>;
+}
 
-const nestPatch: NestPatch = <S, K extends Extract<keyof S, string>>(
-  patch: Patch<S[K]>,
-  prop: K
-): Patch<S> => {
+const nestPatch = <P, K extends string, N>(patch: Patch<P>, prop: K): Patch<N> => {
   const nestedPatch = { [prop]: patch } as unknown;
-  return nestedPatch as Patch<S>;
+  return nestedPatch as Patch<N>;
+};
+
+const nestUpdate = <P, K extends string, N>(parentUpdate: Update<P>, prop: K): Update<N> => {
+  return patch => parentUpdate(nestPatch(patch, prop));
+};
+
+const nestCell = <S, K extends Extract<keyof S, string>>(
+  getState: () => S,
+  parentUpdate: Update<S>
+) => (prop: K): MeiosisCell<S[K]> => {
+  const getNestedState = () => getState()[prop];
+
+  const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+
+  const nested: MeiosisCell<S[K]> = {
+    state: getNestedState(),
+    update: nestedUpdate,
+    actions: undefined,
+    nest: nestCell(getNestedState, nestedUpdate)
+  };
+
+  return nested;
 };
 
 /**
@@ -106,13 +128,29 @@ export const setup = <S, A = unknown>({
   stream,
   merge,
   app
-}: MeiosisConfig<S, A>): MeiosisSetup<S, A> =>
-  commonSetup({
+}: MeiosisConfig<S, A>): MeiosisSetup<S, A> => {
+  const { states, getCell } = commonSetup({
     stream,
     accumulator: merge,
     combine: patches => patches,
-    nestPatch,
     app
   });
+
+  const getCellWithNest = () => {
+    const cell = getCell();
+
+    const cellWithNest: MeiosisCell<S, A> = {
+      ...cell,
+      nest: nestCell(states, cell.update)
+    };
+
+    return cellWithNest;
+  };
+
+  return {
+    states,
+    getCell: getCellWithNest
+  };
+};
 
 export default setup;

@@ -51,8 +51,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const duckCell = cell.nest("duck");
       expect(duckCell.state).toBeUndefined();
-      // FIXME: this should show an error
-      duckCell.update({ QUACK: "DUCK" });
 
       duckCell.update({ color: "yellow" });
       expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });

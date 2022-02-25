@@ -214,8 +214,6 @@ export interface MeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
    * The application states.
    */
   state: S;
-
-  nest: <K extends Extract<keyof S, string>, N>(prop: K) => MeiosisCell<S[K], N>;
 }
 
 /**
@@ -232,17 +230,6 @@ export interface MeiosisSetup<S, P, A = unknown> {
   states: Stream<S>;
 
   getCell: () => MeiosisCell<S, P, A>;
-}
-
-/**
- * Function that nests a patch at a given property.
- */
-export interface NestPatch {
-  <N, K, P>(patch: N, prop: K): P;
-}
-
-export interface NestProp<S, K extends Extract<keyof S, string>, N> {
-  (prop: K): MeiosisCell<S[K], N>;
 }
 
 /**
@@ -360,11 +347,6 @@ export interface MeiosisConfig<S, P, A> extends MeiosisConfigBase<S, P, A> {
    * The function that combines an array of patches into one patch.
    */
   combine: Combine<P>;
-
-  /**
-   * How to nest a patch.
-   */
-  nestPatch: NestPatch;
 }
 
 /**
@@ -402,7 +384,6 @@ export const setup = <S, P, A = unknown>({
   stream,
   accumulator,
   combine,
-  nestPatch,
   app
 }: MeiosisConfig<S, P, A>): MeiosisSetup<S, P, A> => {
   if (!stream) {
@@ -426,12 +407,12 @@ export const setup = <S, P, A = unknown>({
   const scan = stream.scan;
 
   const update: Stream<P> = createStream();
-  const updateFn = patch => update(patch);
+  const updateFn: Update<P> = patch => update(patch);
 
   const runServices = startingState =>
     services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
 
-  const states = scan(
+  const states: Stream<S> = scan(
     (state, patch) => runServices(accumulatorFn(state, patch)),
     runServices(initial),
     update
@@ -448,30 +429,10 @@ export const setup = <S, P, A = unknown>({
     context.actions = safeApp.Actions(context);
   }
 
-  const nestCell = <S, K extends Extract<keyof S, string>, N, P>(
-    nestPatch: NestPatch,
-    parentUpdate: Update<P>,
-    getState: () => S
-  ): NestProp<S, K, N> => (prop: K): MeiosisCell<S[K], N> => {
-    const getNestedState = () => getState()[prop];
-
-    const nestedUpdate: Update<N> = patch => parentUpdate(nestPatch(patch, prop));
-
-    const nested: MeiosisCell<S[K], N> = {
-      state: getNestedState(),
-      update: nestedUpdate,
-      actions: defaultActions,
-      nest: nestCell(nestPatch, nestedUpdate, getNestedState)
-    };
-
-    return nested;
-  };
-
   const getCell = () => ({
     state: states(),
     update: updateFn,
-    actions: context.actions,
-    nest: nestCell(nestPatch, updateFn, states)
+    actions: context.actions
   });
 
   const effects = safeApp.effects || [];
