@@ -11,47 +11,27 @@ import commonSetup, {
 } from "../common";
 
 /**
- * A Mergerino function patch. This is a function that receives the current state and returns the
- * updated state.
- *
- * Example:
- *
- * ```typescript
- * update(state => ({ ...state, { count: 42 }}));
- * ```
- *
  * @template S the State type.
  */
-export type FunctionPatch<S> = (state: S) => S;
-
-/**
- * A Mergerino object patch. This is an object that contains updates to state properties.
- *
- * Example:
- *
- * ```typescript
- * update({ count: 42 });
- * ```
- *
- * @template S the State type.
- */
-export type ObjectPatch<S> = {
-  [K in keyof S]?: Patch<S[K]> | ((a: S[K]) => S[K] | null | undefined) | null | undefined;
-};
-
-/**
- * A Mergerino patch.
- *
- * Examples:
- *
- * ```typescript
- * update({ count: 42 });
- * update({ count: x => x + 1 });
- * ```
- *
- * @template S the State type.
- */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[] | null | undefined | void;
+export interface Patch<S> {
+  /**
+   * A function patch.
+   *
+   * @param {S} state the current state.
+   *
+   * @returns {S} the updated state.
+   *
+   * Examples:
+   *
+   * ```typescript
+   * update(state => ({ ...state, count: 42 }));
+   *
+   * // Using Ramda
+   * update(R.assoc('count', 42)));
+   * ```
+   */
+  (state: S): S;
+}
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
@@ -75,22 +55,20 @@ export interface MeiosisCell<S, A = unknown> extends CommonMeiosisCell<S, Patch<
  * @template S the State type.
  * @template A the Actions type.
  */
-export interface MeiosisConfig<S, A = unknown> extends CommonMeiosisConfig<S, Patch<S>, A> {
-  /**
-   * The Mergerino `merge` function.
-   */
-  merge: (state: S, patch: Patch<S>) => S;
-}
+export type MeiosisConfig<S, A = unknown> = CommonMeiosisConfig<S, Patch<S>, A>;
 
 export interface MeiosisSetup<S, A = unknown> extends CommonMeiosisSetup<S, Patch<S>, A> {
   getCell: () => MeiosisCell<S, A>;
 }
 
+const pipe = <S>(patches: Array<Patch<S>>) => (initialState: S) =>
+  patches.reduce((state, patch) => patch(state), initialState);
+
 const nestPatch = <S, K extends Extract<keyof S, string>>(
   patch: Patch<S[K]>,
   prop: K
 ): Patch<S> => {
-  return { [prop]: patch } as Patch<S>;
+  return (state: S) => Object.assign({}, state, { [prop]: patch(state[prop]) });
 };
 
 const nestUpdate = <S, K extends Extract<keyof S, string>>(
@@ -119,25 +97,21 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
 };
 
 /**
- * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
+ * Helper to setup the Meiosis pattern with function patches.
  *
  * @template S the State type.
  * @template A the Actions type.
  *
- * @param {MeiosisConfig<S, A>} config the Meiosis config for use with Mergerino
+ * @param {MeiosisConfig<S, A>} config the Meiosis config for use with function patches.
  *
- * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
- * where `states` and `update` are streams, and `actions` are the created actions.
+ * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`, where `states` and `update` are
+ * streams, and `actions` are the created actions.
  */
-export const setup = <S, A = unknown>({
-  stream,
-  merge,
-  app
-}: MeiosisConfig<S, A>): MeiosisSetup<S, A> => {
+export const setup = <S, A = unknown>({ stream, app }: MeiosisConfig<S, A>): MeiosisSetup<S, A> => {
   const { states, getCell } = commonSetup({
     stream,
-    accumulator: merge,
-    combine: patches => patches,
+    accumulator: (state, patch) => patch(state),
+    combine: pipe,
     app
   });
 
