@@ -1,20 +1,24 @@
-// @ts-check
+import { MapFunction, Stream, StreamLibWithProperty, Scan } from "../common";
 
 /**
- * Simple stream implementation.
+ * Creates a stream.
  *
- * @type {import("./index").stream}
+ * @template T the type of the stream's values.
+ *
+ * @param value the stream's initial value.
+ *
+ * @returns the created stream.
  */
-export const stream = initial => {
-  const mapFunctions = [];
-  let latestValue = initial;
+export const stream = <T>(initial?: T): Stream<T> => {
+  const mapFunctions: MapFunction<any, any>[] = [];
+  let latestValue = initial as T;
   // credit @cmnstmntmn for discovering this bug.
   // Keep track of mapped values so that they are sent to mapped streams in order.
   // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
-  let mappedValues = [];
-  /** @type {import("../common").Stream} */
-  const createdStream = function (value) {
-    if (arguments.length > 0 && !createdStream.ended) {
+  const mappedValues: any[] = [];
+
+  const createdStream: Stream<T> = function (value) {
+    if (arguments.length > 0 && value !== undefined && !createdStream.ended) {
       latestValue = value;
       mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
@@ -24,8 +28,9 @@ export const stream = initial => {
     }
     return latestValue;
   };
-  createdStream.map = mapFunction => {
-    const newStream = stream();
+
+  createdStream.map = <R>(mapFunction: MapFunction<T, R>) => {
+    const newStream: Stream<R> = stream();
 
     mapFunctions.push(value => {
       newStream(mapFunction(value));
@@ -38,14 +43,20 @@ export const stream = initial => {
 
     return newStream;
   };
+
   createdStream.end = () => {
     createdStream.ended = true;
   };
+
   return createdStream;
 };
 
-/** @type {import("./index").scan} */
-export const scan = (accumulator, initial, sourceStream) => {
+/**
+ * Creates a new stream that starts with the initial value and, for each value arriving onto the
+ * source stream, emits the result of calling the accumulator function with the latest result and
+ * the source stream value.
+ */
+export const scan: Scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);
   let accumulated = initial;
 
@@ -57,8 +68,7 @@ export const scan = (accumulator, initial, sourceStream) => {
   return newStream;
 };
 
-/** @type {import("./index").streamLib} */
-const streamLib = {
+const streamLib: StreamLibWithProperty = {
   stream,
   scan
 };
