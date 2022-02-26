@@ -1,9 +1,9 @@
-// preact + mergerino + simple-stream
+// preact + functionPatches + simple-stream
 import simpleStream from "../../source/dist/simple-stream";
-import { App, MeiosisCell, setup } from "../../source/dist/mergerino";
-import merge from "mergerino";
+import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
+import { add, assoc, over, lensProp } from "rambda";
 import {
   Conditions,
   ConditionsComponent,
@@ -49,10 +49,10 @@ const conditions: ConditionsComponent = {
 
 const conditionsActions: ConditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update({ precipitations: value });
+    cell.update(assoc("precipitations", value));
   },
   changeSky: (cell, value) => {
-    cell.update({ sky: value });
+    cell.update(assoc("sky", value));
   }
 };
 
@@ -100,7 +100,7 @@ const temperature: TemperatureComponent = {
 
 const temperatureActions: TemperatureActions = {
   increment: (cell, amount) => {
-    cell.update({ value: x => x + amount });
+    cell.update(over(lensProp("value"), add(amount)));
   },
   changeUnits: cell => {
     cell.update(state => {
@@ -166,7 +166,7 @@ export const setupPreactExample = (): void => {
     return h(App, { cell: getCell() });
   };
 
-  const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+  const { states, getCell } = setup<State>({ stream: simpleStream, app });
   const element = document.getElementById("preactApp") as HTMLElement;
   preactRender(h(Root, { states, getCell }), element);
 };

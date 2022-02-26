@@ -1,7 +1,6 @@
 {
   "include": [
-    "src/**/*",
-    "tests/*.ts"
+    "src/**/*.ts"
   ],
 
   "compilerOptions": {
@@ -16,7 +15,7 @@
     "moduleResolution": "node",
     "noImplicitAny": false,
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "src",
     "strict": true,
     "target": "es6"
   }

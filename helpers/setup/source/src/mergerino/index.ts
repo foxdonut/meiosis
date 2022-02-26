@@ -83,7 +83,7 @@ export interface MeiosisConfig<S, A = unknown> extends CommonMeiosisConfig<S, Pa
   /**
    * The Mergerino `merge` function.
    */
-  merge: (state: S, patch: Patch<S>) => S;
+  merge: (state: any, patch: any) => any;
 }
 
 export interface MeiosisSetup<S, A = unknown> extends CommonMeiosisSetup<S, Patch<S>, A> {

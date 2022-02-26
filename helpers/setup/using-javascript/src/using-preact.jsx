@@ -1,18 +1,18 @@
 // @ts-check
-// preact + mergerino + simple-stream
+// preact + functionPatches + simple-stream
 
 import meiosis from "../../source/dist/index";
-import merge from "mergerino";
 import { h, render as preactRender } from "preact";
 import { useState } from "preact/hooks";
+import { add, assoc, over, lensProp } from "rambda";
 import { app, convert } from "./common";
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update({ precipitations: value });
+    cell.update(assoc("precipitations", value));
   },
   changeSky: (cell, value) => {
-    cell.update({ sky: value });
+    cell.update(assoc("sky", value));
   }
 };
 
@@ -56,7 +56,7 @@ const Conditions = ({ cell }) =>
 
 const temperatureActions = {
   increment: (cell, amount) => {
-    cell.update({ value: x => x + amount });
+    cell.update(over(lensProp("value"), add(amount)));
   },
   changeUnits: cell => {
     cell.update(state => {
@@ -112,7 +112,10 @@ export const setupPreactExample = () => {
     return h(App, { cell: getCell() });
   };
 
-  const { states, getCell } = meiosis.mergerino.setup({ stream: meiosis.simpleStream, merge, app });
+  const { states, getCell } = meiosis.functionPatches.setup({
+    stream: meiosis.simpleStream,
+    app
+  });
   const element = document.getElementById("preactApp");
   preactRender(h(Root, { states, getCell }), element);
 };

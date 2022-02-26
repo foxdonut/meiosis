@@ -31,6 +31,7 @@
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "preact": "^10.6.5",
+    "rambda": "^7.0.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
