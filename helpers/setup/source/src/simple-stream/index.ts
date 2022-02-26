@@ -18,8 +18,8 @@ export const stream = <T>(initial?: T): Stream<T> => {
   const mappedValues: any[] = [];
 
   const createdStream: Stream<T> = function (value) {
-    if (arguments.length > 0 && value !== undefined && !createdStream.ended) {
-      latestValue = value;
+    if (arguments.length > 0 && !createdStream.ended) {
+      latestValue = value as T;
       mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
         const nextValue = mappedValues[i].shift();
