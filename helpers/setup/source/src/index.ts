@@ -1,5 +1,3 @@
-// @ts-check
-
 import commonSetup, { toStream } from "./common";
 import mSetup, { combinePatches as mCombinePatches } from "./mergerino";
 import fSetup, { combinePatches as fCombinePatches } from "./functionPatches";
