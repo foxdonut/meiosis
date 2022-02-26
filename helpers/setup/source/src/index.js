@@ -1,9 +1,9 @@
 // @ts-check
 
 import commonSetup, { toStream } from "./common";
-import mergerinoSetup from "./mergerino";
-import functionPatchesSetup from "./functionPatches";
-import immerSetup from "./immer";
+import mSetup, { combinePatches as mCombinePatches } from "./mergerino";
+import fSetup, { combinePatches as fCombinePatches } from "./functionPatches";
+import iSetup, { combinePatches as iCombinePatches } from "./immer";
 import simpleStream from "./simple-stream";
 import { get } from "./util";
 
@@ -13,13 +13,16 @@ export default {
     toStream
   },
   mergerino: {
-    setup: mergerinoSetup
+    setup: mSetup,
+    combinePatches: mCombinePatches
   },
   functionPatches: {
-    setup: functionPatchesSetup
+    setup: fSetup,
+    combinePatches: fCombinePatches
   },
   immer: {
-    setup: immerSetup
+    setup: iSetup,
+    combinePatches: iCombinePatches
   },
   simpleStream,
   util: {

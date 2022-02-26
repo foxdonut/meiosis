@@ -82,7 +82,7 @@ describe("meiosis setup with library for applying patches", () => {
           [
             { count: x => x + 1 },
             { increment: undefined },
-            [{ invalid: undefined }, { combined: true }],
+            meiosis.mergerino.combinePatches([{ invalid: undefined }, { combined: true }]),
             { sequenced: true },
             { received: true }
           ],
@@ -92,7 +92,10 @@ describe("meiosis setup with library for applying patches", () => {
           [
             R.over(R.lensProp("count"), R.add(1)),
             R.dissoc("increment"),
-            [R.dissoc("invalid"), R.assoc("combined", true)],
+            meiosis.functionPatches.combinePatches([
+              R.dissoc("invalid"),
+              R.assoc("combined", true)
+            ]),
             R.assoc("sequenced", true),
             R.assoc("received", true)
           ],
@@ -111,14 +114,14 @@ describe("meiosis setup with library for applying patches", () => {
             draft => {
               delete draft.increment;
             },
-            [
+            meiosis.immer.combinePatches(produce, [
               draft => {
                 delete draft.invalid;
               },
               draft => {
                 draft.combined = true;
               }
-            ],
+            ]),
             draft => {
               draft.sequenced = true;
             },
@@ -236,17 +239,22 @@ describe("meiosis setup with library for applying patches", () => {
 
     test.each(
       createTestCases("actions can use combine", [
-        [[{ count: x => x + 1 }, { combined: true }]],
-        [[R.over(R.lensProp("count"), R.add(1)), R.assoc("combined", true)]],
+        [meiosis.mergerino.combinePatches([{ count: x => x + 1 }, { combined: true }])],
         [
-          [
+          meiosis.functionPatches.combinePatches([
+            R.over(R.lensProp("count"), R.add(1)),
+            R.assoc("combined", true)
+          ])
+        ],
+        [
+          meiosis.immer.combinePatches(produce, [
             draft => {
               draft.count++;
             },
             draft => {
               draft.combined = true;
             }
-          ]
+          ])
         ]
       ])
     )("%s", (_label, setupFn, actionPatch) => {
@@ -299,21 +307,28 @@ describe("meiosis setup with library for applying patches", () => {
 
     test.each(
       createTestCases("service calls are combined into a single state update", [
-        [[{ count: x => x + 1 }, { service1: true }], { service2: true }, { count: 1 }],
         [
-          [R.over(R.lensProp("count"), R.add(1)), R.assoc("service1", true)],
+          meiosis.mergerino.combinePatches([{ count: x => x + 1 }, { service1: true }]),
+          { service2: true },
+          { count: 1 }
+        ],
+        [
+          meiosis.functionPatches.combinePatches([
+            R.over(R.lensProp("count"), R.add(1)),
+            R.assoc("service1", true)
+          ]),
           R.assoc("service2", true),
           R.assoc("count", 1)
         ],
         [
-          [
+          meiosis.immer.combinePatches(produce, [
             draft => {
               draft.count++;
             },
             draft => {
               draft.service1 = true;
             }
-          ],
+          ]),
           draft => {
             draft.service2 = true;
           },
@@ -525,7 +540,7 @@ describe("meiosis setup with library for applying patches", () => {
         [
           R.assoc("patch", true),
           R.assoc("one", true),
-          [R.dissoc("patch"), R.assoc("effect", true)]
+          meiosis.functionPatches.combinePatches([R.dissoc("patch"), R.assoc("effect", true)])
         ],
         [
           draft => {
@@ -637,11 +652,12 @@ describe("meiosis setup with library for applying patches", () => {
         [
           R.assoc("nextRoute", "PageB"),
           R.assoc("data", "Loading"),
-          state => [
-            R.assoc("route", state.nextRoute),
-            R.dissoc("nextRoute"),
-            R.assoc("data", "Loaded")
-          ]
+          state =>
+            meiosis.functionPatches.combinePatches([
+              R.assoc("route", state.nextRoute),
+              R.dissoc("nextRoute"),
+              R.assoc("data", "Loaded")
+            ])
         ],
         [
           draft => {
@@ -715,15 +731,16 @@ describe("meiosis setup with library for applying patches", () => {
         ],
         [
           R.assoc("nextRoute", "PageB"),
-          [
+          meiosis.functionPatches.combinePatches([
             R.dissoc("nextRoute"),
             R.assoc("redirect", { route: "PageC", message: "Please login." })
-          ],
-          state => [
-            R.assoc("route", state.redirect.route),
-            R.assoc("message", state.redirect.message),
-            R.dissoc("redirect")
-          ]
+          ]),
+          state =>
+            meiosis.functionPatches.combinePatches([
+              R.assoc("route", state.redirect.route),
+              R.assoc("message", state.redirect.message),
+              R.dissoc("redirect")
+            ])
         ],
         [
           draft => {
@@ -867,8 +884,16 @@ describe("meiosis setup with library for applying patches", () => {
         [
           R.assoc("nextRoute", "PageB"),
           R.assoc("confirm", true),
-          state => [R.assoc("route", state.nextRoute), R.dissoc("nextRoute")],
-          [R.assoc("confirm", false), R.assoc("nextRoute", "PageB"), R.dissoc("form")]
+          state =>
+            meiosis.functionPatches.combinePatches([
+              R.assoc("route", state.nextRoute),
+              R.dissoc("nextRoute")
+            ]),
+          meiosis.functionPatches.combinePatches([
+            R.assoc("confirm", false),
+            R.assoc("nextRoute", "PageB"),
+            R.dissoc("form")
+          ])
         ],
         [
           draft => {
@@ -983,12 +1008,18 @@ describe("meiosis setup with library for applying patches", () => {
         ],
         [
           R.assocPath(["events", "event1"], true),
-          [
+          meiosis.functionPatches.combinePatches([
             R.dissocPath(["events", "event1"]),
             R.assoc("triggers", { trigger1: true, trigger2: true })
-          ],
-          [R.dissocPath(["triggers", "trigger1"]), R.assoc("service1", true)],
-          [R.dissocPath(["triggers", "trigger2"]), R.assoc("service2", true)]
+          ]),
+          meiosis.functionPatches.combinePatches([
+            R.dissocPath(["triggers", "trigger1"]),
+            R.assoc("service1", true)
+          ]),
+          meiosis.functionPatches.combinePatches([
+            R.dissocPath(["triggers", "trigger2"]),
+            R.assoc("service2", true)
+          ])
         ],
         [
           state => {
@@ -1061,12 +1092,18 @@ describe("meiosis setup with library for applying patches", () => {
         ],
         [
           R.assocPath(["events", "event1"], true),
-          [
+          meiosis.functionPatches.combinePatches([
             R.dissocPath(["events", "event1"]),
             R.assoc("triggers", { trigger1: true, trigger2: true })
-          ],
-          [R.dissocPath(["triggers", "trigger1"]), R.assoc("effect1", true)],
-          [R.dissocPath(["triggers", "trigger2"]), R.assoc("effect2", true)]
+          ]),
+          meiosis.functionPatches.combinePatches([
+            R.dissocPath(["triggers", "trigger1"]),
+            R.assoc("effect1", true)
+          ]),
+          meiosis.functionPatches.combinePatches([
+            R.dissocPath(["triggers", "trigger2"]),
+            R.assoc("effect2", true)
+          ])
         ],
         [
           state => {
@@ -1148,17 +1185,9 @@ describe("meiosis setup with library for applying patches", () => {
 
 describe("meiosis setup with generic common", () => {
   describe.each(streamCases)("%s", (_label, streamLib) => {
-    const compose = fns => args => fns.reduceRight((arg, fn) => fn(arg), args);
-
     test("required accumulator function", () => {
       expect(() => {
-        meiosis.common.setup({ stream: streamLib, combine: x => x, app: {} });
-      }).toThrow();
-    });
-
-    test("required combine function", () => {
-      expect(() => {
-        meiosis.common.setup({ stream: streamLib, accumulator: (x, f) => f(x), app: {} });
+        meiosis.common.setup({ stream: streamLib, app: {} });
       }).toThrow();
     });
 
@@ -1170,7 +1199,6 @@ describe("meiosis setup with generic common", () => {
       const { states, getCell } = meiosis.common.setup({
         stream: streamLib,
         accumulator: merge,
-        combine: patches => patches,
         app: { initial: { count: 0 }, Actions }
       });
       const cell = getCell();
@@ -1190,7 +1218,6 @@ describe("meiosis setup with generic common", () => {
       const { states, getCell } = meiosis.common.setup({
         stream: streamLib,
         accumulator: (x, f) => f(x),
-        combine: compose,
         app: { initial: { count: 0 }, Actions }
       });
       const cell = getCell();

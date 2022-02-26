@@ -23,7 +23,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
       cell.update(state => {
@@ -47,7 +47,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual(initial);
 
       cell.update(state => {
@@ -124,7 +124,7 @@ describe("Meiosis with TypeScript - Immer", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, produce, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
 
       const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");

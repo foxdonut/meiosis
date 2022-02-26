@@ -23,7 +23,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
       cell.update(assoc("sound", "quack"));
@@ -44,7 +44,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual({});
 
       cell.update(assoc("sound", "quack"));
@@ -113,7 +113,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeUndefined();
+      expect(cell.actions).toEqual({});
 
       const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
