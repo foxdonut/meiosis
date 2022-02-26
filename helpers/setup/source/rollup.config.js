@@ -6,11 +6,13 @@ import { terser } from "rollup-plugin-terser";
 const name = "Meiosis";
 const input = "./src/index.ts";
 const extensions = [".js", ".ts"];
+const babelHelpers = "bundled";
 
 const plugins = [
   resolve({ extensions }),
   commonjs(),
   babel({
+    babelHelpers,
     extensions,
     include: ["src/**"]
   })

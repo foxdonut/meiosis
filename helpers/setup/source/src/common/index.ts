@@ -113,6 +113,11 @@ interface StreamScan {
   scan: Scan;
 }
 
+export interface ExternalStreamLib {
+  stream?: any;
+  scan: (acc: any, init: any, stream: any) => any;
+}
+
 /**
  * Stream library that provides a function to create a stream.
  *
@@ -328,7 +333,7 @@ export interface MeiosisConfig<S, P, A> extends CommonMeiosisConfig<S, P, A> {
 /**
  * Convenience function to convert flyd or mithril-stream to `StreamLib` with TypeScript.
  */
-export const toStream = (streamLib: StreamLibWithProperty): StreamLib => {
+export const toStream = (streamLib: ExternalStreamLib): StreamLib => {
   const streamFn = streamLib.stream || streamLib;
 
   return {
