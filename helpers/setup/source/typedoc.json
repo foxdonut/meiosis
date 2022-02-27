@@ -3,7 +3,6 @@
     "./src/index.ts",
     "./src/common/index.ts",
     "./src/functionPatches/index.ts",
-    "./src/immer/index.ts",
     "./src/mergerino/index.ts",
     "./src/simple-stream/index.ts",
     "./src/util/index.ts"

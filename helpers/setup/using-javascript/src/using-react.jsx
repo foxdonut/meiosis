@@ -3,21 +3,22 @@
 
 import meiosis from "../../source/dist/index";
 import flyd from "flyd";
-import produce from "immer";
 import React from "react";
 import ReactDOM from "react-dom";
 import { app, convert } from "./common";
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update(state => {
-      state.precipitations = value;
-    });
+    cell.update(state => ({
+      ...state,
+      precipitations: value
+    }));
   },
   changeSky: (cell, value) => {
-    cell.update(state => {
-      state.sky = value;
-    });
+    cell.update(state => ({
+      ...state,
+      sky: value
+    }));
   }
 };
 
@@ -53,17 +54,22 @@ const Conditions = ({ cell }) => (
 
 const temperatureActions = {
   increment: (cell, amount) => {
-    cell.update(state => {
-      state.value += amount;
-    });
+    cell.update(state => ({
+      ...state,
+      value: state.value + amount
+    }));
   },
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
       const newValue = convert(value, newUnits);
-      state.value = newValue;
-      state.units = newUnits;
+
+      return {
+        ...state,
+        value: newValue,
+        units: newUnits
+      };
     });
   }
 };
@@ -112,9 +118,8 @@ export const setupReactExample = () => {
     return React.createElement(App, { cell: getCell() });
   };
 
-  const { states, getCell } = meiosis.immer.setup({
+  const { states, getCell } = meiosis.functionPatches.setup({
     stream: meiosis.common.toStream(flyd),
-    produce: (s, p) => produce(s, p),
     app
   });
   const element = document.getElementById("reactApp");

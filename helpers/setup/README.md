@@ -23,9 +23,9 @@ conveniences:
 
 - works with [Flyd](https://github.com/paldepind/flyd),
 [Mithril-Stream](https://mithril.js.org/stream.html),
-[Mergerino](https://github.com/fuzetsu/mergerino),
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), and
-[Immer](https://github.com/immerjs/immer) out of the box
+[Mergerino](https://github.com/fuzetsu/mergerino), and
+[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
+out of the box
 - provides the ability to call `update()` with an array of patches, automatically combining them into
   a single patch
 - provides a simple stream implementation
@@ -68,7 +68,6 @@ With `meiosis-setup`, you can use:
 
 - [Mergerino](https://github.com/fuzetsu/mergerino)
 - [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
-- [Immer](https://github.com/immerjs/immer)
 
 You can also use another strategy of your choice to merge patches. See [Common Setup](#common_setup)
 for details.
@@ -99,7 +98,6 @@ provided:
 
 - `mergerino.setup`
 - `functionPatches.setup`
-- `immer.setup`
 - `common.setup`
 - `preact.setup`
 - `react.setup`
@@ -213,44 +211,6 @@ asyncFunction(...).then(response => {
 
   // setup your view here
   // call update(state => ({ ...state, duck: "quack" })) to update the state
-  // and/or call actions.someAction(someValue)
-});
-```
-
-### Immer Setup
-
-To use [Immer](https://github.com/immerjs/immer):
-
-```javascript
-import meiosis from "meiosis-setup/immer";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-import produce from "immer";
-
-// A) if the initial state is synchronous:
-const app = { initial: ..., ... };
-
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, produce, app });
-
-// setup your view here
-// call update(draft => { draft.duck = "quack"; }) to update the state
-// and/or call actions.someAction(someValue)
-
-// OR
-
-// B) if the initial state is asynchronous:
-asyncFunction(...).then(response => {
-  const initial = buildInitialState(response);
-  const app = { initial, ... };
-  meiosis({ stream: simpleStream, produce, app });
-
-  // setup your view here
-  // call update(draft => { draft.duck = "quack"; }) to update the state
   // and/or call actions.someAction(someValue)
 });
 ```
@@ -385,8 +345,6 @@ patch (the patch being in whatever form you decide to use), and returns the upda
 
     With Function Patches, the `accumulator` is `(state, patch) => patch(state)`.
 
-    With Immer, the `accumulator` is `produce`.
-
 - `combine`: the `combine` function is of the form `([patches]) => patch`, combining an array of
 patches into a single patch.
 
@@ -395,11 +353,6 @@ patches into a single patch.
 
     With Function Patches:
     `combine = fns => args => fns.reduce((arg, fn) => fn(arg), args)`
-
-    With Immer,
-    `combine = patches => state => patches.reduce((result, patch) => produce(result, patch), state)`.
-    We can't use `patches.reduce(produce, state)` because that would send a third argument to
-    `produce` and not work correctly.
 
 <a name="other_stream_library"></a>
 ### Using another stream library
@@ -430,7 +383,6 @@ To use nesting, start by obtaining the `nest` function according to the type of 
 ```javascript
 const nest = meiosis.functionPatches.nest;
 const nest = meiosis.mergerino.nest;
-const nest = meiosis.immer.nest(produce);
 ```
 
 Then call `nest`, passing the path, either a string for a single level, or an array of strings for

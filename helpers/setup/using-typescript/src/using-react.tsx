@@ -1,8 +1,7 @@
 // react + immer + flyd
 import { toStream } from "../../source/dist/common";
-import { App, MeiosisCell, setup } from "../../source/dist/immer";
+import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import flyd from "flyd";
-import produce from "immer";
 import React, { ReactElement } from "react";
 import ReactDOM from "react-dom";
 import {
@@ -50,14 +49,16 @@ const conditions: ConditionsComponent = {
 
 const conditionsActions: ConditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update(state => {
-      state.precipitations = value;
-    });
+    cell.update(state => ({
+      ...state,
+      precipitations: value
+    }));
   },
   changeSky: (cell, value) => {
-    cell.update(state => {
-      state.sky = value;
-    });
+    cell.update(state => ({
+      ...state,
+      sky: value
+    }));
   }
 };
 
@@ -97,17 +98,22 @@ const temperature: TemperatureComponent = {
 
 const temperatureActions: TemperatureActions = {
   increment: (cell, amount) => {
-    cell.update(state => {
-      state.value += amount;
-    });
+    cell.update(state => ({
+      ...state,
+      value: state.value + amount
+    }));
   },
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
       const newUnits = state.units === "C" ? "F" : "C";
       const newValue = convert(value, newUnits);
-      state.value = newValue;
-      state.units = newUnits;
+
+      return {
+        ...state,
+        value: newValue,
+        units: newUnits
+      };
     });
   }
 };
@@ -162,7 +168,6 @@ export const setupReactExample = (): void => {
 
   const { states, getCell } = setup<State>({
     stream: toStream(flyd),
-    produce: (s, p) => produce(s, p),
     app
   });
   const element = document.getElementById("reactApp");

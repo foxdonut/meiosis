@@ -27,7 +27,6 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "flyd": "^0.2.8",
-    "immer": "^9.0.12",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "preact": "^10.6.5",

@@ -4,7 +4,6 @@ import flyd from "flyd";
 import Stream from "mithril/stream";
 import merge from "mergerino";
 import R from "ramda";
-import { produce } from "immer";
 
 import meiosis from "../src/index";
 
@@ -18,8 +17,7 @@ describe("meiosis setup with library for applying patches", () => {
   describe.each(streamCases)("%s", (_label, streamLib) => {
     const applyPatchCases = [
       ["mergerino", app => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
-      ["functionPatches", app => meiosis.functionPatches.setup({ stream: streamLib, app })],
-      ["immer", app => meiosis.immer.setup({ stream: streamLib, produce, app })]
+      ["functionPatches", app => meiosis.functionPatches.setup({ stream: streamLib, app })]
     ];
 
     const createTestCases = (label, arr = [[], [], []]) => {
@@ -104,44 +102,6 @@ describe("meiosis setup with library for applying patches", () => {
             R.assoc("increment", 10),
             R.assoc("invalid", true),
             R.assoc("sequence", true)
-          ]
-        ],
-        [
-          [
-            draft => {
-              draft.count++;
-            },
-            draft => {
-              delete draft.increment;
-            },
-            meiosis.immer.combinePatches(produce, [
-              draft => {
-                delete draft.invalid;
-              },
-              draft => {
-                draft.combined = true;
-              }
-            ]),
-            draft => {
-              draft.sequenced = true;
-            },
-            draft => {
-              draft.received = true;
-            }
-          ],
-          [
-            state => {
-              state.increment = 1;
-            },
-            state => {
-              state.increment = 10;
-            },
-            state => {
-              state.invalid = true;
-            },
-            state => {
-              state.sequence = true;
-            }
           ]
         ]
       ])
@@ -243,16 +203,6 @@ describe("meiosis setup with library for applying patches", () => {
             R.over(R.lensProp("count"), R.add(1)),
             R.assoc("combined", true)
           ])
-        ],
-        [
-          meiosis.immer.combinePatches(produce, [
-            draft => {
-              draft.count++;
-            },
-            draft => {
-              draft.combined = true;
-            }
-          ])
         ]
       ])
     )("%s", (_label, setupFn, actionPatch) => {
@@ -313,22 +263,6 @@ describe("meiosis setup with library for applying patches", () => {
           ]),
           R.assoc("service2", true),
           R.assoc("count", 1)
-        ],
-        [
-          meiosis.immer.combinePatches(produce, [
-            draft => {
-              draft.count++;
-            },
-            draft => {
-              draft.service1 = true;
-            }
-          ]),
-          draft => {
-            draft.service2 = true;
-          },
-          draft => {
-            draft.count = 1;
-          }
         ]
       ])
     )("%s", (_label, setupFn, service1, service2, updatePatch) => {
@@ -1227,8 +1161,7 @@ describe("Meiosis cell", () => {
 
   const applyPatchCases = [
     ["mergerino", app => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
-    ["functionPatches", app => meiosis.functionPatches.setup({ stream: streamLib, app })],
-    ["immer", app => meiosis.immer.setup({ stream: streamLib, produce, app })]
+    ["functionPatches", app => meiosis.functionPatches.setup({ stream: streamLib, app })]
   ];
 
   const createTestCases = (label, arr = [[], [], []]) => {
