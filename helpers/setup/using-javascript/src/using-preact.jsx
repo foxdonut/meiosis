@@ -112,10 +112,7 @@ export const setupPreactExample = () => {
     return h(App, { cell: getCell() });
   };
 
-  const { states, getCell } = meiosis.functionPatches.setup({
-    stream: meiosis.simpleStream,
-    app
-  });
+  const { states, getCell } = meiosis.functionPatches.setup({ app });
   const element = document.getElementById("preactApp");
   preactRender(h(Root, { states, getCell }), element);
 };

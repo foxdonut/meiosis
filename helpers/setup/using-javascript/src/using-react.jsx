@@ -118,10 +118,7 @@ export const setupReactExample = () => {
     return React.createElement(App, { cell: getCell() });
   };
 
-  const { states, getCell } = meiosis.functionPatches.setup({
-    stream: meiosis.common.toStream(flyd),
-    app
-  });
+  const { states, getCell } = meiosis.functionPatches.setup({ stream: flyd, app });
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(Root, { states, getCell }), element);
 };

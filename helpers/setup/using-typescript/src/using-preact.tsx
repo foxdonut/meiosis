@@ -1,5 +1,4 @@
 // preact + functionPatches + simple-stream
-import simpleStream from "../../source/dist/simple-stream";
 import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import { h, render as preactRender, VNode } from "preact";
 import { useState } from "preact/hooks";
@@ -166,7 +165,7 @@ export const setupPreactExample = (): void => {
     return h(App, { cell: getCell() });
   };
 
-  const { states, getCell } = setup<State>({ stream: simpleStream, app });
+  const { states, getCell } = setup<State>({ app });
   const element = document.getElementById("preactApp") as HTMLElement;
   preactRender(h(Root, { states, getCell }), element);
 };

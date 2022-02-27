@@ -1,4 +1,4 @@
-import commonSetup, { toStream } from "./common";
+import commonSetup from "./common";
 import mSetup, { combinePatches as mCombinePatches } from "./mergerino";
 import fSetup, { combinePatches as fCombinePatches } from "./functionPatches";
 import simpleStream from "./simple-stream";
@@ -6,8 +6,7 @@ import { get } from "./util";
 
 export default {
   common: {
-    setup: commonSetup,
-    toStream
+    setup: commonSetup
   },
   mergerino: {
     setup: mSetup,

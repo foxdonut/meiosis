@@ -1,3 +1,5 @@
+import simpleStream from "../simple-stream";
+
 /**
  * A mapping function.
  *
@@ -238,7 +240,7 @@ export interface CommonMeiosisConfig<S, P> {
    * The function or object must also have a `scan` property. The returned stream must have a `map`
    * method.
    */
-  stream: StreamLib;
+  stream?: ExternalStreamLib;
 
   /**
    * The application object, with optional properties.
@@ -258,18 +260,6 @@ export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S, P> {
    */
   accumulator: Accumulator<S, P>;
 }
-
-/**
- * Convenience function to convert flyd or mithril-stream to `StreamLib` with TypeScript.
- */
-export const toStream = (streamLib: ExternalStreamLib): StreamLib => {
-  const streamFn = streamLib.stream || streamLib;
-
-  return {
-    stream: value => streamFn(value),
-    scan: (acc, init, stream) => streamLib.scan(acc, init, stream)
-  };
-};
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -295,7 +285,7 @@ export const setup = <S, P>({
   app
 }: MeiosisConfig<S, P>): CommonMeiosisSetup<S, P> => {
   if (!stream) {
-    throw new Error("No stream library was specified.");
+    stream = simpleStream;
   }
   if (!accumulator) {
     throw new Error("No accumulator function was specified.");

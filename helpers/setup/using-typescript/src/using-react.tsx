@@ -1,5 +1,4 @@
 // react + functionPatches + flyd
-import { toStream } from "../../source/dist/common";
 import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import flyd from "flyd";
 import React, { ReactElement } from "react";
@@ -166,10 +165,7 @@ export const setupReactExample = (): void => {
     return React.createElement(App, { cell: getCell() });
   };
 
-  const { states, getCell } = setup<State>({
-    stream: toStream(flyd),
-    app
-  });
+  const { states, getCell } = setup<State>({ stream: flyd, app });
   const element = document.getElementById("reactApp");
   ReactDOM.render(React.createElement(Root, { states, getCell }), element);
 };
