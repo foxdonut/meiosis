@@ -161,50 +161,21 @@ export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 export type CommonUpdate<P> = (patch: P) => any;
 
 /**
- * Returned by Meiosis setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface MeiosisBase<P, A> {
-  /**
-   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
-   */
-  update: CommonUpdate<P>;
-
-  /**
-   * The application's actions.
-   */
-  actions: A;
-}
-
-/**
- * Returned by Meiosis setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- * @template A the Actions type.
- */
-export interface CommonMeiosisContext<S, P, A = unknown> extends MeiosisBase<P, A> {
-  /**
-   * The stream of application states.
-   */
-  getState: () => S;
-}
-
-/**
  * Meiosis Cell.
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface CommonMeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> {
+export interface CommonMeiosisCell<S, P> {
   /**
    * The application states.
    */
   state: S;
+
+  /**
+   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
+   */
+  update: CommonUpdate<P>;
 }
 
 /**
@@ -212,15 +183,14 @@ export interface CommonMeiosisCell<S, P, A = unknown> extends MeiosisBase<P, A> 
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface CommonMeiosisSetup<S, P, A = unknown> {
+export interface CommonMeiosisSetup<S, P> {
   /**
    * The stream of application states.
    */
   states: Stream<S>;
 
-  getCell: () => CommonMeiosisCell<S, P, A>;
+  getCell: () => CommonMeiosisCell<S, P>;
 }
 
 /**
@@ -239,42 +209,13 @@ export interface CommonService<S, P> {
 }
 
 /**
- * An effect function. Receives the current state, the `update` stream, and the `actions`, and
- * optionally performs side effects.
- *
- * @template S the State type.
- * @template U the update stream type.
- * @template A the Actions type.
- */
-export interface CommonEffect<S, P, A> {
-  (cell: CommonMeiosisCell<S, P, A>): void;
-}
-
-/**
- * Constructor of application actions.
+ * Application object that provides the application's initial state, the service functions, and the
+ * the effects, all of which are optional.
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface CommonActionConstructor<S, P, A> {
-  /**
-   * @param {Meiosis<S, P, A>} cell the Meiosis cell.
-   *
-   * @returns {A} the application's actions.
-   */
-  (cell: CommonMeiosisContext<S, P, A>): A;
-}
-
-/**
- * Application object that provides the application's initial state, the service functions, the
- * application's actions, and the effects, all of which are optional.
- *
- * @template S the State type.
- * @template U the update stream type.
- * @template A the Actions type.
- */
-export interface CommonApp<S, P, A> {
+export interface CommonApp<S, P> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
@@ -284,24 +225,13 @@ export interface CommonApp<S, P, A> {
    * An array of service functions.
    */
   services?: CommonService<S, P>[];
-
-  /**
-   * A function that creates the application's actions.
-   */
-  Actions?: CommonActionConstructor<S, P, A>;
-
-  /**
-   * A function that creates the application's effects.
-   */
-  effects?: CommonEffect<S, P, A>[];
 }
 
 /**
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface CommonMeiosisConfig<S, P, A> {
+export interface CommonMeiosisConfig<S, P> {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -313,7 +243,7 @@ export interface CommonMeiosisConfig<S, P, A> {
   /**
    * The application object, with optional properties.
    */
-  app: CommonApp<S, P, A>;
+  app: CommonApp<S, P>;
 }
 
 /**
@@ -321,9 +251,8 @@ export interface CommonMeiosisConfig<S, P, A> {
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  */
-export interface MeiosisConfig<S, P, A> extends CommonMeiosisConfig<S, P, A> {
+export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S, P> {
   /**
    * The accumulator function.
    */
@@ -355,17 +284,16 @@ export const toStream = (streamLib: ExternalStreamLib): StreamLib => {
  *
  * @template S the State type.
  * @template P the Patch type.
- * @template A the Actions type.
  *
- * @param {MeiosisConfig<S, P, A>} config the Meiosis config.
+ * @param {MeiosisConfig<S, P>} config the Meiosis config.
  *
- * @returns {Meiosis<S, P, A>} the Meiosis setup.
+ * @returns {Meiosis<S, P>} the Meiosis setup.
  */
-export const setup = <S, P, A = unknown>({
+export const setup = <S, P>({
   stream,
   accumulator,
   app
-}: MeiosisConfig<S, P, A>): CommonMeiosisSetup<S, P, A> => {
+}: MeiosisConfig<S, P>): CommonMeiosisSetup<S, P> => {
   if (!stream) {
     throw new Error("No stream library was specified.");
   }
@@ -394,25 +322,10 @@ export const setup = <S, P, A = unknown>({
     update
   );
 
-  const defaultActions = {} as A;
-  const context: CommonMeiosisContext<S, P, A> = {
-    getState: () => states(),
-    update: updateFn,
-    actions: defaultActions
-  };
-
-  if (safeApp.Actions) {
-    context.actions = safeApp.Actions(context);
-  }
-
   const getCell = () => ({
     state: states(),
-    update: updateFn,
-    actions: context.actions
+    update: updateFn
   });
-
-  const effects = safeApp.effects || [];
-  states.map(() => effects.forEach(effect => effect(getCell())));
 
   return {
     states,

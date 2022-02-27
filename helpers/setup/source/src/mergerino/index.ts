@@ -1,10 +1,7 @@
 import commonSetup, {
-  CommonActionConstructor,
   CommonApp,
-  CommonEffect,
   CommonMeiosisCell,
   CommonMeiosisConfig,
-  CommonMeiosisContext,
   CommonMeiosisSetup,
   CommonService,
   CommonUpdate
@@ -59,17 +56,20 @@ export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
-export type ActionConstructor<S, A> = CommonActionConstructor<S, Patch<S>, A>;
-
 export type Service<S> = CommonService<S, Patch<S>>;
 
-export type Effect<S, A = unknown> = CommonEffect<S, Patch<S>, A>;
+export interface Effect<S> {
+  (cell: MeiosisCell<S>): void;
+}
 
-export type App<S, A = unknown> = CommonApp<S, Patch<S>, A>;
+export interface App<S> extends CommonApp<S, Patch<S>> {
+  /**
+   * An array of effect functions.
+   */
+  effects?: Effect<S>[];
+}
 
-export type MeiosisContext<S, A = unknown> = CommonMeiosisContext<S, Patch<S>, A>;
-
-export interface MeiosisCell<S, A = unknown> extends CommonMeiosisCell<S, Patch<S>, A> {
+export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
@@ -77,17 +77,18 @@ export interface MeiosisCell<S, A = unknown> extends CommonMeiosisCell<S, Patch<
  * Meiosis Config.
  *
  * @template S the State type.
- * @template A the Actions type.
  */
-export interface MeiosisConfig<S, A = unknown> extends CommonMeiosisConfig<S, Patch<S>, A> {
+export interface MeiosisConfig<S> extends CommonMeiosisConfig<S, Patch<S>> {
+  app: App<S>;
+
   /**
    * The Mergerino `merge` function.
    */
   merge: (state: any, patch: any) => any;
 }
 
-export interface MeiosisSetup<S, A = unknown> extends CommonMeiosisSetup<S, Patch<S>, A> {
-  getCell: () => MeiosisCell<S, A>;
+export interface MeiosisSetup<S> extends CommonMeiosisSetup<S, Patch<S>> {
+  getCell: () => MeiosisCell<S>;
 }
 
 const nestPatch = <S, K extends Extract<keyof S, string>>(
@@ -116,7 +117,6 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
   const nested: MeiosisCell<S[K]> = {
     state: getNestedState(),
     update: nestedUpdate,
-    actions: undefined,
     nest: nestCell(getNestedState, nestedUpdate)
   };
 
@@ -134,18 +134,12 @@ export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
- * @template A the Actions type.
  *
- * @param {MeiosisConfig<S, A>} config the Meiosis config for use with Mergerino
+ * @param {MeiosisConfig<S>} config the Meiosis config for use with Mergerino
  *
- * @returns {Meiosis<S, Patch<S>, A>} `{ states, update, actions }`,
- * where `states` and `update` are streams, and `actions` are the created actions.
+ * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
-export const setup = <S, A = unknown>({
-  stream,
-  merge,
-  app
-}: MeiosisConfig<S, A>): MeiosisSetup<S, A> => {
+export const setup = <S>({ stream, merge, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
   const { states, getCell } = commonSetup({
     stream,
     accumulator: merge,
@@ -155,13 +149,17 @@ export const setup = <S, A = unknown>({
   const getCellWithNest = () => {
     const cell = getCell();
 
-    const cellWithNest: MeiosisCell<S, A> = {
+    const cellWithNest: MeiosisCell<S> = {
       ...cell,
       nest: nestCell(states, cell.update)
     };
 
     return cellWithNest;
   };
+
+  if (app?.effects != null && app.effects.length > 0) {
+    states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
+  }
 
   return {
     states,

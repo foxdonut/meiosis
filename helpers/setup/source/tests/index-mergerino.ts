@@ -1,14 +1,5 @@
 import simpleStream from "../src/simple-stream";
-import {
-  ActionConstructor,
-  App,
-  Effect,
-  MeiosisCell,
-  Patch,
-  Service,
-  combinePatches,
-  setup
-} from "../src/mergerino";
+import { App, Effect, MeiosisCell, Patch, Service, combinePatches, setup } from "../src/mergerino";
 import merge from "mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
@@ -23,7 +14,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
       const cell = getCell();
 
-      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
       cell.update({ sound: "quack" });
@@ -44,7 +34,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
       const cell = getCell();
 
-      expect(cell.actions).toEqual({});
       expect(cell.state).toEqual({});
 
       cell.update({ sound: "quack" });
@@ -64,25 +53,25 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       interface Actions {
-        addDucks: (amount: number) => void;
+        addDucks: (cell: MeiosisCell<State>, amount: number) => void;
       }
 
-      const app: App<State, Actions> = {
-        initial: { ducks: 1, sound: "quack" },
-        Actions: rootCell => ({
-          addDucks: (amount: number) => {
-            rootCell.update({ ducks: value => value + amount });
-          }
-        })
+      const actions: Actions = {
+        addDucks: (cell, amount) => {
+          cell.update({ ducks: value => value + amount });
+        }
       };
 
-      const { states, getCell } = setup<State, Actions>({ stream: simpleStream, merge, app });
+      const app: App<State> = {
+        initial: { ducks: 1, sound: "quack" }
+      };
+
+      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
       const cell = getCell();
 
-      expect(cell.actions).toBeDefined();
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
-      cell.actions.addDucks(4);
+      actions.addDucks(cell, 4);
       expect(states()).toEqual({ ducks: 5, sound: "quack" });
     });
 
@@ -112,8 +101,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
       const cell = getCell();
-
-      expect(cell.actions).toEqual({});
 
       const duckCell = cell.nest("duck");
       duckActions.changeDuckColor(duckCell, "yellow");
@@ -186,20 +173,20 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       interface CounterActions {
-        increment: (value: number) => void;
+        increment: (cell: MeiosisCell<Counter>, value: number) => void;
       }
 
-      const Actions: ActionConstructor<Counter, CounterActions> = cell => ({
-        increment: value => {
+      const counterActions: CounterActions = {
+        increment: (cell, value) => {
           cell.update({ count: count => count + value });
         }
-      });
+      };
 
-      const effects: Effect<Counter, CounterActions>[] = [
+      const effects: Effect<Counter>[] = [
         cell => {
           // effect on state is seen by the next effect
           if (cell.state.count === 1) {
-            cell.actions.increment(1);
+            counterActions.increment(cell, 1);
           }
         },
         cell => {
@@ -209,19 +196,17 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         }
       ];
 
-      const app: App<Counter, CounterActions> = {
+      const app: App<Counter> = {
         initial: { count: 0, service: false },
-        effects,
-        Actions
+        effects
       };
 
-      const { states, getCell } = setup<Counter, CounterActions>({
+      const { states, getCell } = setup<Counter>({
         stream: simpleStream,
         merge,
         app
       });
       const cell = getCell();
-      expect(typeof cell.actions.increment).toEqual("function");
 
       cell.update({ count: 1 });
       expect(states()).toEqual({ count: 2, service: true });
