@@ -1,12 +1,12 @@
 {
   "entryPoints": [
-    "./src/common/index.d.ts",
-    "./src/functionPatches/index.d.ts",
-    "./src/immer/index.d.ts",
-    "./src/index.d.ts",
-    "./src/mergerino/index.d.ts",
-    "./src/simple-stream/index.d.ts",
-    "./src/util/index.d.ts"
+    "./src/index.ts",
+    "./src/common/index.ts",
+    "./src/functionPatches/index.ts",
+    "./src/immer/index.ts",
+    "./src/mergerino/index.ts",
+    "./src/simple-stream/index.ts",
+    "./src/util/index.ts"
   ],
   "out": "../docs"
 }
