@@ -1,6 +1,5 @@
 import simpleStream from "../src/simple-stream";
 import { App, Effect, MeiosisCell, Patch, Service, combinePatches, setup } from "../src/mergerino";
-import merge from "mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
   describe("Meiosis", () => {
@@ -11,7 +10,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = { initial: { ducks: 1, sound: "silent" } };
-      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
       expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -31,7 +30,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       const app = {};
-      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
       expect(cell.state).toEqual({});
@@ -66,7 +65,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         initial: { ducks: 1, sound: "quack" }
       };
 
-      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
       expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -99,7 +98,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         initial: { duck: { color: "white" }, sound: "quack" }
       };
 
-      const { states, getCell } = setup<State>({ stream: simpleStream, merge, app });
+      const { states, getCell } = setup<State>({ stream: simpleStream, app });
       const cell = getCell();
 
       const duckCell = cell.nest("duck");
@@ -147,7 +146,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const { states, getCell } = setup<State>({
         stream: simpleStream,
-        merge,
         app: { initial: { count: 0 }, services }
       });
       const cell = getCell();
@@ -203,7 +201,6 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       const { states, getCell } = setup<Counter>({
         stream: simpleStream,
-        merge,
         app
       });
       const cell = getCell();

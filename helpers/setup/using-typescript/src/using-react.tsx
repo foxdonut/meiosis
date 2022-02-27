@@ -1,4 +1,4 @@
-// react + immer + flyd
+// react + functionPatches + flyd
 import { toStream } from "../../source/dist/common";
 import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import flyd from "flyd";

@@ -1,3 +1,4 @@
+import merge from "mergerino";
 import commonSetup, {
   CommonApp,
   CommonMeiosisCell,
@@ -80,11 +81,6 @@ export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
  */
 export interface MeiosisConfig<S> extends CommonMeiosisConfig<S, Patch<S>> {
   app: App<S>;
-
-  /**
-   * The Mergerino `merge` function.
-   */
-  merge: (state: any, patch: any) => any;
 }
 
 export interface MeiosisSetup<S> extends CommonMeiosisSetup<S, Patch<S>> {
@@ -139,7 +135,7 @@ export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
  *
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
-export const setup = <S>({ stream, merge, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
+export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
   const { states, getCell } = commonSetup({
     stream,
     accumulator: merge,

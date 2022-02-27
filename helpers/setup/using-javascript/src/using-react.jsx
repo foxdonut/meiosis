@@ -1,5 +1,5 @@
 // @ts-check
-// react + immer + flyd
+// react + functionPatches + flyd
 
 import meiosis from "../../source/dist/index";
 import flyd from "flyd";

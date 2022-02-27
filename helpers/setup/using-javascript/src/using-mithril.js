@@ -2,7 +2,6 @@
 // mithril + mergerino + mithril-stream
 
 import meiosis from "../../source/dist/index";
-import merge from "mergerino";
 import m from "mithril";
 import Stream from "mithril/stream";
 import { app, convert } from "./common";
@@ -102,7 +101,6 @@ const App = {
 export const setupMithrilExample = () => {
   const { states, getCell } = meiosis.mergerino.setup({
     stream: meiosis.common.toStream(Stream),
-    merge,
     app
   });
 
