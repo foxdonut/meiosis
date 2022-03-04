@@ -65,6 +65,11 @@ export interface Effect<S> {
 
 export interface App<S> extends CommonApp<S, Patch<S>> {
   /**
+   * An array of service functions.
+   */
+  services?: Service<S>[];
+
+  /**
    * An array of effect functions.
    */
   effects?: Effect<S>[];

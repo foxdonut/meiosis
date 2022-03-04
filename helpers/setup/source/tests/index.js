@@ -1396,29 +1396,52 @@ describe("simpleStream", () => {
   test("end stream", () => {
     const s1 = meiosis.simpleStream.stream();
 
+    let c1 = 0;
+    const d1 = s1.map(() => {
+      c1++;
+    });
+
     let c2 = 0;
-    const s2 = s1.map(() => {
+    const d2 = s1.map(() => {
       c2++;
     });
 
     let c3 = 0;
-    s2.map(() => {
+    d2.map(() => {
       c3++;
     });
 
+    let c4 = 0;
+    s1.map(() => {
+      c4++;
+    });
+
     s1(1);
+    expect(c1).toEqual(1);
     expect(c2).toEqual(1);
     expect(c3).toEqual(1);
+    expect(c4).toEqual(1);
 
-    s2.end();
+    d1.end();
     s1(1);
+    expect(c1).toEqual(1);
     expect(c2).toEqual(2);
-    expect(c3).toEqual(1);
+    expect(c3).toEqual(2);
+    expect(c4).toEqual(2);
+
+    d2.end();
+    s1(1);
+    expect(c1).toEqual(1);
+    expect(c2).toEqual(2);
+    expect(c3).toEqual(2);
+    expect(c4).toEqual(3);
 
     s1.end();
     s1(1);
+    expect(c1).toEqual(1);
     expect(c2).toEqual(2);
-    expect(c3).toEqual(1);
+    expect(c3).toEqual(2);
+    expect(c4).toEqual(3);
   });
 });
 

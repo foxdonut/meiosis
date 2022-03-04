@@ -1,17 +1,19 @@
 # meiosis-setup
 
 ```javascript
-import meiosis from "meiosis-setup/functionPatches";
-import simpleStream from "meiosis-setup/simple-stream";
+import meiosis from "meiosis-setup";
 
 const app = {
   initial: { ... },
-  Actions: (update, getState) => ...,
   services: [...],
-  Effects: (update, actions) => [...]
+  effects: [...]
 };
 
-const { update, states, actions } = meiosis({ stream: simpleStream, app });
+const { states, getCell } = meiosis.functionPatches.setup({ app });
+
+// or
+
+const { states, getCell } = meiosis.mergerino.setup({ app });
 ```
 
 [Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
@@ -26,16 +28,9 @@ conveniences:
 [Mergerino](https://github.com/fuzetsu/mergerino), and
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
 out of the box
-- provides the ability to call `update()` with an array of patches, automatically combining them into
-  a single patch
 - provides a simple stream implementation
 - provides [TypeScript](https://www.typescriptlang.org) support
-- provides convenience functions to wire up [React](https://reactjs.org) and
-[Preact](https://preactjs.com)
-- shows how to wire up [Mithril](https://mithril.js.org) and
-[lit-html](https://lit-html.polymer-project.org/).
-
-Meiosis works with other view libraries of course.
+- provides a helper function to combine an array of patches into a single patch
 
 See the repository for examples:
 - [Using JavaScript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-javascript)
@@ -53,7 +48,7 @@ patches are merged to the application state. Of course, you'll also need a view 
 
 Out of the box, `meiosis-setup` supports these stream libraries:
 
-- the `simpleStream` provided by `meiosis-setup`
+- the `simpleStream` provided by `meiosis-setup` (used by default)
 - [Flyd](https://github.com/paldepind/flyd)
 - [Mithril-Stream](https://mithril.js.org/stream.html)
 
@@ -74,10 +69,9 @@ for details.
 
 ### Choosing a view library
 
-You can use any view library that fits with the Meiosis pattern. `meiosis-setup` provides helper
-functions to use [React](https://reactjs.org) and [Preact](https://preactjs.com). You can also use
-[Mithril](https://mithril.js.org) and [lit-html](https://lit-html.polymer-project.org/) without any
-special setup. See [View Setup](#view_setup) for details.
+You can use any view library that fits with the Meiosis pattern. Examples show how to use with
+[React](https://reactjs.org), [Preact](https://preactjs.com), and [Mithril](https://mithril.js.org).
+See [View Setup](#view_setup) for details.
 
 ## Installation
 
@@ -99,16 +93,14 @@ provided:
 - `mergerino.setup`
 - `functionPatches.setup`
 - `common.setup`
-- `preact.setup`
-- `react.setup`
 - `simpleStream.stream`
 - `simpleStream.scan`
 
 ## Meiosis Setup
 
 The `setup` function sets up the Meiosis pattern using the stream library and application that you
-provide. In the application, you can define the `initial` state, the `Actions` constructor function,
-the array of `services`, and the `Effects` constructor function, _all of which are optional_.
+provide. In the application, you can define the `initial` state, the array of `services`, and the
+array of `effects` _all of which are optional_.
 
 The `setup` function returns the `update` and `states` streams, as well as the created `actions`.
 
@@ -118,20 +110,13 @@ In the `app` object that you pass to `setup`, you can **optionally** provide the
 
 - `initial`: an object that represents the initial state. If not provided, the initial state is
 `{}`.
-- `Actions`: a function that receives `(update, getState)` and returns an object with actions. The
-  created actions are returned by `setup`, and also passed to `Effects`. If not provided, the
-  created actions are `{}`. For convience, actions can pass arrays of patches to `update` to combine
-  multiple patches into one, thus reducing the number of updates, state changes, and view refreshes.
-  If an action is defined with `function() { ... }` rather than `() => { ... }`, it can call another
-  action using `this.otherAction(...)`.
 - `services`: an array of functions that get called with `state`. Service functions can change the
 state by returning a patch:
     - returning any patch, changes the state
-    - not returning anything, or returning a falsy value, does not change the state
-- `Effects`: constructor function for effects, which gets called with `(update, actions)` and should
-  return an array of functions that will get called with `state`. The return value of effect
-  functions is ignored. Instead, effect functions should call `update` and/or `actions` to trigger
-  further updates.
+    - not returning anything, does not change the state
+- `effects`: an array of functions that will get called with `{ state, update }`. The return value
+  of effect functions is ignored. Instead, effect functions should call `update` to trigger further
+  updates.
 
 -----
 
@@ -145,24 +130,23 @@ state by returning a patch:
 To use [Mergerino](https://github.com/fuzetsu/mergerino):
 
 ```javascript
-import meiosis from "meiosis-setup/mergerino";
-import simpleStream from "meiosis-setup/simple-stream";
+import { setup } from "meiosis-setup/mergerino";
+// optional:
+import Stream from "mithril/stream";
 // or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-import merge from "mergerino";
+import flyd from "flyd";
 
 // A) if the initial state is synchronous:
 const app = { initial: ..., ... };
 
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, merge, app });
+const { states, getCell } = setup({ app });
+
+// or
+const { states, getCell } = setup({ stream: Stream, app });
+// or
+const { states, getCell } = setup({ stream: flyd, app });
 
 // setup your view here
-// call update({ duck: "quack" }) to update the state
-// and/or call actions.someAction(someValue)
 
 // OR
 
@@ -170,11 +154,9 @@ const { update, states, actions } =
 asyncFunction(...).then(response => {
   const initial = buildInitialState(response);
   const app = { initial, ... };
-  meiosis({ stream: simpleStream, merge, app });
+  meiosis({ app });
 
   // setup your view here
-  // call update({ duck: "quack" }) to update the state
-  // and/or call actions.someAction(someValue)
 });
 ```
 
@@ -183,36 +165,10 @@ asyncFunction(...).then(response => {
 To use
 [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html):
 
+same as above, except:
+
 ```javascript
-import meiosis from "meiosis-setup/functionPatches";
-import simpleStream from "meiosis-setup/simple-stream";
-// or
-// import Stream from "mithril/stream";
-// or
-// import flyd from "flyd";
-
-// A) if the initial state is synchronous:
-const app = { initial: ..., ... };
-
-const { update, states, actions } =
-  meiosis({ stream: simpleStream, app });
-
-// setup your view here
-// call update(state => ({ ...state, duck: "quack" })) to update the state
-// and/or call actions.someAction(someValue)
-
-// OR
-
-// B) if the initial state is asynchronous:
-asyncFunction(...).then(response => {
-  const initial = buildInitialState(response);
-  const app = { initial, ... };
-  meiosis({ stream: simpleStream, app });
-
-  // setup your view here
-  // call update(state => ({ ...state, duck: "quack" })) to update the state
-  // and/or call actions.someAction(someValue)
-});
+import { setup } from "meiosis-setup/functionPatches";
 ```
 
 <a name="view_setup"></a>
@@ -223,20 +179,17 @@ asyncFunction(...).then(response => {
 To use `meiosis-setup` with [Mithril](https://mithril.js.org), no special setup is necessary:
 
 ```javascript
-import meiosis from "meiosis-setup/...";
+import { setup } from "meiosis-setup/...";
 import m from "mithril";
 
 const App = {
-  // If you only use update or actions, you can omit the other
-  view: ({ attrs: { state, update, actions } }) => m(...)
+  view: ({ attrs: { cell } }) => m(...)
 };
 
-// If you only use update or actions, you can omit the other
-const { states, update, actions } = meiosis({ ... });
+const { states, getCell } = setup({ ... });
 
 m.mount(document.getElementById("app"), {
-  // If you only use update or actions, you can omit the other
-  view: () => m(App, { state: states(), update, actions })
+  view: () => m(App, { cell: getCell() })
 });
 
 states.map(() => m.redraw());
@@ -303,33 +256,6 @@ render(<App states={states} update={update} actions={actions} />, element);
 ```
 
 See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/preact/src/index.js)
-for an example.
-
-### lit-html Setup
-
-To use `meiosis-setup` with [lit-html](https://lit-html.polymer-project.org/), no special setup is
-necessary:
-
-```javascript
-import meiosis from "meiosis-setup/...";
-import { html, render } from "lit-html";
-
-const App = ({ state, update, actions }) => html`
-  <div>... </div>
-`;
-
-// Actions are optional
-const app = { initial, Actions, ... };
-// If you only use update or actions, you can omit the other
-const { state, update, actions } = meiosis({ stream, app, ... });
-
-const element = document.getElementById("app");
-// If you only use update or actions, you can omit the other
-states.map(state => render(App({ state, update, actions }), element));
-```
-
-See
-[here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/lit-html/src/index.js)
 for an example.
 
 <a name="common_setup"></a>

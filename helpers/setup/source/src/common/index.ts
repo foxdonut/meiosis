@@ -295,6 +295,7 @@ export const setup = <S, P>({
   const initial = safeApp.initial || {};
   const services = safeApp.services || [];
 
+  // falsy patches are ignored
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, patch) : state);
 
   const createStream = typeof stream === "function" ? stream : stream.stream;

@@ -32,10 +32,18 @@ export const stream = <T>(initial?: T): Stream<T> => {
   createdStream.map = <R>(mapFunction: MapFunction<T, R>) => {
     const newStream: Stream<R> = stream();
 
-    mapFunctions.push(value => {
+    const mappedFunction = value => {
       newStream(mapFunction(value));
-    });
+    };
+    mapFunctions.push(mappedFunction);
     mappedValues.push([]);
+
+    newStream.end = (_value?: boolean) => {
+      const idx = mapFunctions.indexOf(mappedFunction);
+      newStream.ended = true;
+      mapFunctions.splice(idx, 1);
+      mappedValues.splice(idx, 1);
+    };
 
     if (latestValue !== undefined) {
       newStream(mapFunction(latestValue));
@@ -44,7 +52,7 @@ export const stream = <T>(initial?: T): Stream<T> => {
     return newStream;
   };
 
-  createdStream.end = () => {
+  createdStream.end = (_value?: boolean) => {
     createdStream.ended = true;
   };
 
