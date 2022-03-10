@@ -1,3 +1,4 @@
+import simpleStream from "../simple-stream";
 import merge from "mergerino";
 import commonSetup, {
   CommonApp,
@@ -85,7 +86,7 @@ export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
  * @template S the State type.
  */
 export interface MeiosisConfig<S> extends CommonMeiosisConfig<S, Patch<S>> {
-  app: App<S>;
+  app?: App<S>;
 }
 
 export interface MeiosisSetup<S> extends CommonMeiosisSetup<S, Patch<S>> {
@@ -170,11 +171,11 @@ export const getInitialState = <S>(component: StateComponent<S>): Partial<S> | u
 const concatIfPresent = (target: any[], source?: any[]): any[] =>
   source ? target.concat(source) : target;
 
-const assembleServices = (
-  subComponents: SubComponents<any> | undefined,
+const assembleServices = <S, K extends keyof S>(
+  subComponents: SubComponents<S> | undefined,
   getState = state => state,
   nest = nestPatch
-): Service<any>[] =>
+): Service<K>[] =>
   subComponents
     ? Object.keys(subComponents).reduce((result, key) => {
         const nextGetState = state => getState(state[key]);
@@ -187,7 +188,7 @@ const assembleServices = (
             return patch ? nextNestPatch(patch, key) : null;
           })
         ).concat(assembleServices(subComponents[key]?.subComponents, nextGetState, nextNestPatch));
-      }, [] as Service<any>[])
+      }, [] as Service<K>[])
     : [];
 
 export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
@@ -195,10 +196,10 @@ export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
     assembleServices(component.subComponents)
   );
 
-const assembleEffects = (
-  subComponents: SubComponents<any> | undefined,
+const assembleEffects = <S>(
+  subComponents: SubComponents<S> | undefined,
   getCell = cell => cell
-): Effect<any>[] =>
+): Effect<S>[] =>
   subComponents
     ? Object.keys(subComponents).reduce((result, key) => {
         const nextGetCell = cell => getCell(cell).nest(key);
@@ -207,7 +208,7 @@ const assembleEffects = (
           result,
           subComponents[key]?.effects?.map(effect => cell => effect(nextGetCell(cell)))
         ).concat(assembleEffects(subComponents[key]?.subComponents, nextGetCell));
-      }, [] as Effect<any>[])
+      }, [] as Effect<S>[])
     : [];
 
 export const getEffects = <S>(component: StateComponent<S>): Effect<S>[] =>
@@ -224,8 +225,11 @@ export const getEffects = <S>(component: StateComponent<S>): Effect<S>[] =>
  *
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
-export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, getCell } = commonSetup({
+export const setup = <S>({
+  stream = simpleStream,
+  app = {}
+}: MeiosisConfig<S>): MeiosisSetup<S> => {
+  const { states, getCell, dropRepeats } = commonSetup({
     stream,
     accumulator: merge,
     app
@@ -244,6 +248,10 @@ export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => 
 
   if (app?.effects != null && app.effects.length > 0) {
     states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
+
+    app.effects.forEach(effect => {
+      dropRepeats(states).map(() => effect(getCellWithNest()));
+    });
   }
 
   return {

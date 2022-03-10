@@ -338,7 +338,7 @@ See the repository for examples:
 ## Credits
 
 Many thanks to [Barney Carroll](https://github.com/barneycarroll),
-[James Forbes](https://twitter.com/james_a_forbes),
+[James Forbes](https://james-forbes.com),
 [Daniel Loomer](https://github.com/fuzetsu),
 [Scotty Simpson](https://github.com/CreaturesInUnitards), and
 [Stephan Thon](https://github.com/smuemd)

@@ -1,4 +1,3 @@
-import simpleStream from "../src/simple-stream";
 import {
   App,
   Effect,
@@ -18,7 +17,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -38,7 +37,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = {};
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({});
@@ -73,7 +72,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -106,7 +105,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     const duckCell = cell.nest("duck");
@@ -152,10 +151,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       state => (state.sequenced ? servicePatches[4] : null)
     ];
 
-    const { states, getCell } = setup<State>({
-      stream: simpleStream,
-      app: { initial: { count: 0 }, services }
-    });
+    const { states, getCell } = setup<State>({ app: { initial: { count: 0 }, services } });
     const cell = getCell();
 
     cell.update(updatePatches[0]);
@@ -207,10 +203,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       effects
     };
 
-    const { states, getCell } = setup<Counter>({
-      stream: simpleStream,
-      app
-    });
+    const { states, getCell } = setup<Counter>({ app });
     const cell = getCell();
 
     cell.update(assoc("count", 1));

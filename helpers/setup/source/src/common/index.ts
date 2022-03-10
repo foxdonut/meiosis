@@ -195,6 +195,10 @@ export interface CommonMeiosisSetup<S, P> {
   getCell: () => CommonMeiosisCell<S, P>;
 }
 
+export interface UtilityMeiosisSetup<S, P> extends CommonMeiosisSetup<S, P> {
+  dropRepeats<T>(states: Stream<T>, selector?: (state: T) => any): Stream<T>;
+}
+
 /**
  * A service function. Receives the current state and returns a patch to be applied to the state.
  *
@@ -245,7 +249,7 @@ export interface CommonMeiosisConfig<S, P> {
   /**
    * The application object, with optional properties.
    */
-  app: CommonApp<S, P>;
+  app?: CommonApp<S, P>;
 }
 
 /**
@@ -283,7 +287,7 @@ export const setup = <S, P>({
   stream,
   accumulator,
   app
-}: MeiosisConfig<S, P>): CommonMeiosisSetup<S, P> => {
+}: MeiosisConfig<S, P>): UtilityMeiosisSetup<S, P> => {
   if (!stream) {
     stream = simpleStream;
   }
@@ -318,9 +322,25 @@ export const setup = <S, P>({
     update: updateFn
   });
 
+  // Credit: James Forbes (https://james-forbes.com/)
+  const dropRepeats = <S>(states: Stream<S>, selector: (state: S) => any = x => x): Stream<S> => {
+    let prev = undefined;
+    const result = createStream();
+
+    states.map(state => {
+      const next = selector(state);
+      if (next !== prev) {
+        prev = next;
+        result(next);
+      }
+    });
+    return result;
+  };
+
   return {
     states,
-    getCell
+    getCell,
+    dropRepeats
   };
 };
 

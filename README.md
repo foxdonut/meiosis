@@ -59,7 +59,7 @@ Meiosis is the result of a whole adventure of exploring other architectures. Cre
 for their work and that of their respective communities.
 
 - [Mithril](http://mithril.js.org/) and its fantastic community. Special thanks to
-[James Forbes](https://twitter.com/james_a_forbes),
+[James Forbes](https://james-forbes.com),
 [Barney Carroll](https://github.com/barneycarroll),
 [Stefan Thon](https://github.com/smuemd),
 [Rasmus Porsager](https://github.com/porsager),

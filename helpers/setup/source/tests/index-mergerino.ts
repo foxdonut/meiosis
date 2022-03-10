@@ -1,4 +1,3 @@
-import simpleStream from "../src/simple-stream";
 import {
   App,
   Effect,
@@ -7,6 +6,7 @@ import {
   Service,
   StateComponent,
   combinePatches,
+  getEffects,
   getInitialState,
   setup
 } from "../src/mergerino";
@@ -19,7 +19,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -39,7 +39,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = {};
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({});
@@ -74,7 +74,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -107,7 +107,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ stream: simpleStream, app });
+    const { states, getCell } = setup<State>({ app });
     const cell = getCell();
 
     const duckCell = cell.nest("duck");
@@ -153,10 +153,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       state => (state.sequenced ? servicePatches[4] : null)
     ];
 
-    const { states, getCell } = setup<State>({
-      stream: simpleStream,
-      app: { initial: { count: 0 }, services }
-    });
+    const { states, getCell } = setup<State>({ app: { initial: { count: 0 }, services } });
     const cell = getCell();
 
     cell.update(updatePatches[0]);
@@ -208,10 +205,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       effects
     };
 
-    const { states, getCell } = setup<Counter>({
-      stream: simpleStream,
-      app
-    });
+    const { states, getCell } = setup<Counter>({ app });
     const cell = getCell();
 
     cell.update({ count: 1 });
@@ -285,6 +279,61 @@ describe("Meiosis with TypeScript - Mergerino", () => {
           }
         }
       });
+    });
+
+    test("effects (to perhaps become united as services)", () => {
+      interface Nest {
+        size: number;
+      }
+
+      interface Environment {
+        material: string;
+      }
+
+      interface Duck {
+        color: string;
+        texture: string;
+        house: Nest;
+        env: Environment;
+      }
+
+      interface AppState {
+        somewhere: Duck;
+        sound: string;
+      }
+
+      const nestComponent: StateComponent<Nest> = {
+        initial: {
+          size: 37
+        }
+      };
+
+      const duckComponent: StateComponent<Duck> = {
+        initial: {
+          color: "yellow",
+          texture: "soft",
+          env: {
+            material: "straw"
+          }
+        },
+        subComponents: {
+          house: nestComponent
+        }
+      };
+
+      const appComponent: StateComponent<AppState> = {
+        initial: {
+          sound: "quack"
+        },
+        subComponents: {
+          somewhere: duckComponent
+        }
+      };
+
+      const effects = getEffects(appComponent);
+      const { states, getCell } = setup<AppState>({});
+
+      states.map(() => effects.forEach(effect => effect(getCell())));
     });
   });
 });
