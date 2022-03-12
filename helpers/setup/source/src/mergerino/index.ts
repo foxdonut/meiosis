@@ -65,7 +65,7 @@ export interface Effect<S> {
 }
 
 export interface ComponentService<S> {
-  selector: (state: S) => any;
+  onchange: (state: S) => any;
   run: (cell: MeiosisCell<S>) => any;
 }
 
@@ -236,7 +236,7 @@ const assembleServices = <S>(
         return concatIfPresent(
           result,
           subComponents[key]?.services?.map(service => ({
-            selector: state => service.selector(state[key]),
+            onchange: state => service.onchange(state[key]),
             run: cell => service.run(nextGetCell(cell))
           }))
         ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
@@ -282,7 +282,7 @@ export const setup = <S>({
     // states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
 
     app.componentServices.forEach(service => {
-      dropRepeats(states, service.selector).map(() => service.run(getCellWithNest()));
+      dropRepeats(states, service.onchange).map(() => service.run(getCellWithNest()));
     });
   }
 

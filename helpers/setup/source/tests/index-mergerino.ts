@@ -232,7 +232,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
 
       interface AppState {
-        somewhere: Duck;
+        pet: Duck;
         sound: string;
       }
 
@@ -260,7 +260,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
           sound: "quack"
         },
         subComponents: {
-          somewhere: duckComponent
+          pet: duckComponent
         }
       };
 
@@ -268,7 +268,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
 
       expect(initialState).toEqual({
         sound: "quack",
-        somewhere: {
+        pet: {
           color: "yellow",
           texture: "soft",
           env: {
@@ -286,6 +286,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         size: number;
       }
 
+      const nestComponent: StateComponent<Nest> = {
+        initial: {
+          size: 37
+        }
+      };
+
       interface Environment {
         material: string;
       }
@@ -293,34 +299,47 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       interface Duck {
         color: string;
         texture: string;
+        firstName: string;
+        lastName: string;
+        fullName: string;
         house: Nest;
         env: Environment;
       }
 
-      interface AppState {
-        somewhere: Duck;
-        sound: string;
-        volume: string;
-      }
-
-      const nestComponent: StateComponent<Nest> = {
-        initial: {
-          size: 37
-        }
-      };
+      const getFullName = (duck: Duck): string => `${duck.firstName} ${duck.lastName}`;
+      const updateFullName = (cell: MeiosisCell<Duck>) =>
+        cell.update({ fullName: getFullName(cell.state) });
 
       const duckComponent: StateComponent<Duck> = {
         initial: {
           color: "yellow",
           texture: "soft",
+          firstName: "Fluffy",
+          lastName: "McDuck",
           env: {
             material: "straw"
           }
         },
+        services: [
+          {
+            onchange: state => state.firstName,
+            run: updateFullName
+          },
+          {
+            onchange: state => state.lastName,
+            run: updateFullName
+          }
+        ],
         subComponents: {
           house: nestComponent
         }
       };
+
+      interface AppState {
+        pet: Duck;
+        sound: string;
+        volume: string;
+      }
 
       const appComponent: StateComponent<AppState> = {
         initial: {
@@ -328,16 +347,18 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         },
         services: [
           {
-            selector: state => state.sound,
+            onchange: state => state.sound,
             run: cell => {
               if (cell.state.sound === "quack") {
                 cell.update({ volume: "loud" });
+              } else {
+                cell.update({ volume: "quiet" });
               }
             }
           }
         ],
         subComponents: {
-          somewhere: duckComponent
+          pet: duckComponent
         }
       };
 
@@ -346,6 +367,14 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       const { getCell } = setup<AppState>({ app: { initial, componentServices } });
 
       expect(getCell().state.volume).toEqual("loud");
+      getCell().update({ sound: "beck" });
+      expect(getCell().state.volume).toEqual("quiet");
+
+      expect(getCell().state.pet.fullName).toEqual("Fluffy McDuck");
+      getCell().nest("pet").update({ lastName: "Quackington" });
+      expect(getCell().state.pet.fullName).toEqual("Fluffy Quackington");
+      getCell().nest("pet").update({ firstName: "Softy" });
+      expect(getCell().state.pet.fullName).toEqual("Softy Quackington");
     });
   });
 });
