@@ -64,6 +64,11 @@ export interface Effect<S> {
   (cell: MeiosisCell<S>): void;
 }
 
+export interface ComponentService<S> {
+  selector: (state: S) => any;
+  run: (cell: MeiosisCell<S>) => any;
+}
+
 export interface App<S> extends CommonApp<S, Patch<S>> {
   /**
    * An array of service functions.
@@ -74,6 +79,8 @@ export interface App<S> extends CommonApp<S, Patch<S>> {
    * An array of effect functions.
    */
   effects?: Effect<S>[];
+
+  componentServices?: ComponentService<S>[];
 }
 
 export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
@@ -143,8 +150,7 @@ type SubComponents<S> = {
 
 export interface StateComponent<S> {
   initial?: Partial<S>;
-  services?: Service<S>[];
-  effects?: Effect<S>[];
+  services?: ComponentService<S>[];
   subComponents?: SubComponents<S>;
 }
 
@@ -165,17 +171,18 @@ const assembleInitialState = (subComponents: SubComponents<any> | undefined): an
       )
     : {};
 
-export const getInitialState = <S>(component: StateComponent<S>): Partial<S> | undefined =>
+export const getInitialState = <S>(component: StateComponent<S>): S =>
   Object.assign({}, component.initial, assembleInitialState(component.subComponents));
 
 const concatIfPresent = (target: any[], source?: any[]): any[] =>
   source ? target.concat(source) : target;
 
-const assembleServices = <S, K extends keyof S>(
+/*
+const assembleServices = <S>(
   subComponents: SubComponents<S> | undefined,
   getState = state => state,
   nest = nestPatch
-): Service<K>[] =>
+): Service<S>[] =>
   subComponents
     ? Object.keys(subComponents).reduce((result, key) => {
         const nextGetState = state => getState(state[key]);
@@ -188,7 +195,7 @@ const assembleServices = <S, K extends keyof S>(
             return patch ? nextNestPatch(patch, key) : null;
           })
         ).concat(assembleServices(subComponents[key]?.subComponents, nextGetState, nextNestPatch));
-      }, [] as Service<K>[])
+      }, [] as Service<S>[])
     : [];
 
 export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
@@ -214,6 +221,31 @@ const assembleEffects = <S>(
 export const getEffects = <S>(component: StateComponent<S>): Effect<S>[] =>
   concatIfPresent([] as Effect<S>[], component.effects).concat(
     assembleEffects(component.subComponents)
+  );
+*/
+
+const assembleServices = <S>(
+  subComponents: SubComponents<S> | undefined,
+  getCell = cell => cell
+): ComponentService<S>[] =>
+  subComponents
+    ? Object.keys(subComponents).reduce((result, key) => {
+        const nextGetCell = (cell: MeiosisCell<S>): MeiosisCell<typeof key> =>
+          getCell(cell).nest(key);
+
+        return concatIfPresent(
+          result,
+          subComponents[key]?.services?.map(service => ({
+            selector: state => service.selector(state[key]),
+            run: cell => service.run(nextGetCell(cell))
+          }))
+        ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
+      }, [] as ComponentService<S>[])
+    : [];
+
+export const getComponentServices = <S>(component: StateComponent<S>): ComponentService<S>[] =>
+  concatIfPresent([] as ComponentService<S>[], component.services).concat(
+    assembleServices(component.subComponents)
   );
 
 /**
@@ -246,12 +278,16 @@ export const setup = <S>({
     return cellWithNest;
   };
 
+  if (app?.componentServices != null && app.componentServices.length > 0) {
+    // states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
+
+    app.componentServices.forEach(service => {
+      dropRepeats(states, service.selector).map(() => service.run(getCellWithNest()));
+    });
+  }
+
   if (app?.effects != null && app.effects.length > 0) {
     states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
-
-    app.effects.forEach(effect => {
-      dropRepeats(states).map(() => effect(getCellWithNest()));
-    });
   }
 
   return {

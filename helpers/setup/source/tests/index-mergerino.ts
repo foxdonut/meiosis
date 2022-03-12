@@ -6,7 +6,7 @@ import {
   Service,
   StateComponent,
   combinePatches,
-  getEffects,
+  getComponentServices,
   getInitialState,
   setup
 } from "../src/mergerino";
@@ -211,7 +211,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     cell.update({ count: 1 });
     expect(states()).toEqual({ count: 2, service: true });
 
-    // FIIXME: add rest of test
+    // FIXME: add rest of test
   });
 
   describe("State Components", () => {
@@ -281,7 +281,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       });
     });
 
-    test("effects (to perhaps become united as services)", () => {
+    test("state component services", () => {
       interface Nest {
         size: number;
       }
@@ -300,6 +300,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       interface AppState {
         somewhere: Duck;
         sound: string;
+        volume: string;
       }
 
       const nestComponent: StateComponent<Nest> = {
@@ -325,15 +326,26 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         initial: {
           sound: "quack"
         },
+        services: [
+          {
+            selector: state => state.sound,
+            run: cell => {
+              if (cell.state.sound === "quack") {
+                cell.update({ volume: "loud" });
+              }
+            }
+          }
+        ],
         subComponents: {
           somewhere: duckComponent
         }
       };
 
-      const effects = getEffects(appComponent);
-      const { states, getCell } = setup<AppState>({});
+      const initial = getInitialState(appComponent);
+      const componentServices = getComponentServices(appComponent);
+      const { getCell } = setup<AppState>({ app: { initial, componentServices } });
 
-      states.map(() => effects.forEach(effect => effect(getCell())));
+      expect(getCell().state.volume).toEqual("loud");
     });
   });
 });
