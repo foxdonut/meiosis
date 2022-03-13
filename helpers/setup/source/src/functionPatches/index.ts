@@ -3,7 +3,6 @@ import commonSetup, {
   CommonMeiosisCell,
   CommonMeiosisConfig,
   CommonMeiosisSetup,
-  CommonService,
   CommonUpdate
 } from "../common";
 
@@ -32,17 +31,20 @@ export interface Patch<S> {
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
-export type Service<S> = CommonService<S, Patch<S>>;
-
 export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+}
+
+export interface Service<S> {
+  onchange?: (state: S) => any;
+  run: (cell: MeiosisCell<S>) => any;
 }
 
 export interface Effect<S> {
   (cell: MeiosisCell<S>): void;
 }
 
-export interface App<S> extends CommonApp<S, Patch<S>> {
+export interface App<S> extends CommonApp<S> {
   /**
    * An array of service functions.
    */
@@ -59,7 +61,7 @@ export interface App<S> extends CommonApp<S, Patch<S>> {
  *
  * @template S the State type.
  */
-export interface MeiosisConfig<S> extends CommonMeiosisConfig<S, Patch<S>> {
+export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
   app: App<S>;
 }
 
@@ -116,7 +118,7 @@ export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => (initialStat
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
 export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, getCell } = commonSetup({
+  const { states, getCell } = commonSetup<S, Patch<S>>({
     stream,
     accumulator: (state, patch) => patch(state),
     app

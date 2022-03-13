@@ -5,9 +5,8 @@ import commonSetup, {
   CommonMeiosisCell,
   CommonMeiosisConfig,
   CommonMeiosisSetup,
-  CommonService,
   CommonUpdate,
-  commonGetComponentServices,
+  commonGetServices,
   commonGetInitialState
 } from "../common";
 
@@ -60,33 +59,20 @@ export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
-export type Service<S> = CommonService<S, Patch<S>>;
-
 export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
-export interface Effect<S> {
-  (cell: MeiosisCell<S>): void;
-}
-
-export interface ComponentService<S> {
+export interface Service<S> {
   onchange?: (state: S) => any;
   run: (cell: MeiosisCell<S>) => any;
 }
 
-export interface App<S> extends CommonApp<S, Patch<S>> {
+export interface App<S> extends CommonApp<S> {
   /**
    * An array of service functions.
    */
   services?: Service<S>[];
-
-  /**
-   * An array of effect functions.
-   */
-  effects?: Effect<S>[];
-
-  componentServices?: ComponentService<S>[];
 }
 
 /**
@@ -94,7 +80,7 @@ export interface App<S> extends CommonApp<S, Patch<S>> {
  *
  * @template S the State type.
  */
-export interface MeiosisConfig<S> extends CommonMeiosisConfig<S, Patch<S>> {
+export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
   app?: App<S>;
 }
 
@@ -147,15 +133,15 @@ export type SubComponents<S> = {
 
 export interface StateComponent<S> {
   initial?: Partial<S>;
-  services?: ComponentService<S>[];
+  services?: Service<S>[];
   subComponents?: SubComponents<S>;
 }
 
 export const getInitialState = <S>(component: StateComponent<S>): S =>
   commonGetInitialState(component);
 
-export const getComponentServices = <S>(component: StateComponent<S>): ComponentService<S>[] =>
-  commonGetComponentServices(component);
+export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
+  commonGetServices(component);
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -187,16 +173,10 @@ export const setup = <S>({
     return cellWithNest;
   };
 
-  if (app?.componentServices != null && app.componentServices.length > 0) {
-    // states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
-
-    app.componentServices.forEach(service => {
+  if (app?.services != null && app.services.length > 0) {
+    app.services.forEach(service => {
       dropRepeats(states, service.onchange).map(() => service.run(getCellWithNest()));
     });
-  }
-
-  if (app?.effects != null && app.effects.length > 0) {
-    states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
   }
 
   return {

@@ -201,44 +201,21 @@ export interface UtilityMeiosisSetup<S, P> extends CommonMeiosisSetup<S, P> {
 }
 
 /**
- * A service function. Receives the current state and returns a patch to be applied to the state.
+ * Application object.
  *
  * @template S the State type.
- * @template P the Patch type.
  */
-export interface CommonService<S, P> {
-  /**
-   * @param {S} state the current state.
-   *
-   * @returns {P} the patch to be applied to the state.
-   */
-  (state: S): P | null | undefined | void;
-}
-
-/**
- * Application object that provides the application's initial state, the service functions, and the
- * the effects, all of which are optional.
- *
- * @template S the State type.
- * @template P the Patch type.
- */
-export interface CommonApp<S, P> {
+export interface CommonApp<S> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
   initial?: S;
-
-  /**
-   * An array of service functions.
-   */
-  services?: CommonService<S, P>[];
 }
 
 /**
  * @template S the State type.
- * @template P the Patch type.
  */
-export interface CommonMeiosisConfig<S, P> {
+export interface CommonMeiosisConfig<S> {
   /**
    * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
    * which you provide either a function or an object with a `stream` function to create a stream.
@@ -250,7 +227,7 @@ export interface CommonMeiosisConfig<S, P> {
   /**
    * The application object, with optional properties.
    */
-  app?: CommonApp<S, P>;
+  app?: CommonApp<S>;
 }
 
 /**
@@ -259,14 +236,14 @@ export interface CommonMeiosisConfig<S, P> {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S, P> {
+export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   /**
    * The accumulator function.
    */
   accumulator: Accumulator<S, P>;
 }
 
-interface CommonComponentService<S> {
+interface CommonService<S> {
   onchange?: (state: S) => any;
   run: (cell: any) => any;
 }
@@ -277,7 +254,7 @@ type CommonSubComponents<S> = {
 
 interface CommonStateComponent<S> {
   initial?: Partial<S>;
-  services?: CommonComponentService<S>[];
+  services?: CommonService<S>[];
   subComponents?: CommonSubComponents<S>;
 }
 
@@ -304,7 +281,7 @@ export const commonGetInitialState = <S>(component: CommonStateComponent<S>): S 
 const assembleServices = <S>(
   subComponents: CommonSubComponents<S> | undefined,
   getCell = cell => cell
-): CommonComponentService<S>[] =>
+): CommonService<S>[] =>
   subComponents
     ? Object.keys(subComponents).reduce((result, key) => {
         const nextGetCell = cell => getCell(cell).nest(key);
@@ -313,18 +290,16 @@ const assembleServices = <S>(
 
         return concatIfPresent(
           result,
-          subComponent.services?.map<CommonComponentService<any>>(service => ({
+          subComponent.services?.map<CommonService<any>>(service => ({
             onchange: state => (service.onchange ? service.onchange(state[key]) : state),
             run: cell => service.run(nextGetCell(cell))
           }))
         ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
-      }, [] as CommonComponentService<S>[])
+      }, [] as CommonService<S>[])
     : [];
 
-export const commonGetComponentServices = <S>(
-  component: CommonStateComponent<S>
-): CommonComponentService<S>[] =>
-  concatIfPresent([] as CommonComponentService<S>[], component.services).concat(
+export const commonGetServices = <S>(component: CommonStateComponent<S>): CommonService<S>[] =>
+  concatIfPresent([] as CommonService<S>[], component.services).concat(
     assembleServices(component.subComponents)
   );
 
@@ -332,12 +307,7 @@ export const commonGetComponentServices = <S>(
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
  *
- * Patch is merged in to the state by default. Services have access to the state and can return a
- * patch that further updates the state. State changes by services are available to the next
- * services in the list.
- *
- * After the services have run and the state has been updated, effects are executed and have the
- * opportunity to trigger more updates.
+ * Patch is merged in to the state by default.
  *
  * @template S the State type.
  * @template P the Patch type.
@@ -360,7 +330,6 @@ export const setup = <S, P>({
 
   const safeApp = app || {};
   const initial = safeApp.initial || {};
-  const services = safeApp.services || [];
 
   // falsy patches are ignored
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, patch) : state);
@@ -371,14 +340,7 @@ export const setup = <S, P>({
   const update: Stream<P> = createStream();
   const updateFn: CommonUpdate<P> = patch => update(patch);
 
-  const runServices = startingState =>
-    services.reduce((state, service) => accumulatorFn(state, service(state)), startingState);
-
-  const states: Stream<S> = scan(
-    (state, patch) => runServices(accumulatorFn(state, patch)),
-    runServices(initial),
-    update
-  );
+  const states: Stream<S> = scan((state, patch) => accumulatorFn(state, patch), initial, update);
 
   const getCell = () => ({
     state: states(),
