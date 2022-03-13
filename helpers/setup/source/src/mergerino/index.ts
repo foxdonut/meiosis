@@ -154,7 +154,7 @@ export interface StateComponent<S> {
   subComponents?: SubComponents<S>;
 }
 
-const assembleInitialState = (subComponents: SubComponents<any> | undefined): any =>
+const assembleInitialState = <S>(subComponents: SubComponents<S> | undefined): any =>
   subComponents
     ? Object.keys(subComponents).reduce(
         (result, key) =>
@@ -177,53 +177,6 @@ export const getInitialState = <S>(component: StateComponent<S>): S =>
 const concatIfPresent = (target: any[], source?: any[]): any[] =>
   source ? target.concat(source) : target;
 
-/*
-const assembleServices = <S>(
-  subComponents: SubComponents<S> | undefined,
-  getState = state => state,
-  nest = nestPatch
-): Service<S>[] =>
-  subComponents
-    ? Object.keys(subComponents).reduce((result, key) => {
-        const nextGetState = state => getState(state[key]);
-        const nextNestPatch = (patch, key) => nest<any, any>(patch, key);
-
-        return concatIfPresent(
-          result,
-          subComponents[key]?.services?.map(service => state => {
-            const patch = service(nextGetState(state));
-            return patch ? nextNestPatch(patch, key) : null;
-          })
-        ).concat(assembleServices(subComponents[key]?.subComponents, nextGetState, nextNestPatch));
-      }, [] as Service<S>[])
-    : [];
-
-export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
-  concatIfPresent([] as Service<S>[], component.services).concat(
-    assembleServices(component.subComponents)
-  );
-
-const assembleEffects = <S>(
-  subComponents: SubComponents<S> | undefined,
-  getCell = cell => cell
-): Effect<S>[] =>
-  subComponents
-    ? Object.keys(subComponents).reduce((result, key) => {
-        const nextGetCell = cell => getCell(cell).nest(key);
-
-        return concatIfPresent(
-          result,
-          subComponents[key]?.effects?.map(effect => cell => effect(nextGetCell(cell)))
-        ).concat(assembleEffects(subComponents[key]?.subComponents, nextGetCell));
-      }, [] as Effect<S>[])
-    : [];
-
-export const getEffects = <S>(component: StateComponent<S>): Effect<S>[] =>
-  concatIfPresent([] as Effect<S>[], component.effects).concat(
-    assembleEffects(component.subComponents)
-  );
-*/
-
 const assembleServices = <S>(
   subComponents: SubComponents<S> | undefined,
   getCell = cell => cell
@@ -233,9 +186,11 @@ const assembleServices = <S>(
         const nextGetCell = (cell: MeiosisCell<S>): MeiosisCell<typeof key> =>
           getCell(cell).nest(key);
 
+        const subComponent: StateComponent<any> = subComponents[key];
+
         return concatIfPresent(
           result,
-          subComponents[key]?.services?.map(service => ({
+          subComponent.services?.map<ComponentService<any>>(service => ({
             onchange: state => service.onchange(state[key]),
             run: cell => service.run(nextGetCell(cell))
           }))
