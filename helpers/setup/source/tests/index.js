@@ -175,7 +175,7 @@ describe("meiosis setup with library for applying patches", () => {
     });
 
     test.each(
-      createTestCases("service calls are combined into a single state update", [
+      createTestCases("service calls", [
         [
           meiosis.mergerino.combinePatches([{ count: x => x + 1 }, { service1: true }]),
           { service2: true },
@@ -213,12 +213,7 @@ describe("meiosis setup with library for applying patches", () => {
       const { states, getCell } = setupFn({ services });
       const cell = getCell();
 
-      let ticks = 0;
-      states.map(() => ticks++);
-
       cell.update(updatePatch);
-
-      expect(ticks).toEqual(2);
       expect(states()).toEqual({ count: 2, service1: true, service2: true });
     });
 
@@ -351,13 +346,9 @@ describe("meiosis setup with library for applying patches", () => {
       const { states, getCell } = setupFn({ services });
       const cell = getCell();
 
-      let ticks = 0;
-      states.map(() => ticks++);
-
       cell.update(updatePatch);
 
       expect(states()).toEqual({});
-      expect(ticks).toEqual(2);
     });
 
     describe.each(
@@ -556,13 +547,8 @@ describe("meiosis setup with library for applying patches", () => {
       const { states, getCell } = setupFn({ initial, services });
       const cell = getCell();
 
-      states.map(state => {
-        if (state.route === "PageB") {
-          expect(state).toEqual({ route: "PageB", data: "None" });
-        }
-      });
-
       cell.update(updatePatch);
+      expect(states()).toEqual({ route: "PageB", data: "None" });
     });
 
     test.each(
@@ -575,6 +561,7 @@ describe("meiosis setup with library for applying patches", () => {
 
       const services = [
         {
+          onchange: state => state.nextRoute,
           run: cell => {
             if (
               cell.state.form === "data" &&
@@ -635,10 +622,17 @@ describe("meiosis setup with library for applying patches", () => {
 
       const services = [
         {
+          onchange: state => state.nextRoute,
           run: cell => {
             if (cell.state.form === "data" && cell.state.nextRoute !== "PageA") {
               cell.update(servicePatch1);
-            } else {
+            }
+          }
+        },
+        {
+          onchange: state => state.confirm,
+          run: cell => {
+            if (!cell.state.confirm) {
               cell.update(servicePatch2(cell.state));
             }
           }
@@ -651,13 +645,13 @@ describe("meiosis setup with library for applying patches", () => {
       states.map(state => {
         if (state.confirm === true) {
           expect(state.route).toEqual("PageA");
-        } else if (state.confirm === false) {
-          expect(state).toEqual({ route: "PageB", confirm: false });
         }
       });
 
       cell.update(updatePatch);
       cell.update(confirmPatch);
+
+      expect(states()).toEqual({ route: "PageB", confirm: false });
     });
 
     // credit @cmnstmntmn for this test case
@@ -702,16 +696,9 @@ describe("meiosis setup with library for applying patches", () => {
       const { states, getCell } = setupFn(app);
       const cell = getCell();
 
-      const stateLog = [];
-      states.map(state => stateLog.push(state));
-
       actions.action1(cell);
 
-      expect(stateLog.length).toEqual(2);
-
-      if (stateLog.length === 2) {
-        expect(stateLog[1].flag).toEqual("action2");
-      }
+      expect(states().flag).toEqual("action2");
     });
 
     test.each(
@@ -776,15 +763,9 @@ describe("meiosis setup with library for applying patches", () => {
       const { states, getCell } = setupFn(app);
       const cell = getCell();
 
-      const stateLog = [];
-      states.map(state => stateLog.push(state));
-
       cell.update(updatePatch);
 
-      expect(stateLog).toEqual([
-        { events: {}, triggers: {} },
-        { events: {}, triggers: {}, service1: true, service2: true }
-      ]);
+      expect(states()).toEqual({ events: {}, triggers: {}, service1: true, service2: true });
     });
 
     describe.each(
@@ -856,14 +837,12 @@ describe("meiosis setup with library for applying patches", () => {
 
           if (stateLog.length === 6) {
             try {
-              expect(stateLog).toEqual([
-                { events: {}, triggers: {} },
-                { events: { event1: true }, triggers: {} },
-                { events: {}, triggers: { trigger1: true, trigger2: true } },
-                { events: {}, triggers: { trigger2: true }, service1: true },
-                { events: {}, triggers: {}, service1: true, service2: true },
-                { events: {}, triggers: {}, service1: true, service2: true }
-              ]);
+              expect(states()).toEqual({
+                events: {},
+                triggers: {},
+                service1: true,
+                service2: true
+              });
               done();
             } catch (error) {
               done(error);
@@ -885,9 +864,11 @@ describe("meiosis setup with generic common", () => {
       }).toThrow();
     });
 
-    test("basic common setup with no services", () => {
+    test("basic mergerino setup with no services", () => {
       const actions = {
-        increment: (cell, amount) => cell.update({ count: x => x + amount })
+        increment: (cell, amount) => {
+          cell.update({ count: x => x + amount });
+        }
       };
 
       const { states, getCell } = meiosis.common.setup({
@@ -904,7 +885,9 @@ describe("meiosis setup with generic common", () => {
 
     test("basic functionPatch setup with no services", () => {
       const actions = {
-        increment: (cell, amount) => cell.update(R.over(R.lensProp("count"), R.add(amount)))
+        increment: (cell, amount) => {
+          cell.update(R.over(R.lensProp("count"), R.add(amount)));
+        }
       };
 
       const { states, getCell } = meiosis.common.setup({
