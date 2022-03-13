@@ -1,15 +1,4 @@
-import {
-  App,
-  Effect,
-  MeiosisCell,
-  Patch,
-  Service,
-  StateComponent,
-  combinePatches,
-  getComponentServices,
-  getInitialState,
-  setup
-} from "../src/mergerino";
+import { App, MeiosisCell, Patch, Service, combinePatches, setup } from "../src/mergerino";
 
 describe("Meiosis with TypeScript - Mergerino", () => {
   test("with no actions", () => {
@@ -130,7 +119,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       { count: x => x + 1 },
       { increment: undefined },
       combinePatches([{ invalid: undefined }, { combined: true }]),
-      { sequenced: true },
+      { sequence: false, sequenced: true },
       { received: true }
     ];
 
@@ -142,15 +131,44 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     ];
 
     const services: Service<State>[] = [
-      state =>
-        state.increment && state.increment > 0 && state.increment < 10 ? servicePatches[0] : null,
-      state =>
-        state.increment && (state.increment <= 0 || state.increment >= 10)
-          ? servicePatches[1]
-          : null,
-      state => (state.invalid ? servicePatches[2] : null),
-      state => (state.sequence ? servicePatches[3] : null),
-      state => (state.sequenced ? servicePatches[4] : null)
+      {
+        onchange: state => state.increment,
+        run: cell => {
+          if (cell.state.increment && cell.state.increment > 0 && cell.state.increment < 10) {
+            cell.update(servicePatches[0]);
+          }
+        }
+      },
+      {
+        onchange: state => state.increment,
+        run: cell => {
+          if (cell.state.increment && (cell.state.increment <= 0 || cell.state.increment >= 10)) {
+            cell.update(servicePatches[1]);
+          }
+        }
+      },
+      {
+        run: cell => {
+          if (cell.state.invalid) {
+            cell.update(servicePatches[2]);
+          }
+        }
+      },
+      {
+        run: cell => {
+          if (cell.state.sequence) {
+            cell.update(servicePatches[3]);
+          }
+        }
+      },
+      {
+        onchange: state => state.sequenced,
+        run: cell => {
+          if (cell.state.sequenced) {
+            cell.update(servicePatches[4]);
+          }
+        }
+      }
     ];
 
     const { states, getCell } = setup<State>({ app: { initial: { count: 0 }, services } });
@@ -164,13 +182,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     expect(states()).toEqual({
       count: 1,
       combined: true,
-      sequence: true,
+      sequence: false,
       sequenced: true,
       received: true
     });
   });
 
-  test("effects", () => {
+  test("service actions", () => {
     interface Counter {
       count: number;
       service: boolean;
@@ -186,23 +204,26 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
     };
 
-    const effects: Effect<Counter>[] = [
-      cell => {
-        // effect on state is seen by the next effect
-        if (cell.state.count === 1) {
-          counterActions.increment(cell, 1);
+    const services: Service<Counter>[] = [
+      {
+        run: cell => {
+          if (cell.state.count === 1) {
+            counterActions.increment(cell, 1);
+          }
         }
       },
-      cell => {
-        if (cell.state.count === 2 && !cell.state.service) {
-          cell.update({ service: true });
+      {
+        run: cell => {
+          if (cell.state.count === 2 && !cell.state.service) {
+            cell.update({ service: true });
+          }
         }
       }
     ];
 
     const app: App<Counter> = {
       initial: { count: 0, service: false },
-      effects
+      services
     };
 
     const { states, getCell } = setup<Counter>({ app });
@@ -214,7 +235,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     // FIXME: add rest of test
   });
 
-  describe("State Components", () => {
+  describe("Nested Apps", () => {
     test("initial state", () => {
       interface Nest {
         size: number;
@@ -236,13 +257,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         sound: string;
       }
 
-      const nestComponent: StateComponent<Nest> = {
+      const nestApp: App<Nest> = {
         initial: {
           size: 37
         }
       };
 
-      const duckComponent: StateComponent<Duck> = {
+      const duckApp: App<Duck> = {
         initial: {
           color: "yellow",
           texture: "soft",
@@ -250,21 +271,22 @@ describe("Meiosis with TypeScript - Mergerino", () => {
             material: "straw"
           }
         },
-        subComponents: {
-          house: nestComponent
+        nested: {
+          house: nestApp
         }
       };
 
-      const appComponent: StateComponent<AppState> = {
+      const app: App<AppState> = {
         initial: {
           sound: "quack"
         },
-        subComponents: {
-          pet: duckComponent
+        nested: {
+          pet: duckApp
         }
       };
 
-      const initialState = getInitialState(appComponent);
+      const { getCell } = setup<AppState>({ app });
+      const initialState = getCell().state;
 
       expect(initialState).toEqual({
         sound: "quack",
@@ -281,12 +303,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       });
     });
 
-    test("state component services", () => {
+    test("nested app services", () => {
       interface Nest {
         size: number;
       }
 
-      const nestComponent: StateComponent<Nest> = {
+      const nestApp: App<Nest> = {
         initial: {
           size: 37
         }
@@ -310,7 +332,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       const updateFullName = (cell: MeiosisCell<Duck>) =>
         cell.update({ fullName: getFullName(cell.state) });
 
-      const duckComponent: StateComponent<Duck> = {
+      const duckApp: App<Duck> = {
         initial: {
           color: "yellow",
           texture: "soft",
@@ -330,8 +352,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
             run: updateFullName
           }
         ],
-        subComponents: {
-          house: nestComponent
+        nested: {
+          house: nestApp
         }
       };
 
@@ -341,7 +363,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         volume: string;
       }
 
-      const appComponent: StateComponent<AppState> = {
+      const app: App<AppState> = {
         initial: {
           sound: "quack"
         },
@@ -357,14 +379,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
             }
           }
         ],
-        subComponents: {
-          pet: duckComponent
+        nested: {
+          pet: duckApp
         }
       };
 
-      const initial = getInitialState(appComponent);
-      const componentServices = getComponentServices(appComponent);
-      const { getCell } = setup<AppState>({ app: { initial, componentServices } });
+      const { getCell } = setup<AppState>({ app });
 
       expect(getCell().state.volume).toEqual("loud");
       getCell().update({ sound: "beck" });

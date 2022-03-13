@@ -3,7 +3,10 @@ import commonSetup, {
   CommonMeiosisCell,
   CommonMeiosisConfig,
   CommonMeiosisSetup,
-  CommonUpdate
+  CommonService,
+  CommonUpdate,
+  commonGetServices,
+  commonGetInitialState
 } from "../common";
 
 /**
@@ -35,13 +38,8 @@ export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
-export interface Service<S> {
-  onchange?: (state: S) => any;
+export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
-}
-
-export interface Effect<S> {
-  (cell: MeiosisCell<S>): void;
 }
 
 export interface App<S> extends CommonApp<S> {
@@ -50,11 +48,12 @@ export interface App<S> extends CommonApp<S> {
    */
   services?: Service<S>[];
 
-  /**
-   * An array of effect functions.
-   */
-  effects?: Effect<S>[];
+  nested?: NestedApps<S>;
 }
+
+export type NestedApps<S> = {
+  [K in keyof S]?: App<S[K]>;
+};
 
 /**
  * Meiosis Config.
@@ -108,6 +107,10 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => (initialState: S) =>
   patches.reduce((state, patch) => patch(state), initialState);
 
+export const getInitialState = <S>(app: App<S>): S => commonGetInitialState(app);
+
+export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
+
 /**
  * Helper to setup the Meiosis pattern with function patches.
  *
@@ -118,7 +121,7 @@ export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => (initialStat
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
 export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, getCell } = commonSetup<S, Patch<S>>({
+  const { states, getCell, dropRepeats } = commonSetup<S, Patch<S>>({
     stream,
     accumulator: (state, patch) => patch(state),
     app
@@ -135,12 +138,14 @@ export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => 
     return cellWithNest;
   };
 
-  if (app?.effects != null && app.effects.length > 0) {
-    states.map(() => app.effects?.forEach(effect => effect(getCellWithNest())));
+  if (app) {
+    getServices(app).forEach(service => {
+      dropRepeats(states, service.onchange).map(() => service.run(getCellWithNest()));
+    });
   }
 
   return {
-    states,
+    states: dropRepeats(states),
     getCell: getCellWithNest
   };
 };

@@ -200,6 +200,11 @@ export interface UtilityMeiosisSetup<S, P> extends CommonMeiosisSetup<S, P> {
   dropRepeats<T>(states: Stream<T>, selector?: (state: T) => any): Stream<T>;
 }
 
+export interface CommonService<S> {
+  onchange?: (state: S) => any;
+  run: (cell: any) => any;
+}
+
 /**
  * Application object.
  *
@@ -209,8 +214,14 @@ export interface CommonApp<S> {
   /**
    * An object that represents the initial state. If not specified, the initial state will be `{}`.
    */
-  initial?: S;
+  initial?: Partial<S>;
+  services?: CommonService<S>[];
+  nested?: CommonNestedApps<S>;
 }
+
+type CommonNestedApps<S> = {
+  [K in keyof S]?: CommonApp<S[K]>;
+};
 
 /**
  * @template S the State type.
@@ -243,31 +254,16 @@ export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   accumulator: Accumulator<S, P>;
 }
 
-interface CommonService<S> {
-  onchange?: (state: S) => any;
-  run: (cell: any) => any;
-}
-
-type CommonSubComponents<S> = {
-  [K in keyof S]?: CommonStateComponent<S[K]>;
-};
-
-interface CommonStateComponent<S> {
-  initial?: Partial<S>;
-  services?: CommonService<S>[];
-  subComponents?: CommonSubComponents<S>;
-}
-
-const assembleInitialState = <S>(subComponents: CommonSubComponents<S> | undefined): any =>
-  subComponents
-    ? Object.keys(subComponents).reduce(
+const assembleInitialState = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
+  nestedApps
+    ? Object.keys(nestedApps).reduce(
         (result, key) =>
           assoc(
             key,
             Object.assign(
               {},
-              subComponents[key]?.initial,
-              assembleInitialState(subComponents[key]?.subComponents)
+              nestedApps[key]?.initial,
+              assembleInitialState(nestedApps[key]?.nested)
             ),
             result
           ),
@@ -275,33 +271,31 @@ const assembleInitialState = <S>(subComponents: CommonSubComponents<S> | undefin
       )
     : {};
 
-export const commonGetInitialState = <S>(component: CommonStateComponent<S>): S =>
-  Object.assign({}, component.initial, assembleInitialState(component.subComponents));
+export const commonGetInitialState = <S>(app: CommonApp<S>): S =>
+  Object.assign({}, app.initial, assembleInitialState(app.nested));
 
 const assembleServices = <S>(
-  subComponents: CommonSubComponents<S> | undefined,
+  nestedApps: CommonNestedApps<S> | undefined,
   getCell = cell => cell
 ): CommonService<S>[] =>
-  subComponents
-    ? Object.keys(subComponents).reduce((result, key) => {
+  nestedApps
+    ? Object.keys(nestedApps).reduce((result, key) => {
         const nextGetCell = cell => getCell(cell).nest(key);
 
-        const subComponent: CommonStateComponent<any> = subComponents[key];
+        const nestedApp: CommonApp<any> = nestedApps[key];
 
         return concatIfPresent(
           result,
-          subComponent.services?.map<CommonService<any>>(service => ({
+          nestedApp.services?.map<CommonService<any>>(service => ({
             onchange: state => (service.onchange ? service.onchange(state[key]) : state),
             run: cell => service.run(nextGetCell(cell))
           }))
-        ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
+        ).concat(assembleServices(nestedApps[key]?.nested, nextGetCell));
       }, [] as CommonService<S>[])
     : [];
 
-export const commonGetServices = <S>(component: CommonStateComponent<S>): CommonService<S>[] =>
-  concatIfPresent([] as CommonService<S>[], component.services).concat(
-    assembleServices(component.subComponents)
-  );
+export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
+  concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -328,8 +322,7 @@ export const setup = <S, P>({
     throw new Error("No accumulator function was specified.");
   }
 
-  const safeApp = app || {};
-  const initial = safeApp.initial || {};
+  const initial = commonGetInitialState(app || {});
 
   // falsy patches are ignored
   const accumulatorFn = (state, patch) => (patch ? accumulator(state, patch) : state);

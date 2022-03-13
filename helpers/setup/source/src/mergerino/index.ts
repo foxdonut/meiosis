@@ -5,6 +5,7 @@ import commonSetup, {
   CommonMeiosisCell,
   CommonMeiosisConfig,
   CommonMeiosisSetup,
+  CommonService,
   CommonUpdate,
   commonGetServices,
   commonGetInitialState
@@ -63,8 +64,7 @@ export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
-export interface Service<S> {
-  onchange?: (state: S) => any;
+export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
 }
 
@@ -73,7 +73,13 @@ export interface App<S> extends CommonApp<S> {
    * An array of service functions.
    */
   services?: Service<S>[];
+
+  nested?: NestedApps<S>;
 }
+
+export type NestedApps<S> = {
+  [K in keyof S]?: App<S[K]>;
+};
 
 /**
  * Meiosis Config.
@@ -127,21 +133,9 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
  */
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
 
-export type SubComponents<S> = {
-  [K in keyof S]?: StateComponent<S[K]>;
-};
+export const getInitialState = <S>(app: App<S>): S => commonGetInitialState(app);
 
-export interface StateComponent<S> {
-  initial?: Partial<S>;
-  services?: Service<S>[];
-  subComponents?: SubComponents<S>;
-}
-
-export const getInitialState = <S>(component: StateComponent<S>): S =>
-  commonGetInitialState(component);
-
-export const getServices = <S>(component: StateComponent<S>): Service<S>[] =>
-  commonGetServices(component);
+export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
@@ -173,14 +167,14 @@ export const setup = <S>({
     return cellWithNest;
   };
 
-  if (app?.services != null && app.services.length > 0) {
-    app.services.forEach(service => {
+  if (app) {
+    getServices(app).forEach(service => {
       dropRepeats(states, service.onchange).map(() => service.run(getCellWithNest()));
     });
   }
 
   return {
-    states,
+    states: dropRepeats(states),
     getCell: getCellWithNest
   };
 };

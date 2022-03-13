@@ -67,81 +67,34 @@ describe("meiosis setup with library for applying patches", () => {
     });
 
     test.each(
-      createTestCases("services", [
+      createTestCases("services run on initial state", [
+        [{ count: x => x + 1, increment: 0 }],
         [
-          [
-            { count: x => x + 1 },
-            { increment: undefined },
-            meiosis.mergerino.combinePatches([{ invalid: undefined }, { combined: true }]),
-            { sequenced: true },
-            { received: true }
-          ],
-          [{ increment: 1 }, { increment: 10 }, { invalid: true }, { sequence: true }]
-        ],
-        [
-          [
+          meiosis.functionPatches.combinePatches([
             R.over(R.lensProp("count"), R.add(1)),
-            R.dissoc("increment"),
-            meiosis.functionPatches.combinePatches([
-              R.dissoc("invalid"),
-              R.assoc("combined", true)
-            ]),
-            R.assoc("sequenced", true),
-            R.assoc("received", true)
-          ],
-          [
-            R.assoc("increment", 1),
-            R.assoc("increment", 10),
-            R.assoc("invalid", true),
-            R.assoc("sequence", true)
-          ]
+            R.assoc("increment", 0)
+          ])
         ]
       ])
-    )("%s", (_label, setupFn, servicePatches, updatePatches) => {
-      const services = [
-        state => (state.increment > 0 && state.increment < 10 ? servicePatches[0] : null),
-        state => (state.increment <= 0 || state.increment >= 10 ? servicePatches[1] : null),
-        state => (state.invalid ? servicePatches[2] : null),
-        state => (state.sequence ? servicePatches[3] : null),
-        state => (state.sequenced ? servicePatches[4] : null)
-      ];
-
-      const { states, getCell } = setupFn({ initial: { count: 0 }, services });
-      const cell = getCell();
-
-      cell.update(updatePatches[0]);
-      cell.update(updatePatches[1]);
-      cell.update(updatePatches[2]);
-      cell.update(updatePatches[3]);
-
-      expect(states()).toEqual({
-        count: 1,
-        combined: true,
-        sequence: true,
-        sequenced: true,
-        received: true
-      });
-    });
-
-    test.each(
-      createTestCases("services run on initial state", [
-        [{ count: x => x + 1 }],
-        [R.over(R.lensProp("count"), R.add(1))]
-      ])
     )("%s", (_label, setupFn, patch) => {
-      const services = [state => (state.increment > 0 && state.increment < 10 ? patch : null)];
+      const services = [
+        {
+          run: cell =>
+            cell.state.increment > 0 && cell.state.increment < 10 ? cell.update(patch) : null
+        }
+      ];
 
       const { states } = setupFn({ initial: { count: 0, increment: 1 }, services });
 
       let ticks = 0;
       states.map(() => ticks++);
 
-      expect(states()).toEqual({ count: 1, increment: 1 });
+      expect(states()).toEqual({ count: 1, increment: 0 });
       expect(ticks).toEqual(1);
     });
 
     test.each(
-      createTestCases("effects and actions", [
+      createTestCases("services and actions", [
         [{ count: x => x + 1 }, { service: true }, { count: 1 }],
         [R.over(R.lensProp("count"), R.add(1)), R.assoc("service", true), R.assoc("count", 1)]
       ])
@@ -150,20 +103,24 @@ describe("meiosis setup with library for applying patches", () => {
         increment: cell => cell.update(actionPatch)
       };
 
-      const effects = [
-        cell => {
-          if (cell.state.count === 1) {
-            actions.increment(cell);
+      const services = [
+        {
+          run: cell => {
+            if (cell.state.count === 1) {
+              actions.increment(cell);
+            }
           }
         },
-        ({ state, update }) => {
-          if (state.count === 2 && !state.service) {
-            update(servicePatch);
+        {
+          run: ({ state, update }) => {
+            if (state.count === 2 && !state.service) {
+              update(servicePatch);
+            }
           }
         }
       ];
 
-      const { states, getCell } = setupFn({ initial: { count: 0 }, effects });
+      const { states, getCell } = setupFn({ initial: { count: 0 }, services });
       const cell = getCell();
 
       cell.update(updatePatch);
@@ -235,15 +192,20 @@ describe("meiosis setup with library for applying patches", () => {
       ])
     )("%s", (_label, setupFn, service1, service2, updatePatch) => {
       const services = [
-        state => {
-          if (state.count === 1) {
-            return service1;
+        {
+          run: cell => {
+            if (cell.state.count === 1) {
+              cell.update(service1);
+            }
           }
         },
         // Services see previous changes
-        state => {
-          if (state.count === 2) {
-            return service2;
+        {
+          onchange: state => state.count,
+          run: cell => {
+            if (cell.state.count === 2) {
+              cell.update(service2);
+            }
           }
         }
       ];
@@ -261,81 +223,89 @@ describe("meiosis setup with library for applying patches", () => {
     });
 
     test.each(
-      createTestCases("synchronous effect updates", [
-        [{ count: x => x + 1 }, { effect1: true }, { effect2: true }, { count: 1 }],
+      createTestCases("synchronous service updates", [
+        [{ count: x => x + 1 }, { service1: true }, { service2: true }, { count: 1 }],
         [
           R.over(R.lensProp("count"), R.add(1)),
-          R.assoc("effect1", true),
-          R.assoc("effect2", true),
+          R.assoc("service1", true),
+          R.assoc("service2", true),
           R.assoc("count", 1)
         ]
       ])
-    )("%s", (_label, setupFn, incr, effect1, effect2, init) => {
-      const effects = [
-        ({ state, update }) => {
-          if (state.count === 1) {
-            update(incr);
-            update(effect1);
+    )("%s", (_label, setupFn, incr, service1, service2, init) => {
+      const services = [
+        {
+          run: ({ state, update }) => {
+            if (state.count === 1) {
+              update(incr);
+              update(service1);
+            }
           }
         },
-        ({ state, update }) => {
-          if (state.count > 1 && !state.effect2) {
-            update(effect2);
+        {
+          run: ({ state, update }) => {
+            if (state.count > 1 && !state.service2) {
+              update(service2);
+            }
           }
         }
       ];
 
-      const { states, getCell } = setupFn({ effects });
+      const { states, getCell } = setupFn({ services });
       const cell = getCell();
 
       cell.update(init);
 
-      expect(states()).toEqual({ count: 2, effect1: true, effect2: true });
+      expect(states()).toEqual({ count: 2, service1: true, service2: true });
     });
 
     test.each(
-      createTestCases("effects may be called in an infinite loop", [
-        [{ effect: true }, { count: 1 }],
-        [R.assoc("effect", true), R.assoc("count", 1)]
+      createTestCases("services may be called in an infinite loop", [
+        [{ service: true }, { count: 1 }],
+        [R.assoc("service", true), R.assoc("count", 1)]
       ])
-    )("%s", (_label, setupFn, effect, init) => {
-      let effectCalls = 0;
+    )("%s", (_label, setupFn, service, init) => {
+      let serviceCalls = 0;
 
-      const effects = [
-        ({ state, update }) => {
-          if (state.count === 1 && effectCalls < 5) {
-            effectCalls++;
-            update(effect);
+      const services = [
+        {
+          run: ({ state, update }) => {
+            if (state.count === 1 && serviceCalls < 5) {
+              serviceCalls++;
+              update(service);
+            }
           }
         }
       ];
 
-      const { states, getCell } = setupFn({ effects });
+      const { states, getCell } = setupFn({ services });
       const cell = getCell();
 
       cell.update(init);
 
-      expect(effectCalls).toEqual(5);
-      expect(states()).toEqual({ count: 1, effect: true });
+      expect(serviceCalls).toEqual(5);
+      expect(states()).toEqual({ count: 1, service: true });
     });
 
     test.each(
-      createTestCases("effect running on initial state is seen in the getState stream", [
-        [{ effect: true }],
-        [R.assoc("effect", true)]
+      createTestCases("service running on initial state is seen in the states stream", [
+        [{ service: true }],
+        [R.assoc("service", true)]
       ])
-    )("%s", (_label, setupFn, effect) => {
-      const effects = [
-        ({ state, update }) => {
-          if (!state.effect) {
-            update(effect);
+    )("%s", (_label, setupFn, service) => {
+      const services = [
+        {
+          run: ({ state, update }) => {
+            if (!state.service) {
+              update(service);
+            }
           }
         }
       ];
 
-      const { states } = setupFn({ effects });
+      const { states } = setupFn({ services });
 
-      expect(states()).toEqual({ effect: true });
+      expect(states()).toEqual({ service: true });
     });
 
     test.each(
@@ -345,9 +315,11 @@ describe("meiosis setup with library for applying patches", () => {
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch) => {
       const services = [
-        state => {
-          if (state.one) {
-            return servicePatch;
+        {
+          run: cell => {
+            if (cell.state.one) {
+              cell.update(servicePatch);
+            }
           }
         }
       ];
@@ -367,9 +339,11 @@ describe("meiosis setup with library for applying patches", () => {
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch) => {
       const services = [
-        state => {
-          if (state.one) {
-            return servicePatch;
+        {
+          run: cell => {
+            if (cell.state.one) {
+              cell.update(servicePatch);
+            }
           }
         }
       ];
@@ -386,72 +360,36 @@ describe("meiosis setup with library for applying patches", () => {
       expect(ticks).toEqual(2);
     });
 
-    test.each(
-      createTestCases("a service and an effect", [
-        [{ patch: true }, { one: true }, { patch: undefined, effect: true }],
-        [
-          R.assoc("patch", true),
-          R.assoc("one", true),
-          meiosis.functionPatches.combinePatches([R.dissoc("patch"), R.assoc("effect", true)])
-        ]
-      ])
-    )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
-      const services = [
-        state => {
-          if (state.patch) {
-            return servicePatch;
-          }
-        }
-      ];
-
-      const effects = [
-        ({ state, update }) => {
-          if (state.patch) {
-            update(effectPatch);
-          }
-        }
-      ];
-
-      const { states, getCell } = setupFn({ services, effects });
-      const cell = getCell();
-
-      let ticks = 0;
-      states.map(() => ticks++);
-
-      cell.update(updatePatch);
-
-      expect(states()).toEqual({ one: true, effect: true });
-      expect(ticks).toEqual(3);
-    });
-
     describe.each(
       createTestCases("route change, please wait, load async", [
         [{ route: "PageB" }, { data: "Loading" }, { data: "Loaded" }],
         [R.assoc("route", "PageB"), R.assoc("data", "Loading"), R.assoc("data", "Loaded")]
       ])
-    )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
+    )("%s", (_label, setupFn, updatePatch, servicePatch1, servicePatch2) => {
       test("async", done => {
         const initial = { route: "PageA", data: "None" };
 
         const services = [
-          state => {
-            if (state.route === "PageB" && state.data === "None") {
-              return servicePatch;
+          {
+            onchange: state => state.route,
+            run: cell => {
+              if (cell.state.route === "PageB") {
+                cell.update(servicePatch1);
+              }
+            }
+          },
+          {
+            run: ({ state, update }) => {
+              if (state.data === "Loading") {
+                setTimeout(() => {
+                  update(servicePatch2);
+                }, 10);
+              }
             }
           }
         ];
 
-        const effects = [
-          ({ state, update }) => {
-            if (state.data === "Loading") {
-              setTimeout(() => {
-                update(effectPatch);
-              }, 10);
-            }
-          }
-        ];
-
-        const { states, getCell } = setupFn({ initial, services, effects });
+        const { states, getCell } = setupFn({ initial, services });
         const cell = getCell();
 
         states.map(state => {
@@ -489,29 +427,31 @@ describe("meiosis setup with library for applying patches", () => {
             ])
         ]
       ])
-    )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
+    )("%s", (_label, setupFn, updatePatch, servicePatch1, servicePatch2) => {
       test("async", done => {
         const initial = { route: "PageA", data: "None" };
 
         const services = [
-          state => {
-            if (state.nextRoute === "PageB" && state.data === "None") {
-              return servicePatch;
+          {
+            onchange: state => state.nextRoute,
+            run: cell => {
+              if (cell.state.nextRoute === "PageB") {
+                cell.update(servicePatch1);
+              }
+            }
+          },
+          {
+            run: ({ state, update }) => {
+              if (state.data === "Loading") {
+                setTimeout(() => {
+                  update(servicePatch2(state));
+                }, 10);
+              }
             }
           }
         ];
 
-        const effects = [
-          ({ state, update }) => {
-            if (state.data === "Loading") {
-              setTimeout(() => {
-                update(effectPatch(state));
-              }, 10);
-            }
-          }
-        ];
-
-        const { states, getCell } = setupFn({ initial, services, effects });
+        const { states, getCell } = setupFn({ initial, services });
         const cell = getCell();
 
         states.map(state => {
@@ -559,26 +499,28 @@ describe("meiosis setup with library for applying patches", () => {
             ])
         ]
       ])
-    )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
+    )("%s", (_label, setupFn, updatePatch, servicePatch1, servicePatch2) => {
       const initial = { route: "PageA" };
 
       const services = [
-        state => {
-          if (state.nextRoute === "PageB" && !state.user) {
-            return servicePatch;
+        {
+          onchange: state => state.nextRoute,
+          run: cell => {
+            if (cell.state.nextRoute === "PageB" && !cell.state.user) {
+              cell.update(servicePatch1);
+            }
+          }
+        },
+        {
+          run: ({ state, update }) => {
+            if (state.redirect) {
+              update(servicePatch2(state));
+            }
           }
         }
       ];
 
-      const effects = [
-        ({ state, update }) => {
-          if (state.redirect) {
-            update(effectPatch(state));
-          }
-        }
-      ];
-
-      const { states, getCell } = setupFn({ initial, services, effects });
+      const { states, getCell } = setupFn({ initial, services });
       const cell = getCell();
 
       states.map(state => {
@@ -601,9 +543,12 @@ describe("meiosis setup with library for applying patches", () => {
       const initial = { route: "PageA", data: "Loaded" };
 
       const services = [
-        state => {
-          if (state.data === "Loaded" && state.route !== "PageA") {
-            return servicePatch;
+        {
+          onchange: state => state.route,
+          run: cell => {
+            if (cell.state.data === "Loaded" && cell.state.route !== "PageA") {
+              cell.update(servicePatch);
+            }
           }
         }
       ];
@@ -629,9 +574,15 @@ describe("meiosis setup with library for applying patches", () => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        state => {
-          if (state.form === "data" && state.nextRoute !== "PageA" && state.confirm !== false) {
-            return servicePatch;
+        {
+          run: cell => {
+            if (
+              cell.state.form === "data" &&
+              cell.state.nextRoute !== "PageA" &&
+              cell.state.confirm !== false
+            ) {
+              cell.update(servicePatch);
+            }
           }
         }
       ];
@@ -683,11 +634,13 @@ describe("meiosis setup with library for applying patches", () => {
       const initial = { route: "PageA", form: "data" };
 
       const services = [
-        state => {
-          if (state.form === "data" && state.nextRoute !== "PageA") {
-            return servicePatch1;
-          } else {
-            return servicePatch2(state);
+        {
+          run: cell => {
+            if (cell.state.form === "data" && cell.state.nextRoute !== "PageA") {
+              cell.update(servicePatch1);
+            } else {
+              cell.update(servicePatch2(cell.state));
+            }
           }
         }
       ];
@@ -714,7 +667,7 @@ describe("meiosis setup with library for applying patches", () => {
     ];
 
     test.each(
-      createTestCases("stream - action and effect calling another action", [
+      createTestCases("stream - action and service calling another action", [
         [{ data: userData }, { flag: "action2" }],
         [R.assoc("data", userData), R.assoc("flag", "action2")]
       ])
@@ -728,18 +681,22 @@ describe("meiosis setup with library for applying patches", () => {
         }
       };
 
-      const appEffects = cell => {
-        if (cell.state.flag === null && cell.state.data.length > 0) {
-          actions.action2(cell);
+      const services = [
+        {
+          run: cell => {
+            if (cell.state.flag === null && cell.state.data.length > 0) {
+              actions.action2(cell);
+            }
+          }
         }
-      };
+      ];
 
       const app = {
         initial: {
           flag: null,
           data: []
         },
-        effects: [appEffects]
+        services
       };
 
       const { states, getCell } = setupFn(app);
@@ -750,10 +707,10 @@ describe("meiosis setup with library for applying patches", () => {
 
       actions.action1(cell);
 
-      expect(stateLog.length).toEqual(3);
+      expect(stateLog.length).toEqual(2);
 
-      if (stateLog.length === 3) {
-        expect(stateLog[2].flag).toEqual("action2");
+      if (stateLog.length === 2) {
+        expect(stateLog[1].flag).toEqual("action2");
       }
     });
 
@@ -782,21 +739,27 @@ describe("meiosis setup with library for applying patches", () => {
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
-      const appService = state => {
-        if (state.events.event1) {
-          return appServicePatch;
+      const appService = {
+        run: cell => {
+          if (cell.state.events.event1) {
+            cell.update(appServicePatch);
+          }
         }
       };
 
-      const service1 = state => {
-        if (state.triggers.trigger1) {
-          return servicePatch1;
+      const service1 = {
+        run: cell => {
+          if (cell.state.triggers.trigger1) {
+            cell.update(servicePatch1);
+          }
         }
       };
 
-      const service2 = state => {
-        if (state.triggers.trigger2) {
-          return servicePatch2;
+      const service2 = {
+        run: cell => {
+          if (cell.state.triggers.trigger2) {
+            cell.update(servicePatch2);
+          }
         }
       };
 
@@ -825,12 +788,12 @@ describe("meiosis setup with library for applying patches", () => {
     });
 
     describe.each(
-      createTestCases("one event triggers multiple effects", [
+      createTestCases("one event triggers multiple services", [
         [
           { events: { event1: true } },
           { events: { event1: undefined }, triggers: { trigger1: true, trigger2: true } },
-          { triggers: { trigger1: undefined }, effect1: true },
-          { triggers: { trigger2: undefined }, effect2: true }
+          { triggers: { trigger1: undefined }, service1: true },
+          { triggers: { trigger2: undefined }, service2: true }
         ],
         [
           R.assocPath(["events", "event1"], true),
@@ -840,42 +803,48 @@ describe("meiosis setup with library for applying patches", () => {
           ]),
           meiosis.functionPatches.combinePatches([
             R.dissocPath(["triggers", "trigger1"]),
-            R.assoc("effect1", true)
+            R.assoc("service1", true)
           ]),
           meiosis.functionPatches.combinePatches([
             R.dissocPath(["triggers", "trigger2"]),
-            R.assoc("effect2", true)
+            R.assoc("service2", true)
           ])
         ]
       ])
-    )("%s", (_label, setupFn, updatePatch, appEffectPatch, effectPatch1, effectPatch2) => {
+    )("%s", (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
       test("async", done => {
-        const appEffect = ({ state, update }) => {
-          if (state.events.event1) {
-            setTimeout(() => update(appEffectPatch), 1);
+        const appService = {
+          run: ({ state, update }) => {
+            if (state.events.event1) {
+              setTimeout(() => update(appServicePatch), 1);
+            }
           }
         };
 
-        const effect1 = ({ state, update }) => {
-          if (state.triggers.trigger1) {
-            setTimeout(() => update(effectPatch1), 1);
+        const service1 = {
+          run: ({ state, update }) => {
+            if (state.triggers.trigger1) {
+              setTimeout(() => update(servicePatch1), 1);
+            }
           }
         };
 
-        const effect2 = ({ state, update }) => {
-          if (state.triggers.trigger2) {
-            setTimeout(() => update(effectPatch2), 1);
+        const service2 = {
+          run: ({ state, update }) => {
+            if (state.triggers.trigger2) {
+              setTimeout(() => update(servicePatch2), 1);
+            }
           }
         };
 
-        const effects = [appEffect, effect1, effect2];
+        const services = [appService, service1, service2];
 
         const app = {
           initial: {
             events: {},
             triggers: {}
           },
-          effects
+          services
         };
 
         const { states, getCell } = setupFn(app);
@@ -891,9 +860,9 @@ describe("meiosis setup with library for applying patches", () => {
                 { events: {}, triggers: {} },
                 { events: { event1: true }, triggers: {} },
                 { events: {}, triggers: { trigger1: true, trigger2: true } },
-                { events: {}, triggers: { trigger2: true }, effect1: true },
-                { events: {}, triggers: {}, effect1: true, effect2: true },
-                { events: {}, triggers: {}, effect1: true, effect2: true }
+                { events: {}, triggers: { trigger2: true }, service1: true },
+                { events: {}, triggers: {}, service1: true, service2: true },
+                { events: {}, triggers: {}, service1: true, service2: true }
               ]);
               done();
             } catch (error) {
