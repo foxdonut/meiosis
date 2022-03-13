@@ -1,4 +1,5 @@
 import simpleStream from "../simple-stream";
+import { assoc, concatIfPresent } from "../util";
 
 /**
  * A mapping function.
@@ -264,6 +265,68 @@ export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S, P> {
    */
   accumulator: Accumulator<S, P>;
 }
+
+interface CommonComponentService<S> {
+  onchange?: (state: S) => any;
+  run: (cell: any) => any;
+}
+
+type CommonSubComponents<S> = {
+  [K in keyof S]?: CommonStateComponent<S[K]>;
+};
+
+interface CommonStateComponent<S> {
+  initial?: Partial<S>;
+  services?: CommonComponentService<S>[];
+  subComponents?: CommonSubComponents<S>;
+}
+
+const assembleInitialState = <S>(subComponents: CommonSubComponents<S> | undefined): any =>
+  subComponents
+    ? Object.keys(subComponents).reduce(
+        (result, key) =>
+          assoc(
+            key,
+            Object.assign(
+              {},
+              subComponents[key]?.initial,
+              assembleInitialState(subComponents[key]?.subComponents)
+            ),
+            result
+          ),
+        {}
+      )
+    : {};
+
+export const commonGetInitialState = <S>(component: CommonStateComponent<S>): S =>
+  Object.assign({}, component.initial, assembleInitialState(component.subComponents));
+
+const assembleServices = <S>(
+  subComponents: CommonSubComponents<S> | undefined,
+  getCell = cell => cell
+): CommonComponentService<S>[] =>
+  subComponents
+    ? Object.keys(subComponents).reduce((result, key) => {
+        const nextGetCell = cell => getCell(cell).nest(key);
+
+        const subComponent: CommonStateComponent<any> = subComponents[key];
+
+        return concatIfPresent(
+          result,
+          subComponent.services?.map<CommonComponentService<any>>(service => ({
+            onchange: state => (service.onchange ? service.onchange(state[key]) : state),
+            run: cell => service.run(nextGetCell(cell))
+          }))
+        ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
+      }, [] as CommonComponentService<S>[])
+    : [];
+
+export const commonGetComponentServices = <S>(
+  component: CommonStateComponent<S>
+): CommonComponentService<S>[] =>
+  concatIfPresent([] as CommonComponentService<S>[], component.services).concat(
+    assembleServices(component.subComponents)
+  );
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,

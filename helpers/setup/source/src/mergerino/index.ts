@@ -6,7 +6,9 @@ import commonSetup, {
   CommonMeiosisConfig,
   CommonMeiosisSetup,
   CommonService,
-  CommonUpdate
+  CommonUpdate,
+  commonGetComponentServices,
+  commonGetInitialState
 } from "../common";
 
 /**
@@ -60,12 +62,16 @@ export type Update<S> = CommonUpdate<Patch<S>>;
 
 export type Service<S> = CommonService<S, Patch<S>>;
 
+export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+}
+
 export interface Effect<S> {
   (cell: MeiosisCell<S>): void;
 }
 
 export interface ComponentService<S> {
-  onchange: (state: S) => any;
+  onchange?: (state: S) => any;
   run: (cell: MeiosisCell<S>) => any;
 }
 
@@ -81,10 +87,6 @@ export interface App<S> extends CommonApp<S, Patch<S>> {
   effects?: Effect<S>[];
 
   componentServices?: ComponentService<S>[];
-}
-
-export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
-  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
 /**
@@ -139,12 +141,7 @@ const nestCell = <S, K extends Extract<keyof S, string>>(
  */
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
 
-const assoc = (key: string, value: any, result: any): any => {
-  result[key] = value;
-  return result;
-};
-
-type SubComponents<S> = {
+export type SubComponents<S> = {
   [K in keyof S]?: StateComponent<S[K]>;
 };
 
@@ -154,54 +151,11 @@ export interface StateComponent<S> {
   subComponents?: SubComponents<S>;
 }
 
-const assembleInitialState = <S>(subComponents: SubComponents<S> | undefined): any =>
-  subComponents
-    ? Object.keys(subComponents).reduce(
-        (result, key) =>
-          assoc(
-            key,
-            Object.assign(
-              {},
-              subComponents[key]?.initial,
-              assembleInitialState(subComponents[key]?.subComponents)
-            ),
-            result
-          ),
-        {}
-      )
-    : {};
-
 export const getInitialState = <S>(component: StateComponent<S>): S =>
-  Object.assign({}, component.initial, assembleInitialState(component.subComponents));
-
-const concatIfPresent = (target: any[], source?: any[]): any[] =>
-  source ? target.concat(source) : target;
-
-const assembleServices = <S>(
-  subComponents: SubComponents<S> | undefined,
-  getCell = cell => cell
-): ComponentService<S>[] =>
-  subComponents
-    ? Object.keys(subComponents).reduce((result, key) => {
-        const nextGetCell = (cell: MeiosisCell<S>): MeiosisCell<typeof key> =>
-          getCell(cell).nest(key);
-
-        const subComponent: StateComponent<any> = subComponents[key];
-
-        return concatIfPresent(
-          result,
-          subComponent.services?.map<ComponentService<any>>(service => ({
-            onchange: state => service.onchange(state[key]),
-            run: cell => service.run(nextGetCell(cell))
-          }))
-        ).concat(assembleServices(subComponents[key]?.subComponents, nextGetCell));
-      }, [] as ComponentService<S>[])
-    : [];
+  commonGetInitialState(component);
 
 export const getComponentServices = <S>(component: StateComponent<S>): ComponentService<S>[] =>
-  concatIfPresent([] as ComponentService<S>[], component.services).concat(
-    assembleServices(component.subComponents)
-  );
+  commonGetComponentServices(component);
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).

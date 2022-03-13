@@ -34,6 +34,10 @@ export type Update<S> = CommonUpdate<Patch<S>>;
 
 export type Service<S> = CommonService<S, Patch<S>>;
 
+export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+}
+
 export interface Effect<S> {
   (cell: MeiosisCell<S>): void;
 }
@@ -48,10 +52,6 @@ export interface App<S> extends CommonApp<S, Patch<S>> {
    * An array of effect functions.
    */
   effects?: Effect<S>[];
-}
-
-export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
-  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
 /**
