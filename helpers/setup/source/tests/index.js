@@ -32,15 +32,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("minimal", [
         [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-        [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
-        [
-          state => {
-            state.duck = { sound: "quack" };
-          },
-          state => {
-            state.duck.color = "yellow";
-          }
-        ]
+        [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
       ])
     )("%s", (_label, setupFn, patch1, patch2) => {
       const { states, getCell } = setupFn();
@@ -134,12 +126,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("services run on initial state", [
         [{ count: x => x + 1 }],
-        [R.over(R.lensProp("count"), R.add(1))],
-        [
-          draft => {
-            draft.count++;
-          }
-        ]
+        [R.over(R.lensProp("count"), R.add(1))]
       ])
     )("%s", (_label, setupFn, patch) => {
       const services = [state => (state.increment > 0 && state.increment < 10 ? patch : null)];
@@ -156,18 +143,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("effects and actions", [
         [{ count: x => x + 1 }, { service: true }, { count: 1 }],
-        [R.over(R.lensProp("count"), R.add(1)), R.assoc("service", true), R.assoc("count", 1)],
-        [
-          draft => {
-            draft.count++;
-          },
-          draft => {
-            draft.service = true;
-          },
-          draft => {
-            draft.count = 1;
-          }
-        ]
+        [R.over(R.lensProp("count"), R.add(1)), R.assoc("service", true), R.assoc("count", 1)]
       ])
     )("%s", (_label, setupFn, actionPatch, servicePatch, updatePatch) => {
       const actions = {
@@ -221,15 +197,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("an action can call another action", [
         [{ count: x => x + 1 }, { interaction: true }],
-        [R.over(R.lensProp("count"), R.add(1)), R.assoc("interaction", true)],
-        [
-          draft => {
-            draft.count++;
-          },
-          draft => {
-            draft.interaction = true;
-          }
-        ]
+        [R.over(R.lensProp("count"), R.add(1)), R.assoc("interaction", true)]
       ])
     )("%s", (_label, setupFn, action1, action2) => {
       const actions = {
@@ -300,20 +268,6 @@ describe("meiosis setup with library for applying patches", () => {
           R.assoc("effect1", true),
           R.assoc("effect2", true),
           R.assoc("count", 1)
-        ],
-        [
-          draft => {
-            draft.count++;
-          },
-          draft => {
-            draft.effect1 = true;
-          },
-          draft => {
-            draft.effect2 = true;
-          },
-          draft => {
-            draft.count = 1;
-          }
         ]
       ])
     )("%s", (_label, setupFn, incr, effect1, effect2, init) => {
@@ -342,15 +296,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("effects may be called in an infinite loop", [
         [{ effect: true }, { count: 1 }],
-        [R.assoc("effect", true), R.assoc("count", 1)],
-        [
-          draft => {
-            draft.effect = true;
-          },
-          draft => {
-            draft.count = 1;
-          }
-        ]
+        [R.assoc("effect", true), R.assoc("count", 1)]
       ])
     )("%s", (_label, setupFn, effect, init) => {
       let effectCalls = 0;
@@ -376,12 +322,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("effect running on initial state is seen in the getState stream", [
         [{ effect: true }],
-        [R.assoc("effect", true)],
-        [
-          draft => {
-            draft.effect = true;
-          }
-        ]
+        [R.assoc("effect", true)]
       ])
     )("%s", (_label, setupFn, effect) => {
       const effects = [
@@ -400,16 +341,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("a service can alter a state change", [
         [{ one: true }, { one: undefined, two: true }],
-        [R.assoc("one", true), R.compose(R.dissoc("one"), R.assoc("two", true))],
-        [
-          draft => {
-            draft.one = true;
-          },
-          draft => {
-            delete draft.one;
-            draft.two = true;
-          }
-        ]
+        [R.assoc("one", true), R.compose(R.dissoc("one"), R.assoc("two", true))]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch) => {
       const services = [
@@ -431,15 +363,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("a service can cancel a patch", [
         [{ one: true }, { one: undefined }],
-        [R.assoc("one", true), R.dissoc("one")],
-        [
-          draft => {
-            draft.one = true;
-          },
-          draft => {
-            delete draft.one;
-          }
-        ]
+        [R.assoc("one", true), R.dissoc("one")]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch) => {
       const services = [
@@ -469,18 +393,6 @@ describe("meiosis setup with library for applying patches", () => {
           R.assoc("patch", true),
           R.assoc("one", true),
           meiosis.functionPatches.combinePatches([R.dissoc("patch"), R.assoc("effect", true)])
-        ],
-        [
-          draft => {
-            draft.patch = true;
-          },
-          draft => {
-            draft.one = true;
-          },
-          draft => {
-            delete draft.patch;
-            draft.effect = true;
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
@@ -515,18 +427,7 @@ describe("meiosis setup with library for applying patches", () => {
     describe.each(
       createTestCases("route change, please wait, load async", [
         [{ route: "PageB" }, { data: "Loading" }, { data: "Loaded" }],
-        [R.assoc("route", "PageB"), R.assoc("data", "Loading"), R.assoc("data", "Loaded")],
-        [
-          draft => {
-            draft.route = "PageB";
-          },
-          draft => {
-            draft.data = "Loading";
-          },
-          draft => {
-            draft.data = "Loaded";
-          }
-        ]
+        [R.assoc("route", "PageB"), R.assoc("data", "Loading"), R.assoc("data", "Loaded")]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
       test("async", done => {
@@ -586,19 +487,6 @@ describe("meiosis setup with library for applying patches", () => {
               R.dissoc("nextRoute"),
               R.assoc("data", "Loaded")
             ])
-        ],
-        [
-          draft => {
-            draft.nextRoute = "PageB";
-          },
-          draft => {
-            draft.data = "Loading";
-          },
-          state => draft => {
-            draft.route = state.nextRoute;
-            delete draft.nextRoute;
-            draft.data = "Loaded";
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
@@ -669,20 +557,6 @@ describe("meiosis setup with library for applying patches", () => {
               R.assoc("message", state.redirect.message),
               R.dissoc("redirect")
             ])
-        ],
-        [
-          draft => {
-            draft.nextRoute = "PageB";
-          },
-          draft => {
-            delete draft.nextRoute;
-            draft.redirect = { route: "PageC", message: "Please login." };
-          },
-          state => draft => {
-            draft.route = state.redirect.route;
-            draft.message = state.redirect.message;
-            delete draft.redirect;
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch, effectPatch) => {
@@ -721,15 +595,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("leave route, cleanup", [
         [{ route: "PageB" }, { data: "None" }],
-        [R.assoc("route", "PageB"), R.assoc("data", "None")],
-        [
-          draft => {
-            draft.route = "PageB";
-          },
-          draft => {
-            draft.data = "None";
-          }
-        ]
+        [R.assoc("route", "PageB"), R.assoc("data", "None")]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch) => {
       const initial = { route: "PageA", data: "Loaded" };
@@ -757,18 +623,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("leave route, confirm unsaved data, stay on page", [
         [{ nextRoute: "PageB" }, { confirm: true }, { confirm: false }],
-        [R.assoc("nextRoute", "PageB"), R.assoc("confirm", true), R.assoc("confirm", false)],
-        [
-          draft => {
-            draft.nextRoute = "PageB";
-          },
-          draft => {
-            draft.confirm = true;
-          },
-          draft => {
-            draft.confirm = false;
-          }
-        ]
+        [R.assoc("nextRoute", "PageB"), R.assoc("confirm", true), R.assoc("confirm", false)]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch, cancelPatch) => {
       const initial = { route: "PageA", form: "data" };
@@ -822,23 +677,6 @@ describe("meiosis setup with library for applying patches", () => {
             R.assoc("nextRoute", "PageB"),
             R.dissoc("form")
           ])
-        ],
-        [
-          draft => {
-            draft.nextRoute = "PageB";
-          },
-          draft => {
-            draft.confirm = true;
-          },
-          state => draft => {
-            draft.route = state.nextRoute;
-            delete draft.nextRoute;
-          },
-          draft => {
-            draft.confirm = false;
-            draft.nextRoute = "PageB";
-            delete draft.form;
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, servicePatch1, servicePatch2, confirmPatch) => {
@@ -878,15 +716,7 @@ describe("meiosis setup with library for applying patches", () => {
     test.each(
       createTestCases("stream - action and effect calling another action", [
         [{ data: userData }, { flag: "action2" }],
-        [R.assoc("data", userData), R.assoc("flag", "action2")],
-        [
-          state => {
-            state.data = userData;
-          },
-          state => {
-            state.flag = "action2";
-          }
-        ]
+        [R.assoc("data", userData), R.assoc("flag", "action2")]
       ])
     )("%s", (_label, setupFn, patch1, patch2) => {
       const actions = {
@@ -949,23 +779,6 @@ describe("meiosis setup with library for applying patches", () => {
             R.dissocPath(["triggers", "trigger2"]),
             R.assoc("service2", true)
           ])
-        ],
-        [
-          state => {
-            state.events.event1 = true;
-          },
-          state => {
-            delete state.events.event1;
-            state.triggers = { trigger1: true, trigger2: true };
-          },
-          state => {
-            delete state.triggers.trigger1;
-            state.service1 = true;
-          },
-          state => {
-            delete state.triggers.trigger2;
-            state.service2 = true;
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
@@ -1033,23 +846,6 @@ describe("meiosis setup with library for applying patches", () => {
             R.dissocPath(["triggers", "trigger2"]),
             R.assoc("effect2", true)
           ])
-        ],
-        [
-          state => {
-            state.events.event1 = true;
-          },
-          state => {
-            delete state.events.event1;
-            state.triggers = { trigger1: true, trigger2: true };
-          },
-          state => {
-            delete state.triggers.trigger1;
-            state.effect1 = true;
-          },
-          state => {
-            delete state.triggers.trigger2;
-            state.effect2 = true;
-          }
         ]
       ])
     )("%s", (_label, setupFn, updatePatch, appEffectPatch, effectPatch1, effectPatch2) => {
@@ -1176,15 +972,7 @@ describe("Meiosis cell", () => {
   test.each(
     createTestCases("minimal", [
       [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
-      [
-        state => {
-          state.duck = { sound: "quack" };
-        },
-        state => {
-          state.duck.color = "yellow";
-        }
-      ]
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
     const { states, getCell } = setupFn();
@@ -1200,15 +988,7 @@ describe("Meiosis cell", () => {
   test.each(
     createTestCases("nest", [
       [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
-      [
-        state => {
-          state.duck = { sound: "quack" };
-        },
-        state => {
-          state.duck.color = "yellow";
-        }
-      ]
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
     const { states, getCell } = setupFn({ initial: { feathers: { duck: {} } } });
@@ -1224,15 +1004,7 @@ describe("Meiosis cell", () => {
   test.each(
     createTestCases("nest gets latest state", [
       [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
-      [
-        state => {
-          state.duck = { sound: "quack" };
-        },
-        state => {
-          state.duck.color = "yellow";
-        }
-      ]
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
     const { getCell } = setupFn({ initial: { feathers: { duck: {} } } });
@@ -1248,15 +1020,7 @@ describe("Meiosis cell", () => {
   test.each(
     createTestCases("deep nest", [
       [{ duck: { sound: "quack" } }, { duck: { color: "yellow" } }],
-      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")],
-      [
-        state => {
-          state.duck = { sound: "quack" };
-        },
-        state => {
-          state.duck.color = "yellow";
-        }
-      ]
+      [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
     const { states, getCell } = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
@@ -1278,17 +1042,6 @@ describe("Meiosis cell", () => {
         () => ({ duck: { sound: "quack" } }),
         R.assocPath(["duck", "color"], "yellow"),
         R.assoc("done", true)
-      ],
-      [
-        state => {
-          state.duck = { sound: "quack" };
-        },
-        state => {
-          state.duck.color = "yellow";
-        },
-        state => {
-          state.done = true;
-        }
       ]
     ])
   )("%s", (_label, setupFn, patch1, patch2, patch3) => {

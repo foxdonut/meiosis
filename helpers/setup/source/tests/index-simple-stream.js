@@ -11,7 +11,7 @@ describe("simpleStream", () => {
     expect(result).toEqual(42);
   });
 
-  test("value order", () => {
+  test("latest value", () => {
     const s1 = meiosis.simpleStream.stream();
 
     const f1 = x => {
@@ -20,9 +20,9 @@ describe("simpleStream", () => {
       }
     };
 
-    const f2 = x => x;
-
     s1.map(f1);
+
+    const f2 = x => x;
     const s2 = s1.map(f2);
 
     const values = [];
@@ -30,8 +30,8 @@ describe("simpleStream", () => {
 
     s1(10);
 
-    // This actually results in [20, 20] with mithril stream...
-    expect(values).toEqual([10, 20]);
+    // Synchronous updates
+    expect(values).toEqual([20, 20]);
   });
 
   test("effect on initial state", done => {

@@ -12,18 +12,15 @@ import { MapFunction, Stream, StreamLibWithProperty, Scan } from "../common";
 export const stream = <T>(initial?: T): Stream<T> => {
   const mapFunctions: MapFunction<any, any>[] = [];
   let latestValue = initial as T;
-  // credit @cmnstmntmn for discovering this bug.
-  // Keep track of mapped values so that they are sent to mapped streams in order.
-  // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1.
-  const mappedValues: any[] = [];
 
   const createdStream: Stream<T> = function (value) {
     if (arguments.length > 0 && !createdStream.ended) {
       latestValue = value as T;
-      mappedValues.forEach(arr => arr.push(value));
       for (const i in mapFunctions) {
-        const nextValue = mappedValues[i].shift();
-        mapFunctions[i](nextValue);
+        // credit @cmnstmntmn for discovering this bug.
+        // Make sure to send the latest value.
+        // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1 (old value).
+        mapFunctions[i](latestValue);
       }
     }
     return latestValue;
@@ -36,13 +33,11 @@ export const stream = <T>(initial?: T): Stream<T> => {
       newStream(mapFunction(value));
     };
     mapFunctions.push(mappedFunction);
-    mappedValues.push([]);
 
     newStream.end = (_value?: boolean) => {
       const idx = mapFunctions.indexOf(mappedFunction);
       newStream.ended = true;
       mapFunctions.splice(idx, 1);
-      mappedValues.splice(idx, 1);
     };
 
     if (latestValue !== undefined) {
