@@ -88,37 +88,21 @@ const Temperature = ({ cell }) => (
   </div>
 );
 
-/** @type {import("react").FunctionComponent} */
-const App = ({ cell }) => {
-  /** @type {import("react").ReactElement} */
-  /// @ts-ignore
-  const result = (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-      <div>
-        <Conditions cell={cell.nest("conditions")} />
-        <Temperature cell={cell.nest("temperature").nest("air")} />
-        <Temperature cell={cell.nest("temperature").nest("water")} />
-      </div>
-      <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
+const App = ({ cell }) => (
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+    <div>
+      <Conditions cell={cell.nest("conditions")} />
+      <Temperature cell={cell.nest("temperature").nest("air")} />
+      <Temperature cell={cell.nest("temperature").nest("water")} />
     </div>
-  );
-  return result;
-};
+    <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
+  </div>
+);
 
 export const setupReactExample = () => {
-  const Root = ({ states, getCell }) => {
-    const [init, setInit] = React.useState(false);
-    const [, setState] = React.useState(states());
-
-    if (!init) {
-      setInit(true);
-      states.map(setState);
-    }
-
-    return React.createElement(App, { cell: getCell() });
-  };
-
   const { states, getCell } = meiosis.functionPatches.setup({ stream: flyd, app });
   const element = document.getElementById("reactApp");
-  ReactDOM.render(React.createElement(Root, { states, getCell }), element);
+  states.map(() => {
+    ReactDOM.render(<App cell={getCell()} />, element);
+  });
 };

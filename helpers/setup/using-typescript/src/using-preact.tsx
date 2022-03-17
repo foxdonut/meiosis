@@ -1,7 +1,7 @@
 // preact + functionPatches + simple-stream
+
 import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
 import { h, render as preactRender, VNode } from "preact";
-import { useState } from "preact/hooks";
 import { add, assoc, over, lensProp } from "rambda";
 import {
   Conditions,
@@ -158,14 +158,9 @@ const App: (attrs: Attrs) => VNode = ({ cell }) =>
   );
 
 export const setupPreactExample = (): void => {
-  const Root = ({ states, getCell }) => {
-    const [, setState] = useState(states());
-    states.map(setState);
-
-    return h(App, { cell: getCell() });
-  };
-
   const { states, getCell } = setup<State>({ app });
   const element = document.getElementById("preactApp") as HTMLElement;
-  preactRender(h(Root, { states, getCell }), element);
+  states.map(() => {
+    preactRender(h(App, { cell: getCell() }), element);
+  });
 };

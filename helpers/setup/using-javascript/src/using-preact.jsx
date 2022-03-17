@@ -3,7 +3,6 @@
 
 import meiosis from "../../source/dist/index";
 import { h, render as preactRender } from "preact";
-import { useState } from "preact/hooks";
 import { add, assoc, over, lensProp } from "rambda";
 import { app, convert } from "./common";
 
@@ -105,14 +104,9 @@ const App = ({ cell }) =>
   );
 
 export const setupPreactExample = () => {
-  const Root = ({ states, getCell }) => {
-    const [, setState] = useState(states());
-    states.map(setState);
-
-    return h(App, { cell: getCell() });
-  };
-
   const { states, getCell } = meiosis.functionPatches.setup({ app });
   const element = document.getElementById("preactApp");
-  preactRender(h(Root, { states, getCell }), element);
+  states.map(() => {
+    preactRender(h(App, { cell: getCell() }), element);
+  });
 };
