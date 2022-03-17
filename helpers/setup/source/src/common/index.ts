@@ -161,8 +161,6 @@ export interface StreamLibWithProperty extends StreamScan {
  */
 export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
 
-export type CommonUpdate<P> = (patch: P) => any;
-
 /**
  * Meiosis Cell.
  *
@@ -184,9 +182,7 @@ export interface CommonMeiosisSetup<S, P> {
   /**
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
-  update: CommonUpdate<P>;
-
-  dropRepeats<T>(states: Stream<T>, selector?: (state: T) => any): Stream<T>;
+  update: Stream<P>;
 }
 
 export interface CommonService<S> {
@@ -286,6 +282,26 @@ const assembleServices = <S>(
 export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
   concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
 
+// Credit: James Forbes (https://james-forbes.com/)
+export const createDropRepeats = (stream: ExternalStreamLib = simpleStream) => <S>(
+  states: Stream<S>,
+  selector: (state: S) => any = x => x
+): Stream<S> => {
+  const createStream = typeof stream === "function" ? stream : stream.stream;
+
+  let prev = undefined;
+  const result = createStream();
+
+  states.map(state => {
+    const next = selector(state);
+    if (next !== prev) {
+      prev = next;
+      result(state);
+    }
+  });
+  return result;
+};
+
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
  * use their respective `setup` function instead.
@@ -314,35 +330,22 @@ export const setup = <S, P>({
   const initial = commonGetInitialState(app || {});
 
   // falsy patches are ignored
-  const accumulatorFn = (state, patch) => (patch ? accumulator(state, patch) : state);
+  const accumulatorFn = (state: S, patch: P) => (patch ? accumulator(state, patch) : state);
 
   const createStream = typeof stream === "function" ? stream : stream.stream;
   const scan = stream.scan;
 
   const update: Stream<P> = createStream();
-  const updateFn: CommonUpdate<P> = patch => update(patch);
 
-  const states: Stream<S> = scan((state, patch) => accumulatorFn(state, patch), initial, update);
-
-  // Credit: James Forbes (https://james-forbes.com/)
-  const dropRepeats = <S>(states: Stream<S>, selector: (state: S) => any = x => x): Stream<S> => {
-    let prev = undefined;
-    const result = createStream();
-
-    states.map(state => {
-      const next = selector(state);
-      if (next !== prev) {
-        prev = next;
-        result(state);
-      }
-    });
-    return result;
-  };
+  const states: Stream<S> = scan(
+    (state: S, patch: P) => accumulatorFn(state, patch),
+    initial,
+    update
+  );
 
   return {
     states,
-    update: updateFn,
-    dropRepeats
+    update
   };
 };
 

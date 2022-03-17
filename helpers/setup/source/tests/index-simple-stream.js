@@ -34,7 +34,7 @@ describe("simpleStream", () => {
     expect(values).toEqual([20, 20]);
   });
 
-  test("effect on initial state", done => {
+  test("service on initial state", done => {
     const update = meiosis.simpleStream.stream();
     const initial = { route: "Home", routeChanged: true, data: [] };
 
@@ -44,7 +44,7 @@ describe("simpleStream", () => {
       update
     );
 
-    const effect = state => {
+    const service = state => {
       if (state.route === "Home") {
         if (state.routeChanged) {
           update({ routeChanged: false, loading: true });
@@ -56,7 +56,7 @@ describe("simpleStream", () => {
       }
     };
 
-    states.map(state => effect(state));
+    states.map(state => service(state));
 
     states.map(state => {
       try {
@@ -77,6 +77,48 @@ describe("simpleStream", () => {
     });
 
     s1(undefined);
+  });
+
+  test("dropRepeats", () => {
+    const dropRepeats = meiosis.common.createDropRepeats();
+    const s1 = meiosis.simpleStream.stream();
+    const s2 = dropRepeats(s1);
+
+    let ticks = 0;
+    s2.map(() => {
+      ticks++;
+    });
+
+    s1("A");
+    s1("A");
+    s1("A");
+    s1("A");
+    s1("B");
+    s1("B");
+    s1("B");
+
+    expect(ticks).toEqual(2);
+  });
+
+  test("dropRepeats with selector", () => {
+    const dropRepeats = meiosis.common.createDropRepeats();
+    const s1 = meiosis.simpleStream.stream();
+    const s2 = dropRepeats(s1, s => s.value);
+
+    let ticks = 0;
+    s2.map(() => {
+      ticks++;
+    });
+
+    s1({ value: 5 });
+    s1({ value: 5, duck: "quack" });
+    s1({ value: 5, color: "yellow" });
+    s1({ value: 42, color: "yellow" });
+    s1({ value: 42, duck: "quack" });
+    s1({ value: 42, color: "yellow" });
+    s1({ value: 42 });
+
+    expect(ticks).toEqual(2);
   });
 
   test("end stream", () => {

@@ -2,10 +2,10 @@ import commonSetup, {
   CommonApp,
   CommonMeiosisConfig,
   CommonService,
-  CommonUpdate,
   Stream,
   commonGetServices,
-  commonGetInitialState
+  commonGetInitialState,
+  createDropRepeats
 } from "../common";
 
 /**
@@ -31,7 +31,9 @@ export interface Patch<S> {
   (state: S): S;
 }
 
-export type Update<S> = CommonUpdate<Patch<S>>;
+export interface Update<S> {
+  (patch: Patch<S>): any;
+}
 
 export interface MeiosisCell<S> {
   state: S;
@@ -122,7 +124,7 @@ export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(a
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
 export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, update, dropRepeats } = commonSetup<S, Patch<S>>({
+  const { states, update } = commonSetup<S, Patch<S>>({
     stream,
     accumulator: (state, patch) => patch(state),
     app
@@ -138,6 +140,8 @@ export const setup = <S>({ stream, app }: MeiosisConfig<S>): MeiosisSetup<S> => 
     update,
     nest
   });
+
+  const dropRepeats = createDropRepeats(stream);
 
   if (app) {
     getServices(app).forEach(service => {

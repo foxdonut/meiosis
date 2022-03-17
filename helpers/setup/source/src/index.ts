@@ -1,12 +1,13 @@
-import commonSetup from "./common";
+import commonSetup, { createDropRepeats } from "./common";
 import mSetup, { combinePatches as mCombinePatches } from "./mergerino";
 import fSetup, { combinePatches as fCombinePatches } from "./functionPatches";
 import simpleStream from "./simple-stream";
-import { get } from "./util";
+import { assoc, concatIfPresent, get } from "./util";
 
 export default {
   common: {
-    setup: commonSetup
+    setup: commonSetup,
+    createDropRepeats
   },
   mergerino: {
     setup: mSetup,
@@ -18,6 +19,8 @@ export default {
   },
   simpleStream,
   util: {
-    get
+    assoc,
+    get,
+    concatIfPresent
   }
 };
