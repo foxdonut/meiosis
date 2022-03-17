@@ -104,9 +104,9 @@ const App = ({ cell }) =>
   );
 
 export const setupPreactExample = () => {
-  const { states, getCell } = meiosis.functionPatches.setup({ app });
+  const { cells } = meiosis.functionPatches.setup({ app });
   const element = document.getElementById("preactApp");
-  states.map(() => {
-    preactRender(h(App, { cell: getCell() }), element);
+  cells.map(() => {
+    preactRender(h(App, { cell: cells() }), element);
   });
 };

@@ -2,11 +2,10 @@ import simpleStream from "../simple-stream";
 import merge from "mergerino";
 import commonSetup, {
   CommonApp,
-  CommonMeiosisCell,
   CommonMeiosisConfig,
-  CommonMeiosisSetup,
   CommonService,
   CommonUpdate,
+  Stream,
   commonGetServices,
   commonGetInitialState
 } from "../common";
@@ -60,7 +59,9 @@ export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 export type Update<S> = CommonUpdate<Patch<S>>;
 
-export interface MeiosisCell<S> extends CommonMeiosisCell<S, Patch<S>> {
+export interface MeiosisCell<S> {
+  state: S;
+  update: Update<S>;
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
 }
 
@@ -90,8 +91,8 @@ export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
   app?: App<S>;
 }
 
-export interface MeiosisSetup<S> extends CommonMeiosisSetup<S, Patch<S>> {
-  getCell: () => MeiosisCell<S>;
+export interface MeiosisSetup<S> {
+  cells: Stream<MeiosisCell<S>>;
 }
 
 const nestPatch = <S, K extends Extract<keyof S, string>>(
@@ -150,33 +151,32 @@ export const setup = <S>({
   stream = simpleStream,
   app = {}
 }: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, getCell, dropRepeats } = commonSetup({
+  const { states, update, dropRepeats } = commonSetup<S, Patch<S>>({
     stream,
     accumulator: merge,
     app
   });
 
-  const getCellWithNest = () => {
-    const cell = getCell();
+  const nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]> = nestCell(
+    states,
+    update
+  );
 
-    const cellWithNest: MeiosisCell<S> = {
-      ...cell,
-      nest: nestCell(states, cell.update)
-    };
-
-    return cellWithNest;
-  };
+  const getCell = (state: S): MeiosisCell<S> => ({
+    state,
+    update,
+    nest
+  });
 
   if (app) {
     getServices(app).forEach(service => {
-      dropRepeats(states, service.onchange).map(() => service.run(getCellWithNest()));
+      dropRepeats(states, service.onchange).map(state => service.run(getCell(state)));
     });
   }
 
-  return {
-    states: dropRepeats(states),
-    getCell: getCellWithNest
-  };
+  const cells: Stream<MeiosisCell<S>> = dropRepeats(states).map(getCell);
+
+  return { cells };
 };
 
 export default setup;

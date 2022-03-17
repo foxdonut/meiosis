@@ -35,20 +35,20 @@ describe("meiosis setup with library for applying patches", () => {
         [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
       ])
     )("%s", (_label, setupFn, patch1, patch2) => {
-      const { states, getCell } = setupFn();
-      const cell = getCell();
+      const { cells } = setupFn();
+      const cell = cells();
       expect(cell.state).toEqual({});
 
       cell.update(patch1);
       cell.update(patch2);
 
-      expect(states()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+      expect(cells().state).toEqual({ duck: { sound: "quack", color: "yellow" } });
     });
 
     test.each(createTestCases("initial state"))("%s", (_label, setupFn) => {
-      const { getCell } = setupFn({ initial: { duck: "yellow" } });
+      const { cells } = setupFn({ initial: { duck: "yellow" } });
 
-      expect(getCell().state).toEqual({ duck: "yellow" }, "initial state");
+      expect(cells().state).toEqual({ duck: "yellow" }, "initial state");
     });
 
     test.each(createTestCases("initial state promise"))("%s", (_label, setupFn) => {
@@ -60,9 +60,9 @@ describe("meiosis setup with library for applying patches", () => {
       const createApp = () => Initial().then(initial => ({ initial }));
 
       return createApp().then(app => {
-        const { states } = setupFn(app);
+        const { cells } = setupFn(app);
 
-        expect(states()).toEqual({ duck: "yellow" }, "initial state");
+        expect(cells().state).toEqual({ duck: "yellow" }, "initial state");
       });
     });
 
@@ -84,12 +84,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states } = setupFn({ initial: { count: 0, increment: 1 }, services });
+      const { cells } = setupFn({ initial: { count: 0, increment: 1 }, services });
 
       let ticks = 0;
-      states.map(() => ticks++);
+      cells.map(() => ticks++);
 
-      expect(states()).toEqual({ count: 1, increment: 0 });
+      expect(cells().state).toEqual({ count: 1, increment: 0 });
       expect(ticks).toEqual(1);
     });
 
@@ -120,12 +120,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ initial: { count: 0 }, services });
-      const cell = getCell();
+      const { cells } = setupFn({ initial: { count: 0 }, services });
+      const cell = cells();
 
       cell.update(updatePatch);
 
-      expect(states()).toEqual({ count: 2, service: true });
+      expect(cells().state).toEqual({ count: 2, service: true });
     });
 
     test.each(
@@ -143,12 +143,12 @@ describe("meiosis setup with library for applying patches", () => {
         increment: cell => cell.update(actionPatch)
       };
 
-      const { states, getCell } = setupFn({ initial: { count: 0 } });
-      const cell = getCell();
+      const { cells } = setupFn({ initial: { count: 0 } });
+      const cell = cells();
 
       actions.increment(cell);
 
-      expect(states()).toEqual({ count: 1, combined: true });
+      expect(cells().state).toEqual({ count: 1, combined: true });
     });
 
     test.each(
@@ -166,12 +166,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       };
 
-      const { states, getCell } = setupFn({ initial: { count: 0 } });
-      const cell = getCell();
+      const { cells } = setupFn({ initial: { count: 0 } });
+      const cell = cells();
 
       actions.interact(cell);
 
-      expect(states()).toEqual({ count: 1, interaction: true });
+      expect(cells().state).toEqual({ count: 1, interaction: true });
     });
 
     test.each(
@@ -210,11 +210,11 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ services });
-      const cell = getCell();
+      const { cells } = setupFn({ services });
+      const cell = cells();
 
       cell.update(updatePatch);
-      expect(states()).toEqual({ count: 2, service1: true, service2: true });
+      expect(cells().state).toEqual({ count: 2, service1: true, service2: true });
     });
 
     test.each(
@@ -246,12 +246,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ services });
-      const cell = getCell();
+      const { cells } = setupFn({ services });
+      const cell = cells();
 
       cell.update(init);
 
-      expect(states()).toEqual({ count: 2, service1: true, service2: true });
+      expect(cells().state).toEqual({ count: 2, service1: true, service2: true });
     });
 
     test.each(
@@ -273,13 +273,13 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ services });
-      const cell = getCell();
+      const { cells } = setupFn({ services });
+      const cell = cells();
 
       cell.update(init);
 
       expect(serviceCalls).toEqual(5);
-      expect(states()).toEqual({ count: 1, service: true });
+      expect(cells().state).toEqual({ count: 1, service: true });
     });
 
     test.each(
@@ -298,9 +298,9 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states } = setupFn({ services });
+      const { cells } = setupFn({ services });
 
-      expect(states()).toEqual({ service: true });
+      expect(cells().state).toEqual({ service: true });
     });
 
     test.each(
@@ -319,12 +319,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ services });
-      const cell = getCell();
+      const { cells } = setupFn({ services });
+      const cell = cells();
 
       cell.update(updatePatch);
 
-      expect(states()).toEqual({ two: true });
+      expect(cells().state).toEqual({ two: true });
     });
 
     test.each(
@@ -343,12 +343,12 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ services });
-      const cell = getCell();
+      const { cells } = setupFn({ services });
+      const cell = cells();
 
       cell.update(updatePatch);
 
-      expect(states()).toEqual({});
+      expect(cells().state).toEqual({});
     });
 
     describe.each(
@@ -380,15 +380,15 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const { states, getCell } = setupFn({ initial, services });
-        const cell = getCell();
+        const { cells } = setupFn({ initial, services });
+        const cell = cells();
 
-        states.map(state => {
+        cells.map(cell => {
           try {
-            if (state.data === "Loading") {
-              expect(state.route).toEqual("PageB");
-            } else if (state.data === "Loaded") {
-              expect(state).toEqual({ route: "PageB", data: "Loaded" });
+            if (cell.state.data === "Loading") {
+              expect(cell.state.route).toEqual("PageB");
+            } else if (cell.state.data === "Loaded") {
+              expect(cell.state).toEqual({ route: "PageB", data: "Loaded" });
               done();
             }
           } catch (error) {
@@ -442,15 +442,15 @@ describe("meiosis setup with library for applying patches", () => {
           }
         ];
 
-        const { states, getCell } = setupFn({ initial, services });
-        const cell = getCell();
+        const { cells } = setupFn({ initial, services });
+        const cell = cells();
 
-        states.map(state => {
+        cells.map(cell => {
           try {
-            if (state.data === "Loading") {
-              expect(state.route).toEqual("PageA");
-            } else if (state.data === "Loaded") {
-              expect(state).toEqual({ route: "PageB", data: "Loaded" });
+            if (cell.state.data === "Loading") {
+              expect(cell.state.route).toEqual("PageA");
+            } else if (cell.state.data === "Loaded") {
+              expect(cell.state).toEqual({ route: "PageB", data: "Loaded" });
               done();
             }
           } catch (error) {
@@ -511,14 +511,14 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ initial, services });
-      const cell = getCell();
+      const { cells } = setupFn({ initial, services });
+      const cell = cells();
 
-      states.map(state => {
-        expect(state.route).not.toEqual("PageB");
+      cells.map(cell => {
+        expect(cell.state.route).not.toEqual("PageB");
 
-        if (state.route === "PageC") {
-          expect(state).toEqual({ route: "PageC", message: "Please login." });
+        if (cell.state.route === "PageC") {
+          expect(cell.state).toEqual({ route: "PageC", message: "Please login." });
         }
       });
 
@@ -544,11 +544,11 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ initial, services });
-      const cell = getCell();
+      const { cells } = setupFn({ initial, services });
+      const cell = cells();
 
       cell.update(updatePatch);
-      expect(states()).toEqual({ route: "PageB", data: "None" });
+      expect(cells().state).toEqual({ route: "PageB", data: "None" });
     });
 
     test.each(
@@ -574,16 +574,16 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ initial, services });
-      const cell = getCell();
+      const { cells } = setupFn({ initial, services });
+      const cell = cells();
 
-      states.map(state => {
-        expect(state.route).not.toEqual("PageB");
+      cells.map(cell => {
+        expect(cell.state.route).not.toEqual("PageB");
 
-        if (state.confirm === true) {
-          expect(state.route).toEqual("PageA");
-        } else if (state.confirm === false) {
-          expect(state.route).toEqual("PageA");
+        if (cell.state.confirm === true) {
+          expect(cell.state.route).toEqual("PageA");
+        } else if (cell.state.confirm === false) {
+          expect(cell.state.route).toEqual("PageA");
         }
       });
 
@@ -639,19 +639,19 @@ describe("meiosis setup with library for applying patches", () => {
         }
       ];
 
-      const { states, getCell } = setupFn({ initial, services });
-      const cell = getCell();
+      const { cells } = setupFn({ initial, services });
+      const cell = cells();
 
-      states.map(state => {
-        if (state.confirm === true) {
-          expect(state.route).toEqual("PageA");
+      cells.map(cell => {
+        if (cell.state.confirm === true) {
+          expect(cell.state.route).toEqual("PageA");
         }
       });
 
       cell.update(updatePatch);
       cell.update(confirmPatch);
 
-      expect(states()).toEqual({ route: "PageB", confirm: false });
+      expect(cells().state).toEqual({ route: "PageB", confirm: false });
     });
 
     // credit @cmnstmntmn for this test case
@@ -693,12 +693,12 @@ describe("meiosis setup with library for applying patches", () => {
         services
       };
 
-      const { states, getCell } = setupFn(app);
-      const cell = getCell();
+      const { cells } = setupFn(app);
+      const cell = cells();
 
       actions.action1(cell);
 
-      expect(states().flag).toEqual("action2");
+      expect(cells().state.flag).toEqual("action2");
     });
 
     test.each(
@@ -760,12 +760,12 @@ describe("meiosis setup with library for applying patches", () => {
         services
       };
 
-      const { states, getCell } = setupFn(app);
-      const cell = getCell();
+      const { cells } = setupFn(app);
+      const cell = cells();
 
       cell.update(updatePatch);
 
-      expect(states()).toEqual({ events: {}, triggers: {}, service1: true, service2: true });
+      expect(cells().state).toEqual({ events: {}, triggers: {}, service1: true, service2: true });
     });
 
     describe.each(
@@ -828,16 +828,16 @@ describe("meiosis setup with library for applying patches", () => {
           services
         };
 
-        const { states, getCell } = setupFn(app);
-        const cell = getCell();
+        const { cells } = setupFn(app);
+        const cell = cells();
 
         const stateLog = [];
-        states.map(state => {
-          stateLog.push(state);
+        cells.map(cell => {
+          stateLog.push(cell.state);
 
           if (stateLog.length === 6) {
             try {
-              expect(states()).toEqual({
+              expect(cells().state).toEqual({
                 events: {},
                 triggers: {},
                 service1: true,
@@ -866,38 +866,36 @@ describe("meiosis setup with generic common", () => {
 
     test("basic mergerino setup with no services", () => {
       const actions = {
-        increment: (cell, amount) => {
-          cell.update({ count: x => x + amount });
+        increment: (update, amount) => {
+          update({ count: x => x + amount });
         }
       };
 
-      const { states, getCell } = meiosis.common.setup({
+      const { states, update } = meiosis.common.setup({
         stream: streamLib,
         accumulator: merge,
         app: { initial: { count: 0 } }
       });
-      const cell = getCell();
 
-      actions.increment(cell, 2);
+      actions.increment(update, 2);
 
       expect(states()).toEqual({ count: 2 });
     });
 
     test("basic functionPatch setup with no services", () => {
       const actions = {
-        increment: (cell, amount) => {
-          cell.update(R.over(R.lensProp("count"), R.add(amount)));
+        increment: (update, amount) => {
+          update(R.over(R.lensProp("count"), R.add(amount)));
         }
       };
 
-      const { states, getCell } = meiosis.common.setup({
+      const { states, update } = meiosis.common.setup({
         stream: streamLib,
         accumulator: (x, f) => f(x),
         app: { initial: { count: 0 } }
       });
-      const cell = getCell();
 
-      actions.increment(cell, 2);
+      actions.increment(update, 2);
 
       expect(states()).toEqual({ count: 2 });
     });
@@ -927,14 +925,14 @@ describe("Meiosis cell", () => {
       [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
-    const { states, getCell } = setupFn();
-    const cell = getCell();
+    const { cells } = setupFn();
+    const cell = cells();
     expect(cell.state).toEqual({});
 
     cell.update(patch1);
     cell.update(patch2);
 
-    expect(states()).toEqual({ duck: { sound: "quack", color: "yellow" } });
+    expect(cells().state).toEqual({ duck: { sound: "quack", color: "yellow" } });
   });
 
   test.each(
@@ -943,14 +941,14 @@ describe("Meiosis cell", () => {
       [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
-    const { states, getCell } = setupFn({ initial: { feathers: { duck: {} } } });
-    const cell = getCell();
+    const { cells } = setupFn({ initial: { feathers: { duck: {} } } });
+    const cell = cells();
     const nested = cell.nest("feathers");
 
     nested.update(patch1);
     nested.update(patch2);
 
-    expect(states()).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
+    expect(cells().state).toEqual({ feathers: { duck: { sound: "quack", color: "yellow" } } });
   });
 
   test.each(
@@ -959,13 +957,13 @@ describe("Meiosis cell", () => {
       [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
-    const { getCell } = setupFn({ initial: { feathers: { duck: {} } } });
-    const nested = getCell().nest("feathers");
+    const { cells } = setupFn({ initial: { feathers: { duck: {} } } });
+    const nested = cells().nest("feathers");
 
     nested.update(patch1);
     nested.update(patch2);
 
-    const nestedCell = getCell().nest("feathers");
+    const nestedCell = cells().nest("feathers");
     expect(nestedCell.state).toEqual({ duck: { sound: "quack", color: "yellow" } });
   });
 
@@ -975,14 +973,14 @@ describe("Meiosis cell", () => {
       [() => ({ duck: { sound: "quack" } }), R.assocPath(["duck", "color"], "yellow")]
     ])
   )("%s", (_label, setupFn, patch1, patch2) => {
-    const { states, getCell } = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
-    const cell = getCell();
+    const { cells } = setupFn({ initial: { fowl: { feathers: { duck: {} } } } });
+    const cell = cells();
     const deepNested = cell.nest("fowl").nest("feathers");
 
     deepNested.update(patch1);
     deepNested.update(patch2);
 
-    expect(states()).toEqual({
+    expect(cells().state).toEqual({
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });
   });
@@ -1001,10 +999,10 @@ describe("Meiosis cell", () => {
       done: cell => cell.update(patch3)
     };
 
-    const { states, getCell } = setupFn({
+    const { cells } = setupFn({
       initial: { fowl: { feathers: { duck: {} } } }
     });
-    const cell = getCell();
+    const cell = cells();
 
     const nestedActions = {
       action1: cell => cell.update(patch1),
@@ -1017,7 +1015,7 @@ describe("Meiosis cell", () => {
     nestedActions.action2(deepNested);
     actions.done(cell);
 
-    expect(states()).toEqual({
+    expect(cells().state).toEqual({
       done: true,
       fowl: { feathers: { duck: { sound: "quack", color: "yellow" } } }
     });

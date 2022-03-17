@@ -169,18 +169,6 @@ export type CommonUpdate<P> = (patch: P) => any;
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface CommonMeiosisCell<S, P> {
-  /**
-   * The application states.
-   */
-  state: S;
-
-  /**
-   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
-   */
-  update: CommonUpdate<P>;
-}
-
 /**
  * Returned by Meiosis setup.
  *
@@ -193,10 +181,11 @@ export interface CommonMeiosisSetup<S, P> {
    */
   states: Stream<S>;
 
-  getCell: () => CommonMeiosisCell<S, P>;
-}
+  /**
+   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
+   */
+  update: CommonUpdate<P>;
 
-export interface UtilityMeiosisSetup<S, P> extends CommonMeiosisSetup<S, P> {
   dropRepeats<T>(states: Stream<T>, selector?: (state: T) => any): Stream<T>;
 }
 
@@ -314,7 +303,7 @@ export const setup = <S, P>({
   stream,
   accumulator,
   app
-}: MeiosisConfig<S, P>): UtilityMeiosisSetup<S, P> => {
+}: MeiosisConfig<S, P>): CommonMeiosisSetup<S, P> => {
   if (!stream) {
     stream = simpleStream;
   }
@@ -335,11 +324,6 @@ export const setup = <S, P>({
 
   const states: Stream<S> = scan((state, patch) => accumulatorFn(state, patch), initial, update);
 
-  const getCell = () => ({
-    state: states(),
-    update: updateFn
-  });
-
   // Credit: James Forbes (https://james-forbes.com/)
   const dropRepeats = <S>(states: Stream<S>, selector: (state: S) => any = x => x): Stream<S> => {
     let prev = undefined;
@@ -349,7 +333,7 @@ export const setup = <S, P>({
       const next = selector(state);
       if (next !== prev) {
         prev = next;
-        result(next);
+        result(state);
       }
     });
     return result;
@@ -357,7 +341,7 @@ export const setup = <S, P>({
 
   return {
     states,
-    getCell,
+    update: updateFn,
     dropRepeats
   };
 };

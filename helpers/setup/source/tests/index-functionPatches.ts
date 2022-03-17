@@ -9,13 +9,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
     cell.update(assoc("sound", "quack"));
-    expect(states()).toEqual({ ducks: 1, sound: "quack" });
+    expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
   });
 
   test("with nesting and no actions", () => {
@@ -29,19 +29,19 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = {};
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({});
 
     cell.update(assoc("sound", "quack"));
-    expect(states()).toEqual({ sound: "quack" });
+    expect(cells().state).toEqual({ sound: "quack" });
 
     const duckCell = cell.nest("duck");
     expect(duckCell.state).toBeUndefined();
 
     duckCell.update(assoc("color", "yellow"));
-    expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });
+    expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
   });
 
   test("with actions", () => {
@@ -64,13 +64,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
     actions.addDucks(cell, 4);
-    expect(states()).toEqual({ ducks: 5, sound: "quack" });
+    expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
   });
 
   test("with actions and nesting", () => {
@@ -97,12 +97,12 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     const duckCell = cell.nest("duck");
     duckActions.changeDuckColor(duckCell, "yellow");
-    expect(states()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+    expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
   });
 
   test("services", () => {
@@ -172,15 +172,15 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
     ];
 
-    const { states, getCell } = setup<State>({ app: { initial: { count: 0 }, services } });
-    const cell = getCell();
+    const { cells } = setup<State>({ app: { initial: { count: 0 }, services } });
+    const cell = cells();
 
     cell.update(updatePatches[0]);
     cell.update(updatePatches[1]);
     cell.update(updatePatches[2]);
     cell.update(updatePatches[3]);
 
-    expect(states()).toEqual({
+    expect(cells().state).toEqual({
       count: 1,
       combined: true,
       sequence: false,
@@ -227,13 +227,13 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       services
     };
 
-    const { states, getCell } = setup<Counter>({ app });
-    const cell = getCell();
+    const { cells } = setup<Counter>({ app });
+    const cell = cells();
 
     cell.update(assoc("count", 1));
-    expect(states()).toEqual({ count: 2, service: true });
+    expect(cells().state).toEqual({ count: 2, service: true });
 
     cell.update(combinePatches([assoc("count", 3), assoc("service", false)]));
-    expect(states()).toEqual({ count: 3, service: false });
+    expect(cells().state).toEqual({ count: 3, service: false });
   });
 });

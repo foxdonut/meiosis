@@ -8,13 +8,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
 
     cell.update({ sound: "quack" });
-    expect(states()).toEqual({ ducks: 1, sound: "quack" });
+    expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
   });
 
   test("with nesting and no actions", () => {
@@ -28,19 +28,19 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = {};
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({});
 
     cell.update({ sound: "quack" });
-    expect(states()).toEqual({ sound: "quack" });
+    expect(cells().state).toEqual({ sound: "quack" });
 
     const duckCell = cell.nest("duck");
     expect(duckCell.state).toBeUndefined();
 
     duckCell.update({ color: "yellow" });
-    expect(states()).toEqual({ sound: "quack", duck: { color: "yellow" } });
+    expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
   });
 
   test("with actions", () => {
@@ -63,13 +63,13 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
 
     actions.addDucks(cell, 4);
-    expect(states()).toEqual({ ducks: 5, sound: "quack" });
+    expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
   });
 
   test("with actions and nesting", () => {
@@ -96,12 +96,12 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { states, getCell } = setup<State>({ app });
-    const cell = getCell();
+    const { cells } = setup<State>({ app });
+    const cell = cells();
 
     const duckCell = cell.nest("duck");
     duckActions.changeDuckColor(duckCell, "yellow");
-    expect(states()).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+    expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
   });
 
   test("services", () => {
@@ -171,15 +171,15 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
     ];
 
-    const { states, getCell } = setup<State>({ app: { initial: { count: 0 }, services } });
-    const cell = getCell();
+    const { cells } = setup<State>({ app: { initial: { count: 0 }, services } });
+    const cell = cells();
 
     cell.update(updatePatches[0]);
     cell.update(updatePatches[1]);
     cell.update(updatePatches[2]);
     cell.update(updatePatches[3]);
 
-    expect(states()).toEqual({
+    expect(cells().state).toEqual({
       count: 1,
       combined: true,
       sequence: false,
@@ -226,11 +226,11 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       services
     };
 
-    const { states, getCell } = setup<Counter>({ app });
-    const cell = getCell();
+    const { cells } = setup<Counter>({ app });
+    const cell = cells();
 
     cell.update({ count: 1 });
-    expect(states()).toEqual({ count: 2, service: true });
+    expect(cells().state).toEqual({ count: 2, service: true });
 
     // FIXME: add rest of test
   });
@@ -285,8 +285,8 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         }
       };
 
-      const { getCell } = setup<AppState>({ app });
-      const initialState = getCell().state;
+      const { cells } = setup<AppState>({ app });
+      const initialState = cells().state;
 
       expect(initialState).toEqual({
         sound: "quack",
@@ -384,17 +384,17 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         }
       };
 
-      const { getCell } = setup<AppState>({ app });
+      const { cells } = setup<AppState>({ app });
 
-      expect(getCell().state.volume).toEqual("loud");
-      getCell().update({ sound: "beck" });
-      expect(getCell().state.volume).toEqual("quiet");
+      expect(cells().state.volume).toEqual("loud");
+      cells().update({ sound: "beck" });
+      expect(cells().state.volume).toEqual("quiet");
 
-      expect(getCell().state.pet.fullName).toEqual("Fluffy McDuck");
-      getCell().nest("pet").update({ lastName: "Quackington" });
-      expect(getCell().state.pet.fullName).toEqual("Fluffy Quackington");
-      getCell().nest("pet").update({ firstName: "Softy" });
-      expect(getCell().state.pet.fullName).toEqual("Softy Quackington");
+      expect(cells().state.pet.fullName).toEqual("Fluffy McDuck");
+      cells().nest("pet").update({ lastName: "Quackington" });
+      expect(cells().state.pet.fullName).toEqual("Fluffy Quackington");
+      cells().nest("pet").update({ firstName: "Softy" });
+      expect(cells().state.pet.fullName).toEqual("Softy Quackington");
     });
   });
 });

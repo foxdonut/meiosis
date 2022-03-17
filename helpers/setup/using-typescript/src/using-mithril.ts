@@ -153,11 +153,11 @@ const App: m.Component<Attrs> = {
 };
 
 export const setupMithrilExample = (): void => {
-  const { states, getCell } = setup<State>({ stream: Stream, app });
+  const { cells } = setup<State>({ stream: Stream, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
-    view: () => m(App, { cell: getCell() })
+    view: () => m(App, { cell: cells() })
   });
 
-  states.map(() => m.redraw());
+  cells.map(() => m.redraw());
 };

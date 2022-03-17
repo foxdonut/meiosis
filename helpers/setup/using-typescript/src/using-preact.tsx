@@ -158,9 +158,9 @@ const App: (attrs: Attrs) => VNode = ({ cell }) =>
   );
 
 export const setupPreactExample = (): void => {
-  const { states, getCell } = setup<State>({ app });
+  const { cells } = setup<State>({ app });
   const element = document.getElementById("preactApp") as HTMLElement;
-  states.map(() => {
-    preactRender(h(App, { cell: getCell() }), element);
+  cells.map(() => {
+    preactRender(h(App, { cell: cells() }), element);
   });
 };
