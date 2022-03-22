@@ -1,13 +1,14 @@
 import simpleStream from "../simple-stream";
 import merge from "mergerino";
-import commonSetup, {
+import {
   CommonApp,
   CommonMeiosisConfig,
   CommonService,
+  NestSetup,
   Stream,
   commonGetServices,
   commonGetInitialState,
-  createDropRepeats
+  nestSetup
 } from "../common";
 
 /**
@@ -147,40 +148,15 @@ export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(a
  *
  * @param {MeiosisConfig<S>} config the Meiosis config for use with Mergerino
  *
- * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
+ * @returns {Meiosis<S, Patch<S>>} `{ cells }`.
  */
-export const setup = <S>({
-  stream = simpleStream,
-  app = {}
-}: MeiosisConfig<S>): MeiosisSetup<S> => {
-  const { states, update } = commonSetup<S, Patch<S>>({
-    stream,
+export const setup = <S>({ stream = simpleStream, app = {} }: MeiosisConfig<S>): MeiosisSetup<S> =>
+  nestSetup<S, Patch<S>, NestSetup<S, Patch<S>>, Service<S>, MeiosisCell<S>>({
     accumulator: merge,
+    getServices,
+    nestCell,
+    stream,
     app
   });
-
-  const nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]> = nestCell(
-    states,
-    update
-  );
-
-  const getCell = (state: S): MeiosisCell<S> => ({
-    state,
-    update,
-    nest
-  });
-
-  const dropRepeats = createDropRepeats(stream);
-
-  if (app) {
-    getServices(app).forEach(service => {
-      dropRepeats(states, service.onchange).map(state => service.run(getCell(state)));
-    });
-  }
-
-  const cells: Stream<MeiosisCell<S>> = dropRepeats(states).map(getCell);
-
-  return { cells };
-};
 
 export default setup;

@@ -350,3 +350,39 @@ export const setup = <S, P>({
 };
 
 export default setup;
+
+export interface NestSetup<S, P> {
+  accumulator: Accumulator<S, P>;
+  getServices: any;
+  nestCell: any;
+  stream: ExternalStreamLib;
+  app: any;
+}
+
+export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonService<S>, C>({
+  accumulator,
+  getServices,
+  nestCell,
+  stream = simpleStream,
+  app = {}
+}: F): { cells: Stream<C> } => {
+  const { states, update } = setup<S, P>({
+    stream,
+    accumulator,
+    app
+  });
+
+  const nest = nestCell(states, update);
+  const getCell = (state: S) => ({ state, update, nest });
+  const dropRepeats = createDropRepeats(stream);
+
+  if (app) {
+    getServices(app).forEach((service: T) => {
+      dropRepeats(states, service.onchange).map(state => service.run(getCell(state)));
+    });
+  }
+
+  const cells: Stream<any> = dropRepeats(states).map(getCell);
+
+  return { cells };
+};

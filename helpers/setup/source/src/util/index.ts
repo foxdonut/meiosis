@@ -18,7 +18,7 @@ export const get = (object: Record<string, any>, path: string[]): any =>
  * @param result the target object
  * @returns the target object with the associated property
  */
-export const assoc = (prop: string, value: any, target: any): any => {
+export const assoc = (prop: string, value: unknown, target: Record<string, any>): any => {
   target[prop] = value;
   return target;
 };
