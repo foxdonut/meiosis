@@ -8,7 +8,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -28,7 +28,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
     }
 
     const app = {};
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({});
@@ -63,7 +63,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -96,7 +96,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     const duckCell = cell.nest("duck");
@@ -171,7 +171,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       }
     ];
 
-    const { cells } = setup<State>({ app: { initial: { count: 0 }, services } });
+    const cells = setup<State>({ app: { initial: { count: 0 }, services } });
     const cell = cells();
 
     cell.update(updatePatches[0]);
@@ -226,7 +226,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
       services
     };
 
-    const { cells } = setup<Counter>({ app });
+    const cells = setup<Counter>({ app });
     const cell = cells();
 
     cell.update({ count: 1 });
@@ -285,7 +285,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         }
       };
 
-      const { cells } = setup<AppState>({ app });
+      const cells = setup<AppState>({ app });
       const initialState = cells().state;
 
       expect(initialState).toEqual({
@@ -384,7 +384,7 @@ describe("Meiosis with TypeScript - Mergerino", () => {
         }
       };
 
-      const { cells } = setup<AppState>({ app });
+      const cells = setup<AppState>({ app });
 
       expect(cells().state.volume).toEqual("loud");
       cells().update({ sound: "beck" });

@@ -100,7 +100,7 @@ const App = ({ cell }) => (
 );
 
 export const setupReactExample = () => {
-  const { cells } = meiosis.functionPatches.setup({ stream: flyd, app });
+  const cells = meiosis.functionPatches.setup({ stream: flyd, app });
   const element = document.getElementById("reactApp");
   cells.map(() => {
     ReactDOM.render(<App cell={cells()} />, element);

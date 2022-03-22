@@ -153,7 +153,7 @@ const App: m.Component<Attrs> = {
 };
 
 export const setupMithrilExample = (): void => {
-  const { cells } = setup<State>({ stream: Stream, app });
+  const cells = setup<State>({ stream: Stream, app });
 
   m.mount(document.getElementById("mithrilApp") as HTMLElement, {
     view: () => m(App, { cell: cells() })

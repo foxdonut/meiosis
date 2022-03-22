@@ -365,7 +365,7 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
   nestCell,
   stream = simpleStream,
   app = {}
-}: F): { cells: Stream<C> } => {
+}: F): Stream<C> => {
   const { states, update } = setup<S, P>({
     stream,
     accumulator,
@@ -384,5 +384,5 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
 
   const cells: Stream<any> = dropRepeats(states).map(getCell);
 
-  return { cells };
+  return cells;
 };

@@ -153,7 +153,7 @@ const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
 );
 
 export const setupReactExample = (): void => {
-  const { cells } = setup<State>({ stream: flyd, app });
+  const cells = setup<State>({ stream: flyd, app });
   const element = document.getElementById("reactApp");
   cells.map(() => {
     ReactDOM.render(<App cell={cells()} />, element);

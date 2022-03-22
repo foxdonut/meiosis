@@ -94,10 +94,6 @@ export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
   app?: App<S>;
 }
 
-export interface MeiosisSetup<S> {
-  cells: Stream<MeiosisCell<S>>;
-}
-
 const nestPatch = <S, K extends Extract<keyof S, string>>(
   patch: Patch<S[K]>,
   prop: K
@@ -150,7 +146,10 @@ export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(a
  *
  * @returns {Meiosis<S, Patch<S>>} `{ cells }`.
  */
-export const setup = <S>({ stream = simpleStream, app = {} }: MeiosisConfig<S>): MeiosisSetup<S> =>
+export const setup = <S>({
+  stream = simpleStream,
+  app = {}
+}: MeiosisConfig<S>): Stream<MeiosisCell<S>> =>
   nestSetup<S, Patch<S>, NestSetup<S, Patch<S>>, Service<S>, MeiosisCell<S>>({
     accumulator: merge,
     getServices,

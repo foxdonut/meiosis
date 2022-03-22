@@ -9,7 +9,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = { initial: { ducks: 1, sound: "silent" } };
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
@@ -29,7 +29,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const app = {};
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({});
@@ -64,7 +64,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { ducks: 1, sound: "quack" }
     };
 
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
@@ -97,7 +97,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       initial: { duck: { color: "white" }, sound: "quack" }
     };
 
-    const { cells } = setup<State>({ app });
+    const cells = setup<State>({ app });
     const cell = cells();
 
     const duckCell = cell.nest("duck");
@@ -172,7 +172,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       }
     ];
 
-    const { cells } = setup<State>({ app: { initial: { count: 0 }, services } });
+    const cells = setup<State>({ app: { initial: { count: 0 }, services } });
     const cell = cells();
 
     cell.update(updatePatches[0]);
@@ -227,7 +227,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
       services
     };
 
-    const { cells } = setup<Counter>({ app });
+    const cells = setup<Counter>({ app });
     const cell = cells();
 
     cell.update(assoc("count", 1));
