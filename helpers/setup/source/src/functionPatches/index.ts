@@ -72,16 +72,12 @@ export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
 const nestPatch = <S, K extends Extract<keyof S, string>>(
   patch: Patch<S[K]>,
   prop: K
-): Patch<S> => {
-  return (state: S) => Object.assign({}, state, { [prop]: patch(state[prop]) });
-};
+): Patch<S> => (state: S) => Object.assign({}, state, { [prop]: patch(state[prop]) });
 
 const nestUpdate = <S, K extends Extract<keyof S, string>>(
   parentUpdate: Update<S>,
   prop: K
-): Update<S[K]> => {
-  return patch => parentUpdate(nestPatch(patch, prop));
-};
+): Update<S[K]> => patch => parentUpdate(nestPatch(patch, prop));
 
 const nestCell = <S, K extends Extract<keyof S, string>>(
   getState: () => S,
