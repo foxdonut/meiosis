@@ -285,7 +285,7 @@ export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
 // Credit: James Forbes (https://james-forbes.com/)
 export const createDropRepeats = (stream: ExternalStreamLib = simpleStream) => <S>(
   states: Stream<S>,
-  selector: (state: S) => any = x => x
+  selector: (state: S) => any = state => state
 ): Stream<S> => {
   const createStream = typeof stream === "function" ? stream : stream.stream;
 
