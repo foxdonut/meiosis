@@ -176,8 +176,8 @@ Type: [Object][76]
 
 ### Properties
 
--   `parse` **[QueryStringParse][84]** 
--   `stringify` **[QueryStringStringify][85]** 
+-   `parse` **[QueryStringParse][84]**
+-   `stringify` **[QueryStringStringify][85]**
 
 ## ToRoute
 
@@ -211,11 +211,11 @@ Helper that creates a `toUrl` function.
 
 ### Parameters
 
--   `routeConfig` **[RouteConfig][87]** 
--   `getStatePath` **function ([string][77]): [string][77]** 
--   `queryString` **[QueryStringLib][88]** 
+-   `routeConfig` **[RouteConfig][87]**
+-   `getStatePath` **function ([string][77]): [string][77]**
+-   `queryString` **[QueryStringLib][88]**
 
-Returns **[ToUrl][89]** 
+Returns **[ToUrl][89]**
 
 ## OnRouteChange
 
@@ -230,9 +230,9 @@ Type: [Function][80]
 
 ### Parameters
 
--   `route` **[Route][86]** 
+-   `route` **[Route][86]**
 
-Returns **any** 
+Returns **any**
 
 ## Start
 
@@ -244,7 +244,7 @@ Type: [Function][80]
 
 -   `onRouteChange` **[OnRouteChange][90]** callback function for when the route changes.
 
-Returns **any** 
+Returns **any**
 
 ## SyncLocationBarParams
 
@@ -252,9 +252,9 @@ Type: [Object][76]
 
 ### Properties
 
--   `page` **[string][77]** 
--   `params` **[Params][78]?** 
--   `replace` **[boolean][79]?** 
+-   `page` **[string][77]**
+-   `params` **[Params][78]?**
+-   `replace` **[boolean][79]?**
 
 ## SyncLocationBar
 
@@ -264,9 +264,9 @@ Type: [Function][80]
 
 ### Parameters
 
--   `syncLocationBarParams` **[SyncLocationBarParams][91]** 
+-   `syncLocationBarParams` **[SyncLocationBarParams][91]**
 
-Returns **void** 
+Returns **void**
 
 ## DecodeURI
 
@@ -292,7 +292,7 @@ Type: [Function][80]
 -   `title` **[string][77]** the document title - most browsers ignore this parameter
 -   `url` **[string][77]** the new history entry's URL
 
-Returns **void** 
+Returns **void**
 
 ## Onpopstate
 
@@ -304,7 +304,7 @@ Type: [Function][80]
 
 -   `event` **any** the event.
 
-Returns **void** 
+Returns **void**
 
 ## Location
 
@@ -314,10 +314,10 @@ Type: [Object][76]
 
 ### Properties
 
--   `hash` **[string][77]** 
--   `origin` **[string][77]** 
--   `pathname` **[string][77]** 
--   `search` **[string][77]** 
+-   `hash` **[string][77]**
+-   `origin` **[string][77]**
+-   `pathname` **[string][77]**
+-   `search` **[string][77]**
 
 ## History
 
@@ -327,7 +327,7 @@ Type: [Object][76]
 
 ### Properties
 
--   `pushState` **[PushState][92]** 
+-   `pushState` **[PushState][92]**
 
 ## AddEventListener
 
@@ -337,9 +337,9 @@ Type: [Function][80]
 
 ### Parameters
 
--   `type` **[string][77]** 
--   `listener` **any** 
--   `options` **any** 
+-   `type` **[string][77]**
+-   `listener` **any**
+-   `options` **any**
 
 ## RemoveEventListener
 
@@ -349,8 +349,8 @@ Type: [Function][80]
 
 ### Parameters
 
--   `type` **[string][77]** 
--   `listener` **any** 
+-   `type` **[string][77]**
+-   `listener` **any**
 
 ## Window
 
@@ -383,7 +383,7 @@ Type: [Object][76]
 -   `toUrl` **[ToUrl][89]?** the `toUrl` function. If not provided, `routeConfig` must be
     provided and `toUrl` is constructed from `routeConfig`.
 -   `rootPath` **[string][77]?** if specified, uses history mode instead of hash mode. If you are
-    using history mode, you need to provide server side routing support. If not provided, defaults to
+    using history mode, you need to provide server side router support. If not provided, defaults to
     the identity function.
 -   `plainHash` **[boolean][79]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
     `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
@@ -415,20 +415,20 @@ Helper to intercept link clicks in history mode.
 
 ### Parameters
 
--   `wdw` **[Window][101]** 
--   `prefix` **[string][77]** 
--   `setHref` **function ([string][77]): void** 
+-   `wdw` **[Window][101]**
+-   `prefix` **[string][77]**
+-   `setHref` **function ([string][77]): void**
 
 ## createRouter
 
 ### Parameters
 
--   `config` **[RouterConfig][105]&lt;M>** 
-    -   `config.routeMatcher`  
-    -   `config.convertMatch`  
-    -   `config.routeConfig`  
-    -   `config.toUrl`  
-    -   `config.rootPath`  
+-   `config` **[RouterConfig][105]&lt;M>**
+    -   `config.routeMatcher`
+    -   `config.convertMatch`
+    -   `config.routeConfig`
+    -   `config.toUrl`
+    -   `config.rootPath`
     -   `config.plainHash`   (optional, default `false`)
     -   `config.queryString`   (optional, default `emptyQueryString`)
     -   `config.wdw`   (optional, default `window`)
@@ -441,9 +441,9 @@ Helper for route change effects.
 
 ### Parameters
 
--   `$0` **[Object][76]** 
-    -   `$0.update`  
-    -   `$0.Effects`  
+-   `$0` **[Object][76]**
+    -   `$0.update`
+    -   `$0.Effects`
     -   `$0.isRouteChanged`   (optional, default `state=>state.route.changed`)
     -   `$0.routeChangedPatch`   (optional, default `{route:{changed:false}}`)
 
@@ -458,7 +458,7 @@ Type: [Object][76]
 -   `m` **[m][107]** the Mithril instance.
 -   `routeConfig` **[RouteConfig][87]** the route configuration.
 -   `rootPath` **[string][77]?** if specified, uses history mode instead of hash mode. If you
-    are using history mode, you need to provide server side routing support.
+    are using history mode, you need to provide server side router support.
 -   `plainHash` **[boolean][79]?** whether to use a plain hash, `"#"`, instead of a hash-bang,
     `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
     if `historyMode` is `true`.
@@ -472,10 +472,10 @@ Type: [Function][80]
 
 ### Parameters
 
--   `params` **any** 
--   `url` **[string][77]** 
+-   `params` **any**
+-   `url` **[string][77]**
 
-Returns **void** 
+Returns **void**
 
 ## MithrilRender
 
@@ -498,8 +498,8 @@ Type: [Object][76]
 
 ### Properties
 
--   `onmatch` **[MithrilOnmatch][108]** 
--   `render` **[MithrilRender][109]** 
+-   `onmatch` **[MithrilOnmatch][108]**
+-   `render` **[MithrilRender][109]**
 
 ## MithrilRoutes
 
@@ -515,8 +515,8 @@ Type: [Object][76]
 
 ### Properties
 
--   `onRouteChange` **[OnRouteChange][90]** 
--   `render` **any** 
+-   `onRouteChange` **[OnRouteChange][90]**
+-   `render` **any**
 
 ## CreateMithrilRoutes
 
@@ -537,7 +537,7 @@ Type: [Function][80]
 
 ### Parameters
 
--   `config` **[CreateMithrilRoutesConfig][111]** 
+-   `config` **[CreateMithrilRoutesConfig][111]**
 
 Returns **[MithrilRoutes][112]** Mithril routes.
 
@@ -566,7 +566,7 @@ Type: [Object][76]
 
 ### Properties
 
--   `prefix` **[string][77]** 
+-   `prefix` **[string][77]**
 
 ## m
 
@@ -576,8 +576,8 @@ Type: any
 
 ### Properties
 
--   `route` **[MithrilDotRoute][114]** 
--   `buildQueryString` **[QueryStringStringify][85]** 
+-   `route` **[MithrilDotRoute][114]**
+-   `buildQueryString` **[QueryStringStringify][85]**
 
 ## createMithrilRouter
 
@@ -585,14 +585,14 @@ Sets up a router using [Mithril Router][115].
 
 ### Parameters
 
--   `config` **[MithrilRouterConfig][116]** 
-    -   `config.m`  
-    -   `config.routeConfig`  
-    -   `config.rootPath`  
+-   `config` **[MithrilRouterConfig][116]**
+    -   `config.m`
+    -   `config.routeConfig`
+    -   `config.rootPath`
     -   `config.plainHash`   (optional, default `false`)
     -   `config.wdw`   (optional, default `window`)
 
-Returns **[MithrilRouter][117]** 
+Returns **[MithrilRouter][117]**
 
 [1]: #routeconfig
 

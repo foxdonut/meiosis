@@ -6,8 +6,6 @@ var toDir = process.argv[3];
 var linkMap = {
   bss: "https://unpkg.com/bss@1.3.0/bss.js",
   flyd: "https://unpkg.com/flyd@0.2.8/flyd.js",
-  "meiosis-routing":
-    "https://unpkg.com/meiosis-routing@3.0.0/meiosis-routing.js",
   "meiosis-setup":
     "https://unpkg.com/meiosis-setup@5.0.0/dist/meiosis-setup.js",
   "meiosis-tracer":
@@ -37,7 +35,7 @@ filenames.forEach(source => {
   var lines = input.split("\n");
   var flemNumber = 1;
 
-  lines = lines.map(function(line) {
+  lines = lines.map(function (line) {
     if (line.startsWith("@flems")) {
       var parts = line.split(" ");
 

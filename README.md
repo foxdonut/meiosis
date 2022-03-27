@@ -26,9 +26,6 @@ and so on.
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is available for
 your convenience.
 
-→ For routing, check out
-[meiosis-routing](https://github.com/foxdonut/meiosis/tree/master/helpers/routing#meiosis-routing).
-
 ## Ready for More?
 
 - Try out more [examples](https://meiosis.js.org/examples.html).

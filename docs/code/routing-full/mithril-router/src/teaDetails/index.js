@@ -1,1 +1,0 @@
-export { TeaDetails } from "./view";

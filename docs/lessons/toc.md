@@ -8,7 +8,6 @@ please see the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html).
 - [The Meiosis Pattern Cheatsheet](the-meiosis-pattern.html)
 - [Services and Effects](services-and-effects.html)
 - [Using a Router](using-a-router.html)
-- [Routing](routing.html)
 - [Preventing Re-renders](preventing-re-renders.html)
 
 [Documentation Examples](http://meiosis.js.org/docs-examples.html)

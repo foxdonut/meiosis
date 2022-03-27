@@ -8,11 +8,6 @@ Coming soon.
 
 <!--
 
-The sections under "Using a Router" show how we can use a router with Meiosis. These sections are a
-different approach than [Meiosis Routing](routing.html), which is a library and pattern for using
-route segments and transitions to manage routes. This "Using a Router" pattern is simpler and meant
-to be set up yourself with about 20 to 60 lines of code, according to the needs of your application.
-
 Each section under "Using a Router" shows a way to set up a router pattern. You only need to use the
 approach that matches your needs. There is no right or wrong approach. Obviously, you can take one
 of the setups and tweak it according to your requirements.

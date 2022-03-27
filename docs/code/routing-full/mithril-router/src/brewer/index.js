@@ -1,1 +1,0 @@
-export { Brewer } from "./view";

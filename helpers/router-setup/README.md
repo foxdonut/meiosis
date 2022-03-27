@@ -251,7 +251,7 @@ and triggers route updates.
 By default, the router uses `#!` as the hash prefix. Using this prefix makes your pages available
 for Google search engine indexing and improves your web application's visibility by having your
 pages appear in Google search results. It is also a convention to indicate that the hash is being
-used for routing purposes instead of for linking to anchor tags.
+used for router purposes instead of for linking to anchor tags.
 
 If you prefer to use `#` instead of `#!` as the hash prefix, specify `plainHash: true` when creating
 the router:

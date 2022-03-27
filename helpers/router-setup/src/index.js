@@ -255,7 +255,7 @@
  * @property {ToUrl} [toUrl] the `toUrl` function. If not provided, `routeConfig` must be
  * provided and `toUrl` is constructed from `routeConfig`.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you are
- * using history mode, you need to provide server side routing support. If not provided, defaults to
+ * using history mode, you need to provide server side router support. If not provided, defaults to
  * the identity function.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
@@ -502,7 +502,7 @@ export const RouteChangeEffect = ({
  * @property {m} m the Mithril instance.
  * @property {RouteConfig} routeConfig the route configuration.
  * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you
- * are using history mode, you need to provide server side routing support.
+ * are using history mode, you need to provide server side router support.
  * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
  * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
  * if `historyMode` is `true`.
