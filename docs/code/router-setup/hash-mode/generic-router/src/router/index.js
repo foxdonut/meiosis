@@ -1,3 +1,4 @@
+// @ts-check
 import { createRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";

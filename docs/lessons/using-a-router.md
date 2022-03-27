@@ -18,26 +18,15 @@ library works. The following router libraries are used in the examples of this d
 
 - [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher)
 - [Mithril Router](https://mithril.js.org/route.html)
-- [Superouter](https://gitlab.com/harth/superouter)
 
 Here is a summary of the approaches:
 
 - [Basic Pattern Setup](router-setup.html): introduces the pattern and provides a minimal setup that
   uses [feather-route-matcher](https://github.com/HenrikJoreteg/feather-route-matcher) and hardcoded
   paths in `href`s and actions.
-- [Query String Support](router-query-string.html): builds on the Basic Pattern Setup and adds
-  support for using [query strings](https://en.wikipedia.org/wiki/Query_string).
-- [`toPath` Function](router-to-path.html): provides a `toPath` function for building paths in
-  `href`s and actions instead of hardcoding them.
 - [Mithril Router](router-mithril.html): shows how to set up the pattern with
   [Mithril Router](https://mithril.js.org/route.html), in case you are already using Mithril and
   want to use its router instead of a separate router library.
-- [Static Tagged Union](router-static-tagged-union.html): shows how to use
-  [tagged unions](https://en.wikipedia.org/wiki/Tagged_union) with routes, using the
-  [static-tagged-union](https://github.com/foxdonut/static-tagged-union) library.
-- [Superouter](router-superouter.html): shows how to use
-  [Superouter](https://gitlab.com/harth/superouter), which is a router library with built-in support
-  for using [tagged unions](https://en.wikipedia.org/wiki/Tagged_union) with routes.
 
 Each setup is ready to use, so have a look and pick the setup that most closely matches your
 requirements. This mostly comes down to:

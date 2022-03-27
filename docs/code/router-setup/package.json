@@ -33,8 +33,7 @@
     "mithril": "^2.0.4",
     "query-string": "^6.13.7",
     "router-setup-common": "./common",
-    "router5": "^8.0.1",
-    "url-mapper": "^2.0.0"
+    "router5": "^8.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

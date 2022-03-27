@@ -1,12 +1,13 @@
 // @ts-check
-import Mapper from "url-mapper";
 import { createRouter } from "meiosis-router-setup";
 import queryString from "query-string";
 import { routeConfig } from "router-setup-common/src/router";
 
-const urlMapper = Mapper();
-const routeMatcher = path => urlMapper.map(path, routeConfig);
-const convertMatch = ({ match, values }) => ({ page: match, params: values });
+import createRouteMatcher from "feather-route-matcher";
+
+const routeMatcher = createRouteMatcher(routeConfig);
+
+const convertMatch = ({ value, params }) => ({ page: value, params });
 
 export const router = createRouter({
   routeMatcher,
