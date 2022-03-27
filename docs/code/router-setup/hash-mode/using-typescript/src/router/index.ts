@@ -1,8 +1,3 @@
-/*
-Instead of meiosis/router.js,
-you can also npm install meiosis-router-setup and use it as shown below:
-*/
-
 import createRouter5, { State } from "router5";
 import { createRouter, Router, RouteMatcher, ConvertMatch } from "meiosis-router-setup";
 import * as queryString from "query-string";

@@ -3,7 +3,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const modes = ["hash", "history"];
-const examples = ["generic-router", "mithril-router", "superouter"];
+const examples = ["generic-router", "mithril-router"];
 const configs = [];
 
 const createConfig = (mode, example) => ({

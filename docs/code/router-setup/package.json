@@ -32,12 +32,9 @@
     "meiosis-router-setup": "^1.0.0-alpha.14",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
-    "page": "^1.11.6",
     "query-string": "^6.13.7",
     "router-setup-common": "./common",
     "router5": "^8.0.1",
-    "superouter": "^0.3.2",
-    "superouter-common": "./superouter-common",
     "url-mapper": "^2.0.0"
   },
   "devDependencies": {

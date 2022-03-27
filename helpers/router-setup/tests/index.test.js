@@ -4,7 +4,6 @@ import createRouteMatcher from "feather-route-matcher";
 import queryString from "query-string";
 import m from "mithril";
 import stream from "mithril/stream";
-import * as Superouter from "superouter";
 import merge from "mergerino";
 
 import { createRouter, createMithrilRouter, RouteChangeEffect } from "../src/index";
@@ -222,27 +221,6 @@ describe("historyMode and plainHash", () => {
           params: {},
           changed: true
         });
-      });
-
-      test("uses custom toUrl", () => {
-        const path = "/login";
-        const wdw = createWindow(path);
-
-        const superouterConfig = {
-          Home: "/",
-          Login: "/login",
-          UserProfile: "/user/:id"
-        };
-
-        const Route = Superouter.type("Route", superouterConfig);
-
-        const toUrl = Route.toURL;
-        const routeMatcher = path => Route.matchOr(() => Route.of.Home(), path);
-        const router = createRouterFn({ routeMatcher, toUrl, queryString, wdw });
-
-        const result = router.toUrl(Route.of.UserProfile({ id: "42" }));
-
-        expect(result).toBe(prefix + "/user/42");
       });
     });
 

@@ -1,9 +1,4 @@
 // @ts-check
-/*
-Instead of meiosis/router.js,
-you can also npm install meiosis-router-setup and use it as shown below:
-*/
-
 import Mapper from "url-mapper";
 import { createRouter } from "meiosis-router-setup";
 import queryString from "query-string";
