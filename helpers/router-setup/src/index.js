@@ -282,17 +282,17 @@
 
 // ----- Helpers
 
-const stripTrailingSlash = url => (url.endsWith("/") ? url.substring(0, url.length - 1) : url);
+const stripTrailingSlash = url => (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
 const I = x => x;
 
 const getQuery = path => {
-  const idx = path.indexOf("?");
-  return idx >= 0 ? path.substring(idx + 1) : "";
+  const idx = path.indexOf('?');
+  return idx >= 0 ? path.substring(idx + 1) : '';
 };
 
 export const getQueryString = (queryString, queryParams = {}) => {
   const query = queryString.stringify(queryParams);
-  return (query.length > 0 ? "?" : "") + query;
+  return (query.length > 0 ? '?' : '') + query;
 };
 
 const separateParamsAndQueryParams = (path, allParams) => {
@@ -300,7 +300,7 @@ const separateParamsAndQueryParams = (path, allParams) => {
 
   return Object.entries(allParams).reduce(
     (result, [key, value]) => {
-      const slot = pathParams.indexOf(key) >= 0 ? "params" : "queryParams";
+      const slot = pathParams.indexOf(key) >= 0 ? 'params' : 'queryParams';
       result[slot][key] = value;
       return result;
     },
@@ -310,7 +310,7 @@ const separateParamsAndQueryParams = (path, allParams) => {
 
 const getConfig = (rootPath, plainHash) => {
   const historyMode = rootPath != null;
-  const prefix = historyMode ? rootPath : "#" + (plainHash ? "" : "!");
+  const prefix = historyMode ? rootPath : '#' + (plainHash ? '' : '!');
 
   return { prefix, historyMode };
 };
@@ -321,7 +321,7 @@ const replaceRoute = (page, params = {}) => ({ page, params, changed: true, repl
 const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
-    : () => wdw.decodeURI(wdw.location.hash || prefix + "/");
+    : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
 /**
  * Helper that creates a `toUrl` function.
@@ -360,13 +360,13 @@ const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl) => {
 
 const emptyQueryString = {
   parse: _ => ({}),
-  stringify: _ => ""
+  stringify: _ => ''
 };
 
 const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
   if (url !== getUrl()) {
-    const fn = replace ? "replaceState" : "pushState";
-    wdw.history[fn].call(wdw.history, {}, "", url);
+    const fn = replace ? 'replaceState' : 'pushState';
+    wdw.history[fn].call(wdw.history, {}, '', url);
   }
 };
 
@@ -382,12 +382,12 @@ const addEventListener = (wdw, prefix, setHref) => {
 
   const linkHandler = evt => {
     let element = evt.target;
-    while (element && element.nodeName.toLowerCase() !== "a") {
+    while (element && element.nodeName.toLowerCase() !== 'a') {
       element = element.parentNode;
     }
     if (
       element &&
-      element.nodeName.toLowerCase() === "a" &&
+      element.nodeName.toLowerCase() === 'a' &&
       element.href.startsWith(origin) &&
       element.href.indexOf(prefix) >= 0
     ) {
@@ -396,10 +396,10 @@ const addEventListener = (wdw, prefix, setHref) => {
     }
   };
 
-  wdw.addEventListener("click", linkHandler, false);
+  wdw.addEventListener('click', linkHandler, false);
 
-  wdw.addEventListener("beforeunload", () => {
-    wdw.removeEventListener("click", linkHandler);
+  wdw.addEventListener('beforeunload', () => {
+    wdw.removeEventListener('click', linkHandler);
   });
 };
 
@@ -424,27 +424,27 @@ export const createRouter = ({
   wdw = window
 }) => {
   if (!routeMatcher) {
-    throw "routeMatcher is required";
+    throw 'routeMatcher is required';
   }
 
   if (!convertMatch) {
-    throw "convertMatch is required";
+    throw 'convertMatch is required';
   }
 
   if (!routeConfig && !toUrl) {
-    throw "routeConfig or toUrl is required";
+    throw 'routeConfig or toUrl is required';
   }
 
   const { prefix, historyMode } = getConfig(rootPath, plainHash);
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
-  const getPath = () => getUrl().substring(prefix.length) || "/";
+  const getPath = () => getUrl().substring(prefix.length) || '/';
   toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
   const getRoute = path => {
-    let matchPath = path || "/";
-    if (matchPath.startsWith("?")) {
-      matchPath = "/" + matchPath;
+    let matchPath = path || '/';
+    if (matchPath.startsWith('?')) {
+      matchPath = '/' + matchPath;
     }
     const match = routeMatcher(matchPath);
     const converted = convertMatch(match);
@@ -459,7 +459,7 @@ export const createRouter = ({
   const start = onRouteChange => {
     if (historyMode) {
       addEventListener(wdw, prefix, href => {
-        wdw.history.pushState({}, "", href);
+        wdw.history.pushState({}, '', href);
         wdw.onpopstate();
       });
     }
@@ -623,11 +623,11 @@ export const createMithrilRouter = ({
   wdw = window
 }) => {
   if (!m) {
-    throw "m is required";
+    throw 'm is required';
   }
 
   if (!routeConfig) {
-    throw "routeConfig is required";
+    throw 'routeConfig is required';
   }
 
   const { prefix, historyMode } = getConfig(rootPath, plainHash);

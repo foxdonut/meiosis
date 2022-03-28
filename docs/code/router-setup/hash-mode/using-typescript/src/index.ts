@@ -11,14 +11,18 @@ import { State, Patch, AppActions } from "./app/types";
 import { router } from "./router";
 
 const app = createApp(router);
-const { states, update, actions } = meiosis<State, Patch, AppActions>({
+const { states, update, actions } = meiosis<
+  State,
+  Patch,
+  AppActions
+>({
   stream: flyd.stream,
   accumulator: merge,
   app
 });
 
-router.start(route => update({ route: () => route }));
-states.map(state => router.syncLocationBar(state.route));
+router.start((route) => update({ route: () => route }));
+states.map((state) => router.syncLocationBar(state.route));
 
 // Only for using Meiosis Tracer in development.
 meiosisTracer({

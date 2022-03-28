@@ -1,15 +1,15 @@
 /*global __dirname*/
-var path = require("path");
+var path = require('path');
 
 module.exports = {
-  mode: "development",
-  entry: "./src/index.jsx",
+  mode: 'development',
+  entry: './src/index.jsx',
   output: {
-    path: path.join(__dirname, "build"),
-    filename: "generated-app.js"
+    path: path.join(__dirname, 'build'),
+    filename: 'generated-app.js'
   },
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: ['.js', '.jsx']
   },
   module: {
     rules: [
@@ -17,7 +17,7 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: 'babel-loader'
         }
       }
     ]

@@ -33,7 +33,7 @@ var skyOption = function ({
       name: "sky",
       value,
       checked: state[id].sky === value,
-      onchange: evt => actions.changeSky(id, evt.target.value)
+      onchange: (evt) => actions.changeSky(id, evt.target.value)
     }),
     label
   );
@@ -48,7 +48,7 @@ var Conditions = {
         m("input", {
           type: "checkbox",
           checked: state[id].precipitations,
-          onchange: evt =>
+          onchange: (evt) =>
             actions.togglePrecipitations(id, evt.target.checked)
         }),
         "Precipitations"
@@ -98,11 +98,11 @@ var temperature = {
   Actions: function (update) {
     return {
       increment: function (id, amount) {
-        update({ [id]: { value: x => x + amount } });
+        update({ [id]: { value: (x) => x + amount } });
       },
       changeUnits: function (id) {
         update({
-          [id]: state => {
+          [id]: (state) => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);

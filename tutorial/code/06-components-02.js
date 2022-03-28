@@ -34,11 +34,11 @@ var temperature = {
   Actions: function (update) {
     return {
       increment: function (id, amount) {
-        update({ [id]: { value: x => x + amount } });
+        update({ [id]: { value: (x) => x + amount } });
       },
       changeUnits: function (id) {
         update({
-          [id]: state => {
+          [id]: (state) => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);

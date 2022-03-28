@@ -21,7 +21,8 @@ const componentMap = {
 export const App = {
   view: ({ attrs: { state, update, actions, router } }) => {
     const Component = componentMap[state.route.page];
-    const isActive = tab => (tab === Component ? ".active" : "");
+    const isActive = (tab) =>
+      tab === Component ? ".active" : "";
 
     return m(
       "div",
@@ -29,13 +30,41 @@ export const App = {
         "nav.navbar.navbar-default",
         m(
           "ul.nav.navbar-nav",
-          m("li" + isActive(Home), m("a", { href: router.toUrl(Route.Home) }, "Home")),
-          m("li" + isActive(Login), m("a", { href: router.toUrl(Route.Login) }, "Login")),
-          m("li" + isActive(Settings), m("a", { href: router.toUrl(Route.Settings) }, "Settings")),
-          m("li" + isActive(Tea), m("a", { href: router.toUrl(Route.Tea) }, "Tea")),
+          m(
+            "li" + isActive(Home),
+            m(
+              "a",
+              { href: router.toUrl(Route.Home) },
+              "Home"
+            )
+          ),
+          m(
+            "li" + isActive(Login),
+            m(
+              "a",
+              { href: router.toUrl(Route.Login) },
+              "Login"
+            )
+          ),
+          m(
+            "li" + isActive(Settings),
+            m(
+              "a",
+              { href: router.toUrl(Route.Settings) },
+              "Settings"
+            )
+          ),
+          m(
+            "li" + isActive(Tea),
+            m("a", { href: router.toUrl(Route.Tea) }, "Tea")
+          ),
           m(
             "li" + isActive(TeaSearch),
-            m("a", { href: router.toUrl(Route.TeaSearch) }, "Tea Search")
+            m(
+              "a",
+              { href: router.toUrl(Route.TeaSearch) },
+              "Tea Search"
+            )
           )
         )
       ),

@@ -42,7 +42,9 @@ export const meiosis = <S, P, A>({
   const actions: A = app.Actions(update, states);
   const effects: Effect<S>[] = app.Effects(update, actions);
 
-  states.map(state => effects.forEach(effect => effect(state)));
+  states.map((state) =>
+    effects.forEach((effect) => effect(state))
+  );
 
   return { states, update, actions };
 };

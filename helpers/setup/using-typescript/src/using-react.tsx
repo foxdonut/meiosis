@@ -1,8 +1,8 @@
 // react + functionPatches + flyd
-import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
-import flyd from "flyd";
-import React, { ReactElement } from "react";
-import ReactDOM from "react-dom";
+import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
+import flyd from 'flyd';
+import React, { ReactElement } from 'react';
+import ReactDOM from 'react-dom';
 import {
   Conditions,
   ConditionsComponent,
@@ -13,7 +13,7 @@ import {
   TemperatureComponent,
   convert,
   initialConditions
-} from "./common";
+} from './common';
 
 interface Attrs {
   cell: MeiosisCell<State>;
@@ -105,7 +105,7 @@ const temperatureActions: TemperatureActions = {
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
-      const newUnits = state.units === "C" ? "F" : "C";
+      const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
 
       return {
@@ -135,26 +135,26 @@ const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
-      air: temperature.Initial("Air"),
-      water: temperature.Initial("Water")
+      air: temperature.Initial('Air'),
+      water: temperature.Initial('Water')
     }
   }
 };
 
 const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
     <div>
-      <Conditions cell={cell.nest("conditions")} />
-      <Temperature cell={cell.nest("temperature").nest("air")} />
-      <Temperature cell={cell.nest("temperature").nest("water")} />
+      <Conditions cell={cell.nest('conditions')} />
+      <Temperature cell={cell.nest('temperature').nest('air')} />
+      <Temperature cell={cell.nest('temperature').nest('water')} />
     </div>
-    <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
+    <pre style={{ margin: '0' }}>{JSON.stringify(cell.state, null, 4)}</pre>
   </div>
 );
 
 export const setupReactExample = (): void => {
   const cells = setup<State>({ stream: flyd, app });
-  const element = document.getElementById("reactApp");
+  const element = document.getElementById('reactApp');
   cells.map(cell => {
     ReactDOM.render(<App cell={cell} />, element);
   });

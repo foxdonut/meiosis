@@ -1,13 +1,13 @@
 /* global b, m, R */
 
-const I = x => x;
-const o = (f, g) => x => f(g(x));
-const K = x => () => x;
+const I = (x) => x;
+const o = (f, g) => (x) => f(g(x));
+const K = (x) => () => x;
 
 function dropRepeats(s) {
   var ready = false;
   var d = m.stream();
-  s.map(function(v) {
+  s.map(function (v) {
     if (!ready || v !== d()) {
       ready = true;
       d(v);
@@ -16,7 +16,7 @@ function dropRepeats(s) {
   return d;
 }
 
-const humanList = s => xs =>
+const humanList = (s) => (xs) =>
   xs.length > 1
     ? xs.slice(0, -1).join(", ") +
       " " +
@@ -25,12 +25,13 @@ const humanList = s => xs =>
       xs.slice(-1)
     : xs.join("");
 
-const pipe = xs => xs.reduceRight(o, I);
+const pipe = (xs) => xs.reduceRight(o, I);
 const $ = {
-  prop: k => f => o => Object.assign(o, { [k]: f(o[k]) }),
-  get: lens => o => {
+  prop: (k) => (f) => (o) =>
+    Object.assign(o, { [k]: f(o[k]) }),
+  get: (lens) => (o) => {
     var y;
-    lens(x => (y = x))(o);
+    lens((x) => (y = x))(o);
     return y;
   }
 };
@@ -40,12 +41,13 @@ const $description = $.prop("description");
 const $colors = $.prop("colors");
 
 const Action = {
-  addBox: x =>
-    pipe([K(x), x => xs => xs.concat(x), $boxes]),
-  removeBox: i => $boxes(xs => xs.filter((x, j) => i != j))
+  addBox: (x) =>
+    pipe([K(x), (x) => (xs) => xs.concat(x), $boxes]),
+  removeBox: (i) =>
+    $boxes((xs) => xs.filter((x, j) => i != j))
 };
 
-const view = update => state =>
+const view = (update) => (state) =>
   m(
     ".app" + b.d("grid").ff("Helvetica"),
     m(
@@ -59,7 +61,7 @@ const view = update => state =>
           .p("1em"),
 
       m("h1" + b.m(0), "Boxes"),
-      $.get($colors)(state).map(x =>
+      $.get($colors)(state).map((x) =>
         m(
           "button" +
             b
@@ -89,17 +91,9 @@ const view = update => state =>
           .overflowY("auto"),
 
       $.get($boxes)(state).map((x, i) =>
-        m(
-          "" +
-            b
-              .bc(x)
-              .c("white")
-              .w("4em")
-              .h("4em"),
-          {
-            onclick: pipe([K(Action.removeBox(i)), update])
-          }
-        )
+        m("" + b.bc(x).c("white").w("4em").h("4em"), {
+          onclick: pipe([K(Action.removeBox(i)), update])
+        })
       )
     )
   );
@@ -112,7 +106,7 @@ const StatsService = {
       .reduce(R.merge, {});
   },
   start(state) {
-    return dropRepeats(state.map(x => x.boxes))
+    return dropRepeats(state.map((x) => x.boxes))
       .map(R.countBy(I))
       .map(R.assoc("stats"));
   }
@@ -129,7 +123,7 @@ const LocalStorageService = {
   start(state) {
     const update = m.stream();
 
-    dropRepeats(state.map(R.pick(["boxes"]))).map(x =>
+    dropRepeats(state.map(R.pick(["boxes"]))).map((x) =>
       localStorage.setItem("v1", JSON.stringify(x))
     );
 
@@ -144,7 +138,7 @@ const DescriptionService = {
     };
   },
   start(state) {
-    return dropRepeats(state.map(x => x.stats)).map(
+    return dropRepeats(state.map((x) => x.stats)).map(
       R.pipe(
         R.toPairs,
         R.groupBy(R.last),
@@ -153,7 +147,7 @@ const DescriptionService = {
         R.toPairs,
         R.map(R.join(" ")),
         humanList("and"),
-        x => x + ".",
+        (x) => x + ".",
         R.objOf("description"),
         R.mergeDeepLeft
       )
@@ -175,7 +169,9 @@ const initialState = () => {
   return Object.assign(
     {},
     state,
-    services.map(s => s.initial(state)).reduce(R.merge, {})
+    services
+      .map((s) => s.initial(state))
+      .reduce(R.merge, {})
   );
 };
 
@@ -183,6 +179,6 @@ const update = m.stream();
 const T = (x, f) => f(x);
 const states = m.stream.scan(T, initialState(), update);
 const element = document.getElementById("app");
-states.map(view(update)).map(v => m.render(element, v));
+states.map(view(update)).map((v) => m.render(element, v));
 
-services.map(s => s.start(states).map(update));
+services.map((s) => s.start(states).map(update));

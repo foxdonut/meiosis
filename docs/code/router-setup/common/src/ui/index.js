@@ -6,10 +6,18 @@ export const PleaseWait = {
       "div",
       {
         style: {
-          visibility: state.route.changed ? "visible" : "hidden"
+          visibility: state.route.changed
+            ? "visible"
+            : "hidden"
         }
       },
-      m("div.simpleModal", m("div.simpleBox", m("div", "Loading, please wait...")))
+      m(
+        "div.simpleModal",
+        m(
+          "div.simpleBox",
+          m("div", "Loading, please wait...")
+        )
+      )
     );
   }
 };

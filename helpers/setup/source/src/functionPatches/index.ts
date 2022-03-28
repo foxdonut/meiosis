@@ -1,4 +1,4 @@
-import simpleStream from "../simple-stream";
+import simpleStream from '../simple-stream';
 import {
   CommonApp,
   CommonMeiosisConfig,
@@ -8,7 +8,7 @@ import {
   commonGetServices,
   commonGetInitialState,
   nestSetup
-} from "../common";
+} from '../common';
 
 /**
  * @template S the State type.
@@ -69,40 +69,41 @@ export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
   app: App<S>;
 }
 
-const nestPatch = <S, K extends Extract<keyof S, string>>(
-  patch: Patch<S[K]>,
-  prop: K
-): Patch<S> => (state: S) => Object.assign({}, state, { [prop]: patch(state[prop]) });
+const nestPatch =
+  <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> =>
+  (state: S) =>
+    Object.assign({}, state, { [prop]: patch(state[prop]) });
 
-const nestUpdate = <S, K extends Extract<keyof S, string>>(
-  parentUpdate: Update<S>,
-  prop: K
-): Update<S[K]> => patch => parentUpdate(nestPatch(patch, prop));
+const nestUpdate =
+  <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
+  patch =>
+    parentUpdate(nestPatch(patch, prop));
 
-const nestCell = <S, K extends Extract<keyof S, string>>(
-  getState: () => S,
-  parentUpdate: Update<S>
-) => (prop: K): MeiosisCell<S[K]> => {
-  const getNestedState = () => getState()[prop];
+const nestCell =
+  <S, K extends Extract<keyof S, string>>(getState: () => S, parentUpdate: Update<S>) =>
+  (prop: K): MeiosisCell<S[K]> => {
+    const getNestedState = () => getState()[prop];
 
-  const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+    const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
 
-  const nested: MeiosisCell<S[K]> = {
-    state: getNestedState(),
-    update: nestedUpdate,
-    nest: nestCell(getNestedState, nestedUpdate)
+    const nested: MeiosisCell<S[K]> = {
+      state: getNestedState(),
+      update: nestedUpdate,
+      nest: nestCell(getNestedState, nestedUpdate)
+    };
+
+    return nested;
   };
-
-  return nested;
-};
 
 /**
  * Combines an array of patches into a single patch.
  *
  * @template S the State type.
  */
-export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => (initialState: S) =>
-  patches.reduce((state, patch) => patch(state), initialState);
+export const combinePatches =
+  <S>(patches: Patch<S>[]): Patch<S> =>
+  (initialState: S) =>
+    patches.reduce((state, patch) => patch(state), initialState);
 
 export const getInitialState = <S>(app: App<S>): S => commonGetInitialState(app);
 

@@ -7,13 +7,17 @@ import createRouteMatcher from "feather-route-matcher";
 
 const routeMatcher = createRouteMatcher(routeConfig);
 
-const convertMatch = ({ value, params }) => ({ page: value, params });
+const convertMatch = ({ value, params }) => ({
+  page: value,
+  params
+});
 
 export const router = createRouter({
   routeMatcher,
   convertMatch,
   routeConfig,
-  rootPath: "/code/router-setup/history-mode/generic-router/build",
+  rootPath:
+    "/code/router-setup/history-mode/generic-router/build",
   queryString
 });
 

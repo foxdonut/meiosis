@@ -13,8 +13,7 @@ All you need is a simple stream library such as Flyd or Mithril Stream in one pl
 the pattern. You do not need anything else, not even Meiosis itself. You could even implement the
 stream yourself with a handful of lines of code. Zero dependencies!
 
-Easily use the pattern with your favourite view library: React, Preact, Mithril, lit-html,
-and so on.
+Easily use the pattern with your favourite view library: React, Preact, Mithril, and so on.
 
 ## Ready to have a closer look?
 

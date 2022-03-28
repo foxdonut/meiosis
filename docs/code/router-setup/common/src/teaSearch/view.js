@@ -18,26 +18,49 @@ export const TeaSearch = () => ({
           state.searchTeas && [
             m(
               "div",
-              types.map(type => [
+              types.map((type) => [
                 m(
                   "a",
                   {
                     style: { marginRight: "10px" },
-                    href: router.toUrl(Route.TeaSearch, { type })
+                    href: router.toUrl(Route.TeaSearch, {
+                      type
+                    })
                   },
                   type
                 )
               ]),
-              m("a", { href: router.toUrl(Route.TeaSearch) }, "All")
+              m(
+                "a",
+                { href: router.toUrl(Route.TeaSearch) },
+                "All"
+              )
             ),
             m(
               "table.table.table-bordered.table-striped",
-              m("thead", m("tr", m("th", "Type"), m("th", "Description"))),
+              m(
+                "thead",
+                m(
+                  "tr",
+                  m("th", "Type"),
+                  m("th", "Description")
+                )
+              ),
               m(
                 "tbody",
                 state.searchTeas
-                  .filter(tea => !teaType || tea.type === teaType)
-                  .map(tea => m("tr", { key: tea.id }, m("td", tea.type), m("td", tea.description)))
+                  .filter(
+                    (tea) =>
+                      !teaType || tea.type === teaType
+                  )
+                  .map((tea) =>
+                    m(
+                      "tr",
+                      { key: tea.id },
+                      m("td", tea.type),
+                      m("td", tea.description)
+                    )
+                  )
               )
             )
           ]

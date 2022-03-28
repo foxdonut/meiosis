@@ -1,5 +1,10 @@
 import createRouter5, { State } from "router5";
-import { createRouter, Router, RouteMatcher, ConvertMatch } from "meiosis-router-setup";
+import {
+  createRouter,
+  Router,
+  RouteMatcher,
+  ConvertMatch
+} from "meiosis-router-setup";
 import * as queryString from "query-string";
 
 type Match = State | null;
@@ -23,11 +28,15 @@ const router5Config = [
   { path: "/tea/:id", name: Route.TeaDetails }
 ];
 
-const router5 = createRouter5(router5Config, { queryParamsMode: "loose" });
+const router5 = createRouter5(router5Config, {
+  queryParamsMode: "loose"
+});
 const routeMatcher: RouteMatcher<Match> = router5.matchPath;
 
 const convertMatch: ConvertMatch<Match> = (match: Match) =>
-  match ? { page: match.name, params: match.params } : { page: Route.Home, params: {} };
+  match
+    ? { page: match.name, params: match.params }
+    : { page: Route.Home, params: {} };
 
 export const router: Router = createRouter({
   routeMatcher,

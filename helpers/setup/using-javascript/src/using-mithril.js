@@ -1,10 +1,10 @@
 // @ts-check
 // mithril + mergerino + mithril-stream
 
-import meiosis from "../../source/dist/index";
-import m from "mithril";
-import Stream from "mithril/stream";
-import { app, convert } from "./common";
+import meiosis from '../../source/dist/index';
+import m from 'mithril';
+import Stream from 'mithril/stream';
+import { app, convert } from './common';
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
@@ -18,9 +18,9 @@ const conditionsActions = {
 const SkyOption = {
   view: ({ attrs: { cell, value, label } }) =>
     m(
-      "label",
-      m("input", {
-        type: "radio",
+      'label',
+      m('input', {
+        type: 'radio',
         value,
         checked: cell.state.sky === value,
         onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
@@ -32,21 +32,21 @@ const SkyOption = {
 const Conditions = {
   view: ({ attrs: { cell } }) =>
     m(
-      "div",
+      'div',
       m(
-        "label",
-        m("input", {
-          type: "checkbox",
+        'label',
+        m('input', {
+          type: 'checkbox',
           checked: cell.state.precipitations,
           onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
         }),
-        "Precipitations"
+        'Precipitations'
       ),
       m(
-        "div",
-        m(SkyOption, { cell, value: "SUNNY", label: "Sunny" }),
-        m(SkyOption, { cell, value: "CLOUDY", label: "Cloudy" }),
-        m(SkyOption, { cell, value: "MIX", label: "Mix of sun/clouds" })
+        'div',
+        m(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
+        m(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
+        m(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
       )
     )
 };
@@ -58,7 +58,7 @@ const temperatureActions = {
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
-      const newUnits = state.units === "C" ? "F" : "C";
+      const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
       return { ...state, value: newValue, units: newUnits };
     });
@@ -68,40 +68,40 @@ const temperatureActions = {
 const Temperature = {
   view: ({ attrs: { cell } }) =>
     m(
-      "div",
+      'div',
       cell.state.label,
-      " Temperature: ",
+      ' Temperature: ',
       cell.state.value,
-      m.trust("&deg;"),
+      m.trust('&deg;'),
       cell.state.units,
       m(
-        "div",
-        m("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
-        m("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
+        'div',
+        m('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
+        m('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
       ),
-      m("div", m("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units"))
+      m('div', m('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units'))
     )
 };
 
 const App = {
   view: ({ attrs: { cell } }) =>
     m(
-      "div",
-      { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+      'div',
+      { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
       m(
-        "div",
-        m(Conditions, { cell: cell.nest("conditions") }),
-        m(Temperature, { cell: cell.nest("temperature").nest("air") }),
-        m(Temperature, { cell: cell.nest("temperature").nest("water") })
+        'div',
+        m(Conditions, { cell: cell.nest('conditions') }),
+        m(Temperature, { cell: cell.nest('temperature').nest('air') }),
+        m(Temperature, { cell: cell.nest('temperature').nest('water') })
       ),
-      m("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
+      m('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
     )
 };
 
 export const setupMithrilExample = () => {
   const cells = meiosis.mergerino.setup({ stream: Stream, app });
 
-  m.mount(document.getElementById("mithrilApp"), {
+  m.mount(document.getElementById('mithrilApp'), {
     view: () => m(App, { cell: cells() })
   });
 

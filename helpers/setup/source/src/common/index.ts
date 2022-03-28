@@ -1,5 +1,5 @@
-import simpleStream from "../simple-stream";
-import { assoc, concatIfPresent } from "../util";
+import simpleStream from '../simple-stream';
+import { assoc, concatIfPresent } from '../util';
 
 /**
  * A mapping function.
@@ -283,24 +283,23 @@ export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
   concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
 
 // Credit: James Forbes (https://james-forbes.com/)
-export const createDropRepeats = (stream: ExternalStreamLib = simpleStream) => <S>(
-  states: Stream<S>,
-  selector: (state: S) => any = state => state
-): Stream<S> => {
-  const createStream = typeof stream === "function" ? stream : stream.stream;
+export const createDropRepeats =
+  (stream: ExternalStreamLib = simpleStream) =>
+  <S>(states: Stream<S>, selector: (state: S) => any = state => state): Stream<S> => {
+    const createStream = typeof stream === 'function' ? stream : stream.stream;
 
-  let prev = undefined;
-  const result = createStream();
+    let prev = undefined;
+    const result = createStream();
 
-  states.map(state => {
-    const next = selector(state);
-    if (next !== prev) {
-      prev = next;
-      result(state);
-    }
-  });
-  return result;
-};
+    states.map(state => {
+      const next = selector(state);
+      if (next !== prev) {
+        prev = next;
+        result(state);
+      }
+    });
+    return result;
+  };
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
@@ -324,7 +323,7 @@ export const setup = <S, P>({
     stream = simpleStream;
   }
   if (!accumulator) {
-    throw new Error("No accumulator function was specified.");
+    throw new Error('No accumulator function was specified.');
   }
 
   const initial = commonGetInitialState(app || {});
@@ -332,7 +331,7 @@ export const setup = <S, P>({
   // falsy patches are ignored
   const accumulatorFn = (state: S, patch: P) => (patch ? accumulator(state, patch) : state);
 
-  const createStream = typeof stream === "function" ? stream : stream.stream;
+  const createStream = typeof stream === 'function' ? stream : stream.stream;
   const scan = stream.scan;
 
   const update: Stream<P> = createStream();

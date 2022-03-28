@@ -2,7 +2,7 @@
 const [stream, scan] = [m.stream, m.stream.scan];
 const accumulator = mergerino;
 
-const loginService = state => {
+const loginService = (state) => {
   if (state.page === "Login") {
     if (!state.login) {
       return { login: { username: "", password: "" } };
@@ -12,7 +12,7 @@ const loginService = state => {
   }
 };
 
-const dataService = state => {
+const dataService = (state) => {
   if (state.page === "Data") {
     if (!state.data) {
       return { data: "loading" };
@@ -22,7 +22,7 @@ const dataService = state => {
   }
 };
 
-const DataEffect = actions => state => {
+const DataEffect = (actions) => (state) => {
   if (state.data === "loading") {
     actions.loadData();
   }
@@ -33,7 +33,7 @@ const app = {
     page: "Home"
   },
 
-  Actions: update => ({
+  Actions: (update) => ({
     loadData: () =>
       setTimeout(
         () =>
@@ -51,7 +51,7 @@ const app = {
 
 const update = stream();
 
-const runServices = startingState =>
+const runServices = (startingState) =>
   app.services.reduce(
     (state, service) => accumulator(state, service(state)),
     startingState
@@ -66,8 +66,8 @@ const states = scan(
 const actions = app.Actions(update, states);
 const effects = app.Effects(update, actions);
 
-states.map(state =>
-  effects.forEach(effect => effect(state))
+states.map((state) =>
+  effects.forEach((effect) => effect(state))
 );
 
 const App = {
@@ -78,7 +78,7 @@ const App = {
         "a",
         {
           href: "#",
-          onclick: evt => {
+          onclick: (evt) => {
             evt.preventDefault();
             update({ page: "Home" });
           }
@@ -90,7 +90,7 @@ const App = {
         "a",
         {
           href: "#",
-          onclick: evt => {
+          onclick: (evt) => {
             evt.preventDefault();
             update({ page: "Login" });
           }
@@ -102,7 +102,7 @@ const App = {
         "a",
         {
           href: "#",
-          onclick: evt => {
+          onclick: (evt) => {
             evt.preventDefault();
             update({ page: "Data" });
           }
@@ -120,7 +120,7 @@ const App = {
             m("span", "Username:"),
             m("input[type=text]", {
               value: state.login.username,
-              oninput: evt =>
+              oninput: (evt) =>
                 update({
                   login: { username: evt.target.value }
                 })
@@ -131,7 +131,7 @@ const App = {
             m("span", "Password:"),
             m("input[type=password]", {
               value: state.login.password,
-              oninput: evt =>
+              oninput: (evt) =>
                 update({
                   login: { password: evt.target.value }
                 })
@@ -143,7 +143,10 @@ const App = {
           m("h4", "Data page"),
           state.data === "loading"
             ? m("div", "Loading, please wait...")
-            : m("ul", state.data.map(item => m("li", item)))
+            : m(
+                "ul",
+                state.data.map((item) => m("li", item))
+              )
         ]
       : null,
     m("pre", JSON.stringify(state, null, 2))

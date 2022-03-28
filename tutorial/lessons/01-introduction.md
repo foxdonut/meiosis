@@ -27,8 +27,7 @@ plain objects and functions.
 Besides JavaScript, you will need to know, or learn, about the view library that you would
 like to use. Most of this tutorial is independent of the view library. When we put it all
 together, there are examples with [React](https://reactjs.org),
-[Mithril](http://mithril.js.org), [Preact](https://preactjs.com), and
-[lit-html](https://lit-html.polymer-project.org/).
+[Mithril](http://mithril.js.org), and [Preact](https://preactjs.com).
 
 If none of those is your preferred view library, fear not! It is trivial to use just about
 any view library with the Meiosis pattern.

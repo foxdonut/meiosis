@@ -1,8 +1,8 @@
 // preact + functionPatches + simple-stream
 
-import { App, MeiosisCell, setup } from "../../source/dist/functionPatches";
-import { h, render as preactRender, VNode } from "preact";
-import { add, assoc, over, lensProp } from "rambda";
+import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
+import { h, render as preactRender, VNode } from 'preact';
+import { add, assoc, over, lensProp } from 'rambda';
 import {
   Conditions,
   ConditionsComponent,
@@ -13,7 +13,7 @@ import {
   TemperatureComponent,
   convert,
   initialConditions
-} from "./common";
+} from './common';
 
 interface Attrs {
   cell: MeiosisCell<State>;
@@ -48,10 +48,10 @@ const conditions: ConditionsComponent = {
 
 const conditionsActions: ConditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update(assoc("precipitations", value));
+    cell.update(assoc('precipitations', value));
   },
   changeSky: (cell, value) => {
-    cell.update(assoc("sky", value));
+    cell.update(assoc('sky', value));
   }
 };
 
@@ -59,10 +59,10 @@ const conditionsActions: ConditionsActions = {
 // file, we'll use h here.
 const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
   h(
-    "label",
+    'label',
     {},
-    h("input", {
-      type: "radio",
+    h('input', {
+      type: 'radio',
       value,
       checked: cell.state.sky === value,
       onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
@@ -72,24 +72,24 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
 
 const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
   h(
-    "div",
+    'div',
     {},
     h(
-      "label",
+      'label',
       {},
-      h("input", {
-        type: "checkbox",
+      h('input', {
+        type: 'checkbox',
         checked: cell.state.precipitations,
         onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
-      "Precipitations"
+      'Precipitations'
     ),
     h(
-      "div",
+      'div',
       {},
-      h(SkyOption, { cell, value: "SUNNY", label: "Sunny" }),
-      h(SkyOption, { cell, value: "CLOUDY", label: "Cloudy" }),
-      h(SkyOption, { cell, value: "MIX", label: "Mix of sun/clouds" })
+      h(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
+      h(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
+      h(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
     )
   );
 
@@ -99,12 +99,12 @@ const temperature: TemperatureComponent = {
 
 const temperatureActions: TemperatureActions = {
   increment: (cell, amount) => {
-    cell.update(over(lensProp("value"), add(amount)));
+    cell.update(over(lensProp('value'), add(amount)));
   },
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
-      const newUnits = state.units === "C" ? "F" : "C";
+      const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
       return { ...state, value: newValue, units: newUnits };
     });
@@ -113,23 +113,23 @@ const temperatureActions: TemperatureActions = {
 
 const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
   h(
-    "div",
+    'div',
     {},
     cell.state.label,
-    " Temperature: ",
+    ' Temperature: ',
     cell.state.value,
-    h("span", { dangerouslySetInnerHTML: { __html: "&deg;" } }),
+    h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
     cell.state.units,
     h(
-      "div",
+      'div',
       {},
-      h("button", { onclick: () => temperatureActions.increment(cell, 1) }, "Increment"),
-      h("button", { onclick: () => temperatureActions.increment(cell, -1) }, "Decrement")
+      h('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
+      h('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
     ),
     h(
-      "div",
+      'div',
       {},
-      h("button", { onclick: () => temperatureActions.changeUnits(cell) }, "Change Units")
+      h('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units')
     )
   );
 
@@ -137,29 +137,29 @@ const app: App<State> = {
   initial: {
     conditions: conditions.initial,
     temperature: {
-      air: temperature.Initial("Air"),
-      water: temperature.Initial("Water")
+      air: temperature.Initial('Air'),
+      water: temperature.Initial('Water')
     }
   }
 };
 
 const App: (attrs: Attrs) => VNode = ({ cell }) =>
   h(
-    "div",
-    { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+    'div',
+    { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
     h(
-      "div",
+      'div',
       {},
-      h(Conditions, { cell: cell.nest("conditions") }),
-      h(Temperature, { cell: cell.nest("temperature").nest("air") }),
-      h(Temperature, { cell: cell.nest("temperature").nest("water") })
+      h(Conditions, { cell: cell.nest('conditions') }),
+      h(Temperature, { cell: cell.nest('temperature').nest('air') }),
+      h(Temperature, { cell: cell.nest('temperature').nest('water') })
     ),
-    h("pre", { style: { margin: "0" } }, JSON.stringify(cell.state, null, 4))
+    h('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
   );
 
 export const setupPreactExample = (): void => {
   const cells = setup<State>({ app });
-  const element = document.getElementById("preactApp") as HTMLElement;
+  const element = document.getElementById('preactApp') as HTMLElement;
   cells.map(cell => {
     preactRender(h(App, { cell }), element);
   });

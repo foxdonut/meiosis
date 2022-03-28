@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
 [< Previous](08-using-react.html) |
-[Next >](10-using-lit-html.html) |
+[Next >](10-whats-next.html) |
 [Table of Contents](toc.html)
 
 ## 09 - Using Preact
@@ -153,7 +153,7 @@ This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html)
 to go from here.
 
 [< Previous](08-using-react.html) |
-[Next >](10-using-lit-html.html) |
+[Next >](10-whats-next.html) |
 [Table of Contents](toc.html)
 
 -----

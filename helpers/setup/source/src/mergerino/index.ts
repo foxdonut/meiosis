@@ -1,5 +1,5 @@
-import simpleStream from "../simple-stream";
-import merge from "mergerino";
+import simpleStream from '../simple-stream';
+import merge from 'mergerino';
 import {
   CommonApp,
   CommonMeiosisConfig,
@@ -9,7 +9,7 @@ import {
   commonGetServices,
   commonGetInitialState,
   nestSetup
-} from "../common";
+} from '../common';
 
 /**
  * A Mergerino function patch. This is a function that receives the current state and returns the
@@ -97,27 +97,26 @@ export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
 const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> =>
   ({ [prop]: patch } as Patch<S>);
 
-const nestUpdate = <S, K extends Extract<keyof S, string>>(
-  parentUpdate: Update<S>,
-  prop: K
-): Update<S[K]> => patch => parentUpdate(nestPatch(patch, prop));
+const nestUpdate =
+  <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
+  patch =>
+    parentUpdate(nestPatch(patch, prop));
 
-const nestCell = <S, K extends Extract<keyof S, string>>(
-  getState: () => S,
-  parentUpdate: Update<S>
-) => (prop: K): MeiosisCell<S[K]> => {
-  const getNestedState = () => getState()[prop];
+const nestCell =
+  <S, K extends Extract<keyof S, string>>(getState: () => S, parentUpdate: Update<S>) =>
+  (prop: K): MeiosisCell<S[K]> => {
+    const getNestedState = () => getState()[prop];
 
-  const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+    const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
 
-  const nested: MeiosisCell<S[K]> = {
-    state: getNestedState(),
-    update: nestedUpdate,
-    nest: nestCell(getNestedState, nestedUpdate)
+    const nested: MeiosisCell<S[K]> = {
+      state: getNestedState(),
+      update: nestedUpdate,
+      nest: nestCell(getNestedState, nestedUpdate)
+    };
+
+    return nested;
   };
-
-  return nested;
-};
 
 /**
  * Combines an array of patches into a single patch.

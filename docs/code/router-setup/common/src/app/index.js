@@ -6,7 +6,7 @@ import { tea } from "../tea";
 import { teaDetails } from "../teaDetails";
 import { teaSearch } from "../teaSearch";
 
-export const createApp = router => ({
+export const createApp = (router) => ({
   initial: {
     route: router.initialRoute || {},
     login: {
@@ -15,12 +15,12 @@ export const createApp = router => ({
     }
   },
 
-  Actions: update => ({
+  Actions: (update) => ({
     login: login.Actions(update, router),
     settings: settings.Actions(update, router)
   }),
 
-  Effects: update => [
+  Effects: (update) => [
     RouteChangeEffect({
       update,
       Effects: [

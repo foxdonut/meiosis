@@ -1,4 +1,4 @@
-import { MapFunction, Stream, StreamLibWithProperty, Scan } from "../common";
+import { MapFunction, Stream, StreamLibWithProperty, Scan } from '../common';
 
 /**
  * Creates a stream.

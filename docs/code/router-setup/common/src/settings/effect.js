@@ -1,6 +1,6 @@
 import { Route } from "../router";
 
-export const Effect = router => update => state => {
+export const Effect = (router) => (update) => (state) => {
   if (state.route.page === Route.Settings && !state.user) {
     update({
       route: router.replaceRoute(Route.Login),

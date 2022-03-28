@@ -13,7 +13,8 @@ export const Login: m.Component<ViewAttrs> = {
           type: "text",
           placeholder: "username",
           value: state.login.username,
-          oninput: (evt: { target: { value: string } }) => actions.login.username(evt.target.value)
+          oninput: (evt: { target: { value: string } }) =>
+            actions.login.username(evt.target.value)
         })
       ),
       m(
@@ -22,14 +23,19 @@ export const Login: m.Component<ViewAttrs> = {
           type: "password",
           placeholder: "password",
           value: state.login.password,
-          oninput: (evt: { target: { value: string } }) => actions.login.password(evt.target.value)
+          oninput: (evt: { target: { value: string } }) =>
+            actions.login.password(evt.target.value)
         })
       ),
       m(
         "button.btn.btn-primary",
         {
           type: "button",
-          onclick: () => actions.login.login(state.login.username, state.login.returnTo)
+          onclick: () =>
+            actions.login.login(
+              state.login.username,
+              state.login.returnTo
+            )
         },
         "Login"
       )

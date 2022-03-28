@@ -19,13 +19,13 @@ var temperature = {
       increment: function (amount) {
         update({
           temperature: {
-            value: x => x + amount
+            value: (x) => x + amount
           }
         });
       },
       changeUnits: function () {
         update({
-          temperature: state => {
+          temperature: (state) => {
             var value = state.value;
             var newUnits = state.units === "C" ? "F" : "C";
             var newValue = convert(value, newUnits);

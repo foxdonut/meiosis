@@ -220,7 +220,6 @@ view libraries. Feel free to jump straight to the view library in which you are 
 - [07 - Using Mithril](07-using-mithril.html)
 - [08 - Using React](08-using-react.html)
 - [09 - Using Preact](09-using-preact.html)
-- [10 - Using lit-html](10-using-lit-html.html)
 
 [< Previous](05-meiosis-with-mergerino.html) |
 [Next >](07-using-mithril.html) |

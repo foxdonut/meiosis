@@ -33,7 +33,9 @@ export interface State {
 export type Patch = any;
 export type Update = Stream<Patch>;
 export type AppService = Service<State, Patch>;
-export type EffectConstructor = (update: Update) => Effect<State>;
+export type EffectConstructor = (
+  update: Update
+) => Effect<State>;
 
 export interface LoginActions {
   username: (value: string) => void;

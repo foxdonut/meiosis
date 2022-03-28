@@ -1,8 +1,8 @@
-import commonSetup, { createDropRepeats } from "./common";
-import mSetup, { combinePatches as mCombinePatches } from "./mergerino";
-import fSetup, { combinePatches as fCombinePatches } from "./functionPatches";
-import simpleStream from "./simple-stream";
-import { assoc, concatIfPresent, get } from "./util";
+import commonSetup, { createDropRepeats } from './common';
+import mSetup, { combinePatches as mCombinePatches } from './mergerino';
+import fSetup, { combinePatches as fCombinePatches } from './functionPatches';
+import simpleStream from './simple-stream';
+import { assoc, concatIfPresent, get } from './util';
 
 export default {
   common: {

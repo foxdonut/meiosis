@@ -13,8 +13,7 @@
 | [07 - Using Mithril](07-using-mithril.html) |
 | [08 - Using React](08-using-react.html) |
 | [09 - Using Preact](09-using-preact.html) |
-| [10 - Using lit-html](10-using-lit-html.html) |
-| [11 - What's Next?](11-whats-next.html) |
+| [10 - What's Next?](10-whats-next.html) |
 
 -----
 

@@ -1,11 +1,11 @@
 // @ts-check
 // react + functionPatches + flyd
 
-import meiosis from "../../source/dist/index";
-import flyd from "flyd";
-import React from "react";
-import ReactDOM from "react-dom";
-import { app, convert } from "./common";
+import meiosis from '../../source/dist/index';
+import flyd from 'flyd';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { app, convert } from './common';
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) => {
@@ -62,7 +62,7 @@ const temperatureActions = {
   changeUnits: cell => {
     cell.update(state => {
       const value = state.value;
-      const newUnits = state.units === "C" ? "F" : "C";
+      const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
 
       return {
@@ -89,19 +89,19 @@ const Temperature = ({ cell }) => (
 );
 
 const App = ({ cell }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
     <div>
-      <Conditions cell={cell.nest("conditions")} />
-      <Temperature cell={cell.nest("temperature").nest("air")} />
-      <Temperature cell={cell.nest("temperature").nest("water")} />
+      <Conditions cell={cell.nest('conditions')} />
+      <Temperature cell={cell.nest('temperature').nest('air')} />
+      <Temperature cell={cell.nest('temperature').nest('water')} />
     </div>
-    <pre style={{ margin: "0" }}>{JSON.stringify(cell.state, null, 4)}</pre>
+    <pre style={{ margin: '0' }}>{JSON.stringify(cell.state, null, 4)}</pre>
   </div>
 );
 
 export const setupReactExample = () => {
   const cells = meiosis.functionPatches.setup({ stream: flyd, app });
-  const element = document.getElementById("reactApp");
+  const element = document.getElementById('reactApp');
   cells.map(cell => {
     ReactDOM.render(<App cell={cell} />, element);
   });

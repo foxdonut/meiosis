@@ -15,7 +15,7 @@ console.log(
 
 // Toggle the `comfortable` property with a function that changes the value to the
 // opposite of what it was
-console.log(merge(target, { comfortable: x => !x }));
+console.log(merge(target, { comfortable: (x) => !x }));
 
 // Change the `air` value to `20` without losing the units.
 console.log(merge(target, { air: { value: 20 } }));

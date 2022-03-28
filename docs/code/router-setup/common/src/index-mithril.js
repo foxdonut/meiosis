@@ -8,11 +8,17 @@ import meiosisTracer from "meiosis-tracer";
 import { meiosis } from "./meiosis";
 import { createApp, App } from "./app";
 
-export const setupApp = router => {
+export const setupApp = (router) => {
   const app = createApp(router);
-  const { states, update, actions } = meiosis({ stream: flyd, merge, app });
+  const { states, update, actions } = meiosis({
+    stream: flyd,
+    merge,
+    app
+  });
 
-  states.map(state => router.syncLocationBar(state.route));
+  states.map((state) =>
+    router.syncLocationBar(state.route)
+  );
 
   // Only for using Meiosis Tracer in development.
   meiosisTracer({
@@ -25,8 +31,10 @@ export const setupApp = router => {
     document.getElementById("app"),
     "/",
     router.createMithrilRoutes({
-      onRouteChange: route => update({ route: () => route }),
-      render: () => m(App, { state: states(), update, actions, router })
+      onRouteChange: (route) =>
+        update({ route: () => route }),
+      render: () =>
+        m(App, { state: states(), update, actions, router })
     })
   );
 

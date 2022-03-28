@@ -9,7 +9,7 @@ const entryNumber = {
   initial: {
     value: ""
   },
-  Actions: update => ({
+  Actions: (update) => ({
     editEntryValue: (id, value) =>
       update({ [id]: { value } })
   })
@@ -30,7 +30,7 @@ const EntryNumber = {
       ),
       m("input[type=text][size=2]", {
         value: state[id].value,
-        oninput: evt =>
+        oninput: (evt) =>
           actions.editEntryValue(id, evt.target.value)
       })
     );
@@ -41,7 +41,7 @@ const entryDate = {
   initial: {
     value: ""
   },
-  Actions: update => ({
+  Actions: (update) => ({
     editDateValue: (id, value) =>
       update({ [id]: { value } })
   })
@@ -63,7 +63,7 @@ const EntryDate = {
       ),
       m("input[type=text][size=10]", {
         value: state[id].value,
-        oninput: evt =>
+        oninput: (evt) =>
           actions.editDateValue(id, evt.target.value)
       })
     );
@@ -78,22 +78,22 @@ const convert = (value, to) =>
   );
 
 const temperature = {
-  Initial: label => ({
+  Initial: (label) => ({
     label,
     value: 20,
     units: "C"
   }),
-  Actions: update => ({
-    increment: (id, amount) => evt => {
+  Actions: (update) => ({
+    increment: (id, amount) => (evt) => {
       evt.preventDefault();
       update({
-        [id]: { value: value => value + amount }
+        [id]: { value: (value) => value + amount }
       });
     },
-    changeUnits: id => evt => {
+    changeUnits: (id) => (evt) => {
       evt.preventDefault();
       update({
-        [id]: state => {
+        [id]: (state) => {
           const newUnits = state.units === "C" ? "F" : "C";
           const newValue = convert(state.value, newUnits);
           return merge(state, {
@@ -150,7 +150,7 @@ const Temperature = {
   }
 };
 
-const displayTemperature = temperature =>
+const displayTemperature = (temperature) =>
   temperature.label +
   ": " +
   temperature.value +
@@ -165,10 +165,10 @@ const app = {
     air: temperature.Initial("Air"),
     water: temperature.Initial("Water")
   },
-  Actions: update =>
+  Actions: (update) =>
     Object.assign(
       {
-        save: state => evt => {
+        save: (state) => (evt) => {
           evt.preventDefault();
           update({
             saved:

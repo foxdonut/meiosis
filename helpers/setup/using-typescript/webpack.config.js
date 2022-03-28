@@ -1,16 +1,16 @@
 /*global __dirname*/
-var path = require("path");
+var path = require('path');
 
 module.exports = {
-  mode: "development",
-  entry: "./src/index.tsx",
-  devtool: "source-map",
+  mode: 'development',
+  entry: './src/index.tsx',
+  devtool: 'source-map',
   output: {
-    path: path.join(__dirname, "build"),
-    filename: "generated-app.js"
+    path: path.join(__dirname, 'build'),
+    filename: 'generated-app.js'
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"]
+    extensions: ['.ts', '.tsx', '.js']
   },
   module: {
     rules: [
@@ -18,14 +18,14 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: "ts-loader"
+          loader: 'ts-loader'
         }
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "source-map-loader"
+          loader: 'source-map-loader'
         }
       }
     ]

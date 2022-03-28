@@ -12,15 +12,24 @@ export const Tea = {
       m(
         ".col-md-6",
         state.teas &&
-          state.teas.map(tea =>
+          state.teas.map((tea) =>
             m(
               "div",
               { key: tea.id },
-              m("a", { href: router.toUrl(Route.TeaDetails, { id: tea.id }) }, tea.title)
+              m(
+                "a",
+                {
+                  href: router.toUrl(Route.TeaDetails, {
+                    id: tea.id
+                  })
+                },
+                tea.title
+              )
             )
           )
       ),
-      state.route.page === "TeaDetails" && m(".col-md-6", m(TeaDetails, { state, router }))
+      state.route.page === "TeaDetails" &&
+        m(".col-md-6", m(TeaDetails, { state, router }))
     ),
     m(PleaseWait, { state })
   ]
