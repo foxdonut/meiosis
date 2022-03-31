@@ -10,7 +10,7 @@ import { stream, scan } from '../../source/dist/simple-stream';
 // common code
 export type Sky = 'SUNNY' | 'CLOUDY' | 'MIX';
 
-export interface Conditions {
+export interface Condition {
   precipitations: boolean;
   sky: Sky;
 }
@@ -24,7 +24,7 @@ export interface Temperature {
 }
 
 export interface State {
-  conditions: Conditions;
+  conditions: Condition;
   temperature: {
     air: Temperature;
     water: Temperature;

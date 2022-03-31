@@ -1,49 +1,37 @@
 // preact + functionPatches + simple-stream
 
 import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
-import { h, render as preactRender, VNode } from 'preact';
+import { h, render as preactRender } from 'preact';
 import { add, assoc, over, lensProp } from 'rambda';
-import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
+import { Condition, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
-interface Attrs {
-  cell: MeiosisCell<State>;
-}
-
-interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
-}
-
-interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
-}
-
-interface SkyOptionAttrs extends ConditionsAttrs {
-  value: string;
-  label: string;
-}
-
-interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
-}
-
-interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
-}
-
-const conditionsActions: ConditionsActions = {
-  togglePrecipitations: (cell, value) => {
+const conditionsActions = {
+  togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
     cell.update(assoc('precipitations', value));
   },
-  changeSky: (cell, value) => {
+  changeSky: (cell: MeiosisCell<Condition>, value: Sky) => {
     cell.update(assoc('sky', value));
+  }
+};
+
+const conditions: App<Condition> = {
+  initial: {
+    precipitations: false,
+    sky: 'SUNNY'
   }
 };
 
 // Normally we could use JSX with the Preact.h pragma, but since we already have React in this
 // file, we'll use h here.
-const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
+const SkyOption = ({
+  cell,
+  value,
+  label
+}: {
+  cell: MeiosisCell<Condition>;
+  value: string;
+  label: string;
+}) =>
   h(
     'label',
     {},
@@ -56,7 +44,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
     label
   );
 
-const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
+const Conditions = ({ cell }: { cell: MeiosisCell<Condition> }) =>
   h(
     'div',
     {},
@@ -79,15 +67,15 @@ const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
     )
   );
 
-const temperature: TemperatureComponent = {
-  Initial: InitialTemperature
-};
+const createTemperature = (label: string) => ({
+  initial: InitialTemperature(label)
+});
 
-const temperatureActions: TemperatureActions = {
-  increment: (cell, amount) => {
+const temperatureActions = {
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => {
     cell.update(over(lensProp('value'), add(amount)));
   },
-  changeUnits: (cell) => {
+  changeUnits: (cell: MeiosisCell<Temperature>) => {
     cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
@@ -97,7 +85,7 @@ const temperatureActions: TemperatureActions = {
   }
 };
 
-const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
+const Temperature = ({ cell }: { cell: MeiosisCell<Temperature> }) =>
   h(
     'div',
     {},
@@ -120,16 +108,18 @@ const Temperature: (attrs: TemperatureAttrs) => VNode = ({ cell }) =>
   );
 
 const app: App<State> = {
-  initial: {
-    conditions: conditions.initial,
+  nested: {
+    conditions,
     temperature: {
-      air: temperature.Initial('Air'),
-      water: temperature.Initial('Water')
+      nested: {
+        air: createTemperature('Air'),
+        water: createTemperature('Water')
+      }
     }
   }
 };
 
-const App: (attrs: Attrs) => VNode = ({ cell }) =>
+const AppView = ({ cell }: { cell: MeiosisCell<State> }) =>
   h(
     'div',
     { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
@@ -147,6 +137,6 @@ export const setupPreactExample = (): void => {
   const cells = setup<State>({ app });
   const element = document.getElementById('preactApp') as HTMLElement;
   cells.map((cell) => {
-    preactRender(h(App, { cell }), element);
+    preactRender(h(AppView, { cell }), element);
   });
 };

@@ -1,45 +1,18 @@
 // react + functionPatches + flyd
 import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
 import flyd from 'flyd';
-import React, { ReactElement } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
+import { Condition, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
-interface Attrs {
-  cell: MeiosisCell<State>;
-}
-
-interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
-}
-
-interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
-}
-
-interface SkyOptionAttrs extends ConditionsAttrs {
-  value: string;
-  label: string;
-}
-
-interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
-}
-
-interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
-}
-
-const conditionsActions: ConditionsActions = {
-  togglePrecipitations: (cell, value) => {
+const conditionsActions = {
+  togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
     cell.update((state) => ({
       ...state,
       precipitations: value
     }));
   },
-  changeSky: (cell, value) => {
+  changeSky: (cell: MeiosisCell<Condition>, value: Sky) => {
     cell.update((state) => ({
       ...state,
       sky: value
@@ -47,7 +20,22 @@ const conditionsActions: ConditionsActions = {
   }
 };
 
-const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label }) => (
+const conditions: App<Condition> = {
+  initial: {
+    precipitations: false,
+    sky: 'SUNNY'
+  }
+};
+
+const SkyOption = ({
+  cell,
+  value,
+  label
+}: {
+  cell: MeiosisCell<Condition>;
+  value: string;
+  label: string;
+}) => (
   <label>
     <input
       type="radio"
@@ -59,7 +47,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label
   </label>
 );
 
-const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
+const Conditions = ({ cell }: { cell: MeiosisCell<Condition> }) => (
   <div>
     <label>
       <input
@@ -77,18 +65,18 @@ const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
   </div>
 );
 
-const temperature: TemperatureComponent = {
-  Initial: InitialTemperature
-};
+const createTemperature = (label: string) => ({
+  initial: InitialTemperature(label)
+});
 
-const temperatureActions: TemperatureActions = {
-  increment: (cell, amount) => {
+const temperatureActions = {
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => {
     cell.update((state) => ({
       ...state,
       value: state.value + amount
     }));
   },
-  changeUnits: (cell) => {
+  changeUnits: (cell: MeiosisCell<Temperature>) => {
     cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
@@ -103,7 +91,7 @@ const temperatureActions: TemperatureActions = {
   }
 };
 
-const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
+const Temperature = ({ cell }: { cell: MeiosisCell<Temperature> }) => (
   <div>
     {cell.state.label} Temperature:
     {cell.state.value}&deg;{cell.state.units}
@@ -118,16 +106,18 @@ const Temperature: (attrs: TemperatureAttrs) => ReactElement = ({ cell }) => (
 );
 
 const app: App<State> = {
-  initial: {
-    conditions: conditions.initial,
+  nested: {
+    conditions,
     temperature: {
-      air: temperature.Initial('Air'),
-      water: temperature.Initial('Water')
+      nested: {
+        air: createTemperature('Air'),
+        water: createTemperature('Water')
+      }
     }
   }
 };
 
-const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
+const AppView = ({ cell }: { cell: MeiosisCell<State> }) => (
   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
     <div>
       <Conditions cell={cell.nest('conditions')} />
@@ -142,6 +132,6 @@ export const setupReactExample = (): void => {
   const cells = setup<State>({ stream: flyd, app });
   const element = document.getElementById('reactApp');
   cells.map((cell) => {
-    ReactDOM.render(<App cell={cell} />, element);
+    ReactDOM.render(<AppView cell={cell} />, element);
   });
 };

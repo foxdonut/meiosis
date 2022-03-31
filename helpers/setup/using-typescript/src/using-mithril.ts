@@ -2,25 +2,25 @@
 import { App, MeiosisCell, setup } from '../../source/dist/mergerino';
 import m from 'mithril';
 import Stream from 'mithril/stream';
-import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
+import { Condition, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
 const conditionsActions = {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => {
+  togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
     cell.update({ precipitations: value });
   },
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => {
+  changeSky: (cell: MeiosisCell<Condition>, value: Sky) => {
     cell.update({ sky: value });
   }
 };
 
-const conditions: App<Conditions> = {
+const conditions: App<Condition> = {
   initial: {
     precipitations: false,
     sky: 'SUNNY'
   }
 };
 
-const SkyOption: m.Component<{ cell: MeiosisCell<Conditions>; value: string; label: string }> = {
+const SkyOption: m.Component<{ cell: MeiosisCell<Condition>; value: string; label: string }> = {
   view: ({ attrs: { cell, value, label } }) =>
     m(
       'label',
@@ -35,7 +35,7 @@ const SkyOption: m.Component<{ cell: MeiosisCell<Conditions>; value: string; lab
     )
 };
 
-const Conditions: m.Component<{ cell: MeiosisCell<Conditions> }> = {
+const Conditions: m.Component<{ cell: MeiosisCell<Condition> }> = {
   view: ({ attrs: { cell } }) =>
     m(
       'div',
