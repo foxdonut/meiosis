@@ -1,20 +1,20 @@
 /* eslint-env jest */
 
-import merge from "mergerino";
+import merge from 'mergerino';
 
-import meiosis from "../src/index";
+import meiosis from '../src/index';
 
-describe("simpleStream", () => {
-  test("basic", () => {
+describe('simpleStream', () => {
+  test('basic', () => {
     const s1 = meiosis.simpleStream.stream();
     const result = s1(42);
     expect(result).toEqual(42);
   });
 
-  test("latest value", () => {
+  test('latest value', () => {
     const s1 = meiosis.simpleStream.stream();
 
-    const f1 = x => {
+    const f1 = (x) => {
       if (x === 10) {
         s1(20);
       }
@@ -22,11 +22,11 @@ describe("simpleStream", () => {
 
     s1.map(f1);
 
-    const f2 = x => x;
+    const f2 = (x) => x;
     const s2 = s1.map(f2);
 
     const values = [];
-    s2.map(value => values.push(value));
+    s2.map((value) => values.push(value));
 
     s1(10);
 
@@ -34,9 +34,9 @@ describe("simpleStream", () => {
     expect(values).toEqual([20, 20]);
   });
 
-  test("service on initial state", done => {
+  test('service on initial state', (done) => {
     const update = meiosis.simpleStream.stream();
-    const initial = { route: "Home", routeChanged: true, data: [] };
+    const initial = { route: 'Home', routeChanged: true, data: [] };
 
     const states = meiosis.simpleStream.scan(
       (state, patch) => merge(state, patch),
@@ -44,21 +44,21 @@ describe("simpleStream", () => {
       update
     );
 
-    const service = state => {
-      if (state.route === "Home") {
+    const service = (state) => {
+      if (state.route === 'Home') {
         if (state.routeChanged) {
           update({ routeChanged: false, loading: true });
         } else if (state.loading) {
           setTimeout(() => {
-            update({ loading: false, data: ["duck", "quack"] });
+            update({ loading: false, data: ['duck', 'quack'] });
           });
         }
       }
     };
 
-    states.map(state => service(state));
+    states.map((state) => service(state));
 
-    states.map(state => {
+    states.map((state) => {
       try {
         if (state.data.length === 2) {
           done();
@@ -69,17 +69,17 @@ describe("simpleStream", () => {
     });
   });
 
-  test("set undefined", done => {
+  test('set undefined', (done) => {
     const s1 = meiosis.simpleStream.stream();
 
-    s1.map(_value => {
+    s1.map((_value) => {
       done();
     });
 
     s1(undefined);
   });
 
-  test("dropRepeats", () => {
+  test('dropRepeats', () => {
     const dropRepeats = meiosis.common.createDropRepeats();
     const s1 = meiosis.simpleStream.stream();
     const s2 = dropRepeats(s1);
@@ -89,21 +89,21 @@ describe("simpleStream", () => {
       ticks++;
     });
 
-    s1("A");
-    s1("A");
-    s1("A");
-    s1("A");
-    s1("B");
-    s1("B");
-    s1("B");
+    s1('A');
+    s1('A');
+    s1('A');
+    s1('A');
+    s1('B');
+    s1('B');
+    s1('B');
 
     expect(ticks).toEqual(2);
   });
 
-  test("dropRepeats with selector", () => {
+  test('dropRepeats with selector', () => {
     const dropRepeats = meiosis.common.createDropRepeats();
     const s1 = meiosis.simpleStream.stream();
-    const s2 = dropRepeats(s1, s => s.value);
+    const s2 = dropRepeats(s1, (s) => s.value);
 
     let ticks = 0;
     s2.map(() => {
@@ -111,17 +111,17 @@ describe("simpleStream", () => {
     });
 
     s1({ value: 5 });
-    s1({ value: 5, duck: "quack" });
-    s1({ value: 5, color: "yellow" });
-    s1({ value: 42, color: "yellow" });
-    s1({ value: 42, duck: "quack" });
-    s1({ value: 42, color: "yellow" });
+    s1({ value: 5, duck: 'quack' });
+    s1({ value: 5, color: 'yellow' });
+    s1({ value: 42, color: 'yellow' });
+    s1({ value: 42, duck: 'quack' });
+    s1({ value: 42, color: 'yellow' });
     s1({ value: 42 });
 
     expect(ticks).toEqual(2);
   });
 
-  test("end stream", () => {
+  test('end stream', () => {
     const s1 = meiosis.simpleStream.stream();
 
     let c1 = 0;

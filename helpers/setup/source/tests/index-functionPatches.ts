@@ -1,24 +1,24 @@
-import { App, MeiosisCell, Patch, Service, combinePatches, setup } from "../src/functionPatches";
-import { add, assoc, dissoc, lensProp, over } from "ramda";
+import { App, MeiosisCell, Patch, Service, combinePatches, setup } from '../src/functionPatches';
+import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
-describe("Meiosis with TypeScript - Function Patches", () => {
-  test("with no actions", () => {
+describe('Meiosis with TypeScript - Function Patches', () => {
+  test('with no actions', () => {
     interface State {
       ducks: number;
       sound: string;
     }
 
-    const app = { initial: { ducks: 1, sound: "silent" } };
+    const app = { initial: { ducks: 1, sound: 'silent' } };
     const cells = setup<State>({ app });
     const cell = cells();
 
-    expect(cell.state).toEqual({ ducks: 1, sound: "silent" });
+    expect(cell.state).toEqual({ ducks: 1, sound: 'silent' });
 
-    cell.update(assoc("sound", "quack"));
-    expect(cells().state).toEqual({ ducks: 1, sound: "quack" });
+    cell.update(assoc('sound', 'quack'));
+    expect(cells().state).toEqual({ ducks: 1, sound: 'quack' });
   });
 
-  test("with nesting and no actions", () => {
+  test('with nesting and no actions', () => {
     interface Duck {
       color: string;
     }
@@ -34,17 +34,17 @@ describe("Meiosis with TypeScript - Function Patches", () => {
 
     expect(cell.state).toEqual({});
 
-    cell.update(assoc("sound", "quack"));
-    expect(cells().state).toEqual({ sound: "quack" });
+    cell.update(assoc('sound', 'quack'));
+    expect(cells().state).toEqual({ sound: 'quack' });
 
-    const duckCell = cell.nest("duck");
+    const duckCell = cell.nest('duck');
     expect(duckCell.state).toBeUndefined();
 
-    duckCell.update(assoc("color", "yellow"));
-    expect(cells().state).toEqual({ sound: "quack", duck: { color: "yellow" } });
+    duckCell.update(assoc('color', 'yellow'));
+    expect(cells().state).toEqual({ sound: 'quack', duck: { color: 'yellow' } });
   });
 
-  test("with actions", () => {
+  test('with actions', () => {
     interface State {
       ducks: number;
       sound: string;
@@ -56,24 +56,24 @@ describe("Meiosis with TypeScript - Function Patches", () => {
 
     const actions: Actions = {
       addDucks: (cell, amount) => {
-        cell.update(over(lensProp("ducks"), add(amount)));
+        cell.update(over(lensProp('ducks'), add(amount)));
       }
     };
 
     const app: App<State> = {
-      initial: { ducks: 1, sound: "quack" }
+      initial: { ducks: 1, sound: 'quack' }
     };
 
     const cells = setup<State>({ app });
     const cell = cells();
 
-    expect(cell.state).toEqual({ ducks: 1, sound: "quack" });
+    expect(cell.state).toEqual({ ducks: 1, sound: 'quack' });
 
     actions.addDucks(cell, 4);
-    expect(cells().state).toEqual({ ducks: 5, sound: "quack" });
+    expect(cells().state).toEqual({ ducks: 5, sound: 'quack' });
   });
 
-  test("with actions and nesting", () => {
+  test('with actions and nesting', () => {
     interface Duck {
       color: string;
     }
@@ -89,23 +89,23 @@ describe("Meiosis with TypeScript - Function Patches", () => {
 
     const duckActions: DuckActions = {
       changeDuckColor: (cell, color) => {
-        cell.update(assoc("color", color));
+        cell.update(assoc('color', color));
       }
     };
 
     const app = {
-      initial: { duck: { color: "white" }, sound: "quack" }
+      initial: { duck: { color: 'white' }, sound: 'quack' }
     };
 
     const cells = setup<State>({ app });
     const cell = cells();
 
-    const duckCell = cell.nest("duck");
-    duckActions.changeDuckColor(duckCell, "yellow");
-    expect(cells().state).toEqual({ duck: { color: "yellow" }, sound: "quack" });
+    const duckCell = cell.nest('duck');
+    duckActions.changeDuckColor(duckCell, 'yellow');
+    expect(cells().state).toEqual({ duck: { color: 'yellow' }, sound: 'quack' });
   });
 
-  test("services", () => {
+  test('services', () => {
     interface State {
       count: number;
       combined?: boolean;
@@ -117,54 +117,54 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     }
 
     const servicePatches: Patch<State>[] = [
-      over(lensProp("count"), add(1)),
-      dissoc("increment"),
-      combinePatches<State>([dissoc("invalid"), assoc("combined", true)]),
-      combinePatches<State>([assoc("sequence", false), assoc("sequenced", true)]),
-      assoc("received", true)
+      over(lensProp('count'), add(1)),
+      dissoc('increment'),
+      combinePatches<State>([dissoc('invalid'), assoc('combined', true)]),
+      combinePatches<State>([assoc('sequence', false), assoc('sequenced', true)]),
+      assoc('received', true)
     ];
 
     const updatePatches: Patch<State>[] = [
-      assoc("increment", 1),
-      assoc("increment", 10),
-      assoc("invalid", true),
-      assoc("sequence", true)
+      assoc('increment', 1),
+      assoc('increment', 10),
+      assoc('invalid', true),
+      assoc('sequence', true)
     ];
 
     const services: Service<State>[] = [
       {
-        onchange: state => state.increment,
-        run: cell => {
+        onchange: (state) => state.increment,
+        run: (cell) => {
           if (cell.state.increment && cell.state.increment > 0 && cell.state.increment < 10) {
             cell.update(servicePatches[0]);
           }
         }
       },
       {
-        onchange: state => state.increment,
-        run: cell => {
+        onchange: (state) => state.increment,
+        run: (cell) => {
           if (cell.state.increment && (cell.state.increment <= 0 || cell.state.increment >= 10)) {
             cell.update(servicePatches[1]);
           }
         }
       },
       {
-        run: cell => {
+        run: (cell) => {
           if (cell.state.invalid) {
             cell.update(servicePatches[2]);
           }
         }
       },
       {
-        run: cell => {
+        run: (cell) => {
           if (cell.state.sequence) {
             cell.update(servicePatches[3]);
           }
         }
       },
       {
-        onchange: state => state.sequenced,
-        run: cell => {
+        onchange: (state) => state.sequenced,
+        run: (cell) => {
           if (cell.state.sequenced) {
             cell.update(servicePatches[4]);
           }
@@ -189,7 +189,7 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     });
   });
 
-  test("service actions", () => {
+  test('service actions', () => {
     interface Counter {
       count: number;
       service: boolean;
@@ -201,22 +201,22 @@ describe("Meiosis with TypeScript - Function Patches", () => {
 
     const counterActions: CounterActions = {
       increment: (cell, value) => {
-        cell.update(over(lensProp("count"), add(value)));
+        cell.update(over(lensProp('count'), add(value)));
       }
     };
 
     const services: Service<Counter>[] = [
       {
-        run: cell => {
+        run: (cell) => {
           if (cell.state.count === 1) {
             counterActions.increment(cell, 1);
           }
         }
       },
       {
-        run: cell => {
+        run: (cell) => {
           if (cell.state.count === 2 && !cell.state.service) {
-            cell.update(assoc("service", true));
+            cell.update(assoc('service', true));
           }
         }
       }
@@ -230,10 +230,10 @@ describe("Meiosis with TypeScript - Function Patches", () => {
     const cells = setup<Counter>({ app });
     const cell = cells();
 
-    cell.update(assoc("count", 1));
+    cell.update(assoc('count', 1));
     expect(cells().state).toEqual({ count: 2, service: true });
 
-    cell.update(combinePatches([assoc("count", 3), assoc("service", false)]));
+    cell.update(combinePatches([assoc('count', 3), assoc('service', false)]));
     expect(cells().state).toEqual({ count: 3, service: false });
   });
 });

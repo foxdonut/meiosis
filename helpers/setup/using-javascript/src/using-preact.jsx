@@ -25,7 +25,7 @@ const SkyOption = ({ cell, value, label }) =>
       type: 'radio',
       value,
       checked: cell.state.sky === value,
-      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+      onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
   );
@@ -40,7 +40,7 @@ const Conditions = ({ cell }) =>
       h('input', {
         type: 'checkbox',
         checked: cell.state.precipitations,
-        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+        onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       'Precipitations'
     ),
@@ -57,8 +57,8 @@ const temperatureActions = {
   increment: (cell, amount) => {
     cell.update(over(lensProp('value'), add(amount)));
   },
-  changeUnits: cell => {
-    cell.update(state => {
+  changeUnits: (cell) => {
+    cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
@@ -106,7 +106,7 @@ const App = ({ cell }) =>
 export const setupPreactExample = () => {
   const cells = meiosis.functionPatches.setup({ app });
   const element = document.getElementById('preactApp');
-  cells.map(cell => {
+  cells.map((cell) => {
     preactRender(h(App, { cell }), element);
   });
 };

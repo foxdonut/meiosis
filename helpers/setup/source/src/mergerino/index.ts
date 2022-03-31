@@ -7,9 +7,9 @@ import {
   NestSetup,
   Stream,
   commonGetServices,
-  commonGetInitialState,
   nestSetup
 } from '../common';
+import { get } from '../util';
 
 /**
  * A Mergerino function patch. This is a function that receives the current state and returns the
@@ -62,10 +62,23 @@ export interface Update<S> {
   (patch: Patch<S>): any;
 }
 
+export interface View<S> {
+  (cell: MeiosisCell<S>, ...args: any[]): any;
+}
+
+export interface ViewComponent<S> {
+  view: View<S>;
+}
+
+export type NestedViews<S> = {
+  [K in keyof S]: ViewComponent<S>;
+};
+
 export interface MeiosisCell<S> {
   state: S;
   update: Update<S>;
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+  nested: NestedViews<S>;
 }
 
 export interface Service<S> extends CommonService<S> {
@@ -77,6 +90,8 @@ export interface App<S> extends CommonApp<S> {
    * An array of service functions.
    */
   services?: Service<S>[];
+
+  view?: View<S>;
 
   nested?: NestedApps<S>;
 }
@@ -99,20 +114,25 @@ const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, pr
 
 const nestUpdate =
   <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
-  patch =>
+  (patch) =>
     parentUpdate(nestPatch(patch, prop));
 
 const nestCell =
-  <S, K extends Extract<keyof S, string>>(getState: () => S, parentUpdate: Update<S>) =>
+  <S, K extends Extract<keyof S, string>>(
+    getState: () => S,
+    parentUpdate: Update<S>,
+    view: App<S> | undefined
+  ) =>
   (prop: K): MeiosisCell<S[K]> => {
     const getNestedState = () => getState()[prop];
-
+    const nestedView = get(view, [prop, 'nested']);
     const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
 
     const nested: MeiosisCell<S[K]> = {
       state: getNestedState(),
       update: nestedUpdate,
-      nest: nestCell(getNestedState, nestedUpdate)
+      nest: nestCell(getNestedState, nestedUpdate, nestedView),
+      nested: nestedView
     };
 
     return nested;
@@ -125,9 +145,7 @@ const nestCell =
  */
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
 
-export const getInitialState = <S>(app: App<S>): S => commonGetInitialState(app);
-
-export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
+const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).

@@ -3,17 +3,7 @@
 import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
 import { h, render as preactRender, VNode } from 'preact';
 import { add, assoc, over, lensProp } from 'rambda';
-import {
-  Conditions,
-  ConditionsComponent,
-  InitialTemperature,
-  Sky,
-  State,
-  Temperature,
-  TemperatureComponent,
-  convert,
-  initialConditions
-} from './common';
+import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
 interface Attrs {
   cell: MeiosisCell<State>;
@@ -42,10 +32,6 @@ interface TemperatureAttrs {
   cell: MeiosisCell<Temperature>;
 }
 
-const conditions: ConditionsComponent = {
-  initial: initialConditions
-};
-
 const conditionsActions: ConditionsActions = {
   togglePrecipitations: (cell, value) => {
     cell.update(assoc('precipitations', value));
@@ -65,7 +51,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => VNode = ({ cell, value, label }) =>
       type: 'radio',
       value,
       checked: cell.state.sky === value,
-      onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+      onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
     }),
     label
   );
@@ -80,7 +66,7 @@ const Conditions: (attrs: ConditionsAttrs) => VNode = ({ cell }) =>
       h('input', {
         type: 'checkbox',
         checked: cell.state.precipitations,
-        onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+        onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
       }),
       'Precipitations'
     ),
@@ -101,8 +87,8 @@ const temperatureActions: TemperatureActions = {
   increment: (cell, amount) => {
     cell.update(over(lensProp('value'), add(amount)));
   },
-  changeUnits: cell => {
-    cell.update(state => {
+  changeUnits: (cell) => {
+    cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
@@ -160,7 +146,7 @@ const App: (attrs: Attrs) => VNode = ({ cell }) =>
 export const setupPreactExample = (): void => {
   const cells = setup<State>({ app });
   const element = document.getElementById('preactApp') as HTMLElement;
-  cells.map(cell => {
+  cells.map((cell) => {
     preactRender(h(App, { cell }), element);
   });
 };

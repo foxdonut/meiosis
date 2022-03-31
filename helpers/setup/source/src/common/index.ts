@@ -183,11 +183,17 @@ export interface CommonMeiosisSetup<S, P> {
    * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
    */
   update: Stream<P>;
+
+  view: any;
 }
 
 export interface CommonService<S> {
   onchange?: (state: S) => any;
   run: (cell: any) => any;
+}
+
+export interface CommonView {
+  (cell: any, ...args: any[]): any;
 }
 
 /**
@@ -201,6 +207,7 @@ export interface CommonApp<S> {
    */
   initial?: Partial<S>;
   services?: CommonService<S>[];
+  view?: CommonView;
   nested?: CommonNestedApps<S>;
 }
 
@@ -247,8 +254,8 @@ const assembleInitialState = <S>(nestedApps: CommonNestedApps<S> | undefined): a
             key,
             Object.assign(
               {},
-              nestedApps[key]?.initial,
-              assembleInitialState(nestedApps[key]?.nested)
+              nestedApps[key].initial,
+              assembleInitialState(nestedApps[key].nested)
             ),
             result
           ),
@@ -256,26 +263,49 @@ const assembleInitialState = <S>(nestedApps: CommonNestedApps<S> | undefined): a
       )
     : {};
 
-export const commonGetInitialState = <S>(app: CommonApp<S>): S =>
+const getInitialState = <S>(app: CommonApp<S>): S =>
   Object.assign({}, app.initial, assembleInitialState(app.nested));
+
+const assembleView = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
+  nestedApps
+    ? Object.keys(nestedApps).reduce((result, key) => {
+        const nestedApp: CommonApp<any> = nestedApps[key];
+
+        if (nestedApp.view !== undefined) {
+          const view = nestedApp.view;
+
+          return assoc(
+            key,
+            {
+              view: (cell: any, ...args: any[]) => view(cell.nest(key), args),
+              nested: assembleView(nestedApp.nested)
+            },
+            result
+          );
+        }
+        return result;
+      }, {})
+    : {};
+
+const getView = <S>(app: CommonApp<S>): CommonApp<S> => assembleView(app.nested);
 
 const assembleServices = <S>(
   nestedApps: CommonNestedApps<S> | undefined,
-  getCell = cell => cell
+  getCell = (cell) => cell
 ): CommonService<S>[] =>
   nestedApps
     ? Object.keys(nestedApps).reduce((result, key) => {
-        const nextGetCell = cell => getCell(cell).nest(key);
+        const nextGetCell = (cell) => getCell(cell).nest(key);
 
         const nestedApp: CommonApp<any> = nestedApps[key];
 
         return concatIfPresent(
           result,
-          nestedApp.services?.map<CommonService<any>>(service => ({
-            onchange: state => (service.onchange ? service.onchange(state[key]) : state),
-            run: cell => service.run(nextGetCell(cell))
+          nestedApp.services?.map<CommonService<any>>((service) => ({
+            onchange: (state) => (service.onchange ? service.onchange(state[key]) : state),
+            run: (cell) => service.run(nextGetCell(cell))
           }))
-        ).concat(assembleServices(nestedApps[key]?.nested, nextGetCell));
+        ).concat(assembleServices(nestedApp.nested, nextGetCell));
       }, [] as CommonService<S>[])
     : [];
 
@@ -285,13 +315,13 @@ export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
 // Credit: James Forbes (https://james-forbes.com/)
 export const createDropRepeats =
   (stream: ExternalStreamLib = simpleStream) =>
-  <S>(states: Stream<S>, selector: (state: S) => any = state => state): Stream<S> => {
+  <S>(states: Stream<S>, selector: (state: S) => any = (state) => state): Stream<S> => {
     const createStream = typeof stream === 'function' ? stream : stream.stream;
 
     let prev = undefined;
     const result = createStream();
 
-    states.map(state => {
+    states.map((state) => {
       const next = selector(state);
       if (next !== prev) {
         prev = next;
@@ -326,7 +356,9 @@ export const setup = <S, P>({
     throw new Error('No accumulator function was specified.');
   }
 
-  const initial = commonGetInitialState(app || {});
+  const safeApp = app || {};
+  const initial = getInitialState(safeApp);
+  const view = getView(safeApp);
 
   // falsy patches are ignored
   const accumulatorFn = (state: S, patch: P) => (patch ? accumulator(state, patch) : state);
@@ -344,7 +376,8 @@ export const setup = <S, P>({
 
   return {
     states,
-    update
+    update,
+    view
   };
 };
 
@@ -365,19 +398,19 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
   stream = simpleStream,
   app = {}
 }: F): Stream<C> => {
-  const { states, update } = setup<S, P>({
+  const { states, update, view } = setup<S, P>({
     stream,
     accumulator,
     app
   });
 
-  const nest = nestCell(states, update);
-  const getCell = (state: S) => ({ state, update, nest });
+  const nest = nestCell(states, update, view);
+  const getCell = (state: S) => ({ state, update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
   if (app) {
     getServices(app).forEach((service: T) => {
-      dropRepeats(states, service.onchange).map(state => service.run(getCell(state)));
+      dropRepeats(states, service.onchange).map((state) => service.run(getCell(state)));
     });
   }
 

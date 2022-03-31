@@ -3,17 +3,7 @@ import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
 import flyd from 'flyd';
 import React, { ReactElement } from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Conditions,
-  ConditionsComponent,
-  InitialTemperature,
-  Sky,
-  State,
-  Temperature,
-  TemperatureComponent,
-  convert,
-  initialConditions
-} from './common';
+import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
 interface Attrs {
   cell: MeiosisCell<State>;
@@ -42,19 +32,15 @@ interface TemperatureAttrs {
   cell: MeiosisCell<Temperature>;
 }
 
-const conditions: ConditionsComponent = {
-  initial: initialConditions
-};
-
 const conditionsActions: ConditionsActions = {
   togglePrecipitations: (cell, value) => {
-    cell.update(state => ({
+    cell.update((state) => ({
       ...state,
       precipitations: value
     }));
   },
   changeSky: (cell, value) => {
-    cell.update(state => ({
+    cell.update((state) => ({
       ...state,
       sky: value
     }));
@@ -67,7 +53,7 @@ const SkyOption: (attrs: SkyOptionAttrs) => ReactElement = ({ cell, value, label
       type="radio"
       value={value}
       checked={cell.state.sky === value}
-      onChange={evt => conditionsActions.changeSky(cell, evt.target.value)}
+      onChange={(evt) => conditionsActions.changeSky(cell, evt.target.value)}
     />
     {label}
   </label>
@@ -79,7 +65,7 @@ const Conditions: (attrs: ConditionsAttrs) => ReactElement = ({ cell }) => (
       <input
         type="checkbox"
         checked={cell.state.precipitations}
-        onChange={evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
+        onChange={(evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
       />
       Precipitations
     </label>
@@ -97,13 +83,13 @@ const temperature: TemperatureComponent = {
 
 const temperatureActions: TemperatureActions = {
   increment: (cell, amount) => {
-    cell.update(state => ({
+    cell.update((state) => ({
       ...state,
       value: state.value + amount
     }));
   },
-  changeUnits: cell => {
-    cell.update(state => {
+  changeUnits: (cell) => {
+    cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
@@ -155,7 +141,7 @@ const App: (attrs: Attrs) => ReactElement = ({ cell }) => (
 export const setupReactExample = (): void => {
   const cells = setup<State>({ stream: flyd, app });
   const element = document.getElementById('reactApp');
-  cells.map(cell => {
+  cells.map((cell) => {
     ReactDOM.render(<App cell={cell} />, element);
   });
 };

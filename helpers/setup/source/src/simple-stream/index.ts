@@ -29,7 +29,7 @@ export const stream = <T>(initial?: T): Stream<T> => {
   createdStream.map = <R>(mapFunction: MapFunction<T, R>) => {
     const newStream: Stream<R> = stream();
 
-    const mappedFunction = value => {
+    const mappedFunction = (value) => {
       newStream(mapFunction(value));
     };
     mapFunctions.push(mappedFunction);
@@ -63,7 +63,7 @@ export const scan: Scan = (accumulator, initial, sourceStream) => {
   const newStream = stream(initial);
   let accumulated = initial;
 
-  sourceStream.map(value => {
+  sourceStream.map((value) => {
     accumulated = accumulator(accumulated, value);
     newStream(accumulated);
   });

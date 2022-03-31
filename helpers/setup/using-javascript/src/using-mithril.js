@@ -23,7 +23,7 @@ const SkyOption = {
         type: 'radio',
         value,
         checked: cell.state.sky === value,
-        onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+        onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
       }),
       label
     )
@@ -38,7 +38,7 @@ const Conditions = {
         m('input', {
           type: 'checkbox',
           checked: cell.state.precipitations,
-          onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+          onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
         }),
         'Precipitations'
       ),
@@ -53,10 +53,10 @@ const Conditions = {
 
 const temperatureActions = {
   increment: (cell, amount) => {
-    cell.update({ value: x => x + amount });
+    cell.update({ value: (x) => x + amount });
   },
-  changeUnits: cell => {
-    cell.update(state => {
+  changeUnits: (cell) => {
+    cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);

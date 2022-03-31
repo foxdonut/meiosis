@@ -6,7 +6,6 @@ import {
   NestSetup,
   Stream,
   commonGetServices,
-  commonGetInitialState,
   nestSetup
 } from '../common';
 
@@ -47,11 +46,17 @@ export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
 }
 
+export interface View<S> {
+  (cell: MeiosisCell<S>): any;
+}
+
 export interface App<S> extends CommonApp<S> {
   /**
    * An array of service functions.
    */
   services?: Service<S>[];
+
+  view?: View<S>;
 
   nested?: NestedApps<S>;
 }
@@ -76,7 +81,7 @@ const nestPatch =
 
 const nestUpdate =
   <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
-  patch =>
+  (patch) =>
     parentUpdate(nestPatch(patch, prop));
 
 const nestCell =
@@ -105,9 +110,7 @@ export const combinePatches =
   (initialState: S) =>
     patches.reduce((state, patch) => patch(state), initialState);
 
-export const getInitialState = <S>(app: App<S>): S => commonGetInitialState(app);
-
-export const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
+const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
 
 /**
  * Helper to setup the Meiosis pattern with function patches.

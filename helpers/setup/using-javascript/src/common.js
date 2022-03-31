@@ -6,7 +6,7 @@ export const convert = (value, to) => {
 };
 
 export const temperature = {
-  Initial: label => ({
+  Initial: (label) => ({
     label,
     value: 22,
     units: 'C'

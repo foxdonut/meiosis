@@ -2,59 +2,25 @@
 import { App, MeiosisCell, setup } from '../../source/dist/mergerino';
 import m from 'mithril';
 import Stream from 'mithril/stream';
-import {
-  Conditions,
-  ConditionsComponent,
-  InitialTemperature,
-  Sky,
-  State,
-  Temperature,
-  TemperatureComponent,
-  convert,
-  initialConditions
-} from './common';
+import { Conditions, InitialTemperature, Sky, State, Temperature, convert } from './common';
 
-interface Attrs {
-  cell: MeiosisCell<State>;
-}
-
-interface ConditionsAttrs {
-  cell: MeiosisCell<Conditions>;
-}
-
-interface SkyOptionAttrs extends ConditionsAttrs {
-  value: string;
-  label: string;
-}
-
-interface TemperatureAttrs {
-  cell: MeiosisCell<Temperature>;
-}
-
-interface ConditionsActions {
-  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => void;
-  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => void;
-}
-
-interface TemperatureActions {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => void;
-  changeUnits: (cell: MeiosisCell<Temperature>) => void;
-}
-
-const conditions: ConditionsComponent = {
-  initial: initialConditions
-};
-
-const conditionsActions: ConditionsActions = {
-  togglePrecipitations: (cell, value) => {
+const conditionsActions = {
+  togglePrecipitations: (cell: MeiosisCell<Conditions>, value: boolean) => {
     cell.update({ precipitations: value });
   },
-  changeSky: (cell, value) => {
+  changeSky: (cell: MeiosisCell<Conditions>, value: Sky) => {
     cell.update({ sky: value });
   }
 };
 
-const SkyOption: m.Component<SkyOptionAttrs> = {
+const conditions: App<Conditions> = {
+  initial: {
+    precipitations: false,
+    sky: 'SUNNY'
+  }
+};
+
+const SkyOption: m.Component<{ cell: MeiosisCell<Conditions>; value: string; label: string }> = {
   view: ({ attrs: { cell, value, label } }) =>
     m(
       'label',
@@ -63,13 +29,13 @@ const SkyOption: m.Component<SkyOptionAttrs> = {
         value,
         checked: cell.state.sky === value,
         // FIXME: evt type
-        onchange: evt => conditionsActions.changeSky(cell, evt.target.value)
+        onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
       }),
       label
     )
 };
 
-const Conditions: m.Component<ConditionsAttrs> = {
+const Conditions: m.Component<{ cell: MeiosisCell<Conditions> }> = {
   view: ({ attrs: { cell } }) =>
     m(
       'div',
@@ -78,7 +44,7 @@ const Conditions: m.Component<ConditionsAttrs> = {
         m('input', {
           type: 'checkbox',
           checked: cell.state.precipitations,
-          onchange: evt => conditionsActions.togglePrecipitations(cell, evt.target.checked)
+          onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
         }),
         'Precipitations'
       ),
@@ -91,16 +57,16 @@ const Conditions: m.Component<ConditionsAttrs> = {
     )
 };
 
-const temperature: TemperatureComponent = {
-  Initial: InitialTemperature
-};
+const createTemperature = (label: string) => ({
+  initial: InitialTemperature(label)
+});
 
-const temperatureActions: TemperatureActions = {
-  increment: (cell, amount) => {
-    cell.update({ value: x => x + amount });
+const temperatureActions = {
+  increment: (cell: MeiosisCell<Temperature>, amount: number) => {
+    cell.update({ value: (x) => x + amount });
   },
-  changeUnits: cell => {
-    cell.update(state => {
+  changeUnits: (cell: MeiosisCell<Temperature>) => {
+    cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
       const newValue = convert(value, newUnits);
@@ -109,7 +75,7 @@ const temperatureActions: TemperatureActions = {
   }
 };
 
-const Temperature: m.Component<TemperatureAttrs> = {
+const Temperature: m.Component<{ cell: MeiosisCell<Temperature> }> = {
   view: ({ attrs: { cell } }) =>
     m(
       'div',
@@ -127,17 +93,7 @@ const Temperature: m.Component<TemperatureAttrs> = {
     )
 };
 
-const app: App<State> = {
-  initial: {
-    conditions: conditions.initial,
-    temperature: {
-      air: temperature.Initial('Air'),
-      water: temperature.Initial('Water')
-    }
-  }
-};
-
-const App: m.Component<Attrs> = {
+const AppView: m.Component<{ cell: MeiosisCell<State> }> = {
   view: ({ attrs: { cell } }) =>
     m(
       'div',
@@ -152,11 +108,23 @@ const App: m.Component<Attrs> = {
     )
 };
 
+const app: App<State> = {
+  nested: {
+    conditions,
+    temperature: {
+      nested: {
+        air: createTemperature('Air'),
+        water: createTemperature('Water')
+      }
+    }
+  }
+};
+
 export const setupMithrilExample = (): void => {
   const cells = setup<State>({ stream: Stream, app });
 
   m.mount(document.getElementById('mithrilApp') as HTMLElement, {
-    view: () => m(App, { cell: cells() })
+    view: () => m(AppView, { cell: cells() })
   });
 
   cells.map(() => m.redraw());

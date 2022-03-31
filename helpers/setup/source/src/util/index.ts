@@ -7,7 +7,7 @@
  *
  * @returns {*} the property value, or `undefined` if any property along the path is `undefined`.
  */
-export const get = (object: Record<string, any>, path: string[]): any =>
+export const get = (object: Record<string, any> | undefined, path: string[]): any =>
   path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object);
 
 /**
