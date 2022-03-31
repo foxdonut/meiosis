@@ -397,7 +397,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       expect(cells().state.pet.fullName).toEqual('Softy Quackington');
     });
 
-    test('views', () => {
+    test('views', (done) => {
       interface Home {
         size: number;
       }
@@ -408,6 +408,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         },
         view: (cell) => {
           expect(cell.state.size).toEqual(37);
+          done();
         }
       };
 
