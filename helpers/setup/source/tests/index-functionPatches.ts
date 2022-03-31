@@ -236,4 +236,220 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     cell.update(combinePatches([assoc('count', 3), assoc('service', false)]));
     expect(cells().state).toEqual({ count: 3, service: false });
   });
+
+  describe('Nested Apps', () => {
+    test('initial state', () => {
+      interface Home {
+        size: number;
+      }
+
+      interface Environment {
+        material: string;
+      }
+
+      interface Duck {
+        color: string;
+        texture: string;
+        house: Home;
+        env: Environment;
+      }
+
+      interface AppState {
+        pet: Duck;
+        sound: string;
+      }
+
+      const homeApp: App<Home> = {
+        initial: {
+          size: 37
+        }
+      };
+
+      const duckApp: App<Duck> = {
+        initial: {
+          color: 'yellow',
+          texture: 'soft',
+          env: {
+            material: 'straw'
+          }
+        },
+        nested: {
+          house: homeApp
+        }
+      };
+
+      const app: App<AppState> = {
+        initial: {
+          sound: 'quack'
+        },
+        nested: {
+          pet: duckApp
+        }
+      };
+
+      const cells = setup<AppState>({ app });
+      const initialState = cells().state;
+
+      expect(initialState).toEqual({
+        sound: 'quack',
+        pet: {
+          color: 'yellow',
+          texture: 'soft',
+          env: {
+            material: 'straw'
+          },
+          house: {
+            size: 37
+          }
+        }
+      });
+    });
+
+    test('services', () => {
+      interface Home {
+        size: number;
+      }
+
+      const homeApp: App<Home> = {
+        initial: {
+          size: 37
+        }
+      };
+
+      interface Environment {
+        material: string;
+      }
+
+      interface Duck {
+        color: string;
+        texture: string;
+        firstName: string;
+        lastName: string;
+        fullName: string;
+        house: Home;
+        env: Environment;
+      }
+
+      const getFullName = (duck: Duck): string => `${duck.firstName} ${duck.lastName}`;
+      const updateFullName = (cell: MeiosisCell<Duck>) =>
+        cell.update(assoc('fullName', getFullName(cell.state)));
+
+      const duckApp: App<Duck> = {
+        initial: {
+          color: 'yellow',
+          texture: 'soft',
+          firstName: 'Fluffy',
+          lastName: 'McDuck',
+          env: {
+            material: 'straw'
+          }
+        },
+        services: [
+          {
+            onchange: (state) => state.firstName,
+            run: updateFullName
+          },
+          {
+            onchange: (state) => state.lastName,
+            run: updateFullName
+          }
+        ],
+        nested: {
+          house: homeApp
+        }
+      };
+
+      interface AppState {
+        pet: Duck;
+        sound: string;
+        volume: string;
+      }
+
+      const app: App<AppState> = {
+        initial: {
+          sound: 'quack'
+        },
+        services: [
+          {
+            onchange: (state) => state.sound,
+            run: (cell) => {
+              if (cell.state.sound === 'quack') {
+                cell.update(assoc('volume', 'loud'));
+              } else {
+                cell.update(assoc('volume', 'quiet'));
+              }
+            }
+          }
+        ],
+        nested: {
+          pet: duckApp
+        }
+      };
+
+      const cells = setup<AppState>({ app });
+
+      expect(cells().state.volume).toEqual('loud');
+      cells().update(assoc('sound', 'beck'));
+      expect(cells().state.volume).toEqual('quiet');
+
+      expect(cells().state.pet.fullName).toEqual('Fluffy McDuck');
+      cells().nest('pet').update(assoc('lastName', 'Quackington'));
+      expect(cells().state.pet.fullName).toEqual('Fluffy Quackington');
+      cells().nest('pet').update(assoc('firstName', 'Softy'));
+      expect(cells().state.pet.fullName).toEqual('Softy Quackington');
+    });
+
+    test('views', (done) => {
+      interface Home {
+        size: number;
+      }
+
+      const homeApp: App<Home> = {
+        initial: {
+          size: 37
+        },
+        view: (cell, value) => {
+          expect(cell.state.size).toEqual(37);
+          expect(value).toEqual(42);
+          done();
+        }
+      };
+
+      interface Duck {
+        color: string;
+        house: Home;
+      }
+
+      const duckApp: App<Duck> = {
+        initial: {
+          color: 'yellow'
+        },
+        nested: {
+          house: homeApp
+        },
+        view: (cell) => {
+          cell.nested.house.view(cell, 42);
+        }
+      };
+
+      interface AppState {
+        pet: Duck;
+        sound: string;
+        volume: string;
+      }
+
+      const app: App<AppState> = {
+        initial: {
+          sound: 'quack'
+        },
+        nested: {
+          pet: duckApp
+        }
+      };
+
+      const cells = setup<AppState>({ app });
+      const cell = cells();
+      cell.nested.pet.view(cell);
+    });
+  });
 });

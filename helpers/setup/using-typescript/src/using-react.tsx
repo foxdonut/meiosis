@@ -3,7 +3,15 @@ import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
 import flyd from 'flyd';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Condition, InitialTemperature, Sky, State, Temperature, convert } from './common';
+import {
+  Condition,
+  DomEvent,
+  InitialTemperature,
+  Sky,
+  State,
+  TemperatureState,
+  convert
+} from './common';
 
 const conditionsActions = {
   togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
@@ -17,13 +25,6 @@ const conditionsActions = {
       ...state,
       sky: value
     }));
-  }
-};
-
-const conditions: App<Condition> = {
-  initial: {
-    precipitations: false,
-    sky: 'SUNNY'
   }
 };
 
@@ -41,42 +42,47 @@ const SkyOption = ({
       type="radio"
       value={value}
       checked={cell.state.sky === value}
-      onChange={(evt) => conditionsActions.changeSky(cell, evt.target.value)}
+      onChange={(evt: DomEvent) => conditionsActions.changeSky(cell, evt.target.value as Sky)}
     />
     {label}
   </label>
 );
 
-const Conditions = ({ cell }: { cell: MeiosisCell<Condition> }) => (
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        checked={cell.state.precipitations}
-        onChange={(evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)}
-      />
-      Precipitations
-    </label>
-    <div>
-      <SkyOption cell={cell} value="SUNNY" label="Sunny" />
-      <SkyOption cell={cell} value="CLOUDY" label="Cloudy" />
-      <SkyOption cell={cell} value="MIX" label="Mix of sun/clouds" />
-    </div>
-  </div>
-);
+const conditions: App<Condition> = {
+  initial: {
+    precipitations: false,
+    sky: 'SUNNY'
+  },
 
-const createTemperature = (label: string) => ({
-  initial: InitialTemperature(label)
-});
+  view: (cell: MeiosisCell<Condition>) => (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={cell.state.precipitations}
+          onChange={(evt: DomEvent) =>
+            conditionsActions.togglePrecipitations(cell, evt.target.checked)
+          }
+        />
+        Precipitations
+      </label>
+      <div>
+        <SkyOption cell={cell} value="SUNNY" label="Sunny" />
+        <SkyOption cell={cell} value="CLOUDY" label="Cloudy" />
+        <SkyOption cell={cell} value="MIX" label="Mix of sun/clouds" />
+      </div>
+    </div>
+  )
+};
 
 const temperatureActions = {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => {
+  increment: (cell: MeiosisCell<TemperatureState>, amount: number) => {
     cell.update((state) => ({
       ...state,
       value: state.value + amount
     }));
   },
-  changeUnits: (cell: MeiosisCell<Temperature>) => {
+  changeUnits: (cell: MeiosisCell<TemperatureState>) => {
     cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
@@ -91,38 +97,37 @@ const temperatureActions = {
   }
 };
 
-const Temperature = ({ cell }: { cell: MeiosisCell<Temperature> }) => (
-  <div>
-    {cell.state.label} Temperature:
-    {cell.state.value}&deg;{cell.state.units}
+const createTemperature = (label: string) => ({
+  initial: InitialTemperature(label),
+  view: (cell: MeiosisCell<TemperatureState>) => (
     <div>
-      <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
-      <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
+      {cell.state.label} Temperature:
+      {cell.state.value}&deg;{cell.state.units}
+      <div>
+        <button onClick={() => temperatureActions.increment(cell, 1)}>Increment</button>
+        <button onClick={() => temperatureActions.increment(cell, -1)}>Decrement</button>
+      </div>
+      <div>
+        <button onClick={() => temperatureActions.changeUnits(cell)}>Change Units</button>
+      </div>
     </div>
-    <div>
-      <button onClick={() => temperatureActions.changeUnits(cell)}>Change Units</button>
-    </div>
-  </div>
-);
+  )
+});
 
 const app: App<State> = {
   nested: {
     conditions,
-    temperature: {
-      nested: {
-        air: createTemperature('Air'),
-        water: createTemperature('Water')
-      }
-    }
+    airTemperature: createTemperature('Air'),
+    waterTemperature: createTemperature('Water')
   }
 };
 
 const AppView = ({ cell }: { cell: MeiosisCell<State> }) => (
   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
     <div>
-      <Conditions cell={cell.nest('conditions')} />
-      <Temperature cell={cell.nest('temperature').nest('air')} />
-      <Temperature cell={cell.nest('temperature').nest('water')} />
+      {cell.nested.conditions.view(cell)}
+      {cell.nested.airTemperature.view(cell)}
+      {cell.nested.waterTemperature.view(cell)}
     </div>
     <pre style={{ margin: '0' }}>{JSON.stringify(cell.state, null, 4)}</pre>
   </div>

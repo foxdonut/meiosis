@@ -8,6 +8,7 @@ import {
   commonGetServices,
   nestSetup
 } from '../common';
+import { get } from '../util';
 
 /**
  * @template S the State type.
@@ -36,18 +37,27 @@ export interface Update<S> {
   (patch: Patch<S>): any;
 }
 
+export interface View<S> {
+  (cell: MeiosisCell<S>, ...args: any[]): any;
+}
+
+export interface ViewComponent<S> {
+  view: View<S>;
+}
+
+export type NestedViews<S> = {
+  [K in keyof S]: ViewComponent<S>;
+};
+
 export interface MeiosisCell<S> {
   state: S;
   update: Update<S>;
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+  nested: NestedViews<S>;
 }
 
 export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
-}
-
-export interface View<S> {
-  (cell: MeiosisCell<S>): any;
 }
 
 export interface App<S> extends CommonApp<S> {
@@ -85,16 +95,21 @@ const nestUpdate =
     parentUpdate(nestPatch(patch, prop));
 
 const nestCell =
-  <S, K extends Extract<keyof S, string>>(getState: () => S, parentUpdate: Update<S>) =>
+  <S, K extends Extract<keyof S, string>>(
+    getState: () => S,
+    parentUpdate: Update<S>,
+    view: App<S> | undefined
+  ) =>
   (prop: K): MeiosisCell<S[K]> => {
     const getNestedState = () => getState()[prop];
-
+    const nestedView = get(view, [prop, 'nested']);
     const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
 
     const nested: MeiosisCell<S[K]> = {
       state: getNestedState(),
       update: nestedUpdate,
-      nest: nestCell(getNestedState, nestedUpdate)
+      nest: nestCell(getNestedState, nestedUpdate, nestedView),
+      nested: nestedView
     };
 
     return nested;

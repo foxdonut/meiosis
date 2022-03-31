@@ -1,9 +1,16 @@
 // preact + functionPatches + simple-stream
-
 import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
 import { h, render as preactRender } from 'preact';
 import { add, assoc, over, lensProp } from 'rambda';
-import { Condition, InitialTemperature, Sky, State, Temperature, convert } from './common';
+import {
+  Condition,
+  DomEvent,
+  InitialTemperature,
+  Sky,
+  State,
+  TemperatureState,
+  convert
+} from './common';
 
 const conditionsActions = {
   togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
@@ -11,13 +18,6 @@ const conditionsActions = {
   },
   changeSky: (cell: MeiosisCell<Condition>, value: Sky) => {
     cell.update(assoc('sky', value));
-  }
-};
-
-const conditions: App<Condition> = {
-  initial: {
-    precipitations: false,
-    sky: 'SUNNY'
   }
 };
 
@@ -39,43 +39,46 @@ const SkyOption = ({
       type: 'radio',
       value,
       checked: cell.state.sky === value,
-      onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
+      onchange: (evt: DomEvent) => conditionsActions.changeSky(cell, evt.target.value as Sky)
     }),
     label
   );
 
-const Conditions = ({ cell }: { cell: MeiosisCell<Condition> }) =>
-  h(
-    'div',
-    {},
-    h(
-      'label',
-      {},
-      h('input', {
-        type: 'checkbox',
-        checked: cell.state.precipitations,
-        onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
-      }),
-      'Precipitations'
-    ),
+const conditions: App<Condition> = {
+  initial: {
+    precipitations: false,
+    sky: 'SUNNY'
+  },
+  view: (cell: MeiosisCell<Condition>) =>
     h(
       'div',
       {},
-      h(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
-      h(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
-      h(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
+      h(
+        'label',
+        {},
+        h('input', {
+          type: 'checkbox',
+          checked: cell.state.precipitations,
+          onchange: (evt: DomEvent) =>
+            conditionsActions.togglePrecipitations(cell, evt.target.checked)
+        }),
+        'Precipitations'
+      ),
+      h(
+        'div',
+        {},
+        h(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
+        h(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
+        h(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
+      )
     )
-  );
-
-const createTemperature = (label: string) => ({
-  initial: InitialTemperature(label)
-});
+};
 
 const temperatureActions = {
-  increment: (cell: MeiosisCell<Temperature>, amount: number) => {
+  increment: (cell: MeiosisCell<TemperatureState>, amount: number) => {
     cell.update(over(lensProp('value'), add(amount)));
   },
-  changeUnits: (cell: MeiosisCell<Temperature>) => {
+  changeUnits: (cell: MeiosisCell<TemperatureState>) => {
     cell.update((state) => {
       const value = state.value;
       const newUnits = state.units === 'C' ? 'F' : 'C';
@@ -85,37 +88,36 @@ const temperatureActions = {
   }
 };
 
-const Temperature = ({ cell }: { cell: MeiosisCell<Temperature> }) =>
-  h(
-    'div',
-    {},
-    cell.state.label,
-    ' Temperature: ',
-    cell.state.value,
-    h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
-    cell.state.units,
+const createTemperature = (label: string) => ({
+  initial: InitialTemperature(label),
+  view: (cell: MeiosisCell<TemperatureState>) =>
     h(
       'div',
       {},
-      h('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
-      h('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
-    ),
-    h(
-      'div',
-      {},
-      h('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units')
+      cell.state.label,
+      ' Temperature: ',
+      cell.state.value,
+      h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
+      cell.state.units,
+      h(
+        'div',
+        {},
+        h('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
+        h('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
+      ),
+      h(
+        'div',
+        {},
+        h('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units')
+      )
     )
-  );
+});
 
 const app: App<State> = {
   nested: {
     conditions,
-    temperature: {
-      nested: {
-        air: createTemperature('Air'),
-        water: createTemperature('Water')
-      }
-    }
+    airTemperature: createTemperature('Air'),
+    waterTemperature: createTemperature('Water')
   }
 };
 
@@ -126,9 +128,9 @@ const AppView = ({ cell }: { cell: MeiosisCell<State> }) =>
     h(
       'div',
       {},
-      h(Conditions, { cell: cell.nest('conditions') }),
-      h(Temperature, { cell: cell.nest('temperature').nest('air') }),
-      h(Temperature, { cell: cell.nest('temperature').nest('water') })
+      cell.nested.conditions.view(cell),
+      cell.nested.airTemperature.view(cell),
+      cell.nested.waterTemperature.view(cell)
     ),
     h('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
   );
