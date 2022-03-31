@@ -277,7 +277,7 @@ const assembleView = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
           return assoc(
             key,
             {
-              view: (cell: any, ...args: any[]) => view(cell.nest(key), args),
+              view: (cell: any, ...args: any[]) => view(cell.nest(key), ...args),
               nested: assembleView(nestedApp.nested)
             },
             result

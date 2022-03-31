@@ -406,8 +406,9 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         initial: {
           size: 37
         },
-        view: (cell) => {
+        view: (cell, value) => {
           expect(cell.state.size).toEqual(37);
+          expect(value).toEqual(42);
           done();
         }
       };
@@ -425,7 +426,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
           house: homeApp
         },
         view: (cell) => {
-          cell.nested.house.view(cell);
+          cell.nested.house.view(cell, 42);
         }
       };
 
