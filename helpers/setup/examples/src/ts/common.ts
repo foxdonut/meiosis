@@ -1,4 +1,4 @@
-import { stream, scan } from '../../source/dist/simple-stream';
+import { stream, scan } from '../../../source/dist/simple-stream';
 
 // simple-stream
 (() => {

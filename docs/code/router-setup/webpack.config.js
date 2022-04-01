@@ -10,7 +10,10 @@ const createConfig = (mode, example) => ({
   mode: "development",
   entry: `./${mode}-mode/${example}/src/index.js`,
   output: {
-    path: path.join(__dirname, `${mode}-mode/${example}/build`),
+    path: path.join(
+      __dirname,
+      `${mode}-mode/${example}/build`
+    ),
     filename: `generated-app.js`
   },
   plugins: [
@@ -43,8 +46,8 @@ const createConfig = (mode, example) => ({
   }
 });
 
-modes.forEach(mode =>
-  examples.forEach(example => {
+modes.forEach((mode) =>
+  examples.forEach((example) => {
     configs.push(createConfig(mode, example));
   })
 );

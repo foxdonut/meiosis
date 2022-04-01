@@ -856,52 +856,6 @@ describe('meiosis setup with library for applying patches', () => {
   });
 });
 
-describe('meiosis setup with generic common', () => {
-  describe.each(streamCases)('%s', (_label, streamLib) => {
-    test('required accumulator function', () => {
-      expect(() => {
-        meiosis.common.setup({ stream: streamLib, app: {} });
-      }).toThrow();
-    });
-
-    test('basic mergerino setup with no services', () => {
-      const actions = {
-        increment: (update, amount) => {
-          update({ count: (x) => x + amount });
-        }
-      };
-
-      const { states, update } = meiosis.common.setup({
-        stream: streamLib,
-        accumulator: merge,
-        app: { initial: { count: 0 } }
-      });
-
-      actions.increment(update, 2);
-
-      expect(states()).toEqual({ count: 2 });
-    });
-
-    test('basic functionPatch setup with no services', () => {
-      const actions = {
-        increment: (update, amount) => {
-          update(R.over(R.lensProp('count'), R.add(amount)));
-        }
-      };
-
-      const { states, update } = meiosis.common.setup({
-        stream: streamLib,
-        accumulator: (x, f) => f(x),
-        app: { initial: { count: 0 } }
-      });
-
-      actions.increment(update, 2);
-
-      expect(states()).toEqual({ count: 2 });
-    });
-  });
-});
-
 describe('Meiosis cell', () => {
   const streamLib = meiosis.simpleStream;
 

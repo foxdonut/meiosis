@@ -1,189 +1,14 @@
-import simpleStream from '../simple-stream';
+import simpleStream, {
+  Accumulator,
+  ExternalStreamLib,
+  Stream,
+  createDropRepeats
+} from '../simple-stream';
 import { assoc, concatIfPresent } from '../util';
 
-/**
- * A mapping function.
- *
- * @template T the type of the source value.
- * @template R the type of the returned value.
- */
-export interface MapFunction<T, R> {
-  /**
-   * @param {T} value the source value.
-   *
-   * @returns {R} the result of calling the map function on the source value.
-   */
-  (value: T): R;
-}
-
-/**
- * A stream of values.
- *
- * @template T the type of the stream's values.
- */
-export interface Stream<T> {
-  /**
-   * Function to either send a value onto the stream -- by providing a value, `stream1(value)` -- or
-   * to get the stream's latest value -- by calling the function with no arguments, `stream1()`.
-   *
-   * @param {T} [value] the value to send onto the stream. If not provided, the function instead
-   * returns the stream's latest value.
-   *
-   * @returns {T} the stream's latest value.
-   */
-  (value?: T): T;
-
-  /**
-   * Function to create a new stream with values that are the result of calling a mapping function
-   * on the source stream's values.
-   *
-   * @template R the type of the returned stream's values.
-   *
-   * @param fn the mapping function.
-   *
-   * @returns {Stream<R>} a stream resulting from mapping the source stream.
-   */
-  map<R>(fn: MapFunction<T, R>): Stream<R>;
-
-  /**
-   * Ends a stream, so that the streams that were created with `map` and/or `scan` no longer receive
-   * values from this stream.
-   *
-   * @param {boolean} [value] the value indicating to end the stream.
-   */
-  end(value?: boolean): void;
-
-  /**
-   * Indicates whether or not this stream has been ended.
-   */
-  ended?: boolean;
-}
-
-/**
- * Function that creates a stream.
- *
- * @template T the type of the stream's values.
- */
-export interface StreamConstructor {
-  /**
-   * @param {T} [value] the stream's initial value.
-   *
-   * @returns {Stream<T>} the created stream.
-   */
-  <T>(value?: T): Stream<T>;
-}
-
-/**
- * Accumulator function.
- *
- * @template R the type of the result value.
- * @template T the type of the source value.
- */
-export interface Accumulator<R, T> {
-  /**
-   * @param {R} result the current accumulated result value.
-   * @param {T} next the next source value.
-   *
-   * @returns {R} the accumulated result value.
-   */
-  (result: R, next: T): R;
-}
-
-/**
- * Stream library `scan` function.
- *
- * @template T the type of the source stream's values.
- * @template R the type of the returned stream's values.
- */
-export interface Scan {
-  /**
-   * @param {Accumulator<R, T>} acc the accumulator function.
-   * @param {R} init the returned stream's initial value.
-   * @param {Stream<T>} stream the source stream.
-   *
-   * @returns {Stream<R>} a stream resulting from scanning the source stream.
-   */
-  <T, R>(acc: Accumulator<R, T>, init: R, stream: Stream<T>): Stream<R>;
-}
-
-/**
- * Defines the stream library's `scan` function.
- */
-interface StreamScan {
-  /**
-   * The stream library's `scan` function.
-   */
-  scan: Scan;
-}
-
-export interface ExternalStreamLib {
-  stream?: any;
-  scan: (acc: any, init: any, stream: any) => any;
-}
-
-/**
- * Stream library that provides a function to create a stream.
- *
- * @template T the type of the stream's values.
- */
-export interface StreamLibWithFunction extends StreamScan {
-  /**
-   * The function to create a stream.
-   *
-   * @param {T} [value] the initial value for the stream.
-   *
-   * @returns {Stream<T>} the created stream.
-   */
-  <T>(value?: T): Stream<T>;
-}
-
-/**
- * Stream library that provides a `stream` property which is a function to create a stream.
- *
- * @template T the type of the stream's values.
- */
-export interface StreamLibWithProperty extends StreamScan {
-  /**
-   * The function to create a stream.
-   *
-   * @param {T} [value] the initial value for the stream.
-   *
-   * @returns {Stream<T>} the created stream.
-   */
-  stream<T>(value?: T): Stream<T>;
-}
-
-/**
- * Stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for which
- * you provide either a function or an object with a `stream` function to create a stream. The
- * function or object must also have a `scan` property. The returned stream must have a `map`
- * method.
- */
-export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
-
-/**
- * Meiosis Cell.
- *
- * @template S the State type.
- * @template P the Patch type.
- */
-/**
- * Returned by Meiosis setup.
- *
- * @template S the State type.
- * @template P the Patch type.
- */
-export interface CommonMeiosisSetup<S, P> {
-  /**
-   * The stream of application states.
-   */
+interface CommonMeiosisSetup<S, P> {
   states: Stream<S>;
-
-  /**
-   * The `update` stream. Patches should be sent onto this stream by calling `update(patch)`.
-   */
   update: Stream<P>;
-
   view: any;
 }
 
@@ -196,23 +21,15 @@ export interface CommonView {
   (cell: any, ...args: any[]): any;
 }
 
-/**
- * Application object.
- *
- * @template S the State type.
- */
-export interface CommonApp<S> {
-  /**
-   * An object that represents the initial state. If not specified, the initial state will be `{}`.
-   */
+export interface CommonMeiosisComponent<S> {
   initial?: Partial<S>;
   services?: CommonService<S>[];
   view?: CommonView;
-  nested?: CommonNestedApps<S>;
+  nested?: CommonNestedComponents<S>;
 }
 
-type CommonNestedApps<S> = {
-  [K in keyof S]?: CommonApp<S[K]>;
+type CommonNestedComponents<S> = {
+  [K in keyof S]?: CommonMeiosisComponent<S[K]>;
 };
 
 /**
@@ -230,7 +47,7 @@ export interface CommonMeiosisConfig<S> {
   /**
    * The application object, with optional properties.
    */
-  app?: CommonApp<S>;
+  app?: CommonMeiosisComponent<S>;
 }
 
 /**
@@ -246,16 +63,16 @@ export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   accumulator: Accumulator<S, P>;
 }
 
-const assembleInitialState = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
-  nestedApps
-    ? Object.keys(nestedApps).reduce(
+const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
+  nestedComponents
+    ? Object.keys(nestedComponents).reduce(
         (result, key) =>
           assoc(
             key,
             Object.assign(
               {},
-              nestedApps[key].initial,
-              assembleInitialState(nestedApps[key].nested)
+              nestedComponents[key].initial,
+              assembleInitialState(nestedComponents[key].nested)
             ),
             result
           ),
@@ -263,13 +80,13 @@ const assembleInitialState = <S>(nestedApps: CommonNestedApps<S> | undefined): a
       )
     : {};
 
-const getInitialState = <S>(app: CommonApp<S>): S =>
+const getInitialState = <S>(app: CommonMeiosisComponent<S>): S =>
   Object.assign({}, app.initial, assembleInitialState(app.nested));
 
-const assembleView = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
-  nestedApps
-    ? Object.keys(nestedApps).reduce((result, key) => {
-        const nestedApp: CommonApp<any> = nestedApps[key];
+const assembleView = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
+  nestedComponents
+    ? Object.keys(nestedComponents).reduce((result, key) => {
+        const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
 
         if (nestedApp.view !== undefined) {
           const view = nestedApp.view;
@@ -287,17 +104,18 @@ const assembleView = <S>(nestedApps: CommonNestedApps<S> | undefined): any =>
       }, {})
     : {};
 
-const getView = <S>(app: CommonApp<S>): CommonApp<S> => assembleView(app.nested);
+const getView = <S>(app: CommonMeiosisComponent<S>): CommonMeiosisComponent<S> =>
+  assembleView(app.nested);
 
 const assembleServices = <S>(
-  nestedApps: CommonNestedApps<S> | undefined,
+  nestedComponents: CommonNestedComponents<S> | undefined,
   getCell = (cell) => cell
 ): CommonService<S>[] =>
-  nestedApps
-    ? Object.keys(nestedApps).reduce((result, key) => {
+  nestedComponents
+    ? Object.keys(nestedComponents).reduce((result, key) => {
         const nextGetCell = (cell) => getCell(cell).nest(key);
 
-        const nestedApp: CommonApp<any> = nestedApps[key];
+        const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
 
         return concatIfPresent(
           result,
@@ -309,27 +127,8 @@ const assembleServices = <S>(
       }, [] as CommonService<S>[])
     : [];
 
-export const commonGetServices = <S>(app: CommonApp<S>): CommonService<S>[] =>
+export const commonGetServices = <S>(app: CommonMeiosisComponent<S>): CommonService<S>[] =>
   concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
-
-// Credit: James Forbes (https://james-forbes.com/)
-export const createDropRepeats =
-  (stream: ExternalStreamLib = simpleStream) =>
-  <S>(states: Stream<S>, selector: (state: S) => any = (state) => state): Stream<S> => {
-    const createStream = typeof stream === 'function' ? stream : stream.stream;
-
-    let prev = undefined;
-    const result = createStream();
-
-    states.map((state) => {
-      const next = selector(state);
-      if (next !== prev) {
-        prev = next;
-        result(state);
-      }
-    });
-    return result;
-  };
 
 /**
  * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,

@@ -1,8 +1,8 @@
 // react + functionPatches + flyd
-import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
+import { MeiosisCell, MeiosisViewComponent, setup } from '../../../source/dist/functionPatches';
 import flyd from 'flyd';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   Condition,
   DomEvent,
@@ -48,7 +48,7 @@ const SkyOption = ({
   </label>
 );
 
-const conditions: App<Condition> = {
+const conditions: MeiosisViewComponent<Condition> = {
   initial: {
     precipitations: false,
     sky: 'SUNNY'
@@ -97,7 +97,7 @@ const temperatureActions = {
   }
 };
 
-const createTemperature = (label: string) => ({
+const createTemperature = (label: string): MeiosisViewComponent<TemperatureState> => ({
   initial: InitialTemperature(label),
   view: (cell: MeiosisCell<TemperatureState>) => (
     <div>
@@ -114,29 +114,29 @@ const createTemperature = (label: string) => ({
   )
 });
 
-const app: App<State> = {
+const app: MeiosisViewComponent<State> = {
   nested: {
     conditions,
     airTemperature: createTemperature('Air'),
     waterTemperature: createTemperature('Water')
-  }
-};
-
-const AppView = ({ cell }: { cell: MeiosisCell<State> }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-    <div>
-      {cell.nested.conditions.view(cell)}
-      {cell.nested.airTemperature.view(cell)}
-      {cell.nested.waterTemperature.view(cell)}
+  },
+  view: (cell: MeiosisCell<State>) => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+      <div>
+        {cell.nested.conditions.view(cell)}
+        {cell.nested.airTemperature.view(cell)}
+        {cell.nested.waterTemperature.view(cell)}
+      </div>
+      <pre style={{ margin: '0' }}>{JSON.stringify(cell.state, null, 4)}</pre>
     </div>
-    <pre style={{ margin: '0' }}>{JSON.stringify(cell.state, null, 4)}</pre>
-  </div>
-);
+  )
+};
 
 export const setupReactExample = (): void => {
   const cells = setup<State>({ stream: flyd, app });
-  const element = document.getElementById('reactApp');
+  const element = document.getElementById('tsReactApp');
+  const root = createRoot(element);
   cells.map((cell) => {
-    ReactDOM.render(<AppView cell={cell} />, element);
+    root.render(app.view(cell));
   });
 };

@@ -1,7 +1,6 @@
 // @ts-check
 // preact + functionPatches + simple-stream
-
-import meiosis from '../../source/dist/index';
+import meiosis from '../../../source/dist/index';
 import { h, render as preactRender } from 'preact';
 import { add, assoc, over, lensProp } from 'rambda';
 import { app, convert } from './common';
@@ -105,7 +104,7 @@ const App = ({ cell }) =>
 
 export const setupPreactExample = () => {
   const cells = meiosis.functionPatches.setup({ app });
-  const element = document.getElementById('preactApp');
+  const element = document.getElementById('jsPreactApp');
   cells.map((cell) => {
     preactRender(h(App, { cell }), element);
   });

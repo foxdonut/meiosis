@@ -1,4 +1,11 @@
-import { App, MeiosisCell, Patch, Service, combinePatches, setup } from '../src/mergerino';
+import {
+  MeiosisCell,
+  MeiosisComponent,
+  Patch,
+  Service,
+  combinePatches,
+  setup
+} from '../src/mergerino';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
   test('with no actions', () => {
@@ -59,7 +66,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       }
     };
 
-    const app: App<State> = {
+    const app: MeiosisComponent<State> = {
       initial: { ducks: 1, sound: 'quack' }
     };
 
@@ -221,7 +228,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       }
     ];
 
-    const app: App<Counter> = {
+    const app: MeiosisComponent<Counter> = {
       initial: { count: 0, service: false },
       services
     };
@@ -235,7 +242,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     // FIXME: add rest of test
   });
 
-  describe('Nested Apps', () => {
+  describe('Nested Components', () => {
     test('initial state', () => {
       interface Home {
         size: number;
@@ -257,13 +264,13 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         sound: string;
       }
 
-      const homeApp: App<Home> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         }
       };
 
-      const duckApp: App<Duck> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow',
           texture: 'soft',
@@ -272,16 +279,16 @@ describe('Meiosis with TypeScript - Mergerino', () => {
           }
         },
         nested: {
-          house: homeApp
+          house: homeComponent
         }
       };
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },
         nested: {
-          pet: duckApp
+          pet: duckComponent
         }
       };
 
@@ -308,7 +315,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
-      const homeApp: App<Home> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         }
@@ -332,7 +339,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       const updateFullName = (cell: MeiosisCell<Duck>) =>
         cell.update({ fullName: getFullName(cell.state) });
 
-      const duckApp: App<Duck> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow',
           texture: 'soft',
@@ -353,7 +360,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
           }
         ],
         nested: {
-          house: homeApp
+          house: homeComponent
         }
       };
 
@@ -363,7 +370,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         volume: string;
       }
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },
@@ -380,7 +387,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
           }
         ],
         nested: {
-          pet: duckApp
+          pet: duckComponent
         }
       };
 
@@ -402,7 +409,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
-      const homeApp: App<Home> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         },
@@ -418,12 +425,12 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         house: Home;
       }
 
-      const duckApp: App<Duck> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow'
         },
         nested: {
-          house: homeApp
+          house: homeComponent
         },
         view: (cell) => {
           cell.nested.house.view(cell, 42);
@@ -436,12 +443,12 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         volume: string;
       }
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },
         nested: {
-          pet: duckApp
+          pet: duckComponent
         }
       };
 

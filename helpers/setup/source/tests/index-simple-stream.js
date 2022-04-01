@@ -6,13 +6,13 @@ import meiosis from '../src/index';
 
 describe('simpleStream', () => {
   test('basic', () => {
-    const s1 = meiosis.simpleStream.stream();
+    const s1 = meiosis.stream.simpleStream.stream();
     const result = s1(42);
     expect(result).toEqual(42);
   });
 
   test('latest value', () => {
-    const s1 = meiosis.simpleStream.stream();
+    const s1 = meiosis.stream.simpleStream.stream();
 
     const f1 = (x) => {
       if (x === 10) {
@@ -35,10 +35,10 @@ describe('simpleStream', () => {
   });
 
   test('service on initial state', (done) => {
-    const update = meiosis.simpleStream.stream();
+    const update = meiosis.stream.simpleStream.stream();
     const initial = { route: 'Home', routeChanged: true, data: [] };
 
-    const states = meiosis.simpleStream.scan(
+    const states = meiosis.stream.simpleStream.scan(
       (state, patch) => merge(state, patch),
       initial,
       update
@@ -70,7 +70,7 @@ describe('simpleStream', () => {
   });
 
   test('set undefined', (done) => {
-    const s1 = meiosis.simpleStream.stream();
+    const s1 = meiosis.stream.simpleStream.stream();
 
     s1.map((_value) => {
       done();
@@ -80,8 +80,8 @@ describe('simpleStream', () => {
   });
 
   test('dropRepeats', () => {
-    const dropRepeats = meiosis.common.createDropRepeats();
-    const s1 = meiosis.simpleStream.stream();
+    const dropRepeats = meiosis.stream.dropRepeats;
+    const s1 = meiosis.stream.simpleStream.stream();
     const s2 = dropRepeats(s1);
 
     let ticks = 0;
@@ -101,8 +101,8 @@ describe('simpleStream', () => {
   });
 
   test('dropRepeats with selector', () => {
-    const dropRepeats = meiosis.common.createDropRepeats();
-    const s1 = meiosis.simpleStream.stream();
+    const dropRepeats = meiosis.stream.dropRepeats;
+    const s1 = meiosis.stream.simpleStream.stream();
     const s2 = dropRepeats(s1, (s) => s.value);
 
     let ticks = 0;
@@ -122,7 +122,7 @@ describe('simpleStream', () => {
   });
 
   test('end stream', () => {
-    const s1 = meiosis.simpleStream.stream();
+    const s1 = meiosis.stream.simpleStream.stream();
 
     let c1 = 0;
     const d1 = s1.map(() => {

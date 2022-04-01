@@ -1,5 +1,5 @@
 // mithril + mergerino + mithril-stream
-import { App, MeiosisCell, setup } from '../../source/dist/mergerino';
+import { MeiosisCell, MeiosisViewComponent, setup } from '../../../source/dist/mergerino';
 import m from 'mithril';
 import Stream from 'mithril/stream';
 import {
@@ -35,7 +35,7 @@ const SkyOption: m.Component<{ cell: MeiosisCell<Condition>; value: string; labe
     )
 };
 
-const conditions: App<Condition> = {
+const conditions: MeiosisViewComponent<Condition> = {
   initial: {
     precipitations: false,
     sky: 'SUNNY'
@@ -76,7 +76,7 @@ const temperatureActions = {
   }
 };
 
-const createTemperature = (label: string): App<TemperatureState> => ({
+const createTemperature = (label: string): MeiosisViewComponent<TemperatureState> => ({
   initial: InitialTemperature(label),
   view: (cell) =>
     m(
@@ -95,16 +95,13 @@ const createTemperature = (label: string): App<TemperatureState> => ({
     )
 });
 
-const app: App<State> = {
+const app: MeiosisViewComponent<State> = {
   nested: {
     conditions,
     airTemperature: createTemperature('Air'),
     waterTemperature: createTemperature('Water')
-  }
-};
-
-const AppView: m.Component<{ cell: MeiosisCell<State> }> = {
-  view: ({ attrs: { cell } }) =>
+  },
+  view: (cell) =>
     m(
       'div',
       { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
@@ -121,8 +118,8 @@ const AppView: m.Component<{ cell: MeiosisCell<State> }> = {
 export const setupMithrilExample = (): void => {
   const cells = setup<State>({ stream: Stream, app });
 
-  m.mount(document.getElementById('mithrilApp') as HTMLElement, {
-    view: () => m(AppView, { cell: cells() })
+  m.mount(document.getElementById('tsMithrilApp') as HTMLElement, {
+    view: () => app.view(cells())
   });
 
   cells.map(() => m.redraw());

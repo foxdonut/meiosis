@@ -1,11 +1,10 @@
-import simpleStream from '../simple-stream';
+import simpleStream, { Stream } from '../simple-stream';
 import merge from 'mergerino';
 import {
-  CommonApp,
+  CommonMeiosisComponent,
   CommonMeiosisConfig,
   CommonService,
   NestSetup,
-  Stream,
   commonGetServices,
   nestSetup
 } from '../common';
@@ -85,19 +84,21 @@ export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
 }
 
-export interface App<S> extends CommonApp<S> {
+export interface MeiosisComponent<S> extends CommonMeiosisComponent<S> {
   /**
    * An array of service functions.
    */
   services?: Service<S>[];
 
-  view?: View<S>;
-
-  nested?: NestedApps<S>;
+  nested?: NestedComponents<S>;
 }
 
-export type NestedApps<S> = {
-  [K in keyof S]?: App<S[K]>;
+export interface MeiosisViewComponent<S> extends MeiosisComponent<S> {
+  view: View<S>;
+}
+
+type NestedComponents<S> = {
+  [K in keyof S]?: MeiosisComponent<S[K]>;
 };
 
 /**
@@ -106,7 +107,7 @@ export type NestedApps<S> = {
  * @template S the State type.
  */
 export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
-  app?: App<S>;
+  app?: MeiosisComponent<S>;
 }
 
 const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> =>
@@ -121,7 +122,7 @@ const nestCell =
   <S, K extends Extract<keyof S, string>>(
     getState: () => S,
     parentUpdate: Update<S>,
-    view: App<S> | undefined
+    view: MeiosisComponent<S> | undefined
   ) =>
   (prop: K): MeiosisCell<S[K]> => {
     const getNestedState = () => getState()[prop];
@@ -145,7 +146,8 @@ const nestCell =
  */
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
 
-const getServices = <S>(app: App<S>): Service<S>[] => commonGetServices(app);
+const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
+  commonGetServices(component);
 
 /**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).

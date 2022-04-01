@@ -1,4 +1,11 @@
-import { App, MeiosisCell, Patch, Service, combinePatches, setup } from '../src/functionPatches';
+import {
+  MeiosisCell,
+  MeiosisComponent,
+  Patch,
+  Service,
+  combinePatches,
+  setup
+} from '../src/functionPatches';
 import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
 describe('Meiosis with TypeScript - Function Patches', () => {
@@ -60,7 +67,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       }
     };
 
-    const app: App<State> = {
+    const app: MeiosisComponent<State> = {
       initial: { ducks: 1, sound: 'quack' }
     };
 
@@ -222,7 +229,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       }
     ];
 
-    const app: App<Counter> = {
+    const app: MeiosisComponent<Counter> = {
       initial: { count: 0, service: false },
       services
     };
@@ -237,7 +244,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     expect(cells().state).toEqual({ count: 3, service: false });
   });
 
-  describe('Nested Apps', () => {
+  describe('Nested Components', () => {
     test('initial state', () => {
       interface Home {
         size: number;
@@ -259,13 +266,13 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         sound: string;
       }
 
-      const homeApp: App<Home> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         }
       };
 
-      const duckApp: App<Duck> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow',
           texture: 'soft',
@@ -274,16 +281,16 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           }
         },
         nested: {
-          house: homeApp
+          house: homeComponent
         }
       };
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },
         nested: {
-          pet: duckApp
+          pet: duckComponent
         }
       };
 
@@ -310,7 +317,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         size: number;
       }
 
-      const homeApp: App<Home> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         }
@@ -334,7 +341,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       const updateFullName = (cell: MeiosisCell<Duck>) =>
         cell.update(assoc('fullName', getFullName(cell.state)));
 
-      const duckApp: App<Duck> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow',
           texture: 'soft',
@@ -355,7 +362,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           }
         ],
         nested: {
-          house: homeApp
+          house: homeComponent
         }
       };
 
@@ -365,7 +372,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         volume: string;
       }
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },
@@ -382,7 +389,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           }
         ],
         nested: {
-          pet: duckApp
+          pet: duckComponent
         }
       };
 
@@ -404,7 +411,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         size: number;
       }
 
-      const homeApp: App<Home> = {
+      const homeApp: MeiosisComponent<Home> = {
         initial: {
           size: 37
         },
@@ -420,7 +427,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         house: Home;
       }
 
-      const duckApp: App<Duck> = {
+      const duckApp: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow'
         },
@@ -438,7 +445,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         volume: string;
       }
 
-      const app: App<AppState> = {
+      const app: MeiosisComponent<AppState> = {
         initial: {
           sound: 'quack'
         },

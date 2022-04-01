@@ -1,10 +1,9 @@
 // @ts-check
 // react + functionPatches + flyd
-
-import meiosis from '../../source/dist/index';
+import meiosis from '../../../source/dist/index';
 import flyd from 'flyd';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { app, convert } from './common';
 
 const conditionsActions = {
@@ -101,8 +100,9 @@ const App = ({ cell }) => (
 
 export const setupReactExample = () => {
   const cells = meiosis.functionPatches.setup({ stream: flyd, app });
-  const element = document.getElementById('reactApp');
+  const element = document.getElementById('jsReactApp');
+  const root = createRoot(element);
   cells.map((cell) => {
-    ReactDOM.render(<App cell={cell} />, element);
+    root.render(<App cell={cell} />);
   });
 };

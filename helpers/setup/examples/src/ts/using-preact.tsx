@@ -1,5 +1,5 @@
 // preact + functionPatches + simple-stream
-import { App, MeiosisCell, setup } from '../../source/dist/functionPatches';
+import { MeiosisCell, MeiosisViewComponent, setup } from '../../../source/dist/functionPatches';
 import { h, render as preactRender } from 'preact';
 import { add, assoc, over, lensProp } from 'rambda';
 import {
@@ -44,7 +44,7 @@ const SkyOption = ({
     label
   );
 
-const conditions: App<Condition> = {
+const conditions: MeiosisViewComponent<Condition> = {
   initial: {
     precipitations: false,
     sky: 'SUNNY'
@@ -88,7 +88,7 @@ const temperatureActions = {
   }
 };
 
-const createTemperature = (label: string) => ({
+const createTemperature = (label: string): MeiosisViewComponent<TemperatureState> => ({
   initial: InitialTemperature(label),
   view: (cell: MeiosisCell<TemperatureState>) =>
     h(
@@ -113,32 +113,31 @@ const createTemperature = (label: string) => ({
     )
 });
 
-const app: App<State> = {
+const app: MeiosisViewComponent<State> = {
   nested: {
     conditions,
     airTemperature: createTemperature('Air'),
     waterTemperature: createTemperature('Water')
-  }
-};
-
-const AppView = ({ cell }: { cell: MeiosisCell<State> }) =>
-  h(
-    'div',
-    { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
+  },
+  view: (cell) =>
     h(
       'div',
-      {},
-      cell.nested.conditions.view(cell),
-      cell.nested.airTemperature.view(cell),
-      cell.nested.waterTemperature.view(cell)
-    ),
-    h('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
-  );
+      { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
+      h(
+        'div',
+        {},
+        cell.nested.conditions.view(cell),
+        cell.nested.airTemperature.view(cell),
+        cell.nested.waterTemperature.view(cell)
+      ),
+      h('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
+    )
+};
 
 export const setupPreactExample = (): void => {
   const cells = setup<State>({ app });
-  const element = document.getElementById('preactApp') as HTMLElement;
+  const element = document.getElementById('tsPreactApp') as HTMLElement;
   cells.map((cell) => {
-    preactRender(h(AppView, { cell }), element);
+    preactRender(app.view(cell), element);
   });
 };
