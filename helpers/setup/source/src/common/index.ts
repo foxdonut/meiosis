@@ -17,14 +17,10 @@ export interface CommonService<S> {
   run: (cell: any) => any;
 }
 
-export interface CommonView {
-  (cell: any, ...args: any[]): any;
-}
-
 export interface CommonMeiosisComponent<S> {
   initial?: Partial<S>;
   services?: CommonService<S>[];
-  view?: CommonView;
+  view?: (cell: any, ...args: any[]) => any;
   nested?: CommonNestedComponents<S>;
 }
 

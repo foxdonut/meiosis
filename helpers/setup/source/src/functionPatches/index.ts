@@ -99,21 +99,19 @@ const nestCell =
   <S, K extends Extract<keyof S, string>>(
     getState: () => S,
     parentUpdate: Update<S>,
-    view: MeiosisComponent<S> | undefined
+    components: MeiosisComponent<S> | undefined
   ) =>
   (prop: K): MeiosisCell<S[K]> => {
     const getNestedState = () => getState()[prop];
-    const nestedView = get(view, [prop, 'nested']);
     const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+    const nestedComponents = get(components, [prop, 'nested']);
 
-    const nested: MeiosisCell<S[K]> = {
+    return {
       state: getNestedState(),
       update: nestedUpdate,
-      nest: nestCell(getNestedState, nestedUpdate, nestedView),
-      nested: nestedView
+      nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
+      nested: nestedComponents
     };
-
-    return nested;
   };
 
 /**
