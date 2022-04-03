@@ -6,8 +6,7 @@
 
 ## 04 - Meiosis with Function Patches
 
-In the previous lesson, [03 - Streams](03-streams.html), we started setting up the
-Meiosis pattern:
+In the previous lesson, [03 - Streams](03-streams.html), we started setting up the Meiosis pattern:
 
 - an `update` stream of **patches**
 - a `states` stream of states, obtained with `scan` on the `update` stream and applying
@@ -23,12 +22,12 @@ Our state had the following shape:
 }
 ```
 
-Our patches were numbers such as `1` and `-1`, and our accumulator applied the patches to the
-state by adding the number to `state.value`.
+Our patches were numbers such as `1` and `-1`, and our accumulator applied the patches to the state
+by adding the number to `state.value`.
 
-We are going to change our patches and accumulator function to be general-purpose, so that the
-shape of our state can be much more flexible, and our actions can issue patches to make all sorts
-of changes to the state.
+We are going to change our patches and accumulator function to be general-purpose, so that the shape
+of our state can be much more flexible, and our actions can issue patches to make all sorts of
+changes to the state.
 
 <a name="temperature_example"></a>
 ### [A Temperature Example](#temperature_example)
@@ -44,26 +43,26 @@ const initial = {
 };
 ```
 
-We can increase and decrease the value, as well as change the units betwen `C` (Celsius) and
-`F` (Farenheit), converting the value in the process.
+We can increase and decrease the value, as well as change the units betwen `C` (Celsius) and `F`
+(Farenheit), converting the value in the process.
 
 We need to:
 
 - Determine the shape of our patches
 - Write an accumulator function that will use those patches to produce the updated state.
 
-In this section, we will use one approach using **function patches**. In the next section, we
-will look at another approach - my personal favourite - using a small utility called Mergerino.
+In this section, we will use one approach using **function patches**. In the next section, we will
+look at another approach - my personal favourite - using a small utility called Mergerino.
 
 <a name="using_function_patches"></a>
 ### [Using Function Patches](#using_function_patches)
 
-Instead of using plain numbers as patches, which are limited to incrementing a counter, we can
-use **functions**. Indeed, we can pass functions onto the `update` stream and use them in the
+Instead of using plain numbers as patches, which are limited to incrementing a counter, we can use
+**functions**. Indeed, we can pass functions onto the `update` stream and use them in the
 accumulator to update the state.
 
-These functions receive the current state as a parameter, and return the updated state.
-For example, to increment the temperature value:
+These functions receive the current state as a parameter, and return the updated state. For example,
+to increment the temperature value:
 
 ```js
 const actions = {
@@ -110,8 +109,8 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-In the next section, [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html), we will look
-at an alternative to function patches.
+In the next section, [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html), we will look at
+an alternative to function patches.
 
 [< Previous](03-streams.html) |
 [Next >](05-meiosis-with-mergerino.html) |

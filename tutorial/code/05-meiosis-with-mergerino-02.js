@@ -1,49 +1,47 @@
 /*global flyd, mergerino*/
 const merge = mergerino;
 
-var convert = function (value, to) {
+const convert = function (value, to) {
   return Math.round(
     to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
-var temperature = {
-  initial: {
-    temperature: {
-      value: 22,
-      units: 'C'
-    }
-  },
-  Actions: function (update) {
-    return {
-      increment: function (amount) {
-        update({
-          temperature: {
-            value: (x) => x + amount
-          }
-        });
-      },
-      changeUnits: function () {
-        update({
-          temperature: (state) => {
-            var value = state.value;
-            var newUnits = state.units === 'C' ? 'F' : 'C';
-            var newValue = convert(value, newUnits);
-            state.value = newValue;
-            state.units = newUnits;
-            return state;
-          }
-        });
+// eslint-disable-next-line no-unused-vars
+const actions = {
+  increment: (update, amount) => {
+    update({
+      temperature: {
+        value: (x) => x + amount
       }
-    };
+    });
+  },
+  changeUnits: (update) => {
+    update({
+      temperature: (temperature) => {
+        const value = temperature.value;
+        const newUnits = temperature.units === 'C' ? 'F' : 'C';
+        const newValue = convert(value, newUnits);
+
+        return {
+          value: newValue,
+          units: newUnits
+        };
+      }
+    });
   }
 };
 
-var update = flyd.stream();
-var states = flyd.scan(merge, temperature.initial, update);
+const initial = {
+  temperature: {
+    value: 22,
+    units: 'C'
+  }
+};
 
-// eslint-disable-next-line no-unused-vars
-var actions = temperature.Actions(update);
+const update = flyd.stream();
+const states = flyd.scan(merge, initial, update);
+
 states.map(function (state) {
   document.write(
     '<pre>' + JSON.stringify(state, null, 2) + '</pre>'

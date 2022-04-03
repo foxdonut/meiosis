@@ -10,8 +10,8 @@ In the previous lesson, [04 - Meiosis with Function Patches](04-meiosis-with-fun
 we set up the Meiosis pattern with an `update` stream of function patches.
 
 In this section, we will use another approach - my personal favourite - using a library called
-Mergerino. The Meiosis pattern is flexible enough that you can use either of these approaches
-or even one of your own.
+Mergerino. The Meiosis pattern is flexible enough that you can use either of these approaches or
+even one of your own.
 
 <a name="introducing_mergerino"></a>
 ### [Introducing Mergerino](#introducing_mergerino)
@@ -24,16 +24,16 @@ our accumulator function.
 Let's say we have this initial state:
 
 ```js
-{
+const initial = {
   temperature: {
     value: 22,
-    units: "C"
+    units: 'C'
   }
-}
+};
 ```
 
-Imagine that our patches are objects that describe how we want to update the state. If
-we want to change the temperature value to 23, we would call:
+Imagine that our patches are objects that describe how we want to update the state. If we want to
+change the temperature value to 23, we would call:
 
 ```js
 update({ value: 23 })
@@ -42,30 +42,29 @@ update({ value: 23 })
 To change the units:
 
 ```js
-update({ units: "F" })
+update({ units: 'F' })
 ```
 
 To convert the value at the same time as changing the units:
 
 ```js
-update({ value: 72, units: "F" })
+update({ value: 72, units: 'F' })
 ```
 
-How to we write an accumulator function that handles these object patches to update the
-state?
+How do we write an accumulator function that handles these object patches to update the state?
 
-Mergerino comes with a function, `merge`, that takes a target object as its first
-parameter, and patch objects in the remainder of the parameters. It patches the target object
-by copying over the properties from the patch objects onto the target object:
+Mergerino provides a function, `merge`, that takes a target object as its first parameter, and patch
+objects in the remainder of the parameters. It patches the target object by copying over the
+properties from the patch objects onto the target object:
 
 ```javascript
-merge({ value: 22, units: "C" }, { value: 23 })
+merge({ value: 22, units: 'C' }, { value: 23 })
 // result:
-{ value: 23, units: "C" }
+{ value: 23, units: 'C' }
 
-merge({ value: 23, units: "C" }, { comfortable: true })
+merge({ value: 23, units: 'C' }, { comfortable: true })
 // result:
-{ value: 23, units: "C", comfortable: true }
+{ value: 23, units: 'C', comfortable: true }
 ```
 
 If you find that this looks like `Object.assign`, you are correct: `merge` does the equivalent.
@@ -78,21 +77,14 @@ Within a patch, you can use the current value of the target object to determine 
 Just pass a **function** as the value of the property. Mergerino passes the value of that property
 to the function, and assigns the function's return value back to that property.
 
-This makes it easy for us to update a value using the previous value. For example, say that
-we want to increment the temperature value by 1. We need the previous value to compute the updated
-value. We can use a function for `value`:
+This makes it easy to update a value using the previous value. For example, say that we want to
+increment the temperature value by 1. We need the previous value to compute the updated value. We
+can use a function for `value`:
 
 ```js
-merge({ value: 22, units: "C" }, { value: x => x + 1 }) // The function receives 22
+merge({ value: 22, units: 'C' }, { value: x => x + 1 }) // The function receives 22
 // result:
-{ value: 23, units: "C" }
-```
-
-> Note that `x => x + 1` is ES6 syntax that is short for
-```js
-function(x) {
-  return x + 1;
-}
+{ value: 23, units: 'C' }
 ```
 
 By passing a function for the `value` property, Mergerino passes the previous value of that property
@@ -105,8 +97,8 @@ to the `value` property.
 `Object.assign` performs a _shallow_ merge. If our target object is:
 
 ```javascript
-{ air:   { value: 22, units: "C" },
-  water: { value: 84, units: "F" }
+{ air:   { value: 22, units: 'C' },
+  water: { value: 84, units: 'F' }
 }
 ```
 
@@ -114,8 +106,8 @@ And we want to change the `air` `value` to `25` by calling:
 
 ```javascript
 Object.assign(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air:   { value: 25 } }
 )
@@ -125,7 +117,7 @@ We get this result:
 
 ```js
 { air:   { value: 25 },
-  water: { value: 84, units: "F" }
+  water: { value: 84, units: 'F' }
 }
 ```
 
@@ -135,14 +127,14 @@ With Mergerino, we can merge properties deeper than the first level without losi
 
 ```javascript
 merge(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air: { value: 25 } }
 )
 // result:
-{ air:   { value: 25, units: "C" }, // now we didn't lose the units!
-  water: { value: 84, units: "F" }
+{ air:   { value: 25, units: 'C' }, // now we didn't lose the units!
+  water: { value: 84, units: 'F' }
 }
 ```
 
@@ -150,14 +142,14 @@ Deep patching and function patching can also be used together:
 
 ```javascript
 merge(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air:  { value: x => x + 8 } }
 )
 // result:
-{ air:   { value: 30, units: "C" }, // we increased the value by 8, and didn't lose the units
-  water: { value: 84, units: "F" }
+{ air:   { value: 30, units: 'C' }, // increased the value by 8, didn't lose the units
+  water: { value: 84, units: 'F' }
 }
 ```
 
@@ -166,18 +158,14 @@ Say we want to set `air` to `{ replaced: true }` without keeping `value` and `un
 
 ```javascript
 merge(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air:   () => ({ replaced: true }) } // use a function to replace the value
 )
-```
-
-We get this result:
-
-```js
+// result:
 { air:   { replaced: true },
-  water: { value: 84, units: "F" }
+  water: { value: 84, units: 'F' }
 }
 ```
 
@@ -188,35 +176,35 @@ Finally, we can use `undefined` as a property value when we wish to delete that 
 
 ```js
 merge(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air: undefined }
 )
 // result:
-{ water: { value: 84, units: "F" } }
+{ water: { value: 84, units: 'F' } }
 
 merge(
-  { air:   { value: 22, units: "C" },
-    water: { value: 84, units: "F" }
+  { air:   { value: 22, units: 'C' },
+    water: { value: 84, units: 'F' }
   },
   { air: { value: undefined } }
 )
 // result:
-{ air:   { units: "C" },
-  water: { value: 84, units: "F" }
+{ air:   { units: 'C' },
+  water: { value: 84, units: 'F' }
 }
 ```
 
-Try it out. Using the code window below, try the following exercises. Use `console.log` to
-verify your answers.
+Try it out. Using the code window below, try the following exercises. Use `console.log` to verify
+your answers.
 
 @flems code/05-meiosis-with-mergerino-01.js mergerino 550
 
 <a name="exercises_1"></a>
 ### [Exercises](#exercises_1)
 
-1. Change `water` to `{ value: 84, units: "F" }`
+1. Change `water` to `{ value: 84, units: 'F' }`
 1. Toggle the `comfortable` property with a function that changes the value to the
 opposite of what it was
 1. Change the `air` value to `20` without losing the units
@@ -230,44 +218,40 @@ opposite of what it was
 <a name="using_mergerino_with_meiosis"></a>
 ### [Using Mergerino with Meiosis](#using_mergerino_with_meiosis)
 
-To use Mergerino with Meiosis, we can pass object patches onto the `update` stream and use
-them in the accumulator to update the state.
+To use Mergerino with Meiosis, we can pass object patches onto the `update` stream and use them in
+the accumulator to update the state.
 
 For example, to increment the temperature value:
 
 ```js
-increment: function(amount) {
+increment: (update, amount) => {
   update({
     temperature: {
-      value: x => x + amount
+      value: (x) => x + amount
     }
   });
 }
 ```
 
-Now we need to use these object patches in the accumulator function. Remember that the
-accumulator gets the current state and the incoming patch as parameters, and must return the
-updated state. We can use `merge`:
+Now we need to use these object patches in the accumulator function. Remember that the accumulator
+gets the current state and the incoming patch as parameters, and must return the updated state. We
+can use `merge`:
 
 ```js
-var states = flyd.scan(function(state, patch) {
-  return merge(state, patch);
-}, temperature.initial, update);
+const states = flyd.scan((state, patch) => merge(state, patch), initial, update);
 ```
 
 Notice that the accumulator function that we are passing is:
 
 ```js
-function(state, patch) {
-  return merge(state, patch);
-}
+(state, patch) => merge(state, patch);
 ```
 
-We have a function that takes (state, patch) and calls `merge` with (state, patch). But `merge`
+We have a function that takes `(state, patch)` and calls `merge` with `(state, patch)`. But `merge`
 already does what we want, so we can pass it directly:
 
 ```js
-var states = flyd.scan(merge, temperature.initial, update);
+const states = flyd.scan(merge, initial, update);
 ```
 
 Putting it all together, we have:
@@ -280,9 +264,9 @@ Putting it all together, we have:
 Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:
 
-`actions.increment(2)`
+`actions.increment(update, 2)`
 
-`actions.changeUnits()`
+`actions.changeUnits(update)`
 
 In the output on the right, you'll see the updated states.
 

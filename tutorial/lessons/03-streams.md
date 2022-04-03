@@ -7,21 +7,20 @@
 ## 03 - Streams
 
 In the previous lesson, [02 - Initial State and Actions](02-initial-state-and-actions.html), we
-created an `increment` function to update the application state. The function changed the state
-by directly modifying a global variable.
+created an `increment` function to update the application state. The function changed the state by
+directly modifying a global variable.
 
-This works, but we can improve the approach. Namely, we'd like to gain more control over the
-flow of data and how we make changes to the state. We can do this by using a **stream**. A
-stream is a nice and simple way to **communicate values** and to control data flow.
+This works, but we can improve the approach. Namely, we'd like to gain more control over the flow of
+data and how we make changes to the state. We can do this by using a **stream**. A stream is a nice
+and simple way to **communicate values** and to control data flow.
 
 <a name="introducing_streams"></a>
 ### [Introducing Streams](#introducing_streams)
 
-> If you already know about streams and are comfortable with them, great. But, if you have
-glanced at streams elsewhere and found them overly complicated, **please forget all of that**
-because the streams that we use here are very simple. In fact, we only use two stream operators,
-`map` and `scan`, and only to set up the Meiosis pattern at the starting point of the
-application.
+> If you already know about streams and are comfortable with them, great. But, if you have glanced
+at streams elsewhere and found them overly complicated, **please forget all of that** because the
+streams that we use here are very simple. In fact, we only use two stream operators, `map` and
+`scan`, and only to set up the Meiosis pattern at the starting point of the application.
 
 A stream is a **sequence of values**, similar to an array. You can send values onto a stream. You
 can also have functions that get called every time a value arrives on the stream.
@@ -36,16 +35,16 @@ We can pass values, objects, and even functions onto a stream.
 <a name="stream_map"></a>
 ### [Stream `map`](#stream_map)
 
-The way to **do** something with the values that arrive on the stream is by calling `map`. We
-pass a **function** as a parameter to `map`, and that function gets called every time a new
-value arrives onto the stream. The **result** of calling `map` is a **new stream** with the
-values **returned by the function**.
+The way to **do** something with the values that arrive on the stream is by calling `map`. We pass a
+**function** as a parameter to `map`, and that function gets called every time a new value arrives
+onto the stream. The **result** of calling `map` is a **new stream** with the values **returned by
+the function**.
 
 ![Map Stream](03-streams-02.svg)
 
 Although `map` produces a new stream, we don't always need it. The function that we pass may not
-return anything that we need to use. We can also use `map` to **do** something with the values
-(also known as **side effects**).
+return anything that we need to use. We can also use `map` to **do** something with the values (also
+known as **side effects**).
 
 <a name="stream_library_flyd"></a>
 ### [A simple stream library: flyd](#stream_library_flyd)
@@ -76,8 +75,8 @@ const value = update();
 // value is 1
 ```
 
-We can call `map` on the created stream, passing a function that will get called for
-every value that arrives onto the stream. The call to `map` returns a new stream.
+We can call `map` on the created stream, passing a function that will get called for every value
+that arrives onto the stream. The call to `map` returns a new stream.
 
 ```js
 // otherStream is every value from the update stream plus ten
@@ -90,8 +89,8 @@ otherStream.map((value) => {
 });
 ```
 
-I invite you to get familiar with streams. Using the code box below, which has `flyd`
-already loaded, try the exercises.
+I invite you to get familiar with streams. Using the code box below, which has `flyd` already
+loaded, try the exercises.
 
 @flems code/03-streams-01.js flyd 550
 
@@ -115,22 +114,21 @@ already loaded, try the exercises.
 <a name="stream_scan"></a>
 ### [Stream `scan`](#stream_scan)
 
-The other stream function that we'll use is called `scan`. Stream libraries have a number of
-other functions (also called operators), ranging from a handful to an
-overwhelming amount! But, we **only** need `map` and `scan`, and we only need them to set up
-the Meiosis pattern.
+The other stream function that we'll use is called `scan`. Stream libraries have a number of other
+functions (also called operators), ranging from a handful to an overwhelming amount! But, we
+**only** need `map` and `scan`, and we only need them to set up the Meiosis pattern.
 
 Like `map`, `scan` takes a source stream and produces a new stream. Remember that with `map`,
-whenever a new value arrives on the source stream, the function that we passed to `map` gets
-called, and the result is the next value on the new stream.
+whenever a new value arrives on the source stream, the function that we passed to `map` gets called,
+and the result is the next value on the new stream.
 
 With `scan`, instead of passing a function of one parameter, we pass a function of **two**
 parameters. This function is called an **accumulator**.
 
 When a new value arrives on the source stream, the accumulator function gets called with the
 **latest** result that we returned, and the incoming value from the source stream. The result that
-we return from the accumulator function is the next value on the new stream, **and** it also
-becomes the **latest** result.
+we return from the accumulator function is the next value on the new stream, **and** it also becomes
+the **latest** result.
 
 Finally, since at first there is no latest result, we pass to `scan` an **initial value**, which
 becomes starting point for the latest result, and the first value on the new stream.
@@ -156,8 +154,7 @@ latest value.
 
 If we call `update(5)`, the next value on `otherStream` will be `0 + 5 = 5`. If we then call
 `update(-3)`, now the latest value is `5`, the next value is `-3`, and the result is `5 + -3 = 2`.
-The sequence continues, always adding the incoming value to the latest result, as illustrated
-below:
+The sequence continues, always adding the incoming value to the latest result, as illustrated below:
 
 ![Scan](03-streams-03.svg)
 
@@ -182,11 +179,11 @@ const actions => {
 We can incorporate streams to manage the flow of data:
 
 - We create an `update` stream, and pass it to `Actions`.
-- To update the state, an action passes a value onto the `update` stream, indicating a state
-change. We'll call this a **patch**. In our example, the patches are numbers by which to
-increment the value of the counter.
-- Using `scan`, we create a stream of states, starting with the initial state and incrementing
-the counter by the values coming in on the `update` stream.
+- To update the state, an action passes a value onto the `update` stream, indicating a state change.
+We'll call this a **patch**. In our example, the patches are numbers by which to increment the value
+of the counter.
+- Using `scan`, we create a stream of states, starting with the initial state and incrementing the
+counter by the values coming in on the `update` stream.
 - Using `map`, we'll display the latest state.
 
 Here are our changes:
@@ -222,10 +219,10 @@ states.map((state) => {
 });
 ```
 
-The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives
-onto the `update` stream, the accumulator function adds that number to `state.value`. We have a
-stream of states, and the actions can change the value by pushing a patch (in this case, a number)
-onto the `update` stream.
+The `states` stream starts with the initial state, `{ value: 0 }`. Every time a number arrives onto
+the `update` stream, the accumulator function adds that number to `state.value`. We have a stream of
+states, and the actions can change the value by pushing a patch (in this case, a number) onto the
+`update` stream.
 
 Putting it all together, we have the complete example as shown below.
 
