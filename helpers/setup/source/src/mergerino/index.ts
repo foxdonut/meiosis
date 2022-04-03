@@ -90,7 +90,7 @@ export interface MeiosisViewComponent<S> extends MeiosisComponent<S> {
   view: View<S>;
 }
 
-type NestedComponents<S> = {
+export type NestedComponents<S> = {
   [K in keyof S]?: MeiosisComponent<S[K]>;
 };
 

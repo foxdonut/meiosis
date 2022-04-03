@@ -48,13 +48,6 @@ export type NestedViews<S> = {
   [K in keyof S]: ViewComponent<S>;
 };
 
-export interface MeiosisCell<S> {
-  state: S;
-  update: Update<S>;
-  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
-  nested: NestedViews<S>;
-}
-
 export interface Service<S> extends CommonService<S> {
   run: (cell: MeiosisCell<S>) => any;
 }
@@ -72,9 +65,16 @@ export interface MeiosisViewComponent<S> extends MeiosisComponent<S> {
   view: View<S>;
 }
 
-type NestedComponents<S> = {
+export type NestedComponents<S> = {
   [K in keyof S]?: MeiosisComponent<S[K]>;
 };
+
+export interface MeiosisCell<S> {
+  state: S;
+  update: Update<S>;
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+  nested: NestedViews<S>;
+}
 
 /**
  * Meiosis Config.
@@ -82,7 +82,7 @@ type NestedComponents<S> = {
  * @template S the State type.
  */
 export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
-  app: MeiosisComponent<S>;
+  app?: MeiosisComponent<S>;
 }
 
 const nestPatch =

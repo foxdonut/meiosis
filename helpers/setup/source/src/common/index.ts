@@ -24,7 +24,7 @@ export interface CommonMeiosisComponent<S> {
   nested?: CommonNestedComponents<S>;
 }
 
-type CommonNestedComponents<S> = {
+export type CommonNestedComponents<S> = {
   [K in keyof S]?: CommonMeiosisComponent<S[K]>;
 };
 
@@ -52,7 +52,7 @@ export interface CommonMeiosisConfig<S> {
  * @template S the State type.
  * @template P the Patch type.
  */
-export interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
+interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   /**
    * The accumulator function.
    */
@@ -139,7 +139,7 @@ export const commonGetServices = <S>(app: CommonMeiosisComponent<S>): CommonServ
  *
  * @returns {Meiosis<S, P>} the Meiosis setup.
  */
-export const setup = <S, P>({
+const setup = <S, P>({
   stream,
   accumulator,
   app
@@ -175,8 +175,6 @@ export const setup = <S, P>({
     view
   };
 };
-
-export default setup;
 
 export interface NestSetup<S, P> {
   accumulator: Accumulator<S, P>;
