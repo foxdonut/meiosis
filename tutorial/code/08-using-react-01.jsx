@@ -4,7 +4,7 @@ const merge = mergerino;
 var conditions = {
   initial: {
     precipitations: false,
-    sky: "Sunny"
+    sky: 'Sunny'
   },
   Actions: function (update) {
     return {
@@ -33,7 +33,7 @@ var SkyOption = function ({
         name="sky"
         value={value}
         checked={state[id].sky === value}
-        onChange={evt =>
+        onChange={(evt) =>
           actions.changeSky(id, evt.target.value)
         }
       />
@@ -49,7 +49,7 @@ var Conditions = function ({ state, id, actions }) {
         <input
           type="checkbox"
           checked={state[id].precipitations}
-          onChange={evt =>
+          onChange={(evt) =>
             actions.togglePrecipitations(id, evt.target.checked)
           }
         />
@@ -84,7 +84,7 @@ var Conditions = function ({ state, id, actions }) {
 
 var convert = function (value, to) {
   return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -93,19 +93,19 @@ var temperature = {
     return {
       label,
       value: 22,
-      units: "C"
+      units: 'C'
     };
   },
   Actions: function (update) {
     return {
       increment: function (id, amount) {
-        update({ [id]: { value: x => x + amount } });
+        update({ [id]: { value: (x) => x + amount } });
       },
       changeUnits: function (id) {
         update({
-          [id]: state => {
+          [id]: (state) => {
             var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
+            var newUnits = state.units === 'C' ? 'F' : 'C';
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
@@ -142,8 +142,8 @@ var Temperature = function ({ state, id, actions }) {
 var app = {
   initial: {
     conditions: conditions.initial,
-    "temperature:air": temperature.Initial("Air"),
-    "temperature:water": temperature.Initial("Water")
+    'temperature:air': temperature.Initial('Air'),
+    'temperature:water': temperature.Initial('Water')
   },
   Actions: function (update) {
     return Object.assign(
@@ -191,5 +191,5 @@ var actions = app.Actions(update);
 
 ReactDOM.render(
   <App states={states} actions={actions} />,
-  document.getElementById("app")
+  document.getElementById('app')
 );

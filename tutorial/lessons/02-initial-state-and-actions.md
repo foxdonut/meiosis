@@ -12,7 +12,7 @@ object, and simple ways to update the state.
 Let's imagine a simple counter example. Our initial state might be:
 
 ```js
-var initial = {
+const initial = {
   value: 0
 };
 ```
@@ -24,28 +24,25 @@ Now, we want to create an action that increments the counter.
 <a name="increment_action"></a>
 ### [Increment Action](#increment_action)
 
-We'll write an `Actions` function that returns object with an `increment` function that
-increments the counter.
+We'll create an `actions` object with an `increment` function that increments the counter.
 
 ```javascript
-var initial = {
+const initial = {
   value: 0
 };
 
-function Actions() {
-  return {
-    increment: function() {
-      initial.value = initial.value + 1;
-    }
-  };
-}
+const actions = {
+  increment: () => {
+    initial.value = initial.value + 1;
+  }
+};
 ```
 
-So we already have an initial state, and an actions object to update the state. However, this
-approach is somewhat lacking: we are directly modifying a global variable. This forces the need
-for the actions to have a reference to the global variable. Moreover, it gives us no control over
-the flow of data - being able to know when something has changed so that we can react. Most
-notable, we'll want to refresh the view when the state has been updated.
+We now have an initial state and an actions object to update the state. However, this approach is
+somewhat lacking: we are directly modifying a global variable. This forces the actions to have a
+reference to the global variable. Moreover, it gives us no control over the flow of data - being
+able to know when something has changed so that we can react. Most notably, we'll want to refresh
+the view when the state has been updated.
 
 In the next section, we'll look at a way to gain control over the flow of data. When you are
 ready, continue on to [03 - Streams](03-streams.html).

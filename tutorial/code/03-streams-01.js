@@ -2,4 +2,4 @@
 /*global flyd*/
 
 // eslint-disable-next-line no-unused-vars
-var update = null; // change this line to create a stream
+const update = null; // change this line to create a stream

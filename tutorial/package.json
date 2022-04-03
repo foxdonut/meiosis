@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
-    "build": "harp compile build dist && (cd images && ./generate_all_diagrams.sh)",
+    "build": "harp build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "cp css/* images/*.svg images/*.png dist",
     "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/*' -- npm run build",
     "start": "static-server -p ${PORT:-9000}",
@@ -30,9 +30,9 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
-    "harp": "^0.40.3",
-    "onchange": "^7.0.2",
-    "reload": "^3.0.4",
+    "harp": "^0.41.2",
+    "onchange": "^7.1.0",
+    "reload": "^3.2.0",
     "static-server": "^2.2.1"
   },
   "dependencies": {}

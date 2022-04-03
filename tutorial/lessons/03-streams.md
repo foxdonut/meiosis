@@ -60,7 +60,7 @@ another stream library simply by using its equivalents of:
 To create a stream with flyd, we simply call `flyd.stream()`:
 
 ```js
-var update = flyd.stream();
+const update = flyd.stream();
 ```
 
 To push a value onto the stream, we call it as a function and pass the value:
@@ -72,7 +72,7 @@ update(1);
 To get the latest value from a stream, we call it as a function with no parameters:
 
 ```js
-var value = update();
+const value = update();
 // value is 1
 ```
 
@@ -81,13 +81,11 @@ every value that arrives onto the stream. The call to `map` returns a new stream
 
 ```js
 // otherStream is every value from the update stream plus ten
-var otherStream = update.map(function(value) {
-  return value + 10;
-});
+const otherStream = update.map((value) => value + 10);
 // display every value from the otherStream onto console.log
 // here we are doing something with every value, but not returning anything.
 // we are also ignoring the stream returned by otherStream.map(...).
-otherStream.map(function(value) {
+otherStream.map((value) => {
   console.log(value);
 });
 ```
@@ -140,15 +138,13 @@ becomes starting point for the latest result, and the first value on the new str
 Let's look at an example. Say we start with an `update` stream:
 
 ```js
-var update = flyd.stream();
+const update = flyd.stream();
 ```
 
 Next, we create an `otherStream` with `scan`:
 
 ```js
-var otherStream = flyd.scan(function(latest, next) {
-  return latest + next;
-}, 0, update);
+const otherStream = flyd.scan((latest, next) => latest + next, 0, update);
 ```
 
 As you can see, we need to pass three parameters to `scan`:
@@ -172,17 +168,15 @@ Now that have we streams, `map`, and `scan`, we can use them to manage our appli
 Previously, we had:
 
 ```js
-var initial = {
+const initial = {
   value: 0
 };
 
-function Actions() {
-  return {
-    increment: function() {
-      initial.value = initial.value + 1;
-    }
-  };
-}
+const actions => {
+  increment: () => {
+    initial.value = initial.value + 1;
+  }
+};
 ```
 
 We can incorporate streams to manage the flow of data:
@@ -198,30 +192,32 @@ the counter by the values coming in on the `update` stream.
 Here are our changes:
 
 ```js
-var app = {
-  initial: {
-    value: 0
+const actions = {
+  increment: (update) => {
+    update(1);
   },
-  Actions: function(update) {
-    return {
-      increment: function() {
-        update(1);
-      },
-      decrement: function() {
-        update(-1);
-      }
-    };
+  decrement: (update) => {
+    update(-1);
   }
 };
 
-var update = flyd.stream();
-var states = flyd.scan(function(state, increment) {
-  state.value = state.value + increment;
-  return state;
-}, app.initial, update);
+const app = {
+  initial: {
+    value: 0
+  }
+};
 
-var actions = app.Actions(update);
-states.map(function(state) {
+const update = flyd.stream();
+const states = flyd.scan(
+  (state, increment) => {
+    state.value = state.value + increment;
+    return state;
+  },
+  app.initial,
+  update
+);
+
+states.map((state) => {
   document.write("<pre>" + JSON.stringify(state) + "</pre>");
 });
 ```
@@ -238,26 +234,26 @@ Putting it all together, we have the complete example as shown below.
 <a name="exercises_2"></a>
 ### [Exercises](#exercises_2)
 
-Try it out: notice that `{"value":0}` appears in the output on the right. This is our initial
-state. Now, within the console, type and then press Enter:
+Try it out: notice that `{"value":0}` appears in the output on the right. This is our initial state.
+Now, within the console, type and then press Enter:
 
-`actions.increment()`
+`actions.increment(update)`
 
-In the output on the right, you will see `{"value":1}` appear, showing that the state has
-been updated. Try `actions.increment()` again and also `actions.decrement()`.
+In the output on the right, you will see `{"value":1}` appear, showing that the state has been
+updated. Try `actions.increment(update)` again and also `actions.decrement(update)`.
 
 We are starting to implement the Meiosis pattern:
 
 - an `update` stream
 - actions push **patches** onto the `update` stream
-- a `states` stream that `scan`s the `update` stream, starting with an initial state and
-applying patches to the state with an **accumulator** function
+- a `states` stream that `scan`s the `update` stream, starting with an initial state and applying
+patches to the state with an **accumulator** function
 - a `map` on the `states` stream to display the stream of states.
 
-You've probably noticed that our patches and our accumulator function are pretty limited.
-Indeed, our patches are just numbers, and all the accumulator function does is add the
-number to the state value. In the upcoming sections, we will look at more general-purpose
-patches and accumulator functions, fully implementing the Meiosis pattern in the process.
+You've probably noticed that our patches and our accumulator function are pretty limited. Indeed,
+our patches are just numbers, and all the accumulator function does is add the number to the state
+value. In the upcoming sections, we will look at more general-purpose patches and accumulator
+functions, fully implementing the Meiosis pattern in the process.
 
 > **A Note about Using Mithril Streams**:
 if you're using Mithril as a view library, you can use

@@ -1,5 +1,5 @@
 digraph meiosistutorial {
-  stream [shape="none", label="var update = stream();"]
+  stream [shape="none", label="const update = stream();"]
 
   updateplus1 [shape="none", style="filled", fillcolor="yellow", label="update(1)"]
 
@@ -18,13 +18,10 @@ digraph meiosistutorial {
   map [shape="plaintext", label=<
     <table border="0">
       <tr>
-        <td align='left'>var otherStream = update.map(function(value) {</td>
+        <td align='left'>const otherStream = update.map(</td>
       </tr>
       <tr>
-        <td align='left'>    return value * 10;</td>
-      </tr>
-      <tr>
-        <td align='left'>});</td>
+        <td align='left'>    (value) =&gt; value * 10);</td>
       </tr>
     </table>
   >]

@@ -4,7 +4,7 @@ const merge = mergerino;
 var conditions = {
   initial: {
     precipitations: false,
-    sky: "Sunny"
+    sky: 'Sunny'
   },
   Actions: function (update) {
     return {
@@ -20,7 +20,7 @@ var conditions = {
 
 var convert = function (value, to) {
   return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -28,7 +28,7 @@ var temperature = {
   initial: function () {
     return {
       value: 22,
-      units: "C"
+      units: 'C'
     };
   },
   Actions: function (update) {
@@ -40,7 +40,7 @@ var temperature = {
         update({
           [id]: (state) => {
             var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
+            var newUnits = state.units === 'C' ? 'F' : 'C';
             var newValue = convert(value, newUnits);
             return {
               value: newValue,
@@ -56,8 +56,8 @@ var temperature = {
 var app = {
   initial: {
     conditions: conditions.initial,
-    "temperature:air": temperature.initial(),
-    "temperature:water": temperature.initial()
+    'temperature:air': temperature.initial(),
+    'temperature:water': temperature.initial()
   },
   Actions: function (update) {
     return Object.assign(
@@ -75,6 +75,6 @@ var states = flyd.scan(merge, app.initial, update);
 var actions = app.Actions(update);
 states.map(function (state) {
   document.write(
-    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+    '<pre>' + JSON.stringify(state, null, 2) + '</pre>'
   );
 });

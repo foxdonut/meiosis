@@ -5,7 +5,7 @@ var conditions = {
   initial: {
     conditions: {
       precipitations: false,
-      sky: "Sunny"
+      sky: 'Sunny'
     }
   },
   Actions: function (update) {
@@ -22,7 +22,7 @@ var conditions = {
 
 var convert = function (value, to) {
   return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -31,7 +31,7 @@ var temperature = {
     return {
       temperature: {
         value: 22,
-        units: "C"
+        units: 'C'
       }
     };
   },
@@ -46,7 +46,7 @@ var temperature = {
         update({
           temperature: (state) => {
             var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
+            var newUnits = state.units === 'C' ? 'F' : 'C';
             var newValue = convert(value, newUnits);
             return {
               value: newValue,
@@ -81,6 +81,6 @@ var states = flyd.scan(merge, app.initial, update);
 var actions = app.Actions(update);
 states.map(function (state) {
   document.write(
-    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+    '<pre>' + JSON.stringify(state, null, 2) + '</pre>'
   );
 });

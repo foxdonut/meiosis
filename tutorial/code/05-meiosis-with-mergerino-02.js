@@ -3,7 +3,7 @@ const merge = mergerino;
 
 var convert = function (value, to) {
   return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -11,7 +11,7 @@ var temperature = {
   initial: {
     temperature: {
       value: 22,
-      units: "C"
+      units: 'C'
     }
   },
   Actions: function (update) {
@@ -27,7 +27,7 @@ var temperature = {
         update({
           temperature: (state) => {
             var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
+            var newUnits = state.units === 'C' ? 'F' : 'C';
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
@@ -46,6 +46,6 @@ var states = flyd.scan(merge, temperature.initial, update);
 var actions = temperature.Actions(update);
 states.map(function (state) {
   document.write(
-    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+    '<pre>' + JSON.stringify(state, null, 2) + '</pre>'
   );
 });

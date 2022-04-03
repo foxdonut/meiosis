@@ -4,7 +4,7 @@ const merge = mergerino;
 var conditions = {
   initial: {
     precipitations: false,
-    sky: "Sunny"
+    sky: 'Sunny'
   },
   Actions: function (update) {
     return {
@@ -26,11 +26,11 @@ var skyOption = function ({
   label
 }) {
   return m(
-    "label",
-    m("input", {
-      type: "radio",
+    'label',
+    m('input', {
+      type: 'radio',
       id: value,
-      name: "sky",
+      name: 'sky',
       value,
       checked: state[id].sky === value,
       onchange: (evt) => actions.changeSky(id, evt.target.value)
@@ -42,39 +42,39 @@ var skyOption = function ({
 var Conditions = {
   view: function ({ attrs: { state, id, actions } }) {
     return m(
-      "div",
+      'div',
       m(
-        "label",
-        m("input", {
-          type: "checkbox",
+        'label',
+        m('input', {
+          type: 'checkbox',
           checked: state[id].precipitations,
           onchange: (evt) =>
             actions.togglePrecipitations(id, evt.target.checked)
         }),
-        "Precipitations"
+        'Precipitations'
       ),
       m(
-        "div",
+        'div',
         skyOption({
           state,
           id,
           actions,
-          value: "SUNNY",
-          label: "Sunny"
+          value: 'SUNNY',
+          label: 'Sunny'
         }),
         skyOption({
           state,
           id,
           actions,
-          value: "CLOUDY",
-          label: "Cloudy"
+          value: 'CLOUDY',
+          label: 'Cloudy'
         }),
         skyOption({
           state,
           id,
           actions,
-          value: "MIX",
-          label: "Mix of sun/clouds"
+          value: 'MIX',
+          label: 'Mix of sun/clouds'
         })
       )
     );
@@ -83,7 +83,7 @@ var Conditions = {
 
 var convert = function (value, to) {
   return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 };
 
@@ -92,7 +92,7 @@ var temperature = {
     return {
       label,
       value: 22,
-      units: "C"
+      units: 'C'
     };
   },
   Actions: function (update) {
@@ -104,7 +104,7 @@ var temperature = {
         update({
           [id]: (state) => {
             var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
+            var newUnits = state.units === 'C' ? 'F' : 'C';
             var newValue = convert(value, newUnits);
             state.value = newValue;
             state.units = newUnits;
@@ -119,31 +119,31 @@ var temperature = {
 var Temperature = {
   view: function ({ attrs: { state, id, actions } }) {
     return m(
-      "div",
+      'div',
       state[id].label,
-      " Temperature: ",
+      ' Temperature: ',
       state[id].value,
-      m.trust("&deg;"),
+      m.trust('&deg;'),
       state[id].units,
       m(
-        "div",
+        'div',
         m(
-          "button",
+          'button',
           { onclick: () => actions.increment(id, 1) },
-          "Increment"
+          'Increment'
         ),
         m(
-          "button",
+          'button',
           { onclick: () => actions.increment(id, -1) },
-          "Decrement"
+          'Decrement'
         )
       ),
       m(
-        "div",
+        'div',
         m(
-          "button",
+          'button',
           { onclick: () => actions.changeUnits(id) },
-          "Change Units"
+          'Change Units'
         )
       )
     );
@@ -153,8 +153,8 @@ var Temperature = {
 var app = {
   initial: {
     conditions: conditions.initial,
-    "temperature:air": temperature.Initial("Air"),
-    "temperature:water": temperature.Initial("Water")
+    'temperature:air': temperature.Initial('Air'),
+    'temperature:water': temperature.Initial('Water')
   },
   Actions: function (update) {
     return Object.assign(
@@ -168,15 +168,15 @@ var app = {
 var App = {
   view: function ({ attrs: { state, actions } }) {
     return m(
-      "div",
-      m(Conditions, { state, id: "conditions", actions }),
-      m(Temperature, { state, id: "temperature:air", actions }),
+      'div',
+      m(Conditions, { state, id: 'conditions', actions }),
+      m(Temperature, { state, id: 'temperature:air', actions }),
       m(Temperature, {
         state,
-        id: "temperature:water",
+        id: 'temperature:water',
         actions
       }),
-      m("pre", JSON.stringify(state, null, 4))
+      m('pre', JSON.stringify(state, null, 4))
     );
   }
 };
@@ -185,6 +185,6 @@ var update = m.stream();
 var states = m.stream.scan(merge, app.initial, update);
 var actions = app.Actions(update);
 
-m.mount(document.getElementById("app"), {
+m.mount(document.getElementById('app'), {
   view: () => m(App, { state: states(), actions })
 });

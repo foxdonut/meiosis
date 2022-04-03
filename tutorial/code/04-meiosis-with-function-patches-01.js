@@ -1,53 +1,59 @@
 /*global flyd*/
-var convert = function (value, to) {
-  return Math.round(
-    to === "C" ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
+const convert = (value, to) =>
+  Math.round(
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
-};
 
-var temperature = {
-  initial: {
-    temperature: {
-      value: 22,
-      units: "C"
-    }
+// eslint-disable-next-line no-unused-vars
+const actions = {
+  increment: (update, amount) => {
+    update((state) => {
+      const temperature = {
+        ...state.temperature,
+        value: state.temperature.value + amount
+      };
+      return {
+        ...state,
+        temperature
+      };
+    });
   },
-  Actions: function (update) {
-    return {
-      increment: function (amount) {
-        update(function (state) {
-          state.temperature.value += amount;
-          return state;
-        });
-      },
-      changeUnits: function () {
-        update(function (state) {
-          var value = state.temperature.value;
-          var newUnits =
-            state.temperature.units === "C" ? "F" : "C";
-          var newValue = convert(value, newUnits);
-          state.temperature.value = newValue;
-          state.temperature.units = newUnits;
-          return state;
-        });
-      }
-    };
+  changeUnits: (update) => {
+    update((state) => {
+      const value = state.temperature.value;
+      const newUnits =
+        state.temperature.units === 'C' ? 'F' : 'C';
+      const newValue = convert(value, newUnits);
+
+      const temperature = {
+        ...state.temperature,
+        value: newValue,
+        units: newUnits
+      };
+      return {
+        ...state,
+        temperature
+      };
+    });
   }
 };
 
-var update = flyd.stream();
-var states = flyd.scan(
-  function (state, patch) {
-    return patch(state);
-  },
-  temperature.initial,
+const initial = {
+  temperature: {
+    value: 22,
+    units: 'C'
+  }
+};
+
+const update = flyd.stream();
+const states = flyd.scan(
+  (state, patch) => patch(state),
+  initial,
   update
 );
 
-// eslint-disable-next-line no-unused-vars
-var actions = temperature.Actions(update);
-states.map(function (state) {
+states.map((state) => {
   document.write(
-    "<pre>" + JSON.stringify(state, null, 2) + "</pre>"
+    '<pre>' + JSON.stringify(state, null, 2) + '</pre>'
   );
 });

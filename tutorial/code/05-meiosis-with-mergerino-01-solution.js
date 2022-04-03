@@ -2,15 +2,15 @@
 const merge = mergerino;
 
 var target = {
-  air: { value: 22, units: "C" },
-  water: { value: 29, units: "F" },
+  air: { value: 22, units: 'C' },
+  water: { value: 29, units: 'F' },
   comfortable: false,
   invalid: true
 };
 
 // Change `water` to `{ value: 84, units: "F" }`
 console.log(
-  merge(target, { water: { value: 84, units: "F" } })
+  merge(target, { water: { value: 84, units: 'F' } })
 );
 
 // Toggle the `comfortable` property with a function that changes the value to the

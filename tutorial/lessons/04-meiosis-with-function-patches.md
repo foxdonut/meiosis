@@ -36,12 +36,12 @@ of changes to the state.
 Let's build a temperature example with the following initial state:
 
 ```js
-{
+const initial = {
   temperature: {
     value: 22,
-    units: "C"
+    units: 'C'
   }
-}
+};
 ```
 
 We can increase and decrease the value, as well as change the units betwen `C` (Celsius) and
@@ -49,7 +49,7 @@ We can increase and decrease the value, as well as change the units betwen `C` (
 
 We need to:
 
-- Decide the shape of our patches
+- Determine the shape of our patches
 - Write an accumulator function that will use those patches to produce the updated state.
 
 In this section, we will use one approach using **function patches**. In the next section, we
@@ -66,32 +66,33 @@ These functions receive the current state as a parameter, and return the updated
 For example, to increment the temperature value:
 
 ```js
-increment: function(amount) {
-  update(function(state) {
-    state.temperature.value += amount;
-    return state;
-  });
-}
+const actions = {
+  increment: (update, amount) => {
+    update((state) => {
+      const temperature = {
+        ...state.temperature,
+        value: state.temperature.value + amount
+      };
+      return {
+        ...state,
+        temperature
+      };
+    });
+  }
+};
 ```
 
-Now we need to use these function patches in the accumulator function. Remember that the
-accumulator gets the current state and the incoming patch as parameters, and must return the
-updated state. Since the incoming patches are functions, we just need to call them:
+> Note that we could also use a library to update the state, such as
+[lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide) or
+[Ramda](https://ramdajs.com/) for example.
+
+Now we need to use function patches in the accumulator function. Remember that the accumulator gets
+the current state and the incoming patch as parameters, and must return the updated state. Since the
+incoming patches are functions, we just need to call them:
 
 ```js
-var states = flyd.scan(function(state, patch) {
-  return patch(state);
-}, temperature.initial, update);
+const states = flyd.scan((state, patch) => patch(state), initial, update);
 ```
-
-Using the ES6 arrow function syntax, this would be:
-
-```js
-var states = flyd.scan((state, patch) => patch(state),
-  temperature.initial, update);
-```
-
-Either way, it's a simple way to create the stream of states.
 
 Putting it all together, we have:
 
@@ -103,9 +104,9 @@ Putting it all together, we have:
 Try it out: notice that the initial state appears in the output on the right. Within the console,
 type and then press Enter:
 
-`actions.increment(2)`
+`actions.increment(update, 2)`
 
-`actions.changeUnits()`
+`actions.changeUnits(update)`
 
 In the output on the right, you'll see the updated states.
 
