@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](07-using-mithril.html) |
-[Next >](09-using-preact.html) |
+[< Previous](08-using-preact.html) |
+[Next >](10-whats-next.html) |
 [Table of Contents](toc.html)
 
 ## 08 - Using React
@@ -136,7 +136,7 @@ var Temperature = function({ state, id, actions }) {
 
 You can see the complete example below.
 
-@flems code/08-using-react-01.jsx,app.html,app.css flyd,react,react-dom,mergerino 800 shown 60
+@flems code/09-using-react-01.jsx,app.html,app.css flyd,react,react-dom,mergerino 800 shown 60
 
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)
@@ -155,11 +155,11 @@ state, and call `actions` to trigger changes.
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
 
-This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
+This concludes the Meiosis tutorial. See [10 - What's Next?](10-whats-next.html) for ideas on where
 to go from here.
 
-[< Previous](07-using-mithril.html) |
-[Next >](09-using-preact.html) |
+[< Previous](08-using-preact.html) |
+[Next >](10-whats-next.html) |
 [Table of Contents](toc.html)
 
 -----

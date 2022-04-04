@@ -4,7 +4,7 @@
 [Next >](07-using-mithril.html) |
 [Table of Contents](toc.html)
 
-## 06 - Components
+## 06 - Cells
 
 <a name="building_components"></a>
 ### [Building Components](#building_components)
@@ -109,8 +109,6 @@ var app = {
 
 Here is the complete example:
 
-@flems code/06-components-01.js flyd,mergerino 800
-
 In this example, components designate a property for their state (`conditions`, `temperature`). What
 if we want to designate a property from outside the component, to make sure there are no conflicts?
 Even more significantly, what if we want to have multiple instances of a component?
@@ -176,8 +174,6 @@ var app = {
 ```
 
 Here is the complete example:
-
-@flems code/06-components-02.js flyd,mergerino 800
 
 <a name="exercises"></a>
 ### [Exercises](#exercises)

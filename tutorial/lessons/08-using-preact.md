@@ -1,10 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](08-using-react.html) |
-[Next >](10-whats-next.html) |
+[< Previous](07-using-mithril.html) |
+[Next >](09-using-react.html) |
 [Table of Contents](toc.html)
 
-## 09 - Using Preact
+## 08 - Using Preact
 
 In the [06 - Components](06-components.html) lesson, we created the state management
 code for an example with a `conditions` component and two temperature components, `air` and
@@ -131,7 +131,7 @@ var Temperature = function({ state, id, actions }) {
 
 You can see the complete example below.
 
-@flems code/09-using-preact-01.jsx,app.html,app.css flyd,preact,preactHooks,mergerino 800 shown 60
+@flems code/08-using-preact-01.jsx,app.html,app.css flyd,preact,preactHooks,mergerino 800 shown 60
 
 ### [Takeaways](#takeaways)
 
@@ -149,11 +149,11 @@ state, and call `actions` to trigger changes.
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
 
-This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
+This concludes the Meiosis tutorial. See [10 - What's Next?](10-whats-next.html) for ideas on where
 to go from here.
 
-[< Previous](08-using-react.html) |
-[Next >](10-whats-next.html) |
+[< Previous](07-using-mithril.html) |
+[Next >](09-using-react.html) |
 [Table of Contents](toc.html)
 
 -----

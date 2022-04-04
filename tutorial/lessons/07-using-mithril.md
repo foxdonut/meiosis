@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
 [< Previous](06-components.html) |
-[Next >](08-using-react.html) |
+[Next >](08-using-preact.html) |
 [Table of Contents](toc.html)
 
 ## 07 - Using Mithril
@@ -165,11 +165,11 @@ redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw)) yo
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
 
-This concludes the Meiosis tutorial. See [11 - What's Next?](11-whats-next.html) for ideas on where
+This concludes the Meiosis tutorial. See [10 - What's Next?](10-whats-next.html) for ideas on where
 to go from here.
 
 [< Previous](06-components.html) |
-[Next >](08-using-react.html) |
+[Next >](08-using-preact.html) |
 [Table of Contents](toc.html)
 
 -----

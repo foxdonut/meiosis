@@ -9,10 +9,10 @@
 | [03 - Streams](03-streams.html) |
 | [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) |
 | [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) |
-| [06 - Components](06-components.html) |
+| [06 - Cells](06-cells.html) |
 | [07 - Using Mithril](07-using-mithril.html) |
-| [08 - Using React](08-using-react.html) |
-| [09 - Using Preact](09-using-preact.html) |
+| [08 - Using Preact](08-using-preact.html) |
+| [09 - Using React](09-using-react.html) |
 | [10 - What's Next?](10-whats-next.html) |
 
 -----
