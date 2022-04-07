@@ -9,6 +9,7 @@ button, button.light {
   background-color: #ffffff;
   border: 1px solid #5755d9;
   margin: 4px;
+  border-radius: 4px;
 }
 button:hover {
   background-color: #eeeeee;

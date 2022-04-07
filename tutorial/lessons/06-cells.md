@@ -6,212 +6,43 @@
 
 ## 06 - Cells
 
-<a name="building_components"></a>
-### [Building Components](#building_components)
+In the previous sections, we set up the Meiosis pattern with function patches, and with
+[Mergerino](https://github.com/fuzetsu/mergerino). In both cases, we created:
 
-Let's continue our previous example. We already had a "temperature" component. We'll add a
-"conditions" component for the current conditions (sunny, cloudy, rain) so that our initial state is
-now:
+- `states`: a stream of application states
+- `update`: a stream of updates to the application state
 
-```js
-{
-  conditions: {
-    precipitations: false,
-    sky: "Sunny"
-  },
-  temperature: {
-    value: 22,
-    units: "C"
-  }
-}
-```
+We now have a way to manage application state. The next piece of the puzzle will be to wire up the
+application state to a view library. We will be looking at that in the next few sections. Before
+doing that, however, let's discuss a small but useful detail.
 
-Each component will separately indicate its initial state and the actions that it provides. At the
-top-level app, we'll assemble these together into the complete initial state and set of actions.
+As it is now, we would need to pass `states` (or rather, `states()`, that is, the current state) and
+`update` to our views.
 
-For the conditions, we have:
+To make things simpler, let's pass a single parameter to our views. I call this a **cell**.
 
-```js
-var conditions = {
-  initial: {
-    conditions: {
-      precipitations: false,
-      sky: "Sunny"
-    }
-  },
-  Actions: function(update) {
-    return {
-      togglePrecipitations: function(value) {
-        update({ conditions: { precipitations: value } });
-      },
-      changeSky: function(value) {
-        update({ conditions: { sky: value } });
-      }
-    };
-  }
-};
-```
+> I chose the name **cell** because in science, Meiosis has to do with cells.
 
-For the temperature, we have essentially the same code as we previously had.
+Passing a single `cell` parameter to our views makes it simpler later on to refactor if we want to
+pass additional properties besides the current state and the update stream. We can add the
+properties to the cell, and we won't have to change the parameters in all of our views.
+
+We can also pass `cell` to actions, making it easy for actions to access the current state and issue
+updates.
+
+Creating a stream of cells from the stream of states is simple. We can use `map`:
 
 ```js
-var temperature = {
-  initial: function() {
-    return {
-      temperature: {
-        value: 22,
-        units: "C"
-      }
-    };
-  },
-  Actions: function(update) {
-    return {
-      increment: function(amount) {
-        update({ temperature: { value: x => x + amount } });
-      },
-      changeUnits: function() {
-        update({
-          temperature: state => {
-            var value = state.value;
-            var newUnits = state.units === "C" ? "F" : "C";
-            var newValue = convert(value, newUnits);
-            return {
-              value: newValue,
-              units: newUnits;
-            };
-          }
-        });
-      }
-    };
-  }
-};
+const cells = states.map((state) => ({ state, update }));
 ```
 
-Then, to assemble the components into the top-level app, we put together the state management code
-by combining the initial state and the actions of the components.
+We now have a stream of cells. To get the current cell, we can call `cells()` and pass that as a
+`cell` to views. Views can then access the state with `cell.state` and issue updates by calling
+`cell.update(...)`. Finally, we can also pass `cell` to actions which in turn can use `cell.state`
+and `cell.update(...)`.
 
-```js
-var app = {
-  initial: Object.assign(
-    {},
-    conditions.initial,
-    temperature.initial()
-  ),
-  Actions: function(update) {
-    return Object.assign(
-      {},
-      conditions.Actions(update),
-      temperature.Actions(update)
-    );
-  }
-};
-```
-
-Here is the complete example:
-
-In this example, components designate a property for their state (`conditions`, `temperature`). What
-if we want to designate a property from outside the component, to make sure there are no conflicts?
-Even more significantly, what if we want to have multiple instances of a component?
-
-<a name="using_ids_for_components"></a>
-### [Using IDs for Components](#using_ids_for_components)
-
-Whether it's to manage properties from outside of components, or to use multiple instances of a
-component, we can use IDs and pass them to components. Then, instead of having a hardcoded property
-in the component, the ID is used when reading and updating state.
-
-Continuing the previous example, let's say we want to have two instances of the `temperature`
-component: one for the air temperature and one for the water temperature. We want to use the
-`temperature:air` and `temperature:water` properties in the application state.
-
-We'll change the actions to accept an `id` parameter. Then, we use the `id` when issuing updates, so
-that we dyamically update the `id` property of the state:
-
-```js
-Actions: function(update) {
-  return {
-    increment: function(id, amount) {
-      update({ [id]: { value: x => x + amount } });
-    },
-    changeUnits: function(id) {
-      update({
-        [id]: state => {
-          var value = state.value;
-          var newUnits = state.units === "C" ? "F" : "C";
-          var newValue = convert(value, newUnits);
-          return {
-            value: newValue,
-            units: newUnits
-          };
-        }
-      });
-    }
-  };
-}
-```
-
-Notice the `{ [id]: ... }` syntax which creates an object with a dynamic `id` property.
-
-Now, we create the initial state with two instances of `temperature`, one with `temperature:air` and
-one with `temperature:water`. The actions are created the same as before. Indeed, we just need one
-instance of the temperature actions; it's the `id` that we pass to the actions that indicates which
-instance to act upon.
-
-```js
-var app = {
-  initial: {
-    "conditions": conditions.initial,
-    "temperature:air": temperature.initial(),
-    "temperature:water": temperature.initial()
-  ),
-  Actions: function(update) {
-    return Object.assign({},
-      conditions.Actions(update),
-      temperature.Actions(update)
-    );
-  }
-};
-```
-
-Here is the complete example:
-
-<a name="exercises"></a>
-### [Exercises](#exercises)
-
-Try it out: notice that the initial state appears in the output on the right. Within the console,
-type and then press Enter:
-
-`actions.changeSky("conditions", "Cloudy")`
-
-`actions.increment("temperature:air", 2)`
-
-`actions.changeUnits("temperature:water")`
-
-In the output on the right, you'll see the updated states.
-
-<a name="state_management_and_view_code"></a>
-### [State Management and View code](#state_management_and_view_code)
-
-So far, all we have is state management code; there is no view code. This is on purpose:
-we've built our state management code independently. We can trigger actions and see the
-updated state. Our code is not tied to any particular view code.
-
-Having independent state management code makes it easier to test and debug. You can organize
-and assemble actions as you prefer. For example, if you find that the number of actions in
-your application is getting large, you might decide to _namespace_ your actions by grouping
-them under properties, such as `actions.conditions.changeSky` and
-`actions.temperature.increment`.
-
-The view code is a separate concern. It will display the UI based on the state, and call
-actions. No matter which view library you use, it is easy to wire up because views only
-depend on `state` and `actions`.
-
-How you group together the code is up to you. In some cases, it might make sense to put state
-management and view code together into a folder for a component of your application. In other
-cases, you may prefer to have view components separate from the code that manages state.
-
-In the following sections, we will look at wiring up the Meiosis pattern to a handful of
-view libraries. Feel free to jump straight to the view library in which you are interested.
+In the following sections, we will look at how to wire up the Meiosis pattern to three view
+libraries. Feel free to jump straight to the view library in which you are interested.
 
 - [07 - Using Mithril](07-using-mithril.html)
 - [08 - Using React](08-using-react.html)
@@ -223,4 +54,5 @@ view libraries. Feel free to jump straight to the view library in which you are 
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

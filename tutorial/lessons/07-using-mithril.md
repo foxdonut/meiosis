@@ -1,16 +1,13 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
-[< Previous](06-components.html) |
+[< Previous](06-cells.html) |
 [Next >](08-using-preact.html) |
 [Table of Contents](toc.html)
 
 ## 07 - Using Mithril
 
-In the [06 - Components](06-components.html) lesson, we created the state management code for an
-example with a `conditions` component and two temperature components, `temperature:air` and
-`temperature:water`.
-
-In this section, we'll wire this up to [Mithril](http://mithril.js.org/).
+In the previous lessons, we set up the Meiosis pattern with a temperature example.
+In this section, we'll wire this up to [Mithril](https://mithril.js.org/).
 
 <a name="mithril_stream"></a>
 ### [Mithril Stream](#mithril_stream)
@@ -22,123 +19,98 @@ purposes, it works just like `flyd`. The only difference is that you call `m.str
 <a name="wiring_meiosis"></a>
 ### [Wiring Meiosis](#wiring_meiosis)
 
-Next, remember that we had an `actions` object and a `states` stream:
+Next, remember that in the previous section, we set up a stream of cells:
 
 ```js
-var actions = app.Actions(update);
-states.map(function(state) {
-  document.write("<pre>" + JSON.stringify(state, null, 2) + "</pre>");
-});
+const cells = states.map((state) => ({ state, update }));
 ```
 
 Now, we'll use `m.mount` and a minimal Mithril component to render the view. We'll pass the
-`actions` and `state` attributes to a top-level `App` component:
+current cell to the view:
 
 ```js
-m.mount(document.getElementById("app"), {
-  view: () => m(App, { state: states(), actions })
+m.mount(document.getElementById('app'), {
+  view: () => app.view(cells())
 });
 ```
 
-We are calling `states()` to get the latest from the stream and pass it as the `state` attribute.
+We are calling `cells()` to get the latest cell from the stream and pass to the view.
 
 With Mithril's [auto-redraw system](https://mithril.js.org/autoredraw.html), the view is
 automatically re-rendered after user interaction.
 
-<a name="the_app_component"></a>
-### [The App Component](#the_app_component)
+<a name="the_actions"></a>
+### [Actions](#the_actions)
 
-The `App` component retrieves `state` and `actions` from the passed-in attributes. We pass these on
-to other components, in this case `Conditions` and `Temperature`. Notice that we have two instances
-of `Temperature`, and we pass a different `id` to each one.
+Remember that we had an `actions` object to update the state:
 
 ```js
-var App = {
-  view: function(vnode) {
-    var { state, actions } = vnode.attrs;
-    return m("div",
-      m(Conditions, { state, id: "conditions", actions }),
-      m(Temperature, { state, id: "temperature:air", actions }),
-      m(Temperature, { state, id: "temperature:water", actions }),
-      m("pre", JSON.stringify(state, null, 4))
-    );
-  }
+const actions = {
+  increment: (cell, amount) =>
+    cell.update({ value: (x) => x + amount }),
+
+  changeUnits: (cell) =>
+    cell.update(
+      cell.state.units === 'C'
+        ? {
+            units: 'F',
+            value: (value) => Math.round((value * 9) / 5 + 32)
+          }
+        : {
+            units: 'C',
+            value: (value) => Math.round(((value - 32) / 9) * 5)
+          }
+    )
 };
 ```
 
-<a name="the_conditions_component"></a>
-### [The Conditions Component](#the_conditions_component)
+> This example uses Mergerino, but of course you can also use function patches if you prefer.
 
-The `Conditions` component displays a checkbox for "precipitations" and a series of radio butons for
-the sky (Sunny, Cloudy, Mix of sun/clouds). The `state` is used to reflect the current state, and
-`actions` are called to update the state when the user changes the checkbox and radio buttons:
+The view can call `actions.increment` and `actions.changeUnits` to trigger updates.
+
+<a name="the_view"></a>
+### [View](#the_view)
+
+The view is a function that gets the current `cell` as a parameter, from which the current state is
+available as `cell.state`. Mithril is used to render the view:
 
 ```js
-var skyOption = function({ state, id, actions, value, label }) {
-  return m("label",
-    m("input", { type: "radio", id: value, name: "sky",
-      value, checked: state[id].sky === value,
-      onchange: evt => actions.changeSky(id, evt.target.value)
-    }),
-    label
+const view = (cell) =>
+  m(
+    'div',
+    m(
+      'div',
+      m(
+        'label',
+        'Temperature: ',
+        cell.state.value,
+        m.trust('&deg;'),
+        cell.state.units
+      )
+    ),
+    m(
+      'div',
+      m(
+        'button',
+        { onclick: () => actions.increment(cell, 1) },
+        'Increment'
+      ),
+      m(
+        'button',
+        { onclick: () => actions.increment(cell, -1) },
+        'Decrement'
+      ),
+      m(
+        'button',
+        { onclick: () => actions.changeUnits(cell) },
+        'Change Units'
+      )
+    )
   );
-};
-
-var Conditions = {
-  view: function(vnode) {
-    var { state, id, actions } = vnode.attrs;
-    return m("div",
-      m("label",
-        m("input", {
-          type: "checkbox",
-          checked: state[id].precipitations,
-          onchange: evt =>
-            actions.togglePrecipitations(id, evt.target.checked)
-        }),
-        "Precipitations"
-      ),
-      m("div",
-        skyOption({ state, id, actions, value: "SUNNY",
-          label: "Sunny"}),
-        skyOption({ state, id, actions, value: "CLOUDY",
-          label: "Cloudy"}),
-        skyOption({ state, id, actions, value: "MIX",
-          label: "Mix of sun/clouds"})
-      )
-    );
-  }
-};
 ```
 
-<a name="the_temperature_component"></a>
-### [The Temperature Component](#the_temperature_component)
-
-The `Temperature` component is similar:
-
-```js
-var Temperature = {
-  view: function(vnode) {
-    var { state, id, actions } = vnode.attrs;
-    return m("div",
-      state[id].label, " Temperature: ",
-      state[id].value, m.trust("&deg;"), state[id].units,
-      m("div",
-        m("button",
-          { onclick: () => actions.increment(id, 1) },
-          "Increment"),
-        m("button",
-          { onclick: () => actions.increment(id,-1) },
-          "Decrement")
-      ),
-      m("div",
-        m("button",
-          { onclick: () => actions.changeUnits(id) },
-          "Change Units")
-      )
-    );
-  }
-};
-```
+Notice that the `onclick` handlers call actions, passing `cell` and any needed additional
+parameters.
 
 You can see the complete example below.
 
@@ -147,20 +119,20 @@ You can see the complete example below.
 <a name="takeaways"></a>
 ### [Takeaways](#takeaways)
 
-We can wire up Meiosis to Mithril using `m.mount` and passing `state` from the latest value of the
-`states` stream, along with `actions`, to the top-level Mithril component.
+We can wire up Meiosis to Mithril using `m.mount` and the latest value of the `cells` stream to the
+view.
 
-Then, all Mithril components in the application are consistent: they all receive `state` and
-`actions`. When rendering other components, `state` and `actions` are passed along. When a component
-is used multiple times, or when you want to define the state property outside of the component, you
-also pass the `id`.
+Then, all Mithril views in the application are consistent: they all receive `cell`. When rendering
+other components, `cell` is passed along.
 
-Components can then use the `state` to render the view according to the current application state,
-and call `actions` to trigger changes. Because of Mithril's
-[auto-redraw system](https://mithril.js.org/autoredraw.html), the view is automatically re-rendered.
-Of course, if you trigger state changes outside of Mithril's auto-redraw (see [When Mithril does not
-redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw)) you have to call
-`m.redraw()` yourself.
+Components can then use the `cell.state` to render the view according to the current application
+state, and call `actions` to trigger changes. Views could also call `cell.update(...)` for simple
+state changes.
+
+Because of Mithril's [auto-redraw system](https://mithril.js.org/autoredraw.html), the view is
+automatically re-rendered. Of course, if you trigger state changes outside of Mithril's auto-redraw
+(see
+[When Mithril does not redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw)) you have to call `m.redraw()` yourself.
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
@@ -168,10 +140,11 @@ redraw](https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw)) yo
 This concludes the Meiosis tutorial. See [10 - What's Next?](10-whats-next.html) for ideas on where
 to go from here.
 
-[< Previous](06-components.html) |
+[< Previous](06-cells.html) |
 [Next >](08-using-preact.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

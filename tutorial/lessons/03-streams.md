@@ -178,7 +178,7 @@ const actions => {
 
 We can incorporate streams to manage the flow of data:
 
-- We create an `update` stream, and pass it to `Actions`.
+- We create an `update` stream, and pass it to the functions in our `actions` object.
 - To update the state, an action passes a value onto the `update` stream, indicating a state change.
 We'll call this a **patch**. In our example, the patches are numbers by which to increment the value
 of the counter.
@@ -267,4 +267,5 @@ When you are ready, continue on to
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

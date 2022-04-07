@@ -53,4 +53,5 @@ continue on to [03 - Streams](03-streams.html).
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

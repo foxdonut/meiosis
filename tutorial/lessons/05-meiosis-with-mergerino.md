@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Tutorial
 
 [< Previous](04-meiosis-with-function-patches.html) |
-[Next >](06-components.html) |
+[Next >](06-cells.html) |
 [Table of Contents](toc.html)
 
 ## 05 - Meiosis with Mergerino
@@ -10,8 +10,8 @@ In the previous lesson, [04 - Meiosis with Function Patches](04-meiosis-with-fun
 we set up the Meiosis pattern with an `update` stream of function patches.
 
 In this section, we will use another approach - my personal favourite - using a library called
-Mergerino. The Meiosis pattern is flexible enough that you can use either of these approaches or
-even one of your own.
+[Mergerino](https://github.com/fuzetsu/mergerino). The Meiosis pattern is flexible enough that you
+can use either of these approaches or even one of your own.
 
 <a name="introducing_mergerino"></a>
 ### [Introducing Mergerino](#introducing_mergerino)
@@ -247,8 +247,8 @@ Notice that the accumulator function that we are passing is:
 (state, patch) => merge(state, patch);
 ```
 
-We have a function that takes `(state, patch)` and calls `merge` with `(state, patch)`. But `merge`
-already does what we want, so we can pass it directly:
+We have a function that takes `(state, patch)` and calls `merge` with `(state, patch)`. But, that is
+the same as `merge` itself! So, we can use it directly:
 
 ```js
 const states = flyd.scan(merge, initial, update);
@@ -270,12 +270,13 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-When you are ready, continue on to [06 - Components](06-components.html).
+When you are ready, continue on to [06 - Cells](06-cells.html).
 
 [< Previous](04-meiosis-with-function-patches.html) |
-[Next >](06-components.html) |
+[Next >](06-cells.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

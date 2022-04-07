@@ -11,8 +11,8 @@ In the previous lesson, [03 - Streams](03-streams.html), we started setting up t
 - an `update` stream of **patches**
 - a `states` stream of states, obtained with `scan` on the `update` stream and applying
 an **accumulator**
-- an `actions` object created by passing `update` and having functions that call `update`
-to trigger state changes.
+- an `actions` object containing functions to which we pass `update`, so that those functions can
+trigger state changes.
 
 Our state had the following shape:
 
@@ -85,9 +85,9 @@ const actions = {
 [lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide) or
 [Ramda](https://ramdajs.com/) for example.
 
-Now we need to use function patches in the accumulator function. Remember that the accumulator gets
-the current state and the incoming patch as parameters, and must return the updated state. Since the
-incoming patches are functions, we just need to call them:
+Now we need to use function patches in the accumulator function. Remember that the accumulator gets,
+as parameters, the current state and the incoming patch. The accumulator must return the updated
+state. Since the incoming patches are functions, we just need to call them:
 
 ```js
 const states = flyd.scan((state, patch) => patch(state), initial, update);
@@ -118,4 +118,5 @@ an alternative to function patches.
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) / [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.
