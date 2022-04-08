@@ -1,10 +1,9 @@
-# [Meiosis](https://meiosis.js.org) Documentation
+/* global flyd, preact */
+const app = {
+  initial: {},
+  view: (cell) => cell
+};
 
-[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
-
-## Nesting
-
-```js
 const nestPatch = (patch, prop) => (state) =>
   Object.assign({}, state, { [prop]: patch(state[prop]) });
 
@@ -24,8 +23,8 @@ const nestCell = (getState, parentUpdate) => (prop) => {
   return nested;
 };
 
-const update = stream();
-const states = scan(
+const update = flyd.stream();
+const states = flyd.scan(
   (state, patch) => patch(state),
   app.initial,
   update
@@ -37,13 +36,6 @@ const cells = states.map((state) => ({
   update,
   nest
 }));
-```
 
-[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
-
------
-
-[Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](https://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut)
-and is released under the MIT license.
+const element = document.getElementById("app");
+cells.map((cell) => preact.render(app.view(cell), element));
