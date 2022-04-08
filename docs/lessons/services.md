@@ -4,143 +4,250 @@
 
 ## Services
 
-[James Forbes](https://james-forbes.com) shared his idea of _Services_. In this section, we'll look
-at James' version using streams, and another version using
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup)
-with [Daniel Loomer](https://github.com/fuzetsu)'s
-[Mergerino](https://github.com/fuzetsu/mergerino).
+All credit goes to [James Forbes](https://james-forbes.com) for his idea of **services**, and I am
+grateful to James for sharing this and other ideas that have significantly improved Meiosis.
 
-James explains that while one-off actions occur after click events, user input, and so on,
-services are for ongoing state synchronization. They can produce computed properties, store and
-retrieve state from local storage, and trigger other actions.
+James explains that while one-off actions occur after click events, user input, and so on, services
+are for ongoing state synchronization. They can produce computed properties, store and retrieve
+state from local storage, and trigger other actions.
 
-<a name="using_streams"></a>
-### [Using Streams](#using_streams)
+In this section, we will look at how services work in Meiosis.
 
-James' version uses streams to implement services. The structure is as follows:
+### Services Overview
+
+![Services](services.svg)
+
+In Meiosis, **services** are functions that run every time there is an update. Services can alter
+the state _before_ the final state arrives onto the `states` stream. To change the state, services
+return patches which are applied to the state. After all services have executed, the resulting state
+arrives onto states stream, and the view is rendered.
+
+After the view has rendered, **effects** can trigger more updates. Effects are functions that may
+call `update` or `actions` to trigger more updates.
+
+### Services
+
+A service function receives `state` and returns a patch to alter the state. If a service does not
+need to alter the state, it simply does not return a patch.
+
+Service functions run **synchronously** and **in order**. Thus, a service can depend on the changes
+made by a previous service.
+
+We can use service functions for computed properties, setting up an initial blank state for a page,
+cleaning up state after leaving a page, and any other state changes that we want to perform
+synchronously before rendering the view.
+
+### Effects
+
+Effect functions receive `state` and may make asynchronous calls to `update` and/or `actions` to
+trigger more updates. Since triggering an update will call the effect again, **effect functions must
+change the state in a way that will avoid an infinite loop**.
+
+Effects are good for tasks such as loading asynchronous data or triggering other types of
+asynchronous updates, saving state to local storage, and so on.
+
+### Pattern Setup
+
+Let's see how we can set up services and effects with Meiosis. We'll start with our `update` stream:
 
 ```javascript
-{
-  initial: state => initialState,
-  start: states => patches
-}
+const update = stream();
 ```
 
-A service has an `initial` function which produces the service's initial state. The `start`
-function takes the Meiosis **stream** of states and returns a **stream** of patches. The
-service emits patches onto this stream.
+Next comes our accumulator function. This function needs to ignore `null` or `undefined` patches.
+That way, we can write services that don't return anything when they don't need to alter the state.
 
-The application's initial state is combined with each service's initial state to produce the
-final initial state:
+If we're using [Mergerino](https://github.com/fuzetsu/mergerino), the accumulator is `merge`. This
+function already ignores empty patches.
 
 ```javascript
-const services = [ /* ... */ ];
+// Using Mergerino:
+const accumulator = merge;
+```
 
-const initialState = () => {
-  const state = {
-    boxes: [],
-    colors: ["red", "purple", "blue"]
-  };
-  return Object.assign(
-    {},
-    state,
-    services.map(s => s.initial(state)).reduce(R.merge, {})
+If we're using
+[function patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), we make a
+slight adjustment to check whether the patch is truthy before applying it. If it is not, we ignore
+the patch and just return the state unchanged.
+
+```javascript
+// Using Function Patches:
+const accumulator = (state, patch) => patch ? patch(state) : state;
+```
+
+Next, we'll write a function that runs services. The function calls each service, accumulating state
+by calling the `accumulator`:
+
+```javascript
+const runServices = startingState =>
+  app.services.reduce(
+    (state, service) => accumulator(state, service(state)),
+    startingState
   );
-};
 ```
 
-Then, every service is started by passing in the stream of states, and mapping the resulting stream
-of patches onto the `update` stream:
+Now, we can create our `states` stream with `scan`. We'll run the services on the initial state, as
+well as in the accumulator function for `scan`:
 
 ```javascript
-services.map(s => s.start(states).map(update));
+const states = scan(
+  (state, patch) => runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
 ```
 
-When a service emits a patch onto its stream, it is passed on to the `update` stream.
-
-#### Colored Boxes Example
-
-James shared an example where you have colored boxes that you can click on to add them to a list.
-The boxes are displayed one next to the other, with a description of how many boxes of each color
-are in the list. You can remove a box from the list by clicking on it.
-
-> Note that the example code is somewhat different that the "Meiosis style". There are some nifty
-functional programming at play here, and you can learn some nice techniques from this code. But if
-you are having some trouble understanding, please know that the code in the next section uses a
-style that is closer to what we have been using so far.
-
-In the example, there are three services:
-
-- `StatsService`: produces an object that indicates how many boxes of each color.
-- `LocalStorageService`: stores and retrieves the box data to and from local storage. You will
-notice that the box list remains even after reloading the page.
-- `DescriptionService`: produces the text description of how many boxes of each color are in
-the list.
-
-Each service has an `initial` and `start` function. For example, the `StatsService` initializes its
-state with `0` for every box color, and computes the number of instances of each color:
+Next, we create our actions and effects:
 
 ```javascript
-const StatsService = {
-  initial(state) {
-    return state.colors
-      .map(R.objOf)
-      .map(K(0))
-      .reduce(R.merge, {});
-  },
-  start(state) {
-    return dropRepeats(state.map(x => x.boxes))
-      .map(R.countBy(I))
-      .map(R.assoc("stats"));
+const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
+```
+
+Finally, we trigger effects whenever the state changes. This is simply a matter of calling each
+effect function and passing the `state`:
+
+```javascript
+states.map(state =>
+  effects.forEach(effect => effect(state))
+);
+```
+
+All together, here is our pattern setup:
+
+```javascript
+const update = stream();
+
+// Using Mergerino:
+const accumulator = merge;
+
+// Using Function Patches:
+const accumulator = (state, patch) => patch ? patch(state) : state;
+
+const runServices = startingState =>
+  app.services.reduce(
+    (state, service) => accumulator(state, service(state)),
+    startingState
+  );
+
+const states = scan(
+  (state, patch) => runServices(accumulator(state, patch)),
+  runServices(app.initial),
+  update
+);
+
+const actions = app.Actions(update, states);
+const effects = app.Effects(update, actions);
+
+states.map(state => effects.forEach(effect => effect(state)));
+```
+
+Our pattern setup is complete, and we can wire up the view using `states`, `update`, and `actions`.
+
+### Using Services and Effects
+
+Let's look at an example using services and effects.
+
+Say we have an app with three pages: Home, Login, and Data. We'll use services and effects to
+achieve the following:
+
+- Set up a blank form when going to the Login page
+- Clean up the form when leaving the Login page
+- Change the state to "loading" when going to the Data page
+- Load the data asynchronously for the Data page
+- Clean up the data when leaving the Data page.
+
+We'll use these properties in the state:
+
+- `page` to indicate the current page: `"Home"`, `"Login"`, `"Data"`
+- `login` with `username` and `password` for the Login form
+- `data` to indicate `"loading"` or an array of data for the Data page.
+
+The login service checks whether the current page is `"Login"`. If so, and the login form has not
+yet been set up, it returns a patch to set up the form with a blank username and password.
+
+If the current page is not `"Login"`, and the login form is still present, the service returns a
+patch to remove the login form from the state.
+
+```javascript
+const loginService = state => {
+  if (state.page === "Login") {
+    if (!state.login) {
+      return { login: { username: "", password: "" } };
+    }
+  } else if (state.login) {
+    return { login: undefined };
   }
 };
 ```
 
-Notice the call to `dropRepeats`. This is necessary because the stream of patches produced by the
-service is fed back into the Meiosis `update` stream. This in turn produces an updated state, which
-triggers the service again. To avoid an infinite loop, `dropRepeats` does not emit a value when it
-is the same as the previous one:
+The data service checks whether the current page is `"Data"`. If so, and `data` has not been set,
+the service sets the data to `"loading"`. The view uses this to display a `Loading, please wait...`
+message.
+
+If the current page is not `"Data"`, the service clears the `data` property if it is present.
 
 ```javascript
-function dropRepeats(s) {
-  var ready = false;
-  var d = m.stream();
-  s.map(function (v) {
-    if (!ready || v !== d()) {
-      ready = true;
-      d(v);
+const dataService = state => {
+  if (state.page === "Data") {
+    if (!state.data) {
+      return { data: "loading" };
     }
-  });
-  return d;
-}
+  } else if (state.data) {
+    return { data: undefined };
+  }
+};
 ```
 
-The example uses function patches. Here is the setup for the Meiosis pattern:
+Finally, the data effect checks to see if the `data` property is `"loading"`, in which case it calls
+`actions.loadData`, which simulates loading data asynchronously.
+
+Our `app` contains the `initial` state, the `Actions` constructor function, the array of `services`,
+and the `Effects` constructor function which returns an array of effects.
 
 ```javascript
-const update = m.stream();
-const T = (x, f) => f(x);
-const state = m.stream.scan(T, initialState(), update);
-const element = document.getElementById("app");
-states.map(view(update)).map(v => m.render(element, v));
+const DataEffect = actions => state => {
+  if (state.data === "loading") {
+    actions.loadData();
+  }
+};
+
+const app = {
+  initial: {
+    page: "Home"
+  },
+
+  Actions: update => ({
+    loadData: () =>
+      setTimeout(
+        () =>
+          update({
+            data: ["One", "Two"]
+          }),
+        1500
+      )
+  }),
+
+  services: [loginService, dataService],
+
+  Effects: (_update, actions) => [DataEffect(actions)]
+};
 ```
 
-The complete example is below.
+You can see the complete example in action below.
 
-@flems code/services/index-streams.js,app.html mithril,mithril-stream,ramda,bss 700 60
-
-#### Flexibility
-
-Using streams gives you the flexibility of being able to hook into them and wiring them as you
-wish.
+@flems code/services/index-mergerino.js,app.html mithril,mithril-stream,mergerino 700 60
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
 
+In this section, we've augmented our Meiosis pattern setup with services and effects. We do not need
+a lot of code for this setup; nevertheless, for your convenience, you can also use the same setup by
+adding [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup)
+to your project.
+
 We can use services for computed properties, state synchronization, and other purposes. Please note,
 however, that not everything belongs in a service, so it's important to avoid getting carried away.
-
-In [this section](services-and-effects.html), we look at how services and effects work in Meiosis.
 
 -----
 

@@ -33,7 +33,9 @@ updates.
 Creating a stream of cells from the stream of states is simple. We can use `map`:
 
 ```js
-const cells = states.map((state) => ({ state, update }));
+const update = flyd.stream();
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
 ```
 
 We now have a stream of cells. To get the current cell, we can call `cells()` and pass that as a
