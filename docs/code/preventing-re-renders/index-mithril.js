@@ -7,7 +7,7 @@ const checkIfStateChanged = (next, prev) =>
 
 const entryNumber = {
   initial: {
-    value: ""
+    value: ''
   },
   Actions: (update) => ({
     editEntryValue: (id, value) =>
@@ -19,16 +19,16 @@ const EntryNumber = {
   onbeforeupdate: checkIfStateChanged,
   view: ({ attrs: { state, id, actions } }) => {
     // eslint-disable-next-line no-console
-    console.log("render Entry");
+    console.log('render Entry');
 
     return m(
-      "div",
+      'div',
       m(
-        "span",
-        { style: { "margin-right": "8px" } },
-        "Entry number:"
+        'span',
+        { style: { 'margin-right': '8px' } },
+        'Entry number:'
       ),
-      m("input[type=text][size=2]", {
+      m('input[type=text][size=2]', {
         value: state[id].value,
         oninput: (evt) =>
           actions.editEntryValue(id, evt.target.value)
@@ -39,7 +39,7 @@ const EntryNumber = {
 
 const entryDate = {
   initial: {
-    value: ""
+    value: ''
   },
   Actions: (update) => ({
     editDateValue: (id, value) =>
@@ -51,17 +51,17 @@ const EntryDate = {
   onbeforeupdate: checkIfStateChanged,
   view: ({ attrs: { state, id, actions } }) => {
     // eslint-disable-next-line no-console
-    console.log("render Date");
+    console.log('render Date');
 
     return m(
-      "div",
-      { style: { "margin-top": "8px" } },
+      'div',
+      { style: { 'margin-top': '8px' } },
       m(
-        "span",
-        { style: { "margin-right": "8px" } },
-        "Date:"
+        'span',
+        { style: { 'margin-right': '8px' } },
+        'Date:'
       ),
-      m("input[type=text][size=10]", {
+      m('input[type=text][size=10]', {
         value: state[id].value,
         oninput: (evt) =>
           actions.editDateValue(id, evt.target.value)
@@ -72,7 +72,7 @@ const EntryDate = {
 
 const convert = (value, to) =>
   Math.round(
-    to === "C"
+    to === 'C'
       ? ((value - 32) / 9) * 5
       : (value * 9) / 5 + 32
   );
@@ -81,7 +81,7 @@ const temperature = {
   Initial: (label) => ({
     label,
     value: 20,
-    units: "C"
+    units: 'C'
   }),
   Actions: (update) => ({
     increment: (id, amount) => (evt) => {
@@ -94,7 +94,7 @@ const temperature = {
       evt.preventDefault();
       update({
         [id]: (state) => {
-          const newUnits = state.units === "C" ? "F" : "C";
+          const newUnits = state.units === 'C' ? 'F' : 'C';
           const newValue = convert(state.value, newUnits);
           return merge(state, {
             units: newUnits,
@@ -110,40 +110,40 @@ const Temperature = {
   onbeforeupdate: checkIfStateChanged,
   view: ({ attrs: { state, id, actions } }) => {
     // eslint-disable-next-line no-console
-    console.log("render Temperature", state[id].label);
+    console.log('render Temperature', state[id].label);
 
     return m(
-      "div.row",
-      { style: { "margin-top": "8px" } },
+      'div.row',
+      { style: { 'margin-top': '8px' } },
       m(
-        "div.col-md-3",
+        'div.col-md-3',
         m(
-          "span",
+          'span',
           state[id].label,
-          " Temperature: ",
+          ' Temperature: ',
           state[id].value,
-          m.trust("&deg;"),
+          m.trust('&deg;'),
           state[id].units
         )
       ),
       m(
-        "div.col-md-6",
+        'div.col-md-6',
         m(
-          "button.btn.btn-sm.btn-default",
+          'button.btn.btn-sm.btn-default',
           { onclick: actions.increment(id, 1) },
-          "Increment"
+          'Increment'
         ),
 
         m(
-          "button.btn.btn-sm.btn-default",
+          'button.btn.btn-sm.btn-default',
           { onclick: actions.increment(id, -1) },
-          "Decrement"
+          'Decrement'
         ),
 
         m(
-          "button.btn.btn-sm.btn-info",
+          'button.btn.btn-sm.btn-info',
           { onclick: actions.changeUnits(id) },
-          "Change Units"
+          'Change Units'
         )
       )
     );
@@ -152,18 +152,18 @@ const Temperature = {
 
 const displayTemperature = (temperature) =>
   temperature.label +
-  ": " +
+  ': ' +
   temperature.value +
-  "\xB0" +
+  '\xB0' +
   temperature.units;
 
 const app = {
   initial: {
-    saved: "",
+    saved: '',
     entry: entryNumber.initial,
     date: entryDate.initial,
-    air: temperature.Initial("Air"),
-    water: temperature.Initial("Water")
+    air: temperature.Initial('Air'),
+    water: temperature.Initial('Water')
   },
   Actions: (update) =>
     Object.assign(
@@ -172,18 +172,18 @@ const app = {
           evt.preventDefault();
           update({
             saved:
-              " Entry #" +
+              ' Entry #' +
               state.entry.value +
-              " on " +
+              ' on ' +
               state.date.value +
-              ":" +
-              " Temperatures: " +
+              ':' +
+              ' Temperatures: ' +
               displayTemperature(state.air) +
-              " " +
+              ' ' +
               displayTemperature(state.water),
 
-            entry: { value: "" },
-            date: { value: "" }
+            entry: { value: '' },
+            date: { value: '' }
           });
         }
       },
@@ -196,19 +196,19 @@ const app = {
 const App = {
   view: ({ attrs: { state, actions } }) =>
     m(
-      "form",
-      m(EntryNumber, { state, id: "entry", actions }),
-      m(EntryDate, { state, id: "date", actions }),
-      m(Temperature, { state, id: "air", actions }),
-      m(Temperature, { state, id: "water", actions }),
+      'form',
+      m(EntryNumber, { state, id: 'entry', actions }),
+      m(EntryDate, { state, id: 'date', actions }),
+      m(Temperature, { state, id: 'air', actions }),
+      m(Temperature, { state, id: 'water', actions }),
       m(
-        "div",
+        'div',
         m(
-          "button.btn.btn-primary",
+          'button.btn.btn-primary',
           { onclick: actions.save(state) },
-          "Save"
+          'Save'
         ),
-        m("span", state.saved)
+        m('span', state.saved)
       )
     )
 };
@@ -217,6 +217,6 @@ const update = m.stream();
 const states = m.stream.scan(merge, app.initial, update);
 const actions = app.Actions(update);
 
-m.mount(document.getElementById("app"), {
+m.mount(document.getElementById('app'), {
   view: () => m(App, { state: states(), actions })
 });

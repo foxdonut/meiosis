@@ -7,7 +7,7 @@ const actions = {
     setTimeout(
       () =>
         cell.update({
-          data: ["One", "Two"]
+          data: ['One', 'Two']
         }),
       1500
     )
@@ -16,9 +16,9 @@ const actions = {
 const loginService = {
   onchange: (state) => state.page,
   run: (cell) => {
-    if (cell.state.page === "Login") {
+    if (cell.state.page === 'Login') {
       cell.update({
-        login: { username: "", password: "" }
+        login: { username: '', password: '' }
       });
     } else {
       return cell.update({ login: undefined });
@@ -29,8 +29,8 @@ const loginService = {
 const dataService = {
   onchange: (state) => state.page,
   run: (cell) => {
-    if (cell.state.page === "Data") {
-      cell.update({ data: "loading" });
+    if (cell.state.page === 'Data') {
+      cell.update({ data: 'loading' });
       actions.loadData(cell);
     } else {
       cell.update({ data: undefined });
@@ -40,59 +40,59 @@ const dataService = {
 
 const app = {
   initial: {
-    page: "Home"
+    page: 'Home'
   },
 
   services: [loginService, dataService],
 
   view: (cell) => [
     m(
-      "div",
+      'div',
       m(
-        "a",
+        'a',
         {
-          href: "#",
+          href: '#',
           onclick: (evt) => {
             evt.preventDefault();
-            cell.update({ page: "Home" });
+            cell.update({ page: 'Home' });
           }
         },
-        "Home"
+        'Home'
       ),
-      m("span", " | "),
+      m('span', ' | '),
       m(
-        "a",
+        'a',
         {
-          href: "#",
+          href: '#',
           onclick: (evt) => {
             evt.preventDefault();
-            cell.update({ page: "Login" });
+            cell.update({ page: 'Login' });
           }
         },
-        "Login"
+        'Login'
       ),
-      m("span", " | "),
+      m('span', ' | '),
       m(
-        "a",
+        'a',
         {
-          href: "#",
+          href: '#',
           onclick: (evt) => {
             evt.preventDefault();
-            cell.update({ page: "Data" });
+            cell.update({ page: 'Data' });
           }
         },
-        "Data"
+        'Data'
       )
     ),
-    cell.state.page === "Home"
-      ? m("h4", "Home page")
-      : cell.state.page === "Login"
+    cell.state.page === 'Home'
+      ? m('h4', 'Home page')
+      : cell.state.page === 'Login'
       ? [
-          m("h4", "Login page"),
+          m('h4', 'Login page'),
           m(
-            "div",
-            m("span", "Username:"),
-            m("input[type=text]", {
+            'div',
+            m('span', 'Username:'),
+            m('input[type=text]', {
               value: cell.state.login.username,
               oninput: (evt) =>
                 cell.update({
@@ -101,9 +101,9 @@ const app = {
             })
           ),
           m(
-            "div",
-            m("span", "Password:"),
-            m("input[type=password]", {
+            'div',
+            m('span', 'Password:'),
+            m('input[type=password]', {
               value: cell.state.login.password,
               oninput: (evt) =>
                 cell.update({
@@ -112,18 +112,18 @@ const app = {
             })
           )
         ]
-      : cell.state.page === "Data"
+      : cell.state.page === 'Data'
       ? [
-          m("h4", "Data page"),
-          cell.state.data === "loading"
-            ? m("div", "Loading, please wait...")
+          m('h4', 'Data page'),
+          cell.state.data === 'loading'
+            ? m('div', 'Loading, please wait...')
             : m(
-                "ul",
-                cell.state.data.map((item) => m("li", item))
+                'ul',
+                cell.state.data.map((item) => m('li', item))
               )
         ]
       : null,
-    m("pre", JSON.stringify(cell.state, null, 2))
+    m('pre', JSON.stringify(cell.state, null, 2))
   ]
 };
 
@@ -156,7 +156,7 @@ app.services.forEach((service) => {
 
 const cells = dropRepeats(states).map(createCell);
 
-m.mount(document.getElementById("app"), {
+m.mount(document.getElementById('app'), {
   view: () => app.view(cells())
 });
 

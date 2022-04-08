@@ -37,5 +37,5 @@ const cells = states.map((state) => ({
   nest
 }));
 
-const element = document.getElementById("app");
+const element = document.getElementById('app');
 cells.map((cell) => preact.render(app.view(cell), element));

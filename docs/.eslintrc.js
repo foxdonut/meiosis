@@ -1,10 +1,13 @@
 module.exports = {
   rules: {
-    "prettier/prettier": [
-      "error",
+    'prettier/prettier': [
+      'error',
       {
+        arrowParens: 'always',
         printWidth: 60,
-        trailingComma: "none"
+        semi: true,
+        singleQuote: true,
+        trailingComma: 'none'
       }
     ]
   }

@@ -3,9 +3,9 @@ const merge = mergerino;
 
 const entryNumber = {
   initial: {
-    value: ""
+    value: ''
   },
-  Actions: update => ({
+  Actions: (update) => ({
     editEntryValue: (id, value) =>
       update({ [id]: { value } })
   })
@@ -21,7 +21,7 @@ class EntryNumber extends React.Component {
   render() {
     const { state, id, actions } = this.props;
     // eslint-disable-next-line no-console
-    console.log("render Entry");
+    console.log('render Entry');
 
     return (
       <div>
@@ -32,7 +32,7 @@ class EntryNumber extends React.Component {
           type="text"
           size="2"
           value={state[id].value}
-          onChange={evt =>
+          onChange={(evt) =>
             actions.editEntryValue(id, evt.target.value)
           }
         />
@@ -43,9 +43,9 @@ class EntryNumber extends React.Component {
 
 const entryDate = {
   initial: {
-    value: ""
+    value: ''
   },
-  Actions: update => ({
+  Actions: (update) => ({
     editDateValue: (id, value) =>
       update({ [id]: { value } })
   })
@@ -61,7 +61,7 @@ class EntryDate extends React.Component {
   render() {
     const { state, id, actions } = this.props;
     // eslint-disable-next-line no-console
-    console.log("render Date");
+    console.log('render Date');
 
     return (
       <div style={{ marginTop: 8 }}>
@@ -70,7 +70,7 @@ class EntryDate extends React.Component {
           type="text"
           size="10"
           value={state[id].value}
-          onChange={evt =>
+          onChange={(evt) =>
             actions.editDateValue(id, evt.target.value)
           }
         />
@@ -81,29 +81,29 @@ class EntryDate extends React.Component {
 
 const convert = (value, to) =>
   Math.round(
-    to === "C"
+    to === 'C'
       ? ((value - 32) / 9) * 5
       : (value * 9) / 5 + 32
   );
 
 const temperature = {
-  Initial: label => ({
+  Initial: (label) => ({
     label,
     value: 20,
-    units: "C"
+    units: 'C'
   }),
-  Actions: update => ({
-    increment: (id, amount) => evt => {
+  Actions: (update) => ({
+    increment: (id, amount) => (evt) => {
       evt.preventDefault();
       update({
-        [id]: { value: value => value + amount }
+        [id]: { value: (value) => value + amount }
       });
     },
-    changeUnits: id => evt => {
+    changeUnits: (id) => (evt) => {
       evt.preventDefault();
       update({
-        [id]: state => {
-          const newUnits = state.units === "C" ? "F" : "C";
+        [id]: (state) => {
+          const newUnits = state.units === 'C' ? 'F' : 'C';
           const newValue = convert(state.value, newUnits);
           return merge(state, {
             units: newUnits,
@@ -125,7 +125,7 @@ class Temperature extends React.Component {
   render() {
     const { state, id, actions } = this.props;
     // eslint-disable-next-line no-console
-    console.log("render Temperature", state[id].label);
+    console.log('render Temperature', state[id].label);
 
     return (
       <div className="row" style={{ marginTop: 8 }}>
@@ -160,40 +160,40 @@ class Temperature extends React.Component {
   }
 }
 
-const displayTemperature = temperature =>
+const displayTemperature = (temperature) =>
   temperature.label +
-  ": " +
+  ': ' +
   temperature.value +
-  "\xB0" +
+  '\xB0' +
   temperature.units;
 
 const app = {
   initial: {
-    saved: "",
+    saved: '',
     entry: entryNumber.initial,
     date: entryDate.initial,
-    air: temperature.Initial("Air"),
-    water: temperature.Initial("Water")
+    air: temperature.Initial('Air'),
+    water: temperature.Initial('Water')
   },
-  Actions: update =>
+  Actions: (update) =>
     Object.assign(
       {
-        save: state => evt => {
+        save: (state) => (evt) => {
           evt.preventDefault();
           update({
             saved:
-              " Entry #" +
+              ' Entry #' +
               state.entry.value +
-              " on " +
+              ' on ' +
               state.date.value +
-              ":" +
-              " Temperatures: " +
+              ':' +
+              ' Temperatures: ' +
               displayTemperature(state.air) +
-              " " +
+              ' ' +
               displayTemperature(state.water),
 
-            entry: { value: "" },
-            date: { value: "" }
+            entry: { value: '' },
+            date: { value: '' }
           });
         }
       },
@@ -211,7 +211,7 @@ class App extends React.Component {
   }
   componentDidMount() {
     const setState = this.setState.bind(this);
-    this.props.states.map(state => {
+    this.props.states.map((state) => {
       if (this.skippedFirst) {
         setState(state);
       } else {
@@ -264,5 +264,5 @@ const actions = app.Actions(update);
 
 ReactDOM.render(
   <App states={states} actions={actions} />,
-  document.getElementById("app")
+  document.getElementById('app')
 );
