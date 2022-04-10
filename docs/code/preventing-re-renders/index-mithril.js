@@ -10,8 +10,7 @@ const entryNumber = {
     value: ''
   },
   Actions: (update) => ({
-    editEntryValue: (id, value) =>
-      update({ [id]: { value } })
+    editEntryValue: (id, value) => update({ [id]: { value } })
   })
 };
 
@@ -42,8 +41,7 @@ const entryDate = {
     value: ''
   },
   Actions: (update) => ({
-    editDateValue: (id, value) =>
-      update({ [id]: { value } })
+    editDateValue: (id, value) => update({ [id]: { value } })
   })
 };
 
@@ -56,11 +54,7 @@ const EntryDate = {
     return m(
       'div',
       { style: { 'margin-top': '8px' } },
-      m(
-        'span',
-        { style: { 'margin-right': '8px' } },
-        'Date:'
-      ),
+      m('span', { style: { 'margin-right': '8px' } }, 'Date:'),
       m('input[type=text][size=10]', {
         value: state[id].value,
         oninput: (evt) =>
@@ -72,9 +66,7 @@ const EntryDate = {
 
 const convert = (value, to) =>
   Math.round(
-    to === 'C'
-      ? ((value - 32) / 9) * 5
-      : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 
 const temperature = {

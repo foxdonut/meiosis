@@ -17,9 +17,7 @@ Easily use the pattern with your favourite view library: React, Preact, Mithril,
 
 ## Ready to have a closer look?
 
-→ Read the [Meiosis Tutorial](https://meiosis.js.org/tutorial/toc.html) to get started.
-
-→ Read the [Documentation](https://meiosis.js.org/docs/toc.html) to learn more techniques.
+→ Read the [Meiosis Documentation](https://meiosis.js.org/docs/toc.html) to get started.
 
 → Don't want to setup Meiosis yourself?
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is

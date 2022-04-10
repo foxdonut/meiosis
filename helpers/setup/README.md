@@ -23,7 +23,7 @@ conveniences:
 - works with [Flyd](https://github.com/paldepind/flyd),
 [Mithril-Stream](https://mithril.js.org/stream.html),
 [Mergerino](https://github.com/fuzetsu/mergerino), and
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
+[Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)
 out of the box
 - provides a simple stream implementation
 - provides [TypeScript](https://www.typescriptlang.org) support
@@ -59,7 +59,7 @@ stream of patches and merges them to produce the states.
 With `meiosis-setup`, you can use:
 
 - [Mergerino](https://github.com/fuzetsu/mergerino)
-- [Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html)
+- [Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)
 
 ### Choosing a view library
 

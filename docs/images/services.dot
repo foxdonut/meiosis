@@ -1,4 +1,4 @@
-digraph meiosistutorial {
+digraph meiosisdocs {
   states [shape="none", style="filled", fillcolor="yellow", label="states"]
   services [shape="none", style="filled", fillcolor="lightblue", label="services"]
   update [shape="none", style="filled", fillcolor="yellow", label="update(patch)"]

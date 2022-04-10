@@ -1,6 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
+[Table of Contents](toc.html)
 
 ## Using a Router
 
@@ -153,7 +153,7 @@ You can see the complete code for the example
 
 [Section Contents](#section_contents)
 
-[Table of Contents](toc.html) | [Documentation Examples](http://meiosis.js.org/docs-examples.html)
+[Table of Contents](toc.html)
 
 -->
 

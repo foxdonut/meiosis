@@ -137,8 +137,8 @@ router.start(route => update({ route: () => route }));
 
 Normally the function that you provide should call `update` to update the state with the route,
 using a patch that corresponds to your Meiosis setup
-([Mergerino](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html),
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), ...).
+([Mergerino](http://meiosis.js.org/docs/05-meiosis-with-mergerino.html),
+[Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html), ...).
 The example above uses Mergerino.
 
 Next, move on to [Using the Router](#using-the-router).
@@ -182,8 +182,8 @@ m.route(
 The `onRouteChange` function is called with the `route` whenever the route changes. Normally the
 function that you provide should call `update` to update the state with the route, using a patch
 that corresponds to your Meiosis setup
-([Mergerino](http://meiosis.js.org/tutorial/05-meiosis-with-mergerino.html),
-[Function Patches](http://meiosis.js.org/tutorial/04-meiosis-with-function-patches.html), ...).
+([Mergerino](http://meiosis.js.org/docs/05-meiosis-with-mergerino.html),
+[Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html), ...).
 The example above uses Mergerino.
 
 ## Using the Router

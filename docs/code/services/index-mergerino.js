@@ -127,10 +127,7 @@ const app = {
   ]
 };
 
-const dropRepeats = (
-  states,
-  onchange = (state) => state
-) => {
+const dropRepeats = (states, onchange = (state) => state) => {
   let prev = undefined;
   const result = stream();
 

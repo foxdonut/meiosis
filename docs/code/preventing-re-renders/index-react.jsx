@@ -6,8 +6,7 @@ const entryNumber = {
     value: ''
   },
   Actions: (update) => ({
-    editEntryValue: (id, value) =>
-      update({ [id]: { value } })
+    editEntryValue: (id, value) => update({ [id]: { value } })
   })
 };
 
@@ -25,9 +24,7 @@ class EntryNumber extends React.Component {
 
     return (
       <div>
-        <span style={{ marginRight: 8 }}>
-          Entry number:
-        </span>
+        <span style={{ marginRight: 8 }}>Entry number:</span>
         <input
           type="text"
           size="2"
@@ -46,8 +43,7 @@ const entryDate = {
     value: ''
   },
   Actions: (update) => ({
-    editDateValue: (id, value) =>
-      update({ [id]: { value } })
+    editDateValue: (id, value) => update({ [id]: { value } })
   })
 };
 
@@ -81,9 +77,7 @@ class EntryDate extends React.Component {
 
 const convert = (value, to) =>
   Math.round(
-    to === 'C'
-      ? ((value - 32) / 9) * 5
-      : (value * 9) / 5 + 32
+    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
   );
 
 const temperature = {
@@ -229,16 +223,8 @@ class App extends React.Component {
           id="entry"
           actions={actions}
         />
-        <EntryDate
-          state={state}
-          id="date"
-          actions={actions}
-        />
-        <Temperature
-          state={state}
-          id="air"
-          actions={actions}
-        />
+        <EntryDate state={state} id="date" actions={actions} />
+        <Temperature state={state} id="air" actions={actions} />
         <Temperature
           state={state}
           id="water"
