@@ -2,21 +2,21 @@
 const merge = mergerino;
 
 const checkIfStateChanged = (next, prev) =>
-  next.attrs.state[next.attrs.id] !==
-  prev.attrs.state[prev.attrs.id];
+  next.attrs.cell.state !== prev.attrs.cell.state;
+
+const entryActions = {
+  editEntryValue: (cell, value) => cell.update({ value })
+};
 
 const entryNumber = {
   initial: {
     value: ''
-  },
-  Actions: (update) => ({
-    editEntryValue: (id, value) => update({ [id]: { value } })
-  })
+  }
 };
 
 const EntryNumber = {
   onbeforeupdate: checkIfStateChanged,
-  view: ({ attrs: { state, id, actions } }) => {
+  view: ({ attrs: { cell } }) => {
     // eslint-disable-next-line no-console
     console.log('render Entry');
 
@@ -28,81 +28,29 @@ const EntryNumber = {
         'Entry number:'
       ),
       m('input[type=text][size=2]', {
-        value: state[id].value,
+        value: cell.state.value,
         oninput: (evt) =>
-          actions.editEntryValue(id, evt.target.value)
+          entryActions.editEntryValue(cell, evt.target.value)
       })
     );
   }
 };
 
-const entryDate = {
-  initial: {
-    value: ''
-  },
-  Actions: (update) => ({
-    editDateValue: (id, value) => update({ [id]: { value } })
-  })
-};
-
-const EntryDate = {
-  onbeforeupdate: checkIfStateChanged,
-  view: ({ attrs: { state, id, actions } }) => {
-    // eslint-disable-next-line no-console
-    console.log('render Date');
-
-    return m(
-      'div',
-      { style: { 'margin-top': '8px' } },
-      m('span', { style: { 'margin-right': '8px' } }, 'Date:'),
-      m('input[type=text][size=10]', {
-        value: state[id].value,
-        oninput: (evt) =>
-          actions.editDateValue(id, evt.target.value)
-      })
-    );
+const temperatureActions = {
+  increment: (cell, amount) => {
+    cell.update({ value: (value) => value + amount });
   }
 };
-
-const convert = (value, to) =>
-  Math.round(
-    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
-  );
 
 const temperature = {
-  Initial: (label) => ({
-    label,
-    value: 20,
-    units: 'C'
-  }),
-  Actions: (update) => ({
-    increment: (id, amount) => (evt) => {
-      evt.preventDefault();
-      update({
-        [id]: { value: (value) => value + amount }
-      });
-    },
-    changeUnits: (id) => (evt) => {
-      evt.preventDefault();
-      update({
-        [id]: (state) => {
-          const newUnits = state.units === 'C' ? 'F' : 'C';
-          const newValue = convert(state.value, newUnits);
-          return merge(state, {
-            units: newUnits,
-            value: newValue
-          });
-        }
-      });
-    }
-  })
+  createInitial: (label) => ({ label, value: 20 })
 };
 
 const Temperature = {
   onbeforeupdate: checkIfStateChanged,
-  view: ({ attrs: { state, id, actions } }) => {
+  view: ({ attrs: { cell } }) => {
     // eslint-disable-next-line no-console
-    console.log('render Temperature', state[id].label);
+    console.log('render Temperature', cell.state.label);
 
     return m(
       'div.row',
@@ -111,31 +59,29 @@ const Temperature = {
         'div.col-md-3',
         m(
           'span',
-          state[id].label,
+          cell.state.label,
           ' Temperature: ',
-          state[id].value,
+          cell.state.value,
           m.trust('&deg;'),
-          state[id].units
+          'C'
         )
       ),
       m(
         'div.col-md-6',
         m(
-          'button.btn.btn-sm.btn-default',
-          { onclick: actions.increment(id, 1) },
+          'button.btn.btn-sm.btn-secondary',
+          {
+            onclick: () => temperatureActions.increment(cell, 1)
+          },
           'Increment'
         ),
-
         m(
-          'button.btn.btn-sm.btn-default',
-          { onclick: actions.increment(id, -1) },
+          'button.btn.btn-sm.btn-secondary',
+          {
+            onclick: () =>
+              temperatureActions.increment(cell, -1)
+          },
           'Decrement'
-        ),
-
-        m(
-          'button.btn.btn-sm.btn-info',
-          { onclick: actions.changeUnits(id) },
-          'Change Units'
         )
       )
     );
@@ -143,72 +89,75 @@ const Temperature = {
 };
 
 const displayTemperature = (temperature) =>
-  temperature.label +
-  ': ' +
-  temperature.value +
-  '\xB0' +
-  temperature.units;
+  temperature.label + ': ' + temperature.value + '\xB0 C';
+
+const appActions = {
+  save: (cell) => {
+    cell.update({
+      saved:
+        ' Entry #' +
+        cell.state.entry.value +
+        ':' +
+        displayTemperature(cell.state.air) +
+        ' ' +
+        displayTemperature(cell.state.water),
+
+      air: { value: 20 },
+      water: { value: 20 },
+      entry: { value: '' }
+    });
+  }
+};
 
 const app = {
   initial: {
     saved: '',
     entry: entryNumber.initial,
-    date: entryDate.initial,
-    air: temperature.Initial('Air'),
-    water: temperature.Initial('Water')
+    air: temperature.createInitial('Air'),
+    water: temperature.createInitial('Water')
   },
-  Actions: (update) =>
-    Object.assign(
-      {
-        save: (state) => (evt) => {
-          evt.preventDefault();
-          update({
-            saved:
-              ' Entry #' +
-              state.entry.value +
-              ' on ' +
-              state.date.value +
-              ':' +
-              ' Temperatures: ' +
-              displayTemperature(state.air) +
-              ' ' +
-              displayTemperature(state.water),
-
-            entry: { value: '' },
-            date: { value: '' }
-          });
-        }
-      },
-      entryNumber.Actions(update),
-      entryDate.Actions(update),
-      temperature.Actions(update)
-    )
-};
-
-const App = {
-  view: ({ attrs: { state, actions } }) =>
+  view: (cell) =>
     m(
-      'form',
-      m(EntryNumber, { state, id: 'entry', actions }),
-      m(EntryDate, { state, id: 'date', actions }),
-      m(Temperature, { state, id: 'air', actions }),
-      m(Temperature, { state, id: 'water', actions }),
+      'div',
+      m(EntryNumber, { cell: cell.nest('entry') }),
+      m(Temperature, { cell: cell.nest('air') }),
+      m(Temperature, { cell: cell.nest('water') }),
       m(
         'div',
         m(
           'button.btn.btn-primary',
-          { onclick: actions.save(state) },
+          { onclick: () => appActions.save(cell) },
           'Save'
         ),
-        m('span', state.saved)
+        m('span', cell.state.saved)
       )
     )
 };
 
+const nestPatch = (patch, prop) => ({ [prop]: patch });
+
+const nestUpdate = (parentUpdate, prop) => (patch) =>
+  parentUpdate(nestPatch(patch, prop));
+
+const nestCell = (getState, parentUpdate) => (prop) => {
+  const getNestedState = () => getState()[prop];
+  const nestedUpdate = nestUpdate(parentUpdate, prop);
+
+  const nested = {
+    state: getNestedState(),
+    update: nestedUpdate,
+    nest: nestCell(getNestedState, nestedUpdate)
+  };
+
+  return nested;
+};
+
 const update = m.stream();
 const states = m.stream.scan(merge, app.initial, update);
-const actions = app.Actions(update);
+const nest = nestCell(states, update);
+const createCell = (state) => ({ state, update, nest });
+const cells = states.map(createCell);
 
 m.mount(document.getElementById('app'), {
-  view: () => m(App, { state: states(), actions })
+  view: () => app.view(cells())
 });
