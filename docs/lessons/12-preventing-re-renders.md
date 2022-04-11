@@ -27,30 +27,10 @@ To prevent re-renders of a component, we determine whether a component's state h
 to produce **new object instances** when updating the state, instead of mutating the existing
 object.
 
-We can do this with Mergerino's `merge` function. It produces a new object instance instead
-of mutating the state. Here, we are assigning the new instance back to the `[id]` property:
+This works when using Mergerino, or when using function patches if we make sure to return new object
+instances instead of mutating state.
 
-```js
-actions: update => ({
-  editEntryValue: (id, value) => update({ [id]: { value } })
-})
-```
-
-This also works patches that use functions when returning the result in order to create a new object
-instance. For example:
-
-```js
-changeUnits: id => evt => {
-  evt.preventDefault();
-  update({ [id]: state => {
-    const newUnits = state.units === "C" ? "F" : "C";
-    const newValue = convert(state.value, newUnits);
-    return merge(state, { units: newUnits, value: newValue });
-  } });
-}
-```
-
-We are now ready to prevent re-renders. Continue reading for the React version, or
+We will now look at how to prevent re-renders. Continue reading for the React version, or
 [click here to skip to the Mithril version](#mithril_prevent_re_render).
 
 <a name="react_version"></a>
@@ -62,13 +42,14 @@ lifecycle method to prevent a component from re-rendering when the state has not
 this to work, we need to compare the component's next state to the current state.
 
 The next props get passed as a parameter to the `shouldComponentUpdate` method. From them we can
-extract the `state` and use the `id` to get the component's state. Then, we compare to the current
+extract the `cell` and the `state` to get the component's state. Then, we compare to the current
 state using `this.props`. We return `true` or `false` depending on whether or not they are the same:
 
 ```js
-shouldComponentUpdate(nextProps) {
-  return nextProps.state[nextProps.id] !==
-    this.props.state[this.props.id];
+class ReRenderOnStateChangeComponent extends React.Component {
+  shouldComponentUpdate(nextProps) {
+    return nextProps.cell.state !== this.props.cell.state;
+  }
 }
 ```
 
@@ -77,9 +58,9 @@ changed. We can prove this to ourselves by adding `console.log` statements in th
 of the components, and check the console output to confirm that components are only re-rendered when
 their state has changed.
 
-Verify this in the example below. Notice that `render Entry`, `render Date`, `render Temperature
-Air`, and `render Temperature Water` appear in the console output **only** when you interact with
-that component in the user interface. Other components do not get re-rendered.
+Verify this in the example below. Notice that `render Entry`, `render Temperature Air`, and `render
+Temperature Water` appear in the console output **only** when you interact with that component in
+the user interface. Other components do not get re-rendered.
 
 @flems {"files":"code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"react,react-dom,flyd,mergerino","height":800,"middle":65}
 
@@ -95,8 +76,7 @@ We can write a simple helper function that checks whether the component's state 
 
 ```js
 const checkIfStateChanged = (next, prev) =>
-  next.attrs.state[next.attrs.id] !==
-  prev.attrs.state[prev.attrs.id];
+  next.attrs.cell.state !== prev.attrs.cell.state;
 ```
 
 Then, we add the `onbeforeupdate` lifecycle method to the component:
@@ -110,9 +90,9 @@ We can prove this to ourselves by adding `console.log` statements in the `view()
 components, and check the console output to confirm that components are only re-rendered when their
 state has changed.
 
-Verify this in the example below. Notice that `render Entry`, `render Date`, `render Temperature
-Air`, and `render Temperature Water` appear in the console output **only** when you interact with
-that component in the user interface. Other components do not get re-rendered.
+Verify this in the example below. Notice that `render Entry`, `render Temperature Air`, and `render
+Temperature Water` appear in the console output **only** when you interact with that component in
+the user interface. Other components do not get re-rendered.
 
 @flems {"files":"code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 

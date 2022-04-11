@@ -88,27 +88,6 @@ const Temperature = {
   }
 };
 
-const displayTemperature = (temperature) =>
-  temperature.label + ': ' + temperature.value + '\xB0 C';
-
-const appActions = {
-  save: (cell) => {
-    cell.update({
-      saved:
-        ' Entry #' +
-        cell.state.entry.value +
-        ':' +
-        displayTemperature(cell.state.air) +
-        ' ' +
-        displayTemperature(cell.state.water),
-
-      air: { value: 20 },
-      water: { value: 20 },
-      entry: { value: '' }
-    });
-  }
-};
-
 const app = {
   initial: {
     saved: '',
@@ -121,16 +100,7 @@ const app = {
       'div',
       m(EntryNumber, { cell: cell.nest('entry') }),
       m(Temperature, { cell: cell.nest('air') }),
-      m(Temperature, { cell: cell.nest('water') }),
-      m(
-        'div',
-        m(
-          'button.btn.btn-primary',
-          { onclick: () => appActions.save(cell) },
-          'Save'
-        ),
-        m('span', cell.state.saved)
-      )
+      m(Temperature, { cell: cell.nest('water') })
     )
 };
 

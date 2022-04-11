@@ -86,27 +86,6 @@ class Temperature extends ReRenderOnStateChangeComponent {
   }
 }
 
-const displayTemperature = (temperature) =>
-  temperature.label + ': ' + temperature.value + '\xB0 C';
-
-const appActions = {
-  save: (cell) => {
-    cell.update({
-      saved:
-        ' Entry #' +
-        cell.state.entry.value +
-        ':' +
-        displayTemperature(cell.state.air) +
-        ' ' +
-        displayTemperature(cell.state.water),
-
-      air: { value: 20 },
-      water: { value: 20 },
-      entry: { value: '' }
-    });
-  }
-};
-
 const app = {
   initial: {
     saved: '',
@@ -119,15 +98,6 @@ const app = {
       <EntryNumber cell={cell.nest('entry')} />
       <Temperature cell={cell.nest('air')} />
       <Temperature cell={cell.nest('water')} />
-      <div>
-        <button
-          className="btn btn-primary"
-          onClick={() => appActions.save(cell)}
-        >
-          Save
-        </button>
-        <div>{cell.state.saved}</div>
-      </div>
     </div>
   )
 };
