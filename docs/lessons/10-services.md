@@ -1,8 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
+[< Previous](09-using-react.html) |
+[Next >](11-nesting.html) |
 [Table of Contents](toc.html)
 
-## Services
+## 10 - Services
 
 All credit goes to [James Forbes](https://james-forbes.com) for his idea of **services**, and I am
 grateful to James for sharing this and other ideas that have significantly improved Meiosis.
@@ -199,11 +201,11 @@ careful not to get carried away.
 
 -----
 
+[< Previous](09-using-react.html) |
+[Next >](11-nesting.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](http://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut)
-and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

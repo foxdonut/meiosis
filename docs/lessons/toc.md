@@ -19,7 +19,5 @@
 | [13 - The Meiosis Pattern Cheatsheet](13-the-meiosis-pattern.html) |
 | [14 - What's Next?](14-whats-next.html) |
 
------
-
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
 [foxdonut](https://github.com/foxdonut) and is released under the MIT license.

@@ -1,8 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
+[< Previous](10-services.html) |
+[Next >](12-preventing-re-renders.html) |
 [Table of Contents](toc.html)
 
-## Nesting
+## 11- Nesting
 
 ```js
 const nestPatch = (patch, prop) => (state) =>
@@ -39,11 +41,11 @@ const cells = states.map((state) => ({
 }));
 ```
 
+[< Previous](10-services.html) |
+[Next >](12-preventing-re-renders.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](https://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut)
-and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](https://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

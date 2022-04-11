@@ -1,8 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
+[< Previous](12-preventing-re-renders.html) |
+[Next >](14-whats-next.html) |
 [Table of Contents](toc.html)
 
-## The Meiosis Pattern Cheatsheet
+## 13 - The Meiosis Pattern Cheatsheet
 
 > **Helper functions!** Meiosis is a pattern that you can set up yourself, but by popular demand
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now available
@@ -158,11 +160,11 @@ preact.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
 ```
 
+[< Previous](12-preventing-re-renders.html) |
+[Next >](14-whats-next.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](https://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut)
-and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](https://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

@@ -1,8 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
+[< Previous](11-nesting.html) |
+[Next >](13-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
-## Preventing Re-Renders
+## 12 - Preventing Re-Renders
 
 > **IMPORTANT NOTE**: before preventing re-renders, please first make sure that re-rendering a part
 of your application is indeed causing a performance problem that impacts the user experience.
@@ -114,11 +116,11 @@ that component in the user interface. Other components do not get re-rendered.
 
 @flems {"files":"code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 
+[< Previous](11-nesting.html) |
+[Next >](13-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by
-[@foxdonut00](http://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut)
-and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
+[foxdonut](https://github.com/foxdonut) and is released under the MIT license.

@@ -1,5 +1,6 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
+[< Previous](13-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
 ## 14 - What's Next?
@@ -15,9 +16,10 @@ additional features including TypeScript support, see
 
 Thank you for reading. I hope you enjoy Meiosis!
 
+[< Previous](13-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by [@foxdonut00](http://twitter.com/foxdonut00) /
+[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
 [foxdonut](https://github.com/foxdonut) and is released under the MIT license.
