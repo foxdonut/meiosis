@@ -47,8 +47,8 @@ In the following sections, we will look at how to wire up the Meiosis pattern to
 libraries. Feel free to jump straight to the view library in which you are interested.
 
 - [07 - Using Mithril](07-using-mithril.html)
-- [08 - Using React](08-using-react.html)
-- [09 - Using Preact](09-using-preact.html)
+- [08 - Using Preact](08-using-preact.html)
+- [09 - Using React](09-using-react.html)
 
 [< Previous](05-meiosis-with-mergerino.html) |
 [Next >](07-using-mithril.html) |

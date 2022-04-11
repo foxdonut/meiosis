@@ -1,10 +1,10 @@
 digraph meiosisdocs {
   stream [shape="none", label="const update = stream();"]
 
-  updateplus1 [shape="none", style="filled", fillcolor="yellow", label="update(5)"]
-  updateplus3 [shape="none", style="filled", fillcolor="yellow", label="update(-3)"]
-  updateplus4 [shape="none", style="filled", fillcolor="yellow", label="update(8)"]
-  updateplus2 [shape="none", style="filled", fillcolor="yellow", label="update(2)"]
+  updateplus1 [shape="none", style="filled", fillcolor="orange", label="update(5)"]
+  updateplus3 [shape="none", style="filled", fillcolor="orange", label="update(-3)"]
+  updateplus4 [shape="none", style="filled", fillcolor="orange", label="update(8)"]
+  updateplus2 [shape="none", style="filled", fillcolor="orange", label="update(2)"]
 
   thestream [shape="plaintext", style="filled", fillcolor="lightblue", label=<
     <table border="1">
@@ -53,11 +53,11 @@ digraph meiosisdocs {
     </table>
   >]
 
-  scan0 [shape="none", style="filled", fillcolor="yellow", label="initial"]
-  scan1 [shape="none", style="filled", fillcolor="yellow", label="0 + 5 = 5"]
-  scan2 [shape="none", style="filled", fillcolor="yellow", label="5 + -3 = 2"]
-  scan3 [shape="none", style="filled", fillcolor="yellow", label="2 + 8 = 10"]
-  scan4 [shape="none", style="filled", fillcolor="yellow", label="10 + 2 = 12"]
+  scan0 [shape="none", style="filled", fillcolor="orange", label="initial"]
+  scan1 [shape="none", style="filled", fillcolor="orange", label="0 + 5 = 5"]
+  scan2 [shape="none", style="filled", fillcolor="orange", label="5 + -3 = 2"]
+  scan3 [shape="none", style="filled", fillcolor="orange", label="2 + 8 = 10"]
+  scan4 [shape="none", style="filled", fillcolor="orange", label="10 + 2 = 12"]
 
   updateplus1 -> thestream:plusone
   updateplus3 -> thestream:plusthree

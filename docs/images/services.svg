@@ -12,7 +12,7 @@
 <!-- states -->
 <g id="node1" class="node">
 <title>states</title>
-<polygon fill="yellow" stroke="transparent" points="137.5,-206 83.5,-206 83.5,-170 137.5,-170 137.5,-206"/>
+<polygon fill="orange" stroke="transparent" points="137.5,-206 83.5,-206 83.5,-170 137.5,-170 137.5,-206"/>
 <text text-anchor="middle" x="110.5" y="-184.9" font-family="Courier,monospace" font-size="12.00">states</text>
 </g>
 <!-- services -->
@@ -44,7 +44,7 @@
 <!-- update -->
 <g id="node3" class="node">
 <title>update</title>
-<polygon fill="yellow" stroke="transparent" points="152.5,-36 46.5,-36 46.5,0 152.5,0 152.5,-36"/>
+<polygon fill="orange" stroke="transparent" points="152.5,-36 46.5,-36 46.5,0 152.5,0 152.5,-36"/>
 <text text-anchor="middle" x="99.5" y="-14.9" font-family="Courier,monospace" font-size="12.00">update(patch)</text>
 </g>
 <!-- services&#45;&gt;update -->

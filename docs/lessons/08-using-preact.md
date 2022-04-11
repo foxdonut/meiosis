@@ -15,7 +15,8 @@ In this section, we'll wire this up to [Preact](https://preactjs.com).
 Next, remember that in the previous section, we set up a stream of cells:
 
 ```js
-const cells = states.map((state) => ({ state, update }));
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
 ```
 
 Now, we'll use `cells.map` to render the view whenever the state changes. We'll use `preact.render`

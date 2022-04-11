@@ -37,7 +37,7 @@
 <!-- updateplus1 -->
 <g id="node2" class="node">
 <title>updateplus1</title>
-<polygon fill="yellow" stroke="transparent" points="278.5,-378 202.5,-378 202.5,-342 278.5,-342 278.5,-378"/>
+<polygon fill="orange" stroke="transparent" points="278.5,-378 202.5,-378 202.5,-342 278.5,-342 278.5,-378"/>
 <text text-anchor="middle" x="240.5" y="-356.9" font-family="Courier,monospace" font-size="12.00">update(5)</text>
 </g>
 <!-- updateplus1&#45;&gt;thestream -->
@@ -49,7 +49,7 @@
 <!-- updateplus3 -->
 <g id="node3" class="node">
 <title>updateplus3</title>
-<polygon fill="yellow" stroke="transparent" points="412.5,-378 328.5,-378 328.5,-342 412.5,-342 412.5,-378"/>
+<polygon fill="orange" stroke="transparent" points="412.5,-378 328.5,-378 328.5,-342 412.5,-342 412.5,-378"/>
 <text text-anchor="middle" x="370.5" y="-356.9" font-family="Courier,monospace" font-size="12.00">update(&#45;3)</text>
 </g>
 <!-- updateplus3&#45;&gt;thestream -->
@@ -61,7 +61,7 @@
 <!-- updateplus4 -->
 <g id="node4" class="node">
 <title>updateplus4</title>
-<polygon fill="yellow" stroke="transparent" points="538.5,-378 462.5,-378 462.5,-342 538.5,-342 538.5,-378"/>
+<polygon fill="orange" stroke="transparent" points="538.5,-378 462.5,-378 462.5,-342 538.5,-342 538.5,-378"/>
 <text text-anchor="middle" x="500.5" y="-356.9" font-family="Courier,monospace" font-size="12.00">update(8)</text>
 </g>
 <!-- updateplus4&#45;&gt;thestream -->
@@ -73,7 +73,7 @@
 <!-- updateplus2 -->
 <g id="node5" class="node">
 <title>updateplus2</title>
-<polygon fill="yellow" stroke="transparent" points="664.5,-378 588.5,-378 588.5,-342 664.5,-342 664.5,-378"/>
+<polygon fill="orange" stroke="transparent" points="664.5,-378 588.5,-378 588.5,-342 664.5,-342 664.5,-378"/>
 <text text-anchor="middle" x="626.5" y="-356.9" font-family="Courier,monospace" font-size="12.00">update(2)</text>
 </g>
 <!-- updateplus2&#45;&gt;thestream -->
@@ -85,7 +85,7 @@
 <!-- scan1 -->
 <g id="node10" class="node">
 <title>scan1</title>
-<polygon fill="yellow" stroke="transparent" points="278.5,-232 202.5,-232 202.5,-196 278.5,-196 278.5,-232"/>
+<polygon fill="orange" stroke="transparent" points="278.5,-232 202.5,-232 202.5,-196 278.5,-196 278.5,-232"/>
 <text text-anchor="middle" x="240.5" y="-210.9" font-family="Courier,monospace" font-size="12.00">0 + 5 = 5</text>
 </g>
 <!-- thestream&#45;&gt;scan1 -->
@@ -97,7 +97,7 @@
 <!-- scan2 -->
 <g id="node11" class="node">
 <title>scan2</title>
-<polygon fill="yellow" stroke="transparent" points="412.5,-232 328.5,-232 328.5,-196 412.5,-196 412.5,-232"/>
+<polygon fill="orange" stroke="transparent" points="412.5,-232 328.5,-232 328.5,-196 412.5,-196 412.5,-232"/>
 <text text-anchor="middle" x="370.5" y="-210.9" font-family="Courier,monospace" font-size="12.00">5 + &#45;3 = 2</text>
 </g>
 <!-- thestream&#45;&gt;scan2 -->
@@ -109,7 +109,7 @@
 <!-- scan3 -->
 <g id="node12" class="node">
 <title>scan3</title>
-<polygon fill="yellow" stroke="transparent" points="542.5,-232 458.5,-232 458.5,-196 542.5,-196 542.5,-232"/>
+<polygon fill="orange" stroke="transparent" points="542.5,-232 458.5,-232 458.5,-196 542.5,-196 542.5,-232"/>
 <text text-anchor="middle" x="500.5" y="-210.9" font-family="Courier,monospace" font-size="12.00">2 + 8 = 10</text>
 </g>
 <!-- thestream&#45;&gt;scan3 -->
@@ -121,7 +121,7 @@
 <!-- scan4 -->
 <g id="node13" class="node">
 <title>scan4</title>
-<polygon fill="yellow" stroke="transparent" points="672,-232 581,-232 581,-196 672,-196 672,-232"/>
+<polygon fill="orange" stroke="transparent" points="672,-232 581,-232 581,-196 672,-196 672,-232"/>
 <text text-anchor="middle" x="626.5" y="-210.9" font-family="Courier,monospace" font-size="12.00">10 + 2 = 12</text>
 </g>
 <!-- thestream&#45;&gt;scan4 -->
@@ -162,7 +162,7 @@
 <!-- scan0 -->
 <g id="node9" class="node">
 <title>scan0</title>
-<polygon fill="yellow" stroke="transparent" points="179,-232 118,-232 118,-196 179,-196 179,-232"/>
+<polygon fill="orange" stroke="transparent" points="179,-232 118,-232 118,-196 179,-196 179,-232"/>
 <text text-anchor="middle" x="148.5" y="-210.9" font-family="Courier,monospace" font-size="12.00">initial</text>
 </g>
 <!-- scan0&#45;&gt;thescanstream -->

@@ -22,7 +22,8 @@ purposes, it works just like `flyd`. The only difference is that you call `m.str
 Next, remember that in the previous section, we set up a stream of cells:
 
 ```js
-const cells = states.map((state) => ({ state, update }));
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
 ```
 
 Now, we'll use `m.mount` and a minimal Mithril component to render the view. We'll pass the

@@ -50,7 +50,8 @@ const app = {
 
 const update = flyd.stream();
 const states = flyd.scan(merge, app.initial, update);
-const cells = states.map((state) => ({ state, update }));
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
 
 const element = document.getElementById('app');
 cells.map((cell) => {

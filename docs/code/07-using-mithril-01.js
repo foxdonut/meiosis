@@ -62,7 +62,8 @@ const app = {
 
 const update = m.stream();
 const states = m.stream.scan(merge, app.initial, update);
-const cells = states.map((state) => ({ state, update }));
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
 
 m.mount(document.getElementById('app'), {
   view: () => app.view(cells())

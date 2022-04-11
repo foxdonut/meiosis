@@ -1,24 +1,25 @@
 /* global React, ReactDOM, flyd, mergerino */
 const merge = mergerino;
 
+class ReRenderOnStateChangeComponent extends React.Component {
+  shouldComponentUpdate(nextProps) {
+    return nextProps.cell.state !== this.props.cell.state;
+  }
+}
+
+const entryActions = {
+  editEntryValue: (cell, value) => cell.update({ value })
+};
+
 const entryNumber = {
   initial: {
     value: ''
-  },
-  Actions: (update) => ({
-    editEntryValue: (id, value) => update({ [id]: { value } })
-  })
+  }
 };
 
-class EntryNumber extends React.Component {
-  shouldComponentUpdate(nextProps) {
-    return (
-      nextProps.state[nextProps.id] !==
-      this.props.state[this.props.id]
-    );
-  }
+class EntryNumber extends ReRenderOnStateChangeComponent {
   render() {
-    const { state, id, actions } = this.props;
+    const { cell } = this.props;
     // eslint-disable-next-line no-console
     console.log('render Entry');
 
@@ -28,9 +29,9 @@ class EntryNumber extends React.Component {
         <input
           type="text"
           size="2"
-          value={state[id].value}
+          value={cell.state.value}
           onChange={(evt) =>
-            actions.editEntryValue(id, evt.target.value)
+            entryActions.editEntryValue(cell, evt.target.value)
           }
         />
       </div>
@@ -38,115 +39,46 @@ class EntryNumber extends React.Component {
   }
 }
 
-const entryDate = {
-  initial: {
-    value: ''
-  },
-  Actions: (update) => ({
-    editDateValue: (id, value) => update({ [id]: { value } })
-  })
+const temperatureActions = {
+  increment: (cell, amount) => {
+    cell.update({ value: (value) => value + amount });
+  }
 };
-
-class EntryDate extends React.Component {
-  shouldComponentUpdate(nextProps) {
-    return (
-      nextProps.state[nextProps.id] !==
-      this.props.state[this.props.id]
-    );
-  }
-  render() {
-    const { state, id, actions } = this.props;
-    // eslint-disable-next-line no-console
-    console.log('render Date');
-
-    return (
-      <div style={{ marginTop: 8 }}>
-        <span style={{ marginRight: 8 }}>Date:</span>
-        <input
-          type="text"
-          size="10"
-          value={state[id].value}
-          onChange={(evt) =>
-            actions.editDateValue(id, evt.target.value)
-          }
-        />
-      </div>
-    );
-  }
-}
-
-const convert = (value, to) =>
-  Math.round(
-    to === 'C' ? ((value - 32) / 9) * 5 : (value * 9) / 5 + 32
-  );
 
 const temperature = {
-  Initial: (label) => ({
-    label,
-    value: 20,
-    units: 'C'
-  }),
-  Actions: (update) => ({
-    increment: (id, amount) => (evt) => {
-      evt.preventDefault();
-      update({
-        [id]: { value: (value) => value + amount }
-      });
-    },
-    changeUnits: (id) => (evt) => {
-      evt.preventDefault();
-      update({
-        [id]: (state) => {
-          const newUnits = state.units === 'C' ? 'F' : 'C';
-          const newValue = convert(state.value, newUnits);
-          return merge(state, {
-            units: newUnits,
-            value: newValue
-          });
-        }
-      });
-    }
-  })
+  createInitial: (label) => ({ label, value: 20 })
 };
 
-class Temperature extends React.Component {
-  shouldComponentUpdate(nextProps) {
-    return (
-      nextProps.state[nextProps.id] !==
-      this.props.state[this.props.id]
-    );
-  }
+class Temperature extends ReRenderOnStateChangeComponent {
   render() {
-    const { state, id, actions } = this.props;
+    const { cell } = this.props;
     // eslint-disable-next-line no-console
-    console.log('render Temperature', state[id].label);
+    console.log('render Temperature', cell.state.label);
 
     return (
       <div className="row" style={{ marginTop: 8 }}>
         <div className="col-md-3">
           <span>
-            {state[id].label} Temperature:
-            {state[id].value}&deg; {state[id].units}
+            {cell.state.label} Temperature:
+            {cell.state.value}&deg;C
           </span>
         </div>
         <div className="col-md-6">
           <button
-            className="btn btn-sm btn-default"
-            onClick={actions.increment(id, 1)}
+            className="btn btn-sm btn-secondary"
+            onClick={() =>
+              temperatureActions.increment(cell, 1)
+            }
           >
             Increment
           </button>
           <button
-            className="btn btn-sm btn-default"
-            onClick={actions.increment(id, -1)}
+            className="btn btn-sm btn-secondary"
+            onClick={() =>
+              temperatureActions.increment(cell, -1)
+            }
           >
             Decrement
-          </button>
-          <button
-            className="btn btn-sm btn-info"
-            onClick={actions.changeUnits(id)}
-          >
-            Change Units
           </button>
         </div>
       </div>
@@ -155,100 +87,76 @@ class Temperature extends React.Component {
 }
 
 const displayTemperature = (temperature) =>
-  temperature.label +
-  ': ' +
-  temperature.value +
-  '\xB0' +
-  temperature.units;
+  temperature.label + ': ' + temperature.value + '\xB0 C';
+
+const appActions = {
+  save: (cell) => {
+    cell.update({
+      saved:
+        ' Entry #' +
+        cell.state.entry.value +
+        ':' +
+        displayTemperature(cell.state.air) +
+        ' ' +
+        displayTemperature(cell.state.water),
+
+      air: { value: 20 },
+      water: { value: 20 },
+      entry: { value: '' }
+    });
+  }
+};
 
 const app = {
   initial: {
     saved: '',
     entry: entryNumber.initial,
-    date: entryDate.initial,
-    air: temperature.Initial('Air'),
-    water: temperature.Initial('Water')
+    air: temperature.createInitial('Air'),
+    water: temperature.createInitial('Water')
   },
-  Actions: (update) =>
-    Object.assign(
-      {
-        save: (state) => (evt) => {
-          evt.preventDefault();
-          update({
-            saved:
-              ' Entry #' +
-              state.entry.value +
-              ' on ' +
-              state.date.value +
-              ':' +
-              ' Temperatures: ' +
-              displayTemperature(state.air) +
-              ' ' +
-              displayTemperature(state.water),
-
-            entry: { value: '' },
-            date: { value: '' }
-          });
-        }
-      },
-      entryNumber.Actions(update),
-      entryDate.Actions(update),
-      temperature.Actions(update)
-    )
+  view: (cell) => (
+    <div>
+      <EntryNumber cell={cell.nest('entry')} />
+      <Temperature cell={cell.nest('air')} />
+      <Temperature cell={cell.nest('water')} />
+      <div>
+        <button
+          className="btn btn-primary"
+          onClick={() => appActions.save(cell)}
+        >
+          Save
+        </button>
+        <div>{cell.state.saved}</div>
+      </div>
+    </div>
+  )
 };
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.states();
-    this.skippedFirst = false;
-  }
-  componentDidMount() {
-    const setState = this.setState.bind(this);
-    this.props.states.map((state) => {
-      if (this.skippedFirst) {
-        setState(state);
-      } else {
-        this.skippedFirst = true;
-      }
-    });
-  }
-  render() {
-    const state = this.state;
-    const { actions } = this.props;
-    return (
-      <form>
-        <EntryNumber
-          state={state}
-          id="entry"
-          actions={actions}
-        />
-        <EntryDate state={state} id="date" actions={actions} />
-        <Temperature state={state} id="air" actions={actions} />
-        <Temperature
-          state={state}
-          id="water"
-          actions={actions}
-        />
-        <div>
-          <button
-            className="btn btn-primary"
-            onClick={actions.save(state)}
-          >
-            Save
-          </button>
-          <span>{state.saved}</span>
-        </div>
-      </form>
-    );
-  }
-}
+const nestPatch = (patch, prop) => ({ [prop]: patch });
+
+const nestUpdate = (parentUpdate, prop) => (patch) =>
+  parentUpdate(nestPatch(patch, prop));
+
+const nestCell = (getState, parentUpdate) => (prop) => {
+  const getNestedState = () => getState()[prop];
+  const nestedUpdate = nestUpdate(parentUpdate, prop);
+
+  const nested = {
+    state: getNestedState(),
+    update: nestedUpdate,
+    nest: nestCell(getNestedState, nestedUpdate)
+  };
+
+  return nested;
+};
 
 const update = flyd.stream();
 const states = flyd.scan(merge, app.initial, update);
-const actions = app.Actions(update);
+const nest = nestCell(states, update);
+const createCell = (state) => ({ state, update, nest });
+const cells = states.map(createCell);
 
-ReactDOM.render(
-  <App states={states} actions={actions} />,
-  document.getElementById('app')
-);
+const element = document.getElementById('app');
+cells.map((cell) => {
+  ReactDOM.render(app.view(cell), element);
+});

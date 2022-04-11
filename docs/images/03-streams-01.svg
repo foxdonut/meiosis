@@ -33,7 +33,7 @@
 <!-- updateplus1 -->
 <g id="node2" class="node">
 <title>updateplus1</title>
-<polygon fill="yellow" stroke="transparent" points="144,-109 68,-109 68,-73 144,-73 144,-109"/>
+<polygon fill="orange" stroke="transparent" points="144,-109 68,-109 68,-73 144,-73 144,-109"/>
 <text text-anchor="middle" x="106" y="-87.9" font-family="Courier,monospace" font-size="12.00">update(1)</text>
 </g>
 <!-- updateplus1&#45;&gt;thestream -->
@@ -45,7 +45,7 @@
 <!-- updateminus1 -->
 <g id="node3" class="node">
 <title>updateminus1</title>
-<polygon fill="yellow" stroke="transparent" points="278,-109 194,-109 194,-73 278,-73 278,-109"/>
+<polygon fill="orange" stroke="transparent" points="278,-109 194,-109 194,-73 278,-73 278,-109"/>
 <text text-anchor="middle" x="236" y="-87.9" font-family="Courier,monospace" font-size="12.00">update(&#45;1)</text>
 </g>
 <!-- updateminus1&#45;&gt;thestream -->
