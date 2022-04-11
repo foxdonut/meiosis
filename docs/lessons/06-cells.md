@@ -56,5 +56,5 @@ libraries. Feel free to jump straight to the view library in which you are inter
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
+[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

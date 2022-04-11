@@ -278,5 +278,5 @@ When you are ready, continue on to [06 - Cells](06-cells.html).
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](http://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
+[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

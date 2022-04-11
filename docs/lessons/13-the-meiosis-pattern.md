@@ -166,5 +166,5 @@ preact.render(<App states={states} actions={actions} />,
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut [Twitter](https://twitter.com/foxdonut00) /
-[foxdonut](https://github.com/foxdonut) and is released under the MIT license.
+[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
+[GitHub](https://github.com/foxdonut)) and is released under the MIT license.
