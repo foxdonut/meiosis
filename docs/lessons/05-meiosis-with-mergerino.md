@@ -6,8 +6,7 @@
 
 ## 05 - Meiosis with Mergerino
 
-In the previous lesson, [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html),
-we set up the Meiosis pattern with an `update` stream of function patches.
+In the previous section, we set up the Meiosis pattern with an `update` stream of function patches.
 
 In this section, we will use another approach - my personal favourite - using a library called
 [Mergerino](https://github.com/fuzetsu/mergerino). The Meiosis pattern is flexible enough that you
@@ -16,10 +15,9 @@ can use either of these approaches or even one of your own.
 <a name="introducing_mergerino"></a>
 ### [Introducing Mergerino](#introducing_mergerino)
 
-[Mergerino](https://github.com/fuzetsu/mergerino) is a brilliant utility that
-[Daniel Loomer](https://github.com/fuzetsu) wrote in less than 30 lines of code. We will
-use it to issue patches onto our `update` stream, and to produce the updated state from
-our accumulator function.
+[Mergerino](https://github.com/fuzetsu/mergerino) is a brilliant utility that [Daniel
+Loomer](https://github.com/fuzetsu) wrote in less than 30 lines of code. We will use patches on our
+`update` stream that Mergerino can use to produce the updated state from our accumulator function.
 
 Let's say we have this initial state:
 
@@ -36,29 +34,29 @@ Imagine that our patches are objects that describe how we want to update the sta
 change the temperature value to 23, we would call:
 
 ```js
-update({ value: 23 })
+update({ value: 23 });
 ```
 
 To change the units:
 
 ```js
-update({ units: 'F' })
+update({ units: 'F' });
 ```
 
 To convert the value at the same time as changing the units:
 
 ```js
-update({ value: 72, units: 'F' })
+update({ value: 72, units: 'F' });
 ```
 
 How do we write an accumulator function that handles these object patches to update the state?
 
-Mergerino provides a function, `merge`, that takes a target object as its first parameter, and patch
-objects in the remainder of the parameters. It patches the target object by copying over the
-properties from the patch objects onto the target object:
+Mergerino exports a function, that we call `merge`, which takes a target object as its first
+parameter, and patch objects in the remainder of the parameters. It patches the target object by
+copying over the properties from the patch objects onto the target object:
 
-```javascript
-merge({ value: 22, units: 'C' }, { value: 23 })
+```js
+merge({ value: 22, units: 'C' }, { value: 23 });
 // result:
 { value: 23, units: 'C' }
 
@@ -67,27 +65,27 @@ merge({ value: 23, units: 'C' }, { comfortable: true })
 { value: 23, units: 'C', comfortable: true }
 ```
 
-If you find that this looks like `Object.assign`, you are correct: `merge` does the equivalent.
-However, `merge` has more capabilities.
+If you find that this looks like `Object.assign`, you are correct: in these examples, `merge` does
+the equivalent. However, `merge` has capabilities beyond what you can do with `Object.assign`.
 
 <a name="patching_based_on_current"></a>
 ### [Patching based on the current value](#patching_based_on_current)
 
 Within a patch, you can use the current value of the target object to determine the updated value.
-Just pass a **function** as the value of the property. Mergerino passes the value of that property
-to the function, and assigns the function's return value back to that property.
+Just pass a **function** as the value of the property. Mergerino passes the current value of that
+property to the function, and assigns the function's return value back to that property.
 
-This makes it easy to update a value using the previous value. For example, say that we want to
-increment the temperature value by 1. We need the previous value to compute the updated value. We
-can use a function for `value`:
+This makes it easy to update a value using the current value. For example, say that we want to
+increment the temperature value by 1. We need the current value to compute the updated value. We can
+use a function for `value`:
 
 ```js
-merge({ value: 22, units: 'C' }, { value: x => x + 1 }) // The function receives 22
+merge({ value: 22, units: 'C' }, { value: x => x + 1 }); // The function receives 22
 // result:
 { value: 23, units: 'C' }
 ```
 
-By passing a function for the `value` property, Mergerino passes the previous value of that property
+By passing a function for the `value` property, Mergerino passes the current value of that property
 to the function. Our function receives `22`, adds `1` and returns `23`, which Mergerino assigns back
 to the `value` property.
 
@@ -96,7 +94,7 @@ to the `value` property.
 
 `Object.assign` performs a _shallow_ merge. If our target object is:
 
-```javascript
+```js
 { air:   { value: 22, units: 'C' },
   water: { value: 84, units: 'F' }
 }
@@ -104,34 +102,37 @@ to the `value` property.
 
 And we want to change the `air` `value` to `25` by calling:
 
-```javascript
+```js
 Object.assign(
   { air:   { value: 22, units: 'C' },
     water: { value: 84, units: 'F' }
   },
   { air:   { value: 25 } }
-)
+);
 ```
 
 We get this result:
 
 ```js
-{ air:   { value: 25 },
+{ air:   { value: 25 }, // we lost the units!
   water: { value: 84, units: 'F' }
 }
 ```
 
-We lost the `units`! This is because properties are merged only at the first level.
+We lost the `units`! This is because properties are merged only at the first level. Beyond that,
+values are completely replaced instead of merged. So `{ value: 22, units: 'C' }` got replaced with
+`{ value: 25 }`.
 
-With Mergerino, we can merge properties deeper than the first level without losing the rest:
+With Mergerino, we can merge properties deeper than the first level. Because merging happens at
+every level, we can update the `value` without losing the `units`:
 
-```javascript
+```js
 merge(
   { air:   { value: 22, units: 'C' },
     water: { value: 84, units: 'F' }
   },
   { air: { value: 25 } }
-)
+);
 // result:
 { air:   { value: 25, units: 'C' }, // now we didn't lose the units!
   water: { value: 84, units: 'F' }
@@ -140,13 +141,13 @@ merge(
 
 Deep patching and function patching can also be used together:
 
-```javascript
+```js
 merge(
   { air:   { value: 22, units: 'C' },
     water: { value: 84, units: 'F' }
   },
   { air:  { value: x => x + 8 } }
-)
+);
 // result:
 { air:   { value: 30, units: 'C' }, // increased the value by 8, didn't lose the units
   water: { value: 84, units: 'F' }
@@ -156,15 +157,32 @@ merge(
 If we want to _avoid_ deep patching and instead want to replace a property, we can use a function.
 Say we want to set `air` to `{ replaced: true }` without keeping `value` and `units`:
 
-```javascript
+```js
 merge(
   { air:   { value: 22, units: 'C' },
     water: { value: 84, units: 'F' }
   },
   { air:   () => ({ replaced: true }) } // use a function to replace the value
-)
+);
 // result:
 { air:   { replaced: true },
+  water: { value: 84, units: 'F' }
+}
+```
+
+We can also use a function at the top level to produce a completely new result without keeping any of the previous values. This could be useful, for example, to re-initialize application state.
+
+```js
+merge(
+  { ... }, // doesn't matter what the previous state was
+  () => (
+    { air:   { value: 22, units: 'C' },
+      water: { value: 84, units: 'F' }
+    }
+  )
+);
+// result:
+{ air:   { value: 22, units: 'C' },
   water: { value: 84, units: 'F' }
 }
 ```
@@ -180,7 +198,7 @@ merge(
     water: { value: 84, units: 'F' }
   },
   { air: undefined }
-)
+);
 // result:
 { water: { value: 84, units: 'F' } }
 
@@ -230,7 +248,7 @@ increment: (update, amount) => {
       value: (x) => x + amount
     }
   });
-}
+};
 ```
 
 Now we need to use these object patches in the accumulator function. Remember that the accumulator
@@ -270,7 +288,8 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-When you are ready, continue on to [06 - Cells](06-cells.html).
+When you are ready, continue on to the next section, where we will combine the `state` and `update`
+into **cells**.
 
 [< Previous](04-meiosis-with-function-patches.html) |
 [Next >](06-cells.html) |

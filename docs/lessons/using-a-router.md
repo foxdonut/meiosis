@@ -59,7 +59,7 @@ This section discusses the basic pattern for setting up a router with Meiosis.
 To use a router with Meiosis, we'll store the current route in the application state under the
 `route` property:
 
-```javascript
+```js
 // application state
 {
   route: { page: "Home", params: {} },
@@ -70,7 +70,7 @@ To use a router with Meiosis, we'll store the current route in the application s
 Then, we'll have access to the route via `state.route`. Using this information, a single top-level
 view renders the page that corresponds to the route, using a simple key-value lookup:
 
-```javascript
+```js
 // The Home component
 import { Home } from "../home";
 
@@ -102,7 +102,7 @@ state just like we have been doing all along.
 
 Putting everything together, here is our `createRouter` function:
 
-```javascript
+```js
 const createRouter = routeConfig => {
   const prefix = "#";
 

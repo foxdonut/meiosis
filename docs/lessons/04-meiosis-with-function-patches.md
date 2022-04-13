@@ -67,16 +67,12 @@ to increment the temperature value:
 ```js
 const actions = {
   increment: (update, amount) => {
-    update((state) => {
-      const temperature = {
-        ...state.temperature,
-        value: state.temperature.value + amount
-      };
-      return {
-        ...state,
-        temperature
-      };
-    });
+    update((state) => ({
+      temperature: {
+        value: state.temperature.value + amount,
+        units: state.temperature.units
+      }
+    }));
   }
 };
 ```
@@ -90,7 +86,11 @@ as parameters, the current state and the incoming patch. The accumulator must re
 state. Since the incoming patches are functions, we just need to call them:
 
 ```js
-const states = flyd.scan((state, patch) => patch(state), initial, update);
+const states = flyd.scan(
+  (state, patch) => patch(state),
+  initial,
+  update
+);
 ```
 
 Putting it all together, we have:
@@ -109,8 +109,7 @@ type and then press Enter:
 
 In the output on the right, you'll see the updated states.
 
-In the next section, [05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html), we will look at
-an alternative to function patches.
+In the next section, we will look at an alternative to function patches, called Mergerino.
 
 [< Previous](03-streams.html) |
 [Next >](05-meiosis-with-mergerino.html) |

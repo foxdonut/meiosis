@@ -1,10 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](10-services.html) |
-[Next >](12-preventing-re-renders.html) |
+[< Previous](08-services.html) |
+[Next >](10-preventing-re-renders.html) |
 [Table of Contents](toc.html)
 
-## 11- Nesting
+## 09 - Nesting
 
 ```js
 const nestPatch = (patch, prop) => (state) =>
@@ -41,8 +41,8 @@ const cells = states.map((state) => ({
 }));
 ```
 
-[< Previous](10-services.html) |
-[Next >](12-preventing-re-renders.html) |
+[< Previous](08-services.html) |
+[Next >](10-preventing-re-renders.html) |
 [Table of Contents](toc.html)
 
 -----

@@ -1,9 +1,9 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](13-the-meiosis-pattern.html) |
+[< Previous](11-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
-## 14 - What's Next?
+## 12 - What's Next?
 
 This concludes the Meiosis documentation. Where do you go from here?
 
@@ -16,7 +16,7 @@ additional features including TypeScript support, see
 
 Thank you for reading. I hope you enjoy Meiosis!
 
-[< Previous](13-the-meiosis-pattern.html) |
+[< Previous](11-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
 -----

@@ -1,10 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](12-preventing-re-renders.html) |
-[Next >](14-whats-next.html) |
+[< Previous](10-preventing-re-renders.html) |
+[Next >](12-whats-next.html) |
 [Table of Contents](toc.html)
 
-## 13 - The Meiosis Pattern Cheatsheet
+## 11 - The Meiosis Pattern Cheatsheet
 
 > **Helper functions!** Meiosis is a pattern that you can set up yourself, but by popular demand
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now available
@@ -29,7 +29,7 @@ or your own patches.
 
 Here is the code to set up the Meiosis Pattern:
 
-```javascript
+```js
 const app = {
   initial: ...,
   Actions: (update, getState) => {
@@ -52,7 +52,7 @@ Then, pass `state` and `actions` to views.
 
 Optionally, add [Services and Effects](services-and-effects.html):
 
-```javascript
+```js
 const app = {
   initial: ...,
   Actions: (update, getState) => {
@@ -97,7 +97,7 @@ Next, wire up your view.
 <a name="using_mithril"></a>
 ### [Using Mithril](#using_mithril)
 
-```javascript
+```js
 const App = {
   view: function({ attrs: { state, actions } }) {
     // render view according to state, call actions to trigger changes
@@ -115,7 +115,7 @@ states.map(() => m.redraw());
 <a name="using_react"></a>
 ### [Using React](#using_react)
 
-```javascript
+```js
 import React from "react";
 
 const App = ({ states, actions }) => {
@@ -139,7 +139,7 @@ ReactDOM.render(<App states={states} actions={actions} />,
 <a name="using_preact"></a>
 ### [Using Preact](#using_preact)
 
-```javascript
+```js
 import { useState } from "preact/hooks";
 
 const App = ({ state, actions }) => {
@@ -160,8 +160,8 @@ preact.render(<App states={states} actions={actions} />,
   document.getElementById("app"));
 ```
 
-[< Previous](12-preventing-re-renders.html) |
-[Next >](14-whats-next.html) |
+[< Previous](10-preventing-re-renders.html) |
+[Next >](12-whats-next.html) |
 [Table of Contents](toc.html)
 
 -----

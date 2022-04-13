@@ -1,22 +1,10 @@
-/*global React, ReactDOM, flyd, mergerino*/
+/*global preact, flyd, mergerino*/
+/** @jsx preact.h */
 const merge = mergerino;
 
 const actions = {
   increment: (cell, amount) =>
-    cell.update({ value: (x) => x + amount }),
-
-  changeUnits: (cell) =>
-    cell.update(
-      cell.state.units === 'C'
-        ? {
-            units: 'F',
-            value: (value) => Math.round((value * 9) / 5 + 32)
-          }
-        : {
-            units: 'C',
-            value: (value) => Math.round(((value - 32) / 9) * 5)
-          }
-    )
+    cell.update({ value: (x) => x + amount })
 };
 
 const view = (cell) => (
@@ -32,9 +20,6 @@ const view = (cell) => (
       </button>
       <button onClick={() => actions.increment(cell, -1)}>
         Decrement
-      </button>
-      <button onClick={() => actions.changeUnits(cell)}>
-        Change Units
       </button>
     </div>
   </div>
@@ -55,5 +40,6 @@ const cells = states.map(createCell);
 
 const element = document.getElementById('app');
 cells.map((cell) => {
-  ReactDOM.render(app.view(cell), element);
+  // eslint-disable-next-line react/no-deprecated
+  preact.render(app.view(cell), element);
 });

@@ -26,14 +26,14 @@ and functions.
 
 Besides JavaScript, you will need to know, or learn, about the view library that you would like to
 use. Most of this documentation is independent of the view library. When we put it all together,
-there are examples with [React](https://reactjs.org), [Mithril](http://mithril.js.org), and
-[Preact](https://preactjs.com).
+there are examples with [Mithril](http://mithril.js.org), [Preact](https://preactjs.com), and
+[React](https://reactjs.org).
 
-If none of those is your preferred view library, fear not! It is trivial to use just about any view
-library with the Meiosis pattern.
+If none of those is your preferred view library, fear not. It is straightforward to use just about
+any view library with the Meiosis pattern.
 
 <a name="es5_or_es6"></a>
-### [ES5 or ES6](#es5_or_es6)
+### [JavaScript ES5 or ES6](#es5_or_es6)
 
 I previously used ES5 syntax in the code examples, but have since updated the documentation and use
 ES6 syntax.
@@ -41,7 +41,7 @@ ES6 syntax.
 <a name="embedded_code_examples"></a>
 ### [Embedded Code Examples](#embedded_code_examples)
 
-The best way to learn is to practice! So, all code examples in this documentation are embedded into
+The best way to learn is to practice. So, all code examples in this documentation are embedded into
 the page using [Flems](https://github.com/porsager/flems), so that you can edit the code and see the
 results right there on the page. In fact, I strongly encourage you to try things out with the code.
 This will help you understand how things work.
@@ -51,10 +51,7 @@ page if that is more comfortable. You can do so using the
 ![Open Flems in new window](flems-open-in-new-window.png) at the top-right corner of the code
 window.
 
-Finally, also note that you can also download and run the code examples for this documentation by
-cloning the [github repository](https://github.com/foxdonut/meiosis).
-
-Let's get started! Please continue on to
+Let's get started. Please continue on to
 [02 - Initial State and Actions](02-initial-state-and-actions.html).
 
 [Next >](02-initial-state-and-actions.html) | [Table of Contents](toc.html)

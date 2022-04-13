@@ -1,10 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](09-using-react.html) |
-[Next >](11-nesting.html) |
+[< Previous](07-views.html) |
+[Next >](09-nesting.html) |
 [Table of Contents](toc.html)
 
-## 10 - Services
+## 08 - Services
 
 All credit goes to [James Forbes](https://james-forbes.com) for his idea of **services**, and I am
 grateful to James for sharing this and other ideas that have significantly improved Meiosis.
@@ -185,7 +185,7 @@ const app = {
 
 You can see the complete example in action below.
 
-@flems {"files":"code/services/index-mergerino.js,app.html","libs":"mithril,mithril-stream,mergerino","height":700,"selected":60}
+@flems {"files":"code/08-services.js,app.html","libs":"mithril,mithril-stream,mergerino","height":700,"selected":60}
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)
@@ -201,8 +201,8 @@ careful not to get carried away.
 
 -----
 
-[< Previous](09-using-react.html) |
-[Next >](11-nesting.html) |
+[< Previous](07-views.html) |
+[Next >](09-nesting.html) |
 [Table of Contents](toc.html)
 
 -----

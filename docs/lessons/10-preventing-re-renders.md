@@ -1,10 +1,10 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](11-nesting.html) |
-[Next >](13-the-meiosis-pattern.html) |
+[< Previous](09-nesting.html) |
+[Next >](11-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
-## 12 - Preventing Re-Renders
+## 10 - Preventing Re-Renders
 
 > **IMPORTANT NOTE**: before preventing re-renders, please first make sure that re-rendering a part
 of your application is indeed causing a performance problem that impacts the user experience.
@@ -62,7 +62,7 @@ Verify this in the example below. Notice that `render Entry`, `render Temperatur
 Temperature Water` appear in the console output **only** when you interact with that component in
 the user interface. Other components do not get re-rendered.
 
-@flems {"files":"code/preventing-re-renders/index-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"react,react-dom,flyd,mergerino","height":800,"middle":65}
+@flems {"files":"code/10-preventing-re-renders-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"react,react-dom,flyd,mergerino","height":800,"middle":65}
 
 <a name="mithril_prevent_re_render"></a>
 ### [Mithril version](#mithril_prevent_re_render)
@@ -94,10 +94,10 @@ Verify this in the example below. Notice that `render Entry`, `render Temperatur
 Temperature Water` appear in the console output **only** when you interact with that component in
 the user interface. Other components do not get re-rendered.
 
-@flems {"files":"code/preventing-re-renders/index-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
+@flems {"files":"code/10-preventing-re-renders-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 
-[< Previous](11-nesting.html) |
-[Next >](13-the-meiosis-pattern.html) |
+[< Previous](09-nesting.html) |
+[Next >](11-the-meiosis-pattern.html) |
 [Table of Contents](toc.html)
 
 -----

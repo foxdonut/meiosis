@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
 [< Previous](05-meiosis-with-mergerino.html) |
-[Next >](07-using-mithril.html) |
+[Next >](07-views.html) |
 [Table of Contents](toc.html)
 
 ## 06 - Cells
@@ -43,15 +43,11 @@ We now have a stream of cells. To get the current cell, we can call `cells()` an
 `cell.update(...)`. Finally, we can also pass `cell` to actions which in turn can use `cell.state`
 and `cell.update(...)`.
 
-In the following sections, we will look at how to wire up the Meiosis pattern to three view
-libraries. Feel free to jump straight to the view library in which you are interested.
-
-- [07 - Using Mithril](07-using-mithril.html)
-- [08 - Using Preact](08-using-preact.html)
-- [09 - Using React](09-using-react.html)
+In the following section, we will look at how to wire up the Meiosis pattern to three view
+libraries.
 
 [< Previous](05-meiosis-with-mergerino.html) |
-[Next >](07-using-mithril.html) |
+[Next >](07-views.html) |
 [Table of Contents](toc.html)
 
 -----
