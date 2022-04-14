@@ -6,17 +6,16 @@
 
 ## 07 - Views
 
-In the previous lessons, we set up the Meiosis pattern with a temperature example.
-In this section, we'll wire this up to three different view libraries:
+In the previous lessons, we set up the Meiosis pattern with a temperature example. In this section,
+we'll wire this up to three different view libraries:
 
 - [Mithril](https://mithril.js.org/)
 - [Preact](https://preactjs.com)
 - [React](https://reactjs.org)
 
-<a name="the_actions"></a>
-### [Actions](#the_actions)
+### Actions
 
-Remember that we had an `actions` object to update the state:
+We had an `actions` object to update the state. To simplify, let's just have the `increment` action:
 
 ```js
 const actions = {
@@ -29,6 +28,18 @@ const actions = {
 
 The view can call `actions.increment` to trigger updates.
 
+### Cells
+
+Next, remember that in the previous section, we set up a stream of cells:
+
+```js
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
+```
+
+We can call `cells()` to get the current cell, or we can use `cells.map(cell => ...)` to render the
+view on every update.
+
 ### Mithril
 
 #### Mithril Stream
@@ -38,13 +49,6 @@ purposes, it works just like `flyd`. The only difference is that you call `m.str
 `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
 #### Wiring Meiosis
-
-Next, remember that in the previous section, we set up a stream of cells:
-
-```js
-const createCell = (state) => ({ state, update });
-const cells = states.map(createCell);
-```
 
 Now, we'll use `m.mount` and a minimal Mithril component to render the view. We'll pass the
 current cell to the view:

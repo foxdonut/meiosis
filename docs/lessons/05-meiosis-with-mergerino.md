@@ -256,7 +256,11 @@ gets the current state and the incoming patch as parameters, and must return the
 can use `merge`:
 
 ```js
-const states = flyd.scan((state, patch) => merge(state, patch), initial, update);
+const states = flyd.scan(
+  (state, patch) => merge(state, patch),
+  initial,
+  update
+);
 ```
 
 Notice that the accumulator function that we are passing is:

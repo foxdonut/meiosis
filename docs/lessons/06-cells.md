@@ -12,12 +12,12 @@ In the previous sections, we set up the Meiosis pattern with function patches, a
 - `states`: a stream of application states
 - `update`: a stream of updates to the application state
 
-We now have a way to manage application state. The next piece of the puzzle will be to wire up the
-application state to a view library. We will be looking at that in the next few sections. Before
-doing that, however, let's discuss a small but useful detail.
+We now have a way to manage application state. The next part of the pattern will be to wire up the
+application state to a view library. We will be looking at that in the next section. Before doing
+that, however, let's discuss a small but useful detail.
 
-As it is now, we would need to pass `states` (or rather, `states()`, that is, the current state) and
-`update` to our views.
+As it is now, we would need to pass `states` -- or rather, `states()`, that is, the current state --
+and `update` to our views. Views would have to pass them along to other views.
 
 To make things simpler, let's pass a single parameter to our views. I call this a **cell**.
 
