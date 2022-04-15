@@ -1,6 +1,18 @@
 /* global m, mergerino */
-const [stream, scan] = [m.stream, m.stream.scan];
 const merge = mergerino;
+
+const loginService = {
+  onchange: (state) => state.page,
+  run: (cell) => {
+    if (cell.state.page === 'Login') {
+      cell.update({
+        login: { username: '', password: '' }
+      });
+    } else {
+      cell.update({ login: undefined });
+    }
+  }
+};
 
 const actions = {
   loadData: (cell) =>
@@ -11,19 +23,6 @@ const actions = {
         }),
       1500
     )
-};
-
-const loginService = {
-  onchange: (state) => state.page,
-  run: (cell) => {
-    if (cell.state.page === 'Login') {
-      cell.update({
-        login: { username: '', password: '' }
-      });
-    } else {
-      return cell.update({ login: undefined });
-    }
-  }
 };
 
 const dataService = {
@@ -129,7 +128,7 @@ const app = {
 
 const dropRepeats = (states, onchange = (state) => state) => {
   let prev = undefined;
-  const result = stream();
+  const result = m.stream();
 
   states.map((state) => {
     const next = onchange(state);
@@ -141,8 +140,8 @@ const dropRepeats = (states, onchange = (state) => state) => {
   return result;
 };
 
-const update = stream();
-const states = scan(merge, app.initial, update);
+const update = m.stream();
+const states = m.stream.scan(merge, app.initial, update);
 const createCell = (state) => ({ state, update });
 
 app.services.forEach((service) => {

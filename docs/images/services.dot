@@ -1,8 +1,0 @@
-digraph meiosisdocs {
-  states [shape="none", style="filled", fillcolor="orange", label="states"]
-  services [shape="none", style="filled", fillcolor="lightblue", label="services"]
-  update [shape="none", style="filled", fillcolor="orange", label="update(patch)"]
-  view [shape="none", style="filled", fillcolor="lightgreen", label="view"]
-
-  states -> services -> update -> states -> view [label="     "]
-}
