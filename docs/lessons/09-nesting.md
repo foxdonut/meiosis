@@ -41,6 +41,8 @@ const cells = states.map((state) => ({
 }));
 ```
 
+@flems {"files":"code/09-nesting.jsx,app.html,public/css/bootstrap.min.css","libs":"flyd,mergerino,preact","height":700,"middle":70}
+
 [< Previous](08-services.html) |
 [Next >](10-preventing-re-renders.html) |
 [Table of Contents](toc.html)

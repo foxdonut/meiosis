@@ -216,6 +216,8 @@ code for this setup; nevertheless, for your convenience, you can also use the sa
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to your
 project.
 
+In the next section, we'll look at another feature that we can add to Meiosis: **nesting**.
+
 -----
 
 [< Previous](07-views.html) |
