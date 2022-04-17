@@ -6,158 +6,182 @@
 
 ## 11 - The Meiosis Pattern Cheatsheet
 
-> **Helper functions!** Meiosis is a pattern that you can set up yourself, but by popular demand
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now available
-for your convenience.
+> Meiosis is a pattern that you can set up yourself, but by popular demand
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now
+available for your convenience. The library includes additional features including TypeScript
+support and nested services and views.
 
-This is a quick summary of the Meiosis Pattern:
+### Meiosis Pattern
 
-- Separate state management code from view code.
-- Use a simple stream library such as [flyd](https://github.com/paldepind/flyd),
-[simpleStream from meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup),
-or, if you're using Mithril, [Mithril Stream](https://mithril.js.org/stream.html).
-- Start with an initial state.
-- Create an `update` stream of **patches**.
-- Patches can be
-[Mergerino](https://meiosis.js.org/docs/05-meiosis-with-mergerino.html) patches,
-[Function Patches](https://meiosis.js.org/docs/04-meiosis-with-function-patches.html),
-or your own patches.
-- Create an `actions` object of functions that issue patches onto the `update` stream.
-- Create a `states` stream by using `scan` on the `update` stream with the initial state, and
-`merge` for Mergerino, or `(state, patch) => patch(state)` for function patches.
-- Pass `state` and `actions` to views (see below for details.)
-
-Here is the code to set up the Meiosis Pattern:
+Here is the code to set up the Meiosis Pattern with function patches:
 
 ```js
-const app = {
-  initial: ...,
-  Actions: (update, getState) => {
-    return ...
-  }
+import flyd from 'flyd';
+
+import { app } from './app';
+
+const update = flyd.stream();
+const states = flyd.scan((state, patch) => patch(state), app.initial, update);
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
+```
+
+With Mergerino:
+
+```js
+import flyd from 'flyd';
+import merge from 'mergerino';
+
+import { app } from './app';
+
+const update = flyd.stream();
+const states = flyd.scan(merge, app.initial, update);
+const createCell = (state) => ({ state, update });
+const cells = states.map(createCell);
+```
+
+To add services:
+
+```js
+import flyd from 'flyd';
+import merge from 'mergerino';
+
+import { app } from './app';
+
+const dropRepeats = (states, onchange = (state) => state) => {
+  let prev = undefined;
+  const result = stream();
+
+  states.map((state) => {
+    const next = onchange(state);
+    if (next !== prev) {
+      prev = next;
+      result(state);
+    }
+  });
+  return result;
 };
 
 const update = stream();
+const states = stream.scan(merge, app.initial, update);
+const createCell = (state) => ({ state, update });
 
-// Using Mergerino:
-const states = scan(merge, app.initial, update);
-
-// Using Function Patches:
-const states = scan((state, patch) => patch(state), app.initial, update);
-
-const actions = app.Actions(update, states);
-```
-
-Then, pass `state` and `actions` to views.
-
-Optionally, add [Services and Effects](services-and-effects.html):
-
-```js
-const app = {
-  initial: ...,
-  Actions: (update, getState) => {
-    return ...
-  },
-  // services are state => patch
-  services: [...],
-  // effects are state => {
-  //   call update(...) or actions.someAction(...);
-  // }
-  Effects: (update, actions) => [...]
-}
-
-// Using Mergerino:
-const accumulator = merge;
-
-// Using Function Patches:
-const accumulator = (state, patch) => patch ? patch(state) : state;
-
-const update = stream();
-
-const runServices = startingState =>
-  app.services.reduce(
-    (state, service) => accumulator(state, service(state)),
-    startingState
-  );
-
-const states = scan(
-  (state, patch) => runServices(accumulator(state, patch)),
-  runServices(app.initial),
-  update
-);
-
-const actions = app.Actions(update, states);
-const effects = app.Effects(update, actions);
-
-states.map(state => effects.forEach(effect => effect(state)));
-```
-
-Next, wire up your view.
-
-<a name="using_mithril"></a>
-### [Using Mithril](#using_mithril)
-
-```js
-const App = {
-  view: function({ attrs: { state, actions } }) {
-    // render view according to state, call actions to trigger changes
-    // pass { state, actions } to other components.
-  }
-};
-
-m.mount(document.getElementById("app"), {
-  view: () => m(App, { state: states(), actions })
+app.services.forEach((service) => {
+  dropRepeats(states, service.onchange).map((state) => service.run(createCell(state)));
 });
 
-states.map(() => m.redraw());
+const cells = dropRepeats(states).map(createCell);
 ```
 
-<a name="using_react"></a>
-### [Using React](#using_react)
+To add nesting with function patches:
 
 ```js
-import React from "react";
+import flyd from 'flyd';
 
-const App = ({ states, actions }) => {
-  const [init, setInit] = React.useState(false);
-  const [state, setState] = React.useState(states());
+import { app } from './app';
 
-  if (!init) {
-    setInit(true);
-    states.map(setState);
-  }
+const nestPatch = (patch, prop) => (state) =>
+  Object.assign({}, state, { [prop]: patch(state[prop]) });
 
-  // render view according to state, call actions to trigger changes
-  // pass state={state} actions={actions} to other components.
-  return (<div>...</div>);
+const nestUpdate = (parentUpdate, prop) => (patch) => parentUpdate(nestPatch(patch, prop));
+
+const nestCell = (getState, parentUpdate) => (prop) => {
+  const getNestedState = () => getState()[prop];
+  const nestedUpdate = nestUpdate(parentUpdate, prop);
+
+  return {
+    state: getNestedState(),
+    update: nestedUpdate,
+    nest: nestCell(getNestedState, nestedUpdate)
+  };
 };
 
-ReactDOM.render(<App states={states} actions={actions} />,
-  document.getElementById("app"));
+const update = flyd.stream();
+const states = flyd.scan((state, patch) => patch(state), app.initial, update);
+
+const nest = nestCell(states, update);
+const createCell = (state) => ({ state, update, nest });
+const cells = states.map(createCell);
 ```
 
-<a name="using_preact"></a>
-### [Using Preact](#using_preact)
+To add nesting with Mergerino:
 
 ```js
-import { useState } from "preact/hooks";
+import flyd from 'flyd';
+import merge from 'mergerino';
 
-const App = ({ state, actions }) => {
-  const [init, setInit] = useState(false);
-  const [state, setState] = useState(states());
+import { app } from './app';
 
-  if (!init) {
-    setInit(true);
-    states.map(setState);
-  }
+const nestPatch = (patch, prop) => ({ [prop]: patch });
 
-  // render view according to state, call actions to trigger changes
-  // pass state={state} actions={actions} to other components.
-  return (<div>...</div>);
+const nestUpdate = (parentUpdate, prop) => (patch) => parentUpdate(nestPatch(patch, prop));
+
+const nestCell = (getState, parentUpdate) => (prop) => {
+  const getNestedState = () => getState()[prop];
+  const nestedUpdate = nestUpdate(parentUpdate, prop);
+
+  return {
+    state: getNestedState(),
+    update: nestedUpdate,
+    nest: nestCell(getNestedState, nestedUpdate)
+  };
 };
 
-preact.render(<App states={states} actions={actions} />,
-  document.getElementById("app"));
+const update = flyd.stream();
+const states = flyd.scan(merge, app.initial, update);
+
+const nest = nestCell(states, update);
+const createCell = (state) => ({ state, update, nest });
+const cells = states.map(createCell);
+```
+
+Of course, you can have both services and nesting.
+
+### Views
+
+Here is the code to wire up Meiosis to Mithril:
+
+```js
+import m from 'mithril';
+
+m.mount(document.getElementById('app'), {
+  view: () => app.view(cells())
+});
+
+cells.map(() => m.redraw());
+```
+
+To wire up Meiosis to Preact:
+
+```js
+import { render } from 'preact';
+
+const element = document.getElementById('app');
+cells.map((cell) => {
+  render(app.view(cell), element);
+});
+```
+
+To wire up Meiosis to React:
+
+```js
+import { render } from 'react-dom';
+
+const element = document.getElementById('app');
+cells.map((cell) => {
+  render(app.view(cell), element);
+});
+```
+
+Starting with React 18:
+
+```js
+import { createRoot } from 'react-dom/client';
+
+const root = createRoot(element);
+cells.map((cell) => {
+  root.render(app.view(cell));
+});
 ```
 
 [< Previous](10-preventing-re-renders.html) |
