@@ -129,13 +129,11 @@ const nestCell = (getState, parentUpdate) => (prop) => {
   const getNestedState = () => getState()[prop];
   const nestedUpdate = nestUpdate(parentUpdate, prop);
 
-  const nested = {
+  return {
     state: getNestedState(),
     update: nestedUpdate,
     nest: nestCell(getNestedState, nestedUpdate)
   };
-
-  return nested;
 };
 
 const update = flyd.stream();
@@ -145,7 +143,6 @@ const states = flyd.scan(
   update
 );
 const nest = nestCell(states, update);
-
 const createCell = (state) => ({ state, update, nest });
 const cells = states.map(createCell);
 
