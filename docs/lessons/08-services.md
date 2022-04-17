@@ -208,8 +208,7 @@ You can see the complete example in action below.
 
 @flems {"files":"code/08-services-example.js,app.html","libs":"mithril,mithril-stream,mergerino","height":700}
 
-<a name="conclusion"></a>
-### [Conclusion](#conclusion)
+### Conclusion
 
 In this section, we've augmented our Meiosis pattern setup with services. We do not need a lot of
 code for this setup; nevertheless, for your convenience, you can also use the same setup by adding

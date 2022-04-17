@@ -107,42 +107,93 @@ const nestCell = (getState, parentUpdate) => (prop) => {
 };
 ```
 
+The function gets a function to get the state and a function for updating the parent. It returns a
+function that takes the property at which to nest. The result is the nested cell.
+
+To create the nested cell, we get the nested state by getting the state and then the nested `prop` off of the state. We create the `nestedUpdate` function using the `nestUpdate` function that we wrote earlier.
+
+Finally, to be able to nest a cell in turn -- for nesting at deeper levels -- we attach `nest` to
+the cell by calling `nestCell` again with the nested functions for getting the state and updating
+the parent.
+
+Now, we can add `nest` to our cells:
+
 ```js
-const nestPatch = (patch, prop) => (state) =>
-  Object.assign({}, state, { [prop]: patch(state[prop]) });
-
-const nestUpdate = (parentUpdate, prop) => (patch) =>
-  parentUpdate(nestPatch(patch, prop));
-
-const nestCell = (getState, parentUpdate) => (prop) => {
-  const getNestedState = () => getState()[prop];
-  const nestedUpdate = nestUpdate(parentUpdate, prop);
-
-  return {
-    state: getNestedState(),
-    update: nestedUpdate,
-    nest: nestCell(getNestedState, nestedUpdate)
-  };
-};
-
-const update = stream();
-const states = scan(
-  (state, patch) => patch(state),
-  app.initial,
-  update
-);
 const nest = nestCell(states, update);
 const createCell = (state) => ({ state, update, nest });
 const cells = states.map(createCell);
 ```
 
-With Mergerino, the setup is the same except for the `nestPatch` function:
+### Nesting Example
+
+Let's look at an example that uses nesting. We'll use a weather conditions component that indicates
+whether or not there are precipitations, and the sky -- sunny, cloudy, or a mix. We'll also use the
+temperature component that we've been using so far -- but in this example, we'll use _two_ instances
+of the component, one for air, and one for water temperature.
+
+Here is our initial application state:
 
 ```js
-const nestPatch = (patch, prop) => ({ [prop]: patch });
+{
+  "conditions": {
+    "precipitations": false,
+    "sky": null
+  },
+  "temperature": {
+    "air": {
+      "value": 22
+    },
+    "water": {
+      "value": 22
+    }
+  }
+}
 ```
 
+That is the full application state, but, using nesting, we're able to have components focus on their
+state without being tied to the application state structure. So the conditions component is only
+concerned with:
+
+```js
+{
+  "precipitations": false,
+  "sky": null
+}
+```
+
+And each temperature component only deals with:
+
+```js
+{
+  "value": 22
+}
+```
+
+We can re-use the temperature component and each one will work with its separate nested state.
+
+When we call the views, we use `cell.nest` to pass a nested cell:
+
+```js
+conditions.view(cell.nest('conditions'))
+temperature.view(cell.nest('temperature').nest('air'))
+temperature.view(cell.nest('temperature').nest('water'))
+```
+
+Each component can use `cell.state` and `cell.update` as before, but the nested cells will
+automatically return and update the nested state.
+
+Have a closer look, the complete example is below.
+
 @flems {"files":"code/09-nesting.jsx,app.html,public/css/bootstrap.min.css","libs":"flyd,lodash-fp,preact","height":700,"middle":70}
+
+### Conclusion
+
+In this section, we've augmented our Meiosis pattern setup with nesting. For your convenience, you
+can also use the same setup by adding
+[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to your
+project.
+
+In the next section, we'll look at an optional performance enhancement: preventing re-renders.
 
 [< Previous](08-services.html) |
 [Next >](10-preventing-re-renders.html) |
