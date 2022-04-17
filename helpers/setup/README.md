@@ -1,5 +1,8 @@
 # meiosis-setup
 
+New release coming soon.
+
+<!--
 ```javascript
 // Choose to use function patches or mergerino
 import meiosisSetup from "meiosis-setup/functionPatches";
@@ -220,3 +223,5 @@ appreciated!
 
 _meiosis-setup is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
+
+-->
