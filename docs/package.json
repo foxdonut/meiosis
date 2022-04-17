@@ -9,7 +9,7 @@
     "build": "harp build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "cp css/* images/*.svg images/*.png dist && echo 'Done.'",
     "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/**' -- npm run build",
-    "start": "http-server . -p ${PORT:-9000}",
+    "start": "static-server -p ${PORT:-9000}",
     "reload": "reload -w code,dist -e html,css,js,jsx -p ${PORT:-9000}"
   },
   "repository": {
@@ -31,7 +31,6 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "devDependencies": {
     "harp": "^0.41.2",
-    "http-server": "^14.1.0",
     "onchange": "^7.1.0",
     "reload": "^3.2.0",
     "static-server": "^2.2.1"
