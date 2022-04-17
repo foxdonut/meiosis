@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="06-cells.html">&lt; Previous</a> |
+<a href="08-services.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<h2>07 - Views</h2><p>In the previous lessons, we set up the Meiosis pattern with a temperature example. In this section,
+we&#39;ll wire this up to three different view libraries:</p>
+<ul>
+<li><a href="https://mithril.js.org/">Mithril</a></li>
+<li><a href="https://preactjs.com">Preact</a></li>
+<li><a href="https://reactjs.org">React</a></li>
+</ul>
+<h3>Actions</h3><p>We had an <code>actions</code> object to update the state. To simplify, let&#39;s just have the <code>increment</code> action:</p>
+<pre><code class="language-js">const actions = {
+  increment: (cell, amount) =&gt;
+    cell.update({ value: (x) =&gt; x + amount })
+};
+</code></pre>
+<blockquote>
+<p>This example uses Mergerino, but of course you can also use function patches if you prefer.</p>
+</blockquote>
+<p>The view can call <code>actions.increment</code> to trigger updates.</p>
+<h3>Cells</h3><p>Next, remember that in the previous section, we set up a stream of cells:</p>
+<pre><code class="language-js">const createCell = (state) =&gt; ({ state, update });
+const cells = states.map(createCell);
+</code></pre>
+<p>We can call <code>cells()</code> to get the current cell, or we can use <code>cells.map(cell =&gt; ...)</code> to render the
+view on every update.</p>
+<h3>View</h3><p>The view is a function that gets the current <code>cell</code> as a parameter, from which the current state is
+available as <code>cell.state</code>. In the view, event handlers (<code>onclick</code> or <code>onClick</code> in the examples
+below) call actions, passing <code>cell</code> and any additional parameters.</p>
+<h3>Mithril</h3><p>Let&#39;s see how we can wire up Meiosis to <a href="https://mithril.js.org/">Mithril</a>.</p>
+<p>First, we can use <a href="https://mithril.js.org/stream.html">Mithril Stream</a> as a stream library. For our
+purposes, it works just like <code>flyd</code>. The only difference is that you call <code>m.stream()</code> instead of
+<code>flyd.stream()</code>, and <code>m.stream.scan</code> instead of <code>flyd.scan</code>.</p>
+<p>Then, we use <code>m.mount</code> and pass the current cell to the view by calling <code>cells()</code>:</p>
+<pre><code class="language-js">m.mount(document.getElementById(&#39;app&#39;), {
+  view: () =&gt; app.view(cells())
+});
+</code></pre>
+<p>The complete example is below.</p>
+<div id="flems1" class="flemscode" style=" height:800px;"></div>
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "07-mithril.js", content: "/*global m, mergerino*/\nconst merge = mergerino;\n\nconst actions = {\n  increment: (cell, amount) =>\n    cell.update({ value: (x) => x + amount })\n};\n\nconst view = (cell) =>\n  m(\n    'div',\n    m(\n      'div',\n      m(\n        'label',\n        'Temperature: ',\n        cell.state.value,\n        m.trust('&deg;'),\n        cell.state.units\n      )\n    ),\n    m(\n      'div',\n      m(\n        'button',\n        { onclick: () => actions.increment(cell, 1) },\n        'Increment'\n      ),\n      m(\n        'button',\n        { onclick: () => actions.increment(cell, -1) },\n        'Decrement'\n      )\n    )\n  );\n\nconst app = {\n  initial: {\n    value: 22,\n    units: 'C'\n  },\n  view\n};\n\nconst update = m.stream();\nconst states = m.stream.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nm.mount(document.getElementById('app'), {\n  view: () => app.view(cells())\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 60
+    })
+  </script>
+      
+
+<p>With Mithril&#39;s <a href="https://mithril.js.org/autoredraw.html">auto-redraw system</a>, the view is
+automatically re-rendered after user interaction. If our application updates the state outside of
+Mithril&#39;s auto-redraw scope (see
+<a href="https://mithril.js.org/autoredraw.html#when-mithril-does-not-redraw">When Mithril does not redraw</a>),
+we can re-render the view on state updates simply by using <code>map</code> on our stream of <code>cells</code> and
+calling <code>m.redraw()</code>:</p>
+<pre><code class="language-js">cells.map(() =&gt; m.redraw());
+</code></pre>
+<p><a name="preact"></a></p>
+<h3><a href="#preact">Preact</a></h3><p>To wire up Meiosis to <a href="https://preactjs.com">Preact</a>, we use <code>cells.map</code> to render the view whenever
+the state changes. We call <code>preact.render</code> to render the view:</p>
+<pre><code class="language-js">const element = document.getElementById(&#39;app&#39;);
+cells.map((cell) =&gt; {
+  preact.render(app.view(cell), element);
+});
+</code></pre>
+<p>You can see the complete example below.</p>
+<div id="flems2" class="flemscode" style=" height:800px;"></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "07-preact.js", content: "/*global preact, flyd, mergerino*/\n/** @jsx preact.h */\nconst merge = mergerino;\n\nconst actions = {\n  increment: (cell, amount) =>\n    cell.update({ value: (x) => x + amount })\n};\n\nconst view = (cell) => (\n  <div>\n    <div>\n      <label>\n        Temperature: {cell.state.value}&deg;{cell.state.units}\n      </label>\n    </div>\n    <div>\n      <button onClick={() => actions.increment(cell, 1)}>\n        Increment\n      </button>\n      <button onClick={() => actions.increment(cell, -1)}>\n        Decrement\n      </button>\n    </div>\n  </div>\n);\n\nconst app = {\n  initial: {\n    value: 22,\n    units: 'C'\n  },\n  view\n};\n\nconst update = flyd.stream();\nconst states = flyd.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nconst element = document.getElementById('app');\ncells.map((cell) => {\n  // eslint-disable-next-line react/no-deprecated\n  preact.render(app.view(cell), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "preact", type: "js", url: "https://unpkg.com/preact@10.3.4/dist/preact.umd.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 60
+    })
+  </script>
+      
+
+<p><a name="react"></a></p>
+<h3><a href="#react">React</a></h3><p>Wiring Meiosis to <a href="https://reactjs.org">React</a> is essentially the same as with Preact, the only
+difference is that we use <code>ReactDOM.render</code> to render the view:</p>
+<pre><code class="language-js">const element = document.getElementById(&#39;app&#39;);
+cells.map((cell) =&gt; {
+  ReactDOM.render(app.view(cell), element);
+});
+</code></pre>
+<p>You can see the complete example below.</p>
+<div id="flems3" class="flemscode" style=" height:800px;"></div>
+  <script>
+    window.Flems(flems3, {
+      files: [{name: "07-react.js", content: "/*global React, ReactDOM, flyd, mergerino*/\nconst merge = mergerino;\n\nconst actions = {\n  increment: (cell, amount) =>\n    cell.update({ value: (x) => x + amount })\n};\n\nconst view = (cell) => (\n  <div>\n    <div>\n      <label>\n        Temperature: {cell.state.value}&deg;{cell.state.units}\n      </label>\n    </div>\n    <div>\n      <button onClick={() => actions.increment(cell, 1)}>\n        Increment\n      </button>\n      <button onClick={() => actions.increment(cell, -1)}>\n        Decrement\n      </button>\n    </div>\n  </div>\n);\n\nconst app = {\n  initial: {\n    value: 22,\n    units: 'C'\n  },\n  view\n};\n\nconst update = flyd.stream();\nconst states = flyd.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nconst element = document.getElementById('app');\ncells.map((cell) => {\n  ReactDOM.render(app.view(cell), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "react", type: "js", url: "https://unpkg.com/react@16.13.1/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 60
+    })
+  </script>
+      
+
+<blockquote>
+<p>Starting with React 18, <code>ReactDOM.render(view, element)</code> has been deprecated in favor of <code>root = createRoot(element)</code> and <code>root.render(view)</code>. This doesn&#39;t change how to wire up Meiosis aside from
+adjusting how to use the React API.</p>
+</blockquote>
+<p><a name="conclusion"></a></p>
+<h3><a href="#conclusion">Conclusion</a></h3><p>In this section, we saw how to wire up Meiosis to a view library. Our base Meiosis pattern is
+complete!</p>
+<p>The remainder of this documentation covers additional functionalities that we can add to Meiosis,
+starting with <a href="08-services.html">Services</a>.</p>
+<p><a href="06-cells.html">&lt; Previous</a> |
+<a href="08-services.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
+
+</body>
+</html>

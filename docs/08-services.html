@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="07-views.html">&lt; Previous</a> |
+<a href="09-nesting.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<h2>08 - Services</h2><p>All credit goes to <a href="https://james-forbes.com">James Forbes</a> for his idea of <strong>services</strong>. I am very
+grateful to James for sharing this and other ideas that have significantly contributed to my Meiosis
+journey.</p>
+<p>James explains that while one-off actions occur after click events, user input, and so on, services
+are for ongoing state synchronization. They can produce computed properties, store and retrieve
+state from local storage, fetch data from a server, trigger other actions, and so on.</p>
+<p>In this section, we will look at how services work in Meiosis.</p>
+<h3>Services Overview</h3><p>In Meiosis, <strong>services</strong> are functions that run every time the state changes. Services can alter the
+state <em>before</em> the final state arrives onto the <code>states</code> and <code>cells</code> streams. To change the state,
+services call <code>cell.update(...)</code>, or call actions, in the same manner as views. After all services
+have executed, the resulting state is rendered by the view.</p>
+<p>Services can call <code>cell.update(...)</code> both synchronously and/or asynchronously (such as to load data
+from a server.)</p>
+<h3>Avoiding Infinite Loops</h3><p>Because a service runs every time the state changes, and a service changes the state, we run the
+risk of having an infinite loop. To avoid this, we&#39;ll use a function called <code>dropRepeats</code> (again,
+credit to James) which takes a stream and an optional <code>onchange</code> function. The result is a new
+stream that only produces a value if it is different from the previous value. By default, the value
+is the stream&#39;s value. If the <code>onchange</code> function is provided by the caller, then the value returned
+by that function is used to compare to the previous value.</p>
+<p>Here is the <code>dropRepeats</code> function. Below it, you will see it in action.</p>
+<ul>
+<li>In the first example, <code>onchange</code> is the default, which is the value of the stream. The stream returned by <code>dropRepeats</code> only produces values that are different from the previous.</li>
+<li>In the second example, <code>onchange</code> is the value of the <code>counter</code> property. Notice that the stream
+returned by <code>dropRepeats</code> only produces values when the <code>counter</code> value is different from the
+previous. When the <code>label</code> value changes but the <code>counter</code> value is the same, the stream does not
+produce a value.</li>
+</ul>
+<div id="flems1" class="flemscode" style=" height:700px;"></div>
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "08-drop-repeats.js", content: "/* global flyd */\n\nconst dropRepeats = (states, onchange = (state) => state) => {\n  let prev = undefined;\n  const result = flyd.stream();\n\n  states.map((state) => {\n    const next = onchange(state);\n    if (next !== prev) {\n      prev = next;\n      result(state);\n    }\n  });\n  return result;\n};\n\nconst s1 = flyd.stream(10);\nconst d1 = dropRepeats(s1);\nd1.map(console.log);\ns1(10);\ns1(11);\ns1(11);\ns1(12);\n\nconst s2 = flyd.stream({ counter: 0, label: 'zero' });\nconst d2 = dropRepeats(s2, (state) => state.counter);\nd2.map(console.log);\ns2({ counter: 0, label: 'one' });\ns2({ counter: 2, label: 'two' });\n", compiler: "babel"}],
+      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"}],
+      middle: 75
+    })
+  </script>
+      
+
+<p>By using <code>dropRepeats</code>, services don&#39;t need to worry about avoiding infinite loops.</p>
+<h3>Services</h3><p>A service function receives the current <code>cell</code> and can call <code>cell.update(...)</code> to alter the state.</p>
+<p>We can use service functions for computed properties, setting up an initial blank state for a page,
+cleaning up state after leaving a page, and any other state changes that we want to perform
+synchronously before rendering the view.</p>
+<p>Services can also call <code>cell.update(...)</code> asynchronously, such as loading data or triggering other
+types of asynchronous updates.</p>
+<p>Finally, services may perform side effects without changing the state, such as saving state to local
+storage.</p>
+<p>To define a service, we&#39;ll create an object with two properties:</p>
+<ul>
+<li><code>onchange</code>: a function that receives the state and returns a value.</li>
+<li><code>run</code>: a function that gets called when the value returned by <code>onchange</code> changes. The <code>run</code>
+function receives the current <code>cell</code>, from which it can read <code>cell.state</code> and call
+<code>cell.update(...)</code> to update the state.</li>
+</ul>
+<pre><code class="language-js">const service = {
+  onchange: (state) =&gt; state.someProperty,
+  run: (cell) =&gt; {
+    // ...
+    cell.update(...);
+  }
+};
+</code></pre>
+<p>The <code>onchange</code> function is optional. If not provided, the <code>run</code> function gets called on every state
+change.</p>
+<h3>Pattern Setup</h3><p>Let&#39;s see how we can set up services with Meiosis. We&#39;ll start with the base pattern:</p>
+<pre><code class="language-js">const update = m.stream();
+const states = m.stream.scan(merge, app.initial, update);
+const createCell = (state) =&gt; ({ state, update });
+</code></pre>
+<p>Next, given a <code>services</code> array of services, for each service we&#39;ll use <code>dropRepeats</code>, passing the
+service&#39;s <code>onchange</code>, and <code>map</code> the resulting stream to call the service&#39;s <code>run</code> function:</p>
+<pre><code class="language-js">services.forEach((service) =&gt; {
+  dropRepeats(states, service.onchange).map((state) =&gt;
+    service.run(createCell(state))
+  );
+});
+</code></pre>
+<p>This will call each service and update the state as each service calls <code>cell.update</code>, with
+<code>dropRepeats</code> avoiding infinite loops.</p>
+<p>Finally, we&#39;ll create our <code>cells</code> stream also using <code>dropRepeats</code>:</p>
+<pre><code class="language-js">const cells = dropRepeats(states).map(createCell);
+</code></pre>
+<p>You can see the complete pattern setup below.</p>
+<div id="flems2" class="flemscode" style=" height:700px;"></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "08-services-setup.js", content: "/* global m, mergerino */\nconst merge = mergerino;\n\nconst app = {\n  initial: {},\n  services: [],\n  view: (_cell) => []\n};\n\nconst dropRepeats = (states, onchange = (state) => state) => {\n  let prev = undefined;\n  const result = m.stream();\n\n  states.map((state) => {\n    const next = onchange(state);\n    if (next !== prev) {\n      prev = next;\n      result(state);\n    }\n  });\n  return result;\n};\n\nconst update = m.stream();\nconst states = m.stream.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\n\napp.services.forEach((service) => {\n  dropRepeats(states, service.onchange).map((state) =>\n    service.run(createCell(state))\n  );\n});\n\nconst cells = dropRepeats(states).map(createCell);\n\nm.mount(document.getElementById('app'), {\n  view: () => app.view(cells())\n});\n\ncells.map(() => m.redraw());\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 75
+    })
+  </script>
+      
+
+<p>Notice that for Mithril we&#39;re using <code>m.redraw</code> to make sure the view is re-rendered because we&#39;re
+updating the state with services, thus outside of Mithril&#39;s auto-redraw scope.</p>
+<h3>Services - Example</h3><p>Let&#39;s look at an example using services.</p>
+<p>Say we have an app with three pages: Home, Login, and Data. We&#39;ll use services to achieve the
+following:</p>
+<ul>
+<li>Set up a blank form state when going to the Login page</li>
+<li>Clear out the form state when leaving the Login page</li>
+<li>Change the state to &quot;loading&quot; when going to the Data page</li>
+<li>Load the data asynchronously for the Data page</li>
+<li>Clear out the data when leaving the Data page.</li>
+</ul>
+<p>We&#39;ll use these properties in the state:</p>
+<ul>
+<li><code>page</code> to indicate the current page: <code>&quot;Home&quot;</code>, <code>&quot;Login&quot;</code>, <code>&quot;Data&quot;</code></li>
+<li><code>login</code> with <code>username</code> and <code>password</code> for the Login form</li>
+<li><code>data</code> to indicate <code>&quot;loading&quot;</code> or an array of data for the Data page.</li>
+</ul>
+<p>The login service checks whether the current page is <code>&quot;Login&quot;</code>. If so, and the login form has not
+yet been set up, it updates the state to set up the form with a blank username and password.</p>
+<p>If the current page is not <code>&quot;Login&quot;</code>, the service removes the login form from the state.</p>
+<pre><code class="language-js">const loginService = {
+  // call the service when the page changes
+  onchange: (state) =&gt; state.page,
+  run: (cell) =&gt; {
+    if (cell.state.page === &quot;Login&quot;) {
+      cell.update({
+        login: { username: &quot;&quot;, password: &quot;&quot; }
+      });
+    } else {
+      cell.update({ login: undefined });
+    }
+  }
+};
+</code></pre>
+<p>The data service checks whether the page has changed to <code>&quot;Data&quot;</code>. If so, the service sets the state
+data to <code>&quot;loading&quot;</code>. The view uses this to display a <code>Loading, please wait...</code> message. The service
+calls <code>actions.loadData</code> to simulate loading data asynchronously from a server.</p>
+<p>If the page has changed to something other than <code>&quot;Data&quot;</code>, the service clears the <code>data</code> property
+from the state.</p>
+<pre><code class="language-js">const actions = {
+  loadData: (cell) =&gt;
+    setTimeout(
+      () =&gt;
+        cell.update({
+          data: [&#39;One&#39;, &#39;Two&#39;]
+        }),
+      1500
+    )
+};
+
+const dataService = {
+  onchange: (state) =&gt; state.page,
+  run: (cell) =&gt; {
+    if (cell.state.page === &quot;Data&quot;) {
+      cell.update({ data: &quot;loading&quot; });
+      actions.loadData(cell);
+    } else {
+      cell.update({ data: undefined });
+    }
+  }
+};
+</code></pre>
+<p>Our <code>app</code> contains the <code>initial</code> state, the array of <code>services</code>, and the view:</p>
+<pre><code class="language-js">const app = {
+  initial: {
+    page: &quot;Home&quot;
+  },
+
+  services: [loginService, dataService],
+
+  view: (cell) =&gt; ...
+};
+</code></pre>
+<p>You can see the complete example in action below.</p>
+<div id="flems3" class="flemscode" style=" height:700px;"></div>
+  <script>
+    window.Flems(flems3, {
+      files: [{name: "08-services-example.js", content: "/* global m, mergerino */\nconst merge = mergerino;\n\nconst loginService = {\n  onchange: (state) => state.page,\n  run: (cell) => {\n    if (cell.state.page === 'Login') {\n      cell.update({\n        login: { username: '', password: '' }\n      });\n    } else {\n      cell.update({ login: undefined });\n    }\n  }\n};\n\nconst actions = {\n  loadData: (cell) =>\n    setTimeout(\n      () =>\n        cell.update({\n          data: ['One', 'Two']\n        }),\n      1500\n    )\n};\n\nconst dataService = {\n  onchange: (state) => state.page,\n  run: (cell) => {\n    if (cell.state.page === 'Data') {\n      cell.update({ data: 'loading' });\n      actions.loadData(cell);\n    } else {\n      cell.update({ data: undefined });\n    }\n  }\n};\n\nconst app = {\n  initial: {\n    page: 'Home'\n  },\n\n  services: [loginService, dataService],\n\n  view: (cell) => [\n    m(\n      'div',\n      m(\n        'a',\n        {\n          href: '#',\n          onclick: (evt) => {\n            evt.preventDefault();\n            cell.update({ page: 'Home' });\n          }\n        },\n        'Home'\n      ),\n      m('span', ' | '),\n      m(\n        'a',\n        {\n          href: '#',\n          onclick: (evt) => {\n            evt.preventDefault();\n            cell.update({ page: 'Login' });\n          }\n        },\n        'Login'\n      ),\n      m('span', ' | '),\n      m(\n        'a',\n        {\n          href: '#',\n          onclick: (evt) => {\n            evt.preventDefault();\n            cell.update({ page: 'Data' });\n          }\n        },\n        'Data'\n      )\n    ),\n    cell.state.page === 'Home'\n      ? m('h4', 'Home page')\n      : cell.state.page === 'Login'\n      ? [\n          m('h4', 'Login page'),\n          m(\n            'div',\n            m('span', 'Username:'),\n            m('input[type=text]', {\n              value: cell.state.login.username,\n              oninput: (evt) =>\n                cell.update({\n                  login: { username: evt.target.value }\n                })\n            })\n          ),\n          m(\n            'div',\n            m('span', 'Password:'),\n            m('input[type=password]', {\n              value: cell.state.login.password,\n              oninput: (evt) =>\n                cell.update({\n                  login: { password: evt.target.value }\n                })\n            })\n          )\n        ]\n      : cell.state.page === 'Data'\n      ? [\n          m('h4', 'Data page'),\n          cell.state.data === 'loading'\n            ? m('div', 'Loading, please wait...')\n            : m(\n                'ul',\n                cell.state.data.map((item) => m('li', item))\n              )\n        ]\n      : null,\n    m('pre', JSON.stringify(cell.state, null, 2))\n  ]\n};\n\nconst dropRepeats = (states, onchange = (state) => state) => {\n  let prev = undefined;\n  const result = m.stream();\n\n  states.map((state) => {\n    const next = onchange(state);\n    if (next !== prev) {\n      prev = next;\n      result(state);\n    }\n  });\n  return result;\n};\n\nconst update = m.stream();\nconst states = m.stream.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\n\napp.services.forEach((service) => {\n  dropRepeats(states, service.onchange).map((state) =>\n    service.run(createCell(state))\n  );\n});\n\nconst cells = dropRepeats(states).map(createCell);\n\nm.mount(document.getElementById('app'), {\n  view: () => app.view(cells())\n});\n\ncells.map(() => m.redraw());\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
+      middle: 75
+    })
+  </script>
+      
+
+<h3>Conclusion</h3><p>In this section, we&#39;ve augmented our Meiosis pattern setup with services. We do not need a lot of
+code for this setup; nevertheless, for your convenience, you can also use the same setup by adding
+<a href="https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup">meiosis-setup</a> to your
+project.</p>
+<p>In the next section, we&#39;ll look at another feature that we can add to Meiosis: <strong>nesting</strong>.</p>
+<hr>
+<p><a href="07-views.html">&lt; Previous</a> |
+<a href="09-nesting.html">Next &gt;</a> |
+<a href="toc.html">Table of Contents</a></p>
+<hr>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
+
+</body>
+</html>
