@@ -1,12 +1,11 @@
-/*global mergerino, flyd, preact*/
+/*global flyd, _, preact*/
 /** @jsx preact.h */
-const merge = mergerino;
 
 const conditionsActions = {
   togglePrecipitations: (cell, value) =>
-    cell.update({ precipitations: value }),
+    cell.update(_.set('precipitations', value)),
 
-  changeSky: (cell, value) => cell.update({ sky: value })
+  changeSky: (cell, value) => cell.update(_.set('sky', value))
 };
 
 const conditionsOption = ({ cell, value, label }) => (
@@ -71,9 +70,8 @@ const conditions = {
 };
 
 const temperatureActions = {
-  increment: (cell, amount) => {
-    cell.update({ value: (x) => x + amount });
-  }
+  increment: (cell, amount) =>
+    cell.update(_.update('value', (x) => x + amount))
 };
 
 const temperature = {
@@ -121,7 +119,8 @@ const app = {
   )
 };
 
-const nestPatch = (patch, prop) => ({ [prop]: patch });
+const nestPatch = (patch, prop) => (state) =>
+  Object.assign({}, state, { [prop]: patch(state[prop]) });
 
 const nestUpdate = (parentUpdate, prop) => (patch) =>
   parentUpdate(nestPatch(patch, prop));
@@ -140,7 +139,11 @@ const nestCell = (getState, parentUpdate) => (prop) => {
 };
 
 const update = flyd.stream();
-const states = flyd.scan(merge, app.initial, update);
+const states = flyd.scan(
+  (state, patch) => patch(state),
+  app.initial,
+  update
+);
 const nest = nestCell(states, update);
 
 const createCell = (state) => ({ state, update, nest });

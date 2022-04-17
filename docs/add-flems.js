@@ -5,6 +5,8 @@ const toDir = process.argv[3];
 
 const libMap = {
   flyd: 'https://unpkg.com/flyd@0.2.8/flyd.js',
+  'lodash-fp':
+    'https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)',
   mergerino: 'https://unpkg.com/mergerino@0.4.0',
   mithril: 'https://unpkg.com/mithril@2.0.4',
   'mithril-stream':
