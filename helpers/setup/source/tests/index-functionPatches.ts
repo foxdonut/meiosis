@@ -320,7 +320,17 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
-        }
+        },
+        services: [
+          {
+            onchange: (state) => state.size,
+            run: (cell) => {
+              if (cell.state.size === 38) {
+                cell.update(assoc('size', 42));
+              }
+            }
+          }
+        ]
       };
 
       interface Environment {
@@ -404,6 +414,9 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       expect(cells().state.pet.fullName).toEqual('Fluffy Quackington');
       cells().nest('pet').update(assoc('firstName', 'Softy'));
       expect(cells().state.pet.fullName).toEqual('Softy Quackington');
+
+      cells().nest('pet').nest('house').update(assoc('size', 38));
+      expect(cells().state.pet.house.size).toEqual(42);
     });
 
     test('views', (done) => {

@@ -105,21 +105,23 @@ const getView = <S>(app: CommonMeiosisComponent<S>): CommonMeiosisComponent<S> =
 
 const assembleServices = <S>(
   nestedComponents: CommonNestedComponents<S> | undefined,
-  getCell = (cell) => cell
+  getCell = (cell) => cell,
+  getState = (state) => state
 ): CommonService<S>[] =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce((result, key) => {
         const nextGetCell = (cell) => getCell(cell).nest(key);
+        const nextGetState = (state) => getState(state)[key];
 
         const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
 
         return concatIfPresent(
           result,
           nestedApp.services?.map<CommonService<any>>((service) => ({
-            onchange: (state) => (service.onchange ? service.onchange(state[key]) : state),
+            onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
             run: (cell) => service.run(nextGetCell(cell))
           }))
-        ).concat(assembleServices(nestedApp.nested, nextGetCell));
+        ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
       }, [] as CommonService<S>[])
     : [];
 

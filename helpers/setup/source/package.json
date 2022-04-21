@@ -26,6 +26,9 @@
     "url": "https://github.com/foxdonut/meiosis/issues"
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
+  "dependencies": {
+    "mergerino": "^0.4.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.17.8",
     "@babel/preset-env": "^7.16.11",
@@ -42,8 +45,5 @@
     "rollup-plugin-terser": "^7.0.2",
     "typedoc": "^0.22.13",
     "typescript": "^4.6.2"
-  },
-  "dependencies": {
-    "mergerino": "^0.4.0"
   }
 }
