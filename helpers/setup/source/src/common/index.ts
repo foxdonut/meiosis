@@ -12,20 +12,20 @@ interface CommonMeiosisSetup<S, P> {
   view: any;
 }
 
-export interface CommonService<S, R = any> {
-  onchange?: (state: S, root: R) => any;
-  run: (cell: any, root: any) => any;
+export interface CommonService<S> {
+  onchange?: (state: S) => any;
+  run: (cell: any) => any;
 }
 
-export interface CommonMeiosisComponent<S, R = any> {
+export interface CommonMeiosisComponent<S> {
   initial?: Partial<S>;
-  services?: CommonService<S, R>[];
+  services?: CommonService<S>[];
   view?: (cell: any, ...args: any[]) => any;
-  nested?: CommonNestedComponents<S, R>;
+  nested?: CommonNestedComponents<S>;
 }
 
-export type CommonNestedComponents<S, R = any> = {
-  [K in keyof S]?: CommonMeiosisComponent<S[K], R>;
+export type CommonNestedComponents<S> = {
+  [K in keyof S]?: CommonMeiosisComponent<S[K]>;
 };
 
 /**
@@ -118,9 +118,8 @@ const assembleServices = <S>(
         return concatIfPresent(
           result,
           nestedApp.services?.map<CommonService<any>>((service) => ({
-            onchange: (state) =>
-              service.onchange ? service.onchange(nextGetState(state), state) : state,
-            run: (cell, root) => service.run(nextGetCell(cell), root)
+            onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
+            run: (cell) => service.run(nextGetCell(cell))
           }))
         ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
       }, [] as CommonService<S>[])
@@ -206,11 +205,7 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
 
   if (app) {
     getServices(app).forEach((service: T) => {
-      let onchange;
-      if (service.onchange) {
-        onchange = (state) => service.onchange && service.onchange(state, state);
-      }
-      dropRepeats(states, onchange).map((state) => service.run(getCell(state), getCell(state)));
+      dropRepeats(states, service.onchange).map((state) => service.run(getCell(state)));
     });
   }
 

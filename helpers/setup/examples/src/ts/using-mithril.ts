@@ -24,19 +24,27 @@ const home = {
   view: () => m('h4', 'Home page')
 };
 
-const loginService: Service<Login, State> = {
-  onchange: (_state, root) => root.page,
-  run: (cell, root) => {
-    if (root.state.page === 'Login') {
-      cell.update({ username: '', password: '' });
+const loginActions = {
+  prepareBlankForm: (cell: MeiosisCell<Login>) => {
+    cell.update({ username: '', password: '' });
+  },
+  clearForm: (cell: MeiosisCell<Login>) => {
+    cell.update({ username: undefined, password: undefined });
+  }
+};
+
+const loginService: Service<State> = {
+  onchange: (state) => state.page,
+  run: (cell) => {
+    if (cell.state.page === 'Login') {
+      loginActions.prepareBlankForm(cell.nest('login'));
     } else {
-      cell.update({ username: undefined, password: undefined });
+      loginActions.clearForm(cell.nest('login'));
     }
   }
 };
 
 const login: MeiosisViewComponent<Login> = {
-  services: [loginService],
   view: (cell) => [
     m('h4', 'Login page'),
     m(
@@ -64,7 +72,8 @@ const login: MeiosisViewComponent<Login> = {
 };
 
 const dataActions = {
-  loadData: (cell: MeiosisCell<Data>) =>
+  loadData: (cell: MeiosisCell<Data>) => {
+    cell.update({ loading: true });
     setTimeout(
       () =>
         cell.update({
@@ -72,23 +81,25 @@ const dataActions = {
           items: ['One', 'Two']
         }),
       1500
-    )
+    );
+  },
+  clearData: (cell: MeiosisCell<Data>) => {
+    cell.update({ items: undefined });
+  }
 };
 
-const dataService: Service<Data, State> = {
-  onchange: (_state, root) => root.page,
-  run: (cell, root) => {
-    if (root.state.page === 'Data') {
-      cell.update({ loading: true });
-      dataActions.loadData(cell);
+const dataService: Service<State> = {
+  onchange: (state) => state.page,
+  run: (cell) => {
+    if (cell.state.page === 'Data') {
+      dataActions.loadData(cell.nest('data'));
     } else {
-      cell.update({ items: undefined });
+      dataActions.clearData(cell.nest('data'));
     }
   }
 };
 
 const data: MeiosisViewComponent<Data> = {
-  services: [dataService],
   view: (cell) => [
     m('h4', 'Data page'),
     cell.state.loading
@@ -104,6 +115,7 @@ const app: MeiosisViewComponent<State> = {
   initial: {
     page: 'Home'
   },
+  services: [loginService, dataService],
   nested: {
     home,
     login,

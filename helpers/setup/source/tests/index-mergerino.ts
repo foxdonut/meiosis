@@ -315,15 +315,15 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
-      const homeComponent: MeiosisComponent<Home, AppState> = {
+      const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         },
         services: [
           {
-            onchange: (_state, root) => root.page,
-            run: (cell, root) => {
-              if (root.state.page === 'Test') {
+            onchange: (state) => state.size,
+            run: (cell) => {
+              if (cell.state.size === 38) {
                 cell.update({ size: 42 });
               }
             }
@@ -349,7 +349,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       const updateFullName = (cell: MeiosisCell<Duck>) =>
         cell.update({ fullName: getFullName(cell.state) });
 
-      const duckComponent: MeiosisComponent<Duck, AppState> = {
+      const duckComponent: MeiosisComponent<Duck> = {
         initial: {
           color: 'yellow',
           texture: 'soft',
@@ -375,7 +375,6 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       };
 
       interface AppState {
-        page: string;
         pet: Duck;
         sound: string;
         volume: string;
@@ -383,7 +382,6 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
       const app: MeiosisComponent<AppState> = {
         initial: {
-          page: 'Home',
           sound: 'quack'
         },
         services: [
@@ -415,7 +413,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       cells().nest('pet').update({ firstName: 'Softy' });
       expect(cells().state.pet.fullName).toEqual('Softy Quackington');
 
-      cells().update({ page: 'Test' });
+      cells().nest('pet').nest('house').update({ size: 38 });
       expect(cells().state.pet.house.size).toEqual(42);
     });
 

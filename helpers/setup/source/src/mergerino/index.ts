@@ -73,25 +73,25 @@ export type NestedViews<S> = {
   [K in keyof S]: ViewComponent<S>;
 };
 
-export interface Service<S, R = any> extends CommonService<S, R> {
-  run: (cell: MeiosisCell<S>, root: MeiosisCell<R>) => any;
+export interface Service<S> extends CommonService<S> {
+  run: (cell: MeiosisCell<S>) => any;
 }
 
-export interface MeiosisComponent<S, R = any> extends CommonMeiosisComponent<S, R> {
+export interface MeiosisComponent<S> extends CommonMeiosisComponent<S> {
   /**
    * An array of service functions.
    */
-  services?: Service<S, R>[];
+  services?: Service<S>[];
   view?: (cell: MeiosisCell<S>, ...args: any[]) => any;
-  nested?: NestedComponents<S, R>;
+  nested?: NestedComponents<S>;
 }
 
-export interface MeiosisViewComponent<S, R = any> extends MeiosisComponent<S, R> {
+export interface MeiosisViewComponent<S> extends MeiosisComponent<S> {
   view: View<S>;
 }
 
-export type NestedComponents<S, R = any> = {
-  [K in keyof S]?: MeiosisComponent<S[K], R>;
+export type NestedComponents<S> = {
+  [K in keyof S]?: MeiosisComponent<S[K]>;
 };
 
 export interface MeiosisCell<S> {
