@@ -428,7 +428,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         initial: {
           size: 37
         },
-        view: (cell, value) => {
+        view: (cell, value: number) => {
           expect(cell.state.size).toEqual(37);
           expect(value).toEqual(42);
           done();

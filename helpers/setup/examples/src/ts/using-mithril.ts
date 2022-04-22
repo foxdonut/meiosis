@@ -1,118 +1,162 @@
 // mithril + mergerino + mithril-stream
-import { MeiosisCell, MeiosisViewComponent, setup } from '../../../source/dist/mergerino';
+import { MeiosisCell, MeiosisViewComponent, Service, setup } from '../../../source/dist/mergerino';
 import m from 'mithril';
 import Stream from 'mithril/stream';
-import {
-  Condition,
-  DomEvent,
-  InitialTemperature,
-  Sky,
-  State,
-  TemperatureState,
-  convert
-} from './common';
 
-const conditionsActions = {
-  togglePrecipitations: (cell: MeiosisCell<Condition>, value: boolean) => {
-    cell.update({ precipitations: value });
-  },
-  changeSky: (cell: MeiosisCell<Condition>, value: Sky) => {
-    cell.update({ sky: value });
+interface Data {
+  loading: boolean;
+  items: string[];
+}
+
+interface Login {
+  username: string;
+  password: string;
+}
+
+interface State {
+  page: string;
+  home: string;
+  data: Data;
+  login: Login;
+}
+
+const home = {
+  view: () => m('h4', 'Home page')
+};
+
+const loginService: Service<Login, State> = {
+  onchange: (_state, root) => root.page,
+  run: (cell, root) => {
+    if (root.state.page === 'Login') {
+      cell.update({ username: '', password: '' });
+    } else {
+      cell.update({ username: undefined, password: undefined });
+    }
   }
 };
 
-const SkyOption: m.Component<{ cell: MeiosisCell<Condition>; value: string; label: string }> = {
-  view: ({ attrs: { cell, value, label } }) =>
+const login: MeiosisViewComponent<Login> = {
+  services: [loginService],
+  view: (cell) => [
+    m('h4', 'Login page'),
     m(
-      'label',
-      m('input', {
-        type: 'radio',
-        value,
-        checked: cell.state.sky === value,
-        onchange: (evt: DomEvent) => conditionsActions.changeSky(cell, evt.target.value as Sky)
+      'div',
+      {
+        style: {
+          width: '300px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 3fr',
+          gridGap: '5px'
+        }
+      },
+      m('span', 'Username:'),
+      m('input[type=text]', {
+        value: cell.state.username,
+        oninput: (evt) => cell.update({ username: evt.target.value })
       }),
-      label
+      m('span', 'Password:'),
+      m('input[type=password]', {
+        value: cell.state.password,
+        oninput: (evt) => cell.update({ password: evt.target.value })
+      })
     )
+  ]
 };
 
-const conditions: MeiosisViewComponent<Condition> = {
-  initial: {
-    precipitations: false,
-    sky: 'SUNNY'
-  },
-  view: (cell) =>
-    m(
-      'div',
-      m(
-        'label',
-        m('input', {
-          type: 'checkbox',
-          checked: cell.state.precipitations,
-          onchange: (evt: DomEvent) =>
-            conditionsActions.togglePrecipitations(cell, evt.target.checked)
+const dataActions = {
+  loadData: (cell: MeiosisCell<Data>) =>
+    setTimeout(
+      () =>
+        cell.update({
+          loading: false,
+          items: ['One', 'Two']
         }),
-        'Precipitations'
-      ),
-      m(
-        'div',
-        m(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
-        m(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
-        m(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
-      )
+      1500
     )
 };
 
-const temperatureActions = {
-  increment: (cell: MeiosisCell<TemperatureState>, amount: number) => {
-    cell.update({ value: (x) => x + amount });
-  },
-  changeUnits: (cell: MeiosisCell<TemperatureState>) => {
-    cell.update((state) => {
-      const value = state.value;
-      const newUnits = state.units === 'C' ? 'F' : 'C';
-      const newValue = convert(value, newUnits);
-      return { ...state, value: newValue, units: newUnits };
-    });
+const dataService: Service<Data, State> = {
+  onchange: (_state, root) => root.page,
+  run: (cell, root) => {
+    if (root.state.page === 'Data') {
+      cell.update({ loading: true });
+      dataActions.loadData(cell);
+    } else {
+      cell.update({ items: undefined });
+    }
   }
 };
 
-const createTemperature = (label: string): MeiosisViewComponent<TemperatureState> => ({
-  initial: InitialTemperature(label),
-  view: (cell) =>
-    m(
-      'div',
-      cell.state.label,
-      ' Temperature: ',
-      cell.state.value,
-      m.trust('&deg;'),
-      cell.state.units,
-      m(
-        'div',
-        m('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
-        m('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
-      ),
-      m('div', m('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units'))
-    )
-});
+const data: MeiosisViewComponent<Data> = {
+  services: [dataService],
+  view: (cell) => [
+    m('h4', 'Data page'),
+    cell.state.loading
+      ? m('div', 'Loading, please wait...')
+      : m(
+          'ul',
+          cell.state.items.map((item) => m('li', item))
+        )
+  ]
+};
 
 const app: MeiosisViewComponent<State> = {
-  nested: {
-    conditions,
-    airTemperature: createTemperature('Air'),
-    waterTemperature: createTemperature('Water')
+  initial: {
+    page: 'Home'
   },
-  view: (cell) =>
+  nested: {
+    home,
+    login,
+    data
+  },
+  view: (cell) => [
     m(
       'div',
-      { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
+      { style: { marginBottom: '10px' } },
       m(
-        'div',
-        cell.nested.conditions.view(cell),
-        cell.nested.airTemperature.view(cell),
-        cell.nested.waterTemperature.view(cell)
+        'a',
+        {
+          href: '#',
+          onclick: (evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'Home' });
+          }
+        },
+        'Home'
       ),
-      m('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
-    )
+      m('span', ' | '),
+      m(
+        'a',
+        {
+          href: '#',
+          onclick: (evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'Login' });
+          }
+        },
+        'Login'
+      ),
+      m('span', ' | '),
+      m(
+        'a',
+        {
+          href: '#',
+          onclick: (evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'Data' });
+          }
+        },
+        'Data'
+      )
+    ),
+    cell.state.page === 'Home'
+      ? cell.nested.home.view(cell)
+      : cell.state.page === 'Login'
+      ? cell.nested.login.view(cell)
+      : cell.state.page === 'Data'
+      ? cell.nested.data.view(cell)
+      : null
+  ]
 };
 
 export const setupMithrilExample = (): void => {

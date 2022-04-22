@@ -1,111 +1,48 @@
 // @ts-check
 // preact + functionPatches + simple-stream
-import meiosis from '../../../source/dist/index';
+import { setup } from '../../../source/dist/functionPatches';
 import { h, render as preactRender } from 'preact';
-import { add, assoc, over, lensProp } from 'rambda';
-import { app, convert } from './common';
+import _ from 'lodash/fp';
 
-const conditionsActions = {
-  togglePrecipitations: (cell, value) => {
-    cell.update(assoc('precipitations', value));
-  },
-  changeSky: (cell, value) => {
-    cell.update(assoc('sky', value));
-  }
+const actions = {
+  increment: (cell, amount) => cell.update(_.update('value', (x) => x + amount))
 };
 
-// Normally we could use JSX with the Preact.h pragma, but since we already have React in this
-// project, we'll use h here.
-const SkyOption = ({ cell, value, label }) =>
-  h(
-    'label',
-    {},
-    h('input', {
-      type: 'radio',
-      value,
-      checked: cell.state.sky === value,
-      onchange: (evt) => conditionsActions.changeSky(cell, evt.target.value)
-    }),
-    label
-  );
-
-const Conditions = ({ cell }) =>
+const view = (cell) =>
   h(
     'div',
     {},
     h(
-      'label',
+      'div',
       {},
-      h('input', {
-        type: 'checkbox',
-        checked: cell.state.precipitations,
-        onchange: (evt) => conditionsActions.togglePrecipitations(cell, evt.target.checked)
-      }),
-      'Precipitations'
+      h(
+        'label',
+        {},
+        'Temperature: ',
+        cell.state.value,
+        h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
+        'C'
+      )
     ),
     h(
       'div',
       {},
-      h(SkyOption, { cell, value: 'SUNNY', label: 'Sunny' }),
-      h(SkyOption, { cell, value: 'CLOUDY', label: 'Cloudy' }),
-      h(SkyOption, { cell, value: 'MIX', label: 'Mix of sun/clouds' })
+      h('button', { onclick: () => actions.increment(cell, 1) }, 'Increment'),
+      h('button', { onclick: () => actions.increment(cell, -1) }, 'Decrement')
     )
   );
 
-const temperatureActions = {
-  increment: (cell, amount) => {
-    cell.update(over(lensProp('value'), add(amount)));
+const app = {
+  initial: {
+    value: 22
   },
-  changeUnits: (cell) => {
-    cell.update((state) => {
-      const value = state.value;
-      const newUnits = state.units === 'C' ? 'F' : 'C';
-      const newValue = convert(value, newUnits);
-      return { ...state, value: newValue, units: newUnits };
-    });
-  }
+  view
 };
-
-const Temperature = ({ cell }) =>
-  h(
-    'div',
-    {},
-    cell.state.label,
-    ' Temperature: ',
-    cell.state.value,
-    h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
-    cell.state.units,
-    h(
-      'div',
-      {},
-      h('button', { onclick: () => temperatureActions.increment(cell, 1) }, 'Increment'),
-      h('button', { onclick: () => temperatureActions.increment(cell, -1) }, 'Decrement')
-    ),
-    h(
-      'div',
-      {},
-      h('button', { onclick: () => temperatureActions.changeUnits(cell) }, 'Change Units')
-    )
-  );
-
-const App = ({ cell }) =>
-  h(
-    'div',
-    { style: { display: 'grid', gridTemplateColumns: '1fr 1fr' } },
-    h(
-      'div',
-      {},
-      h(Conditions, { cell: cell.nest('conditions') }),
-      h(Temperature, { cell: cell.nest('temperature').nest('air') }),
-      h(Temperature, { cell: cell.nest('temperature').nest('water') })
-    ),
-    h('pre', { style: { margin: '0' } }, JSON.stringify(cell.state, null, 4))
-  );
 
 export const setupPreactExample = () => {
-  const cells = meiosis.functionPatches.setup({ app });
+  const cells = setup({ app });
   const element = document.getElementById('jsPreactApp');
   cells.map((cell) => {
-    preactRender(h(App, { cell }), element);
+    preactRender(app.view(cell), element);
   });
 };

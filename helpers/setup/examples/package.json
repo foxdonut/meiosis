@@ -27,10 +27,10 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "flyd": "^0.2.8",
+    "lodash": "^4.17.21",
     "mergerino": "^0.4.0",
     "mithril": "^2.0.4",
     "preact": "^10.7.0",
-    "rambda": "^7.0.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
