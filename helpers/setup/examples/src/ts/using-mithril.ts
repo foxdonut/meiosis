@@ -36,7 +36,7 @@ const loginActions = {
 const loginService: Service<State> = {
   onchange: (state) => state.page,
   run: (cell) => {
-    if (cell.state.page === 'Login') {
+    if (cell.state.page === 'login') {
       loginActions.prepareBlankForm(cell.nest('login'));
     } else {
       loginActions.clearForm(cell.nest('login'));
@@ -91,7 +91,7 @@ const dataActions = {
 const dataService: Service<State> = {
   onchange: (state) => state.page,
   run: (cell) => {
-    if (cell.state.page === 'Data') {
+    if (cell.state.page === 'data') {
       dataActions.loadData(cell.nest('data'));
     } else {
       dataActions.clearData(cell.nest('data'));
@@ -113,7 +113,7 @@ const data: MeiosisViewComponent<Data> = {
 
 const app: MeiosisViewComponent<State> = {
   initial: {
-    page: 'Home'
+    page: 'home'
   },
   services: [loginService, dataService],
   nested: {
@@ -121,54 +121,54 @@ const app: MeiosisViewComponent<State> = {
     login,
     data
   },
-  view: (cell) => [
+  view: (cell) =>
     m(
-      'div',
-      { style: { marginBottom: '10px' } },
+      'div.row',
       m(
-        'a',
-        {
-          href: '#',
-          onclick: (evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'Home' });
-          }
-        },
-        'Home'
+        'div.col-4',
+        m(
+          'div',
+          { style: { marginBottom: '10px' } },
+          m(
+            'a',
+            {
+              href: '#',
+              onclick: (evt) => {
+                evt.preventDefault();
+                cell.update({ page: 'home' });
+              }
+            },
+            'Home'
+          ),
+          m('span', ' | '),
+          m(
+            'a',
+            {
+              href: '#',
+              onclick: (evt) => {
+                evt.preventDefault();
+                cell.update({ page: 'login' });
+              }
+            },
+            'Login'
+          ),
+          m('span', ' | '),
+          m(
+            'a',
+            {
+              href: '#',
+              onclick: (evt) => {
+                evt.preventDefault();
+                cell.update({ page: 'data' });
+              }
+            },
+            'Data'
+          )
+        ),
+        cell.nested[cell.state.page].view(cell)
       ),
-      m('span', ' | '),
-      m(
-        'a',
-        {
-          href: '#',
-          onclick: (evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'Login' });
-          }
-        },
-        'Login'
-      ),
-      m('span', ' | '),
-      m(
-        'a',
-        {
-          href: '#',
-          onclick: (evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'Data' });
-          }
-        },
-        'Data'
-      )
-    ),
-    cell.state.page === 'Home'
-      ? cell.nested.home.view(cell)
-      : cell.state.page === 'Login'
-      ? cell.nested.login.view(cell)
-      : cell.state.page === 'Data'
-      ? cell.nested.data.view(cell)
-      : null
-  ]
+      m('div.col-4', m('pre', JSON.stringify(cell.state, null, 2)))
+    )
 };
 
 export const setupMithrilExample = (): void => {

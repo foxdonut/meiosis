@@ -13,10 +13,10 @@ const view = (cell) => (
   <div>
     <div>Temperature: {cell.state.value}&deg;C</div>
     <div>
-      <button className="btn btn-primary me-1" onClick={() => actions.increment(cell, 1)}>
+      <button className="btn btn-primary btn-sm" onClick={() => actions.increment(cell, 1)}>
         Increment
       </button>
-      <button className="btn btn-primary me-1" onClick={() => actions.increment(cell, -1)}>
+      <button className="btn btn-primary btn-sm ms-1" onClick={() => actions.increment(cell, -1)}>
         Decrement
       </button>
     </div>

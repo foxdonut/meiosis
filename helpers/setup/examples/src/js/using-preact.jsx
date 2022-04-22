@@ -27,8 +27,16 @@ const view = (cell) =>
     h(
       'div',
       {},
-      h('button', { onclick: () => actions.increment(cell, 1) }, 'Increment'),
-      h('button', { onclick: () => actions.increment(cell, -1) }, 'Decrement')
+      h(
+        'button',
+        { className: 'btn btn-primary btn-sm', onclick: () => actions.increment(cell, 1) },
+        'Increment'
+      ),
+      h(
+        'button',
+        { className: 'btn btn-primary btn-sm ms-1', onclick: () => actions.increment(cell, -1) },
+        'Decrement'
+      )
     )
   );
 
