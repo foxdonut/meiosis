@@ -1,13 +1,6 @@
-import simpleStream, { Stream } from '../simple-stream';
+import simpleStream, { ExternalStreamLib, Stream } from '../simple-stream';
 import merge from 'mergerino';
-import {
-  CommonMeiosisComponent,
-  CommonMeiosisConfig,
-  CommonService,
-  NestSetup,
-  commonGetServices,
-  nestSetup
-} from '../common';
+import { NestSetup, commonGetServices, nestSetup } from '../common';
 import { get } from '../util';
 
 /**
@@ -57,58 +50,120 @@ export type ObjectPatch<S> = {
  */
 export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
-export interface Update<S> {
+/**
+ * Function to update the state witha patch.
+ *
+ * @template S the State type.
+ */
+export type Update<S> = {
   (patch: Patch<S>): any;
-}
+};
 
-export interface View<S> {
+/**
+ * View function.
+ *
+ * @template S the State type.
+ */
+export type View<S> = {
   (cell: MeiosisCell<S>, ...args: any[]): any;
-}
+};
 
-export interface ViewComponent<S> {
+/**
+ * View component.
+ *
+ * @template S the State type.
+ */
+export type ViewComponent<S> = {
   view: View<S>;
-}
+};
 
+/**
+ * Nested views.
+ *
+ * @template S the State type.
+ */
 export type NestedViews<S> = {
   [K in keyof S]: ViewComponent<S>;
 };
 
-export interface Service<S> extends CommonService<S> {
-  run: (cell: MeiosisCell<S>) => any;
-}
-
-export interface MeiosisComponent<S> extends CommonMeiosisComponent<S> {
+/**
+ * A service gets called when the state changes and when the value returned by the `onchange`
+ * function has changed.
+ *
+ * @template S the State type.
+ */
+export type Service<S> = {
   /**
-   * An array of service functions.
+   * Function that gets called when the state changes. This function should return a value from the
+   * state. Only when that value changes will the service's `run` function be called.
    */
+  onchange?: (state: S) => any;
+
+  /**
+   * Function that gets called when the value returned by the `onchange` function has changed.
+   * The function should call `cell.update(...)` to update the state.
+   */
+  run: (cell: MeiosisCell<S>) => any;
+};
+
+/**
+ * A Meiosis component has (all of which are optional) initial state, services, and nested
+ * components.
+ *
+ * @template S the State type.
+ */
+export type MeiosisComponent<S> = {
+  /** Initial state. */
+  initial?: Partial<S>;
+
+  /** An array of service functions. */
   services?: Service<S>[];
-  view?: (cell: MeiosisCell<S>, ...args: any[]) => any;
+
+  /** Nested components. */
   nested?: NestedComponents<S>;
-}
+};
 
-export interface MeiosisViewComponent<S> extends MeiosisComponent<S> {
-  view: View<S>;
-}
+/**
+ * A Meiosis component with a view, and (optional) initial state, services, and nested components.
+ *
+ * @template S the State type.
+ */
+export type MeiosisViewComponent<S> = MeiosisComponent<S> & ViewComponent<S>;
 
+/**
+ * Nested components match properties of the state.
+ *
+ * @template S the State type.
+ */
 export type NestedComponents<S> = {
   [K in keyof S]?: MeiosisComponent<S[K]>;
 };
 
-export interface MeiosisCell<S> {
+/**
+ * Meiosis cell contains everything needed to access and update state.
+ *
+ * @template S the State type.
+ */
+export type MeiosisCell<S> = {
+  /** The current state. */
   state: S;
+  /** Function to update the state. */
   update: Update<S>;
+  /** Produces a nested cell. */
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+  /** Contains nested view components. */
   nested: NestedViews<S>;
-}
+};
 
 /**
  * Meiosis Config.
  *
  * @template S the State type.
  */
-export interface MeiosisConfig<S> extends CommonMeiosisConfig<S> {
+export type MeiosisConfig<S> = {
+  stream?: ExternalStreamLib;
   app?: MeiosisComponent<S>;
-}
+};
 
 const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> =>
   ({ [prop]: patch } as Patch<S>);

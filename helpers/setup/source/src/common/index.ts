@@ -12,46 +12,39 @@ interface CommonMeiosisSetup<S, P> {
   view: any;
 }
 
+/**
+ * Internal use only.
+ */
 export interface CommonService<S> {
   onchange?: (state: S) => any;
   run: (cell: any) => any;
 }
 
+/**
+ * Internal use only.
+ */
 export interface CommonMeiosisComponent<S> {
   initial?: Partial<S>;
   services?: CommonService<S>[];
-  view?: (cell: any, ...args: any[]) => any;
   nested?: CommonNestedComponents<S>;
+  view?: (cell: any, ...args: any[]) => any;
 }
 
+/**
+ * Internal use only.
+ */
 export type CommonNestedComponents<S> = {
   [K in keyof S]?: CommonMeiosisComponent<S[K]>;
 };
 
 /**
- * @template S the State type.
+ * Internal use only.
  */
-export interface CommonMeiosisConfig<S> {
-  /**
-   * The stream library. This works with `meiosis.simpleStream`, `flyd`, `m.stream`, or anything for
-   * which you provide either a function or an object with a `stream` function to create a stream.
-   * The function or object must also have a `scan` property. The returned stream must have a `map`
-   * method.
-   */
+interface CommonMeiosisConfig<S> {
   stream?: ExternalStreamLib;
-
-  /**
-   * The application object, with optional properties.
-   */
   app?: CommonMeiosisComponent<S>;
 }
 
-/**
- * Meiosis configuration.
- *
- * @template S the State type.
- * @template P the Patch type.
- */
 interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   /**
    * The accumulator function.
@@ -125,22 +118,12 @@ const assembleServices = <S>(
       }, [] as CommonService<S>[])
     : [];
 
+/**
+ * Internal use only.
+ */
 export const commonGetServices = <S>(app: CommonMeiosisComponent<S>): CommonService<S>[] =>
   concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
 
-/**
- * Base helper to setup the Meiosis pattern. If you are using Mergerino, Function Patches, or Immer,
- * use their respective `setup` function instead.
- *
- * Patch is merged in to the state by default.
- *
- * @template S the State type.
- * @template P the Patch type.
- *
- * @param {MeiosisConfig<S, P>} config the Meiosis config.
- *
- * @returns {Meiosis<S, P>} the Meiosis setup.
- */
 const setup = <S, P>({
   stream,
   accumulator,
@@ -178,6 +161,9 @@ const setup = <S, P>({
   };
 };
 
+/**
+ * Internal use only.
+ */
 export interface NestSetup<S, P> {
   accumulator: Accumulator<S, P>;
   getServices: any;
@@ -186,6 +172,9 @@ export interface NestSetup<S, P> {
   app: any;
 }
 
+/**
+ * Internal use only.
+ */
 export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonService<S>, C>({
   accumulator,
   getServices,
@@ -213,85 +202,3 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
 
   return cells;
 };
-
-/*
-https://stackoverflow.com/questions/66181496/typescript-generic-generic
-https://www.typescriptlang.org/play?#code/HYQwtgpgzgDiDGEAEApeIA2AvJBvAUIUkgJbAAuEATgGYLICiAbhBXvsceQJ4wQBcSKOSpkA5gG4OSAL5EkPPkmatyAFV4QAPGqQQAHpWAATKMpYUAfEgC8SNQG0A5IohOAulK6bzqgBIgJhjUOnqGrKa+VrZIABQQFuSCagCUttZMAPYkxlLSAPT5QplIdFTFSGKZmcbSrlHqmgCCJgFB1GoArjDBoQZGkSrRdg5DjXw6lgA0DW3GwVSTnvKFCgAWJGabSADua9TIAJK7m2tIx-CZnRjGSMYlAEYQ5JRUAHTnSOClmVSIt+QSp0oBBboFuHUfGMNHwWsY5gsuj1oDFoc1WoF5h1ur1wZYHO55GRXnREPYapkmsZjKCxmEBmY6QROApNIIAERqClUmnGdleTiA+4AOXAAiEInEAuIxhAlB5oMEABE5RABXJvEoufcFfDMQtUYkESFtZTqbTEpY8sRidRSchTQAlCBgTIsYx0-oRRmJdgs1wcp0ut2g-nSLgU0WQQTCUTASThu6q52u93K1XqyFaikpkN69rlOxjY2LIOpi2qK2EaQ0+AYEBUZCXYDCBTc80exKCNETU26sZVmUQOsNpuZFvkJBrfUQPsdsbdo0z0vt3kDgW1+uNpDN1tCzK590Lhow7RlvPrmvDrdjidTmfno9d2bLnQ54NPyvWpCgSCwehIAAqsAJDjuwib1MBoHAAA8jQPYQHCJZIsEZhFokZheiYWzADQ1D2EgAD8ibELoWGDL6hEnui+ZYlQKFntYgjAAk+HMaxVDSkgqyQSB45wQhSHLgxaFIImqyCRiBYMW+OrzpaSAAD7UbCUl0TJj4VlY8iaowGExHOa6+spmmdqo37EKsmQANYgBCLK7pOrEUKeXLITi0CCFB-HwYkp5CdJHlQASMQOCRSAOPu-aJDM07tIZWnkO4UzhZF77lmZFCxQ+6UXokhIsss4lFNQVC-ImjlIA8ICZeMs6ZO5yJQF5fGwb5qj+WpiJBSFIypfuh6Jdl8WrolyXcSVVBlVQACEiZFcQcjSL+0BwGSADirDUCQ8DgQ546tiAUAIW5wlBTEfThNhDQEpYsTheQQWCA4byvbgEXHGQSDWRA3CZDQ9juIuHU0Y1vQMIYVAIOQOgOIc40DtYMgFZwaQ2NYj1NXkxVIDZdkVQdTl+Zop2BU1MRHSdDVnU1sRhSyxBpXJRmqMNWIJbVyX9bln5ZfeI33INnPzSkFkTXoU3lftd7VbVrnU2TqEU8dxN8KT6lBXT3OCx+Q38+zo2czMqylb8c2FaL8hyHIQA
-
-interface Event {
-  type: string;
-}
-
-type EventType<T extends Event> = T['type'];
-type EventHandler<T extends Event> = (event: T) => void;
-
-// so far so good
-type EventTypeAndHandlerTuple<T extends Event> = [EventType<T>, EventHandler<T>];
-
-// this is where I wish I could do better. I am forced to used any
-type EventTypeAndHandlerTuples = EventTypeAndHandlerTuple<any>[];
-
-interface TodoAddedEvent extends Event {
-  type: 'TodoAdded';
-  todoName: string;
-  dateAdded: Date;
-}
-type TodoAddedHandler = EventHandler<TodoAddedEvent>;
-
-interface TodoRemovedEvent extends Event {
-  type: 'TodoRemoved';
-  todoName: string;
-  dateRemoved: Date;
-}
-type TodoRemovedHandler = EventHandler<TodoRemovedEvent>;
-
-declare const todoAddedEvent: EventType<TodoAddedEvent>;
-declare const handleTodoAddedEvent: TodoAddedHandler;
-declare const todoRemovedEvent: EventType<TodoRemovedEvent>;
-declare const handleTodoRemovedEvent: TodoRemovedHandler;
-
-const eventTypeToHandlerTuples: EventTypeAndHandlerTuples = [
-  [todoAddedEvent, handleTodoRemovedEvent],
-  [todoRemovedEvent, handleTodoAddedEvent]
-];
-
-console.log(eventTypeToHandlerTuples);
-
-type Events = TodoAddedEvent | TodoRemovedEvent;
-
-type UnionOfEventTypeAndHandlerTuples = Events extends infer T
-  ? T extends Event
-    ? EventTypeAndHandlerTuple<T>
-    : never
-  : never;
-
-const goodEventTypeToHandlerTuples: UnionOfEventTypeAndHandlerTuples[] = [
-  [todoAddedEvent, handleTodoAddedEvent],
-  [todoRemovedEvent, handleTodoRemovedEvent]
-];
-
-console.log(goodEventTypeToHandlerTuples);
-
-const badEventTypeToHandlerTuples: UnionOfEventTypeAndHandlerTuples[] = [
-  [todoRemovedEvent, handleTodoAddedEvent] // error!
-];
-
-console.log(badEventTypeToHandlerTuples);
-
-const asEventTypeToHandlerTuples = <T extends Event[]>(
-  tuples: [...{ [I in keyof T]: EventTypeAndHandlerTuple<Extract<T[I], Event>> }]
-) => tuples;
-
-const goodGenericEventTypeToHandlerTuples = asEventTypeToHandlerTuples([
-  [todoAddedEvent, handleTodoAddedEvent],
-  [todoRemovedEvent, handleTodoRemovedEvent]
-]);
-
-console.log(goodGenericEventTypeToHandlerTuples);
-
-const badGenericEventTypeToHandlerTuples = asEventTypeToHandlerTuples([
-  [todoRemovedEvent, handleTodoAddedEvent] // error!
-]);
-
-console.log(badGenericEventTypeToHandlerTuples);
-*/

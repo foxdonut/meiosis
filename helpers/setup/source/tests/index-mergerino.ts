@@ -1,6 +1,7 @@
 import {
   MeiosisCell,
   MeiosisComponent,
+  MeiosisViewComponent,
   Patch,
   Service,
   combinePatches,
@@ -422,7 +423,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
-      const homeComponent: MeiosisComponent<Home> = {
+      const homeComponent: MeiosisViewComponent<Home> = {
         initial: {
           size: 37
         },
@@ -438,7 +439,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         house: Home;
       }
 
-      const duckComponent: MeiosisComponent<Duck> = {
+      const duckComponent: MeiosisViewComponent<Duck> = {
         initial: {
           color: 'yellow'
         },

@@ -1,6 +1,7 @@
 import {
   MeiosisCell,
   MeiosisComponent,
+  MeiosisViewComponent,
   Patch,
   Service,
   combinePatches,
@@ -424,7 +425,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         size: number;
       }
 
-      const homeApp: MeiosisComponent<Home> = {
+      const homeApp: MeiosisViewComponent<Home> = {
         initial: {
           size: 37
         },
@@ -440,7 +441,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         house: Home;
       }
 
-      const duckApp: MeiosisComponent<Duck> = {
+      const duckApp: MeiosisViewComponent<Duck> = {
         initial: {
           color: 'yellow'
         },
