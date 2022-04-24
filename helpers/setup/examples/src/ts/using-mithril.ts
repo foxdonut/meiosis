@@ -20,7 +20,7 @@ interface State {
   login: Login;
 }
 
-const home = {
+const home: MeiosisViewComponent<string> = {
   view: () => m('h4', 'Home page')
 };
 
