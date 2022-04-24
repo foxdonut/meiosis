@@ -282,10 +282,10 @@
 
 // ----- Helpers
 
-const stripTrailingSlash = url => (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
-const I = x => x;
+const stripTrailingSlash = (url) => (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
+const I = (x) => x;
 
-const getQuery = path => {
+const getQuery = (path) => {
   const idx = path.indexOf('?');
   return idx >= 0 ? path.substring(idx + 1) : '';
 };
@@ -296,7 +296,7 @@ export const getQueryString = (queryString, queryParams = {}) => {
 };
 
 const separateParamsAndQueryParams = (path, allParams) => {
-  const pathParams = (path.match(/(:[^/]*)/g) || []).map(key => key.substring(1));
+  const pathParams = (path.match(/(:[^/]*)/g) || []).map((key) => key.substring(1));
 
   return Object.entries(allParams).reduce(
     (result, [key, value]) => {
@@ -359,8 +359,8 @@ const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl) => {
 };
 
 const emptyQueryString = {
-  parse: _ => ({}),
-  stringify: _ => ''
+  parse: (_) => ({}),
+  stringify: (_) => ''
 };
 
 const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
@@ -380,7 +380,7 @@ const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
 const addEventListener = (wdw, prefix, setHref) => {
   const origin = wdw.location.origin;
 
-  const linkHandler = evt => {
+  const linkHandler = (evt) => {
     let element = evt.target;
     while (element && element.nodeName.toLowerCase() !== 'a') {
       element = element.parentNode;
@@ -441,7 +441,7 @@ export const createRouter = ({
   const getPath = () => getUrl().substring(prefix.length) || '/';
   toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
 
-  const getRoute = path => {
+  const getRoute = (path) => {
     let matchPath = path || '/';
     if (matchPath.startsWith('?')) {
       matchPath = '/' + matchPath;
@@ -456,9 +456,9 @@ export const createRouter = ({
 
   const initialRoute = getRoute(getPath());
 
-  const start = onRouteChange => {
+  const start = (onRouteChange) => {
     if (historyMode) {
-      addEventListener(wdw, prefix, href => {
+      addEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);
         wdw.onpopstate();
       });
@@ -479,15 +479,15 @@ export const createRouter = ({
 export const RouteChangeEffect = ({
   update,
   Effects,
-  isRouteChanged = state => state.route.changed,
+  isRouteChanged = (state) => state.route.changed,
   routeChangedPatch = { route: { changed: false } }
 }) => {
-  const routeChangeUpdate = patch => update([patch, routeChangedPatch]);
-  const effects = Effects.map(Effect => Effect(routeChangeUpdate));
+  const routeChangeUpdate = (patch) => update([patch, routeChangedPatch]);
+  const effects = Effects.map((Effect) => Effect(routeChangeUpdate));
 
-  return state => {
+  return (state) => {
     if (isRouteChanged(state)) {
-      effects.forEach(effect => effect(state));
+      effects.forEach((effect) => effect(state));
     }
   };
 };
@@ -641,7 +641,7 @@ export const createMithrilRouter = ({
   const createMithrilRoutes = ({ onRouteChange, render }) => {
     if (historyMode) {
       const prefixLength = prefix.length;
-      addEventListener(wdw, prefix, href => {
+      addEventListener(wdw, prefix, (href) => {
         m.route.set(href.substring(href.indexOf(prefix) + prefixLength));
       });
     }
@@ -649,7 +649,7 @@ export const createMithrilRouter = ({
     return Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: params => onRouteChange({ page, params, changed: true }),
+        onmatch: (params) => onRouteChange({ page, params, changed: true }),
         render
       };
       return result;

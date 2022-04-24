@@ -1,15 +1,15 @@
 /*global __dirname*/
-var path = require("path");
+var path = require('path');
 
 module.exports = {
-  mode: "development",
-  entry: "./src/index.js",
+  mode: 'development',
+  entry: './src/index.js',
   output: {
-    path: path.join(__dirname, "build"),
-    filename: "generated-app.js"
+    path: path.join(__dirname, 'build'),
+    filename: 'generated-app.js'
   },
   resolve: {
-    extensions: [".js"]
+    extensions: ['.js']
   },
   module: {
     rules: [
@@ -17,7 +17,7 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: 'babel-loader'
         }
       }
     ]
