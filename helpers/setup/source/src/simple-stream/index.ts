@@ -4,21 +4,21 @@
  * @template T the type of the source value.
  * @template R the type of the returned value.
  */
-export interface MapFunction<T, R> {
+export type MapFunction<T, R> = {
   /**
    * @param {T} value the source value.
    *
    * @returns {R} the result of calling the map function on the source value.
    */
   (value: T): R;
-}
+};
 
 /**
  * A stream of values.
  *
  * @template T the type of the stream's values.
  */
-export interface Stream<T> {
+export type Stream<T> = {
   /**
    * Function to either send a value onto the stream -- by providing a value, `stream1(value)` -- or
    * to get the stream's latest value -- by calling the function with no arguments, `stream1()`.
@@ -54,21 +54,21 @@ export interface Stream<T> {
    * Indicates whether or not this stream has been ended.
    */
   ended?: boolean;
-}
+};
 
 /**
  * Function that creates a stream.
  *
  * @template T the type of the stream's values.
  */
-export interface StreamConstructor {
+export type StreamConstructor = {
   /**
    * @param {T} [value] the stream's initial value.
    *
    * @returns {Stream<T>} the created stream.
    */
   <T>(value?: T): Stream<T>;
-}
+};
 
 /**
  * Accumulator function.
@@ -76,7 +76,7 @@ export interface StreamConstructor {
  * @template R the type of the result value.
  * @template T the type of the source value.
  */
-export interface Accumulator<R, T> {
+export type Accumulator<R, T> = {
   /**
    * @param {R} result the current accumulated result value.
    * @param {T} next the next source value.
@@ -84,7 +84,7 @@ export interface Accumulator<R, T> {
    * @returns {R} the accumulated result value.
    */
   (result: R, next: T): R;
-}
+};
 
 /**
  * Stream library `scan` function.
@@ -92,7 +92,7 @@ export interface Accumulator<R, T> {
  * @template T the type of the source stream's values.
  * @template R the type of the returned stream's values.
  */
-export interface Scan {
+export type Scan = {
   /**
    * @param {Accumulator<R, T>} acc the accumulator function.
    * @param {R} init the returned stream's initial value.
@@ -101,22 +101,25 @@ export interface Scan {
    * @returns {Stream<R>} a stream resulting from scanning the source stream.
    */
   <T, R>(acc: Accumulator<R, T>, init: R, stream: Stream<T>): Stream<R>;
-}
+};
 
 /**
  * Defines the stream library's `scan` function.
  */
-interface StreamScan {
+type StreamScan = {
   /**
    * The stream library's `scan` function.
    */
   scan: Scan;
-}
+};
 
-export interface ExternalStreamLib {
+/**
+ * Interface to adapt an external stream library.
+ */
+export type ExternalStreamLib = {
   stream?: any;
   scan: (acc: any, init: any, stream: any) => any;
-}
+};
 
 /**
  * Stream library that provides a function to create a stream.
@@ -163,7 +166,7 @@ export type StreamLib = StreamLibWithFunction | StreamLibWithProperty;
  *
  * @template T the type of the stream's values.
  *
- * @param value the stream's initial value.
+ * @param initial the stream's initial value.
  *
  * @returns the created stream.
  */
@@ -236,17 +239,30 @@ const simpleStream: StreamLibWithProperty = {
 
 export default simpleStream;
 
-// Credit: James Forbes (https://james-forbes.com/)
+/**
+ * Credit: James Forbes (https://james-forbes.com/)
+ *
+ * Creates a `dropRepeats` function, which returns new stream that drops repeated values from the
+ * source stream.
+ *
+ * @param stream the stream library, defaults to simpleStream.
+ */
 export const createDropRepeats =
   (stream: ExternalStreamLib = simpleStream) =>
-  <S>(states: Stream<S>, selector: (state: S) => any = (state) => state): Stream<S> => {
+  /**
+   * @param source the source stream.
+   * @param onchange function that receives the current state of the source stream and returns the
+   * value for which changes will emit onto the returned stream.
+   * @returns a stream that does not emit repeated values.
+   */
+  <S>(source: Stream<S>, onchange: (state: S) => any = (state) => state): Stream<S> => {
     const createStream = typeof stream === 'function' ? stream : stream.stream;
 
     let prev = undefined;
     const result = createStream();
 
-    states.map((state) => {
-      const next = selector(state);
+    source.map((state) => {
+      const next = onchange(state);
       if (next !== prev) {
         prev = next;
         result(state);
@@ -255,4 +271,7 @@ export const createDropRepeats =
     return result;
   };
 
+/**
+ * `dropRepeats` function that uses `simpleStream`.
+ */
 export const dropRepeats = createDropRepeats();
