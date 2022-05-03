@@ -168,7 +168,7 @@ export interface NestSetup<S, P> {
   accumulator: Accumulator<S, P>;
   getServices: any;
   nestCell: any;
-  stream: ExternalStreamLib;
+  stream?: ExternalStreamLib;
   app: any;
 }
 

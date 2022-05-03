@@ -1,15 +1,29 @@
-import {
+import meiosisSetup, {
   MeiosisCell,
   MeiosisComponent,
   MeiosisViewComponent,
   Patch,
   Service,
-  combinePatches,
-  setup
+  combinePatches
 } from '../src/functionPatches';
 import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
 describe('Meiosis with TypeScript - Function Patches', () => {
+  test('with no parameters', () => {
+    interface State {
+      ducks: number;
+      sound: string;
+    }
+
+    const cells = meiosisSetup<State>();
+    const cell = cells();
+
+    expect(cell.state).toEqual({});
+
+    cell.update(assoc('sound', 'quack'));
+    expect(cells().state).toEqual({ sound: 'quack' });
+  });
+
   test('with no actions', () => {
     interface State {
       ducks: number;
@@ -17,7 +31,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     }
 
     const app = { initial: { ducks: 1, sound: 'silent' } };
-    const cells = setup<State>({ app });
+    const cells = meiosisSetup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: 'silent' });
@@ -37,7 +51,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     }
 
     const app = {};
-    const cells = setup<State>({ app });
+    const cells = meiosisSetup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({});
@@ -72,7 +86,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       initial: { ducks: 1, sound: 'quack' }
     };
 
-    const cells = setup<State>({ app });
+    const cells = meiosisSetup<State>({ app });
     const cell = cells();
 
     expect(cell.state).toEqual({ ducks: 1, sound: 'quack' });
@@ -105,7 +119,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       initial: { duck: { color: 'white' }, sound: 'quack' }
     };
 
-    const cells = setup<State>({ app });
+    const cells = meiosisSetup<State>({ app });
     const cell = cells();
 
     const duckCell = cell.nest('duck');
@@ -180,7 +194,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       }
     ];
 
-    const cells = setup<State>({ app: { initial: { count: 0 }, services } });
+    const cells = meiosisSetup<State>({ app: { initial: { count: 0 }, services } });
     const cell = cells();
 
     cell.update(updatePatches[0]);
@@ -235,7 +249,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       services
     };
 
-    const cells = setup<Counter>({ app });
+    const cells = meiosisSetup<Counter>({ app });
     const cell = cells();
 
     cell.update(assoc('count', 1));
@@ -295,7 +309,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         }
       };
 
-      const cells = setup<AppState>({ app });
+      const cells = meiosisSetup<AppState>({ app });
       const initialState = cells().state;
 
       expect(initialState).toEqual({
@@ -404,7 +418,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         }
       };
 
-      const cells = setup<AppState>({ app });
+      const cells = meiosisSetup<AppState>({ app });
 
       expect(cells().state.volume).toEqual('loud');
       cells().update(assoc('sound', 'beck'));
@@ -468,7 +482,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         }
       };
 
-      const cells = setup<AppState>({ app });
+      const cells = meiosisSetup<AppState>({ app });
       const cell = cells();
       cell.nested.pet.view(cell);
     });

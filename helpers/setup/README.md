@@ -1,6 +1,51 @@
 # meiosis-setup
 
-New release coming soon.
+Helper library to set up the [Meiosis](https://meiosis.js.org) pattern for you.
+
+## Features
+
+- Works with [function patches](#setup-with-function-patches) and [Mergerino](#setup-with-mergerino)
+- Includes a simple stream implementation, or you can use [Flyd](https://github.com/paldepind/flyd)
+or [Mithril Stream](https://mithril.js.org/stream.html)
+- Sets up [Services](#services), [Nesting](#nesting), and [Nested Components](#nested-components)
+- Provides [TypeScript](https://www.typescriptlang.org/) support
+
+## Setup with Function Patches
+
+To set up Meiosis with function patches (explained in the Meiosis Documentation:
+[reference](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)), use the following
+code:
+
+```js
+import { setup } from 'meiosis-setup/functionPatches';
+
+const cells = setup({});
+```
+
+## Setup with Mergerino
+
+To set up Meiosis with [Mergerino](https://github.com/fuzetsu/mergerino)
+(explained in the Meiosis Documentation:
+[reference](http://meiosis.js.org/docs/05-meiosis-with-mergerino.html)), use the following
+code:
+
+```js
+import { setup } from 'meiosis-setup/mergerino';
+
+const cells = setup({});
+```
+
+## Services
+
+As explained in the [Services](http://meiosis.js.org/docs/08-services.html) section of the Meiosis
+documentation
+
+## Nesting
+
+In the [Nesting](http://meiosis.js.org/docs/09-nesting.html) section of the Meiosis documentation,
+...
+
+## Nested Components
 
 <!--
 ```javascript

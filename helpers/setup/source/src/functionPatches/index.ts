@@ -1,4 +1,4 @@
-import simpleStream, { ExternalStreamLib, Stream } from '../simple-stream';
+import { ExternalStreamLib, Stream } from '../simple-stream';
 import { NestSetup, commonGetServices, nestSetup } from '../common';
 import { get } from '../util';
 
@@ -191,16 +191,13 @@ const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
  *
  * @returns {Meiosis<S, Patch<S>>} `{ states, getCell }`.
  */
-export const setup = <S>({
-  stream = simpleStream,
-  app = {}
-}: MeiosisConfig<S>): Stream<MeiosisCell<S>> =>
+export const setup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S>> =>
   nestSetup<S, Patch<S>, NestSetup<S, Patch<S>>, Service<S>, MeiosisCell<S>>({
     accumulator: (state, patch) => patch(state),
     getServices,
     nestCell,
-    stream,
-    app
+    stream: config?.stream,
+    app: config?.app
   });
 
 export default setup;
