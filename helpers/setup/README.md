@@ -1,6 +1,9 @@
 # meiosis-setup
 
-Helper library to set up the [Meiosis](https://meiosis.js.org) pattern for you.
+# Caution: Work In Progress - Not Yet Released!
+
+Helper library to set up the [Meiosis](https://meiosis.js.org) pattern for you. Please refer to the
+[documentation](https://meiosis.js.org/docs/toc.html) on the Meiosis pattern.
 
 ## Features
 
@@ -17,9 +20,9 @@ To set up Meiosis with function patches (explained in the Meiosis Documentation:
 code:
 
 ```js
-import { setup } from 'meiosis-setup/functionPatches';
+import meiosisSetup from 'meiosis-setup/functionPatches';
 
-const cells = setup({});
+const cells = meiosisSetup();
 ```
 
 ## Setup with Mergerino
@@ -30,226 +33,170 @@ To set up Meiosis with [Mergerino](https://github.com/fuzetsu/mergerino)
 code:
 
 ```js
-import { setup } from 'meiosis-setup/mergerino';
+import meiosisSetup from 'meiosis-setup/mergerino';
 
-const cells = setup({});
+const cells = meiosisSetup();
 ```
+
+## Using Cells
+
+Once Meiosis is set up either with Function Patches or Mergerino, you have a stream of **cells**.
+Each cell has `state` and `update` to read the state and update the state. Normally you use
+`cells.map` to render the view on each state change. For example, with Preact or React:
+
+```js
+import meiosisSetup from '...';
+import { render } from '...'; // Preact or React
+
+const cells = meiosisSetup();
+
+const view = (cell) => (
+  <div>
+    <span>Counter: {cell.state.counter}</span>
+    <button onClick={() => cell.update(...)}>Increment</button>
+  </div>
+);
+
+const element = document.getElementById('...');
+cells.map((cell) => {
+  render(view(cell), element);
+});
+```
+
+With Mithril:
+
+```jsx
+import meiosisSetup from '...';
+import m from 'mithril';
+
+const cells = meiosisSetup();
+
+const view = (cell) =>
+  m('div',
+    m('span', 'Counter:', cell.state.counter),
+    m('button', { onclick: () => cell.update(...) }, 'Increment')
+  );
+
+m.mount(document.getElementById('jsMithrilApp'), {
+  view: () => app.view(cells())
+});
+
+cells.map(() => m.redraw());
+```
+
+## Initial State
+
+By default, the initial state is an empty object, `{}`.
 
 ## Services
 
-As explained in the [Services](http://meiosis.js.org/docs/08-services.html) section of the Meiosis
-documentation
+To set up Meiosis with Services
+(explained in the Meiosis Documentation:
+[reference](http://meiosis.js.org/docs/08-services.html)), use the following
+code:
 
-## Nesting
-
-In the [Nesting](http://meiosis.js.org/docs/09-nesting.html) section of the Meiosis documentation,
-...
-
-## Nested Components
-
-<!--
-```javascript
-// Choose to use function patches or mergerino
-import meiosisSetup from "meiosis-setup/functionPatches";
-import meiosisSetup from "meiosis-setup/mergerino";
-
+```js
 const app = {
-  initial: { ... },
   services: [...]
 };
 
 const cells = meiosisSetup({ app });
 ```
 
-[Meiosis](https://meiosis.js.org) is a pattern, not a library. Nevertheless, in response to popular
-demand and for your convenience, here are some utility functions that help set up and use Meiosis.
+Each service is an object with a `run` function and, optionally, an `onchange` function.
+`meiosis-setup` automatically wires up services, calling `onchange` (if defined) and calling `run`
+only when the value returned by `onchange` changes:
 
-`meiosis-setup` wires up the Meiosis pattern for you as explained in
-[Services and Effects](https://meiosis.js.org/docs/services-and-effects.html), plus these
-conveniences:
-
-- works with [Flyd](https://github.com/paldepind/flyd),
-[Mithril-Stream](https://mithril.js.org/stream.html),
-[Mergerino](https://github.com/fuzetsu/mergerino), and
-[Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)
-out of the box
-- provides a simple stream implementation
-- provides [TypeScript](https://www.typescriptlang.org) support
-- provides a helper function to combine an array of patches into a single patch
-
-See the repository for examples:
-- [Using JavaScript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-javascript)
-- [Using Typescript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-typescript)
-
-Also see the [Meiosis examples](https://meiosis.js.org/examples.html) for more examples using
-`meiosis-setup`.
-
-## Getting Started
-
-To use `meiosis-setup`, specify a stream library, and, optionally, a library instance to manage how
-patches are merged to the application state. Of course, you'll also need a view library.
-
-### Choosing a stream library
-
-Out of the box, `meiosis-setup` supports these stream libraries:
-
-- the `simpleStream` provided by `meiosis-setup` (used by default)
-- [Flyd](https://github.com/paldepind/flyd)
-- [Mithril-Stream](https://mithril.js.org/stream.html)
-
-You can also use another stream library; see [Using another stream library](#other_stream_library).
-
-### Choosing how to merge patches
-
-Remember that the core of the Meiosis pattern is a stream of `states` that `scan`s an `update`
-stream of patches and merges them to produce the states.
-
-With `meiosis-setup`, you can use:
-
-- [Mergerino](https://github.com/fuzetsu/mergerino)
-- [Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)
-
-### Choosing a view library
-
-You can use any view library that fits with the Meiosis pattern. Examples show how to use with
-[React](https://reactjs.org), [Preact](https://preactjs.com), and [Mithril](https://mithril.js.org).
-See [View Setup](#view_setup) for details.
-
-## Installation
-
-Using `npm`:
-
-```
-npm i meiosis-setup
-```
-
-Using a `script` tag:
-
-```
-<script src="https://unpkg.com/meiosis-setup"></script>
-```
-
-Using the `script` tag exposes a `Meiosis` global, under which the helper functions are
-provided:
-
-- `mergerino.setup`
-- `functionPatches.setup`
-- `common.setup`
-- `simpleStream.stream`
-- `simpleStream.scan`
-
-## Meiosis Setup
-
-The `meiosisSetup` function sets up the Meiosis pattern using the stream library and application
-that you provide.
-
-The `setup` function returns a stream of _cells_.
-
-### Application
-
-In the `app` object that you pass to `setup`, you can **optionally** provide the following:
-
-- `initial`: an object that represents the initial state. If not provided, the initial state is
-`{}`.
-- `services`: an array of services.
-
------
-
-**For an explanation of services, please see the
-[Services documentation](https://meiosis.js.org/docs/services-and-effects.html).**
-
------
-
-<a name="view_setup"></a>
-## View Setup
-
-### Mithril Setup
-
-[Mithril](https://mithril.js.org) setup:
-
-```javascript
-import meiosisSetup from "meiosis-setup/...";
-import m from "mithril";
-
-// your App component
-const App = {
-  view: ({ attrs: { cell } }) => m(...)
+```js
+const service = {
+  onchange: (state) => state.x,
+  // run is called only when x changes, thus avoiding infinite loops
+  run: (cell) => {
+    cell.update({ y: x * 10 });
+  }
 };
-
-// your app
-const app = { ... };
-const cells = meiosisSetup({ app });
-
-m.mount(document.getElementById("app"), {
-  view: () => m(App, { cell: cells() })
-});
-
-states.map(() => m.redraw());
 ```
 
-See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/mithril/src/index.js)
-for an example.
+If a service does not have an `onchange` function, its `run` function will be called for every state
+change. Thus it must make sure to avoid an infinite loop:
 
-### Preact Setup
-
-[Preact](https://preactjs.com) setup:
-
-```javascript
-import meiosisSetup from "meiosis-setup/...";
-import { h, render } from "preact"
-
-// your App component
-const App = ({ cell }) => (
-  <div>...</div>
-);
-
-// your app
-const app = { ... };
-const cells = meiosisSetup({ app });
-
-const element = document.getElementById("app")
-cells.map(cell => render(<App cell={cell} />, element))
+```js
+const service = {
+  run: (cell) => {
+    if (cell.state.data === undefined) {
+      loadData().then(data => {
+        cell.update({ data });
+      })
+    }
+  }
+}
 ```
 
-See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/preact/src/index.js)
-for an example.
-
-### React Setup
-
-[React](https://reactjs.org) setup:
-
-```javascript
-import meiosisSetup from "meiosis-setup/...";
-import React from "react"
-import { render } from "react-dom"
-
-// your App component
-const App = ({ cell }) => (
-  <div>...</div>
-);
-
-// your app
-const app = { ... };
-const cells = meiosisSetup({ app });
-
-const element = document.getElementById("app")
-cells.map(cell => render(<App cell={cell} />, element))
-```
-
-See [here](https://github.com/foxdonut/meiosis/blob/master/helpers/setup/views/react/src/index.jsx)
-for an example.
+Services can also be nested using [nested components](#nested-components).
 
 ## Nesting
 
-More to come..
+`meiosis-setup` automatically sets up Meiosis with Nesting
+(explained in the Meiosis Documentation:
+[reference](http://meiosis.js.org/docs/09-nesting.html)).
 
-See the repository for examples:
-- [Using JavaScript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-javascript)
-- [Using Typescript](https://github.com/foxdonut/meiosis/tree/master/helpers/setup/using-typescript)
+```js
+cell.nest('someProperty')
+```
 
-## API
+## Nested Components
 
-[API documentation is here.](docs/index.html)
+`meiosis-setup` also provides **nested components**. This conveniently combines nesting of:
+- initial state
+- services
+- views
+
+## TypeScript Support
+
+## TypeScript API
+
+[TypeScript API documentation is here.](docs/index.html)
+
+## Using a Different Stream Implementation
+
+By default, `meiosis-setup` uses its `simple-stream` implementation. You can use a different stream
+implementation. For example, these work out-of-the-box:
+
+- [Flyd](https://github.com/paldepind/flyd)
+- [Mithril Stream](https://mithril.js.org/stream.html)
+
+Use the `stream` property to specify the stream implementation that you want to use. For example:
+
+```js
+import flyd from 'flyd'
+
+const cells = setup({ stream: flyd });
+```
+
+```js
+import Stream from 'mithril/stream';
+
+const cells = setup({ stream: Stream });
+```
+
+You can use any other stream library as long as you adapt it by providing an object with a `stream`
+and a `scan` property, which indicate the functions to create a stream and to scan a stream:
+
+```js
+import someStream from 'some-stream-library';
+
+const someStreamLib = {
+  stream: someStream.createStream,
+  scan: someStream.scan
+};
+
+const cells = setup({ stream: someStreamLib })
+```
+
+Also, the stream returned when creating a stream must have a `map` function.
+
+Adapting a different stream library is usually not necessary, since using either `simple-stream`,
+`Flyd`, or `Mithril Stream` should be suitable.
 
 ## Credits
 
@@ -268,5 +215,3 @@ appreciated!
 
 _meiosis-setup is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._
-
--->
