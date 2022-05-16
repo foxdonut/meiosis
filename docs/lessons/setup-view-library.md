@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [Services &rarrhk;](setup-services.html) | [&larrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; Services](setup-services.html) | [&larrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 ## View Library
 
@@ -24,7 +24,7 @@ With React:
 
 | | | |
 | ---- | ---- | ---- |
-| [Services &rarrhk;](setup-services.html) | [&larrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; Services](setup-services.html) | [&larrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

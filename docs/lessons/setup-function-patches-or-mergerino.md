@@ -2,7 +2,7 @@
 
 | | |
 | ---- | ---- |
-| [Initial State &rarrhk;](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 ## Function Patches or Mergerino
 
@@ -43,7 +43,7 @@ For example:
 
 | | |
 | ---- | ---- |
-| [Initial State &rarrhk;](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; Initial State](setup-initial-state.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.
