@@ -62,7 +62,7 @@ Verify this in the example below. Notice that `render Entry`, `render Temperatur
 Temperature Water` appear in the console output **only** when you interact with that component in
 the user interface. Other components do not get re-rendered.
 
-@flems {"files":"code/10-preventing-re-renders-react.jsx,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"react,react-dom,flyd,mergerino","height":800,"middle":65}
+@flems {"files":"code/10-preventing-re-renders-react.jsx,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"react,react-dom,flyd,mergerino","height":800,"middle":65}
 
 <a name="mithril_prevent_re_render"></a>
 ### [Mithril version](#mithril_prevent_re_render)
@@ -94,7 +94,7 @@ Verify this in the example below. Notice that `render Entry`, `render Temperatur
 Temperature Water` appear in the console output **only** when you interact with that component in
 the user interface. Other components do not get re-rendered.
 
-@flems {"files":"code/10-preventing-re-renders-mithril.js,app.html,public/css/bootstrap.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
+@flems {"files":"code/10-preventing-re-renders-mithril.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 
 [< Previous](09-nesting.html) |
 [Next >](11-the-meiosis-pattern.html) |

@@ -184,7 +184,7 @@ automatically return and update the nested state.
 
 Have a closer look, the complete example is below.
 
-@flems {"files":"code/09-nesting.jsx,app.html,public/css/bootstrap.min.css","libs":"flyd,lodash-fp,preact","height":700,"middle":70}
+@flems {"files":"code/09-nesting.jsx,app.html,public/css/bootstrap-simplex.min.css","libs":"flyd,lodash-fp,preact","height":700,"middle":70}
 
 ### Conclusion
 
