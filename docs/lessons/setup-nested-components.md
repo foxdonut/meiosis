@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## Nested Components
 
@@ -115,7 +115,7 @@ cell.nested.one.view(cell, 'more', 'parameters')
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

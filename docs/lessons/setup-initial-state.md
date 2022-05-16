@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; View Library](setup-view-library.html) | [&larrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; View Library](setup-view-library.html) | [&larrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## Initial State
 
@@ -30,7 +30,7 @@ Initial state can also be nested using [nested components](setup-nested-componen
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; View Library](setup-view-library.html) | [&larrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [Table of Contents &#8673;](setup-toc.html) |
+| [&rarrhk; View Library](setup-view-library.html) | [&larrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.
