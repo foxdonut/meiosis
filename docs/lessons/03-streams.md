@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](02-initial-state-and-actions.html) |
-[Next >](04-meiosis-with-function-patches.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&larrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 03 - Streams
 
@@ -261,11 +261,9 @@ it works just like `flyd`. The only difference is that you call `m.stream()` ins
 When you are ready, continue on to
 [04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html).
 
-[< Previous](02-initial-state-and-actions.html) |
-[Next >](04-meiosis-with-function-patches.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&larrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

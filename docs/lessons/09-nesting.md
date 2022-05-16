@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](08-services.html) |
-[Next >](10-preventing-re-renders.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&larrhk; 08 - Services](08-services.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 09 - Nesting
 
@@ -195,11 +195,9 @@ project.
 
 In the next section, we'll look at an optional performance enhancement: preventing re-renders.
 
-[< Previous](08-services.html) |
-[Next >](10-preventing-re-renders.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&larrhk; 08 - Services](08-services.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

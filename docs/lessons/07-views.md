@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](06-cells.html) |
-[Next >](08-services.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 08 - Services](08-services.html) | [&larrhk; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 07 - Views
 
@@ -124,11 +124,9 @@ complete!
 The remainder of this documentation covers additional functionalities that we can add to Meiosis,
 starting with [Services](08-services.html).
 
-[< Previous](06-cells.html) |
-[Next >](08-services.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 08 - Services](08-services.html) | [&larrhk; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

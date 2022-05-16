@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](05-meiosis-with-mergerino.html) |
-[Next >](07-views.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 07 - Views](07-views.html) | [&larrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 06 - Cells
 
@@ -46,11 +46,9 @@ and `cell.update(...)`.
 In the following section, we will look at how to wire up the Meiosis pattern to three view
 libraries.
 
-[< Previous](05-meiosis-with-mergerino.html) |
-[Next >](07-views.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 07 - Views](07-views.html) | [&larrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

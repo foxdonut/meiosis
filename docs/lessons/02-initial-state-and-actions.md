@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](01-introduction.html) |
-[Next >](03-streams.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 03 - Streams](03-streams.html) | [&larrhk; 01 - Introduction](01-introduction.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 02 - Initial State and Actions
 
@@ -47,11 +47,9 @@ the view when the state has been updated.
 In the next section, we'll look at a way to gain control over the flow of data. When you are ready,
 continue on to [03 - Streams](03-streams.html).
 
-[< Previous](01-introduction.html) |
-[Next >](03-streams.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 03 - Streams](03-streams.html) | [&larrhk; 01 - Introduction](01-introduction.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

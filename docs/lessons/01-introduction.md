@@ -1,6 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[Next >](02-initial-state-and-actions.html) | [Table of Contents](toc.html)
+| | |
+| ---- | ---- |
+| [&rarrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 01 - Introduction and Goals
 
@@ -51,12 +53,11 @@ page if that is more comfortable. You can do so using the
 ![Open Flems in new window](flems-open-in-new-window.png) at the top-right corner of the code
 window.
 
-Let's get started. Please continue on to
-[02 - Initial State and Actions](02-initial-state-and-actions.html).
+Let's get started.
 
-[Next >](02-initial-state-and-actions.html) | [Table of Contents](toc.html)
-
------
+| | |
+| ---- | ---- |
+| [&rarrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

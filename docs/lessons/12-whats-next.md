@@ -1,7 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](11-the-meiosis-pattern.html) |
-[Table of Contents](toc.html)
+| | |
+| ---- | ---- |
+| [&larrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 12 - What's Next?
 
@@ -16,10 +17,9 @@ additional features including TypeScript support and nested services and views, 
 
 Thank you for reading. I hope you enjoy Meiosis!
 
-[< Previous](11-the-meiosis-pattern.html) |
-[Table of Contents](toc.html)
-
------
+| | |
+| ---- | ---- |
+| [&larrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

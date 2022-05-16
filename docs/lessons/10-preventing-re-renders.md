@@ -1,8 +1,8 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-[< Previous](09-nesting.html) |
-[Next >](11-the-meiosis-pattern.html) |
-[Table of Contents](toc.html)
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&larrhk; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 10 - Preventing Re-Renders
 
@@ -96,11 +96,9 @@ the user interface. Other components do not get re-rendered.
 
 @flems {"files":"code/10-preventing-re-renders-mithril.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 
-[< Previous](09-nesting.html) |
-[Next >](11-the-meiosis-pattern.html) |
-[Table of Contents](toc.html)
-
------
+| | | |
+| ---- | ---- | ---- |
+| [&rarrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&larrhk; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

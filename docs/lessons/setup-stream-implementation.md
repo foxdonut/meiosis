@@ -2,7 +2,7 @@
 
 | | |
 | ---- | ---- |
-| [&larr; TypeScript Support](setup-typescript-support.html) | [Table of Contents &uarr;](setup-toc.html) |
+| [&larrhk; TypeScript Support](setup-typescript-support.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 ## Stream Implementation
 
@@ -47,7 +47,7 @@ Adapting a different stream library is usually not necessary, since using either
 
 | | |
 | ---- | ---- |
-| [&larr; TypeScript Support](setup-typescript-support.html) | [Table of Contents &uarr;](setup-toc.html) |
+| [&larrhk; TypeScript Support](setup-typescript-support.html) | [Table of Contents &#8673;](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

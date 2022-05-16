@@ -2,24 +2,31 @@
 /* @jsx preact.h */
 
 const actions = {
-  increment: (cell) => {
-    cell.update({ counter: (value) => value + 1 });
-  }
+  increment: (cell, amount) =>
+    cell.update({ value: (x) => x + amount })
 };
 
 const app = {
   initial: {
-    counter: 0
+    value: 22
   },
   view: (cell) => (
     <div>
-      <div>Counter: {cell.state.counter}</div>
-      <button
-        className="btn btn-primary btn-sm"
-        onClick={() => actions.increment(cell)}
-      >
-        Increment
-      </button>
+      <div>Temperature: {cell.state.value}&deg;C</div>
+      <div>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => actions.increment(cell, 1)}
+        >
+          Increment
+        </button>
+        <button
+          className="btn btn-primary btn-sm ms-1"
+          onClick={() => actions.increment(cell, -1)}
+        >
+          Decrement
+        </button>
+      </div>
     </div>
   )
 };
