@@ -189,9 +189,7 @@ Have a closer look, the complete example is below.
 ### Conclusion
 
 In this section, we've augmented our Meiosis pattern setup with nesting. For your convenience, you
-can also use the same setup by adding
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to your
-project.
+can also use the same setup by adding [meiosis-setup](https://meiosis.js.org/setup) to your project.
 
 In the next section, we'll look at an optional performance enhancement: preventing re-renders.
 

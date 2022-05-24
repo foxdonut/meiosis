@@ -1,10 +1,12 @@
-# `meiosis-setup` Documentation
+# [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 | | | |
 | ---- | ---- | ---- |
 | [&rarrhk; Stream Implementation](setup-stream-implementation.html) | [&larrhk; Nested Components](setup-nested-components.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## TypeScript Support
+
+[TypeScript API documentation is here.](docs/index.html)
 
 | | | |
 | ---- | ---- | ---- |

@@ -7,9 +7,8 @@
 ## 11 - The Meiosis Pattern Cheatsheet
 
 > Meiosis is a pattern that you can set up yourself, but by popular demand
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is now
-available for your convenience. The library includes additional features including TypeScript
-support and nested services and views.
+[meiosis-setup](https://meiosis.js.org/setup) is now available for your convenience. The library
+includes additional features including TypeScript support and nested services and views.
 
 ### Meiosis Pattern
 

@@ -1,4 +1,4 @@
-# `meiosis-setup` Documentation
+# [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 > Be sure to read the [Meiosis](toc.html) documentation first!
 
@@ -14,6 +14,7 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 
 ## Table of Contents
 
+- [Installation](setup-installation.html)
 - [Function Patches or Mergerino](setup-function-patches-or-mergerino.html)
 - [Initial State](setup-initial-state.html)
 - [View Library](setup-view-library.html)
@@ -21,3 +22,8 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 - [Nested Components](setup-nested-components.html)
 - [TypeScript Support](setup-typescript-support.html)
 - [Stream Implementation](setup-stream-implementation.html)
+
+-----
+
+[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
+[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

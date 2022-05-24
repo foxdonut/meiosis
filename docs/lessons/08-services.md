@@ -212,8 +212,7 @@ You can see the complete example in action below.
 
 In this section, we've augmented our Meiosis pattern setup with services. We do not need a lot of
 code for this setup; nevertheless, for your convenience, you can also use the same setup by adding
-[meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) to your
-project.
+[meiosis-setup](https://meiosis.js.org/setup) to your project.
 
 In the next section, we'll look at another feature that we can add to Meiosis: **nesting**.
 

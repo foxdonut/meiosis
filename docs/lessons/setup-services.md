@@ -1,4 +1,4 @@
-# `meiosis-setup` Documentation
+# [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 | | | |
 | ---- | ---- | ---- |
