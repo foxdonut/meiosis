@@ -1,6 +1,6 @@
 import { ExternalStreamLib, Stream } from '../simple-stream';
 import merge from 'mergerino';
-import { NestSetup, commonGetServices, nestSetup } from '../common';
+import { DomEvent, NestSetup, commonGetServices, nestSetup } from '../common';
 import { get } from '../util';
 
 /**
@@ -198,6 +198,39 @@ const nestCell =
  * @template S the State type.
  */
 export const combinePatches = <S>(patches: Patch<S>[]): Patch<S> => patches;
+
+// helpers to update values from input
+
+const intoPath = (path: string[], value: string | number): any => ({
+  [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
+});
+
+export const updateStringValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) =>
+  cell.update(intoPath(path, evt.target.value));
+
+export const updateIntValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) => {
+  const value = parseInt(evt.target.value);
+  if (!isNaN(value)) {
+    cell.update(intoPath(path, value));
+  }
+};
+
+export const updateFloatValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) => {
+  const value = parseFloat(evt.target.value);
+  if (!isNaN(value)) {
+    cell.update(intoPath(path, value));
+  }
+};
+
+const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
+  commonGetServices(component);
+
+/**
+ * Helper to setup the Meiosis pattern with function patches.
+ *
+ * @template S the State type.
+ *
+ * @param {MeiosisConfig<S>} config the Meiosis config for use with function patches.
 
 const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
   commonGetServices(component);

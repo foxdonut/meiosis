@@ -4,7 +4,10 @@ import meiosisSetup, {
   MeiosisViewComponent,
   Patch,
   Service,
-  combinePatches
+  combinePatches,
+  updateFloatValue,
+  updateIntValue,
+  updateStringValue
 } from '../src/mergerino';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
@@ -254,7 +257,126 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     cell.update({ count: 1 });
     expect(cells().state).toEqual({ count: 2, service: true });
 
-    // FIXME: add rest of test
+    cell.update([{ count: 3 }, { service: false }]);
+    expect(cells().state).toEqual({ count: 3, service: false });
+  });
+
+  test('updateStringValue', () => {
+    interface Environment {
+      material: string;
+    }
+
+    interface Duck {
+      color: string;
+      env: Environment;
+    }
+
+    interface AppState {
+      pet: Duck;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          color: 'yellow',
+          env: {
+            material: 'straw'
+          }
+        }
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app });
+
+    const newMaterial = 'wood';
+    const cell = cells();
+    const evt = { target: { value: newMaterial } };
+    updateStringValue(cell, ['pet', 'env', 'material'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: newMaterial
+        }
+      }
+    });
+  });
+
+  test('updateIntValue', () => {
+    interface House {
+      size: number;
+    }
+
+    interface Duck {
+      house: House;
+    }
+
+    interface AppState {
+      pet: Duck;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          house: {
+            size: 5
+          }
+        }
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: '10' } };
+    updateIntValue(cell, ['pet', 'house', 'size'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10
+        }
+      }
+    });
+  });
+
+  test('updateFloatValue', () => {
+    interface House {
+      size: number;
+    }
+
+    interface Duck {
+      house: House;
+    }
+
+    interface AppState {
+      pet: Duck;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          house: {
+            size: 5
+          }
+        }
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: '10.5' } };
+    updateFloatValue(cell, ['pet', 'house', 'size'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10.5
+        }
+      }
+    });
   });
 
   describe('Nested Components', () => {

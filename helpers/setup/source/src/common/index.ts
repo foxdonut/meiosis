@@ -52,6 +52,15 @@ interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
   accumulator: Accumulator<S, P>;
 }
 
+/**
+ * Represents a DOM event.
+ */
+export interface DomEvent {
+  target: {
+    value: string;
+  };
+}
+
 const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce(
