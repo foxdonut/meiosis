@@ -1,6 +1,13 @@
 import { ExternalStreamLib, Stream } from '../simple-stream';
 import merge from 'mergerino';
-import { DomEvent, NestSetup, commonGetServices, nestSetup } from '../common';
+import {
+  NestSetup,
+  commonGetServices,
+  nestSetup,
+  updateStringValueIntoPath,
+  updateIntValueIntoPath,
+  updateFloatValueIntoPath
+} from '../common';
 import { get } from '../util';
 
 /**
@@ -205,22 +212,14 @@ const intoPath = (path: string[], value: string | number): any => ({
   [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
 });
 
-export const updateStringValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) =>
-  cell.update(intoPath(path, evt.target.value));
+export const updateStringValue = (cell: MeiosisCell<any>, path: string[]) =>
+  updateStringValueIntoPath(intoPath, cell, path);
 
-export const updateIntValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) => {
-  const value = parseInt(evt.target.value);
-  if (!isNaN(value)) {
-    cell.update(intoPath(path, value));
-  }
-};
+export const updateIntValue = (cell: MeiosisCell<any>, path: string[]) =>
+  updateIntValueIntoPath(intoPath, cell, path);
 
-export const updateFloatValue = (cell: MeiosisCell<any>, path: string[]) => (evt: DomEvent) => {
-  const value = parseFloat(evt.target.value);
-  if (!isNaN(value)) {
-    cell.update(intoPath(path, value));
-  }
-};
+export const updateFloatValue = (cell: MeiosisCell<any>, path: string[]) =>
+  updateFloatValueIntoPath(intoPath, cell, path);
 
 const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
   commonGetServices(component);

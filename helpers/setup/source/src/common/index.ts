@@ -61,6 +61,37 @@ export interface DomEvent {
   };
 }
 
+// helpers to update values from input
+
+type Updatable = {
+  update: (value: any) => any;
+};
+
+type PathUpdateFn = (path: string[], value: string | number) => any;
+
+type ParseFn = (value: string) => number;
+
+const updateParseValue =
+  (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[]) =>
+  (evt: DomEvent) => {
+    const value = parseFn(evt.target.value);
+    if (!isNaN(value)) {
+      cell.update(intoPath(path, value));
+    }
+  };
+
+export const updateStringValueIntoPath =
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
+    cell.update(intoPath(path, evt.target.value));
+
+export const updateIntValueIntoPath =
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
+    updateParseValue(intoPath, parseInt, cell, path)(evt);
+
+export const updateFloatValueIntoPath =
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
+    updateParseValue(intoPath, parseFloat, cell, path)(evt);
+
 const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce(
