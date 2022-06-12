@@ -212,8 +212,11 @@ const intoPath = (path: string[], value: string | number): any => ({
   [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
 });
 
-export const updateStringValue = (cell: MeiosisCell<any>, path: string[]) =>
-  updateStringValueIntoPath(intoPath, cell, path);
+export const updateValue = (
+  cell: MeiosisCell<any>,
+  path: string[],
+  fn: (value: string) => any = (value) => value
+) => updateStringValueIntoPath(intoPath, cell, path, fn);
 
 export const updateIntValue = (cell: MeiosisCell<any>, path: string[]) =>
   updateIntValueIntoPath(intoPath, cell, path);

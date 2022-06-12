@@ -81,8 +81,9 @@ const updateParseValue =
   };
 
 export const updateStringValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
-    cell.update(intoPath(path, evt.target.value));
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[], fn: (value: string) => any) =>
+  (evt: DomEvent) =>
+    cell.update(intoPath(path, fn(evt.target.value)));
 
 export const updateIntValueIntoPath =
   (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>

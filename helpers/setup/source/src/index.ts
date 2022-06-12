@@ -1,5 +1,15 @@
-import mSetup, { combinePatches as mCombinePatches } from './mergerino';
-import fSetup, { combinePatches as fCombinePatches } from './functionPatches';
+import mSetup, {
+  combinePatches as mCombinePatches,
+  updateFloatValue as mUpdateFloatValue,
+  updateIntValue as mUpdateIntValue,
+  updateValue as mUpdateValue
+} from './mergerino';
+import fSetup, {
+  combinePatches as fCombinePatches,
+  updateFloatValue as fUpdateFloatValue,
+  updateIntValue as fUpdateIntValue,
+  updateValue as fUpdateValue
+} from './functionPatches';
 import simpleStream, { createDropRepeats, dropRepeats } from './simple-stream';
 import { assoc, concatIfPresent, get } from './util';
 
@@ -10,11 +20,17 @@ export default {
   },
   mergerino: {
     setup: mSetup,
-    combinePatches: mCombinePatches
+    combinePatches: mCombinePatches,
+    updateFloatValue: mUpdateFloatValue,
+    updateIntValue: mUpdateIntValue,
+    updateValue: mUpdateValue
   },
   functionPatches: {
     setup: fSetup,
-    combinePatches: fCombinePatches
+    combinePatches: fCombinePatches,
+    updateFloatValue: fUpdateFloatValue,
+    updateIntValue: fUpdateIntValue,
+    updateValue: fUpdateValue
   },
   stream: {
     simpleStream,

@@ -7,7 +7,7 @@ import meiosisSetup, {
   combinePatches,
   updateFloatValue,
   updateIntValue,
-  updateStringValue
+  updateValue
 } from '../src/mergerino';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
@@ -261,7 +261,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     expect(cells().state).toEqual({ count: 3, service: false });
   });
 
-  test('updateStringValue', () => {
+  test('updateValue', () => {
     interface Environment {
       material: string;
     }
@@ -291,13 +291,54 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     const newMaterial = 'wood';
     const cell = cells();
     const evt = { target: { value: newMaterial } };
-    updateStringValue(cell, ['pet', 'env', 'material'])(evt);
+    updateValue(cell, ['pet', 'env', 'material'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
         color: 'yellow',
         env: {
           material: newMaterial
+        }
+      }
+    });
+  });
+
+  test('updateValue with function', () => {
+    interface Environment {
+      material: string;
+    }
+
+    interface Duck {
+      color: string;
+      env: Environment;
+    }
+
+    interface AppState {
+      pet: Duck;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          color: 'yellow',
+          env: {
+            material: 'straw'
+          }
+        }
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: 'wood' } };
+    updateValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: 'WOOD'
         }
       }
     });
