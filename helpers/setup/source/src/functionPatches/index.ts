@@ -65,7 +65,7 @@ export type ViewComponent<S> = {
  * @template S the State type.
  */
 export type NestedViews<S> = {
-  [K in keyof S]: ViewComponent<S>;
+  [K in keyof S]?: ViewComponent<S>;
 };
 
 /**
