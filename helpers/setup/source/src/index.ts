@@ -1,14 +1,14 @@
 import mSetup, {
   combinePatches as mCombinePatches,
-  updateFloatValue as mUpdateFloatValue,
-  updateIntValue as mUpdateIntValue,
-  updateValue as mUpdateValue
+  updateFormFloatValue as mUpdateFormFloatValue,
+  updateFormIntValue as mUpdateFormIntValue,
+  updateFormValue as mUpdateFormValue
 } from './mergerino';
 import fSetup, {
   combinePatches as fCombinePatches,
-  updateFloatValue as fUpdateFloatValue,
-  updateIntValue as fUpdateIntValue,
-  updateValue as fUpdateValue
+  updateFormFloatValue as fUpdateFormFloatValue,
+  updateFormIntValue as fUpdateFormIntValue,
+  updateFormValue as fUpdateFormValue
 } from './functionPatches';
 import simpleStream, { createDropRepeats, dropRepeats } from './simple-stream';
 import { assoc, concatIfPresent, get } from './util';
@@ -21,16 +21,16 @@ export default {
   mergerino: {
     setup: mSetup,
     combinePatches: mCombinePatches,
-    updateFloatValue: mUpdateFloatValue,
-    updateIntValue: mUpdateIntValue,
-    updateValue: mUpdateValue
+    updateFormFloatValue: mUpdateFormFloatValue,
+    updateFormIntValue: mUpdateFormIntValue,
+    updateFormValue: mUpdateFormValue
   },
   functionPatches: {
     setup: fSetup,
     combinePatches: fCombinePatches,
-    updateFloatValue: fUpdateFloatValue,
-    updateIntValue: fUpdateIntValue,
-    updateValue: fUpdateValue
+    updateFormFloatValue: fUpdateFormFloatValue,
+    updateFormIntValue: fUpdateFormIntValue,
+    updateFormValue: fUpdateFormValue
   },
   stream: {
     simpleStream,

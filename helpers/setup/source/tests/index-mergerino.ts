@@ -5,9 +5,9 @@ import meiosisSetup, {
   Patch,
   Service,
   combinePatches,
-  updateFloatValue,
-  updateIntValue,
-  updateValue
+  updateFormFloatValue,
+  updateFormIntValue,
+  updateFormValue
 } from '../src/mergerino';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
@@ -291,7 +291,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     const newMaterial = 'wood';
     const cell = cells();
     const evt = { target: { value: newMaterial } };
-    updateValue(cell, ['pet', 'env', 'material'])(evt);
+    updateFormValue(cell, ['pet', 'env', 'material'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -332,7 +332,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
     const cell = cells();
     const evt = { target: { value: 'wood' } };
-    updateValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
+    updateFormValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -371,7 +371,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
     const cell = cells();
     const evt = { target: { value: '10' } };
-    updateIntValue(cell, ['pet', 'house', 'size'])(evt);
+    updateFormIntValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -409,7 +409,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
     const cell = cells();
     const evt = { target: { value: '10.5' } };
-    updateFloatValue(cell, ['pet', 'house', 'size'])(evt);
+    updateFormFloatValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
       pet: {

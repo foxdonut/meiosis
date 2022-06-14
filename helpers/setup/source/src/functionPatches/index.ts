@@ -65,7 +65,7 @@ export type ViewComponent<S> = {
  * @template S the State type.
  */
 export type NestedViews<S> = {
-  [K in keyof S]?: ViewComponent<S>;
+  [K in keyof S]: ViewComponent<S>;
 };
 
 /**
@@ -195,16 +195,16 @@ const intoPath =
       [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)(state[path[0]])
     });
 
-export const updateValue = (
+export const updateFormValue = (
   cell: MeiosisCell<any>,
   path: string[],
   fn: (value: string) => any = (value) => value
 ) => updateStringValueIntoPath(intoPath, cell, path, fn);
 
-export const updateIntValue = (cell: MeiosisCell<any>, path: string[]) =>
+export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[]) =>
   updateIntValueIntoPath(intoPath, cell, path);
 
-export const updateFloatValue = (cell: MeiosisCell<any>, path: string[]) =>
+export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[]) =>
   updateFloatValueIntoPath(intoPath, cell, path);
 
 const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>

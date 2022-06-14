@@ -5,9 +5,9 @@ import meiosisSetup, {
   Patch,
   Service,
   combinePatches,
-  updateFloatValue,
-  updateIntValue,
-  updateValue
+  updateFormFloatValue,
+  updateFormIntValue,
+  updateFormValue
 } from '../src/functionPatches';
 import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
@@ -262,7 +262,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     expect(cells().state).toEqual({ count: 3, service: false });
   });
 
-  test('updateValue', () => {
+  test('updateFormValue', () => {
     interface Environment {
       material: string;
     }
@@ -292,7 +292,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     const newMaterial = 'wood';
     const cell = cells();
     const evt = { target: { value: newMaterial } };
-    updateValue(cell, ['pet', 'env', 'material'])(evt);
+    updateFormValue(cell, ['pet', 'env', 'material'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -304,7 +304,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     });
   });
 
-  test('updateValue with function', () => {
+  test('updateFormValue with function', () => {
     interface Environment {
       material: string;
     }
@@ -333,7 +333,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     const cell = cells();
     const evt = { target: { value: 'wood' } };
-    updateValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
+    updateFormValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -372,7 +372,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     const cell = cells();
     const evt = { target: { value: '10' } };
-    updateIntValue(cell, ['pet', 'house', 'size'])(evt);
+    updateFormIntValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
@@ -410,7 +410,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     const cell = cells();
     const evt = { target: { value: '10.5' } };
-    updateFloatValue(cell, ['pet', 'house', 'size'])(evt);
+    updateFormFloatValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
       pet: {
