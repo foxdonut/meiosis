@@ -1,14 +1,7 @@
 module.exports = {
+  extends: ['foxdonut/with-react'],
+  ignorePatterns: ['add-flems.js'],
   rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        arrowParens: 'always',
-        printWidth: 64,
-        semi: true,
-        singleQuote: true,
-        trailingComma: 'none'
-      }
-    ]
+    'max-len': ['error', 64]
   }
 };

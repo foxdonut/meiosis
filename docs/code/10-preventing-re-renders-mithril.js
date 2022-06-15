@@ -20,11 +20,8 @@ const EntryNumber = {
     // eslint-disable-next-line no-console
     console.log('render Entry');
 
-    return m(
-      'div',
-      m(
-        'span',
-        { style: { 'margin-right': '8px' } },
+    return m('div',
+      m('span', { style: { 'margin-right': '8px' } },
         'Entry number:'
       ),
       m('input[type=text][size=2]', {
@@ -52,31 +49,21 @@ const Temperature = {
     // eslint-disable-next-line no-console
     console.log('render Temperature', cell.state.label);
 
-    return m(
-      'div.row',
+    return m('div.row',
       { style: { 'margin-top': '8px' } },
-      m(
-        'div.col-md-3',
-        m(
-          'span',
-          cell.state.label,
-          ' Temperature: ',
-          cell.state.value,
-          m.trust('&deg;'),
-          'C'
+      m('div.col-md-3',
+        m('span', cell.state.label, ' Temperature: ',
+          cell.state.value, m.trust('&deg;'), 'C'
         )
       ),
-      m(
-        'div.col-md-6',
-        m(
-          'button.btn.btn-sm.btn-secondary',
+      m('div.col-md-6',
+        m('button.btn.btn-sm.btn-secondary',
           {
             onclick: () => temperatureActions.increment(cell, 1)
           },
           'Increment'
         ),
-        m(
-          'button.btn.btn-sm.btn-secondary',
+        m('button.btn.btn-sm.btn-secondary',
           {
             onclick: () =>
               temperatureActions.increment(cell, -1)
@@ -96,8 +83,7 @@ const app = {
     water: temperature.createInitial('Water')
   },
   view: (cell) =>
-    m(
-      'div',
+    m('div',
       m(EntryNumber, { cell: cell.nest('entry') }),
       m(Temperature, { cell: cell.nest('air') }),
       m(Temperature, { cell: cell.nest('water') })

@@ -18,8 +18,7 @@ const conditionsOption = ({ cell, value, label }) => (
       checked={cell.state.sky === value}
       onChange={(evt) =>
         conditionsActions.changeSky(cell, evt.target.value)
-      }
-    />
+      } />
     <span style={{ marginLeft: '5px', marginRight: '10px' }}>
       {label}
     </span>
@@ -42,8 +41,7 @@ const conditions = {
               cell,
               evt.target.checked
             )
-          }
-        />
+          } />
         <span style={{ marginLeft: '5px' }}>
           Precipitations
         </span>
@@ -69,7 +67,7 @@ const conditions = {
   )
 };
 
-const temperatureActions = {
+const tempActions = {
   increment: (cell, amount) =>
     cell.update(_.update('value', (x) => x + amount))
 };
@@ -86,14 +84,12 @@ const temperature = {
       <div>
         <button
           className="btn btn-primary btn-sm me-1"
-          onClick={() => temperatureActions.increment(cell, 1)}
-        >
+          onClick={() => tempActions.increment(cell, 1)}>
           Increment
         </button>
         <button
           className="btn btn-primary btn-sm me-1"
-          onClick={() => temperatureActions.increment(cell, -1)}
-        >
+          onClick={() => tempActions.increment(cell, -1)}>
           Decrement
         </button>
       </div>

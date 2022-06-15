@@ -160,7 +160,7 @@ describe('meiosis setup with library for applying patches', () => {
       const actions = {
         increment: (cell) => cell.update(action1),
 
-        interact: function (cell) {
+        interact: function(cell) {
           cell.update(action2);
           this.increment(cell);
         }
@@ -401,7 +401,7 @@ describe('meiosis setup with library for applying patches', () => {
     });
 
     describe.each(
-      createTestCases("route change, don't go to page yet, load async", [
+      createTestCases('route change, don\'t go to page yet, load async', [
         [
           { nextRoute: 'PageB' },
           { data: 'Loading' },

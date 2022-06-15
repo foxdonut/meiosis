@@ -47,8 +47,7 @@ const loginService: Service<State> = {
 const login: MeiosisViewComponent<Login> = {
   view: (cell) => [
     m('h4', 'Login page'),
-    m(
-      'div',
+    m('div',
       {
         style: {
           width: '300px',
@@ -105,9 +104,9 @@ const data: MeiosisViewComponent<Data> = {
     cell.state.loading
       ? m('div', 'Loading, please wait...')
       : m(
-          'ul',
-          cell.state.items.map((item) => m('li', item))
-        )
+        'ul',
+        cell.state.items.map((item) => m('li', item))
+      )
   ]
 };
 
@@ -122,15 +121,11 @@ const app: MeiosisViewComponent<State> = {
     data
   },
   view: (cell) =>
-    m(
-      'div.row',
-      m(
-        'div.col-4',
-        m(
-          'div',
+    m('div.row',
+      m('div.col-4',
+        m('div',
           { style: { marginBottom: '10px' } },
-          m(
-            'a',
+          m('a',
             {
               href: '#',
               onclick: (evt) => {
@@ -141,8 +136,7 @@ const app: MeiosisViewComponent<State> = {
             'Home'
           ),
           m('span', ' | '),
-          m(
-            'a',
+          m('a',
             {
               href: '#',
               onclick: (evt) => {
@@ -153,8 +147,7 @@ const app: MeiosisViewComponent<State> = {
             'Login'
           ),
           m('span', ' | '),
-          m(
-            'a',
+          m('a',
             {
               href: '#',
               onclick: (evt) => {

@@ -1,4 +1,3 @@
-// @ts-check
 // preact + functionPatches + simple-stream
 import { setup } from '../../../source/dist/functionPatches';
 import { h, render as preactRender } from 'preact';
@@ -13,31 +12,21 @@ const app = {
     value: 22
   },
   view: (cell) =>
-    h(
-      'div',
-      {},
-      h(
-        'div',
-        {},
-        h(
-          'label',
-          {},
+    h('div', {},
+      h('div', {},
+        h('label', {},
           'Temperature: ',
           cell.state.value,
           h('span', { dangerouslySetInnerHTML: { __html: '&deg;' } }),
           'C'
         )
       ),
-      h(
-        'div',
-        {},
-        h(
-          'button',
+      h('div', {},
+        h('button',
           { className: 'btn btn-primary btn-sm', onclick: () => actions.increment(cell, 1) },
           'Increment'
         ),
-        h(
-          'button',
+        h('button',
           { className: 'btn btn-primary btn-sm ms-1', onclick: () => actions.increment(cell, -1) },
           'Decrement'
         )

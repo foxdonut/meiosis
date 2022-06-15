@@ -15,14 +15,12 @@ const app = {
       <div>
         <button
           className="btn btn-primary btn-sm"
-          onClick={() => actions.increment(cell, 1)}
-        >
+          onClick={() => actions.increment(cell, 1)}>
           Increment
         </button>
         <button
           className="btn btn-primary btn-sm ms-1"
-          onClick={() => actions.increment(cell, -1)}
-        >
+          onClick={() => actions.increment(cell, -1)}>
           Decrement
         </button>
       </div>

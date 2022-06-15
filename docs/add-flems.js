@@ -5,18 +5,14 @@ const toDir = process.argv[3];
 
 const libMap = {
   flyd: 'https://unpkg.com/flyd@0.2.8/flyd.js',
-  'lodash-fp':
-    'https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)',
+  'lodash-fp': 'https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)',
   'meiosis-setup': 'https://unpkg.com/meiosis-setup',
   mergerino: 'https://unpkg.com/mergerino@0.4.0',
   mithril: 'https://unpkg.com/mithril@2.0.4',
-  'mithril-stream':
-    'https://unpkg.com/mithril@2.0.4/stream/stream.js',
+  'mithril-stream': 'https://unpkg.com/mithril@2.0.4/stream/stream.js',
   preact: 'https://unpkg.com/preact@10.7.2/dist/preact.umd.js',
-  react:
-    'https://unpkg.com/react@18.1.0/umd/react.development.js',
-  'react-dom':
-    'https://unpkg.com/react-dom@18.1.0/umd/react-dom.development.js'
+  react: 'https://unpkg.com/react@18.1.0/umd/react.development.js',
+  'react-dom': 'https://unpkg.com/react-dom@18.1.0/umd/react-dom.development.js'
 };
 
 const filenames = fs.readdirSync(fromDir);

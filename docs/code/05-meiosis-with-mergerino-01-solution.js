@@ -13,8 +13,8 @@ console.log(
   merge(target, { water: { value: 84, units: 'F' } })
 );
 
-// Toggle the `comfortable` property with a function that changes the value to the
-// opposite of what it was
+// Toggle the `comfortable` property with a function that
+// changes the value to the opposite of what it was
 console.log(merge(target, { comfortable: (x) => !x }));
 
 // Change the `air` value to `20` without losing the units.

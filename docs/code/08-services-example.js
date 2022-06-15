@@ -45,10 +45,8 @@ const app = {
   services: [loginService, dataService],
 
   view: (cell) => [
-    m(
-      'div',
-      m(
-        'a',
+    m('div',
+      m('a',
         {
           href: '#',
           onclick: (evt) => {
@@ -59,8 +57,7 @@ const app = {
         'Home'
       ),
       m('span', ' | '),
-      m(
-        'a',
+      m('a',
         {
           href: '#',
           onclick: (evt) => {
@@ -71,8 +68,7 @@ const app = {
         'Login'
       ),
       m('span', ' | '),
-      m(
-        'a',
+      m('a',
         {
           href: '#',
           onclick: (evt) => {
@@ -86,10 +82,9 @@ const app = {
     cell.state.page === 'Home'
       ? m('h4', 'Home page')
       : cell.state.page === 'Login'
-      ? [
+        ? [
           m('h4', 'Login page'),
-          m(
-            'div',
+          m('div',
             m('span', 'Username:'),
             m('input[type=text]', {
               value: cell.state.login.username,
@@ -99,8 +94,7 @@ const app = {
                 })
             })
           ),
-          m(
-            'div',
+          m('div',
             m('span', 'Password:'),
             m('input[type=password]', {
               value: cell.state.login.password,
@@ -111,17 +105,16 @@ const app = {
             })
           )
         ]
-      : cell.state.page === 'Data'
-      ? [
-          m('h4', 'Data page'),
-          cell.state.data === 'loading'
-            ? m('div', 'Loading, please wait...')
-            : m(
-                'ul',
+        : cell.state.page === 'Data'
+          ? [
+            m('h4', 'Data page'),
+            cell.state.data === 'loading'
+              ? m('div', 'Loading, please wait...')
+              : m('ul',
                 cell.state.data.map((item) => m('li', item))
               )
-        ]
-      : null,
+          ]
+          : null,
     m('pre', JSON.stringify(cell.state, null, 2))
   ]
 };

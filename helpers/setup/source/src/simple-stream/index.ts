@@ -174,13 +174,14 @@ export const stream = <T>(initial?: T): Stream<T> => {
   const mapFunctions: MapFunction<any, any>[] = [];
   let latestValue = initial as T;
 
-  const createdStream: Stream<T> = function (value) {
+  const createdStream: Stream<T> = function(value) {
     if (arguments.length > 0 && !createdStream.ended) {
       latestValue = value as T;
       for (const i in mapFunctions) {
         // credit @cmnstmntmn for discovering this bug.
         // Make sure to send the latest value.
-        // Otherwise, if f1 triggers another update, f2 will be called with value2 then value1 (old value).
+        // Otherwise, if f1 triggers another update, f2 will be called with value2 and
+        // then value1 (old value).
         mapFunctions[i](latestValue);
       }
     }
@@ -249,27 +250,27 @@ export default simpleStream;
  */
 export const createDropRepeats =
   (stream: ExternalStreamLib = simpleStream) =>
-  /**
-   * @param source the source stream.
-   * @param onchange function that receives the current state of the source stream and returns the
-   * value for which changes will emit onto the returned stream.
-   * @returns a stream that does not emit repeated values.
-   */
-  <S>(source: Stream<S>, onchange: (state: S) => any = (state) => state): Stream<S> => {
-    const createStream = typeof stream === 'function' ? stream : stream.stream;
+    /**
+     * @param source the source stream.
+     * @param onchange function that receives the current state of the source stream and returns the
+     * value for which changes will emit onto the returned stream.
+     * @returns a stream that does not emit repeated values.
+     */
+    <S>(source: Stream<S>, onchange: (state: S) => any = (state) => state): Stream<S> => {
+      const createStream = typeof stream === 'function' ? stream : stream.stream;
 
-    let prev = undefined;
-    const result = createStream();
+      let prev = undefined;
+      const result = createStream();
 
-    source.map((state) => {
-      const next = onchange(state);
-      if (next !== prev) {
-        prev = next;
-        result(state);
-      }
-    });
-    return result;
-  };
+      source.map((state) => {
+        const next = onchange(state);
+        if (next !== prev) {
+          prev = next;
+          result(state);
+        }
+      });
+      return result;
+    };
 
 /**
  * `dropRepeats` function that uses `simpleStream`.

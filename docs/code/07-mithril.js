@@ -7,27 +7,16 @@ const actions = {
 };
 
 const view = (cell) =>
-  m(
-    'div',
-    m(
-      'div',
-      m(
-        'label',
-        'Temperature: ',
-        cell.state.value,
-        m.trust('&deg;'),
-        cell.state.units
-      )
+  m('div',
+    m('div',
+      m('label', 'Temperature: ',
+        cell.state.value, m.trust('&deg;'), cell.state.units)
     ),
-    m(
-      'div',
-      m(
-        'button',
+    m('div',
+      m('button',
         { onclick: () => actions.increment(cell, 1) },
-        'Increment'
-      ),
-      m(
-        'button',
+        'Increment'),
+      m('button',
         { onclick: () => actions.increment(cell, -1) },
         'Decrement'
       )
