@@ -19,7 +19,10 @@ cell.nest('someProperty')
 - services
 - views
 
-into **components**.
+into **components**. Components can operate on their `cell.state` without being "aware" of how their
+state is nested within the application state.
+
+Also, a component can be reused multiple times simply by nesting it again with a different property.
 
 To specify nested components, use the `nested` property of `app`:
 
@@ -112,6 +115,21 @@ along. For example:
 ```js
 cell.nested.one.view(cell, 'more', 'parameters')
 ```
+
+### Example
+
+Below is an example of using nested components.
+
+Notice how the `login` and `data` components can focus on their state without being "aware" of where
+their state is nested within the application state.
+
+Also note how the application view can call `cell.nested[cell.state.page].view(cell)`, and
+`.view(cell)` will automatically pass the nested cell to the view.
+
+Finally, you can see that the `data` component is reused as-is simply by nesting it with different
+properties, `data1` and `data2`.
+
+@flems {"files":"code/setup-nested-components.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
 
 | | | |
 | ---- | ---- | ---- |
