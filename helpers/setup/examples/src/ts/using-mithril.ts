@@ -3,24 +3,28 @@ import { MeiosisCell, MeiosisViewComponent, Service, setup } from '../../../sour
 import m from 'mithril';
 import Stream from 'mithril/stream';
 
-interface Data {
+interface Page {
+  active: boolean;
+}
+
+interface Data extends Page {
   loading: boolean;
   items: string[];
 }
 
-interface Login {
+interface Login extends Page {
   username: string;
   password: string;
 }
 
-interface State {
+interface State extends Page {
   page: string;
-  home: string;
+  home: Page;
   data: Data;
   login: Login;
 }
 
-const home: MeiosisViewComponent<string> = {
+const home: MeiosisViewComponent<Page> = {
   view: () => m('h4', 'Home page')
 };
 
@@ -33,18 +37,19 @@ const loginActions = {
   }
 };
 
-const loginService: Service<State> = {
-  onchange: (state) => state.page,
-  run: (cell) => {
-    if (cell.state.page === 'login') {
-      loginActions.prepareBlankForm(cell.nest('login'));
-    } else {
-      loginActions.clearForm(cell.nest('login'));
-    }
-  }
-};
-
 const login: MeiosisViewComponent<Login> = {
+  services: [
+    {
+      onchange: (state) => state.active,
+      run: (cell) => {
+        if (cell.state.active) {
+          loginActions.prepareBlankForm(cell);
+        } else {
+          loginActions.clearForm(cell);
+        }
+      }
+    }
+  ],
   view: (cell) => [
     m('h4', 'Login page'),
     m('div',
@@ -87,18 +92,19 @@ const dataActions = {
   }
 };
 
-const dataService: Service<State> = {
-  onchange: (state) => state.page,
-  run: (cell) => {
-    if (cell.state.page === 'data') {
-      dataActions.loadData(cell.nest('data'));
-    } else {
-      dataActions.clearData(cell.nest('data'));
-    }
-  }
-};
-
 const data: MeiosisViewComponent<Data> = {
+  services: [
+    {
+      onchange: (state) => state.active,
+      run: (cell) => {
+        if (cell.state.active) {
+          dataActions.loadData(cell);
+        } else {
+          dataActions.clearData(cell);
+        }
+      }
+    }
+  ],
   view: (cell) => [
     m('h4', 'Data page'),
     cell.state.loading
@@ -110,11 +116,24 @@ const data: MeiosisViewComponent<Data> = {
   ]
 };
 
+const pages = ['home', 'login', 'data'];
+
+const pageService: Service<State> = {
+  onchange: (state) => state.page,
+  run: (cell) => {
+    const pagePatch = pages.reduce((result, page) => {
+      result[page] = { active: cell.state.page === page };
+      return result;
+    }, {});
+    cell.update(pagePatch);
+  }
+};
+
 const app: MeiosisViewComponent<State> = {
   initial: {
     page: 'home'
   },
-  services: [loginService, dataService],
+  services: [pageService],
   nested: {
     home,
     login,

@@ -18,8 +18,7 @@ const view = (cell) =>
         'Increment'),
       m('button',
         { onclick: () => actions.increment(cell, -1) },
-        'Decrement'
-      )
+        'Decrement')
     )
   );
 
