@@ -1,3 +1,4 @@
+// @ts-check
 // preact + functionPatches + simple-stream
 import { setup } from '../../../source/dist/functionPatches';
 import { h, render as preactRender } from 'preact';
@@ -37,7 +38,9 @@ const app = {
 export const setupPreactExample = () => {
   const cells = setup({ app });
   const element = document.getElementById('jsPreactApp');
-  cells.map((cell) => {
-    preactRender(app.view(cell), element);
-  });
+  if (element) {
+    cells.map((cell) => {
+      preactRender(app.view(cell), element);
+    });
+  }
 };

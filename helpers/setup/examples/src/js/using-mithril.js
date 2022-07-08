@@ -1,3 +1,4 @@
+// @ts-check
 // mithril + mergerino + mithril-stream
 import { setup } from '../../../source/dist/mergerino';
 import m from 'mithril';
@@ -29,10 +30,12 @@ const app = {
 
 export const setupMithrilExample = () => {
   const cells = setup({ stream: Stream, app });
+  const element = document.getElementById('jsMithrilApp');
+  if (element) {
+    m.mount(element, {
+      view: () => app.view(cells())
+    });
 
-  m.mount(document.getElementById('jsMithrilApp'), {
-    view: () => app.view(cells())
-  });
-
-  cells.map(() => m.redraw());
+    cells.map(() => m.redraw());
+  }
 };

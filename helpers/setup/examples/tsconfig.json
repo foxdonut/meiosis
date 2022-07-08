@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["es2017", "dom"],
+    "module": "commonjs",
+    "noImplicitAny": true,
     "outDir": "./build",
     "sourceMap": true,
-    "noImplicitAny": false,
-    "module": "commonjs",
-    "target": "es6",
-    "esModuleInterop": true,
-    "lib": ["es2017", "dom"],
-    "jsx": "react"
+    "strict": true,
+    "target": "es6"
   },
   "include": [
     "./src/ts/**/*"

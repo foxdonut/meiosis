@@ -31,8 +31,10 @@ const app = {
 export const setupReactExample = () => {
   const cells = setup({ stream: flyd, app });
   const element = document.getElementById('jsReactApp');
-  const root = createRoot(element);
-  cells.map((cell) => {
-    root.render(app.view(cell));
-  });
+  if (element) {
+    const root = createRoot(element);
+    cells.map((cell) => {
+      root.render(app.view(cell));
+    });
+  }
 };
