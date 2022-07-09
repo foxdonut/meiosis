@@ -53,8 +53,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
       sound: string;
     }
 
-    const app = {};
-    const cells = meiosisSetup<State>({ app });
+    const cells = meiosisSetup<State>();
     const cell = cells();
 
     expect(cell.state).toEqual({});
@@ -421,7 +420,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     });
   });
 
-  test('async', (done) => {
+  test('getState async', (done) => {
     interface AppState {
       active: boolean;
       loading: boolean;
@@ -453,6 +452,25 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     cells().update(combinePatches([
       assoc('active', false), assoc('loading', false)
     ]));
+  });
+
+  test('getState nested', () => {
+    interface Duck {
+      color: string;
+    }
+
+    interface State {
+      duck: Duck;
+      sound: string;
+    }
+
+    const cells = meiosisSetup<State>();
+    const cell = cells();
+
+    cell.update(assoc('sound', 'quack'));
+    const duckCell = cell.nest('duck');
+    duckCell.update(assoc('color', 'yellow'));
+    expect(cells().getState()).toEqual({ sound: 'quack', duck: { color: 'yellow' } });
   });
 
   describe('Nested Components', () => {

@@ -52,8 +52,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       sound: string;
     }
 
-    const app = {};
-    const cells = meiosisSetup<State>({ app });
+    const cells = meiosisSetup<State>();
     const cell = cells();
 
     expect(cell.state).toEqual({});
@@ -448,6 +447,25 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     dataActions.loadData(cells());
 
     cells().update({ active: false, loading: false });
+  });
+
+  test('getState nested', () => {
+    interface Duck {
+      color: string;
+    }
+
+    interface State {
+      duck: Duck;
+      sound: string;
+    }
+
+    const cells = meiosisSetup<State>();
+    const cell = cells();
+
+    cell.update({ sound: 'quack' });
+    const duckCell = cell.nest('duck');
+    duckCell.update({ color: 'yellow' });
+    expect(cells().getState()).toEqual({ sound: 'quack', duck: { color: 'yellow' } });
   });
 
   describe('Nested Components', () => {
