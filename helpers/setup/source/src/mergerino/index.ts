@@ -154,6 +154,8 @@ export type NestedComponents<S> = {
 export type MeiosisCell<S> = {
   /** The current state. */
   state: S;
+  /** Returns the current state. Useful in code where state may have changed elsewhere. */
+  getState: () => S;
   /** Function to update the state. */
   update: Update<S>;
   /** Produces a nested cell. */
@@ -193,6 +195,7 @@ const nestCell =
 
     return {
       state: getNestedState(),
+      getState: getNestedState,
       update: nestedUpdate,
       nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
       nested: nestedComponents

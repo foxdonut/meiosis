@@ -974,4 +974,44 @@ describe('Meiosis cell', () => {
       fowl: { feathers: { duck: { sound: 'quack', color: 'yellow' } } }
     });
   });
+
+  describe.each(
+    createTestCases('getState for state changes', [
+      [
+        { active: true, loading: true },
+        { active: false, loading: false }
+      ],
+      [
+        meiosis.functionPatches.combinePatches([
+          R.assoc('active', true), R.assoc('loading', true)
+        ]),
+        meiosis.functionPatches.combinePatches([
+          R.assoc('active', false), R.assoc('loading', false)
+        ])
+      ]
+    ])
+  )('%s', (_label, setupFn, loadingPatch, unloadingPatch) => {
+    test('async', (done) => {
+      const dataActions = {
+        loadData: (cell) => {
+          setTimeout(
+            () => {
+              done();
+              if (cell.getState().active) {
+                // Fail
+                expect('active: T').toEqual('active: F');
+              }
+            },
+            100
+          );
+        }
+      };
+
+      const cells = setupFn({ app: { initial: { active: false, loading: false } } });
+
+      cells().update(loadingPatch);
+      dataActions.loadData(cells());
+      cells().update(unloadingPatch);
+    });
+  });
 });

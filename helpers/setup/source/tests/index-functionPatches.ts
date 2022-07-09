@@ -421,6 +421,40 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     });
   });
 
+  test('async', (done) => {
+    interface AppState {
+      active: boolean;
+      loading: boolean;
+    }
+
+    const dataActions = {
+      loadData: (cell: MeiosisCell<AppState>) => {
+        setTimeout(
+          () => {
+            done();
+            if (cell.getState().active) {
+              // Fail
+              expect('active: T').toEqual('active: F');
+            }
+          },
+          100
+        );
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app: { initial: { active: false, loading: false } } });
+
+    cells().update(combinePatches([
+      assoc('active', true), assoc('loading', true)
+    ]));
+
+    dataActions.loadData(cells());
+
+    cells().update(combinePatches([
+      assoc('active', false), assoc('loading', false)
+    ]));
+  });
+
   describe('Nested Components', () => {
     test('initial state', () => {
       interface Home {

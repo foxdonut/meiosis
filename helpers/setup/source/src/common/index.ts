@@ -73,17 +73,17 @@ type ParseFn = (value: string) => number;
 
 const updateParseValue =
   (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[]) =>
-  (evt: DomEvent) => {
-    const value = parseFn(evt.target.value);
-    if (!isNaN(value)) {
-      cell.update(intoPath(path, value));
-    }
-  };
+    (evt: DomEvent) => {
+      const value = parseFn(evt.target.value);
+      if (!isNaN(value)) {
+        cell.update(intoPath(path, value));
+      }
+    };
 
 export const updateStringValueIntoPath =
   (intoPath: PathUpdateFn, cell: Updatable, path: string[], fn: (value: string) => any) =>
-  (evt: DomEvent) =>
-    cell.update(intoPath(path, fn(evt.target.value)));
+    (evt: DomEvent) =>
+      cell.update(intoPath(path, fn(evt.target.value)));
 
 export const updateIntValueIntoPath =
   (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
@@ -96,18 +96,18 @@ export const updateFloatValueIntoPath =
 const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce(
-        (result, key) =>
-          assoc(
-            key,
-            Object.assign(
-              {},
-              nestedComponents[key].initial,
-              assembleInitialState(nestedComponents[key].nested)
-            ),
-            result
+      (result, key) =>
+        assoc(
+          key,
+          Object.assign(
+            {},
+            nestedComponents[key].initial,
+            assembleInitialState(nestedComponents[key].nested)
           ),
-        {}
-      )
+          result
+        ),
+      {}
+    )
     : {};
 
 const getInitialState = <S>(app: CommonMeiosisComponent<S>): S =>
@@ -116,22 +116,22 @@ const getInitialState = <S>(app: CommonMeiosisComponent<S>): S =>
 const assembleView = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce((result, key) => {
-        const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
+      const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
 
-        if (nestedApp.view !== undefined) {
-          const view = nestedApp.view;
+      if (nestedApp.view !== undefined) {
+        const view = nestedApp.view;
 
-          return assoc(
-            key,
-            {
-              view: (cell: any, ...args: any[]) => view(cell.nest(key), ...args),
-              nested: assembleView(nestedApp.nested)
-            },
-            result
-          );
-        }
-        return result;
-      }, {})
+        return assoc(
+          key,
+          {
+            view: (cell: any, ...args: any[]) => view(cell.nest(key), ...args),
+            nested: assembleView(nestedApp.nested)
+          },
+          result
+        );
+      }
+      return result;
+    }, {})
     : {};
 
 const getView = <S>(app: CommonMeiosisComponent<S>): CommonMeiosisComponent<S> =>
@@ -144,19 +144,19 @@ const assembleServices = <S>(
 ): CommonService<S>[] =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce((result, key) => {
-        const nextGetCell = (cell) => getCell(cell).nest(key);
-        const nextGetState = (state) => getState(state)[key];
+      const nextGetCell = (cell) => getCell(cell).nest(key);
+      const nextGetState = (state) => getState(state)[key];
 
-        const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
+      const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
 
-        return concatIfPresent(
-          result,
-          nestedApp.services?.map<CommonService<any>>((service) => ({
-            onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
-            run: (cell) => service.run(nextGetCell(cell))
-          }))
-        ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
-      }, [] as CommonService<S>[])
+      return concatIfPresent(
+        result,
+        nestedApp.services?.map<CommonService<any>>((service) => ({
+          onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
+          run: (cell) => service.run(nextGetCell(cell))
+        }))
+      ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
+    }, [] as CommonService<S>[])
     : [];
 
 /**
@@ -230,7 +230,7 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
   });
 
   const nest = nestCell(states, update, view);
-  const getCell = (state: S) => ({ state, update, nest, nested: view });
+  const getCell = (state: S) => ({ state, getState: () => states(), update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
   if (app) {

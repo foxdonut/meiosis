@@ -420,6 +420,36 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     });
   });
 
+  test('async', (done) => {
+    interface AppState {
+      active: boolean;
+      loading: boolean;
+    }
+
+    const dataActions = {
+      loadData: (cell: MeiosisCell<AppState>) => {
+        setTimeout(
+          () => {
+            done();
+            if (cell.getState().active) {
+              // Fail
+              expect('active: T').toEqual('active: F');
+            }
+          },
+          100
+        );
+      }
+    };
+
+    const cells = meiosisSetup<AppState>({ app: { initial: { active: false, loading: false } } });
+
+    cells().update({ active: true, loading: true });
+
+    dataActions.loadData(cells());
+
+    cells().update({ active: false, loading: false });
+  });
+
   describe('Nested Components', () => {
     test('initial state', () => {
       interface Home {
