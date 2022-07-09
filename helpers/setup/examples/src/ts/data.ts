@@ -7,7 +7,7 @@ const dataActions = {
     cell.update({ loading: true });
     setTimeout(
       () => {
-        if (cell.state.active) {
+        if (cell.getState().active) {
           cell.update({
             loading: false,
             items: ['One', 'Two']
