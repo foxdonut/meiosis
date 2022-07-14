@@ -22,6 +22,7 @@ export interface Login extends Page {
 export interface State extends Page {
   page: keyof State;
   home: Page;
-  data: Data;
   login: Login;
+  data1: Data;
+  data2: Data;
 }

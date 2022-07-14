@@ -7,7 +7,7 @@ import { home } from './home';
 import { login } from './login';
 import { data } from './data';
 
-const pages = ['home', 'login', 'data'];
+const pages = ['home', 'login', 'data1', 'data2'];
 
 const pageService: Service<State> = {
   onchange: (state) => state.page,
@@ -28,7 +28,8 @@ const app: MeiosisViewComponent<State> = {
   nested: {
     home,
     login,
-    data
+    data1: data,
+    data2: data
   },
   view: (cell) =>
     m('div.row',
@@ -62,10 +63,21 @@ const app: MeiosisViewComponent<State> = {
               href: '#',
               onclick: (evt: DomEvent) => {
                 evt.preventDefault();
-                cell.update({ page: 'data' });
+                cell.update({ page: 'data1' });
               }
             },
-            'Data'
+            'Data 1'
+          ),
+          m('span', ' | '),
+          m('a',
+            {
+              href: '#',
+              onclick: (evt: DomEvent) => {
+                evt.preventDefault();
+                cell.update({ page: 'data2' });
+              }
+            },
+            'Data 2'
           )
         ),
         cell.nested[cell.state.page].view(cell)

@@ -129,7 +129,7 @@ Also note how the application view can call `cell.nested[cell.state.page].view(c
 Finally, you can see that the `data` component is reused as-is simply by nesting it with different
 properties, `data1` and `data2`.
 
-@flems {"files":"code/setup-nested-components.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
+@flems {"files":"code/setup-nested-components.js,code/home.js,code/login.js,code/data.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
 
 | | | |
 | ---- | ---- | ---- |
