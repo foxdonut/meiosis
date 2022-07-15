@@ -116,6 +116,11 @@ along. For example:
 cell.nested.one.view(cell, 'more', 'parameters')
 ```
 
+### Deep Nesting
+
+Finally, note that nested components can in turn have a `nested` property and themselves use nested
+components. Thus you can nest components at deeper levels within your application.
+
 ### Example
 
 Below is an example of using nested components.
