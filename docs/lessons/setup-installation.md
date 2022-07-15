@@ -42,6 +42,8 @@ const cells = Meiosis.functionPatches.setup();
 const cells = Meiosis.mergerino.setup();
 ```
 
+This gives you a stream of cells as explained in the [Meiosis documentation](toc.html).
+
 | | |
 | ---- | ---- |
 | [&rarrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |

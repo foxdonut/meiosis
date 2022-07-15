@@ -230,7 +230,8 @@ export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonServi
   });
 
   const nest = nestCell(states, update, view);
-  const getCell = (state: S) => ({ state, getState: () => states(), update, nest, nested: view });
+  const getState = () => states();
+  const getCell = (state: S) => ({ state, getState, update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
   if (app) {
