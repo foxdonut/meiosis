@@ -11,9 +11,20 @@
 <body class="container">
 <script src="prism.js" type="text/javascript"></script>
 <script src="flems.html" type="text/javascript" charset="utf-8"></script>
-<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><p><a href="05-meiosis-with-mergerino.html">&lt; Previous</a> |
-<a href="07-views.html">Next &gt;</a> |
-<a href="toc.html">Table of Contents</a></p>
+<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="07-views.html">&rarrhk; 07 - Views</a></td>
+<td><a href="05-meiosis-with-mergerino.html">&larrhk; 05 - Meiosis with Mergerino</a></td>
+<td><a href="toc.html">&#8673; Table of Contents</a></td>
+</tr>
+</tbody></table>
 <h2>06 - Cells</h2><p>In the previous sections, we set up the Meiosis pattern with function patches, and with
 <a href="https://github.com/fuzetsu/mergerino">Mergerino</a>. In both cases, we created:</p>
 <ul>
@@ -36,19 +47,39 @@ properties to the cell, and we won&#39;t have to change the parameters in all of
 updates.</p>
 <p>Creating a stream of cells from the stream of states is simple. We can use <code>map</code>:</p>
 <pre><code class="language-js">const update = flyd.stream();
-const createCell = (state) =&gt; ({ state, update });
+const states = scan(...);
+const getState = () =&gt; states();
+const createCell = (state) =&gt; ({ state, getState, update });
 const cells = states.map(createCell);
 </code></pre>
 <p>We now have a stream of cells. To get the current cell, we can call <code>cells()</code> and pass that as a
 <code>cell</code> to views. Views can then access the state with <code>cell.state</code> and issue updates by calling
 <code>cell.update(...)</code>. Finally, we can also pass <code>cell</code> to actions which in turn can use <code>cell.state</code>
 and <code>cell.update(...)</code>.</p>
+<blockquote>
+<p>We also have <code>cell.getState()</code>. Normally, using <code>cell.state</code> works well to get the current state.
+However, if we pass <code>cell</code> to a function which needs to get the state asynchronously, and the state
+may have changed in the meantime, we should use <code>cell.getState()</code> to make sure we get the updated
+state. Also note that we don&#39;t use <code>states</code> directly as <code>cell.getState</code>, so that we don&#39;t
+accidentally call <code>cell.getState(value)</code> and end up sending <code>value</code> onto the <code>states</code> stream. By
+using <code>const getState = () =&gt; states()</code>, any value passed to <code>getState</code> is ignored.</p>
+</blockquote>
 <p>In the following section, we will look at how to wire up the Meiosis pattern to three view
 libraries.</p>
-<p><a href="05-meiosis-with-mergerino.html">&lt; Previous</a> |
-<a href="07-views.html">Next &gt;</a> |
-<a href="toc.html">Table of Contents</a></p>
-<hr>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="07-views.html">&rarrhk; 07 - Views</a></td>
+<td><a href="05-meiosis-with-mergerino.html">&larrhk; 05 - Meiosis with Mergerino</a></td>
+<td><a href="toc.html">&#8673; Table of Contents</a></td>
+</tr>
+</tbody></table>
 <p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
 <a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
 

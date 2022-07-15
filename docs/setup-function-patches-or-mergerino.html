@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="setup-initial-state.html">&rarrhk; Initial State</a></td>
+<td><a href="setup-installation.html">&larrhk; Installation</a></td>
+<td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
+</tr>
+</tbody></table>
+<h2>Function Patches or Mergerino</h2><h3>Setup with Function Patches</h3><p>To set up Meiosis with function patches (explained in the Meiosis Documentation:
+<a href="http://meiosis.js.org/docs/04-meiosis-with-function-patches.html">reference</a>), use the following
+code:</p>
+<pre><code class="language-js">import meiosisSetup from &#39;meiosis-setup/functionPatches&#39;;
+
+const cells = meiosisSetup();
+</code></pre>
+<p>Here is an example:</p>
+<blockquote>
+<p>In the embedded examples, the exported global <code>Meiosis</code> is used instead of <code>import meiosisSetup from &#39;...&#39;</code>.</p>
+</blockquote>
+<div id="flems1" class="flemscode" style=""></div>
+  <script>
+    window.Flems(flems1, {
+      files: [{name: "setup-function-patches.js", content: "/* global Meiosis */\nconst meiosisSetup = Meiosis.functionPatches.setup;\n\nconst cells = meiosisSetup();\nconsole.log(cells().state);\n\ncells().update((state) => ({ ...state, counter: 1 }));\nconsole.log(cells().state);\n", compiler: "babel"}],
+      links: [{name: "meiosis-setup", type: "js", url: "https://unpkg.com/meiosis-setup"}],
+      middle: 75
+    })
+  </script>
+      
+
+<h3>Setup with Mergerino</h3><p>To set up Meiosis with <a href="https://github.com/fuzetsu/mergerino">Mergerino</a> (explained in the Meiosis
+Documentation: <a href="http://meiosis.js.org/docs/05-meiosis-with-mergerino.html">reference</a>), use the
+following code:</p>
+<pre><code class="language-js">import meiosisSetup from &#39;meiosis-setup/mergerino&#39;;
+
+const cells = meiosisSetup();
+</code></pre>
+<p>For example:</p>
+<div id="flems2" class="flemscode" style=""></div>
+  <script>
+    window.Flems(flems2, {
+      files: [{name: "setup-mergerino.js", content: "/* global Meiosis */\nconst meiosisSetup = Meiosis.mergerino.setup;\n\nconst cells = meiosisSetup();\nconsole.log(cells().state);\n\ncells().update({ counter: 1 });\nconsole.log(cells().state);\n", compiler: "babel"}],
+      links: [{name: "meiosis-setup", type: "js", url: "https://unpkg.com/meiosis-setup"}],
+      middle: 75
+    })
+  </script>
+      
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="setup-initial-state.html">&rarrhk; Initial State</a></td>
+<td><a href="setup-installation.html">&larrhk; Installation</a></td>
+<td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
+</tr>
+</tbody></table>
+<p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
+
+</body>
+</html>
