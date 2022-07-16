@@ -231,23 +231,13 @@ const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
   commonGetServices(component);
 
 /**
- * Helper to setup the Meiosis pattern with function patches.
- *
- * @template S the State type.
- *
- * @param {MeiosisConfig<S>} config the Meiosis config for use with function patches.
-
-const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
-  commonGetServices(component);
-
-/**
  * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
  *
  * @template S the State type.
  *
- * @param {MeiosisConfig<S>} config the Meiosis config for use with Mergerino
+ * @param config the Meiosis config for use with Mergerino
  *
- * @returns {Meiosis<S, Patch<S>>} `{ cells }`.
+ * @returns a stream of meiosis cells.
  */
 export const setup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S>> =>
   nestSetup<S, Patch<S>, NestSetup<S, Patch<S>>, Service<S>, MeiosisCell<S>>({
