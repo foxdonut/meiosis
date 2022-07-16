@@ -9,7 +9,7 @@
 `meiosis-setup` provides TypeScript support so that you can have type checking, auto-suggest, and
 other TypeScript features in your Meiosis code.
 
-[TypeScript API documentation is here.](docs/index.html)
+[TypeScript API documentation is here.](ts-docs/index.html)
 
 | | | |
 | ---- | ---- | ---- |

@@ -63,11 +63,11 @@ export interface DomEvent {
 
 // helpers to update values from input
 
-type Updatable = {
+export type Updatable = {
   update: (value: any) => any;
 };
 
-type PathUpdateFn = (path: string[], value: string | number) => any;
+export type PathUpdateFn = (path: string[], value: string | number) => any;
 
 type ParseFn = (value: string) => number;
 
