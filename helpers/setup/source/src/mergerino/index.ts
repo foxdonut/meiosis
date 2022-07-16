@@ -58,7 +58,7 @@ export type ObjectPatch<S> = {
 export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
 
 /**
- * Function to update the state witha patch.
+ * Function to update the state with a patch.
  *
  * @template S the State type.
  */
@@ -154,12 +154,16 @@ export type NestedComponents<S> = {
 export type MeiosisCell<S> = {
   /** The current state. */
   state: S;
+
   /** Returns the current state. Useful in code where state may have changed elsewhere. */
   getState: () => S;
+
   /** Function to update the state. */
   update: Update<S>;
+
   /** Produces a nested cell. */
   nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+
   /** Contains nested view components. */
   nested: NestedViews<S>;
 };
@@ -217,15 +221,17 @@ const intoPath = (path: string[], value: string | number): any => ({
 
 export const updateFormValue = (
   cell: MeiosisCell<any>,
-  path: string[],
+  path: string[] | string,
   fn: (value: string) => any = (value) => value
 ) => updateStringValueIntoPath(intoPath, cell, path, fn);
 
-export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[]) =>
+export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | string) =>
   updateIntValueIntoPath(intoPath, cell, path);
 
-export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[]) =>
+export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[] | string) =>
   updateFloatValueIntoPath(intoPath, cell, path);
+
+// Services
 
 const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
   commonGetServices(component);
@@ -237,7 +243,7 @@ const getServices = <S>(component: MeiosisComponent<S>): Service<S>[] =>
  *
  * @param config the Meiosis config for use with Mergerino
  *
- * @returns a stream of meiosis cells.
+ * @returns a stream of Meiosis cells.
  */
 export const setup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S>> =>
   nestSetup<S, Patch<S>, NestSetup<S, Patch<S>>, Service<S>, MeiosisCell<S>>({

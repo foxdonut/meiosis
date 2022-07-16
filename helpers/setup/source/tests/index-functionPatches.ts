@@ -273,6 +273,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     interface AppState {
       pet: Duck;
+      name: string;
     }
 
     const app: MeiosisComponent<AppState> = {
@@ -282,7 +283,8 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           env: {
             material: 'straw'
           }
-        }
+        },
+        name: 'Red'
       }
     };
 
@@ -299,7 +301,21 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         env: {
           material: newMaterial
         }
-      }
+      },
+      name: 'Red'
+    });
+
+    const newName = 'Black';
+    updateFormValue(cell, 'name')({ target: { value: newName } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: newMaterial
+        }
+      },
+      name: newName
     });
   });
 
@@ -344,7 +360,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     });
   });
 
-  test('updateIntValue', () => {
+  test('updateFormIntValue', () => {
     interface House {
       size: number;
     }
@@ -355,6 +371,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     interface AppState {
       pet: Duck;
+      counter: number;
     }
 
     const app: MeiosisComponent<AppState> = {
@@ -363,7 +380,8 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           house: {
             size: 5
           }
-        }
+        },
+        counter: 0
       }
     };
 
@@ -378,11 +396,23 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         house: {
           size: 10
         }
-      }
+      },
+      counter: 0
+    });
+
+    updateFormIntValue(cell, 'counter')({ target: { value: '1' } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10
+        }
+      },
+      counter: 1
     });
   });
 
-  test('updateFloatValue', () => {
+  test('updateFormFloatValue', () => {
     interface House {
       size: number;
     }
@@ -393,6 +423,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     interface AppState {
       pet: Duck;
+      pH: number;
     }
 
     const app: MeiosisComponent<AppState> = {
@@ -401,7 +432,8 @@ describe('Meiosis with TypeScript - Function Patches', () => {
           house: {
             size: 5
           }
-        }
+        },
+        pH: 6.9
       }
     };
 
@@ -416,7 +448,19 @@ describe('Meiosis with TypeScript - Function Patches', () => {
         house: {
           size: 10.5
         }
-      }
+      },
+      pH: 6.9
+    });
+
+    updateFormFloatValue(cell, 'pH')({ target: { value: '7.01' } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10.5
+        }
+      },
+      pH: 7.01
     });
   });
 

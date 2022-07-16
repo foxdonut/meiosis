@@ -67,30 +67,45 @@ export type Updatable = {
   update: (value: any) => any;
 };
 
+/**
+ * Internal use only.
+ */
 export type PathUpdateFn = (path: string[], value: string | number) => any;
 
 type ParseFn = (value: string) => number;
 
+const toPath = (pathOrProp: string[] | string): string[] =>
+  Array.isArray(pathOrProp) ? pathOrProp : [pathOrProp];
+
 const updateParseValue =
-  (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[]) =>
+  (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
     (evt: DomEvent) => {
       const value = parseFn(evt.target.value);
       if (!isNaN(value)) {
-        cell.update(intoPath(path, value));
+        cell.update(intoPath(toPath(path), value));
       }
     };
 
+/**
+ * Internal use only.
+ */
 export const updateStringValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[], fn: (value: string) => any) =>
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string, fn: (value: string) => any) =>
     (evt: DomEvent) =>
-      cell.update(intoPath(path, fn(evt.target.value)));
+      cell.update(intoPath(toPath(path), fn(evt.target.value)));
 
+/**
+ * Internal use only.
+ */
 export const updateIntValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
     updateParseValue(intoPath, parseInt, cell, path)(evt);
 
+/**
+ * Internal use only.
+ */
 export const updateFloatValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[]) => (evt: DomEvent) =>
+  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
     updateParseValue(intoPath, parseFloat, cell, path)(evt);
 
 const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
