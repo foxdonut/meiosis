@@ -19,14 +19,21 @@
 </tr>
 </thead>
 <tbody><tr>
-<td><a href="setup-function-patches-or-mergerino.html">&rarrhk; Function Patches or Mergerino</a></td>
+<td><a href="setup-function-patches-or-mergerino.html">&rarr; Function Patches or Mergerino</a></td>
 <td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
 </tr>
 </tbody></table>
-<h2>Installation</h2><p>Using Node.js:</p>
+<h2>Installation</h2><p>You can install <code>meiosis-setup</code>:</p>
+<ul>
+<li>Using Node.js, or,</li>
+<li>Using an HTML <code>&lt;script&gt;</code> tag.</li>
+</ul>
+<p>In both cases, the setup will give you a stream of cells as explained in the
+<a href="toc.html">Meiosis documentation</a>.</p>
+<h3>Using Node.js</h3><p>Install <code>meiosis-setup</code> with <code>npm</code>:</p>
 <pre><code>npm i meiosis-setup
 </code></pre>
-<p>Then you can import using:</p>
+<p>Then you can import it using:</p>
 <pre><code class="language-js">import meiosisSetup from &#39;meiosis-setup/functionPatches&#39;;
 
 // or
@@ -37,7 +44,7 @@ import meiosisSetup from &#39;meiosis-setup/mergerino&#39;;
 
 const cells = meiosisSetup();
 </code></pre>
-<p>With a script tag:</p>
+<h3>Using an HTML <code>&lt;script&gt;</code> tag</h3><p>Load <code>meiosis-setup</code> by adding a <code>&lt;script&gt;</code> tag to your HTML page:</p>
 <pre><code class="language-html">&lt;script src=&quot;http://unpkg.com/meiosis-setup&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p>Then use the <code>Meiosis</code> global variable:</p>
@@ -47,7 +54,6 @@ const cells = meiosisSetup();
 
 const cells = Meiosis.mergerino.setup();
 </code></pre>
-<p>This gives you a stream of cells as explained in the <a href="toc.html">Meiosis documentation</a>.</p>
 <table>
 <thead>
 <tr>
@@ -56,7 +62,7 @@ const cells = Meiosis.mergerino.setup();
 </tr>
 </thead>
 <tbody><tr>
-<td><a href="setup-function-patches-or-mergerino.html">&rarrhk; Function Patches or Mergerino</a></td>
+<td><a href="setup-function-patches-or-mergerino.html">&rarr; Function Patches or Mergerino</a></td>
 <td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
 </tr>
 </tbody></table>

@@ -19,27 +19,33 @@
 </tr>
 </thead>
 <tbody><tr>
-<td><a href="setup-typescript-support.html">&larrhk; TypeScript Support</a></td>
+<td><a href="setup-typescript-support.html">&larr; TypeScript Support</a></td>
 <td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
 </tr>
 </tbody></table>
-<h2>Stream Implementation</h2><p>By default, <code>meiosis-setup</code> uses its <code>simple-stream</code> implementation. You can use a different stream
-implementation. For example, these work out-of-the-box:</p>
+<h2>Stream Implementation</h2><p>By default, <code>meiosis-setup</code> uses its <code>simple-stream</code> implementation. If you are curious, see
+<a href="https://github.com/foxdonut/meiosis/blob/master/helpers/setup/source/src/simple-stream/index.ts">here</a>
+for the source code.</p>
+<p>You can use a different stream implementation. The following two stream libraries work
+out-of-the-box:</p>
 <ul>
 <li><a href="https://github.com/paldepind/flyd">Flyd</a></li>
 <li><a href="https://mithril.js.org/stream.html">Mithril Stream</a></li>
 </ul>
-<p>Use the <code>stream</code> property to specify the stream implementation that you want to use. For example:</p>
-<pre><code class="language-js">import flyd from &#39;flyd&#39;
+<p>Use the <code>stream</code> property to specify the stream implementation that you want to use:</p>
+<pre><code class="language-js">// Using Flyd
+import flyd from &#39;flyd&#39;
 
 const cells = setup({ stream: flyd });
 </code></pre>
-<pre><code class="language-js">import Stream from &#39;mithril/stream&#39;;
+<pre><code class="language-js">// Using Mithril Stream
+import Stream from &#39;mithril/stream&#39;;
 
 const cells = setup({ stream: Stream });
 </code></pre>
 <p>You can use any other stream library as long as you adapt it by providing an object with a <code>stream</code>
-and a <code>scan</code> property, which indicate the functions to create a stream and to scan a stream:</p>
+and a <code>scan</code> property, which indicate the functions to create a stream and to scan a stream. The
+stream returned when creating a stream must have a <code>map</code> function.</p>
 <pre><code class="language-js">import someStream from &#39;some-stream-library&#39;;
 
 const someStreamLib = {
@@ -49,7 +55,6 @@ const someStreamLib = {
 
 const cells = setup({ stream: someStreamLib })
 </code></pre>
-<p>Also, the stream returned when creating a stream must have a <code>map</code> function.</p>
 <p>Adapting a different stream library is usually not necessary, since using either <code>simple-stream</code>,
 <code>Flyd</code>, or <code>Mithril Stream</code> should be suitable.</p>
 <table>
@@ -60,7 +65,7 @@ const cells = setup({ stream: someStreamLib })
 </tr>
 </thead>
 <tbody><tr>
-<td><a href="setup-typescript-support.html">&larrhk; TypeScript Support</a></td>
+<td><a href="setup-typescript-support.html">&larr; TypeScript Support</a></td>
 <td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
 </tr>
 </tbody></table>
