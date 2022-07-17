@@ -6,13 +6,23 @@
 
 ## Installation
 
-Using Node.js:
+You can install `meiosis-setup`:
+
+- Using Node.js, or,
+- Using an HTML `<script>` tag.
+
+In both cases, the setup will give you a stream of cells as explained in the
+[Meiosis documentation](toc.html).
+
+### Using Node.js
+
+Install `meiosis-setup` with `npm`:
 
 ```
 npm i meiosis-setup
 ```
 
-Then you can import using:
+Then you can import it using:
 
 ```js
 import meiosisSetup from 'meiosis-setup/functionPatches';
@@ -26,7 +36,9 @@ import meiosisSetup from 'meiosis-setup/mergerino';
 const cells = meiosisSetup();
 ```
 
-With a script tag:
+### Using an HTML `<script>` tag
+
+Load `meiosis-setup` by adding a `<script>` tag to your HTML page:
 
 ```html
 <script src="http://unpkg.com/meiosis-setup"></script>
@@ -41,8 +53,6 @@ const cells = Meiosis.functionPatches.setup();
 
 const cells = Meiosis.mergerino.setup();
 ```
-
-This gives you a stream of cells as explained in the [Meiosis documentation](toc.html).
 
 | | |
 | ---- | ---- |
