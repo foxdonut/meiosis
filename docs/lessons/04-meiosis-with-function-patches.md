@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&larrhk; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 03 - Streams](03-streams.html) | [&rarr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 04 - Meiosis with Function Patches
 
@@ -113,7 +113,7 @@ In the next section, we will look at an alternative to function patches, called 
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&larrhk; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 03 - Streams](03-streams.html) | [&rarr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

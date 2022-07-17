@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 06 - Cells](06-cells.html) | [&larrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&rarr; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 05 - Meiosis with Mergerino
 
@@ -297,7 +297,7 @@ into **cells**.
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 06 - Cells](06-cells.html) | [&larrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&rarr; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

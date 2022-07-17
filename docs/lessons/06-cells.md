@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 07 - Views](07-views.html) | [&larrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&rarr; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 06 - Cells
 
@@ -57,7 +57,7 @@ libraries.
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 07 - Views](07-views.html) | [&larrhk; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&rarr; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

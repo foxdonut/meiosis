@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&larr; Services](setup-services.html) | [&rarr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## Nested Components
 
@@ -138,7 +138,7 @@ properties, `data1` and `data2`.
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; TypeScript Support](setup-typescript-support.html) | [&larrhk; Services](setup-services.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&larr; Services](setup-services.html) | [&rarr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

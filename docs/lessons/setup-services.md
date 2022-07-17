@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; Nested Components](setup-nested-components.html) | [&larrhk; View Library](setup-view-library.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&larr; View Library](setup-view-library.html) | [&rarr; Nested Components](setup-nested-components.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## Services
 
@@ -50,7 +50,7 @@ Services can also be nested using nested components, which we will look at next.
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; Nested Components](setup-nested-components.html) | [&larrhk; View Library](setup-view-library.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&larr; View Library](setup-view-library.html) | [&rarr; Nested Components](setup-nested-components.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

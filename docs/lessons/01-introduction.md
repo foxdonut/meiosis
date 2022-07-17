@@ -2,7 +2,7 @@
 
 | | |
 | ---- | ---- |
-| [&rarrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+| [&rarr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 01 - Introduction and Goals
 
@@ -57,7 +57,7 @@ Let's get started.
 
 | | |
 | ---- | ---- |
-| [&rarrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+| [&rarr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

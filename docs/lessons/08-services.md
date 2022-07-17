@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 09 - Nesting](09-nesting.html) | [&larrhk; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 07 - Views](07-views.html) | [&rarr; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 08 - Services
 
@@ -220,7 +220,7 @@ In the next section, we'll look at another feature that we can add to Meiosis: *
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 09 - Nesting](09-nesting.html) | [&larrhk; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 07 - Views](07-views.html) | [&rarr; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

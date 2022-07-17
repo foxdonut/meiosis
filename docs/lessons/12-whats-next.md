@@ -2,7 +2,7 @@
 
 | | |
 | ---- | ---- |
-| [&larrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 12 - What's Next?
 
@@ -19,7 +19,7 @@ Thank you for reading. I hope you enjoy Meiosis!
 
 | | |
 | ---- | ---- |
-| [&larrhk; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

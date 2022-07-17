@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&larrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&rarr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 03 - Streams
 
@@ -263,7 +263,7 @@ When you are ready, continue on to
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&larrhk; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&rarr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

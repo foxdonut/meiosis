@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 12 - What's Next?](12-whats-next.html) | [&larrhk; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&rarr; 12 - What's Next?](12-whats-next.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 11 - The Meiosis Pattern Cheatsheet
 
@@ -185,7 +185,7 @@ cells.map((cell) => {
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 12 - What's Next?](12-whats-next.html) | [&larrhk; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&rarr; 12 - What's Next?](12-whats-next.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

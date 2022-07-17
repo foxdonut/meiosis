@@ -2,7 +2,7 @@
 
 | | |
 | ---- | ---- |
-| [&rarrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&rarr; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 ## Installation
 
@@ -46,7 +46,7 @@ This gives you a stream of cells as explained in the [Meiosis documentation](toc
 
 | | |
 | ---- | ---- |
-| [&rarrhk; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
+| [&rarr; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

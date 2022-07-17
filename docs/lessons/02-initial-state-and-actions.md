@@ -2,7 +2,7 @@
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 03 - Streams](03-streams.html) | [&larrhk; 01 - Introduction](01-introduction.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 01 - Introduction](01-introduction.html) | [&rarr; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
 
 ## 02 - Initial State and Actions
 
@@ -49,7 +49,7 @@ continue on to [03 - Streams](03-streams.html).
 
 | | | |
 | ---- | ---- | ---- |
-| [&rarrhk; 03 - Streams](03-streams.html) | [&larrhk; 01 - Introduction](01-introduction.html) | [&#8673; Table of Contents](toc.html) |
+| [&larr; 01 - Introduction](01-introduction.html) | [&rarr; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.
