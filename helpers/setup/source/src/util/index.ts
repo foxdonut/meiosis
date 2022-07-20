@@ -2,10 +2,10 @@
  * Safely gets a property path from an object. The path is an array. If any property along the path
  * is `undefined`, the function returns `undefined`.
  *
- * @param {*} object the object on which to get the property.
- * @param {Array<string>} path the property path.
+ * @param object the object on which to get the property.
+ * @param path the property path.
  *
- * @returns {*} the property value, or `undefined` if any property along the path is `undefined`.
+ * @returns the property value, or `undefined` if any property along the path is `undefined`.
  */
 export const get = (object: Record<string, any> | undefined, path: string[]): any =>
   path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object);
@@ -16,6 +16,7 @@ export const get = (object: Record<string, any> | undefined, path: string[]): an
  * @param prop the property name
  * @param value the property value
  * @param result the target object
+ *
  * @returns the target object with the associated property
  */
 export const assoc = (prop: string, value: unknown, target: Record<string, any>): any => {
@@ -28,6 +29,7 @@ export const assoc = (prop: string, value: unknown, target: Record<string, any>)
  *
  * @param target the target array
  * @param source the source array
+ *
  * @returns the target array with the source concatenated if the source is present, otherwise the
  * target array unchanged.
  */

@@ -9,6 +9,30 @@
 `meiosis-setup` provides TypeScript support so that you can have type checking, auto-suggest, and
 other TypeScript features in your Meiosis code.
 
+### State Type
+
+The first thing we need to do is to define a type for our application state.
+
+```ts
+interface State {
+  name: string;
+  age: number;
+}
+```
+
+Then, we can set up Meiosis as follows:
+
+```ts
+import setup from 'meiosis-setup/mergerino';
+
+const cells = setup<State>();
+```
+
+### Example
+
+This
+[example](https://codesandbox.io/s/meiosis-setup-typescript-example-6ppbqk?file=/src/index.ts).
+
 [TypeScript API documentation is here.](ts-docs/index.html)
 
 | | | |

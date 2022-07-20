@@ -37,11 +37,25 @@ export type FunctionPatch<S> = (state: S) => S;
  */
 export type ObjectPatch<S> = {
   [K in Extract<keyof S, string>]?:
-    | Patch<S[K]>
-    | ((a: S[K]) => S[K] | null | undefined)
-    | null
-    | undefined;
+  | S[K]
+  | Patch<S[K]>
+  | ((a: S[K]) => S[K] | null | undefined)
+  | null
+  | undefined;
 };
+
+// Credit: https://stackoverflow.com/questions/48230773
+//   /how-to-create-a-partial-like-that-requires-a-single-property-to-be-set/48244432#48244432
+type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+
+// For reference:
+// https://docs.microsoft.com/en-us/javascript/api/@azure/keyvault-certificates
+//   /requireatleastone?view=azure-node-latest
+/*
+type RequireAtLeastOne<T> = {
+  [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>;
+}[keyof T]
+*/
 
 /**
  * A Mergerino patch.
@@ -55,7 +69,7 @@ export type ObjectPatch<S> = {
  *
  * @template S the State type.
  */
-export type Patch<S> = FunctionPatch<S> | ObjectPatch<S> | Patch<S>[];
+export type Patch<S> = FunctionPatch<S> | AtLeastOne<ObjectPatch<S>> | Patch<S>[];
 
 /**
  * Function to update the state with a patch.
@@ -183,8 +197,8 @@ const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, pr
 
 const nestUpdate =
   <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
-  (patch) =>
-    parentUpdate(nestPatch(patch, prop));
+    (patch) =>
+      parentUpdate(nestPatch(patch, prop));
 
 const nestCell =
   <S, K extends Extract<keyof S, string>>(
@@ -192,19 +206,19 @@ const nestCell =
     parentUpdate: Update<S>,
     components: MeiosisComponent<S> | undefined
   ) =>
-  (prop: K): MeiosisCell<S[K]> => {
-    const getNestedState = () => getState()[prop];
-    const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
-    const nestedComponents = get(components, [prop, 'nested']);
+    (prop: K): MeiosisCell<S[K]> => {
+      const getNestedState = () => getState()[prop];
+      const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+      const nestedComponents = get(components, [prop, 'nested']);
 
-    return {
-      state: getNestedState(),
-      getState: getNestedState,
-      update: nestedUpdate,
-      nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
-      nested: nestedComponents
+      return {
+        state: getNestedState(),
+        getState: getNestedState,
+        update: nestedUpdate,
+        nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
+        nested: nestedComponents
+      };
     };
-  };
 
 /**
  * Combines an array of patches into a single patch.

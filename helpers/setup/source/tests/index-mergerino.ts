@@ -15,6 +15,11 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     interface State {
       ducks: number;
       sound: string;
+      event: {
+        target: {
+          value: string;
+        }
+      }
     }
 
     const cells = meiosisSetup<State>();
@@ -399,7 +404,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       counter: 0
     });
 
-    updateFormIntValue(cell, 'counter')({ target: { value: '1' }});
+    updateFormIntValue(cell, 'counter')({ target: { value: '1' } });
 
     expect(cells().state).toEqual({
       pet: {
@@ -739,5 +744,66 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       const cell = cells();
       cell.nested.pet.view(cell);
     });
+  });
+
+  test('mergerino patches - TypeScript', () => {
+    interface State {
+      sound: string;
+      ducks: number;
+      event: {
+        target: {
+          value: string;
+          source: string;
+        }
+      }
+    }
+
+    const cells = meiosisSetup<State>();
+    const cell = cells();
+
+    // top-level function patch
+    cell.update((state) => ({ ...state, sound: 'quack' }));
+
+    // top-level function patch
+    // cell.update((state) => ({ ...state, ducks: 'invalid' })); // should be invalid
+
+    // primitive property
+    cell.update({ sound: 'quack' });
+
+    // primitive property
+    // cell.update({ ducks: 'invalid' }); // should be invalid
+
+    // null property
+    cell.update({ ducks: null });
+
+    // undefined property
+    cell.update({ ducks: undefined });
+
+    // property with function
+    cell.update({ ducks: (x) => x * 2 });
+
+    // property with function
+    // cell.update({ ducks: (x) => `value is ${x}` }); // should be invalid
+
+    // nested property
+    cell.update({ event: { target: { value: 'test' } } });
+
+    // nested property
+    // cell.update({ event: { target: { value: 38 } } }); // should be invalid
+
+    // nested property with function
+    cell.update({ event: { target: { value: (x) => x.toUpperCase() } } });
+
+    // nested property with function
+    // cell.update({ event: { target: { value: (_x) => 42 } } }); // should be invalid
+
+    // nested property with null
+    cell.update({ event: { target: { value: null } } });
+
+    // nested property with undefined
+    cell.update({ event: { target: { value: undefined } } });
+
+    // array of patches
+    cell.update([{ sound: 'quack' }, { ducks: 5 }]);
   });
 });

@@ -6,9 +6,9 @@
  */
 export type MapFunction<T, R> = {
   /**
-   * @param {T} value the source value.
+   * @param value the source value.
    *
-   * @returns {R} the result of calling the map function on the source value.
+   * @returns the result of calling the map function on the source value.
    */
   (value: T): R;
 };
@@ -23,10 +23,10 @@ export type Stream<T> = {
    * Function to either send a value onto the stream -- by providing a value, `stream1(value)` -- or
    * to get the stream's latest value -- by calling the function with no arguments, `stream1()`.
    *
-   * @param {T} [value] the value to send onto the stream. If not provided, the function instead
+   * @param value the value to send onto the stream. If not provided, the function instead
    * returns the stream's latest value.
    *
-   * @returns {T} the stream's latest value.
+   * @returns the stream's latest value.
    */
   (value?: T): T;
 
@@ -38,7 +38,7 @@ export type Stream<T> = {
    *
    * @param fn the mapping function.
    *
-   * @returns {Stream<R>} a stream resulting from mapping the source stream.
+   * @returns a stream resulting from mapping the source stream.
    */
   map<R>(fn: MapFunction<T, R>): Stream<R>;
 
@@ -46,7 +46,7 @@ export type Stream<T> = {
    * Ends a stream, so that the streams that were created with `map` and/or `scan` no longer receive
    * values from this stream.
    *
-   * @param {boolean} [value] the value indicating to end the stream.
+   * @param value the value indicating to end the stream.
    */
   end(value?: boolean): void;
 
@@ -63,9 +63,9 @@ export type Stream<T> = {
  */
 export type StreamConstructor = {
   /**
-   * @param {T} [value] the stream's initial value.
+   * @param value the stream's initial value.
    *
-   * @returns {Stream<T>} the created stream.
+   * @returns the created stream.
    */
   <T>(value?: T): Stream<T>;
 };
@@ -78,10 +78,10 @@ export type StreamConstructor = {
  */
 export type Accumulator<R, T> = {
   /**
-   * @param {R} result the current accumulated result value.
-   * @param {T} next the next source value.
+   * @param result the current accumulated result value.
+   * @param next the next source value.
    *
-   * @returns {R} the accumulated result value.
+   * @returns the accumulated result value.
    */
   (result: R, next: T): R;
 };
@@ -94,11 +94,11 @@ export type Accumulator<R, T> = {
  */
 export type Scan = {
   /**
-   * @param {Accumulator<R, T>} acc the accumulator function.
-   * @param {R} init the returned stream's initial value.
-   * @param {Stream<T>} stream the source stream.
+   * @param acc the accumulator function.
+   * @param init the returned stream's initial value.
+   * @param stream the source stream.
    *
-   * @returns {Stream<R>} a stream resulting from scanning the source stream.
+   * @returns a stream resulting from scanning the source stream.
    */
   <T, R>(acc: Accumulator<R, T>, init: R, stream: Stream<T>): Stream<R>;
 };
@@ -130,9 +130,9 @@ export interface StreamLibWithFunction extends StreamScan {
   /**
    * The function to create a stream.
    *
-   * @param {T} [value] the initial value for the stream.
+   * @param value the initial value for the stream.
    *
-   * @returns {Stream<T>} the created stream.
+   * @returns the created stream.
    */
   <T>(value?: T): Stream<T>;
 }
@@ -146,9 +146,9 @@ export interface StreamLibWithProperty extends StreamScan {
   /**
    * The function to create a stream.
    *
-   * @param {T} [value] the initial value for the stream.
+   * @param value the initial value for the stream.
    *
-   * @returns {Stream<T>} the created stream.
+   * @returns the created stream.
    */
   stream<T>(value?: T): Stream<T>;
 }
