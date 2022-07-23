@@ -2,7 +2,6 @@
 
 import flyd from 'flyd';
 import Stream from 'mithril/stream';
-import merge from 'mergerino';
 import R from 'ramda';
 
 import meiosis from '../src/index';
@@ -16,8 +15,8 @@ const streamCases = [
 describe('meiosis setup with library for applying patches', () => {
   describe.each(streamCases)('%s', (_label, streamLib) => {
     const applyPatchCases = [
-      ['mergerino', (app) => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
-      ['functionPatches', (app) => meiosis.functionPatches.setup({ stream: streamLib, app })]
+      ['mergerino', (app) => meiosis.setup({ stream: streamLib, app })],
+      ['functionPatches', (app) => meiosis.setup({ stream: streamLib, app })]
     ];
 
     const createTestCases = (label, arr = [[], [], []]) => {
@@ -70,10 +69,10 @@ describe('meiosis setup with library for applying patches', () => {
       createTestCases('services run on initial state', [
         [{ count: (x) => x + 1, increment: 0 }],
         [
-          meiosis.functionPatches.combinePatches([
+          [
             R.over(R.lensProp('count'), R.add(1)),
             R.assoc('increment', 0)
-          ])
+          ]
         ]
       ])
     )('%s', (_label, setupFn, patch) => {
@@ -130,12 +129,12 @@ describe('meiosis setup with library for applying patches', () => {
 
     test.each(
       createTestCases('actions can use combine', [
-        [meiosis.mergerino.combinePatches([{ count: (x) => x + 1 }, { combined: true }])],
+        [[{ count: (x) => x + 1 }, { combined: true }]],
         [
-          meiosis.functionPatches.combinePatches([
+          [
             R.over(R.lensProp('count'), R.add(1)),
             R.assoc('combined', true)
-          ])
+          ]
         ]
       ])
     )('%s', (_label, setupFn, actionPatch) => {
@@ -177,15 +176,15 @@ describe('meiosis setup with library for applying patches', () => {
     test.each(
       createTestCases('service calls', [
         [
-          meiosis.mergerino.combinePatches([{ count: (x) => x + 1 }, { service1: true }]),
+          [{ count: (x) => x + 1 }, { service1: true }],
           { service2: true },
           { count: 1 }
         ],
         [
-          meiosis.functionPatches.combinePatches([
+          [
             R.over(R.lensProp('count'), R.add(1)),
             R.assoc('service1', true)
-          ]),
+          ],
           R.assoc('service2', true),
           R.assoc('count', 1)
         ]
@@ -411,11 +410,11 @@ describe('meiosis setup with library for applying patches', () => {
           R.assoc('nextRoute', 'PageB'),
           R.assoc('data', 'Loading'),
           (state) =>
-            meiosis.functionPatches.combinePatches([
+            [
               R.assoc('route', state.nextRoute),
               R.dissoc('nextRoute'),
               R.assoc('data', 'Loaded')
-            ])
+            ]
         ]
       ])
     )('%s', (_label, setupFn, updatePatch, servicePatch1, servicePatch2) => {
@@ -478,16 +477,16 @@ describe('meiosis setup with library for applying patches', () => {
         ],
         [
           R.assoc('nextRoute', 'PageB'),
-          meiosis.functionPatches.combinePatches([
+          [
             R.dissoc('nextRoute'),
             R.assoc('redirect', { route: 'PageC', message: 'Please login.' })
-          ]),
+          ],
           (state) =>
-            meiosis.functionPatches.combinePatches([
+            [
               R.assoc('route', state.redirect.route),
               R.assoc('message', state.redirect.message),
               R.dissoc('redirect')
-            ])
+            ]
         ]
       ])
     )('%s', (_label, setupFn, updatePatch, servicePatch1, servicePatch2) => {
@@ -606,15 +605,15 @@ describe('meiosis setup with library for applying patches', () => {
           R.assoc('nextRoute', 'PageB'),
           R.assoc('confirm', true),
           (state) =>
-            meiosis.functionPatches.combinePatches([
+            [
               R.assoc('route', state.nextRoute),
               R.dissoc('nextRoute')
-            ]),
-          meiosis.functionPatches.combinePatches([
+            ],
+          [
             R.assoc('confirm', false),
             R.assoc('nextRoute', 'PageB'),
             R.dissoc('form')
-          ])
+          ]
         ]
       ])
     )('%s', (_label, setupFn, updatePatch, servicePatch1, servicePatch2, confirmPatch) => {
@@ -711,18 +710,18 @@ describe('meiosis setup with library for applying patches', () => {
         ],
         [
           R.assocPath(['events', 'event1'], true),
-          meiosis.functionPatches.combinePatches([
+          [
             R.dissocPath(['events', 'event1']),
             R.assoc('triggers', { trigger1: true, trigger2: true })
-          ]),
-          meiosis.functionPatches.combinePatches([
+          ],
+          [
             R.dissocPath(['triggers', 'trigger1']),
             R.assoc('service1', true)
-          ]),
-          meiosis.functionPatches.combinePatches([
+          ],
+          [
             R.dissocPath(['triggers', 'trigger2']),
             R.assoc('service2', true)
-          ])
+          ]
         ]
       ])
     )('%s', (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
@@ -778,18 +777,18 @@ describe('meiosis setup with library for applying patches', () => {
         ],
         [
           R.assocPath(['events', 'event1'], true),
-          meiosis.functionPatches.combinePatches([
+          [
             R.dissocPath(['events', 'event1']),
             R.assoc('triggers', { trigger1: true, trigger2: true })
-          ]),
-          meiosis.functionPatches.combinePatches([
+          ],
+          [
             R.dissocPath(['triggers', 'trigger1']),
             R.assoc('service1', true)
-          ]),
-          meiosis.functionPatches.combinePatches([
+          ],
+          [
             R.dissocPath(['triggers', 'trigger2']),
             R.assoc('service2', true)
-          ])
+          ]
         ]
       ])
     )('%s', (_label, setupFn, updatePatch, appServicePatch, servicePatch1, servicePatch2) => {
@@ -860,8 +859,8 @@ describe('Meiosis cell', () => {
   const streamLib = meiosis.simpleStream;
 
   const applyPatchCases = [
-    ['mergerino', (app) => meiosis.mergerino.setup({ stream: streamLib, merge, app })],
-    ['functionPatches', (app) => meiosis.functionPatches.setup({ stream: streamLib, app })]
+    ['mergerino', (app) => meiosis.setup({ stream: streamLib, app })],
+    ['functionPatches', (app) => meiosis.setup({ stream: streamLib, app })]
   ];
 
   const createTestCases = (label, arr = [[], [], []]) => {
@@ -982,12 +981,12 @@ describe('Meiosis cell', () => {
         { active: false, loading: false }
       ],
       [
-        meiosis.functionPatches.combinePatches([
+        [
           R.assoc('active', true), R.assoc('loading', true)
-        ]),
-        meiosis.functionPatches.combinePatches([
+        ],
+        [
           R.assoc('active', false), R.assoc('loading', false)
-        ])
+        ]
       ]
     ])
   )('%s', (_label, setupFn, loadingPatch, unloadingPatch) => {

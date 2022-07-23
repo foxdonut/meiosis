@@ -3,12 +3,9 @@ import meiosisSetup, {
   MeiosisComponent,
   MeiosisViewComponent,
   Patch,
-  Service,
-  combinePatches,
-  updateFormFloatValue,
-  updateFormIntValue,
-  updateFormValue
-} from '../src/mergerino';
+  Service
+} from '../src/common';
+import { updateFormFloatValue, updateFormIntValue, updateFormValue } from '../src/util';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
   test('with no parameters', () => {
@@ -147,7 +144,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
     const servicePatches: Patch<State>[] = [
       { count: (x) => x + 1 },
       { increment: undefined },
-      combinePatches([{ invalid: undefined }, { combined: true }]),
+      [{ invalid: undefined }, { combined: true }],
       { sequence: false, sequenced: true },
       { received: true }
     ];

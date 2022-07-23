@@ -3,12 +3,9 @@ import meiosisSetup, {
   MeiosisComponent,
   MeiosisViewComponent,
   Patch,
-  Service,
-  combinePatches,
-  updateFormFloatValue,
-  updateFormIntValue,
-  updateFormValue
-} from '../src/functionPatches';
+  Service
+} from '../src/common';
+import { updateFormFloatValue, updateFormIntValue, updateFormValue } from '../src/util';
 import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
 describe('Meiosis with TypeScript - Function Patches', () => {
@@ -143,8 +140,8 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     const servicePatches: Patch<State>[] = [
       over(lensProp('count'), add(1)),
       dissoc('increment'),
-      combinePatches<State>([dissoc('invalid'), assoc('combined', true)]),
-      combinePatches<State>([assoc('sequence', false), assoc('sequenced', true)]),
+      [dissoc('invalid'), assoc('combined', true)],
+      [assoc('sequence', false), assoc('sequenced', true)],
       assoc('received', true)
     ];
 
@@ -257,7 +254,7 @@ describe('Meiosis with TypeScript - Function Patches', () => {
     cell.update(assoc('count', 1));
     expect(cells().state).toEqual({ count: 2, service: true });
 
-    cell.update(combinePatches([assoc('count', 3), assoc('service', false)]));
+    cell.update([assoc('count', 3), assoc('service', false)]);
     expect(cells().state).toEqual({ count: 3, service: false });
   });
 
@@ -487,15 +484,11 @@ describe('Meiosis with TypeScript - Function Patches', () => {
 
     const cells = meiosisSetup<AppState>({ app: { initial: { active: false, loading: false } } });
 
-    cells().update(combinePatches([
-      assoc('active', true), assoc('loading', true)
-    ]));
+    cells().update([assoc('active', true), assoc('loading', true)]);
 
     dataActions.loadData(cells());
 
-    cells().update(combinePatches([
-      assoc('active', false), assoc('loading', false)
-    ]));
+    cells().update([assoc('active', false), assoc('loading', false)]);
   });
 
   test('getState nested', () => {

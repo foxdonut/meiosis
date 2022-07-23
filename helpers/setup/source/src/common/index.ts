@@ -1,114 +1,193 @@
-import simpleStream, {
-  Accumulator,
-  ExternalStreamLib,
-  Stream,
-  createDropRepeats
-} from '../simple-stream';
-import { assoc, concatIfPresent } from '../util';
-
-interface CommonMeiosisSetup<S, P> {
-  states: Stream<S>;
-  update: Stream<P>;
-  view: any;
-}
+import simpleStream, { ExternalStreamLib, Stream, createDropRepeats } from '../simple-stream';
+import { assoc, concatIfPresent, get } from '../util';
+import merge from 'mergerino';
 
 /**
- * Internal use only.
+ * A Mergerino function patch. This is a function that receives the current state and returns the
+ * updated state.
+ *
+ * Example:
+ *
+ * ```typescript
+ * update(state => ({ ...state, { count: 42 }}));
+ * ```
+ *
+ * @template S the State type.
  */
-export interface CommonService<S> {
-  onchange?: (state: S) => any;
-  run: (cell: any) => any;
-}
+export type FunctionPatch<S> = (state: S) => S;
 
 /**
- * Internal use only.
+ * A Mergerino object patch. This is an object that contains updates to state properties.
+ *
+ * Example:
+ *
+ * ```typescript
+ * update({ count: 42 });
+ * ```
+ *
+ * @template S the State type.
  */
-export interface CommonMeiosisComponent<S> {
-  initial?: Partial<S>;
-  services?: CommonService<S>[];
-  nested?: CommonNestedComponents<S>;
-  view?: (cell: any, ...args: any[]) => any;
-}
+export type ObjectPatch<S> = {
+  [K in Extract<keyof S, string>]?:
+  | S[K]
+  | Patch<S[K]>
+  | ((a: S[K]) => S[K] | null | undefined)
+  | null
+  | undefined;
+};
+
+// Credit: https://stackoverflow.com/questions/48230773
+//   /how-to-create-a-partial-like-that-requires-a-single-property-to-be-set/48244432#48244432
+type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+
+// For reference:
+// https://docs.microsoft.com/en-us/javascript/api/@azure/keyvault-certificates
+//   /requireatleastone?view=azure-node-latest
+/*
+type RequireAtLeastOne<T> = {
+  [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>;
+}[keyof T]
+*/
 
 /**
- * Internal use only.
+ * A Mergerino patch.
+ *
+ * Examples:
+ *
+ * ```typescript
+ * update({ count: 42 });
+ * update({ count: x => x + 1 });
+ * ```
+ *
+ * @template S the State type.
  */
-export type CommonNestedComponents<S> = {
-  [K in keyof S]?: CommonMeiosisComponent<S[K]>;
+export type Patch<S> = FunctionPatch<S> | AtLeastOne<ObjectPatch<S>> | Patch<S>[];
+
+/**
+ * Function to update the state with a patch.
+ *
+ * @template S the State type.
+ */
+export type Update<S> = {
+  (patch: Patch<S>): any;
 };
 
 /**
- * Internal use only.
+ * View function.
+ *
+ * @template S the State type.
  */
-interface CommonMeiosisConfig<S> {
-  stream?: ExternalStreamLib;
-  app?: CommonMeiosisComponent<S>;
-}
+export type View<S> = {
+  (cell: MeiosisCell<S>, ...args: any[]): any;
+};
 
-interface MeiosisConfig<S, P> extends CommonMeiosisConfig<S> {
+/**
+ * View component.
+ *
+ * @template S the State type.
+ */
+export type ViewComponent<S> = {
+  view: View<S>;
+};
+
+/**
+ * Nested views.
+ *
+ * @template S the State type.
+ */
+export type NestedViews<S> = {
+  [K in keyof S]: ViewComponent<S>;
+};
+
+/**
+ * A service gets called when the state changes and when the value returned by the `onchange`
+ * function has changed.
+ *
+ * @template S the State type.
+ */
+export type Service<S> = {
   /**
-   * The accumulator function.
+   * Function that gets called when the state changes. This function should return a value from the
+   * state. Only when that value changes will the service's `run` function be called.
    */
-  accumulator: Accumulator<S, P>;
-}
+  onchange?: (state: S) => any;
 
-/**
- * Represents a DOM event.
- */
-export interface DomEvent {
-  target: {
-    value: string;
-  };
-}
-
-// helpers to update values from input
-
-export type Updatable = {
-  update: (value: any) => any;
+  /**
+   * Function that gets called when the value returned by the `onchange` function has changed.
+   * The function should call `cell.update(...)` to update the state.
+   */
+  run: (cell: MeiosisCell<S>) => any;
 };
 
 /**
- * Internal use only.
+ * A Meiosis component has (all of which are optional) initial state, services, and nested
+ * components.
+ *
+ * @template S the State type.
  */
-export type PathUpdateFn = (path: string[], value: string | number) => any;
+export type MeiosisComponent<S> = {
+  /** Initial state. */
+  initial?: Partial<S>;
 
-type ParseFn = (value: string) => number;
+  /** An array of service functions. */
+  services?: Service<S>[];
 
-const toPath = (pathOrProp: string[] | string): string[] =>
-  Array.isArray(pathOrProp) ? pathOrProp : [pathOrProp];
+  /** Nested components. */
+  nested?: NestedComponents<S>;
 
-const updateParseValue =
-  (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
-    (evt: DomEvent) => {
-      const value = parseFn(evt.target.value);
-      if (!isNaN(value)) {
-        cell.update(intoPath(toPath(path), value));
-      }
-    };
+  /** Component view. */
+  view?: (cell: MeiosisCell<S>, ...args: any[]) => any;
+};
 
 /**
- * Internal use only.
+ * A Meiosis component with a view, and (optional) initial state, services, and nested components.
+ *
+ * @template S the State type.
  */
-export const updateStringValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string, fn: (value: string) => any) =>
-    (evt: DomEvent) =>
-      cell.update(intoPath(toPath(path), fn(evt.target.value)));
+export type MeiosisViewComponent<S> = MeiosisComponent<S> & ViewComponent<S>;
 
 /**
- * Internal use only.
+ * Nested components match properties of the state.
+ *
+ * @template S the State type.
  */
-export const updateIntValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
-    updateParseValue(intoPath, parseInt, cell, path)(evt);
+export type NestedComponents<S> = {
+  [K in keyof S]?: MeiosisComponent<S[K]>;
+};
 
 /**
- * Internal use only.
+ * Meiosis cell contains everything needed to access and update state.
+ *
+ * @template S the State type.
  */
-export const updateFloatValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
-    updateParseValue(intoPath, parseFloat, cell, path)(evt);
+export type MeiosisCell<S> = {
+  /** The current state. */
+  state: S;
 
-const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
+  /** Returns the current state. Useful in code where state may have changed elsewhere. */
+  getState: () => S;
+
+  /** Function to update the state. */
+  update: Update<S>;
+
+  /** Produces a nested cell. */
+  nest: <K extends Extract<keyof S, string>>(prop: K) => MeiosisCell<S[K]>;
+
+  /** Contains nested view components. */
+  nested: NestedViews<S>;
+};
+
+/**
+ * Meiosis Config.
+ *
+ * @template S the State type.
+ */
+export type MeiosisConfig<S> = {
+  stream?: ExternalStreamLib;
+  app?: MeiosisComponent<S>;
+};
+
+const assembleInitialState = <S>(nestedComponents: NestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce(
       (result, key) =>
@@ -125,13 +204,13 @@ const assembleInitialState = <S>(nestedComponents: CommonNestedComponents<S> | u
     )
     : {};
 
-const getInitialState = <S>(app: CommonMeiosisComponent<S>): S =>
+const getInitialState = <S>(app: MeiosisComponent<S>): S =>
   Object.assign({}, app.initial, assembleInitialState(app.nested));
 
-const assembleView = <S>(nestedComponents: CommonNestedComponents<S> | undefined): any =>
+const assembleView = <S>(nestedComponents: NestedComponents<S> | undefined): any =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce((result, key) => {
-      const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
+      const nestedApp: MeiosisComponent<any> = nestedComponents[key];
 
       if (nestedApp.view !== undefined) {
         const view = nestedApp.view;
@@ -149,63 +228,50 @@ const assembleView = <S>(nestedComponents: CommonNestedComponents<S> | undefined
     }, {})
     : {};
 
-const getView = <S>(app: CommonMeiosisComponent<S>): CommonMeiosisComponent<S> =>
+const getView = <S>(app: MeiosisComponent<S>): NestedViews<S> =>
   assembleView(app.nested);
 
 const assembleServices = <S>(
-  nestedComponents: CommonNestedComponents<S> | undefined,
+  nestedComponents: NestedComponents<S> | undefined,
   getCell = (cell) => cell,
   getState = (state) => state
-): CommonService<S>[] =>
+): Service<S>[] =>
   nestedComponents
     ? Object.keys(nestedComponents).reduce((result, key) => {
       const nextGetCell = (cell) => getCell(cell).nest(key);
       const nextGetState = (state) => getState(state)[key];
 
-      const nestedApp: CommonMeiosisComponent<any> = nestedComponents[key];
+      const nestedApp: MeiosisComponent<any> = nestedComponents[key];
 
       return concatIfPresent(
         result,
-        nestedApp.services?.map<CommonService<any>>((service) => ({
+        nestedApp.services?.map<Service<any>>((service) => ({
           onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
           run: (cell) => service.run(nextGetCell(cell))
         }))
       ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
-    }, [] as CommonService<S>[])
+    }, [] as Service<S>[])
     : [];
 
-/**
- * Internal use only.
- */
-export const commonGetServices = <S>(app: CommonMeiosisComponent<S>): CommonService<S>[] =>
-  concatIfPresent([] as CommonService<S>[], app.services).concat(assembleServices(app.nested));
+const getServices = <S>(app: MeiosisComponent<S>): Service<S>[] =>
+  concatIfPresent([] as Service<S>[], app.services).concat(assembleServices(app.nested));
 
-const setup = <S, P>({
-  stream,
-  accumulator,
-  app
-}: MeiosisConfig<S, P>): CommonMeiosisSetup<S, P> => {
+const baseSetup = <S>({ stream, app }: MeiosisConfig<S>) => {
   if (!stream) {
     stream = simpleStream;
-  }
-  if (!accumulator) {
-    throw new Error('No accumulator function was specified.');
   }
 
   const safeApp = app || {};
   const initial = getInitialState(safeApp);
   const view = getView(safeApp);
 
-  // falsy patches are ignored
-  const accumulatorFn = (state: S, patch: P) => (patch ? accumulator(state, patch) : state);
-
   const createStream = typeof stream === 'function' ? stream : stream.stream;
   const scan = stream.scan;
 
-  const update: Stream<P> = createStream();
+  const update: Stream<Patch<S>> = createStream();
 
   const states: Stream<S> = scan(
-    (state: S, patch: P) => accumulatorFn(state, patch),
+    (state: S, patch: Patch<S>) => merge(state, patch),
     initial,
     update
   );
@@ -217,45 +283,66 @@ const setup = <S, P>({
   };
 };
 
-/**
- * Internal use only.
- */
-export interface NestSetup<S, P> {
-  accumulator: Accumulator<S, P>;
-  getServices: any;
-  nestCell: any;
-  stream?: ExternalStreamLib;
-  app: any;
-}
+const nestPatch = <S, K extends Extract<keyof S, string>>(patch: Patch<S[K]>, prop: K): Patch<S> =>
+  ({ [prop]: patch } as Patch<S>);
+
+const nestUpdate =
+  <S, K extends Extract<keyof S, string>>(parentUpdate: Update<S>, prop: K): Update<S[K]> =>
+    (patch) =>
+      parentUpdate(nestPatch(patch, prop));
+
+const nestCell =
+  <S>(
+    getState: () => S,
+    parentUpdate: Update<S>,
+    components: MeiosisComponent<S> | undefined
+  ) =>
+    <K extends Extract<keyof S, string>>(prop: K): MeiosisCell<S[K]> => {
+      const getNestedState = () => getState()[prop];
+      const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
+      const nestedComponents = get(components, [prop, 'nested']);
+
+      return {
+        state: getNestedState(),
+        getState: getNestedState,
+        update: nestedUpdate,
+        nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
+        nested: nestedComponents
+      };
+    };
 
 /**
- * Internal use only.
+ * Helper to setup the Meiosis pattern with [Mergerino](https://github.com/fuzetsu/mergerino).
+ *
+ * @template S the State type.
+ *
+ * @param config the Meiosis config for use with Mergerino
+ *
+ * @returns a stream of Meiosis cells.
  */
-export const nestSetup = <S, P, F extends NestSetup<S, P>, T extends CommonService<S>, C>({
-  accumulator,
-  getServices,
-  nestCell,
-  stream = simpleStream,
-  app = {}
-}: F): Stream<C> => {
-  const { states, update, view } = setup<S, P>({
+export const setup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S>> => {
+  const stream = config?.stream;
+  const app = config?.app;
+
+  const { states, update, view } = baseSetup<S>({
     stream,
-    accumulator,
     app
   });
 
   const nest = nestCell(states, update, view);
   const getState = () => states();
-  const getCell = (state: S) => ({ state, getState, update, nest, nested: view });
+  const getCell = (state: S): MeiosisCell<S> => ({ state, getState, update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
   if (app) {
-    getServices(app).forEach((service: T) => {
+    getServices(app).forEach((service) => {
       dropRepeats(states, service.onchange).map((state) => service.run(getCell(state)));
     });
   }
 
-  const cells: Stream<any> = dropRepeats(states).map(getCell);
+  const cells: Stream<MeiosisCell<S>> = dropRepeats(states).map(getCell);
 
   return cells;
 };
+
+export default setup;
