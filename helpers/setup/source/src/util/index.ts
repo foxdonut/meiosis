@@ -9,7 +9,7 @@ import { MeiosisCell } from '../common';
  *
  * @returns the property value, or `undefined` if any property along the path is `undefined`.
  */
-export const get = (object: Record<string, any> | undefined, path: string[]): any =>
+export const get = (object: Record<string, any> | null | undefined, path: string[]): any =>
   path.reduce((obj, key) => (obj == undefined ? undefined : obj[key]), object);
 
 /**
@@ -53,40 +53,23 @@ type Updatable = {
   update: (value: any) => any;
 };
 
-type PathUpdateFn = (path: string[], value: string | number) => any;
-
 type ParseFn = (value: string) => number;
+
+const intoPath = (path: string[], value: string | number): any => ({
+  [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
+});
 
 const toPath = (pathOrProp: string[] | string): string[] =>
   Array.isArray(pathOrProp) ? pathOrProp : [pathOrProp];
 
 const updateParseValue =
-  (intoPath: PathUpdateFn, parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
+  (parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
     (evt: DomEvent) => {
       const value = parseFn(evt.target.value);
       if (!isNaN(value)) {
         cell.update(intoPath(toPath(path), value));
       }
     };
-
-const updateStringValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string, fn: (value: string) => any) =>
-    (evt: DomEvent) =>
-      cell.update(intoPath(toPath(path), fn(evt.target.value)));
-
-const updateIntValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
-    updateParseValue(intoPath, parseInt, cell, path)(evt);
-
-const updateFloatValueIntoPath =
-  (intoPath: PathUpdateFn, cell: Updatable, path: string[] | string) => (evt: DomEvent) =>
-    updateParseValue(intoPath, parseFloat, cell, path)(evt);
-
-// helpers to update values from input
-
-const intoPath = (path: string[], value: string | number): any => ({
-  [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
-});
 
 /**
  * Convenience function to update a form value. Pass the Meiosis cell and the state property (such
@@ -112,8 +95,7 @@ export const updateFormValue = (
   cell: MeiosisCell<any>,
   path: string[] | string,
   fn: (value: string) => any = (value) => value
-) => updateStringValueIntoPath(intoPath, cell, path, fn);
-
+) => (evt: DomEvent) => cell.update(intoPath(toPath(path), fn(evt.target.value)));
 /**
  * Convenience function to update a form value with an Integer value. If the user input does not
  * return a number with `parseInt`, no state change occurs. Pass the Meiosis cell and the state
@@ -135,7 +117,7 @@ export const updateFormValue = (
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
 export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  updateIntValueIntoPath(intoPath, cell, path);
+  (evt: DomEvent) => updateParseValue(parseInt, cell, path)(evt);
 
 /**
  * Convenience function to update a form value with a Float value. If the user input does not return
@@ -158,4 +140,4 @@ export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | stri
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
 export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  updateFloatValueIntoPath(intoPath, cell, path);
+  (evt: DomEvent) => updateParseValue(parseFloat, cell, path)(evt);

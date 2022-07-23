@@ -1,0 +1,218 @@
+/* eslint-env jest */
+
+import meiosis from '../src';
+import { MeiosisComponent } from '../src/common';
+import { updateFormFloatValue, updateFormIntValue, updateFormValue } from '../src/util';
+
+describe('util', () => {
+  test('get', () => {
+    expect(meiosis.util.get(null, ['a', 'b'])).toBeUndefined();
+    expect(meiosis.util.get(undefined, ['a', 'b'])).toBeUndefined();
+    expect(meiosis.util.get({}, ['a', 'b'])).toBeUndefined();
+    expect(meiosis.util.get({ a: 42 }, ['a', 'b'])).toBeUndefined();
+    expect(meiosis.util.get({ a: { b: 42 } }, ['a', 'b'])).toEqual(42);
+  });
+
+  test('updateFormValue', () => {
+    interface Environment {
+      material: string;
+    }
+
+    interface Duck {
+      color: string;
+      env: Environment;
+    }
+
+    interface AppState {
+      pet: Duck;
+      name: string;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          color: 'yellow',
+          env: {
+            material: 'straw'
+          }
+        },
+        name: 'Red'
+      }
+    };
+
+    const cells = meiosis.setup<AppState>({ app });
+
+    const newMaterial = 'wood';
+    const cell = cells();
+    const evt = { target: { value: newMaterial } };
+    updateFormValue(cell, ['pet', 'env', 'material'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: newMaterial
+        }
+      },
+      name: 'Red'
+    });
+
+    const newName = 'Black';
+    updateFormValue(cell, 'name')({ target: { value: newName } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: newMaterial
+        }
+      },
+      name: newName
+    });
+  });
+
+  test('updateFormValue with function', () => {
+    interface Environment {
+      material: string;
+    }
+
+    interface Duck {
+      color: string;
+      env: Environment;
+    }
+
+    interface AppState {
+      pet: Duck;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          color: 'yellow',
+          env: {
+            material: 'straw'
+          }
+        }
+      }
+    };
+
+    const cells = meiosis.setup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: 'wood' } };
+    updateFormValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        color: 'yellow',
+        env: {
+          material: 'WOOD'
+        }
+      }
+    });
+  });
+
+  test('updateFormIntValue', () => {
+    interface House {
+      size: number;
+    }
+
+    interface Duck {
+      house: House;
+    }
+
+    interface AppState {
+      pet: Duck;
+      counter: number;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          house: {
+            size: 5
+          }
+        },
+        counter: 0
+      }
+    };
+
+    const cells = meiosis.setup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: '10' } };
+    updateFormIntValue(cell, ['pet', 'house', 'size'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10
+        }
+      },
+      counter: 0
+    });
+
+    updateFormIntValue(cell, 'counter')({ target: { value: '1' } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10
+        }
+      },
+      counter: 1
+    });
+  });
+
+  test('updateFormFloatValue', () => {
+    interface House {
+      size: number;
+    }
+
+    interface Duck {
+      house: House;
+    }
+
+    interface AppState {
+      pet: Duck;
+      pH: number;
+    }
+
+    const app: MeiosisComponent<AppState> = {
+      initial: {
+        pet: {
+          house: {
+            size: 5
+          }
+        },
+        pH: 6.9
+      }
+    };
+
+    const cells = meiosis.setup<AppState>({ app });
+
+    const cell = cells();
+    const evt = { target: { value: '10.5' } };
+    updateFormFloatValue(cell, ['pet', 'house', 'size'])(evt);
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10.5
+        }
+      },
+      pH: 6.9
+    });
+
+    updateFormFloatValue(cell, 'pH')({ target: { value: '7.01' } });
+
+    expect(cells().state).toEqual({
+      pet: {
+        house: {
+          size: 10.5
+        }
+      },
+      pH: 7.01
+    });
+  });
+});
