@@ -2,7 +2,7 @@
 
 import merge from 'mergerino';
 
-import meiosis from '../src/index';
+import meiosis from '../src/meiosis';
 
 describe('simpleStream', () => {
   test('basic', () => {

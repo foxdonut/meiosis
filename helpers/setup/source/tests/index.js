@@ -4,7 +4,7 @@ import flyd from 'flyd';
 import Stream from 'mithril/stream';
 import R from 'ramda';
 
-import meiosis from '../src/index';
+import meiosis from '../src/meiosis';
 
 const streamCases = [
   ['Meiosis simple-stream', meiosis.simpleStream],

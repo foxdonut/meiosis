@@ -1,4 +1,4 @@
-import { MeiosisCell } from '../common';
+import { MeiosisCell } from '../types';
 
 /**
  * Safely gets a property path from an object. The path is an array. If any property along the path

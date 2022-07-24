@@ -1,10 +1,11 @@
-import meiosisSetup, {
+import { meiosisSetup } from '../src';
+import {
   MeiosisCell,
   MeiosisComponent,
   MeiosisViewComponent,
   Patch,
   Service
-} from '../src/common';
+} from '../src/types';
 import { add, assoc, dissoc, lensProp, over } from 'ramda';
 
 describe('Meiosis with TypeScript - Function Patches', () => {

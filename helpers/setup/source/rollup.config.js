@@ -1,12 +1,12 @@
-import commonjs from "@rollup/plugin-commonjs";
-import resolve from "@rollup/plugin-node-resolve";
-import babel from "@rollup/plugin-babel";
-import { terser } from "rollup-plugin-terser";
+import commonjs from '@rollup/plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+import { terser } from 'rollup-plugin-terser';
 
-const name = "Meiosis";
-const input = "./src/index.ts";
-const extensions = [".js", ".ts"];
-const babelHelpers = "bundled";
+const name = 'Meiosis';
+const input = './src/meiosis.ts';
+const extensions = ['.js', '.ts'];
+const babelHelpers = 'bundled';
 
 const plugins = [
   resolve({ extensions }),
@@ -14,13 +14,13 @@ const plugins = [
   babel({
     babelHelpers,
     extensions,
-    include: ["src/**"]
+    include: ['src/**']
   })
 ];
 
 const output = {
   name,
-  format: "umd"
+  format: 'umd'
 };
 
 export default [
@@ -29,7 +29,7 @@ export default [
     plugins,
     output: Object.assign(
       {
-        file: "dist/meiosis-setup.js"
+        file: 'dist/meiosis-setup.js'
       },
       output
     )
@@ -39,7 +39,7 @@ export default [
     plugins: plugins.concat(terser()),
     output: Object.assign(
       {
-        file: "dist/meiosis-setup.min.js"
+        file: 'dist/meiosis-setup.min.js'
       },
       output
     )

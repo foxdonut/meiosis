@@ -233,12 +233,10 @@ export const scan: Scan = (accumulator, initial, sourceStream) => {
   return newStream;
 };
 
-const simpleStream: StreamLibWithProperty = {
+export const simpleStream: StreamLibWithProperty = {
   stream,
   scan
 };
-
-export default simpleStream;
 
 /**
  * Credit: James Forbes (https://james-forbes.com/)

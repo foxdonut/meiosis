@@ -1,16 +1,17 @@
 /* eslint-env jest */
 
-import meiosis from '../src';
-import { MeiosisComponent } from '../src/common';
+import { meiosisSetup } from '../src';
+import { MeiosisComponent } from '../src/types';
+import { get } from '../src/util';
 import { updateFormFloatValue, updateFormIntValue, updateFormValue } from '../src/util';
 
 describe('util', () => {
   test('get', () => {
-    expect(meiosis.util.get(null, ['a', 'b'])).toBeUndefined();
-    expect(meiosis.util.get(undefined, ['a', 'b'])).toBeUndefined();
-    expect(meiosis.util.get({}, ['a', 'b'])).toBeUndefined();
-    expect(meiosis.util.get({ a: 42 }, ['a', 'b'])).toBeUndefined();
-    expect(meiosis.util.get({ a: { b: 42 } }, ['a', 'b'])).toEqual(42);
+    expect(get(null, ['a', 'b'])).toBeUndefined();
+    expect(get(undefined, ['a', 'b'])).toBeUndefined();
+    expect(get({}, ['a', 'b'])).toBeUndefined();
+    expect(get({ a: 42 }, ['a', 'b'])).toBeUndefined();
+    expect(get({ a: { b: 42 } }, ['a', 'b'])).toEqual(42);
   });
 
   test('updateFormValue', () => {
@@ -40,7 +41,7 @@ describe('util', () => {
       }
     };
 
-    const cells = meiosis.setup<AppState>({ app });
+    const cells = meiosisSetup<AppState>({ app });
 
     const newMaterial = 'wood';
     const cell = cells();
@@ -96,7 +97,7 @@ describe('util', () => {
       }
     };
 
-    const cells = meiosis.setup<AppState>({ app });
+    const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
     const evt = { target: { value: 'wood' } };
@@ -137,7 +138,7 @@ describe('util', () => {
       }
     };
 
-    const cells = meiosis.setup<AppState>({ app });
+    const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
     const evt = { target: { value: '10' } };
@@ -189,7 +190,7 @@ describe('util', () => {
       }
     };
 
-    const cells = meiosis.setup<AppState>({ app });
+    const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
     const evt = { target: { value: '10.5' } };

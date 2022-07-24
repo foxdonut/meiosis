@@ -1,10 +1,11 @@
-import meiosisSetup, {
+import { meiosisSetup } from '../src';
+import {
   MeiosisCell,
   MeiosisComponent,
   MeiosisViewComponent,
   Patch,
   Service
-} from '../src/common';
+} from '../src/types';
 
 describe('Meiosis with TypeScript - Mergerino', () => {
   test('with no parameters', () => {
