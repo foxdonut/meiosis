@@ -22,16 +22,10 @@ Install `meiosis-setup` with `npm`:
 npm i meiosis-setup
 ```
 
-Then you can import it using:
+Then you can import it and use it with this code:
 
 ```js
-import meiosisSetup from 'meiosis-setup/functionPatches';
-
-// or
-
-import meiosisSetup from 'meiosis-setup/mergerino';
-
-// then
+import { meiosisSetup } from 'meiosis-setup';
 
 const cells = meiosisSetup();
 ```
@@ -47,11 +41,7 @@ Load `meiosis-setup` by adding a `<script>` tag to your HTML page:
 Then use the `Meiosis` global variable:
 
 ```js
-const cells = Meiosis.functionPatches.setup();
-
-// or
-
-const cells = Meiosis.mergerino.setup();
+const cells = Meiosis.setup();
 ```
 
 | | |

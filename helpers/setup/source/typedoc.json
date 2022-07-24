@@ -1,9 +1,8 @@
 {
   "entryPoints": [
     "./src/index.ts",
-    "./src/common/index.ts",
-    "./src/functionPatches/index.ts",
-    "./src/mergerino/index.ts",
+    "./src/setup.ts",
+    "./src/types.ts",
     "./src/simple-stream/index.ts",
     "./src/util/index.ts"
   ],

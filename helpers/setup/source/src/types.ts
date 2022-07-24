@@ -34,9 +34,13 @@ export type ObjectPatch<S> = {
   | undefined;
 };
 
-// Credit: https://stackoverflow.com/questions/48230773
-//   /how-to-create-a-partial-like-that-requires-a-single-property-to-be-set/48244432#48244432
-type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+/**
+ * Requires at least one property to be defined.
+ *
+ * Credit: https://stackoverflow.com/questions/48230773
+ *   /how-to-create-a-partial-like-that-requires-a-single-property-to-be-set/48244432#48244432
+ */
+export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 
 // For reference:
 // https://docs.microsoft.com/en-us/javascript/api/@azure/keyvault-certificates
