@@ -28,6 +28,7 @@
   "dependencies": {
     "flyd": "^0.2.8",
     "lodash": "^4.17.21",
+    "meiosis-setup": "../source/dist",
     "mergerino": "^0.4.0",
     "mithril": "^2.2.2",
     "preact": "^10.8.2",

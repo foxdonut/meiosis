@@ -1,6 +1,6 @@
 // @ts-check
-// react + mergerino + flyd
-import { setup } from '../../../source/dist/mergerino';
+// react + flyd
+import { meiosisSetup } from 'meiosis-setup';
 import flyd from 'flyd';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -29,7 +29,7 @@ const app = {
 };
 
 export const setupReactExample = () => {
-  const cells = setup({ stream: flyd, app });
+  const cells = meiosisSetup({ stream: flyd, app });
   const element = document.getElementById('jsReactApp');
   if (element) {
     const root = createRoot(element);

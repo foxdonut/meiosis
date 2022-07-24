@@ -1,5 +1,6 @@
 // mithril + mergerino + mithril-stream
-import { MeiosisViewComponent, Service, setup } from '../../../source/dist/mergerino';
+import { meiosisSetup } from 'meiosis-setup';
+import { MeiosisViewComponent, Service } from 'meiosis-setup/types';
 import m from 'mithril';
 import Stream from 'mithril/stream';
 import { DomEvent, Page, State } from './types';
@@ -87,7 +88,7 @@ const app: MeiosisViewComponent<State> = {
 };
 
 export const setupMithrilExample = (): void => {
-  const cells = setup<State>({ stream: Stream, app });
+  const cells = meiosisSetup<State>({ stream: Stream, app });
 
   m.mount(document.getElementById('tsMithrilApp') as HTMLElement, {
     view: () => app.view(cells())

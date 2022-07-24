@@ -1,6 +1,6 @@
 // @ts-check
-// preact + functionPatches + simple-stream
-import { setup } from '../../../source/dist/functionPatches';
+// preact + simple-stream
+import { meiosisSetup } from 'meiosis-setup';
 import { h, render as preactRender } from 'preact';
 import _ from 'lodash/fp';
 
@@ -36,7 +36,7 @@ const app = {
 };
 
 export const setupPreactExample = () => {
-  const cells = setup({ app });
+  const cells = meiosisSetup({ app });
   const element = document.getElementById('jsPreactApp');
   if (element) {
     cells.map((cell) => {

@@ -1,6 +1,6 @@
 // @ts-check
-// mithril + mergerino + mithril-stream
-import { setup } from '../../../source/dist/mergerino';
+// mithril + mithril-stream
+import { meiosisSetup } from 'meiosis-setup';
 import m from 'mithril';
 import Stream from 'mithril/stream';
 
@@ -29,7 +29,7 @@ const app = {
 };
 
 export const setupMithrilExample = () => {
-  const cells = setup({ stream: Stream, app });
+  const cells = meiosisSetup({ stream: Stream, app });
   const element = document.getElementById('jsMithrilApp');
   if (element) {
     m.mount(element, {

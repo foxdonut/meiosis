@@ -1,4 +1,4 @@
-import { MeiosisViewComponent } from '../../../source/dist/mergerino';
+import { MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
 import { Page } from './types';
 

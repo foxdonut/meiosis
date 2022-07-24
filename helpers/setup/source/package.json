@@ -3,7 +3,7 @@
   "version": "6.0.0-beta.22",
   "private": true,
   "description": "Meiosis Helpers - setup",
-  "main": "meiosis-setup.js",
+  "main": "index.js",
   "scripts": {
     "start": "tsc -p tsconfig-build.json && rollup -c && cp ../README.md dist/ && cat package.json|grep -v private>dist/package.json",
     "watch": "rollup -c -w",

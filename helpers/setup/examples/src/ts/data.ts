@@ -1,4 +1,4 @@
-import { MeiosisCell, MeiosisViewComponent } from '../../../source/dist/mergerino';
+import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
 import { Data } from './types';
 
