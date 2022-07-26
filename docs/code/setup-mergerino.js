@@ -1,5 +1,5 @@
 /* global Meiosis */
-const meiosisSetup = Meiosis.mergerino.setup;
+const meiosisSetup = Meiosis.setup;
 
 const cells = meiosisSetup();
 console.log(cells().state);

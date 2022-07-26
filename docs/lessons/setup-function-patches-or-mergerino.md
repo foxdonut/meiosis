@@ -1,14 +1,14 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Installation](setup-installation.html) | [&rarr; Initial State](setup-initial-state.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-installation.html:Installation
+@nav-setup-toc
+@nav-next:setup-initial-state.html:Initial State
+@docs-nav-end
 
 ## Function Patches or Mergerino
 
-### Setup with Function Patches
-
-To set up Meiosis with function patches (explained in the Meiosis Documentation:
+In the Meiosis Documentation:
 [reference](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html)), use the following
 code:
 
@@ -41,9 +41,11 @@ For example:
 
 @flems {"files":"code/setup-mergerino.js","libs":"meiosis-setup"}
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Installation](setup-installation.html) | [&rarr; Initial State](setup-initial-state.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-installation.html:Installation
+@nav-setup-toc
+@nav-next:setup-initial-state.html:Initial State
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

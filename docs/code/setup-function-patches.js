@@ -1,5 +1,5 @@
 /* global Meiosis */
-const meiosisSetup = Meiosis.functionPatches.setup;
+const meiosisSetup = Meiosis.setup;
 
 const cells = meiosisSetup();
 console.log(cells().state);

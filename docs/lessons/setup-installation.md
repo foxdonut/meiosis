@@ -35,7 +35,13 @@ const cells = meiosisSetup();
 Load `meiosis-setup` by adding a `<script>` tag to your HTML page:
 
 ```html
-<script src="http://unpkg.com/meiosis-setup"></script>
+<script src="https://unpkg.com/meiosis-setup/meiosis-setup.js"></script>
+```
+
+Or load the minimized version:
+
+```html
+<script src="https://unpkg.com/meiosis-setup/meiosis-setup.min.js"></script>
 ```
 
 Then use the `Meiosis` global variable:

@@ -26,7 +26,7 @@ const service = {
   onchange: (state) => state.x,
   // run is called only when x changes, thus avoiding infinite loops
   run: (cell) => {
-    cell.update({ y: x * 10 });
+    cell.update({ y: cell.state.x * 10 });
   }
 };
 ```

@@ -6,7 +6,7 @@ const toDir = process.argv[3];
 const libMap = {
   flyd: 'https://unpkg.com/flyd@0.2.8/flyd.js',
   'lodash-fp': 'https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)',
-  'meiosis-setup': 'https://unpkg.com/meiosis-setup',
+  'meiosis-setup': 'https://unpkg.com/meiosis-setup/meiosis-setup.js',
   mergerino: 'https://unpkg.com/mergerino@0.4.0',
   mithril: 'https://unpkg.com/mithril@2.0.4',
   'mithril-stream': 'https://unpkg.com/mithril@2.0.4/stream/stream.js',
@@ -26,7 +26,28 @@ filenames.forEach((source) => {
   let flemNumber = 1;
 
   lines = lines.map(function (line) {
-    if (line.startsWith('@flems')) {
+    if (line.startsWith('@docs-nav-start')) {
+      line = '<div class="docs-nav">';
+    }
+    else if (line.startsWith('@nav-setup-toc')) {
+      line = '  <a href="setup-toc.html">&#8673; Table of Contents</a>';
+    }
+    else if (line.startsWith('@nav-toc')) {
+      line = '  <a href="toc.html">&#8673; Table of Contents</a>';
+    }
+    else if (line.startsWith('@nav-prev') || line.startsWith('@nav-next')) {
+      const navParts = line.split(':');
+      const ref = navParts[1];
+      const title = navParts[2];
+      const prefix = line.startsWith('@nav-prev') ? '&lsaquo; ' : '';
+      const suffix = line.startsWith('@nav-next') ? ' &rsaquo;' : '';
+
+      line = `  <a href="${ref}">${prefix}${title}${suffix}</a>`;
+    }
+    else if (line.startsWith('@docs-nav-end')) {
+      line = '</div>';
+    }
+    else if (line.startsWith('@flems')) {
       const parts = line.split(' ');
       const config = JSON.parse(parts[1]);
 
