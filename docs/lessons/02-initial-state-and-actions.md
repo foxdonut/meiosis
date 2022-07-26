@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 01 - Introduction](01-introduction.html) | [&rarr; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:01-introduction.html:Introduction
+@nav-toc
+@nav-next:03-streams.html:Streams
+@docs-nav-end
 
-## 02 - Initial State and Actions
+## Initial State and Actions
 
 Meiosis is a pattern for managing application state. The idea is to have a top-level state object,
 and simple ways to update the state.
@@ -45,11 +47,13 @@ able to know when something has changed so that we can react. Most notably, we'l
 the view when the state has been updated.
 
 In the next section, we'll look at a way to gain control over the flow of data. When you are ready,
-continue on to [03 - Streams](03-streams.html).
+continue on to [Streams](03-streams.html).
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 01 - Introduction](01-introduction.html) | [&rarr; 03 - Streams](03-streams.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:01-introduction.html:Introduction
+@nav-toc
+@nav-next:03-streams.html:Streams
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

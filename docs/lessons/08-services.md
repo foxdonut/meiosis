@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 07 - Views](07-views.html) | [&rarr; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:07-views.html:Views
+@nav-toc
+@nav-next:09-nesting.html:Nesting
+@docs-nav-end
 
-## 08 - Services
+## Services
 
 All credit goes to [James Forbes](https://james-forbes.com) for his idea of **services**. I am very
 grateful to James for sharing this and other ideas that have significantly contributed to my Meiosis
@@ -218,9 +220,11 @@ In the next section, we'll look at another feature that we can add to Meiosis: *
 
 -----
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 07 - Views](07-views.html) | [&rarr; 09 - Nesting](09-nesting.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:07-views.html:Views
+@nav-toc
+@nav-next:09-nesting.html:Nesting
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

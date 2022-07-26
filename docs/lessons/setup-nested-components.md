@@ -1,8 +1,10 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Services](setup-services.html) | [&rarr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-services.html:Services
+@nav-setup-toc
+@nav-next:setup-typescript-support.html:TypeScript Support
+@docs-nav-end
 
 ## Nested Components
 
@@ -136,9 +138,11 @@ properties, `data1` and `data2`.
 
 @flems {"files":"code/setup-nested-components.js,code/home.js,code/login.js,code/data.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Services](setup-services.html) | [&rarr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-services.html:Services
+@nav-setup-toc
+@nav-next:setup-typescript-support.html:TypeScript Support
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

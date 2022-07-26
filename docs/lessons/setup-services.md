@@ -1,8 +1,10 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; View Library](setup-view-library.html) | [&rarr; Nested Components](setup-nested-components.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-view-library.html:View Library
+@nav-setup-toc
+@nav-next:setup-nested-components.html:Nested Components
+@docs-nav-end
 
 ## Services
 
@@ -48,9 +50,11 @@ const service = {
 
 Services can also be nested using nested components, which we will look at next.
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; View Library](setup-view-library.html) | [&rarr; Nested Components](setup-nested-components.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-view-library.html:View Library
+@nav-setup-toc
+@nav-next:setup-nested-components.html:Nested Components
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

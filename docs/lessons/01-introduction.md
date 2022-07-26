@@ -1,10 +1,11 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | |
-| ---- | ---- |
-| [&rarr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-toc
+@nav-next:02-initial-state-and-actions.html:Initial State and Actions
+@docs-nav-end
 
-## 01 - Introduction and Goals
+## Introduction and Goals
 
 Welcome to the [Meiosis](https://meiosis.js.org) Documentation!
 
@@ -55,9 +56,10 @@ window.
 
 Let's get started.
 
-| | |
-| ---- | ---- |
-| [&rarr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-toc
+@nav-next:02-initial-state-and-actions.html:Initial State and Actions
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

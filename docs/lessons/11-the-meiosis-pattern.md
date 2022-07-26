@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&rarr; 12 - What's Next?](12-whats-next.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:10-preventing-re-renders.html:Preventing Re-Renders
+@nav-toc
+@nav-next:12-whats-next.html:What's Next?
+@docs-nav-end
 
-## 11 - The Meiosis Pattern Cheatsheet
+## The Meiosis Pattern Cheatsheet
 
 > Meiosis is a pattern that you can set up yourself, but by popular demand
 [meiosis-setup](https://meiosis.js.org/setup) is now available for your convenience. The library
@@ -183,9 +185,11 @@ cells.map((cell) => {
 });
 ```
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&rarr; 12 - What's Next?](12-whats-next.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:10-preventing-re-renders.html:Preventing Re-Renders
+@nav-toc
+@nav-next:12-whats-next.html:What's Next?
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

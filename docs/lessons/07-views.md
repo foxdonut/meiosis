@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 06 - Cells](06-cells.html) | [&rarr; 08 - Services](08-services.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:06-cells.html:Cells
+@nav-toc
+@nav-next:08-services.html:Services
+@docs-nav-end
 
-## 07 - Views
+## Views
 
 In the previous lessons, we set up the Meiosis pattern with a temperature example. In this section,
 we'll wire this up to three different view libraries:
@@ -124,9 +126,11 @@ complete!
 The remainder of this documentation covers additional functionalities that we can add to Meiosis,
 starting with [Services](08-services.html).
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 06 - Cells](06-cells.html) | [&rarr; 08 - Services](08-services.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:06-cells.html:Cells
+@nav-toc
+@nav-next:08-services.html:Services
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

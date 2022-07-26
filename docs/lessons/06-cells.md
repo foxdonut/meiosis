@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&rarr; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@nav-toc
+@nav-next:07-views.html:Views
+@docs-nav-end
 
-## 06 - Cells
+## Cells
 
 In the previous sections, we set up the Meiosis pattern with function patches, and with
 [Mergerino](https://github.com/fuzetsu/mergerino). In both cases, we created:
@@ -55,9 +57,11 @@ using `const getState = () => states()`, any value passed to `getState` is ignor
 In the following section, we will look at how to wire up the Meiosis pattern to three view
 libraries.
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&rarr; 07 - Views](07-views.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@nav-toc
+@nav-next:07-views.html:Views
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

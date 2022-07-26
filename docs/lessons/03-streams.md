@@ -1,12 +1,14 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&rarr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:02-initial-state-and-actions.html:Initial State and Actions
+@nav-toc
+@nav-next:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@docs-nav-end
 
-## 03 - Streams
+## Streams
 
-In the previous lesson, [02 - Initial State and Actions](02-initial-state-and-actions.html), we
+In the previous lesson, [Initial State and Actions](02-initial-state-and-actions.html), we
 created an `increment` function to update the application state. The function changed the state by
 directly modifying a global variable.
 
@@ -259,11 +261,13 @@ it works just like `flyd`. The only difference is that you call `m.stream()` ins
 `flyd.stream()`, and `m.stream.scan` instead of `flyd.scan`.
 
 When you are ready, continue on to
-[04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html).
+[Meiosis with Function Patches](04-meiosis-with-function-patches.html).
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 02 - Initial State and Actions](02-initial-state-and-actions.html) | [&rarr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:02-initial-state-and-actions.html:Initial State and Actions
+@nav-toc
+@nav-next:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

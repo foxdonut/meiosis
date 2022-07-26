@@ -1,8 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | |
-| ---- | ---- |
-| [&rarr; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-setup-toc
+@nav-next:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@docs-nav-end
 
 ## Installation
 
@@ -50,9 +51,10 @@ Then use the `Meiosis` global variable:
 const cells = Meiosis.setup();
 ```
 
-| | |
-| ---- | ---- |
-| [&rarr; Function Patches or Mergerino](setup-function-patches-or-mergerino.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-setup-toc
+@nav-next:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

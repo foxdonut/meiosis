@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 08 - Services](08-services.html) | [&rarr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:08-services.html:Services
+@nav-toc
+@nav-next:10-preventing-re-renders.html:Preventing Re-Renders
+@docs-nav-end
 
-## 09 - Nesting
+## Nesting
 
 Until now, we have been using Meiosis cells with `cell.state` to access the application state and
 `cell.update(...)` to update the state. Every view and action has access to the complete application
@@ -193,9 +195,11 @@ can also use the same setup by adding [meiosis-setup](https://meiosis.js.org/set
 
 In the next section, we'll look at an optional performance enhancement: preventing re-renders.
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 08 - Services](08-services.html) | [&rarr; 10 - Preventing Re-Renders](10-preventing-re-renders.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:08-services.html:Services
+@nav-toc
+@nav-next:10-preventing-re-renders.html:Preventing Re-Renders
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

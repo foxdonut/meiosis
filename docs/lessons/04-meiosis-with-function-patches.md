@@ -1,12 +1,14 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 03 - Streams](03-streams.html) | [&rarr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:03-streams.html:Streams
+@nav-toc
+@nav-next:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@docs-nav-end
 
-## 04 - Meiosis with Function Patches
+## Meiosis with Function Patches
 
-In the previous lesson, [03 - Streams](03-streams.html), we started setting up the Meiosis pattern:
+In the previous lesson, [Streams](03-streams.html), we started setting up the Meiosis pattern:
 
 - an `update` stream of **patches**
 - a `states` stream of states, obtained with `scan` on the `update` stream and applying
@@ -111,9 +113,11 @@ In the output on the right, you'll see the updated states.
 
 In the next section, we will look at an alternative to function patches, called Mergerino.
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 03 - Streams](03-streams.html) | [&rarr; 05 - Meiosis with Mergerino](05-meiosis-with-mergerino.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:03-streams.html:Streams
+@nav-toc
+@nav-next:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

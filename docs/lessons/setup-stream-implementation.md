@@ -1,8 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | |
-| ---- | ---- |
-| [&larr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-typescript-support.html:TypeScript Support
+@nav-setup-toc
+@docs-nav-end
 
 ## Stream Implementation
 
@@ -50,9 +51,10 @@ const cells = setup({ stream: someStreamLib })
 Adapting a different stream library is usually not necessary, since using either `simple-stream`,
 `Flyd`, or `Mithril Stream` should be suitable.
 
-| | |
-| ---- | ---- |
-| [&larr; TypeScript Support](setup-typescript-support.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-typescript-support.html:TypeScript Support
+@nav-setup-toc
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

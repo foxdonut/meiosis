@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&rarr; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-toc
+@nav-next:06-cells.html:Cells
+@docs-nav-end
 
-## 05 - Meiosis with Mergerino
+## Meiosis with Mergerino
 
 In the previous section, we set up the Meiosis pattern with an `update` stream of function patches.
 
@@ -295,9 +297,11 @@ In the output on the right, you'll see the updated states.
 When you are ready, continue on to the next section, where we will combine the `state` and `update`
 into **cells**.
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 04 - Meiosis with Function Patches](04-meiosis-with-function-patches.html) | [&rarr; 06 - Cells](06-cells.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-toc
+@nav-next:06-cells.html:Cells
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

@@ -1,10 +1,12 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 09 - Nesting](09-nesting.html) | [&rarr; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:09-nesting.html:Nesting
+@nav-toc
+@nav-next:11-the-meiosis-pattern.html:The Meiosis Pattern Cheatsheet
+@docs-nav-end
 
-## 10 - Preventing Re-Renders
+## Preventing Re-Renders
 
 > **IMPORTANT NOTE**: before preventing re-renders, please first make sure that re-rendering a part
 of your application is indeed causing a performance problem that impacts the user experience.
@@ -96,9 +98,11 @@ the user interface. Other components do not get re-rendered.
 
 @flems {"files":"code/10-preventing-re-renders-mithril.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"mithril,mithril-stream,mergerino","height":800,"middle":65}
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; 09 - Nesting](09-nesting.html) | [&rarr; 11 - The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html) | [&#8673; Table of Contents](toc.html) |
+@docs-nav-start
+@nav-prev:09-nesting.html:Nesting
+@nav-toc
+@nav-next:11-the-meiosis-pattern.html:The Meiosis Pattern Cheatsheet
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.

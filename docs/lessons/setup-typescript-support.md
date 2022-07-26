@@ -1,8 +1,10 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Nested Components](setup-nested-components.html) | [&rarr; Stream Implementation](setup-stream-implementation.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-nested-components.html:Nested Components
+@nav-setup-toc
+@nav-next:setup-stream-implementation.html:Stream Implementation
+@docs-nav-end
 
 ## TypeScript Support
 
@@ -35,9 +37,11 @@ This
 
 [TypeScript API documentation is here.](ts-docs/index.html)
 
-| | | |
-| ---- | ---- | ---- |
-| [&larr; Nested Components](setup-nested-components.html) | [&rarr; Stream Implementation](setup-stream-implementation.html) | [&#8673; Table of Contents](setup-toc.html) |
+@docs-nav-start
+@nav-prev:setup-nested-components.html:Nested Components
+@nav-setup-toc
+@nav-next:setup-stream-implementation.html:Stream Implementation
+@docs-nav-end
 
 [Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
 [GitHub](https://github.com/foxdonut)) and is released under the MIT license.
