@@ -29,7 +29,7 @@ const app = {
   )
 };
 
-const cells = Meiosis.mergerino.setup({ app });
+const cells = Meiosis.setup({ app });
 
 const element = document.getElementById('app');
 cells.map((cell) => {

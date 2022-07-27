@@ -81,7 +81,7 @@ const app = {
   ]
 };
 
-const cells = Meiosis.mergerino.setup({ app });
+const cells = Meiosis.setup({ app });
 
 m.mount(document.getElementById('app'), {
   view: () => app.view(cells())

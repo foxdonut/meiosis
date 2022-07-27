@@ -1,20 +1,25 @@
 body {
   font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
 }
+.docs-nav {
+  display: grid;
+  margin-bottom: 20px;
+}
 @media (max-width: 575.98px) {
   body {
     font-size: 1rem;
   }
   .docs-nav {
-    display: grid;
     grid-template-columns: 1fr;
-    margin-bottom: 20px;
+  }
+  .docs-nav a:nth-of-type(2) {
+    grid-row: 1;
   }
   h1 {
-    font-size: 2.6rem;
+    font-size: 1.8rem;
   }
   h2 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
   h3, h3 a, th {
     font-size: 1.4rem;
@@ -31,9 +36,7 @@ body {
     font-size: 2.0rem;
   }
   .docs-nav {
-    display: grid;
     grid-template-columns: repeat(3, 1fr);
-    margin-bottom: 20px;
   }
   .docs-nav :nth-child(2) {
     text-align: center;

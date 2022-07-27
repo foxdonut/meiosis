@@ -29,11 +29,9 @@ filenames.forEach((source) => {
     if (line.startsWith('@docs-nav-start')) {
       line = '<div class="docs-nav">';
     }
-    else if (line.startsWith('@nav-setup-toc')) {
-      line = '  <a href="setup-toc.html">&#8673; Table of Contents</a>';
-    }
-    else if (line.startsWith('@nav-toc')) {
-      line = '  <a href="toc.html">&#8673; Table of Contents</a>';
+    else if (line.startsWith('@nav-setup-toc') || line.startsWith('@nav-toc')) {
+      const toc = line.startsWith('@nav-toc') ? 'toc' : 'setup-toc';
+      line = `  <a href="${toc}.html">^ Contents</a>`;
     }
     else if (line.startsWith('@nav-prev') || line.startsWith('@nav-next')) {
       const navParts = line.split(':');

@@ -28,7 +28,7 @@ const app = {
   )
 };
 
-const cells = Meiosis.mergerino.setup({ app });
+const cells = Meiosis.setup({ app });
 
 const element = document.getElementById('app');
 const root = ReactDOM.createRoot(element);
