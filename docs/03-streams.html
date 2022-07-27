@@ -6,26 +6,18 @@
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
 <link rel="stylesheet" href="prism.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="docs.css">
 </head>
 <body class="container">
 <script src="prism.js" type="text/javascript"></script>
 <script src="flems.html" type="text/javascript" charset="utf-8"></script>
-<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><a href="02-initial-state-and-actions.html">&larr; 02 - Initial State and Actions</a></td>
-<td><a href="04-meiosis-with-function-patches.html">&rarr; 04 - Meiosis with Function Patches</a></td>
-<td><a href="toc.html">&#8673; Table of Contents</a></td>
-</tr>
-</tbody></table>
-<h2>03 - Streams</h2><p>In the previous lesson, <a href="02-initial-state-and-actions.html">02 - Initial State and Actions</a>, we
+<h1><a href="https://meiosis.js.org">Meiosis</a> Documentation</h1><div class="docs-nav">
+  <a href="02-initial-state-and-actions.html">&lsaquo; Initial State and Actions</a>
+  <a href="toc.html">^ Contents</a>
+  <a href="04-meiosis-with-function-patches.html">Meiosis with Function Patches &rsaquo;</a>
+</div>
+
+<h2>Streams</h2><p>In the previous lesson, <a href="02-initial-state-and-actions.html">Initial State and Actions</a>, we
 created an <code>increment</code> function to update the application state. The function changed the state by
 directly modifying a global variable.</p>
 <p>This works, but we can improve the approach. Namely, we&#39;d like to gain more control over the flow of
@@ -245,21 +237,13 @@ it works just like <code>flyd</code>. The only difference is that you call <code
 <code>flyd.stream()</code>, and <code>m.stream.scan</code> instead of <code>flyd.scan</code>.</p>
 </blockquote>
 <p>When you are ready, continue on to
-<a href="04-meiosis-with-function-patches.html">04 - Meiosis with Function Patches</a>.</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><a href="02-initial-state-and-actions.html">&larr; 02 - Initial State and Actions</a></td>
-<td><a href="04-meiosis-with-function-patches.html">&rarr; 04 - Meiosis with Function Patches</a></td>
-<td><a href="toc.html">&#8673; Table of Contents</a></td>
-</tr>
-</tbody></table>
+<a href="04-meiosis-with-function-patches.html">Meiosis with Function Patches</a>.</p>
+<div class="docs-nav">
+  <a href="02-initial-state-and-actions.html">&lsaquo; Initial State and Actions</a>
+  <a href="toc.html">^ Contents</a>
+  <a href="04-meiosis-with-function-patches.html">Meiosis with Function Patches &rsaquo;</a>
+</div>
+
 <p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
 <a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
 

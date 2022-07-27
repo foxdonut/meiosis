@@ -6,23 +6,16 @@
 <link rel="stylesheet" href="normalize.css">
 <link rel="stylesheet" href="skeleton.css">
 <link rel="stylesheet" href="prism.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="docs.css">
 </head>
 <body class="container">
 <script src="prism.js" type="text/javascript"></script>
 <script src="flems.html" type="text/javascript" charset="utf-8"></script>
-<h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><a href="setup-function-patches-or-mergerino.html">&rarr; Function Patches or Mergerino</a></td>
-<td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
-</tr>
-</tbody></table>
+<h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><div class="docs-nav">
+  <a href="setup-toc.html">^ Contents</a>
+  <a href="setup-function-patches-or-mergerino.html">Function Patches or Mergerino &rsaquo;</a>
+</div>
+
 <h2>Installation</h2><p>You can install <code>meiosis-setup</code>:</p>
 <ul>
 <li>Using Node.js, or,</li>
@@ -33,39 +26,25 @@
 <h3>Using Node.js</h3><p>Install <code>meiosis-setup</code> with <code>npm</code>:</p>
 <pre><code>npm i meiosis-setup
 </code></pre>
-<p>Then you can import it using:</p>
-<pre><code class="language-js">import meiosisSetup from &#39;meiosis-setup/functionPatches&#39;;
-
-// or
-
-import meiosisSetup from &#39;meiosis-setup/mergerino&#39;;
-
-// then
+<p>Then you can import it and use it with this code:</p>
+<pre><code class="language-js">import { meiosisSetup } from &#39;meiosis-setup&#39;;
 
 const cells = meiosisSetup();
 </code></pre>
 <h3>Using an HTML <code>&lt;script&gt;</code> tag</h3><p>Load <code>meiosis-setup</code> by adding a <code>&lt;script&gt;</code> tag to your HTML page:</p>
-<pre><code class="language-html">&lt;script src=&quot;http://unpkg.com/meiosis-setup&quot;&gt;&lt;/script&gt;
+<pre><code class="language-html">&lt;script src=&quot;https://unpkg.com/meiosis-setup/meiosis-setup.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>Or load the minimized version:</p>
+<pre><code class="language-html">&lt;script src=&quot;https://unpkg.com/meiosis-setup/meiosis-setup.min.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p>Then use the <code>Meiosis</code> global variable:</p>
-<pre><code class="language-js">const cells = Meiosis.functionPatches.setup();
-
-// or
-
-const cells = Meiosis.mergerino.setup();
+<pre><code class="language-js">const cells = Meiosis.setup();
 </code></pre>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><a href="setup-function-patches-or-mergerino.html">&rarr; Function Patches or Mergerino</a></td>
-<td><a href="setup-toc.html">&#8673; Table of Contents</a></td>
-</tr>
-</tbody></table>
+<div class="docs-nav">
+  <a href="setup-toc.html">^ Contents</a>
+  <a href="setup-function-patches-or-mergerino.html">Function Patches or Mergerino &rsaquo;</a>
+</div>
+
 <p><a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut (<a href="http://twitter.com/foxdonut00">Twitter</a> /
 <a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.</p>
 
