@@ -7,7 +7,7 @@ body {
 }
 @media (max-width: 575.98px) {
   body {
-    font-size: 1.4rem;
+    font-size: 1.45rem;
   }
   .docs-nav {
     grid-template-columns: 1fr;
@@ -16,7 +16,7 @@ body {
     grid-row: 1;
   }
   h1 {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
   h2 {
     font-size: 1.6rem;
@@ -24,8 +24,14 @@ body {
   h3, h3 a, th {
     font-size: 1.5rem;
   }
+  pre[class*="language-"] code[class*="language-"] {
+    font-size: 1.2rem !important;
+  }
   .CodeMirror pre {
-    font-size: 1rem !important;
+    font-size: 1.2rem !important;
+  }
+  .flemscode .toolbar .tab {
+    font-size: 1rem;
   }
 }
 @media (min-width: 576px) {
