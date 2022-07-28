@@ -12,7 +12,7 @@ body {
   .docs-nav {
     grid-template-columns: 1fr;
   }
-  .docs-nav a:nth-of-type(2) {
+  .docs-nav a.toc {
     grid-row: 1;
   }
   h1 {
