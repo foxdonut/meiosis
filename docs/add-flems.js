@@ -31,7 +31,7 @@ filenames.forEach((source) => {
     }
     else if (line.startsWith('@nav-setup-toc') || line.startsWith('@nav-toc')) {
       const toc = line.startsWith('@nav-toc') ? 'toc' : 'setup-toc';
-      line = `  <a href="${toc}.html">^ Contents</a>`;
+      line = `  <a class="toc" href="${toc}.html">^ Contents</a>`;
     }
     else if (line.startsWith('@nav-prev') || line.startsWith('@nav-next')) {
       const navParts = line.split(':');
