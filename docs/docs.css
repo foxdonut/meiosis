@@ -7,7 +7,7 @@ body {
 }
 @media (max-width: 575.98px) {
   body {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
   .docs-nav {
     grid-template-columns: 1fr;
