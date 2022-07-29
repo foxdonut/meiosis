@@ -31,14 +31,14 @@ filenames.forEach((source) => {
     }
     else if (line.startsWith('@nav-setup-toc') || line.startsWith('@nav-toc')) {
       const toc = line.startsWith('@nav-toc') ? 'toc' : 'setup-toc';
-      line = `  <a class="toc" href="${toc}.html">^ Contents</a>`;
+      line = `  <a class="toc" href="${toc}.html">&#x2B06; Contents</a>`;
     }
     else if (line.startsWith('@nav-prev') || line.startsWith('@nav-next')) {
       const navParts = line.split(':');
       const ref = navParts[1];
       const title = navParts[2];
-      const prefix = line.startsWith('@nav-prev') ? '&lsaquo; ' : '';
-      const suffix = line.startsWith('@nav-next') ? ' &rsaquo;' : '';
+      const prefix = line.startsWith('@nav-prev') ? '&#x2B05; ' : '';
+      const suffix = line.startsWith('@nav-next') ? ' &#x27A1;' : '';
 
       line = `  <a href="${ref}">${prefix}${title}${suffix}</a>`;
     }
