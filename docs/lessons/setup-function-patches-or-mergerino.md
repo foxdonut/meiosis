@@ -38,5 +38,3 @@ from '...'`.
 @nav-next:setup-initial-state.html:Initial State
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

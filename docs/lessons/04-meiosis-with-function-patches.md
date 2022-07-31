@@ -119,5 +119,3 @@ In the next section, we will look at an alternative to function patches, called 
 @nav-next:05-meiosis-with-mergerino.html:Meiosis with Mergerino
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

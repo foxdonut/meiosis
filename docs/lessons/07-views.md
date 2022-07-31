@@ -132,5 +132,3 @@ starting with [Services](08-services.html).
 @nav-next:08-services.html:Services
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

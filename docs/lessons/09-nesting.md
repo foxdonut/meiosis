@@ -201,5 +201,3 @@ In the next section, we'll look at an optional performance enhancement: preventi
 @nav-next:10-preventing-re-renders.html:Preventing Re-Renders
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

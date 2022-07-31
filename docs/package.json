@@ -5,7 +5,7 @@
   "description": "meiosis Documentation",
   "main": "index.js",
   "scripts": {
-    "prebuild": "mkdir -p build dist && node add-flems.js lessons build",
+    "prebuild": "mkdir -p build dist && node process-tags.js lessons build",
     "build": "harp build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "cp css/* images/*.svg images/*.png dist && echo 'Done.'",
     "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/**' -- npm run build",

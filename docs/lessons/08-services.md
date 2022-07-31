@@ -226,5 +226,3 @@ In the next section, we'll look at another feature that we can add to Meiosis: *
 @nav-next:09-nesting.html:Nesting
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

@@ -55,5 +55,3 @@ continue on to [Streams](03-streams.html).
 @nav-next:03-streams.html:Streams
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

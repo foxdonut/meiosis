@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['foxdonut/with-react'],
-  ignorePatterns: ['add-flems.js'],
+  ignorePatterns: ['process-tags.js'],
   rules: {
     'max-len': ['error', 64]
   }

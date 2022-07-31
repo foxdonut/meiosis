@@ -191,5 +191,3 @@ cells.map((cell) => {
 @nav-next:12-whats-next.html:What's Next?
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](https://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

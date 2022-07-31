@@ -56,5 +56,3 @@ Services can also be nested using nested components, which we will look at next.
 @nav-next:setup-nested-components.html:Nested Components
 @docs-nav-end
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

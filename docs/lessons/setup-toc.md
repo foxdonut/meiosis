@@ -25,5 +25,3 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 
 -----
 
-[Meiosis](https://meiosis.js.org) is developed by foxdonut ([Twitter](http://twitter.com/foxdonut00) /
-[GitHub](https://github.com/foxdonut)) and is released under the MIT license.

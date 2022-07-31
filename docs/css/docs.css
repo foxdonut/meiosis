@@ -109,3 +109,6 @@ ul li {
 pre.language-js, pre.language-ts, pre.language-html {
   margin-bottom: 2rem;
 }
+div.footer {
+  margin-bottom: 20px;
+}
