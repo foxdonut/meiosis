@@ -37,10 +37,13 @@ filenames.forEach((source) => {
       const navParts = line.split(':');
       const ref = navParts[1];
       const title = navParts[2];
-      const prefix = line.startsWith('@nav-prev') ? '&#x2B05; ' : '';
-      const suffix = line.startsWith('@nav-next') ? ' &#x27A1;' : '';
+      const navClass = line.startsWith('@nav-prev') ? 'nav-prev' : 'nav-next';
+      const arrow = line.startsWith('@nav-prev') ? '&#x2B05;' : '&#x27A1;';
 
-      line = `  <a href="${ref}">${prefix}${title}${suffix}</a>`;
+      line = `  <a href="${ref}"><span class="${navClass}">
+        <span class="arrow">${arrow}</span>
+        <span class="title">${title}</span>
+      </span></a>`;
     }
     else if (line.startsWith('@docs-nav-end')) {
       line = '</div>';

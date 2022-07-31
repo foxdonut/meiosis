@@ -5,6 +5,13 @@ body {
   display: grid;
   margin-bottom: 20px;
 }
+.nav-prev, .nav-next {
+  display: flex;
+  flex-flow: row;
+}
+.nav-prev .title {
+  margin-left: 5px;
+}
 @media (max-width: 575.98px) {
   body {
     font-size: 1.45rem;
@@ -14,6 +21,9 @@ body {
   }
   .docs-nav a.toc {
     grid-row: 1;
+  }
+  .nav-next .title {
+    margin-left: 5px;
   }
   h1 {
     font-size: 1.7rem;
@@ -44,8 +54,15 @@ body {
   .docs-nav :nth-child(2) {
     text-align: center;
   }
-  .docs-nav :last-child {
-    text-align: right;
+  .nav-next {
+    justify-content: right;
+  }
+  .nav-next .title {
+    order: 1;
+    margin-right: 5px;
+  }
+  .nav-next .arrow {
+    order: 2;
   }
   h1 {
     font-size: 3.6rem;
@@ -109,6 +126,7 @@ ul li {
 pre.language-js, pre.language-ts, pre.language-html {
   margin-bottom: 2rem;
 }
-div.footer {
+div.lesson {
+  margin-top: 20px;
   margin-bottom: 20px;
 }
