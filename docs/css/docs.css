@@ -1,5 +1,9 @@
+@font-face {
+  font-family: "color-emoji";
+  src: local("Apple Color Emoji"), local("Segoe UI Emoji"), local("Segoe UI Symbol"), local("Noto Color Emoji");
+}
 body {
-  font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
+  font-family: "Lucida Grande",Helvetica,Arial,sans-serif,color-emoji;
 }
 .docs-nav {
   display: grid;
