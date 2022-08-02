@@ -1,7 +1,7 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@nav-prev:setup-patches.html:Patches
 @nav-setup-toc
 @nav-next:setup-view-library.html:View Library
 @docs-nav-end
@@ -31,7 +31,7 @@ const cells = meiosisSetup({ app });
 Initial state can also be nested using [nested components](setup-nested-components.html).
 
 @docs-nav-start
-@nav-prev:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@nav-prev:setup-patches.html:Patches
 @nav-setup-toc
 @nav-next:setup-view-library.html:View Library
 @docs-nav-end

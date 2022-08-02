@@ -15,7 +15,7 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 ## Table of Contents
 
 - [Installation](setup-installation.html)
-- [Function Patches or Mergerino](setup-function-patches-or-mergerino.html)
+- [Patches](setup-patches.html)
 - [Initial State](setup-initial-state.html)
 - [View Library](setup-view-library.html)
 - [Services](setup-services.html)

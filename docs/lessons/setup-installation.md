@@ -2,7 +2,7 @@
 
 @docs-nav-start
 @nav-setup-toc
-@nav-next:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@nav-next:setup-patches.html:Patches
 @docs-nav-end
 
 ## Installation
@@ -53,6 +53,6 @@ const cells = Meiosis.setup();
 
 @docs-nav-start
 @nav-setup-toc
-@nav-next:setup-function-patches-or-mergerino.html:Function Patches or Mergerino
+@nav-next:setup-patches.html:Patches
 @docs-nav-end
 

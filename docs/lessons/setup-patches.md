@@ -6,7 +6,7 @@
 @nav-next:setup-initial-state.html:Initial State
 @docs-nav-end
 
-## Function Patches or Mergerino
+## Patches
 
 In the Meiosis Documentation, the Meiosis pattern is setup up either with
 [Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html) or
