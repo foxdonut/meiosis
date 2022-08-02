@@ -27,7 +27,7 @@
 <h2>View Library</h2><p>Once Meiosis is set up either with Function Patches or Mergerino, you have a stream of <strong>cells</strong>.
 Each cell has <code>state</code> and <code>update</code> to read the state and update the state. Normally you use
 <code>cells.map</code> to render the view on each state change.</p>
-<p>For example, with Mithril:</p>
+<h3>Mithril</h3><p>Here is the setup code for Mithril:</p>
 <div id="flems1" class="flemscode" style=""></div>
   <script>
     window.Flems(flems1, {
@@ -38,7 +38,16 @@ Each cell has <code>state</code> and <code>update</code> to read the state and u
   </script>
       
 
-<p>With Preact:</p>
+<p>In the setup above, <code>m.redraw()</code> is called for every state change. This may or may not be acceptable
+depending in the application. If the application triggers many state changes very rapidly (such as
+tracking the mouse), it is preferable to remove the <code>m.redraw()</code> code:</p>
+<pre><code class="language-js">cells.map(() =&gt; m.redraw());
+</code></pre>
+<p>Redraws will still happen by virtue of Mithril&#39;s
+<a href="https://mithril.js.org/autoredraw.html">auto-redraw system</a>. However, they will <strong>not</strong> happen for
+state changes outside of the auto-redraw system. For those state changes, <code>m.redraw()</code> needs to be
+called after updating the state.</p>
+<h3>Preact:</h3><p>Here is the setup code for Preact:</p>
 <div id="flems2" class="flemscode" style=""></div>
   <script>
     window.Flems(flems2, {
@@ -49,7 +58,7 @@ Each cell has <code>state</code> and <code>update</code> to read the state and u
   </script>
       
 
-<p>With React:</p>
+<h3>React:</h3><p>Here is the setup code for React:</p>
 <div id="flems3" class="flemscode" style=""></div>
   <script>
     window.Flems(flems3, {
