@@ -27,9 +27,9 @@ interface State {
 Then, we can set up Meiosis as follows:
 
 ```ts
-import setup from 'meiosis-setup/mergerino';
+import { meiosisSetup } from 'meiosis-setup';
 
-const cells = setup<State>();
+const cells = meiosisSetup<State>();
 ```
 
 ### Example
