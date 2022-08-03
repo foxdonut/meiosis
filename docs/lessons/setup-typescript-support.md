@@ -32,10 +32,7 @@ import { meiosisSetup } from 'meiosis-setup';
 const cells = meiosisSetup<State>();
 ```
 
-### Example
-
-This
-[example](https://codesandbox.io/s/meiosis-setup-typescript-example-6ppbqk?file=/src/index.ts).
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/basic.ts" style="width:100%;height:500px"></iframe>
 
 [TypeScript API documentation is here.](ts-docs/index.html)
 

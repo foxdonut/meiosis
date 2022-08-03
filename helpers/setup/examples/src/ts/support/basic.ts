@@ -8,8 +8,8 @@ interface State {
 const cells = meiosisSetup<State>();
 const cell = cells();
 
-cell.state.name;
+cell.state;
 
 cell.update({ name: 'Meiosis' });
-cell.update({ invalid: true });
-cell.update({ age: 'not valid '});
+// cell.update({ invalid: true });
+// cell.update({ age: 'not valid'});
