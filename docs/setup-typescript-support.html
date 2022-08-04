@@ -35,16 +35,19 @@ other TypeScript features in your Meiosis code.</p>
   age: number;
 }
 </code></pre>
-<p>Then, we can set up Meiosis as follows:</p>
+<p>Then, we can set up Meiosis with TypeScript as follows:</p>
 <pre><code class="language-ts">import { meiosisSetup } from &#39;meiosis-setup&#39;;
 
 const cells = meiosisSetup&lt;State&gt;();
+
+const cell = cells();
 </code></pre>
 <p>Now, we have a stream of cells with each cell having <code>state</code> of type <code>State</code> and having <code>update</code>
 taking patches that must be compatible with <code>State</code>.</p>
 <p>In the example below, you can experiment with TypeScript support. Try the following:</p>
 <ul>
-<li>On the line with <code>cell.state</code>, add a dot (.) <code>after</code> state and see the auto-suggested properties,
+<li>On the line with <code>cell</code>, add a dot (.) after <code>cell</code> and see the auto-suggested <code>cell</code> properties.</li>
+<li>On the line with <code>cell.state</code>, add a dot (.) after <code>state</code> and see the auto-suggested properties,
 <code>name</code> and <code>age</code>.</li>
 <li>Uncomment the line <code>cell.update({ invalid: true });</code> and see the patch in error since <code>&#39;invalid&#39;</code>
 is not a property of <code>State</code>.</li>
@@ -53,7 +56,36 @@ is not a property of <code>State</code>.</li>
 </ul>
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/basic.ts" style="width:100%;height:500px"></iframe>
 
-<p><a href="ts-docs/index.html">TypeScript API documentation is here.</a></p>
+<h3>Initial State</h3><p>To indicate the initial state, we use the <code>initial</code> property of an <code>app</code> object that we pass to
+<code>meiosisSetup()</code>.</p>
+<p>With TypeScript, <code>app</code> is of type <code>MeiosisComponent</code>, which we can import from
+<code>&#39;meiosis-setup/types&#39;</code>. By indicating our <code>State</code> type, our <code>app</code>&#39;s initial state will be
+validated.</p>
+<pre><code class="language-ts">import { meiosisSetup } from &#39;meiosis-setup&#39;;
+import { MeiosisComponent } from &#39;meiosis-setup/types&#39;;
+
+const app: MeiosisComponent&lt;State&gt; = {
+  initial: {
+    age: 25
+  }
+};
+
+const cells = meiosisSetup&lt;State&gt;({ app });
+</code></pre>
+<p>In the example below, try the following in the <code>initial</code> object, which should result in an error:</p>
+<ul>
+<li>Specify a property that does not exist on the <code>State</code> type.</li>
+<li>Specify a value that does not match the type, for example a <code>string</code> on the <code>age</code> property.</li>
+</ul>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/initial.ts" style="width:100%;height:500px"></iframe>
+
+<h3>Services</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
+
+<h3>Nested Cells</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
+
+<h3>Nested Components</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-components.ts" style="width:100%;height:500px"></iframe>
+
+<h3>API Documentation</h3><p><a href="ts-docs/index.html">TypeScript API documentation is here.</a></p>
 <div class="docs-nav">
   <a href="setup-nested-components.html"><span class="nav-prev">
         <span class="arrow">&#x2B05;</span>
