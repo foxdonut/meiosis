@@ -72,6 +72,8 @@ const app: MeiosisComponent&lt;State&gt; = {
 
 const cells = meiosisSetup&lt;State&gt;({ app });
 </code></pre>
+<p>By specifying the <code>MeiosisComponent</code> type on our <code>app</code> object, it will be validated and we can also
+benefit from auto-suggest on the properties (<code>initial</code>, <code>services</code>, etc.)</p>
 <p>In the example below, try the following in the <code>initial</code> object, which should result in an error:</p>
 <ul>
 <li>Specify a property that does not exist on the <code>State</code> type.</li>
@@ -79,7 +81,37 @@ const cells = meiosisSetup&lt;State&gt;({ app });
 </ul>
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/initial.ts" style="width:100%;height:500px"></iframe>
 
-<h3>Services</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
+<h3>Services</h3><p>We can use the <code>Service</code> type for services. This will auto-suggest and validate the properties of a
+service (<code>onchange</code>, <code>run</code>) and automatically type the function parameters.</p>
+<pre><code class="language-ts">import { meiosisSetup } from &#39;meiosis-setup&#39;;
+import { MeiosisComponent, Service } from &#39;meiosis-setup/types&#39;;
+
+interface State {
+  name: string;
+  age: number;
+}
+
+const service: Service&lt;State&gt; = {
+  onchange: (state) =&gt; state.age,
+  run: (cell) =&gt; {
+    cell.update({ age: (value) =&gt; value + 1 });
+  }
+};
+
+const app: MeiosisComponent&lt;State&gt; = {
+  services: [service]
+};
+
+const cells = meiosisSetup&lt;State&gt;({ app });
+</code></pre>
+<p>Below, you can see this in action:</p>
+<ul>
+<li>Invalid properties cannot be specified on the <code>service</code> object.</li>
+<li>The <code>state</code> parameter on the <code>onchange</code> function, as well as the <code>cell</code> parameter on the <code>run</code>
+function, are automatically typed.</li>
+<li>An invalid service object, such as <code>{}</code>, cannot be specified in the <code>services</code> array.</li>
+</ul>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
 
 <h3>Nested Cells</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
 
