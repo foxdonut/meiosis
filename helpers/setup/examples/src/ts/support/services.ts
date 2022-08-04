@@ -1,23 +1,21 @@
 import { meiosisSetup } from 'meiosis-setup';
+import { MeiosisComponent, Service } from 'meiosis-setup/types';
 
 interface State {
   name: string;
   age: number;
 }
 
-const cells = meiosisSetup<State>();
-const cell = cells();
+const service: Service<State> = {
+  onchange: (state) => state.age,
+  run: (cell) => {
+    cell.update({ age: (value) => value + 1 });
+  }
+};
 
-// Add a dot (.) after cell and see auto-suggested cell properties
-cell;
+const app: MeiosisComponent<State> = {
+  services: [service]
+};
 
-// Add a dot (.) after state and see auto-suggested state properties
-cell.state;
-
-cell.update({ name: 'Meiosis' });
-
-// uncomment and see the patch in error since 'invalid' is not a property of State
-// cell.update({ invalid: true });
-
-// uncomment and see the patch in error since 'not valid' is not a number
-// cell.update({ age: 'not valid'});
+const cells = meiosisSetup<State>({ app });
+cells;

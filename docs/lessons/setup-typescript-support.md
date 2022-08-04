@@ -71,6 +71,9 @@ const app: MeiosisComponent<State> = {
 const cells = meiosisSetup<State>({ app });
 ```
 
+By specifying the `MeiosisComponent` type on our `app` object, it will be validated and we can also
+benefit from auto-suggest on the properties (`initial`, `services`, etc.)
+
 In the example below, try the following in the `initial` object, which should result in an error:
 
 - Specify a property that does not exist on the `State` type.
@@ -79,6 +82,39 @@ In the example below, try the following in the `initial` object, which should re
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/initial.ts" style="width:100%;height:500px"></iframe>
 
 ### Services
+
+We can use the `Service` type for services. This will auto-suggest and validate the properties of a
+service (`onchange`, `run`) and automatically type the function parameters.
+
+```ts
+import { meiosisSetup } from 'meiosis-setup';
+import { MeiosisComponent, Service } from 'meiosis-setup/types';
+
+interface State {
+  name: string;
+  age: number;
+}
+
+const service: Service<State> = {
+  onchange: (state) => state.age,
+  run: (cell) => {
+    cell.update({ age: (value) => value + 1 });
+  }
+};
+
+const app: MeiosisComponent<State> = {
+  services: [service]
+};
+
+const cells = meiosisSetup<State>({ app });
+```
+
+Below, you can see this in action:
+
+- Invalid properties cannot be specified on the `service` object.
+- The `state` parameter on the `onchange` function, as well as the `cell` parameter on the `run`
+  function, are automatically typed.
+- An invalid service object, such as `{}`, cannot be specified in the `services` array.
 
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
 
