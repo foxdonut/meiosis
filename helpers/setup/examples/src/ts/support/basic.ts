@@ -8,8 +8,14 @@ interface State {
 const cells = meiosisSetup<State>();
 const cell = cells();
 
+
+// Add a dot (.) after state and see auto-suggested properties
 cell.state;
 
 cell.update({ name: 'Meiosis' });
+
+// uncomment and see the patch in error since 'invalid' is not a property of State
 // cell.update({ invalid: true });
+
+// uncomment and see the patch in error since 'not valid' is not a number
 // cell.update({ age: 'not valid'});
