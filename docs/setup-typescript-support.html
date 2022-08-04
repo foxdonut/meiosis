@@ -40,6 +40,17 @@ other TypeScript features in your Meiosis code.</p>
 
 const cells = meiosisSetup&lt;State&gt;();
 </code></pre>
+<p>Now, we have a stream of cells with each cell having <code>state</code> of type <code>State</code> and having <code>update</code>
+taking patches that must be compatible with <code>State</code>.</p>
+<p>In the example below, you can experiment with TypeScript support. Try the following:</p>
+<ul>
+<li>On the line with <code>cell.state</code>, add a dot (.) <code>after</code> state and see the auto-suggested properties,
+<code>name</code> and <code>age</code>.</li>
+<li>Uncomment the line <code>cell.update({ invalid: true });</code> and see the patch in error since <code>&#39;invalid&#39;</code>
+is not a property of <code>State</code>.</li>
+<li>Uncomment the line <code>cell.update({ age: &#39;not valid&#39;});</code> and see the patch in error since
+<code>&#39;not valid&#39;</code> is not a <code>number</code>.</li>
+</ul>
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/basic.ts" style="width:100%;height:500px"></iframe>
 
 <p><a href="ts-docs/index.html">TypeScript API documentation is here.</a></p>
