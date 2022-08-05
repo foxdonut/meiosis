@@ -9,8 +9,8 @@
 ## Patches
 
 In the Meiosis Documentation, the Meiosis pattern is setup up either with
-[Function Patches](http://meiosis.js.org/docs/04-meiosis-with-function-patches.html) or
-[Mergerino](http://meiosis.js.org/docs/05-meiosis-with-mergerino.html). The idea is that using
+[Function Patches](https://meiosis.js.org/docs/04-meiosis-with-function-patches.html) or
+[Mergerino](https://meiosis.js.org/docs/05-meiosis-with-mergerino.html). The idea is that using
 Function Patches gives you the option of having one less library dependency.
 
 On the other hand, `meiosis-setup` takes a "ready-to-use" approach and includes Mergerino as a
@@ -27,10 +27,11 @@ cells().update(...); // Function Patch or Mergerino works
 
 Here is an example:
 
-> In the embedded examples, the exported global `Meiosis` is used instead of `import meiosisSetup
-from '...'`.
+> In the embedded examples, the exported global `Meiosis` is used instead of
+`import { meiosisSetup } from 'meiosis-setup'` so that the code works in
+[Flems](https://flems.io).
 
-@flems {"files":"code/setup-function-patches-or-mergerino.js","libs":"meiosis-setup"}
+@flems {"files":"code/setup-patches.js","libs":"meiosis-setup"}
 
 @docs-nav-start
 @nav-prev:setup-installation.html:Installation

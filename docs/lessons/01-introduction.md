@@ -29,7 +29,7 @@ and functions.
 
 Besides JavaScript, you will need to know, or learn, about the view library that you would like to
 use. Most of this documentation is independent of the view library. When we put it all together,
-there are examples with [Mithril](http://mithril.js.org), [Preact](https://preactjs.com), and
+there are examples with [Mithril](https://mithril.js.org), [Preact](https://preactjs.com), and
 [React](https://reactjs.org).
 
 If none of those is your preferred view library, fear not. It is straightforward to use just about

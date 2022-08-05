@@ -9,7 +9,7 @@
 ## Nested Components
 
 `meiosis-setup` automatically sets up Meiosis with Nesting (explained in the Meiosis Documentation:
-[reference](http://meiosis.js.org/docs/09-nesting.html)), so that you can call `cell.nest` to get a
+[reference](https://meiosis.js.org/docs/09-nesting.html)), so that you can call `cell.nest` to get a
 nested cell:
 
 ```js

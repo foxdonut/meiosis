@@ -28,8 +28,6 @@ const app = {
 const cells = meiosisSetup({ app });
 ```
 
-Initial state can also be nested using [nested components](setup-nested-components.html).
-
 @docs-nav-start
 @nav-prev:setup-patches.html:Patches
 @nav-setup-toc

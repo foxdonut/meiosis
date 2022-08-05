@@ -9,7 +9,7 @@
 ## Services
 
 To set up Meiosis with Services (explained in the Meiosis Documentation:
-[reference](http://meiosis.js.org/docs/08-services.html)), use the `services` property of `app`:
+[reference](https://meiosis.js.org/docs/08-services.html)), use the `services` property of `app`:
 
 ```js
 const app = {

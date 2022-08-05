@@ -29,6 +29,9 @@ filenames.forEach((source) => {
     if (line.startsWith('@docs-nav-start')) {
       line = '<div class="docs-nav">';
     }
+    else if (line.startsWith('@nav-empty')) {
+      line = '<span></span>';
+    }
     else if (line.startsWith('@nav-setup-toc') || line.startsWith('@nav-toc')) {
       const toc = line.startsWith('@nav-toc') ? 'toc' : 'setup-toc';
       line = `  <a class="toc" href="${toc}.html">&#x2B06; Contents</a>`;
