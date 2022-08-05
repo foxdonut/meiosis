@@ -3,21 +3,26 @@ import { meiosisSetup } from 'meiosis-setup';
 interface State {
   name: string;
   age: number;
+  phone: {
+    home: string;
+    work: string;
+  }
 }
 
 const cells = meiosisSetup<State>();
 const cell = cells();
-
-// Add a dot (.) after cell and see auto-suggested cell properties
 cell;
 
-// Add a dot (.) after state and see auto-suggested state properties
-cell.state;
+// Uncomment the next line and pass a string to nest().
+// Notice that auto-suggest indicates valid properties,
+// and that specifying an invalid property results in an error.
+// Specify 'phone' to create a nested cell.
+// const nestedCell = cell.nest();
 
-cell.update({ name: 'Meiosis' });
+// Enter a dot (.) after state and notice that auto-suggest
+// indicates 'home' and 'work'.
+// nestedCell.state;
 
-// uncomment and see the patch in error since 'invalid' is not a property of State
-// cell.update({ invalid: true });
-
-// uncomment and see the patch in error since 'not valid' is not a number
-// cell.update({ age: 'not valid'});
+// Enter an empty object {} within update(), notice that auto-suggest
+// indicates 'home' and 'work'.
+// nestedCell.update();

@@ -120,6 +120,15 @@ Below, you can see this in action:
 
 ### Nested Cells
 
+By calling `cell.nest('...')`, we can create a nested cell. With TypeScript support, when entering a
+string within `nest('')`, auto-suggest indicates valid properties. Moreover, specifying an invalid
+property results in an error.
+
+Once we have a nested cell, `cell.state.x..` auto-suggested nested properties, as does
+`cell.update({ x: ... })`.
+
+Try experimenting with the code below.
+
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
 
 ### Nested Components
