@@ -113,7 +113,13 @@ function, are automatically typed.</li>
 </ul>
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
 
-<h3>Nested Cells</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
+<h3>Nested Cells</h3><p>By calling <code>cell.nest(&#39;...&#39;)</code>, we can create a nested cell. With TypeScript support, when entering a
+string within <code>nest(&#39;&#39;)</code>, auto-suggest indicates valid properties. Moreover, specifying an invalid
+property results in an error.</p>
+<p>Once we have a nested cell, <code>cell.state.x..</code> auto-suggested nested properties, as does
+<code>cell.update({ x: ... })</code>.</p>
+<p>Try experimenting with the code below.</p>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
 
 <h3>Nested Components</h3><iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-components.ts" style="width:100%;height:500px"></iframe>
 
