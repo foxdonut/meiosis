@@ -25,8 +25,8 @@
 </div>
 
 <h2>Patches</h2><p>In the Meiosis Documentation, the Meiosis pattern is setup up either with
-<a href="http://meiosis.js.org/docs/04-meiosis-with-function-patches.html">Function Patches</a> or
-<a href="http://meiosis.js.org/docs/05-meiosis-with-mergerino.html">Mergerino</a>. The idea is that using
+<a href="https://meiosis.js.org/docs/04-meiosis-with-function-patches.html">Function Patches</a> or
+<a href="https://meiosis.js.org/docs/05-meiosis-with-mergerino.html">Mergerino</a>. The idea is that using
 Function Patches gives you the option of having one less library dependency.</p>
 <p>On the other hand, <code>meiosis-setup</code> takes a &quot;ready-to-use&quot; approach and includes Mergerino as a
 dependency. Since Mergerino handles Function Patches, there is no need to choose between the two
@@ -39,12 +39,14 @@ cells().update(...); // Function Patch or Mergerino works
 </code></pre>
 <p>Here is an example:</p>
 <blockquote>
-<p>In the embedded examples, the exported global <code>Meiosis</code> is used instead of <code>import meiosisSetup from &#39;...&#39;</code>.</p>
+<p>In the embedded examples, the exported global <code>Meiosis</code> is used instead of
+<code>import { meiosisSetup } from &#39;meiosis-setup&#39;</code> so that the code works in
+<a href="https://flems.io">Flems</a>.</p>
 </blockquote>
 <div id="flems1" class="flemscode" style=""></div>
   <script>
     window.Flems(flems1, {
-      files: [{name: "setup-function-patches-or-mergerino.js", content: "/* global Meiosis */\nconst meiosisSetup = Meiosis.setup;\n\nconst cells = meiosisSetup();\nconsole.log(cells().state);\n\n// Function Patch\ncells().update((state) => ({ ...state, counter: 1 }));\nconsole.log(cells().state);\n\n// Mergerino\ncells().update({ counter: 2 });\nconsole.log(cells().state);\n", compiler: "babel"}],
+      files: [{name: "setup-patches.js", content: "/* global Meiosis */\nconst meiosisSetup = Meiosis.setup;\n\nconst cells = meiosisSetup();\nconsole.log(cells().state);\n\n// Function Patch\ncells().update((state) => ({ ...state, counter: 1 }));\nconsole.log(cells().state);\n\n// Mergerino\ncells().update({ counter: 2 });\nconsole.log(cells().state);\n", compiler: "babel"}],
       links: [{name: "meiosis-setup", type: "js", url: "https://unpkg.com/meiosis-setup/meiosis-setup.js"}],
       middle: 75
     })
@@ -66,7 +68,7 @@ cells().update(...); // Function Patch or Mergerino works
 
 <div>
 <a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
-(<a href="http://twitter.com/foxdonut00">Twitter</a> /
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
 <a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
 </div>
 </div>
