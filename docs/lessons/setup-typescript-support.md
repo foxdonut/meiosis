@@ -137,7 +137,7 @@ Try experimenting with the code below.
 
 ### API Documentation
 
-[TypeScript API documentation is here.](ts-docs/index.html)
+[TypeScript API documentation is here.](ts-docs/modules/types.html)
 
 @docs-nav-start
 @nav-prev:setup-nested-components.html:Nested Components

@@ -7,30 +7,24 @@ documentation on the [Meiosis pattern](https://meiosis.js.org/docs/toc.html).
 
 ## Features
 
-- Works with function patches and [Mergerino](#setup-with-mergerino)
+- Works with function patches and [Mergerino](https://github.com/fuzetsu/mergerino)
 - Includes a simple stream implementation, or you can use [Flyd](https://github.com/paldepind/flyd)
 or [Mithril Stream](https://mithril.js.org/stream.html)
-- Sets up Services and Nested Components
+- Sets up Initial State, Services, and Nested Components
 - Provides [TypeScript](https://www.typescriptlang.org/) support
 
 ## Installation
 
-Using Node.js:
+Using npm:
 
 ```
 npm i meiosis-setup
 ```
 
-Then you can import using:
+Then you can import it and use it with this code:
 
 ```js
-import meiosisSetup from 'meiosis-setup/functionPatches';
-
-// or
-
-import meiosisSetup from 'meiosis-setup/mergerino';
-
-// then
+import { meiosisSetup } from 'meiosis-setup';
 
 const cells = meiosisSetup();
 ```
@@ -38,22 +32,24 @@ const cells = meiosisSetup();
 With a script tag:
 
 ```html
-<script src="http://unpkg.com/meiosis-setup"></script>
+<script src="https://unpkg.com/meiosis-setup/meiosis-setup.js"></script>
+```
+
+Or load the minimized version:
+
+```html
+<script src="https://unpkg.com/meiosis-setup/meiosis-setup.min.js"></script>
 ```
 
 Then use the `Meiosis` global variable:
 
 ```js
-const cells = Meiosis.functionPatches.setup();
-
-// or
-
-const cells = Meiosis.mergerino.setup();
+const cells = Meiosis.setup();
 ```
 
 ## Documentation
 
-Please see [`meiosis-setup` Documentation](https://meiosis.js.org/docs/setup-toc.html).
+Please refer to the [`meiosis-setup` Documentation](https://meiosis.js.org/docs/setup-toc.html).
 
 ## Credits
 

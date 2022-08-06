@@ -1,7 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
 @docs-nav-start
-@nav-prev:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-prev:04-meiosis-with-function-patches.html:Function Patches
 @nav-toc
 @nav-next:06-cells.html:Cells
 @docs-nav-end
@@ -298,7 +298,7 @@ When you are ready, continue on to the next section, where we will combine the `
 into **cells**.
 
 @docs-nav-start
-@nav-prev:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-prev:04-meiosis-with-function-patches.html:Function Patches
 @nav-toc
 @nav-next:06-cells.html:Cells
 @docs-nav-end

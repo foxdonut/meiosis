@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:09-nesting.html:Nesting
 @nav-toc
-@nav-next:11-the-meiosis-pattern.html:The Meiosis Pattern Cheatsheet
+@nav-next:11-the-meiosis-pattern.html:Cheatsheet
 @docs-nav-end
 
 ## Preventing Re-Renders
@@ -101,6 +101,6 @@ the user interface. Other components do not get re-rendered.
 @docs-nav-start
 @nav-prev:09-nesting.html:Nesting
 @nav-toc
-@nav-next:11-the-meiosis-pattern.html:The Meiosis Pattern Cheatsheet
+@nav-next:11-the-meiosis-pattern.html:Cheatsheet
 @docs-nav-end
 

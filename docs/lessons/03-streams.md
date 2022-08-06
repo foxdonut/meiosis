@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:02-initial-state-and-actions.html:Initial State and Actions
 @nav-toc
-@nav-next:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-next:04-meiosis-with-function-patches.html:Function Patches
 @docs-nav-end
 
 ## Streams
@@ -266,6 +266,6 @@ When you are ready, continue on to
 @docs-nav-start
 @nav-prev:02-initial-state-and-actions.html:Initial State and Actions
 @nav-toc
-@nav-next:04-meiosis-with-function-patches.html:Meiosis with Function Patches
+@nav-next:04-meiosis-with-function-patches.html:Function Patches
 @docs-nav-end
 

@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:03-streams.html:Streams
 @nav-toc
-@nav-next:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@nav-next:05-meiosis-with-mergerino.html:Mergerino
 @docs-nav-end
 
 ## Meiosis with Function Patches
@@ -116,6 +116,6 @@ In the next section, we will look at an alternative to function patches, called 
 @docs-nav-start
 @nav-prev:03-streams.html:Streams
 @nav-toc
-@nav-next:05-meiosis-with-mergerino.html:Meiosis with Mergerino
+@nav-next:05-meiosis-with-mergerino.html:Mergerino
 @docs-nav-end
 

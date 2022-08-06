@@ -1,6 +1,7 @@
 # [Meiosis](https://meiosis.js.org) Documentation
 
 @docs-nav-start
+@nav-empty
 @nav-toc
 @nav-next:02-initial-state-and-actions.html:Initial State and Actions
 @docs-nav-end
@@ -57,7 +58,7 @@ window.
 Let's get started.
 
 @docs-nav-start
+@nav-empty
 @nav-toc
 @nav-next:02-initial-state-and-actions.html:Initial State and Actions
 @docs-nav-end
-

@@ -77,6 +77,7 @@ const app = {
     ),
     cell.nested[cell.state.page].view(cell),
     m('div',
+      m('hr'),
       m('pre', JSON.stringify(cell.state, null, 2)))
   ]
 };
