@@ -13,33 +13,36 @@ documentation on the <a href="https://meiosis.js.org/docs/toc.html">Meiosis patt
   <h2>Features</h2>
 </a>
 <ul>
-<li>Works with function patches and <a href="#setup-with-mergerino">Mergerino</a></li>
+<li>Works with function patches and <a href="https://github.com/fuzetsu/mergerino">Mergerino</a></li>
 <li>Includes a simple stream implementation, or you can use <a href="https://github.com/paldepind/flyd">Flyd</a>
 or <a href="https://mithril.js.org/stream.html">Mithril Stream</a></li>
-<li>Sets up Services and Nested Components</li>
+<li>Sets up Initial State, Services, and Nested Components</li>
 <li>Provides <a href="https://www.typescriptlang.org/">TypeScript</a> support</li>
 </ul>
 
 <a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
   <h2>Installation</h2>
 </a>
-<p>Using Node.js:</p>
+<p>Using npm:</p>
 <pre><code><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-0">i</span><span class="hl-1"> </span><span class="hl-0">meiosis</span><span class="hl-1">-</span><span class="hl-0">setup</span>
 </code></pre>
-<p>Then you can import using:</p>
-<pre><code class="language-js"><span class="hl-2">import</span><span class="hl-1"> </span><span class="hl-0">meiosisSetup</span><span class="hl-1"> </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&#39;meiosis-setup/functionPatches&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">// or</span><br/><br/><span class="hl-2">import</span><span class="hl-1"> </span><span class="hl-0">meiosisSetup</span><span class="hl-1"> </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&#39;meiosis-setup/mergerino&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">// then</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">cells</span><span class="hl-1"> = </span><span class="hl-7">meiosisSetup</span><span class="hl-1">();</span>
+<p>Then you can import it and use it with this code:</p>
+<pre><code class="language-js"><span class="hl-2">import</span><span class="hl-1"> { </span><span class="hl-0">meiosisSetup</span><span class="hl-1"> } </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&#39;meiosis-setup&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">cells</span><span class="hl-1"> = </span><span class="hl-6">meiosisSetup</span><span class="hl-1">();</span>
 </code></pre>
 <p>With a script tag:</p>
-<pre><code class="language-html"><span class="hl-8">&lt;</span><span class="hl-9">script</span><span class="hl-10"> </span><span class="hl-11">src</span><span class="hl-10">=</span><span class="hl-12">&quot;http://unpkg.com/meiosis-setup&quot;</span><span class="hl-8">&gt;&lt;/</span><span class="hl-9">script</span><span class="hl-8">&gt;</span>
+<pre><code class="language-html"><span class="hl-7">&lt;</span><span class="hl-8">script</span><span class="hl-9"> </span><span class="hl-10">src</span><span class="hl-9">=</span><span class="hl-11">&quot;https://unpkg.com/meiosis-setup/meiosis-setup.js&quot;</span><span class="hl-7">&gt;&lt;/</span><span class="hl-8">script</span><span class="hl-7">&gt;</span>
+</code></pre>
+<p>Or load the minimized version:</p>
+<pre><code class="language-html"><span class="hl-7">&lt;</span><span class="hl-8">script</span><span class="hl-9"> </span><span class="hl-10">src</span><span class="hl-9">=</span><span class="hl-11">&quot;https://unpkg.com/meiosis-setup/meiosis-setup.min.js&quot;</span><span class="hl-7">&gt;&lt;/</span><span class="hl-8">script</span><span class="hl-7">&gt;</span>
 </code></pre>
 <p>Then use the <code>Meiosis</code> global variable:</p>
-<pre><code class="language-js"><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">cells</span><span class="hl-1"> = </span><span class="hl-0">Meiosis</span><span class="hl-1">.</span><span class="hl-0">functionPatches</span><span class="hl-1">.</span><span class="hl-7">setup</span><span class="hl-1">();</span><br/><br/><span class="hl-4">// or</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">cells</span><span class="hl-1"> = </span><span class="hl-0">Meiosis</span><span class="hl-1">.</span><span class="hl-0">mergerino</span><span class="hl-1">.</span><span class="hl-7">setup</span><span class="hl-1">();</span>
+<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">cells</span><span class="hl-1"> = </span><span class="hl-0">Meiosis</span><span class="hl-1">.</span><span class="hl-6">setup</span><span class="hl-1">();</span>
 </code></pre>
 
 <a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
   <h2>Documentation</h2>
 </a>
-<p>Please see <a href="https://meiosis.js.org/docs/setup-toc.html"><code>meiosis-setup</code> Documentation</a>.</p>
+<p>Please refer to the <a href="https://meiosis.js.org/docs/setup-toc.html"><code>meiosis-setup</code> Documentation</a>.</p>
 
 <a href="#credits" id="credits" style="color: inherit; text-decoration: none;">
   <h2>Credits</h2>
