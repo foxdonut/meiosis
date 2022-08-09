@@ -111,12 +111,53 @@ cell.nested.one.view(cell)
 ```
 
 the parent view. This will automatically pass `cell.nest('one')` to the `view` function of
-`oneComponent`. If you need to pass more parameters to the view, add them and they will be passed
-along. For example:
+`oneComponent`.
+
+### Passing Additional Parameters
+
+If you need to pass more parameters to the view, add them and they will be passed along. For
+example:
 
 ```js
-cell.nested.one.view(cell, 'more', 'parameters')
+cell.nested.one.view(cell, cell.state.loggedInUser)
 ```
+
+The first parameter, `cell`, will pass the **nested** cell to the view. If we also need data from
+the parent state, we can pass it in the additional parameters, as shown above.
+
+### Updating Parent State
+
+Besides passing parent state to a nested component, we may sometimes need to update a parent state
+property from a nested component.
+
+Let's say we have a component that is nested within `login`, and we want to update the parent state
+by setting the `loggedInUser` property using the `onLogin` action below:
+
+```js
+const actions = {
+  onLogin: (cell, loggedInUser) => {
+    cell.update({ loggedInUser });
+  }
+};
+```
+
+Again we can simply pass an additional property to the view, this time passing a function that calls
+`actions.onLogin`:
+
+```js
+cell.nested.login.view(cell,
+  (loggedInUser) => actions.onLogin(cell, loggedInUser))
+```
+
+The nested `login` view can then get `onLogin` as a parameter:
+
+```js
+const login = {
+  view: (cell, onLogin) => ...
+};
+```
+
+The view can then call `onLogin` at the appropriate time, passing the logged in user.
 
 ### Deep Nesting
 
@@ -130,8 +171,14 @@ Below is an example of using nested components.
 Notice how the `login` and `data` components can focus on their state without being "aware" of where
 their state is nested within the application state.
 
-Also note how the application view can call `cell.nested[cell.state.page].view(cell)`, and
-`.view(cell)` will automatically pass the nested cell to the view.
+Also note how the application view can call nested views with `view(cell)`, which will automatically
+pass the nested cell to the view.
+
+The `login` component shows how to update the parent state by passing an additional callback
+parameter that calls `actions.onLogin.
+
+The `data` component exemplifies passing parent state to the component, in this case the logged in
+user.
 
 Finally, you can see that the `data` component is reused as-is simply by nesting it with different
 properties, `data1` and `data2`.

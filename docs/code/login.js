@@ -22,7 +22,7 @@ export const login = {
       }
     }
   ],
-  view: (cell) => [
+  view: (cell, onLogin) => [
     m('h4', 'Login page'),
     m('div',
       {
@@ -44,7 +44,12 @@ export const login = {
         value: cell.state.password,
         oninput: (evt) =>
           cell.update({ password: evt.target.value })
-      })
+      }),
+      m('div',
+        m('button.btn.btn-primary',
+          { onclick: () => onLogin(cell.state.username) },
+          'Login')
+      )
     )
   ]
 };

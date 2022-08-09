@@ -5,9 +5,10 @@
   "description": "meiosis-setup examples",
   "main": "src/index.js",
   "scripts": {
+    "server": "static-server -p 9000",
     "start": "webpack",
-    "watch": "webpack --progress --watch",
-    "server": "static-server -p ${PORT:-9000}"
+    "poststart": "npm run server",
+    "watch": "webpack --progress --watch"
   },
   "repository": {
     "type": "git",

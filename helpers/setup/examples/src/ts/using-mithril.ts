@@ -1,9 +1,9 @@
 // mithril + mergerino + mithril-stream
 import { meiosisSetup } from 'meiosis-setup';
-import { MeiosisViewComponent, Service } from 'meiosis-setup/types';
+import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
 import m from 'mithril';
 import Stream from 'mithril/stream';
-import { DomEvent, Page, State } from './types';
+import { DomEvent, Page, PageKey, State } from './types';
 import { home } from './home';
 import { login } from './login';
 import { data } from './data';
@@ -19,6 +19,20 @@ const pageService: Service<State> = {
     }, {} as Record<string, Page>);
     cell.update(pagePatch);
   }
+};
+
+const actions = {
+  onLogin: (cell: MeiosisCell<State>, loggedInUser: string): void => {
+    cell.update({ loggedInUser, page: 'data1' });
+  }
+};
+
+const views: Record<PageKey, (cell: MeiosisCell<State>) => any> = {
+  home: (cell) => cell.nested.home.view(cell),
+  login: (cell) => cell.nested.login.view(cell,
+    (loggedInUser: string) => actions.onLogin(cell, loggedInUser)),
+  data1: (cell) => cell.nested.data1.view(cell, cell.state.loggedInUser),
+  data2: (cell) => cell.nested.data2.view(cell, cell.state.loggedInUser)
 };
 
 const app: MeiosisViewComponent<State> = {
@@ -81,7 +95,7 @@ const app: MeiosisViewComponent<State> = {
             'Data 2'
           )
         ),
-        cell.nested[cell.state.page].view(cell)
+        views[cell.state.page](cell)
       ),
       m('div.col-4', m('pre', JSON.stringify(cell.state, null, 2)))
     )

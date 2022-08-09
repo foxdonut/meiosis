@@ -17,6 +17,22 @@ const pageService = {
   }
 };
 
+const actions = {
+  onLogin: (cell, loggedInUser) => {
+    cell.update({ loggedInUser, page: 'data1' });
+  }
+};
+
+const views = {
+  home: (cell) => cell.nested.home.view(cell),
+  login: (cell) => cell.nested.login.view(cell,
+    (loggedInUser) => actions.onLogin(cell, loggedInUser)),
+  data1: (cell) => cell.nested.data1.view(
+    cell, cell.state.loggedInUser),
+  data2: (cell) => cell.nested.data2.view(
+    cell, cell.state.loggedInUser)
+};
+
 const app = {
   initial: {
     page: 'home'
@@ -75,7 +91,7 @@ const app = {
         'Data 2'
       )
     ),
-    cell.nested[cell.state.page].view(cell),
+    views[cell.state.page](cell),
     m('div',
       m('hr'),
       m('pre', JSON.stringify(cell.state, null, 2)))

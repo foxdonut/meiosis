@@ -24,7 +24,7 @@ export const login: MeiosisViewComponent<Login> = {
       }
     }
   ],
-  view: (cell) => [
+  view: (cell, onLogin) => [
     m('h4', 'Login page'),
     m('div',
       {
@@ -45,6 +45,9 @@ export const login: MeiosisViewComponent<Login> = {
         value: cell.state.password,
         oninput: (evt: DomEvent) => cell.update({ password: evt.target.value })
       })
+    ),
+    m('div',
+      m('button.btn.btn-primary', { onclick: () => onLogin(cell.state.username) }, 'Login')
     )
   ]
 };
