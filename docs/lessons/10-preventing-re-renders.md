@@ -103,4 +103,3 @@ the user interface. Other components do not get re-rendered.
 @nav-toc
 @nav-next:11-the-meiosis-pattern.html:Cheatsheet
 @docs-nav-end
-

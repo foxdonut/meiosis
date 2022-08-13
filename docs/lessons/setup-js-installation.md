@@ -2,19 +2,16 @@
 
 @docs-nav-start
 @nav-empty
-@nav-setup-toc
-@nav-next:setup-patches.html:Patches
+@nav-setup-js-toc
+@nav-next:setup-js-patches.html:Patches
 @docs-nav-end
 
 ## Installation
 
 You can install `meiosis-setup`:
 
-- Using Node.js, or,
+- Using npm, or,
 - Using an HTML `<script>` tag.
-
-In both cases, the setup will give you a stream of cells as explained in the
-[Meiosis documentation](toc.html).
 
 ### Using npm
 
@@ -31,9 +28,6 @@ import { meiosisSetup } from 'meiosis-setup';
 
 const cells = meiosisSetup();
 ```
-
-> Note: we are using JavaScript code, but we will also see how to use Meiosis with TypeScript code
-> in the [TypeScript Support section](setup-typescript-support.html).
 
 ### Using an HTML `<script>` tag
 
@@ -55,8 +49,11 @@ Then use the `Meiosis` global variable:
 const cells = Meiosis.setup();
 ```
 
+In both cases, the setup gives you a stream of cells as explained in the
+[Meiosis documentation](06-cells.html).
+
 @docs-nav-start
 @nav-empty
-@nav-setup-toc
-@nav-next:setup-patches.html:Patches
+@nav-setup-js-toc
+@nav-next:setup-js-patches.html:Patches
 @docs-nav-end

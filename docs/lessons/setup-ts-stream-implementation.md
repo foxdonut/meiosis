@@ -1,8 +1,8 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-typescript-support.html:TypeScript Support
-@nav-setup-toc
+@nav-prev:setup-nested-components.html:Nested Components
+@nav-setup-ts-toc
 @docs-nav-end
 
 ## Stream Implementation
@@ -52,7 +52,6 @@ Adapting a different stream library is usually not necessary, since using either
 `Flyd`, or `Mithril Stream` should be suitable.
 
 @docs-nav-start
-@nav-prev:setup-typescript-support.html:TypeScript Support
-@nav-setup-toc
+@nav-prev:setup-nested-components.html:Nested Components
+@nav-setup-ts-toc
 @docs-nav-end
-

@@ -1,9 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-patches.html:Patches
-@nav-setup-toc
-@nav-next:setup-view-library.html:View Library
+@nav-prev:setup-js-patches.html:Patches
+@nav-setup-js-toc
+@nav-next:setup-js-view-library.html:View Library
 @docs-nav-end
 
 ## Initial State
@@ -29,8 +29,7 @@ const cells = meiosisSetup({ app });
 ```
 
 @docs-nav-start
-@nav-prev:setup-patches.html:Patches
-@nav-setup-toc
-@nav-next:setup-view-library.html:View Library
+@nav-prev:setup-js-patches.html:Patches
+@nav-setup-js-toc
+@nav-next:setup-js-view-library.html:View Library
 @docs-nav-end
-

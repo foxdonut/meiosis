@@ -118,4 +118,3 @@ In the next section, we will look at an alternative to function patches, called 
 @nav-toc
 @nav-next:05-meiosis-with-mergerino.html:Mergerino
 @docs-nav-end
-

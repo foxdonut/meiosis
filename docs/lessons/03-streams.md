@@ -268,4 +268,3 @@ When you are ready, continue on to
 @nav-toc
 @nav-next:04-meiosis-with-function-patches.html:Function Patches
 @docs-nav-end
-

@@ -12,16 +12,10 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 - Sets up Initial State, Services, and Nested Components
 - Provides [TypeScript](https://www.typescriptlang.org/) support
 
-## Table of Contents
+## JavaScript or TypeScript
 
-- [Installation](setup-installation.html)
-- [Patches](setup-patches.html)
-- [Initial State](setup-initial-state.html)
-- [View Library](setup-view-library.html)
-- [Services](setup-services.html)
-- [Nested Components](setup-nested-components.html)
-- [TypeScript Support](setup-typescript-support.html)
-- [Stream Implementation](setup-stream-implementation.html)
+The `meiosis-setup` documentation is available both in a JavaScript and a TypeScript version. Choose
+below.
 
------
-
+- [JavaScript version](setup-js-toc.html)
+- [TypeScript version](setup-ts-toc.html)

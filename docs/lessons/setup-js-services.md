@@ -1,9 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-view-library.html:View Library
-@nav-setup-toc
-@nav-next:setup-nested-components.html:Nested Components
+@nav-prev:setup-js-view-library.html:View Library
+@nav-setup-js-toc
+@nav-next:setup-js-nested-components.html:Nested Components
 @docs-nav-end
 
 ## Services
@@ -51,8 +51,7 @@ const service = {
 Services can also be nested using nested components, which we will look at next.
 
 @docs-nav-start
-@nav-prev:setup-view-library.html:View Library
-@nav-setup-toc
-@nav-next:setup-nested-components.html:Nested Components
+@nav-prev:setup-js-view-library.html:View Library
+@nav-setup-js-toc
+@nav-next:setup-js-nested-components.html:Nested Components
 @docs-nav-end
-

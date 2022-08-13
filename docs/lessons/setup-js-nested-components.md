@@ -1,9 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-services.html:Services
-@nav-setup-toc
-@nav-next:setup-typescript-support.html:TypeScript Support
+@nav-prev:setup-js-services.html:Services
+@nav-setup-js-toc
+@nav-next:setup-ts-stream-implementation.html:Stream Implementation
 @docs-nav-end
 
 ## Nested Components
@@ -186,8 +186,7 @@ properties, `data1` and `data2`.
 @flems {"files":"code/setup-nested-components.js,code/home.js,code/login.js,code/data.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
 
 @docs-nav-start
-@nav-prev:setup-services.html:Services
-@nav-setup-toc
-@nav-next:setup-typescript-support.html:TypeScript Support
+@nav-prev:setup-js-services.html:Services
+@nav-setup-js-toc
+@nav-next:setup-ts-stream-implementation.html:Stream Implementation
 @docs-nav-end
-

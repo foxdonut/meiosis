@@ -1,9 +1,9 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-installation.html:Installation
-@nav-setup-toc
-@nav-next:setup-initial-state.html:Initial State
+@nav-prev:setup-js-installation.html:Installation
+@nav-setup-js-toc
+@nav-next:setup-js-initial-state.html:Initial State
 @docs-nav-end
 
 ## Patches
@@ -34,8 +34,7 @@ Here is an example:
 @flems {"files":"code/setup-patches.js","libs":"meiosis-setup"}
 
 @docs-nav-start
-@nav-prev:setup-installation.html:Installation
-@nav-setup-toc
-@nav-next:setup-initial-state.html:Initial State
+@nav-prev:setup-js-installation.html:Installation
+@nav-setup-js-toc
+@nav-next:setup-js-initial-state.html:Initial State
 @docs-nav-end
-

@@ -32,8 +32,13 @@ filenames.forEach((source) => {
     else if (line.startsWith('@nav-empty')) {
       line = '<span></span>';
     }
-    else if (line.startsWith('@nav-setup-toc') || line.startsWith('@nav-toc')) {
-      const toc = line.startsWith('@nav-toc') ? 'toc' : 'setup-toc';
+    else if (line.startsWith('@nav-toc')
+      || line.startsWith('@nav-setup-js-toc')
+      || line.startsWith('@nav-setup-ts-toc')) {
+
+      const toc = line.startsWith('@nav-toc') ? 'toc' :
+        line.startsWith('@nav-setup-js-toc') ? 'setup-js-toc' : 'setup-ts-toc';
+
       line = `  <a class="toc" href="${toc}.html">&#x2B06; Contents</a>`;
     }
     else if (line.startsWith('@nav-prev') || line.startsWith('@nav-next')) {

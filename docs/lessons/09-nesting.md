@@ -200,4 +200,3 @@ In the next section, we'll look at an optional performance enhancement: preventi
 @nav-toc
 @nav-next:10-preventing-re-renders.html:Preventing Re-Renders
 @docs-nav-end
-

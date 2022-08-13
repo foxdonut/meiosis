@@ -225,4 +225,3 @@ In the next section, we'll look at another feature that we can add to Meiosis: *
 @nav-toc
 @nav-next:09-nesting.html:Nesting
 @docs-nav-end
-

@@ -14,4 +14,3 @@
 - [Preventing Re-renders](10-preventing-re-renders.html)
 - [The Meiosis Pattern Cheatsheet](11-the-meiosis-pattern.html)
 - [What's Next?](12-whats-next.html)
-

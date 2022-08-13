@@ -22,4 +22,3 @@ Thank you for reading. I hope you enjoy Meiosis!
 @nav-prev:11-the-meiosis-pattern.html:The Meiosis Pattern Cheatsheet
 @nav-toc
 @docs-nav-end
-
