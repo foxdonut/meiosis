@@ -56,6 +56,8 @@ const cell = cells();
 We now have a stream of cells with each cell having `state` of type `State` and having `update`
 taking patches that must be compatible with `State`.
 
+As mentioned earlier, both Function Patches and Mergerino work to update the state.
+
 In the example below, you can experiment with TypeScript support. Try the following:
 
 - On the line with `cell`, add a dot (.) after `cell` and see the auto-suggested `cell` properties.
@@ -66,7 +68,7 @@ In the example below, you can experiment with TypeScript support. Try the follow
 - Uncomment the line `cell.update({ age: 'not valid'});` and see the patch in error since
   `'not valid'` is not a `number`.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/basic.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/patches.ts" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-installation.html:Installation

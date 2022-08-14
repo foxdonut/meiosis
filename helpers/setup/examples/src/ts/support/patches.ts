@@ -6,13 +6,22 @@ interface State {
 }
 
 const cells = meiosisSetup<State>();
+const cell = cells();
 
-console.log(cells().state);
+// Add a dot (.) after cell and see auto-suggested cell properties
+cell;
+
+// Add a dot (.) after state and see auto-suggested state properties
+cell.state;
 
 // Function Patch
-cells().update((state) => ({ ...state, age: 21 }));
-console.log(cells().state);
+cell.update((state) => ({ ...state, age: 21 }));
 
 // Mergerino
-cells().update({ age: 24 });
-console.log(cells().state);
+cell.update({ age: 24 });
+
+// uncomment and see the patch in error since 'invalid' is not a property of State
+// cell.update({ invalid: true });
+
+// uncomment and see the patch in error since 'not valid' is not a number
+// cell.update({ age: 'not valid'});
