@@ -4,12 +4,13 @@ import { MeiosisComponent, Service } from 'meiosis-setup/types';
 interface State {
   name: string;
   age: number;
+  status: string;
 }
 
 const service: Service<State> = {
   onchange: (state) => state.age,
   run: (cell) => {
-    cell.update({ age: (value) => value + 1 });
+    cell.update({ status: cell.state.age >= 21 ? 'adult' : 'minor' });
   }
 };
 
