@@ -1,3 +1,3 @@
-import { setupMithrilExample } from './ts/using-mithril';
+import { setupNestedComponents } from './ts/nested-components';
 
-setupMithrilExample();
+setupNestedComponents();

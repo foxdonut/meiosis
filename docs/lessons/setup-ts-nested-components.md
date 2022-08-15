@@ -8,6 +8,8 @@
 
 ## Nested Components
 
+### Nested Cell TypeScript Support
+
 `meiosis-setup` automatically sets up Meiosis with Nesting (explained in the Meiosis Documentation:
 [reference](https://meiosis.js.org/docs/09-nesting.html)), so that you can call `cell.nest` to get a
 nested cell:
@@ -15,6 +17,18 @@ nested cell:
 ```js
 cell.nest('someProperty')
 ```
+
+With TypeScript support, when entering a string within `nest('')`, auto-suggest indicates valid
+properties. Moreover, specifying an invalid property results in an error.
+
+Once we have a nested cell, `cell.state.x..` auto-suggested nested properties, as does
+`cell.update({ x: ... })`.
+
+Try experimenting with the code below.
+
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
+
+### Nested Components
 
 `meiosis-setup` also provides **nested components**. This conveniently combines nesting of:
 - initial state
@@ -184,6 +198,10 @@ Finally, you can see that the `data` component is reused as-is simply by nesting
 properties, `data1` and `data2`.
 
 @flems {"files":"code/setup-nested-components.js,code/home.js,code/login.js,code/data.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
+
+### Nested Components
+
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/nested-components.ts" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-services.html:Services

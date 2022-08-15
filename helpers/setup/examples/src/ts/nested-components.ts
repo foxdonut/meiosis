@@ -101,7 +101,7 @@ const app: MeiosisViewComponent<State> = {
     )
 };
 
-export const setupMithrilExample = (): void => {
+export const setupNestedComponents = (): void => {
   const cells = meiosisSetup<State>({ stream: Stream, app });
 
   m.mount(document.getElementById('tsMithrilApp') as HTMLElement, {

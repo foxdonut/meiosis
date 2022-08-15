@@ -13,8 +13,9 @@ const cells = meiosisSetup<State>();
 const cell = cells();
 cell;
 
-// Uncomment the next line and pass an emptry string to nest().
-// Press Ctrl+Space and notice that auto-suggest indicates valid properties,
+// Uncomment the next line and pass an empty string to nest().
+// Place the cursor inside the empty string and press Ctrl+Space,
+// notice that auto-suggest indicates valid properties,
 // and that specifying an invalid property results in an error.
 // Specify 'phone' to create a nested cell.
 // const nestedCell = cell.nest();
