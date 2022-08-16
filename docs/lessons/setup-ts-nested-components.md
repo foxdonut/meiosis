@@ -197,11 +197,7 @@ user.
 Finally, you can see that the `data` component is reused as-is simply by nesting it with different
 properties, `data1` and `data2`.
 
-@flems {"files":"code/setup-nested-components.js,code/home.js,code/login.js,code/data.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65,"height":800}
-
-### Nested Components
-
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:600px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-services.html:Services

@@ -32,16 +32,11 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
-tutorial/build
-tutorial/dist
 docs/build
 docs/dist
 docs/code/**/build
 docs/code/**/build-no-lib
 docs/code/**/build-with-lib
-helpers/routing/*.tgz
-helpers/routing/dist
-helpers/routing/docs
 helpers/router-setup/*.tgz
 helpers/router-setup/dist
 helpers/router-setup/docs
