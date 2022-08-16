@@ -5,28 +5,6 @@ var path = require('path');
 module.exports = [
   {
     mode: 'development',
-    entry: './src/index.js',
-    output: {
-      path: path.join(__dirname, 'build'),
-      filename: 'js-generated-app.js'
-    },
-    resolve: {
-      extensions: ['.js', '.jsx']
-    },
-    module: {
-      rules: [
-        {
-          test: /\.jsx?$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader'
-          }
-        }
-      ]
-    }
-  },
-  {
-    mode: 'development',
     entry: './src/index.ts',
     devtool: 'source-map',
     output: {

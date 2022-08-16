@@ -26,7 +26,7 @@ Once we have a nested cell, `cell.state.x..` auto-suggested nested properties, a
 
 Try experimenting with the code below.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/nested-cells.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/snippets/nested-cells.ts" style="width:100%;height:500px"></iframe>
 
 ### Nested Components
 
@@ -201,7 +201,7 @@ properties, `data1` and `data2`.
 
 ### Nested Components
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/nested-components.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-services.html:Services

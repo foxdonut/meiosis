@@ -66,7 +66,7 @@ Below, you can see TypeScript support for services in action:
   function, are automatically typed.
 - An invalid service object, such as `{}`, cannot be specified in the `services` array.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/ts/support/services.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/snippets/services.ts" style="width:100%;height:500px"></iframe>
 
 Services can also be nested using nested components, which we will look at next.
 
