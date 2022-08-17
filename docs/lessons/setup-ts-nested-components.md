@@ -197,7 +197,7 @@ user.
 Finally, you can see that the `data` component is reused as-is simply by nesting it with different
 properties, `data1` and `data2`.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:600px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/nested-components/index.ts&initialPath=index-view-nested-components.html" style="width:100%;height:600px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-services.html:Services

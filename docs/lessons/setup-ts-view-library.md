@@ -35,9 +35,13 @@ called after updating the state.
 
 Here is the setup code for Preact:
 
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-preact/index.ts&initialPath=index-view-preact.html" style="width:100%;height:500px"></iframe>
+
 ### React:
 
 Here is the setup code for React:
+
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-react/index.tsx&initialPath=index-view-react.html" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-initial-state.html:Initial State
