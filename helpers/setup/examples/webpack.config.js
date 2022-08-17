@@ -6,7 +6,7 @@ var directories = ['nested-components', 'view-mithril', 'view-preact', 'view-rea
 var extensions = {
   'nested-components': 'ts',
   'view-mithril': 'ts',
-  'view-preact': 'tsx',
+  'view-preact': 'ts',
   'view-react': 'tsx'
 };
 
