@@ -16,8 +16,6 @@ Each cell has `state` and `update` to read the state and update the state. Norma
 
 Here is the setup code for Mithril:
 
-@flems {"files":"code/setup-view-library-mithril.js,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,mithril,mergerino","middle":65}
-
 In the setup above, `m.redraw()` is called for every state change. This may or may not be acceptable
 depending in the application. If the application triggers many state changes very rapidly (such as
 tracking the mouse), it is preferable to remove the `m.redraw()` code:
@@ -35,13 +33,9 @@ called after updating the state.
 
 Here is the setup code for Preact:
 
-@flems {"files":"code/setup-view-library-preact.jsx,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,preact,mergerino","middle":65}
-
 ### React:
 
 Here is the setup code for React:
-
-@flems {"files":"code/setup-view-library-react.jsx,app.html,public/css/bootstrap-simplex.min.css,public/css/style.css","libs":"meiosis-setup,react,react-dom,mergerino","middle":65}
 
 @docs-nav-start
 @nav-prev:setup-ts-initial-state.html:Initial State

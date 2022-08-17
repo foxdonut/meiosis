@@ -2,14 +2,16 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 var path = require('path');
 
-module.exports = [
+var directories = ['nested-components', 'view-mithril', 'view-preact', 'view-react'];
+
+module.exports = directories.map((directory) => (
   {
     mode: 'development',
-    entry: './src/index.ts',
+    entry: `./src/${directory}/index.ts`,
     devtool: 'source-map',
     output: {
       path: path.join(__dirname, 'build'),
-      filename: 'ts-generated-app.js'
+      filename: `${directory}-generated-app.js`
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js']
@@ -33,4 +35,4 @@ module.exports = [
       ]
     }
   }
-];
+));
