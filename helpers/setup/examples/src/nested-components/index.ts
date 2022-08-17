@@ -98,7 +98,7 @@ const app: MeiosisViewComponent<State> = {
 
 const cells = meiosisSetup<State>({ stream: Stream, app });
 
-m.mount(document.getElementById('nestedComponentsApp') as HTMLElement, {
+m.mount(document.getElementById('app') as HTMLElement, {
   view: () => app.view(cells())
 });
 

@@ -16,6 +16,8 @@ Each cell has `state` and `update` to read the state and update the state. Norma
 
 Here is the setup code for Mithril:
 
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-mithril/index.ts&initialPath=index-view-mithril.html" style="width:100%;height:500px"></iframe>
+
 In the setup above, `m.redraw()` is called for every state change. This may or may not be acceptable
 depending in the application. If the application triggers many state changes very rapidly (such as
 tracking the mouse), it is preferable to remove the `m.redraw()` code:

@@ -36,12 +36,8 @@ const app: MeiosisViewComponent<State> = {
 
 const cells = meiosisSetup<State>({ app });
 
-const element = document.getElementById('app');
+m.mount(document.getElementById('app') as HTMLElement, {
+  view: () => app.view(cells())
+});
 
-if (element) {
-  m.mount(element, {
-    view: () => app.view(cells())
-  });
-
-  cells.map(() => m.redraw());
-}
+cells.map(() => m.redraw());
