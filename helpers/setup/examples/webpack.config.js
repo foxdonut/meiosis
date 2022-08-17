@@ -3,11 +3,17 @@
 var path = require('path');
 
 var directories = ['nested-components', 'view-mithril', 'view-preact', 'view-react'];
+var extensions = {
+  'nested-components': 'ts',
+  'view-mithril': 'ts',
+  'view-preact': 'tsx',
+  'view-react': 'tsx'
+};
 
 module.exports = directories.map((directory) => (
   {
     mode: 'development',
-    entry: `./src/${directory}/index.ts`,
+    entry: `./src/${directory}/index.${extensions[directory]}`,
     devtool: 'source-map',
     output: {
       path: path.join(__dirname, 'build'),
