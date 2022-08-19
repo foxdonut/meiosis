@@ -1,6 +1,6 @@
 import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
-import preact from 'preact';
+import { render } from 'preact';
 
 interface State {
   value: number;
@@ -37,5 +37,5 @@ const cells = meiosisSetup<State>({ app });
 
 const element = document.getElementById('app') as HTMLElement;
 cells.map((cell) => {
-  preact.render(app.view(cell), element);
+  render(app.view(cell), element);
 });
