@@ -16,7 +16,7 @@ Each cell has `state` and `update` to read the state and update the state. Norma
 
 Here is the setup code for Mithril:
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-mithril/index.ts&initialPath=index-view-mithril.html" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-mithril?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:500px"></iframe>
 
 In the setup above, `m.redraw()` is called for every state change. This may or may not be acceptable
 depending in the application. If the application triggers many state changes very rapidly (such as
@@ -35,13 +35,13 @@ called after updating the state.
 
 Here is the setup code for Preact:
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-preact/index.ts&initialPath=index-view-preact.html" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-preact?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.tsx" style="width:100%;height:500px"></iframe>
 
 ### React:
 
 Here is the setup code for React:
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=both&file=src/view-react/index.tsx&initialPath=index-view-react.html" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-react?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.tsx" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-initial-state.html:Initial State

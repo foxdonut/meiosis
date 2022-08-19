@@ -68,7 +68,7 @@ In the example below, you can experiment with TypeScript support. Try the follow
 - Uncomment the line `cell.update({ age: 'not valid'});` and see the patch in error since
   `'not valid'` is not a `number`.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/snippets/patches.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/patches.ts" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
 @nav-prev:setup-ts-installation.html:Installation

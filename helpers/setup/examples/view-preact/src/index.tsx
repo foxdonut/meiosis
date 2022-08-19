@@ -1,6 +1,6 @@
 import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
-import { h, render } from 'preact';
+import preact from 'preact';
 
 interface State {
   value: number;
@@ -16,28 +16,26 @@ const app: MeiosisViewComponent<State> = {
     value: 22
   },
   view: (cell) =>
-    h('div', {},
-      h('div', {}, `Temperature: ${cell.state.value} C`),
-      h('div', {},
-        h('button', {
-          className: 'btn btn-primary btn-sm',
-          onClick: () => actions.increment(cell, 1)
-        },
-          'Increment'
-        ),
-        h('button', {
-          className: 'btn btn-primary btn-sm ms-1',
-          onClick: () => actions.increment(cell, -1)
-        },
-          'Decrement'
-        )
-      )
-    )
+    <div>
+      <div>Temperature: {cell.state.value}&deg;C</div>
+      <div>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => actions.increment(cell, 1)}>
+          Increment
+        </button>
+        <button
+          className="btn btn-primary btn-sm ms-1"
+          onClick={() => actions.increment(cell, -1)}>
+          Decrement
+        </button>
+      </div>
+    </div>
 };
 
 const cells = meiosisSetup<State>({ app });
 
 const element = document.getElementById('app') as HTMLElement;
 cells.map((cell) => {
-  render(app.view(cell), element);
+  preact.render(app.view(cell), element);
 });

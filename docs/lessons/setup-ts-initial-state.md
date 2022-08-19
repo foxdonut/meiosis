@@ -50,7 +50,7 @@ In the example below, try the following in the `initial` object, which should re
 - Specify a property that does not exist on the `State` type.
 - Specify a value that does not match the type, for example a `string` on the `age` property.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/snippets/initial.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/initial.ts" style="width:100%;height:500px"></iframe>
 
 
 @docs-nav-start
