@@ -26,7 +26,7 @@ Once we have a nested cell, `cell.state.x..` auto-suggested nested properties, a
 
 Try experimenting with the code below.
 
-<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/snippets/nested-cells.ts" style="width:100%;height:500px"></iframe>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/nested-cells.ts" style="width:100%;height:500px"></iframe>
 
 ### Nested Components
 
@@ -42,37 +42,51 @@ Also, a component can be reused multiple times simply by nesting it again with a
 
 To specify nested components, use the `nested` property of `app`:
 
-```js
-const app = {
+```ts
+const app:MeiosisComponent<State> = {
   nested: {
     ...
   }
 };
 
-const cells = meiosisSetup({ app });
+const cells = meiosisSetup<State>({ app });
 ```
 
 Within `nested`, specify properties on the application state where components will be nested. For
-each property, specify an object with the same structure as an `app` object, that is, with
-`initial` and/or `services`. Moreover, you can also specify a `view`. For example:
+each property, specify an object with the same structure as an `app` object, that is, of type
+`MeiosisComponent<YourNestedState>`, with `initial` and/or `services`. Moreover, you can also
+specify a `view`, in which case you can use the type `MeiosisViewComponent<YourNestedState>`. For
+example:
 
-```js
-const oneComponent = {
+```ts
+interface One {
+  counter: number;
+}
+
+interface Two {
+  duck: string;
+}
+
+interface State {
+  one: One,
+  two: Two
+}
+
+const oneComponent: MeiosisComponent<One> = {
   initial: {
     counter: 0
   },
-  services: [...],
-  view: (cell) => ...
+  services: [...]
 };
 
-const twoComponent = {
+const twoComponent: MeiosisViewComponent<Two> = {
   initial: {
     duck: 'yellow'
   },
   view: (cell) => ...
 };
 
-const app = {
+const app: MeiosisComponent<State> = {
   nested: {
     one: oneComponent,
     two: twoComponent
@@ -149,7 +163,7 @@ by setting the `loggedInUser` property using the `onLogin` action below:
 
 ```js
 const actions = {
-  onLogin: (cell, loggedInUser) => {
+  onLogin: (cell: MeiosisCell<State>, loggedInUser: string): void => {
     cell.update({ loggedInUser });
   }
 };
@@ -160,14 +174,14 @@ Again we can simply pass an additional property to the view, this time passing a
 
 ```js
 cell.nested.login.view(cell,
-  (loggedInUser) => actions.onLogin(cell, loggedInUser))
+  (loggedInUser: string) => actions.onLogin(cell, loggedInUser))
 ```
 
 The nested `login` view can then get `onLogin` as a parameter:
 
 ```js
-const login = {
-  view: (cell, onLogin) => ...
+const login: MeiosisViewComponent<Login> = {
+  view: (cell, onLogin: (username: string) => void) => ...
 };
 ```
 

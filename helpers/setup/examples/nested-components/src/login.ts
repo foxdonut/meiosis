@@ -24,7 +24,7 @@ export const login: MeiosisViewComponent<Login> = {
       }
     }
   ],
-  view: (cell, onLogin) => [
+  view: (cell, onLogin: (username: string) => void) => [
     m('h4', 'Login page'),
     m('div',
       {

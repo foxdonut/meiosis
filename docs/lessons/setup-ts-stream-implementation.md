@@ -1,7 +1,7 @@
 # [meiosis-setup](https://meiosis.js.org/setup) Documentation
 
 @docs-nav-start
-@nav-prev:setup-nested-components.html:Nested Components
+@nav-prev:setup-ts-nested-components.html:Nested Components
 @nav-setup-ts-toc
 @docs-nav-end
 
@@ -33,25 +33,7 @@ import Stream from 'mithril/stream';
 const cells = setup({ stream: Stream });
 ```
 
-You can use any other stream library as long as you adapt it by providing an object with a `stream`
-and a `scan` property, which indicate the functions to create a stream and to scan a stream. The
-stream returned when creating a stream must have a `map` function.
-
-```js
-import someStream from 'some-stream-library';
-
-const someStreamLib = {
-  stream: someStream.createStream,
-  scan: someStream.scan
-};
-
-const cells = setup({ stream: someStreamLib })
-```
-
-Adapting a different stream library is usually not necessary, since using either `simple-stream`,
-`Flyd`, or `Mithril Stream` should be suitable.
-
 @docs-nav-start
-@nav-prev:setup-nested-components.html:Nested Components
+@nav-prev:setup-ts-nested-components.html:Nested Components
 @nav-setup-ts-toc
 @docs-nav-end

@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:setup-js-services.html:Services
 @nav-setup-js-toc
-@nav-next:setup-ts-stream-implementation.html:Stream Implementation
+@nav-next:setup-js-stream-implementation.html:Stream Implementation
 @docs-nav-end
 
 ## Nested Components
@@ -188,5 +188,5 @@ properties, `data1` and `data2`.
 @docs-nav-start
 @nav-prev:setup-js-services.html:Services
 @nav-setup-js-toc
-@nav-next:setup-ts-stream-implementation.html:Stream Implementation
+@nav-next:setup-js-stream-implementation.html:Stream Implementation
 @docs-nav-end
