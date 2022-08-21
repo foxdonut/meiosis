@@ -35,6 +35,15 @@ const cells = setup({ stream: Stream });
 
 ### Using Simple Stream
 
+In your project, you can use the simple stream implementation that comes with `meiosis-setup` by
+importing it:
+
+```js
+import { simpleStream } from 'meiosis-setup/simple-stream';
+```
+
+Then you can use `simpleStream.stream<type>()` and `simpleStream.scan()`:
+
 <iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/simple-stream.ts" style="width:100%;height:500px"></iframe>
 
 @docs-nav-start
