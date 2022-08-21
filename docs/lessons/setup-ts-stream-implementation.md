@@ -33,6 +33,10 @@ import Stream from 'mithril/stream';
 const cells = setup({ stream: Stream });
 ```
 
+### Using Simple Stream
+
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/simple-stream.ts" style="width:100%;height:500px"></iframe>
+
 @docs-nav-start
 @nav-prev:setup-ts-nested-components.html:Nested Components
 @nav-setup-ts-toc
