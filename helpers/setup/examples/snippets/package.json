@@ -4,12 +4,6 @@
   "private": true,
   "description": "meiosis-setup examples",
   "main": "src/initial.ts",
-  "scripts": {
-    "build": "webpack",
-    "server": "static-server -p 9000",
-    "start": "webpack && npm run server",
-    "watch": "webpack --progress --watch"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/foxdonut/meiosis.git"
