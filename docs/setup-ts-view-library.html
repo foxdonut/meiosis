@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<div class="lesson">
+<h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><div class="docs-nav">
+  <a href="setup-ts-initial-state.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Initial State</span>
+      </span></a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
+  <a href="setup-ts-services.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Services</span>
+      </span></a>
+</div>
+
+<h2>View Library</h2><p>Once Meiosis is set up either with Function Patches or Mergerino, you have a stream of <strong>cells</strong>.
+Each cell has <code>state</code> and <code>update</code> to read the state and update the state. Normally you use
+<code>cells.map</code> to render the view on each state change.</p>
+<h3>Mithril</h3><p>Here is the setup code for Mithril:</p>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-mithril?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.ts" style="width:100%;height:500px"></iframe>
+
+<p>In the setup above, <code>m.redraw()</code> is called for every state change. This may or may not be acceptable
+depending in the application. If the application triggers many state changes very rapidly (such as
+tracking the mouse), it is preferable to remove the <code>m.redraw()</code> code:</p>
+<pre><code class="language-js">cells.map(() =&gt; m.redraw());
+</code></pre>
+<p>Redraws will still happen by virtue of Mithril&#39;s
+<a href="https://mithril.js.org/autoredraw.html">auto-redraw system</a>. However, they will <strong>not</strong> happen for
+state changes outside of the auto-redraw system. For those state changes, <code>m.redraw()</code> needs to be
+called after updating the state.</p>
+<h3>Preact:</h3><p>Here is the setup code for Preact:</p>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-preact?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.tsx" style="width:100%;height:500px"></iframe>
+
+<h3>React:</h3><p>Here is the setup code for React:</p>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/view-react?embed=1&terminalHeight=0&ctl=1&view=both&file=src/index.tsx" style="width:100%;height:500px"></iframe>
+
+<div class="docs-nav">
+  <a href="setup-ts-initial-state.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Initial State</span>
+      </span></a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
+  <a href="setup-ts-services.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Services</span>
+      </span></a>
+</div>
+
+<hr>
+<div>
+<a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
+</div>
+</div>
+</body>
+</html>

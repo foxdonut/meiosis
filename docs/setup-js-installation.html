@@ -14,8 +14,8 @@
 <div class="lesson">
 <h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><div class="docs-nav">
 <span></span>
-  <a class="toc" href="setup-toc.html">&#x2B06; Contents</a>
-  <a href="setup-patches.html"><span class="nav-next">
+  <a class="toc" href="setup-js-toc.html">&#x2B06; Contents</a>
+  <a href="setup-js-patches.html"><span class="nav-next">
         <span class="arrow">&#x27A1;</span>
         <span class="title">Patches</span>
       </span></a>
@@ -23,11 +23,9 @@
 
 <h2>Installation</h2><p>You can install <code>meiosis-setup</code>:</p>
 <ul>
-<li>Using Node.js, or,</li>
+<li>Using npm, or,</li>
 <li>Using an HTML <code>&lt;script&gt;</code> tag.</li>
 </ul>
-<p>In both cases, the setup will give you a stream of cells as explained in the
-<a href="toc.html">Meiosis documentation</a>.</p>
 <h3>Using npm</h3><p>Install <code>meiosis-setup</code> with <code>npm</code>:</p>
 <pre><code>npm i meiosis-setup
 </code></pre>
@@ -36,10 +34,6 @@
 
 const cells = meiosisSetup();
 </code></pre>
-<blockquote>
-<p>Note: we are using JavaScript code, but we will also see how to use Meiosis with TypeScript code
-in the <a href="setup-typescript-support.html">TypeScript Support section</a>.</p>
-</blockquote>
 <h3>Using an HTML <code>&lt;script&gt;</code> tag</h3><p>Load <code>meiosis-setup</code> by adding a <code>&lt;script&gt;</code> tag to your HTML page:</p>
 <pre><code class="language-html">&lt;script src=&quot;https://unpkg.com/meiosis-setup/meiosis-setup.js&quot;&gt;&lt;/script&gt;
 </code></pre>
@@ -49,15 +43,18 @@ in the <a href="setup-typescript-support.html">TypeScript Support section</a>.</
 <p>Then use the <code>Meiosis</code> global variable:</p>
 <pre><code class="language-js">const cells = Meiosis.setup();
 </code></pre>
+<p>In both cases, the setup gives you a stream of cells as explained in the
+<a href="06-cells.html">Meiosis documentation</a>.</p>
 <div class="docs-nav">
 <span></span>
-  <a class="toc" href="setup-toc.html">&#x2B06; Contents</a>
-  <a href="setup-patches.html"><span class="nav-next">
+  <a class="toc" href="setup-js-toc.html">&#x2B06; Contents</a>
+  <a href="setup-js-patches.html"><span class="nav-next">
         <span class="arrow">&#x27A1;</span>
         <span class="title">Patches</span>
       </span></a>
 </div>
 
+<hr>
 <div>
 <a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
 (<a href="https://twitter.com/foxdonut00">Twitter</a> /

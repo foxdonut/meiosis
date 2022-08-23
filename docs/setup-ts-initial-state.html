@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<div class="lesson">
+<h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><div class="docs-nav">
+  <a href="setup-ts-patches.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Patches</span>
+      </span></a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
+  <a href="setup-ts-view-library.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">View Library</span>
+      </span></a>
+</div>
+
+<h2>Initial State</h2><p>When calling <code>meiosisSetup</code>, you can specify an <code>app</code>, with the following properties, all of which
+are optional:</p>
+<ul>
+<li><code>initial</code></li>
+<li><code>services</code></li>
+<li><code>nested</code></li>
+</ul>
+<p>We will look at each of these separately, starting with <code>initial</code>.</p>
+<p>By default, the initial state is an empty object, <code>{}</code>. To specify a different initial state, use
+the <code>initial</code> property of <code>app</code>.</p>
+<p>With TypeScript, <code>app</code> is of type <code>MeiosisComponent</code>, which we can import from
+<code>&#39;meiosis-setup/types&#39;</code>. By indicating our <code>State</code> type, our <code>app</code>&#39;s initial state will be
+validated.</p>
+<pre><code class="language-ts">import { meiosisSetup } from &#39;meiosis-setup&#39;;
+import { MeiosisComponent } from &#39;meiosis-setup/types&#39;;
+
+interface State {
+  name: string;
+  age: number;
+}
+
+const app: MeiosisComponent&lt;State&gt; = {
+  initial: {
+    age: 25
+  }
+};
+
+const cells = meiosisSetup&lt;State&gt;({ app });
+</code></pre>
+<p>By specifying the <code>MeiosisComponent</code> type on our <code>app</code> object, it will be validated and we can also
+benefit from auto-suggest on the properties (<code>initial</code>, <code>services</code>, etc.)</p>
+<p>In the example below, try the following in the <code>initial</code> object, which should result in an error:</p>
+<ul>
+<li>Specify a property that does not exist on the <code>State</code> type.</li>
+<li>Specify a value that does not match the type, for example a <code>string</code> on the <code>age</code> property.</li>
+</ul>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/initial.ts" style="width:100%;height:500px"></iframe>
+
+
+<div class="docs-nav">
+  <a href="setup-ts-patches.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Patches</span>
+      </span></a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
+  <a href="setup-ts-view-library.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">View Library</span>
+      </span></a>
+</div>
+
+<hr>
+<div>
+<a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
+</div>
+</div>
+</body>
+</html>

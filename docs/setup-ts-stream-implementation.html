@@ -13,11 +13,11 @@
 <script src="flems.html" type="text/javascript" charset="utf-8"></script>
 <div class="lesson">
 <h1><a href="https://meiosis.js.org/setup">meiosis-setup</a> Documentation</h1><div class="docs-nav">
-  <a href="setup-typescript-support.html"><span class="nav-prev">
+  <a href="setup-ts-nested-components.html"><span class="nav-prev">
         <span class="arrow">&#x2B05;</span>
-        <span class="title">TypeScript Support</span>
+        <span class="title">Nested Components</span>
       </span></a>
-  <a class="toc" href="setup-toc.html">&#x2B06; Contents</a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
 </div>
 
 <h2>Stream Implementation</h2><p>By default, <code>meiosis-setup</code> uses its <code>simple-stream</code> implementation. If you are curious, see
@@ -40,29 +40,22 @@ import Stream from &#39;mithril/stream&#39;;
 
 const cells = setup({ stream: Stream });
 </code></pre>
-<p>You can use any other stream library as long as you adapt it by providing an object with a <code>stream</code>
-and a <code>scan</code> property, which indicate the functions to create a stream and to scan a stream. The
-stream returned when creating a stream must have a <code>map</code> function.</p>
-<pre><code class="language-js">import someStream from &#39;some-stream-library&#39;;
-
-const someStreamLib = {
-  stream: someStream.createStream,
-  scan: someStream.scan
-};
-
-const cells = setup({ stream: someStreamLib })
+<h3>Using Simple Stream</h3><p>In your project, you can use the simple stream implementation that comes with <code>meiosis-setup</code> by
+importing it:</p>
+<pre><code class="language-js">import { simpleStream } from &#39;meiosis-setup/simple-stream&#39;;
 </code></pre>
-<p>Adapting a different stream library is usually not necessary, since using either <code>simple-stream</code>,
-<code>Flyd</code>, or <code>Mithril Stream</code> should be suitable.</p>
+<p>Then you can use <code>simpleStream.stream&lt;type&gt;()</code> and <code>simpleStream.scan()</code>:</p>
+<iframe src="https://stackblitz.com/github/foxdonut/meiosis/tree/master/helpers/setup/examples/snippets?embed=1&terminalHeight=0&ctl=1&view=editor&file=src/simple-stream.ts" style="width:100%;height:500px"></iframe>
+
 <div class="docs-nav">
-  <a href="setup-typescript-support.html"><span class="nav-prev">
+  <a href="setup-ts-nested-components.html"><span class="nav-prev">
         <span class="arrow">&#x2B05;</span>
-        <span class="title">TypeScript Support</span>
+        <span class="title">Nested Components</span>
       </span></a>
-  <a class="toc" href="setup-toc.html">&#x2B06; Contents</a>
+  <a class="toc" href="setup-ts-toc.html">&#x2B06; Contents</a>
 </div>
 
-
+<hr>
 <div>
 <a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
 (<a href="https://twitter.com/foxdonut00">Twitter</a> /
