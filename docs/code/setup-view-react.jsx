@@ -30,8 +30,9 @@ const app = {
 
 const cells = Meiosis.setup({ app });
 
-const element = document.getElementById('app');
-const root = ReactDOM.createRoot(element);
+const root = ReactDOM.createRoot(
+  document.getElementById('app'));
+
 cells.map((cell) => {
   root.render(app.view(cell));
 });
