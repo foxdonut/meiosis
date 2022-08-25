@@ -3,6 +3,7 @@
 @docs-nav-start
 @nav-prev:setup-ts-nested-components.html:Nested Components
 @nav-setup-ts-toc
+@nav-next:setup-ts-utilities.html:Utilities
 @docs-nav-end
 
 ## Stream Implementation
@@ -49,4 +50,5 @@ Then you can use `simpleStream.stream<type>()` and `simpleStream.scan()`:
 @docs-nav-start
 @nav-prev:setup-ts-nested-components.html:Nested Components
 @nav-setup-ts-toc
+@nav-next:setup-ts-utilities.html:Utilities
 @docs-nav-end

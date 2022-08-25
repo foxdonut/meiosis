@@ -1,8 +1,6 @@
 import { meiosisSetup } from './setup';
 import { createDropRepeats, dropRepeats, simpleStream } from './simple-stream';
 import {
-  assoc,
-  concatIfPresent,
   get,
   updateFormFloatValue,
   updateFormIntValue,
@@ -17,8 +15,6 @@ export default {
     dropRepeats
   },
   util: {
-    assoc,
-    concatIfPresent,
     get,
     updateFormFloatValue,
     updateFormIntValue,

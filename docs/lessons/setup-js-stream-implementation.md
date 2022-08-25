@@ -3,6 +3,7 @@
 @docs-nav-start
 @nav-prev:setup-js-nested-components.html:Nested Components
 @nav-setup-js-toc
+@nav-next:setup-js-utilities.html:Utilities
 @docs-nav-end
 
 ## Stream Implementation
@@ -49,4 +50,5 @@ Then you can use `simpleStream.stream()` and `simpleStream.scan()`:
 @docs-nav-start
 @nav-prev:setup-js-nested-components.html:Nested Components
 @nav-setup-js-toc
+@nav-next:setup-js-utilities.html:Utilities
 @docs-nav-end

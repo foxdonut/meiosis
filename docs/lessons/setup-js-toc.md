@@ -13,5 +13,6 @@
 - [Services](setup-js-services.html)
 - [Nested Components](setup-js-nested-components.html)
 - [Stream Implementation](setup-js-stream-implementation.html)
+- [Utilities](setup-js-utilities.html)
 
 The [TypeScript version](setup-ts-toc.html) is also available.

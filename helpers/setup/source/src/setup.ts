@@ -9,8 +9,16 @@ import {
   Update
 } from './types';
 import { Stream, simpleStream, createDropRepeats } from './simple-stream';
-import { assoc, concatIfPresent, get } from './util';
+import { get } from './util';
 import merge from 'mergerino';
+
+const assoc = (prop: string, value: unknown, target: Record<string, any>): any => {
+  target[prop] = value;
+  return target;
+};
+
+const concatIfPresent = (target: any[], source?: any[]): any[] =>
+  source ? target.concat(source) : target;
 
 const assembleInitialState = <S>(nestedComponents: NestedComponents<S> | undefined): any =>
   nestedComponents
