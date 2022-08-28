@@ -70,6 +70,7 @@ export const updateFormValue = (
   path: string[] | string,
   fn: (value: string) => any = (value) => value
 ) => (evt: DomEvent) => cell.update(intoPath(toPath(path), fn(evt.target.value)));
+
 /**
  * Convenience function to update a form value with an Integer value. If the user input does not
  * return a number with `parseInt`, no state change occurs. Pass the Meiosis cell and the state
