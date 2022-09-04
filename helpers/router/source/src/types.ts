@@ -27,9 +27,6 @@ export type Route = {
   /** An object with route and query string params. */
   params: Params;
 
-  /** Indicates that the route changed. */
-  changed: boolean;
-
   /** Indicates whether to replace the entry in the browser's history. */
   replace?: boolean;
 };

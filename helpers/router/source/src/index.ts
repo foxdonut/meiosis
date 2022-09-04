@@ -56,7 +56,7 @@ export const createRouter = ({
     const queryParams = queryString.parse(getQuery(path));
     const params = Object.assign(queryParams, converted.params);
 
-    return Object.assign(converted, { params, changed: true });
+    return Object.assign(converted, { params });
   };
 
   const initialRoute = getRoute(getPath());
@@ -78,23 +78,4 @@ export const createRouter = ({
   };
 
   return { initialRoute, toRoute, replaceRoute, toUrl, start, syncLocationBar };
-};
-
-/**
- * Helper for route change effects.
- */
-export const RouteChangeEffect = ({
-  update,
-  Effects,
-  isRouteChanged = (state) => state.route.changed,
-  routeChangedPatch = { route: { changed: false } }
-}) => {
-  const routeChangeUpdate = (patch) => update([patch, routeChangedPatch]);
-  const effects = Effects.map((Effect) => Effect(routeChangeUpdate));
-
-  return (state) => {
-    if (isRouteChanged(state)) {
-      effects.forEach((effect) => effect(state));
-    }
-  };
 };

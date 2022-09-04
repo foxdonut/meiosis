@@ -37,8 +37,8 @@ export const getConfig = (rootPath?: string, plainHash?: boolean) => {
   return { prefix, historyMode };
 };
 
-export const toRoute = (page, params = {}) => ({ page, params, changed: true });
-export const replaceRoute = (page, params = {}) => ({ page, params, changed: true, replace: true });
+export const toRoute = (page, params = {}) => ({ page, params });
+export const replaceRoute = (page, params = {}) => ({ page, params, replace: true });
 
 export const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode

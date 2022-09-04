@@ -63,7 +63,7 @@ strings, so there is no need for a separate library.
 To configure your routes, use a plain object with the route path templates and a corresponding
 string page ID. Use the `:` prefix for path parameters. For example:
 
-```javascript
+```js
 const routeConfig = {
   "/": "Home",
   "/login": "Login",
@@ -73,7 +73,7 @@ const routeConfig = {
 
 You'll likely want to use string constants instead of hard-coded strings:
 
-```javascript
+```js
 const Route = {
   Home: "Home",
   Login: "Login",
@@ -98,7 +98,7 @@ npm i feather-route-matcher
 
 Then, use `createFeatherRouter` to create the router:
 
-```javascript
+```js
 import createRouteMatcher from "feather-route-matcher";
 import { createFeatherRouter } from "meiosis-router";
 
@@ -113,7 +113,7 @@ const router = createFeatherRouter({ createRouteMatcher, routeConfig });
 
 Use `queryString` to specify the query string library. For example:
 
-```javascript
+```js
 import createRouteMatcher from "feather-route-matcher";
 import { createFeatherRouter } from "meiosis-router";
 import queryString from "query-string";
@@ -131,7 +131,7 @@ Now, `router` provides the `initialRoute` property containing the initial route.
 initialize your application state. Then, start the router by calling `start` and providing a
 function that gets called when the route changes:
 
-```javascript
+```js
 router.start(route => update({ route: () => route }));
 ```
 
@@ -151,7 +151,7 @@ is automatically provided.
 
 Use `createMithrilRouter` to create the router:
 
-```javascript
+```js
 import m from "mithril";
 import { createMithrilRouter } from "meiosis-router";
 
@@ -169,7 +169,7 @@ Then, use [m.route](https://mithril.js.org/route.html#routeroot,-defaultroute,-r
 `states`, `update` and/or `actions` (from your Meiosis setup), and an `onRouteChange` function.
 The latest state (by calling `states()`), `update`, and `actions` will be passed to your `App`.
 
-```javascript
+```js
 m.route(
   document.getElementById("app"),
   "/",
@@ -194,7 +194,7 @@ the page ID that corresponds to the route that you specified in your `routeConfi
 you are using query string support, query string parameters are located under `params.queryParams`.
 For example:
 
-```javascript
+```js
 {
   page: "PageId",
   params: {
@@ -217,7 +217,7 @@ options.
 
 1) The first option is to use `router.locationBarSync`:
 
-```javascript
+```js
 states.map(state => router.locationBarSync(state.route));
 ```
 
@@ -225,7 +225,7 @@ states.map(state => router.locationBarSync(state.route));
 [effects](http://meiosis.js.org/docs/services-and-effects.html), is to add `router.effect` to your
 array of effects:
 
-```javascript
+```js
 const app = {
   ...,
   Effects: update => [
@@ -256,7 +256,7 @@ used for router purposes instead of for linking to anchor tags.
 If you prefer to use `#` instead of `#!` as the hash prefix, specify `plainHash: true` when creating
 the router:
 
-```javascript
+```js
 const router = createFeatherRouter({ createRouteMatcher, routeConfig, plainHash: true });
 
 const router = createMithrilRouter({ m, routeConfig, plainHash: true });
@@ -279,7 +279,7 @@ With this option, you use hard-coded paths in `href`:
 <a href="#!/user/42">User Profile</a>
 ```
 
-```javascript
+```js
 m("a", { href: "#!/" }, "Home"),
 m("a", { href: "#!/login" }, "Login"),
 m("a", { href: "#!/user/42" }, "User Profile")
@@ -287,7 +287,7 @@ m("a", { href: "#!/user/42" }, "User Profile")
 
 For programmatic routes, use the `router.getRoute` function and omit the hash-bang (`"#!"`) prefix:
 
-```javascript
+```js
 update({ route: () => router.getRoute("/") });
 update({ route: () => router.getRoute("/login") });
 update({ route: () => router.getRoute("/user/42") });
@@ -295,7 +295,7 @@ update({ route: () => router.getRoute("/user/42") });
 
 For convenience, you can write a helper function:
 
-```javascript
+```js
 const routeTo = path => ({ route: () => router.getRoute(path) });
 
 update(routeTo("/"));
@@ -317,7 +317,7 @@ With this option, you provide a page ID and the path and query string parameters
 <a href={router.toUrl(Route.UserProfile, { id: 42 })}>User Profile</a>
 ```
 
-```javascript
+```js
 m("a", { href: router.toUrl(Route.Home) }, "Home"),
 m("a", { href: router.toUrl(Route.Login) }, "Login"),
 m("a", { href: router.toUrl(Route.UserProfile, { id: 42 }), "User Profile")
@@ -325,7 +325,7 @@ m("a", { href: router.toUrl(Route.UserProfile, { id: 42 }), "User Profile")
 
 For programmatic routes, use the `router.getRoute` function:
 
-```javascript
+```js
 update({ route: () => router.getRoute(Route.Home) });
 update({ route: () => router.getRoute(Route.Login) });
 update({ route: () => router.getRoute(Route.UserProfile, { id: 42 }) });
@@ -333,7 +333,7 @@ update({ route: () => router.getRoute(Route.UserProfile, { id: 42 }) });
 
 For convenience, you can write a helper function:
 
-```javascript
+```js
 const routeTo = path => ({ route: () => router.getRoute(path) });
 
 update(routeTo(Route.Home));
@@ -354,7 +354,7 @@ plain URLs, such as `/login` and `/user/42`, instead of URLs with a hash such as
 
 To use history mode, specify `historyMode: true` when creating the router:
 
-```javascript
+```js
 const router = createFeatherRouter({ createRouteMatcher, routeConfig, historyMode: true });
 
 const router = createMithrilRouter({ m, routeConfig, historyMode: true });
@@ -368,7 +368,7 @@ uses `router.getLinkHandler(url)` as the `onClick` event handler.
 
 With React or Preact and using hard-coded paths:
 
-```javascript
+```js
 export const Link = ({ href, children, ...props }) => {
   const url = router.toUrl(href);
 
@@ -380,7 +380,7 @@ export const Link = ({ href, children, ...props }) => {
 
 Using page IDs:
 
-```javascript
+```js
 export const Link = ({ page, params, children, ...props }) => {
   const url = router.toUrl(attrs.page, attrs.params);
 
@@ -392,7 +392,7 @@ export const Link = ({ page, params, children, ...props }) => {
 
 With Mithril Router, you can simply use Mithril's `m.route.Link`:
 
-```javascript
+```js
 export const Link = m.route.Link;
 
 m(Link, { href: router.toUrl(Route.UserProfile, { id: 42 }) }, "User Profile"))

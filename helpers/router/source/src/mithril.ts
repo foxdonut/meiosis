@@ -1,5 +1,6 @@
-import { SyncLocationBarParams } from './types';
-import { MithrilRouterConfig, MithrilRouter } from './mithril-types';
+import { Params, SyncLocationBarParams } from './types';
+import m from 'mithril';
+import { CreateMithrilRoutesConfig, MithrilRouterConfig, MithrilRouter } from './mithril-types';
 import {
   addHistoryEventListener,
   createGetUrl,
@@ -36,7 +37,8 @@ export const createMithrilRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const toUrl = createToUrl(routeConfig, prefix, queryString, historyMode);
 
-  const createMithrilRoutes = ({ onRouteChange, render }) => {
+  const createMithrilRoutes = ({ onRouteChange, render }: CreateMithrilRoutesConfig): m.RouteDefs =>
+  {
     if (historyMode) {
       const prefixLength = prefix.length;
       addHistoryEventListener(wdw, prefix, (href) => {
@@ -47,7 +49,7 @@ export const createMithrilRouter = ({
     return Object.keys(routeConfig).reduce((result, path) => {
       const page = routeConfig[path];
       result[path] = {
-        onmatch: (params) => onRouteChange({ page, params, changed: true }),
+        onmatch: (params: Params) => onRouteChange({ page, params }),
         render
       };
       return result;
