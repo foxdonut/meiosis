@@ -1,4 +1,4 @@
-# meiosis-router-setup
+# meiosis-router
 
 **This is work-in-progress only!**
 
@@ -24,13 +24,13 @@ interested in more details of how the router works and how you can implement it 
 Using `npm`:
 
 ```
-npm i meiosis-router-setup
+npm i meiosis-router
 ```
 
 Using a `script` tag:
 
 ```
-<script src="https://unpkg.com/meiosis-router-setup"></script>
+<script src="https://unpkg.com/meiosis-router"></script>
 ```
 
 Using the `script` tag exposes a `MeiosisRouter` global, under which the helper functions are
@@ -100,7 +100,7 @@ Then, use `createFeatherRouter` to create the router:
 
 ```javascript
 import createRouteMatcher from "feather-route-matcher";
-import { createFeatherRouter } from "meiosis-router-setup";
+import { createFeatherRouter } from "meiosis-router";
 
 const routeConfig = {
   "/": Route.Home,
@@ -115,7 +115,7 @@ Use `queryString` to specify the query string library. For example:
 
 ```javascript
 import createRouteMatcher from "feather-route-matcher";
-import { createFeatherRouter } from "meiosis-router-setup";
+import { createFeatherRouter } from "meiosis-router";
 import queryString from "query-string";
 
 const routeConfig = {
@@ -153,7 +153,7 @@ Use `createMithrilRouter` to create the router:
 
 ```javascript
 import m from "mithril";
-import { createMithrilRouter } from "meiosis-router-setup";
+import { createMithrilRouter } from "meiosis-router";
 
 const routeConfig = {
   "/": Route.Home,
@@ -415,5 +415,5 @@ pattern.
 
 ----
 
-_meiosis-router-setup is developed by [foxdonut](https://github.com/foxdonut)
+_meiosis-router is developed by [foxdonut](https://github.com/foxdonut)
 ([@foxdonut00](http://twitter.com/foxdonut00)) and is released under the MIT license._

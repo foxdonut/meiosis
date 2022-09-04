@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const getHtmlContents = () =>
   new Promise((resolve) => {
-    fs.readFile('./index.html', function (error, data) {
+    fs.readFile('./index.html', function(error, data) {
       if (error) {
         resolve(html('<html><body>An error occurred: ' + error + '</body></html>'));
       } else {
@@ -15,7 +15,7 @@ const getHtmlContents = () =>
 
 const getGeneratedApp = () =>
   new Promise((resolve, reject) => {
-    fs.readFile('./build/generated-app.js', function (error, data) {
+    fs.readFile('./build/generated-app.js', function(error, data) {
       if (error) {
         reject(error);
       } else {

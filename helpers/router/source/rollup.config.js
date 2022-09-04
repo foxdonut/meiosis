@@ -4,7 +4,7 @@ import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
 const name = 'Meiosis';
-const input = './src/meiosis.ts';
+const input = './src/router.ts';
 const extensions = ['.js', '.ts'];
 const babelHelpers = 'bundled';
 
@@ -29,7 +29,7 @@ export default [
     plugins,
     output: Object.assign(
       {
-        file: 'dist/meiosis-setup.js'
+        file: 'dist/meiosis-router.js'
       },
       output
     )
@@ -39,7 +39,7 @@ export default [
     plugins: plugins.concat(terser()),
     output: Object.assign(
       {
-        file: 'dist/meiosis-setup.min.js'
+        file: 'dist/meiosis-router.min.js'
       },
       output
     )
