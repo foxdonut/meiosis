@@ -1,6 +1,6 @@
 {
   "include": [
-    "src/**/*.ts",
+    "src/*.ts",
     "tests/*.ts"
   ],
 
@@ -11,7 +11,7 @@
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
     "isolatedModules": false,
-    "lib": ["es2018"],
+    "lib": ["es2018", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,

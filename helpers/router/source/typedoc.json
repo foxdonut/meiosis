@@ -1,10 +1,7 @@
 {
   "entryPoints": [
     "./src/index.ts",
-    "./src/setup.ts",
-    "./src/types.ts",
-    "./src/simple-stream/index.ts",
-    "./src/util/index.ts"
+    "./src/types.ts"
   ],
   "out": "../docs"
 }

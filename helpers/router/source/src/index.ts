@@ -1,301 +1,23 @@
-// @ts-check
-
-// ----- Type definitions
-
-/**
- * Route configuration. This is a plain object that associates route path templates to string page
- * IDs. Route path templates may contain parameters by using `:` as a prefix. For example:
- *
- * ```javascript
- * const routeConfig = {
- *   "/": "Home",
- *   "/login": "Login",
- *   "/user/:id": "UserProfile"
- * };
- * ```
- *
- * @typedef {Object.<string, string>} RouteConfig
- */
-
-/**
- * Route and query string params.
- *
- * @typedef {Object.<string, any>} Params
- */
-
-/**
- * A route in the application state.
- *
- * @typedef {Object} Route
- *
- * @property {string} page the page corresponding to the route.
- * @property {Params} params and object with route and query string params.
- * @property {boolean} changed indicates that the route changed.
- * @property {boolean} [replace] indicates whether to replace the entry in the browser's history.
- */
-
-/**
- * A route matcher resolves a URL to a route.
- *
- * @template M
- * @callback RouteMatcher
- *
- * @param {string} url the URL to resolve.
- *
- * @return {M} the matched route.
- */
-
-/**
- * A function to convert the match from the router library to an object with `page` and `params`.
- *
- * @template M
- * @callback ConvertMatch
- *
- * @param {M} match the route match returned by the router library
- *
- * @return {{page: string, params: Params}} the converted object.
- */
-
-/**
- * Query string parse function.
- *
- * @callback QueryStringParse
- *
- * @param {string} query the query string to parse.
- *
- * @return {Params} the result of parsing the query string.
- */
-
-/**
- * Query string stringify function.
- *
- * @callback QueryStringStringify
- *
- * @param {Params} query the query string object.
- *
- * @return {string} the stringified query string.
- */
-
-/**
- * Query string library that provides the `parse` and `stringify` functions. This is only required
- * if your application needs query string support. Examples of query string libraries that work
- * out-of-the-box are:
- *
- * - [query-string](https://github.com/sindresorhus/query-string)
- * - [qs](https://github.com/ljharb/qs)
- * - [urlon](https://github.com/cerebral/urlon)
- *
- * Note that each library supports different features for query strings.
- *
- * @typedef {Object} QueryStringLib
- *
- * @property {QueryStringParse} parse
- * @property {QueryStringStringify} stringify
- */
-
-/**
- * Function to convert a page and params to a route.
- *
- * @callback ToRoute
- *
- * @param {string} page the page ID.
- * @param {Params} [params] the path parameters.
- *
- * @return {Route} the route.
- */
-
-/**
- * Function to generate a URL from a page ID and params.
- *
- * @callback ToUrl
- *
- * @param {string} page the page ID.
- * @param {Params} [params] the path parameters.
- *
- * @return {string} the URL.
- */
-
-/**
- * Callback function for when the route changes. Typically, this function updates the application
- * state with the route, for example:
- *
- * ```javascript
- * router.start(route => update({ route: () => route }));
- * ```
- *
- * @callback OnRouteChange
- *
- * @param {Route} route
- *
- * @return {any}
- */
-
-/**
- * Function to start the router.
- *
- * @callback Start
- *
- * @param {OnRouteChange} onRouteChange callback function for when the route changes.
- *
- * @return {any}
- */
-
-/**
- * @typedef {Object} SyncLocationBarParams
- *
- * @property {string} page
- * @property {Params} [params]
- * @property {boolean} [replace]
- */
-
-/**
- * Function that synchronizes the location bar with the state route.
- *
- * @callback SyncLocationBar
- *
- * @param {SyncLocationBarParams} syncLocationBarParams
- *
- * @return {void}
- */
-
-/**
- * Built-in function to decode a URI.
- *
- * @callback DecodeURI
- *
- * @param {string} uri the URI.
- *
- * @return {string} the decoded URI.
- */
-
-/**
- * Built-in function to change the location.
- *
- * @callback PushState
- *
- * @param {any} state the state object
- * @param {string} title the document title - most browsers ignore this parameter
- * @param {string} url the new history entry's URL
- *
- * @return {void}
- */
-
-/**
- * Built-in callback function when the location changes.
- *
- * @callback Onpopstate
- *
- * @param {any} event the event.
- *
- * @return {void}
- */
-
-/**
- * Built-in `location` object, defined for testing purposes.
- *
- * @typedef {Object} Location
- *
- * @property {string} hash
- * @property {string} origin
- * @property {string} pathname
- * @property {string} search
- */
-
-/**
- * Built-in `history` object, defined for testing purposes.
- *
- * @typedef {Object} History
- *
- * @property {PushState} pushState
- */
-
-/**
- * Built-in callback function to add an event listener.
- *
- * @callback AddEventListener
- *
- * @param {string} type
- * @param {any} listener
- * @param {any} options
- */
-
-/**
- * Built-in callback function to remove an event listener.
- *
- * @callback RemoveEventListener
- *
- * @param {string} type
- * @param {any} listener
- */
-
-/**
- * Built-in `window` object, defined for testing purposes.
- *
- * @typedef {Object} Window
- *
- * @property {DecodeURI} decodeURI function to decode a URI.
- * @property {Location} location the current location.
- * @property {History} history the window's history.
- * @property {Onpopstate} onpopstate callback function when the location changes.
- * @property {AddEventListener} addEventListener function to add an event listener.
- * @property {RemoveEventListener} removeEventListener function to remove an event listener.
- */
-
-/**
- * Configuration to create a router.
- *
- * @template M
- * @typedef {Object} RouterConfig
- *
- * @property {RouteMatcher<M>} routeMatcher the function that matches routes.
- * @property {ConvertMatch<M>} convertMatch a function to convert a router library match to a
- * route.
- * @property {RouteConfig} [routeConfig] the route configuration. If not provided, `toUrl` must
- * be provided.
- * @property {ToUrl} [toUrl] the `toUrl` function. If not provided, `routeConfig` must be
- * provided and `toUrl` is constructed from `routeConfig`.
- * @property {string} [rootPath] if specified, uses history mode instead of hash mode. If you are
- * using history mode, you need to provide server side router support. If not provided, defaults to
- * the identity function.
- * @property {boolean} [plainHash=false] whether to use a plain hash, `"#"`, instead of a hash-bang,
- * `"#!"`. Defaults to `false`. The `plainHash` option should not be specified (it will be ignored)
- * if `rootPath` is specified.
- * @property {QueryStringLib} [queryString] the query string library to use. You only need to
- * provide this if your application requires query string support.
- * @property {Window} [wdw=window] the `window`, used for testing purposes.
- */
-
-/**
- * This is the router that is created by {@link createRouter}.
- *
- * @typedef {Object} Router
- *
- * @property {Route} initialRoute the initial route as parsed from the location bar.
- * @property {ToRoute} toRoute function to convert a page and params to a route.
- * @property {ToRoute} replaceRoute function to convert a page and params to a route that will
- * replace the current route in the browser history.
- * @property {ToUrl} toUrl function to generate a URL.
- * @property {Start} start function to start the router.
- * @property {SyncLocationBar} syncLocationBar function that synchronizes the location bar with the
- * state route.
- */
+import { GetStatePath, QueryStringLib, RouteConfig, ToUrl } from './types';
 
 // ----- Helpers
 
-const stripTrailingSlash = (url) => (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
-const I = (x) => x;
+const stripTrailingSlash = (url: string) =>
+  (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
 
-const getQuery = (path) => {
+const I = (x: string) => x;
+
+const getQuery = (path: string): string => {
   const idx = path.indexOf('?');
   return idx >= 0 ? path.substring(idx + 1) : '';
 };
 
-export const getQueryString = (queryString, queryParams = {}) => {
+export const getQueryString = (queryString: QueryStringLib, queryParams = {}): string => {
   const query = queryString.stringify(queryParams);
   return (query.length > 0 ? '?' : '') + query;
 };
 
-const separateParamsAndQueryParams = (path, allParams) => {
+const separateParamsAndQueryParams = (path: string, allParams) => {
   const pathParams = (path.match(/(:[^/]*)/g) || []).map((key) => key.substring(1));
 
   return Object.entries(allParams).reduce(
@@ -308,7 +30,7 @@ const separateParamsAndQueryParams = (path, allParams) => {
   );
 };
 
-const getConfig = (rootPath, plainHash) => {
+const getConfig = (rootPath: string, plainHash: boolean) => {
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : '#' + (plainHash ? '' : '!');
 
@@ -325,14 +47,10 @@ const createGetUrl = (prefix, historyMode, wdw) =>
 
 /**
  * Helper that creates a `toUrl` function.
- *
- * @param {RouteConfig} routeConfig
- * @param {function(string):string} getStatePath
- * @param {QueryStringLib} queryString
- *
- * @return {ToUrl}
  */
-const ToUrl = (routeConfig, getStatePath, queryString) => {
+const ToUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath,
+  queryString: QueryStringLib): ToUrl => {
+
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
@@ -352,7 +70,7 @@ const ToUrl = (routeConfig, getStatePath, queryString) => {
   };
 };
 
-const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl) => {
+const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl?) => {
   const getStatePath = historyMode ? stripTrailingSlash : I;
   const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath, queryString);
   return (page, params = {}) => prefix + toUrlFn(page, params);
@@ -460,7 +178,9 @@ export const createRouter = ({
     if (historyMode) {
       addEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);
-        wdw.onpopstate();
+        if (wdw.onpopstate) {
+          wdw.onpopstate(new PopStateEvent('router'));
+        }
       });
     }
     wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
