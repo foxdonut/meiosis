@@ -34,14 +34,9 @@ node_modules
 
 docs/build
 docs/dist
-docs/code/**/build
-docs/code/**/build-no-lib
-docs/code/**/build-with-lib
-helpers/router-setup/*.tgz
-helpers/router-setup/dist
-helpers/router-setup/docs
-helpers/router-setup/poc/build
+helpers/router/**/dist
+helpers/router/**/build
+helpers/router/**/docs
 helpers/setup/**/dist
-helpers/setup/**/generated-d-ts
 helpers/setup/**/build
 helpers/setup/**/docs
