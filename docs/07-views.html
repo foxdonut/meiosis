@@ -99,27 +99,23 @@ cells.map((cell) =&gt; {
 
 <p><a name="react"></a></p>
 <h3><a href="#react">React</a></h3><p>Wiring Meiosis to <a href="https://reactjs.org">React</a> is essentially the same as with Preact, the only
-difference is that we use <code>ReactDOM.render</code> to render the view:</p>
-<pre><code class="language-js">const element = document.getElementById(&#39;app&#39;);
+difference is that we use <code>ReactDOM.createRoot</code> and <code>root.render</code> to render the view:</p>
+<pre><code class="language-js">const root = ReactDOM.createRoot(document.getElementById(&#39;app&#39;));
 cells.map((cell) =&gt; {
-  ReactDOM.render(app.view(cell), element);
+  root.render(app.view(cell));
 });
 </code></pre>
 <p>You can see the complete example below.</p>
 <div id="flems3" class="flemscode" style=" height:800px;"></div>
   <script>
     window.Flems(flems3, {
-      files: [{name: "07-react.js", content: "/*global React, ReactDOM, flyd, mergerino*/\nconst merge = mergerino;\n\nconst actions = {\n  increment: (cell, amount) =>\n    cell.update({ value: (x) => x + amount })\n};\n\nconst view = (cell) => (\n  <div>\n    <div>\n      <label>\n        Temperature: {cell.state.value}&deg;{cell.state.units}\n      </label>\n    </div>\n    <div>\n      <button onClick={() => actions.increment(cell, 1)}>\n        Increment\n      </button>\n      <button onClick={() => actions.increment(cell, -1)}>\n        Decrement\n      </button>\n    </div>\n  </div>\n);\n\nconst app = {\n  initial: {\n    value: 22,\n    units: 'C'\n  },\n  view\n};\n\nconst update = flyd.stream();\nconst states = flyd.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nconst element = document.getElementById('app');\ncells.map((cell) => {\n  ReactDOM.render(app.view(cell), element);\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
+      files: [{name: "07-react.js", content: "/*global React, ReactDOM, flyd, mergerino*/\nconst merge = mergerino;\nconst createRoot = ReactDOM.createRoot;\n\nconst actions = {\n  increment: (cell, amount) =>\n    cell.update({ value: (x) => x + amount })\n};\n\nconst view = (cell) => (\n  <div>\n    <div>\n      <label>\n        Temperature: {cell.state.value}&deg;{cell.state.units}\n      </label>\n    </div>\n    <div>\n      <button onClick={() => actions.increment(cell, 1)}>\n        Increment\n      </button>\n      <button onClick={() => actions.increment(cell, -1)}>\n        Decrement\n      </button>\n    </div>\n  </div>\n);\n\nconst app = {\n  initial: {\n    value: 22,\n    units: 'C'\n  },\n  view\n};\n\nconst update = flyd.stream();\nconst states = flyd.scan(merge, app.initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nconst root = createRoot(document.getElementById('app'));\ncells.map((cell) => {\n  root.render(app.view(cell));\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"app\"></div>\n<div id=\"tracer\"></div>\n"},{name: "app.css", content: "body, button {\n  font-family: sans-serif;\n  font-size: 1rem;\n}\nbutton, button.light {\n  cursor: pointer;\n  padding: 2px 8px 2px 8px;\n  color: #5755d9;\n  background-color: #ffffff;\n  border: 1px solid #5755d9;\n  margin: 4px;\n}\nbutton:hover {\n  background-color: #eeeeee;\n}\nbutton.dark {\n  background-color: #5755d9;\n  color: #ffffff;\n}\nbutton.dark:hover {\n  background-color: #7775f9;\n}\n.temperature {\n  margin-bottom: 20px;\n}"}],
       links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "react", type: "js", url: "https://unpkg.com/react@18.1.0/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@18.1.0/umd/react-dom.development.js"},{name: "mergerino", type: "js", url: "https://unpkg.com/mergerino@0.4.0"}],
       middle: 60
     })
   </script>
       
 
-<blockquote>
-<p>Starting with React 18, <code>ReactDOM.render(view, element)</code> has been deprecated in favor of <code>root = createRoot(element)</code> and <code>root.render(view)</code>. This doesn&#39;t change how to wire up Meiosis aside from
-adjusting how to use the React API.</p>
-</blockquote>
 <p><a name="conclusion"></a></p>
 <h3><a href="#conclusion">Conclusion</a></h3><p>In this section, we saw how to wire up Meiosis to a view library. Our base Meiosis pattern is
 complete!</p>
