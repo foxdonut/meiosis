@@ -109,6 +109,8 @@ export type ToUrl = (page: string, params?: Params) => string;
 
 export type GetStatePath = (path: string) => string;
 
+export type SetHref = (href: string) => void;
+
 /**
  * Callback function for when the route changes. Typically, this function updates the application
  * state with the route, for example:
@@ -134,89 +136,19 @@ export type SyncLocationBarParams = {
   replace?: boolean;
 };
 
+type GetUrl = () => string;
+
+export type DoSyncLocationBarParams = {
+  replace?: boolean;
+  url: string;
+  getUrl: GetUrl;
+  wdw?: Window;
+};
+
 /**
  * Function that synchronizes the location bar with the state route.
  */
 export type SyncLocationBar = (syncLocationBarParams: SyncLocationBarParams) => void;
-
-/**
- * Built-in function to decode a URI.
- *
- * @param uri the URI.
- *
- * @returns the decoded URI.
- */
-export type DecodeURI = (uri: string) => string;
-
-/**
- * Built-in function to change the location.
- *
- * @param state the state object
- * @param title the document title - most browsers ignore this parameter
- * @param url the new history entry's URL
- */
-export type PushState = (state: any, title: string, url: string) => void;
-
-/**
- * Built-in callback function when the location changes.
- *
- * @param event the event.
- */
-export type Onpopstate = (event: any) => void;
-
-/**
- * Built-in `location` object, defined for testing purposes.
- */
-export type Location = {
-  hash: string;
-  origin: string;
-  pathname: string;
-  search: string;
-};
-
-/**
- * Built-in `history` object, defined for testing purposes.
- */
-export type History = {
-  pushState: PushState;
-};
-
-/**
- * Built-in callback function to add an event listener.
- *
- * @param type
- * @param listener
- * @param options
- */
-export type AddEventListener = (type: string, listener: any, options: any) => any;
-
-/**
- * Built-in callback function to remove an event listener.
- */
-export type RemoveEventListener = (type: string, listener: any) => any;
-
-/**
- * Built-in `window` object, defined for testing purposes.
- */
-export type Window = {
-  /** Function to decode a URI. */
-  decodeURI: DecodeURI;
-
-  /** The current location. */
-  location: Location;
-
-  /** The window's history. */
-  history: History;
-
-  /** Callback function when the location changes. */
-  onpopstate: Onpopstate;
-
-  /** Function to add an event listener. */
-  addEventListener: AddEventListener;
-
-  /** Function to remove an event listener. */
-  removeEventListener: RemoveEventListener;
-};
 
 /**
  * Configuration to create a router.

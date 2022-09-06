@@ -1,4 +1,11 @@
-import { GetStatePath, QueryStringLib, RouteConfig, ToUrl } from './types';
+import {
+  DoSyncLocationBarParams,
+  GetStatePath,
+  QueryStringLib,
+  RouteConfig,
+  SetHref,
+  ToUrl
+} from './types';
 
 // ----- Helpers
 
@@ -81,8 +88,8 @@ export const emptyQueryString = {
   stringify: (_) => ''
 };
 
-export const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
-  if (url !== getUrl()) {
+export const doSyncLocationBar = ({ replace, url, getUrl, wdw }: DoSyncLocationBarParams) => {
+  if (url !== getUrl() && wdw) {
     const fn = replace ? 'replaceState' : 'pushState';
     wdw.history[fn].call(wdw.history, {}, '', url);
   }
@@ -95,7 +102,7 @@ export const doSyncLocationBar = ({ replace, url, getUrl, wdw }) => {
  * @param {string} prefix
  * @param {function(string):void} setHref
  */
-export const addHistoryEventListener = (wdw, prefix, setHref) => {
+export const addHistoryEventListener = (wdw: Window, prefix: string, setHref: SetHref) => {
   const origin = wdw.location.origin;
 
   const linkHandler = (evt) => {
