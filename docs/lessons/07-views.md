@@ -100,22 +100,18 @@ You can see the complete example below.
 ### [React](#react)
 
 Wiring Meiosis to [React](https://reactjs.org) is essentially the same as with Preact, the only
-difference is that we use `ReactDOM.render` to render the view:
+difference is that we use `ReactDOM.createRoot` and `root.render` to render the view:
 
 ```js
-const element = document.getElementById('app');
+const root = ReactDOM.createRoot(document.getElementById('app'));
 cells.map((cell) => {
-  ReactDOM.render(app.view(cell), element);
+  root.render(app.view(cell));
 });
 ```
 
 You can see the complete example below.
 
 @flems {"files":"code/07-react.jsx,app.html,app.css","libs":"flyd,react,react-dom,mergerino","height":800,"middle":60}
-
-> Starting with React 18, `ReactDOM.render(view, element)` has been deprecated in favor of `root =
-createRoot(element)` and `root.render(view)`. This doesn't change how to wire up Meiosis aside from
-adjusting how to use the React API.
 
 <a name="conclusion"></a>
 ### [Conclusion](#conclusion)

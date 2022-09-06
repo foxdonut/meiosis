@@ -1,5 +1,6 @@
 /* global React, ReactDOM, flyd, mergerino */
 const merge = mergerino;
+const createRoot = ReactDOM.createRoot;
 
 class ReRenderOnStateChangeComponent extends React.Component {
   shouldComponentUpdate(nextProps) {
@@ -126,7 +127,7 @@ const nest = nestCell(states, update);
 const createCell = (state) => ({ state, update, nest });
 const cells = states.map(createCell);
 
-const element = document.getElementById('app');
+const root = createRoot(document.getElementById('app'));
 cells.map((cell) => {
-  ReactDOM.render(app.view(cell), element);
+  root.render(app.view(cell));
 });

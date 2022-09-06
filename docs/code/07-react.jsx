@@ -1,5 +1,6 @@
 /*global React, ReactDOM, flyd, mergerino*/
 const merge = mergerino;
+const createRoot = ReactDOM.createRoot;
 
 const actions = {
   increment: (cell, amount) =>
@@ -37,7 +38,7 @@ const states = flyd.scan(merge, app.initial, update);
 const createCell = (state) => ({ state, update });
 const cells = states.map(createCell);
 
-const element = document.getElementById('app');
+const root = createRoot(document.getElementById('app'));
 cells.map((cell) => {
-  ReactDOM.render(app.view(cell), element);
+  root.render(app.view(cell));
 });
