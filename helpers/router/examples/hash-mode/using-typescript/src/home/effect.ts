@@ -1,5 +1,5 @@
-import { EffectConstructor } from "../app/types";
-import { Route } from "../router";
+import { EffectConstructor } from '../app/types';
+import { Route } from '../router';
 
 export const Effect: EffectConstructor =
   (update) => (state) => {

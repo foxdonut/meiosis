@@ -1,5 +1,5 @@
-import { LoginActions, Update } from "../app/types";
-import { Route, router } from "../router";
+import { LoginActions, Update } from '../app/types';
+import { Route, router } from '../router';
 
 export const Actions = (update: Update): LoginActions => ({
   username: (value) =>

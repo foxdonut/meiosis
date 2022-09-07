@@ -1,24 +1,24 @@
-import m from "mithril";
+import m from 'mithril';
 
-import { TeaDetails } from "../teaDetails";
-import { PleaseWait } from "../ui";
-import { ViewAttrs } from "../app/types";
-import { Route, router } from "../router";
+import { TeaDetails } from '../teaDetails';
+import { PleaseWait } from '../ui';
+import { ViewAttrs } from '../app/types';
+import { Route, router } from '../router';
 
 export const Tea: m.Component<ViewAttrs> = {
   view: ({ attrs: { state, update, actions } }) => [
-    m("h3", "Tea Page"),
+    m('h3', 'Tea Page'),
     m(
-      ".row",
+      '.row',
       m(
-        ".col-md-6",
+        '.col-md-6',
         state.teas &&
           state.teas.map((tea) =>
             m(
-              "div",
+              'div',
               { key: tea.id },
               m(
-                "a",
+                'a',
                 {
                   href: router.toUrl(Route.TeaDetails, {
                     id: tea.id
@@ -29,9 +29,9 @@ export const Tea: m.Component<ViewAttrs> = {
             )
           )
       ),
-      state.route.page === "TeaDetails" &&
+      state.route.page === 'TeaDetails' &&
         m(
-          ".col-md-6",
+          '.col-md-6',
           m(TeaDetails, { state, update, actions })
         )
     ),

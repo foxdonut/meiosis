@@ -1,29 +1,29 @@
-import m from "mithril";
+import m from 'mithril';
 
-import { PleaseWait } from "../ui";
-import { ViewAttrs } from "../app/types";
-import { Route, router } from "../router";
+import { PleaseWait } from '../ui';
+import { ViewAttrs } from '../app/types';
+import { Route, router } from '../router';
 
-const types = ["Black", "Green", "Herbal", "Oolong"];
+const types = ['Black', 'Green', 'Herbal', 'Oolong'];
 
 export const TeaSearch: m.Component<ViewAttrs> = {
   view: ({ attrs: { state, update, actions } }) => {
     const teaType = state.route.params.type;
 
     return [
-      m("h3", "Tea Search Page"),
+      m('h3', 'Tea Search Page'),
       m(
-        ".row",
+        '.row',
         m(
-          ".col-md-6",
+          '.col-md-6',
           state.searchTeas && [
             m(
-              "div",
+              'div',
               types.map((type) => [
                 m(
-                  "a",
+                  'a',
                   {
-                    style: { marginRight: "10px" },
+                    style: { marginRight: '10px' },
                     href: router.toUrl(Route.TeaSearch, {
                       type
                     })
@@ -32,23 +32,23 @@ export const TeaSearch: m.Component<ViewAttrs> = {
                 )
               ]),
               m(
-                "a",
+                'a',
                 { href: router.toUrl(Route.TeaSearch) },
-                "All"
+                'All'
               )
             ),
             m(
-              "table.table.table-bordered.table-striped",
+              'table.table.table-bordered.table-striped',
               m(
-                "thead",
+                'thead',
                 m(
-                  "tr",
-                  m("th", "Type"),
-                  m("th", "Description")
+                  'tr',
+                  m('th', 'Type'),
+                  m('th', 'Description')
                 )
               ),
               m(
-                "tbody",
+                'tbody',
                 state.searchTeas
                   .filter(
                     (tea) =>
@@ -56,10 +56,10 @@ export const TeaSearch: m.Component<ViewAttrs> = {
                   )
                   .map((tea) =>
                     m(
-                      "tr",
+                      'tr',
                       { key: tea.id },
-                      m("td", tea.type),
-                      m("td", tea.description)
+                      m('td', tea.type),
+                      m('td', tea.description)
                     )
                   )
               )

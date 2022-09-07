@@ -1,7 +1,7 @@
-import { Effect } from "./effect";
+import { Effect } from './effect';
 
 export const teaSearch = {
   Effect
 };
 
-export { TeaSearch } from "./view";
+export { TeaSearch } from './view';

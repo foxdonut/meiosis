@@ -1,36 +1,37 @@
 /* global __dirname */
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const modes = ["hash", "history"];
-const examples = ["generic-router", "mithril-router"];
+const modes = ['hash', 'history'];
+const examples = ['generic-router', 'mithril-router'];
 const configs = [];
 
 const createConfig = (mode, example) => ({
-  mode: "development",
+  mode: 'development',
   entry: `./${mode}-mode/${example}/src/index.js`,
   output: {
     path: path.join(
       __dirname,
       `${mode}-mode/${example}/build`
     ),
-    filename: `generated-app.js`
+    filename: 'generated-app.js'
   },
   plugins: [
     new HtmlWebpackPlugin({
       hash: true,
-      template: "./index-template.html",
-      filename: "index.html",
+      template: './index-template.html',
+      filename: 'index.html',
       chunks: [],
       mode,
       example
     })
   ],
   resolve: {
-    extensions: [".js"],
-    // This is so that router-setup-common can find peerDependencies
+    extensions: ['.js'],
+    // This is so that router-examples-common can find peerDependencies
     alias: {
-      mithril: path.resolve("./node_modules/mithril")
+      mithril: path.resolve('./node_modules/mithril')
     }
   },
   module: {
@@ -39,7 +40,7 @@ const createConfig = (mode, example) => ({
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: 'babel-loader'
         }
       }
     ]
@@ -53,28 +54,29 @@ modes.forEach((mode) =>
 );
 
 configs.push(
-  Object.assign(createConfig("hash", "using-typescript"), {
-    entry: "./hash-mode/using-typescript/src/index.ts",
-    devtool: "source-map",
+  Object.assign(createConfig('hash', 'using-typescript'), {
+    entry: './hash-mode/using-typescript/src/index.ts',
+    devtool: 'source-map',
     resolve: {
-      extensions: [".ts", ".js"],
+      extensions: ['.ts', '.js'],
       alias: {
-        mithril: path.resolve("./node_modules/mithril")
+        mithril: path.resolve('./node_modules/mithril')
       }
     },
     module: {
       rules: [
         {
           test: /\.ts$/,
+          exclude: /node_modules/,
           use: {
-            loader: "awesome-typescript-loader"
+            loader: 'ts-loader'
           }
         },
         {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: "source-map-loader"
+            loader: 'source-map-loader'
           }
         }
       ]

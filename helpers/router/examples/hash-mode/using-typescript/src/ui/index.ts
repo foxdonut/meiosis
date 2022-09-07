@@ -1,22 +1,22 @@
-import m from "mithril";
-import { ViewAttrs } from "../app/types";
+import m from 'mithril';
+import { ViewAttrs } from '../app/types';
 
 export const PleaseWait: m.Component<ViewAttrs> = {
   view: ({ attrs: { state } }) => {
     return m(
-      "div",
+      'div',
       {
         style: {
           visibility: state.route.changed
-            ? "visible"
-            : "hidden"
+            ? 'visible'
+            : 'hidden'
         }
       },
       m(
-        "div.simpleModal",
+        'div.simpleModal',
         m(
-          "div.simpleBox",
-          m("div", "Loading, please wait...")
+          'div.simpleBox',
+          m('div', 'Loading, please wait...')
         )
       )
     );

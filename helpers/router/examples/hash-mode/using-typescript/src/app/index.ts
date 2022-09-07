@@ -1,15 +1,15 @@
 import {
   Router,
   RouteChangeEffect
-} from "meiosis-router-setup";
-import { State, Patch, AppActions } from "./types";
-import { App } from "../meiosis";
-import { home } from "../home";
-import { login } from "../login";
-import { settings } from "../settings";
-import { tea } from "../tea";
-import { teaDetails } from "../teaDetails";
-import { teaSearch } from "../teaSearch";
+} from 'meiosis-router';
+import { State, Patch, AppActions } from './types';
+import { App } from '../meiosis';
+import { home } from '../home';
+import { login } from '../login';
+import { settings } from '../settings';
+import { tea } from '../tea';
+import { teaDetails } from '../teaDetails';
+import { teaSearch } from '../teaSearch';
 
 export const createApp = (
   router: Router
@@ -17,8 +17,8 @@ export const createApp = (
   initial: {
     route: router.initialRoute,
     login: {
-      username: "",
-      password: ""
+      username: '',
+      password: ''
     },
     searchTeas: []
   },
@@ -43,4 +43,4 @@ export const createApp = (
   ]
 });
 
-export { App } from "./view";
+export { App } from './view';

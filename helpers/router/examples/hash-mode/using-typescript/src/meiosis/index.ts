@@ -1,6 +1,6 @@
 /* Equivalent of this code, you can also npm install meiosis-setup */
 /* See https://meiosis.js.org/setup for details. */
-import * as flyd from "flyd";
+import * as flyd from 'flyd';
 
 type Stream<T> = flyd.Stream<T>;
 

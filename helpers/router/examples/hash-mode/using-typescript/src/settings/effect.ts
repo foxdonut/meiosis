@@ -1,5 +1,5 @@
-import { EffectConstructor } from "../app/types";
-import { Route, router } from "../router";
+import { EffectConstructor } from '../app/types';
+import { Route, router } from '../router';
 
 export const Effect: EffectConstructor =
   (update) => (state) => {
@@ -10,7 +10,7 @@ export const Effect: EffectConstructor =
       update({
         route: router.replaceRoute(Route.Login),
         login: {
-          message: "Please login.",
+          message: 'Please login.',
           returnTo: router.toRoute(Route.Settings)
         }
       });

@@ -1,5 +1,5 @@
-import { SettingsActions, Update } from "../app/types";
-import { Route, router } from "../router";
+import { SettingsActions, Update } from '../app/types';
+import { Route, router } from '../router';
 
 export const Actions = (
   update: Update
@@ -8,6 +8,6 @@ export const Actions = (
     update({
       user: null,
       route: () => router.toRoute(Route.Home),
-      message: "You have been logged out."
+      message: 'You have been logged out.'
     })
 });

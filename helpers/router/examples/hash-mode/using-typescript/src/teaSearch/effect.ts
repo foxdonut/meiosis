@@ -1,6 +1,6 @@
-import { EffectConstructor } from "../app/types";
-import { searchTeas } from "../teaSearch/data";
-import { Route } from "../router";
+import { EffectConstructor } from '../app/types';
+import { searchTeas } from '../teaSearch/data';
+import { Route } from '../router';
 
 export const Effect: EffectConstructor =
   (update) => (state) => {

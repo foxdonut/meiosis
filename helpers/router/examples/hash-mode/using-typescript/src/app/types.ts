@@ -1,9 +1,9 @@
-import * as flyd from "flyd";
-import { Route } from "meiosis-router-setup";
+import * as flyd from 'flyd';
+import { Route } from 'meiosis-router';
 
 type Stream<T> = flyd.Stream<T>;
 
-import { Service, Effect } from "../meiosis";
+import { Service, Effect } from '../meiosis';
 
 interface Login {
   username: string;

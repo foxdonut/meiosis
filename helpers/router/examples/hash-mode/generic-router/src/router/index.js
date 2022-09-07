@@ -1,9 +1,9 @@
 // @ts-check
-import { createRouter } from "meiosis-router-setup";
-import queryString from "query-string";
-import { routeConfig } from "router-setup-common/src/router";
+import { createRouter } from 'meiosis-router';
+import queryString from 'query-string';
+import { routeConfig } from 'router-examples-common/src/router';
 
-import createRouteMatcher from "feather-route-matcher";
+import createRouteMatcher from 'feather-route-matcher';
 
 const routeMatcher = createRouteMatcher(routeConfig);
 

@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "esModuleInterop": true,
+    "lib": ["es2017", "dom"],
+    "module": "commonjs",
+    "noImplicitAny": false,
     "outDir": "./hash-mode/using-typescript/build/",
     "sourceMap": true,
-    "noImplicitAny": false,
-    "module": "commonjs",
-    "target": "es6",
-    "esModuleInterop": true,
-    "lib": ["es2017", "dom"]
+    "strict": true,
+    "target": "es6"
   },
   "include": [
     "./hash-mode/using-typescript/src/**/*"
