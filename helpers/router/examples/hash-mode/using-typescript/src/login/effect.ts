@@ -1,5 +1,5 @@
-import { EffectConstructor } from "../app/types";
-import { Route, router } from "../router";
+import { EffectConstructor } from '../app/types';
+import { Route, router } from '../router';
 
 export const Effect: EffectConstructor =
   (update) => (state) => {
@@ -9,13 +9,13 @@ export const Effect: EffectConstructor =
     ) {
       if (
         !state.user &&
-        !confirm("You have unsaved data. Continue?")
+        !confirm('You have unsaved data. Continue?')
       ) {
         update({
           route: () => router.toRoute(Route.Login)
         });
       } else {
-        update({ login: { username: "", password: "" } });
+        update({ login: { username: '', password: '' } });
       }
     }
   };
