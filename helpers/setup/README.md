@@ -1,7 +1,5 @@
 # meiosis-setup
 
-# Caution: Work In Progress - Not Yet Released!
-
 Helper library to set up the Meiosis pattern for you. Please make sure to first read the
 documentation on the [Meiosis pattern](https://meiosis.js.org/docs/toc.html).
 
