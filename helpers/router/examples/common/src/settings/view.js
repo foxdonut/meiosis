@@ -1,12 +1,12 @@
-import m from "mithril";
+import m from 'mithril';
 
 export const Settings = {
   view: ({ attrs: { actions } }) => [
-    m("h3", "Settings Page"),
+    m('h3', 'Settings Page'),
     m(
-      "button.btn.btn-danger",
+      'button.btn.btn-danger',
       { onclick: () => actions.settings.logout() },
-      "Logout"
+      'Logout'
     )
   ]
 };

@@ -1,21 +1,21 @@
-import m from "mithril";
+import m from 'mithril';
 
 export const PleaseWait = {
   view: ({ attrs: { state } }) => {
     return m(
-      "div",
+      'div',
       {
         style: {
           visibility: state.route.changed
-            ? "visible"
-            : "hidden"
+            ? 'visible'
+            : 'hidden'
         }
       },
       m(
-        "div.simpleModal",
+        'div.simpleModal',
         m(
-          "div.simpleBox",
-          m("div", "Loading, please wait...")
+          'div.simpleBox',
+          m('div', 'Loading, please wait...')
         )
       )
     );

@@ -1,11 +1,11 @@
-import { Route } from "../router";
+import { Route } from '../router';
 
 export const Effect = (router) => (update) => (state) => {
   if (state.route.page === Route.Settings && !state.user) {
     update({
       route: router.replaceRoute(Route.Login),
       login: {
-        message: "Please login.",
+        message: 'Please login.',
         returnTo: router.toRoute(Route.Settings)
       }
     });

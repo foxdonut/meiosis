@@ -1,5 +1,5 @@
-import { Route } from "../router";
-import { teas } from "../teaDetails/data";
+import { Route } from '../router';
+import { teas } from '../teaDetails/data';
 
 export const Effect = (update) => (state) => {
   if (

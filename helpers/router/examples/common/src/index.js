@@ -1,12 +1,12 @@
-import merge from "mergerino";
-import m from "mithril";
-import flyd from "flyd";
+import merge from 'mergerino';
+import m from 'mithril';
+import flyd from 'flyd';
 
 // Only for using Meiosis Tracer in development.
-import meiosisTracer from "meiosis-tracer";
+import meiosisTracer from 'meiosis-tracer';
 
-import { meiosis } from "./meiosis";
-import { createApp, App } from "./app";
+import { meiosis } from './meiosis';
+import { createApp, App } from './app';
 
 export const setupApp = (router) => {
   const app = createApp(router);
@@ -23,12 +23,12 @@ export const setupApp = (router) => {
 
   // Only for using Meiosis Tracer in development.
   meiosisTracer({
-    selector: "#tracer",
+    selector: '#tracer',
     rows: 30,
-    streams: [{ stream: states, label: "states" }]
+    streams: [{ stream: states, label: 'states' }]
   });
 
-  m.mount(document.getElementById("app"), {
+  m.mount(document.getElementById('app'), {
     view: () => m(App, { state: states(), actions, router })
   });
 

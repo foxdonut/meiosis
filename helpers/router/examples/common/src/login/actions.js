@@ -1,4 +1,4 @@
-import { Route } from "../router";
+import { Route } from '../router';
 
 export const Actions = (update, router) => ({
   username: (value) =>

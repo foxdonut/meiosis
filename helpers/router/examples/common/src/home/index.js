@@ -1,7 +1,7 @@
-import { Effect } from "./effect";
+import { Effect } from './effect';
 
 export const home = {
   Effect
 };
 
-export { Home } from "./view";
+export { Home } from './view';

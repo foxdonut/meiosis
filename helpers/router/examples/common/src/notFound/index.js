@@ -1,1 +1,1 @@
-export { NotFound } from "./view";
+export { NotFound } from './view';

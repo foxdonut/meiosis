@@ -1,4 +1,4 @@
-import { Route } from "../router";
+import { Route } from '../router';
 
 export const Effect = (update) => (state) => {
   if (state.route.page !== Route.Home && state.message) {

@@ -1,12 +1,12 @@
-import m from "mithril";
+import m from 'mithril';
 
-import { Home } from "../home";
-import { Login } from "../login";
-import { Settings } from "../settings";
-import { Tea } from "../tea";
-import { TeaSearch } from "../teaSearch";
-import { NotFound } from "../notFound";
-import { Route } from "../router";
+import { Home } from '../home';
+import { Login } from '../login';
+import { Settings } from '../settings';
+import { Tea } from '../tea';
+import { TeaSearch } from '../teaSearch';
+import { NotFound } from '../notFound';
+import { Route } from '../router';
 
 const componentMap = {
   Home,
@@ -22,48 +22,48 @@ export const App = {
   view: ({ attrs: { state, update, actions, router } }) => {
     const Component = componentMap[state.route.page];
     const isActive = (tab) =>
-      tab === Component ? ".active" : "";
+      tab === Component ? '.active' : '';
 
     return m(
-      "div",
+      'div',
       m(
-        "nav.navbar.navbar-default",
+        'nav.navbar.navbar-default',
         m(
-          "ul.nav.navbar-nav",
+          'ul.nav.navbar-nav',
           m(
-            "li" + isActive(Home),
+            'li' + isActive(Home),
             m(
-              "a",
+              'a',
               { href: router.toUrl(Route.Home) },
-              "Home"
+              'Home'
             )
           ),
           m(
-            "li" + isActive(Login),
+            'li' + isActive(Login),
             m(
-              "a",
+              'a',
               { href: router.toUrl(Route.Login) },
-              "Login"
+              'Login'
             )
           ),
           m(
-            "li" + isActive(Settings),
+            'li' + isActive(Settings),
             m(
-              "a",
+              'a',
               { href: router.toUrl(Route.Settings) },
-              "Settings"
+              'Settings'
             )
           ),
           m(
-            "li" + isActive(Tea),
-            m("a", { href: router.toUrl(Route.Tea) }, "Tea")
+            'li' + isActive(Tea),
+            m('a', { href: router.toUrl(Route.Tea) }, 'Tea')
           ),
           m(
-            "li" + isActive(TeaSearch),
+            'li' + isActive(TeaSearch),
             m(
-              "a",
+              'a',
               { href: router.toUrl(Route.TeaSearch) },
-              "Tea Search"
+              'Tea Search'
             )
           )
         )

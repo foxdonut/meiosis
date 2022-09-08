@@ -1,23 +1,23 @@
-import m from "mithril";
+import m from 'mithril';
 
-import { TeaDetails } from "../teaDetails";
-import { Route } from "../router";
-import { PleaseWait } from "../ui";
+import { TeaDetails } from '../teaDetails';
+import { Route } from '../router';
+import { PleaseWait } from '../ui';
 
 export const Tea = {
   view: ({ attrs: { state, router } }) => [
-    m("h3", "Tea Page"),
+    m('h3', 'Tea Page'),
     m(
-      ".row",
+      '.row',
       m(
-        ".col-md-6",
+        '.col-md-6',
         state.teas &&
           state.teas.map((tea) =>
             m(
-              "div",
+              'div',
               { key: tea.id },
               m(
-                "a",
+                'a',
                 {
                   href: router.toUrl(Route.TeaDetails, {
                     id: tea.id
@@ -28,8 +28,8 @@ export const Tea = {
             )
           )
       ),
-      state.route.page === "TeaDetails" &&
-        m(".col-md-6", m(TeaDetails, { state, router }))
+      state.route.page === 'TeaDetails' &&
+        m('.col-md-6', m(TeaDetails, { state, router }))
     ),
     m(PleaseWait, { state })
   ]

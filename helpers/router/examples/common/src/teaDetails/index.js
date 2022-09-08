@@ -1,7 +1,7 @@
-import { Effect } from "./effect";
+import { Effect } from './effect';
 
 export const teaDetails = {
   Effect
 };
 
-export { TeaDetails } from "./view";
+export { TeaDetails } from './view';
