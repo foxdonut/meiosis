@@ -1,6 +1,6 @@
 /**
- * Route configuration. This is a plain object that associates route path templates to string page
- * IDs. Route path templates may contain parameters by using `:` as a prefix. For example:
+ * Route configuration. This is a plain object that associates route path templates to values.
+ * Route path templates may contain parameters by using `:` as a prefix. For example:
  *
  * ```ts
  * const routeConfig: RouteConfig = {
@@ -15,14 +15,14 @@ export type RouteConfig = Record<string, string>;
 /**
  * Route and query string params.
  */
-export type Params = Record<string, any>;
+export type Params = Record<string, any> | null;
 
 /**
  * A route in the application state.
  */
 export type Route = {
-  /** The page corresponding to the route. */
-  page: string;
+  /** The value corresponding to the route. */
+  value: string;
 
   /** An object with route and query string params. */
   params: Params;
@@ -32,80 +32,14 @@ export type Route = {
 };
 
 /**
- * A route matcher resolves a URL to a route.
+ * Function to generate a URL from a value and params.
  *
- * @template M the matched route type.
- *
- * @param url the URL to resolve.
- *
- * @returns the matched route.
- */
-export type RouteMatcher<M> = (url: string) => M;
-
-/**
- * A function to convert the match from the router library to an object with `page` and `params`.
- *
- * @template M the matched route type.
- *
- * @param match the route match returned by the router library
- *
- * @returns the converted object.
- */
-export type ConvertMatch<M> = (match: M) => ({ page: string, params: Params });
-
-/**
- * Query string parse function.
- *
- * @param query the query string to parse.
- *
- * @returns the result of parsing the query string.
- */
-export type QueryStringParse = (query: string) => Params;
-
-/**
- * Query string stringify function.
- *
- * @param query the query string object.
- *
- * @returns the stringified query string.
- */
-export type QueryStringStringify = (query: Params) => string;
-
-/**
- * Query string library that provides the `parse` and `stringify` functions. This is only required
- * if your application needs query string support. Examples of query string libraries that work
- * out-of-the-box are:
- *
- * - [query-string](https://github.com/sindresorhus/query-string)
- * - [qs](https://github.com/ljharb/qs)
- * - [urlon](https://github.com/cerebral/urlon)
- *
- * Note that each library supports different features for query strings.
- */
-export type QueryStringLib = {
-  parse: QueryStringParse;
-  stringify: QueryStringStringify;
-};
-
-/**
- * Function to convert a page and params to a route.
- *
- * @param page the page ID.
- * @param params the path parameters.
- *
- * @returns the route.
- */
-export type ToRoute = (page: string, params?: Params) => Route;
-
-/**
- * Function to generate a URL from a page ID and params.
- *
- * @param page the page ID.
+ * @param value the route value.
  * @param params the path parameters.
  *
  * @returns the URL.
  */
-export type ToUrl = (page: string, params?: Params) => string;
+export type ToUrl = (value: string, params?: Params) => string;
 
 export type GetStatePath = (path: string) => string;
 
@@ -130,56 +64,28 @@ export type OnRouteChange = (route: Route) => void;
  */
 export type Start = (onRouteChange: OnRouteChange) => any;
 
-export type SyncLocationBarParams = {
-  page: string;
-  params?: Params;
-  replace?: boolean;
-};
-
-type GetUrl = () => string;
-
 export type DoSyncLocationBarParams = {
   replace?: boolean;
   url: string;
-  getUrl: GetUrl;
+  getUrl: () => string;
   wdw?: Window;
 };
 
 /**
  * Function that synchronizes the location bar with the state route.
  */
-export type SyncLocationBar = (syncLocationBarParams: SyncLocationBarParams) => void;
+export type SyncLocationBar = (route: Route) => void;
 
 /**
  * Configuration to create a router.
- *
- * @template M the matched route type.
  */
-export type RouterConfig<M> = {
-  /** The function that matches routes. */
-  routeMatcher: RouteMatcher<M>;
-
-  /** A function to convert a router library match to a route. */
-  convertMatch: ConvertMatch<M>;
-
-  /** The route configuration. If not provided, `toUrl` must be provided. */
-  routeConfig?: RouteConfig;
-
-  /** The `toUrl` function. If not provided, `routeConfig` must be provided and `toUrl` is
-   * constructed from `routeConfig`. */
-  toUrl?: ToUrl;
+export type RouterConfig = {
+  /** The route configuration. */
+  routeConfig: RouteConfig;
 
   /** If specified, uses history mode instead of hash mode. If you are using history mode, you need
    * to provide server side router support. If not provided, defaults to the identity function. */
   rootPath?: string;
-
-  /** Whether to use a plain hash, `"#"`, instead of a hash-bang, `"#!"`. Defaults to `false`. The
-   * `plainHash` option should not be specified (it will be ignored) if `rootPath` is specified. */
-  plainHash?: boolean;
-
-  /** The query string library to use. You only need to provide this if your application requires
-   * query string support. */
-  queryString?: QueryStringLib;
 
   /** The `window`, used for testing purposes. */
   wdw?: Window;
@@ -191,13 +97,6 @@ export type RouterConfig<M> = {
  export type Router = {
   /** The initial route as parsed from the location bar. */
   initialRoute: Route;
-
-  /** Function to convert a page and params to a route. */
-  toRoute: ToRoute;
-
-  /** Function to convert a page and params to a route that will replace the current route in the
-   * browser history. */
-  replaceRoute: ToRoute;
 
   /** Function to generate a URL. */
   toUrl: ToUrl;

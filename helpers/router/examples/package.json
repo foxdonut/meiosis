@@ -31,8 +31,7 @@
     "meiosis-router": "^1.0.0-beta.1",
     "meiosis-setup": "^6.0.0",
     "mithril": "^2.2.2",
-    "query-string": "^7.1.1",
-    "router5": "^8.0.1"
+    "query-string": "^7.1.1"
   },
   "devDependencies": {
     "@types/mithril": "^2.0.11",

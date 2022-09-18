@@ -1,7 +1,7 @@
+import qs from 'qs';
 import {
   DoSyncLocationBarParams,
   GetStatePath,
-  QueryStringLib,
   RouteConfig,
   SetHref,
   ToUrl
@@ -19,8 +19,8 @@ export const getQuery = (path: string): string => {
   return idx >= 0 ? path.substring(idx + 1) : '';
 };
 
-export const getQueryString = (queryString: QueryStringLib, queryParams = {}): string => {
-  const query = queryString.stringify(queryParams);
+export const getQueryString = (queryParams = {}): string => {
+  const query = qs.stringify(queryParams);
   return (query.length > 0 ? '?' : '') + query;
 };
 
@@ -44,9 +44,6 @@ export const getConfig = (rootPath?: string, plainHash?: boolean) => {
   return { prefix, historyMode };
 };
 
-export const toRoute = (page, params = {}) => ({ page, params });
-export const replaceRoute = (page, params = {}) => ({ page, params, replace: true });
-
 export const createGetUrl = (prefix, historyMode, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
@@ -55,9 +52,7 @@ export const createGetUrl = (prefix, historyMode, wdw) =>
 /**
  * Helper that creates a `toUrl` function.
  */
-const ToUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath,
-  queryString: QueryStringLib): ToUrl => {
-
+const toUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath): ToUrl => {
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
@@ -72,20 +67,15 @@ const ToUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath,
         (result, pathParam) =>
           result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
         path
-      ) + getQueryString(queryString, queryParams)
+      ) + getQueryString(queryParams)
     );
   };
 };
 
-export const createToUrl = (routeConfig, prefix, queryString, historyMode, toUrl?) => {
+export const createToUrl = (routeConfig, prefix, historyMode): ToUrl => {
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = toUrl || ToUrl(routeConfig, getStatePath, queryString);
+  const toUrlFn = toUrl(routeConfig, getStatePath);
   return (page, params = {}) => prefix + toUrlFn(page, params);
-};
-
-export const emptyQueryString = {
-  parse: (_) => ({}),
-  stringify: (_) => ''
 };
 
 export const doSyncLocationBar = ({ replace, url, getUrl, wdw }: DoSyncLocationBarParams) => {

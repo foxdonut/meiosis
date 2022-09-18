@@ -1,50 +1,29 @@
+import createRouteMatcher from 'feather-route-matcher';
+import qs from 'qs';
+import { Route, Router, RouterConfig, ToUrl } from './types';
 import {
   addHistoryEventListener,
   createGetUrl,
   createToUrl,
   doSyncLocationBar,
-  emptyQueryString,
   getConfig,
-  getQuery,
-  replaceRoute,
-  toRoute
+  getQuery
 } from './util';
 
 /**
- * @template M
  * Creates a router.
- *
- * @param {RouterConfig<M>} config
- *
- * @return {Router} the created router.
  */
 export const createRouter = ({
-  routeMatcher,
-  convertMatch,
   routeConfig,
-  toUrl,
   rootPath,
-  plainHash = false,
-  queryString = emptyQueryString,
   wdw = window
-}) => {
-  if (!routeMatcher) {
-    throw 'routeMatcher is required';
-  }
-
-  if (!convertMatch) {
-    throw 'convertMatch is required';
-  }
-
-  if (!routeConfig && !toUrl) {
-    throw 'routeConfig or toUrl is required';
-  }
-
-  const { prefix, historyMode } = getConfig(rootPath, plainHash);
+}: RouterConfig): Router => {
+  const routeMatcher = createRouteMatcher(routeConfig);
+  const { prefix, historyMode } = getConfig(rootPath);
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
-  toUrl = createToUrl(routeConfig, prefix, queryString, historyMode, toUrl);
+  const toUrl: ToUrl = createToUrl(routeConfig, prefix, historyMode);
 
   const getRoute = (path) => {
     let matchPath = path || '/';
@@ -52,11 +31,10 @@ export const createRouter = ({
       matchPath = '/' + matchPath;
     }
     const match = routeMatcher(matchPath);
-    const converted = convertMatch(match);
-    const queryParams = queryString.parse(getQuery(path));
-    const params = Object.assign(queryParams, converted.params);
+    const queryParams = qs.parse(getQuery(path));
+    const params = Object.assign(queryParams, match.params);
 
-    return Object.assign(converted, { params });
+    return Object.assign(match, { params });
   };
 
   const initialRoute = getRoute(getPath());
@@ -73,9 +51,9 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
-  const syncLocationBar = ({ page, params, replace }) => {
-    doSyncLocationBar({ replace, url: toUrl(page, params), getUrl, wdw });
+  const syncLocationBar = ({ value, params, replace }: Route) => {
+    doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
-  return { initialRoute, toRoute, replaceRoute, toUrl, start, syncLocationBar };
+  return { initialRoute, toUrl, start, syncLocationBar };
 };
