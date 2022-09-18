@@ -37,9 +37,9 @@ const separateParamsAndQueryParams = (path: string, allParams) => {
   );
 };
 
-export const getConfig = (rootPath?: string, plainHash?: boolean) => {
+export const getConfig = (rootPath?: string) => {
   const historyMode = rootPath != null;
-  const prefix = historyMode ? rootPath : '#' + (plainHash ? '' : '!');
+  const prefix = historyMode ? rootPath : '#!';
 
   return { prefix, historyMode };
 };
