@@ -1,4 +1,4 @@
-import qs from 'qs';
+import qs from 'query-string';
 import {
   DoSyncLocationBarParams,
   GetStatePath,

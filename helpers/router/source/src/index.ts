@@ -1,5 +1,5 @@
 import createRouteMatcher from 'feather-route-matcher';
-import qs from 'qs';
+import qs from 'query-string';
 import {
   OnRouteChange,
   Route,
