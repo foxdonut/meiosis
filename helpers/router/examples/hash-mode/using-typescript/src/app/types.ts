@@ -1,5 +1,5 @@
 import * as flyd from 'flyd';
-import { Route } from 'meiosis-router';
+import { Route } from 'meiosis-router/types';
 
 type Stream<T> = flyd.Stream<T>;
 

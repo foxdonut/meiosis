@@ -29,17 +29,13 @@
     "feather-route-matcher": "^4.0.0",
     "flyd": "^0.2.8",
     "meiosis-router": "^1.0.0-beta.1",
-    "mergerino": "^0.4.0",
+    "meiosis-setup": "^6.0.0",
     "mithril": "^2.2.2",
     "query-string": "^7.1.1",
-    "router-examples-common": "./common",
     "router5": "^8.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.19.0",
-    "@babel/preset-env": "^7.19.0",
     "@types/mithril": "^2.0.11",
-    "babel-loader": "^8.2.5",
     "html-webpack-plugin": "^5.5.0",
     "meiosis-tracer": "^4.0.0",
     "source-map-loader": "^4.0.0",

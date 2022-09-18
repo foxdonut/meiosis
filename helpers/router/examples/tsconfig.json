@@ -10,6 +10,6 @@
     "target": "es6"
   },
   "include": [
-    "./hash-mode/using-typescript/src/**/*"
+    "src/**/*.ts"
   ]
 }

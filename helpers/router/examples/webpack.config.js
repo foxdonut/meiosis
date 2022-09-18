@@ -1,67 +1,18 @@
 /* global __dirname */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const modes = ['hash', 'history'];
-const examples = ['generic-router', 'mithril-router'];
-const configs = [];
-
-const createConfig = (mode, example) => ({
-  mode: 'development',
-  entry: `./${mode}-mode/${example}/src/index.js`,
-  output: {
-    path: path.join(
-      __dirname,
-      `${mode}-mode/${example}/build`
-    ),
-    filename: 'generated-app.js'
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      hash: true,
-      template: './index-template.html',
-      filename: 'index.html',
-      chunks: [],
-      mode,
-      example
-    })
-  ],
-  resolve: {
-    extensions: ['.js'],
-    // This is so that router-examples-common can find peerDependencies
-    alias: {
-      mithril: path.resolve('./node_modules/mithril')
-    }
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
-        }
-      }
-    ]
-  }
-});
-
-modes.forEach((mode) =>
-  examples.forEach((example) => {
-    configs.push(createConfig(mode, example));
-  })
-);
-
-configs.push(
-  Object.assign(createConfig('hash', 'using-typescript'), {
-    entry: './hash-mode/using-typescript/src/index.ts',
+module.exports = (
+  {
+    mode: 'development',
+    entry: './src/index.ts',
     devtool: 'source-map',
+    output: {
+      path: path.join(__dirname, 'build'),
+      filename: 'generated-app.js'
+    },
     resolve: {
-      extensions: ['.ts', '.js'],
-      alias: {
-        mithril: path.resolve('./node_modules/mithril')
-      }
+      extensions: ['.ts', '.js']
     },
     module: {
       rules: [
@@ -81,7 +32,5 @@ configs.push(
         }
       ]
     }
-  })
+  }
 );
-
-module.exports = configs;
