@@ -3,8 +3,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
-const name = 'Meiosis';
-const input = './src/router.ts';
+const name = 'MeiosisRouter';
+const input = './src/index.ts';
 const extensions = ['.js', '.ts'];
 const babelHelpers = 'bundled';
 

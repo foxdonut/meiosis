@@ -62,7 +62,7 @@ export type OnRouteChange = (route: Route) => void;
  *
  * @param onRouteChange callback function for when the route changes.
  */
-export type Start = (onRouteChange: OnRouteChange) => any;
+export type Start = (onRouteChange: OnRouteChange) => void;
 
 export type DoSyncLocationBarParams = {
   replace?: boolean;

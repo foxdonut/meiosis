@@ -1,6 +1,12 @@
 import createRouteMatcher from 'feather-route-matcher';
 import qs from 'qs';
-import { Route, Router, RouterConfig, ToUrl } from './types';
+import {
+  OnRouteChange,
+  Route,
+  Router,
+  RouterConfig,
+  ToUrl
+} from './types';
 import {
   addHistoryEventListener,
   createGetUrl,
@@ -8,7 +14,7 @@ import {
   doSyncLocationBar,
   getConfig,
   getQuery
-} from './util';
+} from './helpers';
 
 /**
  * Creates a router.
@@ -39,7 +45,7 @@ export const createRouter = ({
 
   const initialRoute = getRoute(getPath());
 
-  const start = (onRouteChange) => {
+  const start = (onRouteChange: OnRouteChange) => {
     if (historyMode) {
       addHistoryEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);

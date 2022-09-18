@@ -2,11 +2,11 @@
 
 import createRouteMatcher from 'feather-route-matcher';
 import { createRouter } from '../src/index';
-import { RouterConfig } from '../src/types';
+import { RouteConfig, RouterConfig } from '../src/types';
 
-const decodeURI = (uri) => uri;
+const decodeURI = (uri: string) => uri;
 
-const mockWindow = (rootPath, prefix, path) => ({
+const mockWindow = (rootPath: string | undefined, prefix: string, path: string) => ({
   decodeURI,
   location: {
     hash: prefix + path,
@@ -25,7 +25,7 @@ export const Route = {
   UserProfile: 'UserProfile'
 };
 
-const routeConfig = {
+const routeConfig: RouteConfig = {
   '/': Route.Home,
   '/login': Route.Login,
   '/user/:id': Route.UserProfile
@@ -45,14 +45,6 @@ const hashAndHistoryModeCases: HashAndHistoryModeCases[] = [
 ];
 
 describe('router', () => {
-  /*
-  test('requires routeConfig or toUrl', () => {
-    expect(() => createRouter({})).toThrow(
-      'routeConfig is required'
-    );
-  });
-  */
-
   describe.each(hashAndHistoryModeCases)('%s',
     (_label, caseConfig, prefix) => {
       const historyMode = !!caseConfig.rootPath;
