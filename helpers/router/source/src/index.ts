@@ -2,9 +2,11 @@ import createRouteMatcher from 'feather-route-matcher';
 import qs from 'query-string';
 import {
   OnRouteChange,
+  Params,
   Route,
   Router,
   RouterConfig,
+  ToRoute,
   ToUrl
 } from './types';
 import {
@@ -30,6 +32,7 @@ export const createRouter = ({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl = createToUrl(routeConfig, prefix, historyMode);
+  const toRoute: ToRoute = (value: string, params?: Params) => ({ value, params: params || {} });
 
   const getRoute = (path) => {
     let matchPath = path || '/';
@@ -61,5 +64,5 @@ export const createRouter = ({
     doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
-  return { initialRoute, toUrl, start, syncLocationBar };
+  return { initialRoute, toUrl, toRoute, start, syncLocationBar };
 };

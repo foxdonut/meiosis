@@ -64,6 +64,19 @@ describe('router', () => {
         expect(router.toUrl(Route.Login)).toEqual(prefix + path);
       });
 
+      test('toRoute produces a Route', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        const route1 = { value: Route.Login, params: {} };
+        expect(router.toRoute(Route.Login)).toEqual(route1);
+
+        const params = { duck: 'quack' };
+        const route2 = { value: Route.Login, params };
+        expect(router.toRoute(Route.Login, params)).toEqual(route2);
+      });
+
       describe('syncLocationBar', () => {
         type SyncLocationBarCases = [string, { replace?: boolean }];
 

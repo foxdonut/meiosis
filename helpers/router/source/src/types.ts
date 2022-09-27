@@ -15,7 +15,7 @@ export type RouteConfig = Record<string, string>;
 /**
  * Route and query string params.
  */
-export type Params = Record<string, any> | null;
+export type Params = Record<string, any>;
 
 /**
  * A route in the application state.
@@ -40,6 +40,14 @@ export type Route = {
  * @returns the URL.
  */
 export type ToUrl = (value: string, params?: Params) => string;
+
+/**
+ * Function to generate a Route.
+ *
+ * @param value the route value.
+ * @param params the path parameters.
+ */
+export type ToRoute = (value: string, params?: Params) => Route;
 
 export type GetStatePath = (path: string) => string;
 
@@ -100,6 +108,9 @@ export type RouterConfig = {
 
   /** Function to generate a URL. */
   toUrl: ToUrl;
+
+  /** Function to generate a Route. */
+  toRoute: ToRoute;
 
   /** Function to start the router. */
   start: Start;

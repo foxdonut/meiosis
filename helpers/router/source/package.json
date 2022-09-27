@@ -1,6 +1,6 @@
 {
   "name": "meiosis-router",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.4",
   "private": true,
   "description": "Meiosis Helpers - Router",
   "main": "dist/meiosis-router.js",
