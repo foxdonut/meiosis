@@ -10,7 +10,7 @@
  * };
  * ```
  */
-export type RouteConfig = Record<string, string>;
+export type RouteConfig<T extends string = string> = Record<string, T>;
 
 /**
  * Route and query string params.
@@ -20,9 +20,9 @@ export type Params = Record<string, any>;
 /**
  * A route in the application state.
  */
-export type Route = {
+export type Route<T extends string = string> = {
   /** The value corresponding to the route. */
-  value: string;
+  value: T;
 
   /** An object with route and query string params. */
   params: Params;
@@ -39,7 +39,7 @@ export type Route = {
  *
  * @returns the URL.
  */
-export type ToUrl = (value: string, params?: Params) => string;
+export type ToUrl<T extends string = string> = (value: T, params?: Params) => string;
 
 /**
  * Function to generate a Route.
@@ -47,7 +47,7 @@ export type ToUrl = (value: string, params?: Params) => string;
  * @param value the route value.
  * @param params the path parameters.
  */
-export type ToRoute = (value: string, params?: Params) => Route;
+export type ToRoute<T extends string = string> = (value: T, params?: Params) => Route;
 
 export type GetStatePath = (path: string) => string;
 
@@ -63,58 +63,74 @@ export type SetHref = (href: string) => void;
  *
  * @param route type current route.
  */
-export type OnRouteChange = (route: Route) => void;
+export type OnRouteChange<T extends string = string> = (route: Route<T>) => void;
 
 /**
  * Function to start the router.
  *
  * @param onRouteChange callback function for when the route changes.
  */
-export type Start = (onRouteChange: OnRouteChange) => void;
+export type Start<T extends string = string> = (onRouteChange: OnRouteChange<T>) => void;
+
+export type WindowLike = {
+  decodeURI: (uri: string) => string;
+  history: {
+    pushState: (state: any, unused: string, url?: string) => any;
+  };
+  location: {
+    hash: string;
+    origin: string;
+    pathname: string;
+    search: string;
+  };
+  addEventListener: (event: string, handler: (event: any) => any, flag?: boolean) => any;
+  removeEventListener: (event: string, handler: (event: any) => any) => any;
+  onpopstate: ((this: any, event: PopStateEvent) => any) | null;
+}
 
 export type DoSyncLocationBarParams = {
   replace?: boolean;
   url: string;
   getUrl: () => string;
-  wdw?: Window;
+  wdw?: WindowLike;
 };
 
 /**
  * Function that synchronizes the location bar with the state route.
  */
-export type SyncLocationBar = (route: Route) => void;
+export type SyncLocationBar<T extends string = string> = (route: Route<T>) => void;
 
 /**
  * Configuration to create a router.
  */
-export type RouterConfig = {
+export type RouterConfig<T extends string = string> = {
   /** The route configuration. */
-  routeConfig: RouteConfig;
+  routeConfig: RouteConfig<T>;
 
   /** If specified, uses history mode instead of hash mode. If you are using history mode, you need
    * to provide server side router support. If not provided, defaults to the identity function. */
   rootPath?: string;
 
   /** The `window`, used for testing purposes. */
-  wdw?: Window;
+  wdw?: WindowLike;
 };
 
 /**
  * This is the router that is created by {@link createRouter}.
  */
- export type Router = {
+ export type Router<T extends string = string> = {
   /** The initial route as parsed from the location bar. */
-  initialRoute: Route;
+  initialRoute: Route<T>;
 
   /** Function to generate a URL. */
-  toUrl: ToUrl;
+  toUrl: ToUrl<T>;
 
   /** Function to generate a Route. */
-  toRoute: ToRoute;
+  toRoute: ToRoute<T>;
 
   /** Function to start the router. */
-  start: Start;
+  start: Start<T>;
 
   /** Function that synchronizes the location bar with the* state route. */
-  syncLocationBar: SyncLocationBar;
+  syncLocationBar: SyncLocationBar<T>;
 };

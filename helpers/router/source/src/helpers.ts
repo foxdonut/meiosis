@@ -4,7 +4,8 @@ import {
   GetStatePath,
   RouteConfig,
   SetHref,
-  ToUrl
+  ToUrl,
+  WindowLike
 } from './types';
 
 // ----- Helpers
@@ -44,7 +45,7 @@ export const getConfig = (rootPath?: string) => {
   return { prefix, historyMode };
 };
 
-export const createGetUrl = (prefix, historyMode, wdw) =>
+export const createGetUrl = (prefix: string, historyMode: boolean, wdw) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
@@ -52,7 +53,9 @@ export const createGetUrl = (prefix, historyMode, wdw) =>
 /**
  * Helper that creates a `toUrl` function.
  */
-const toUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath): ToUrl => {
+const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
+  getStatePath: GetStatePath): ToUrl => {
+
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
     {}
@@ -72,10 +75,12 @@ const toUrl = (routeConfig: RouteConfig, getStatePath: GetStatePath): ToUrl => {
   };
 };
 
-export const createToUrl = (routeConfig, prefix, historyMode): ToUrl => {
+export const createToUrl = <T extends string = string>(routeConfig: RouteConfig<T>,
+  prefix: string, historyMode: boolean): ToUrl<T> => {
+
   const getStatePath = historyMode ? stripTrailingSlash : I;
-  const toUrlFn = toUrl(routeConfig, getStatePath);
-  return (page, params = {}) => prefix + toUrlFn(page, params);
+  const toUrl = createToUrlFn<T>(routeConfig, getStatePath);
+  return (page, params = {}) => prefix + toUrl(page, params);
 };
 
 export const doSyncLocationBar = ({ replace, url, getUrl, wdw }: DoSyncLocationBarParams) => {
@@ -92,7 +97,7 @@ export const doSyncLocationBar = ({ replace, url, getUrl, wdw }: DoSyncLocationB
  * @param {string} prefix
  * @param {function(string):void} setHref
  */
-export const addHistoryEventListener = (wdw: Window, prefix: string, setHref: SetHref) => {
+export const addHistoryEventListener = (wdw: WindowLike, prefix: string, setHref: SetHref) => {
   const origin = wdw.location.origin;
 
   const linkHandler = (evt) => {

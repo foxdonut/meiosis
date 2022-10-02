@@ -2,33 +2,34 @@
 
 import createRouteMatcher from 'feather-route-matcher';
 import { createRouter } from '../src/index';
-import { RouteConfig, RouterConfig } from '../src/types';
+import { Route, RouteConfig, RouterConfig } from '../src/types';
+
+type Page = 'Home' | 'Login' | 'UserProfile';
 
 const decodeURI = (uri: string) => uri;
 
 const mockWindow = (rootPath: string | undefined, prefix: string, path: string) => ({
   decodeURI,
+  history: {
+    pushState: jest.fn()
+  },
   location: {
     hash: prefix + path,
+    origin: '',
     pathname: rootPath + path,
     search: ''
   },
   addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
   onpopstate: () => null
 });
 
 const rootPath = '/my-server/my-base-path';
 
-export const Route = {
-  Home: 'Home',
-  Login: 'Login',
-  UserProfile: 'UserProfile'
-};
-
-const routeConfig: RouteConfig = {
-  '/': Route.Home,
-  '/login': Route.Login,
-  '/user/:id': Route.UserProfile
+const routeConfig: RouteConfig<Page> = {
+  '/': 'Home',
+  '/login': 'Login',
+  '/user/:id': 'UserProfile'
 };
 
 const routeMatcher = createRouteMatcher(routeConfig);
@@ -51,17 +52,18 @@ describe('router', () => {
 
       const createWindow = (path) => mockWindow(caseConfig.rootPath, prefix, path);
 
-      const createRouterConfig = (config?): RouterConfig =>
+      const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
         Object.assign({ routeMatcher, routeConfig }, caseConfig, config);
 
-      const createRouterFn = (config?) => createRouter(createRouterConfig(config));
+      const createRouterFn = (config?: Partial<RouterConfig<Page>>) =>
+        createRouter(createRouterConfig(config));
 
       test('toUrl converts route to URL', () => {
         const path = '/login';
         const wdw = createWindow(path);
         const router = createRouterFn({ wdw });
 
-        expect(router.toUrl(Route.Login)).toEqual(prefix + path);
+        expect(router.toUrl('Login')).toEqual(prefix + path);
       });
 
       test('toRoute produces a Route', () => {
@@ -69,12 +71,12 @@ describe('router', () => {
         const wdw = createWindow(path);
         const router = createRouterFn({ wdw });
 
-        const route1 = { value: Route.Login, params: {} };
-        expect(router.toRoute(Route.Login)).toEqual(route1);
+        const route1 = { value: 'Login', params: {} };
+        expect(router.toRoute('Login')).toEqual(route1);
 
         const params = { duck: 'quack' };
-        const route2 = { value: Route.Login, params };
-        expect(router.toRoute(Route.Login, params)).toEqual(route2);
+        const route2 = { value: 'Login', params };
+        expect(router.toRoute('Login', params)).toEqual(route2);
       });
 
       describe('syncLocationBar', () => {
@@ -91,10 +93,10 @@ describe('router', () => {
           const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
           const router = createRouterFn({ wdw });
           const url = prefix + '/user/42?sport=tennis';
-          const route = Object.assign(
+          const route: Route<Page> = Object.assign(
             {
               url,
-              value: Route.UserProfile,
+              value: 'UserProfile' as Page,
               params: { id: '42', sport: 'tennis' }
             },
             options
@@ -127,29 +129,29 @@ describe('router', () => {
         type InitialRouteCases = [string, string, { value: string, params: any }];
 
         const initialRouteCases: InitialRouteCases[] = [
-          ['slash', '/', { value: Route.Home, params: {} }],
-          ['empty', '', { value: Route.Home, params: {} }],
+          ['slash', '/', { value: 'Home', params: {} }],
+          ['empty', '', { value: 'Home', params: {} }],
           [
             'slash with queryParams',
             '/?sport=tennis',
-            { value: Route.Home, params: { sport: 'tennis' } }
+            { value: 'Home', params: { sport: 'tennis' } }
           ],
           [
             'empty with queryParams',
             '?sport=tennis',
-            { value: Route.Home, params: { sport: 'tennis' } }
+            { value: 'Home', params: { sport: 'tennis' } }
           ],
-          ['just a route', '/login', { value: Route.Login, params: {} }],
-          ['with params', '/user/42', { value: Route.UserProfile, params: { id: '42' } }],
+          ['just a route', '/login', { value: 'Login', params: {} }],
+          ['with params', '/user/42', { value: 'UserProfile', params: { id: '42' } }],
           [
             'with queryParams',
             '/login?sport=tennis',
-            { value: Route.Login, params: { sport: 'tennis' } }
+            { value: 'Login', params: { sport: 'tennis' } }
           ],
           [
             'with params and queryParams',
             '/user/42?sport=tennis',
-            { value: Route.UserProfile, params: { id: '42', sport: 'tennis' } }
+            { value: 'UserProfile', params: { id: '42', sport: 'tennis' } }
           ]
         ];
 
@@ -175,7 +177,7 @@ describe('router', () => {
         const calls = onRouteChange.mock.calls;
         expect(calls.length).toBe(1);
         expect(calls[0][0]).toMatchObject({
-          value: Route.Login,
+          value: 'Login',
           params: {}
         });
       });

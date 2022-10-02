@@ -21,18 +21,18 @@ import {
 /**
  * Creates a router.
  */
-export const createRouter = ({
+export const createRouter = <T extends string = string>({
   routeConfig,
   rootPath,
   wdw = window
-}: RouterConfig): Router => {
+}: RouterConfig<T>): Router<T> => {
   const routeMatcher = createRouteMatcher(routeConfig);
   const { prefix, historyMode } = getConfig(rootPath);
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
-  const toUrl: ToUrl = createToUrl(routeConfig, prefix, historyMode);
-  const toRoute: ToRoute = (value: string, params?: Params) => ({ value, params: params || {} });
+  const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
+  const toRoute: ToRoute<T> = (value: string, params?: Params) => ({ value, params: params || {} });
 
   const getRoute = (path) => {
     let matchPath = path || '/';
@@ -48,7 +48,7 @@ export const createRouter = ({
 
   const initialRoute = getRoute(getPath());
 
-  const start = (onRouteChange: OnRouteChange) => {
+  const start = (onRouteChange: OnRouteChange<T>) => {
     if (historyMode) {
       addHistoryEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);
@@ -60,7 +60,7 @@ export const createRouter = ({
     wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
-  const syncLocationBar = ({ value, params, replace }: Route) => {
+  const syncLocationBar = ({ value, params, replace }: Route<T>) => {
     doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
