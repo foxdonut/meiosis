@@ -32,7 +32,7 @@ export const createRouter = <T extends string = string>({
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
-  const toRoute: ToRoute<T> = (value: string, params?: Params) => ({ value, params: params || {} });
+  const toRoute: ToRoute<T> = (value: T, params?: Params) => ({ value, params: params || {} });
 
   const getRoute = (path) => {
     let matchPath = path || '/';
