@@ -126,20 +126,22 @@ const nestUpdate =
 
 const nestCell =
   <S>(
-    getState: () => S,
+    states: Stream<S>,
     parentUpdate: Update<S>,
     components: MeiosisComponent<S> | undefined
   ) =>
     <K extends Extract<keyof S, string>>(prop: K): MeiosisCell<S[K]> => {
-      const getNestedState = () => getState()[prop];
+      const nestedStates = states.map((state) => state[prop]);
+      const getNestedState = () => states()[prop];
       const nestedUpdate: Update<S[K]> = nestUpdate(parentUpdate, prop);
       const nestedComponents = get(components, [prop, 'nested']);
 
       return {
+        states: nestedStates,
         state: getNestedState(),
         getState: getNestedState,
         update: nestedUpdate,
-        nest: nestCell(getNestedState, nestedUpdate, nestedComponents),
+        nest: nestCell(nestedStates, nestedUpdate, nestedComponents),
         nested: nestedComponents
       };
     };
@@ -164,7 +166,8 @@ export const meiosisSetup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S
 
   const nest = nestCell(states, update, view);
   const getState = () => states();
-  const getCell = (state: S): MeiosisCell<S> => ({ state, getState, update, nest, nested: view });
+  const getCell = (state: S): MeiosisCell<S> =>
+      ({ states, state, getState, update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
   if (app) {

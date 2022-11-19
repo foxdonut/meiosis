@@ -1,4 +1,4 @@
-import { ExternalStreamLib } from './simple-stream';
+import { ExternalStreamLib, Stream } from './simple-stream';
 
 /**
  * A Mergerino function patch. This is a function that receives the current state and returns the
@@ -177,6 +177,9 @@ export type MeiosisCell<S> = {
 
   /** Contains nested view components. */
   nested: NestedViews<S>;
+
+  /** The stream of states. */
+  states: Stream<S>;
 };
 
 /**
