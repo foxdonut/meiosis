@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Meiosis Tracer</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="normalize.css">
-    <link rel="stylesheet" href="skeleton.css">
-    <link rel="stylesheet" href="prism.css">
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body class="container">
-    <script src="prism.js" type="text/javascript"></script>
-    <script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
-    <h1><a href="https://github.com/foxdonut/meiosis-tracer">Meiosis-Tracer</a> Documentation</h1><h2>Contents</h2><ul>
+<head>
+<title>Meiosis Tracer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="https://flems.io/flems.html" type="text/javascript" charset="utf-8"></script>
+<h1><a href="https://github.com/foxdonut/meiosis-tracer">Meiosis-Tracer</a> Documentation</h1><h2>Contents</h2><ul>
 <li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation">Installation</a></li>
 <li><a href="#adding_the_tracer">Adding the Tracer To Your Page</a></li>
 <li><a href="#using_chrome_extension">Using the Chrome DevTools Extension</a></li>
 <li><a href="#using_the_tracer">Using the Tracer</a></li>
@@ -20,13 +21,16 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2>Introduction</h2><p>Meiosis-Tracer is a development and debugging tool that traces, rewinds, and replays snapshots of
-<a href="https://github.com/paldepind/flyd">Flyd</a> or <a href="https://mithril.js.org/stream.html">Mithril</a> streams.
-It can also work with other stream libraries such as <a href="https://rxjs-dev.firebaseapp.com/">RxJS</a>,
-<a href="https://github.com/cujojs/most">most.js</a>, and so on.</p>
+streams such as <a href="https://github.com/paldepind/flyd">flyd</a>,
+<a href="https://mithril.js.org/stream.html">Mithril Stream</a>, and Meiosis&#39;s own
+<a href="https://meiosis.js.org/docs/setup-js-stream-implementation.html">Simple Stream</a>.</p>
 <p>You can also directly enter your own snapshots and send the values onto the streams. This works
-particularly well in <a href="http://meiosis.js.org">Meiosis</a> applications.</p>
-<p>You can install Meiosis-Tracer with <code>npm</code>:</p>
-<pre><code>npm i -D meiosis-tracer</code></pre><p>You can also download the JavaScript file from
+particularly well in <a href="https://meiosis.js.org">Meiosis</a> applications.</p>
+<p><a name="installation"></a></p>
+<h2>Installation</h2><p>You can install Meiosis-Tracer with <code>npm</code>:</p>
+<pre><code>npm i -D meiosis-tracer
+</code></pre>
+<p>You can also download the JavaScript file from
 <a href="https://unpkg.com/meiosis-tracer">unpkg</a> and add it to your page with a plain <code>&lt;script&gt;</code> tag.
 In that case it will be available as the <code>meiosisTracer</code> global variable.</p>
 <p>Then use it either by
@@ -35,7 +39,8 @@ In that case it will be available as the <code>meiosisTracer</code> global varia
 <p><a name="adding_the_tracer"></a></p>
 <h2>Adding the Tracer To Your Page</h2><p>First, add an HTML element to your page where you want the tracer
 to be rendered, and give it a way to identify it via a selector. For example:</p>
-<pre><code class="language-html">&lt;div id=&quot;tracer&quot; style=&quot;position: fixed; top: 0px; right: 0px;&quot;&gt;&lt;/div&gt;</code></pre>
+<pre><code class="language-html">&lt;div id=&quot;tracer&quot; style=&quot;position: fixed; top: 0px; right: 0px;&quot;&gt;&lt;/div&gt;
+</code></pre>
 <p>Second, import the tracer and call it as a function, passing a <code>selector</code> that matches your
 HTML element and an array of <code>streams</code> that you want to trace. For example:</p>
 <pre><code class="language-javascript">import meiosisTracer from &quot;meiosis-tracer&quot;;
@@ -43,7 +48,8 @@ HTML element and an array of <code>streams</code> that you want to trace. For ex
 const models = ...; // a stream
 const states = model.map(...); // another stream
 
-meiosisTracer({ selector: &quot;#tracer&quot;, streams: [ models, states ] });</code></pre>
+meiosisTracer({ selector: &quot;#tracer&quot;, streams: [ models, states ] });
+</code></pre>
 <p>This will render the tracer into the HTML element that has the <code>tracer</code> id.</p>
 <p>See <a href="#using_the_tracer">Using the Tracer</a> for more details and examples.</p>
 <p><a name="using_chrome_extension"></a></p>
@@ -55,7 +61,9 @@ without needing to add it to your page.</p>
 <pre><code>git clone https://github.com/foxdonut/meiosis-tracer
 cd meiosis-tracer
 npm ci
-npm start</code></pre><ul>
+npm start
+</code></pre>
+<ul>
 <li>In Chrome, open <code>chrome://extensions</code></li>
 <li>Press <strong>Load unpacked</strong></li>
 <li>Select the <code>chrome-devtool</code> directory under <code>meiosis-tracer</code></li>
@@ -71,7 +79,8 @@ npm start</code></pre><ul>
 const models = ...; // a stream
 const states = model.map(...); // another stream
 
-meiosisTracer({ streams: [ models, states ] });</code></pre>
+meiosisTracer({ streams: [ models, states ] });
+</code></pre>
 <p>The Meiosis-Tracer UI works in the same way either added to the page, or in DevTools.</p>
 <p>See <a href="#using_the_tracer">Using the Tracer</a> for more details and examples.</p>
 <h3>Credits</h3><p>The following repositories were very helpful in developing the Chrome extension for Meiosis-Tracer.
@@ -83,41 +92,22 @@ My thanks and appreciation go to their authors!</p>
 <li><a href="https://github.com/cerebral/cerebral-debugger">https://github.com/cerebral/cerebral-debugger</a></li>
 </ul>
 <p><a name="using_the_tracer"></a></p>
-<h2>Using the Tracer</h2><p>At it simplest, the Tracer works with
-<a href="https://github.com/paldepind/flyd">Flyd</a> or <a href="https://mithril.js.org/stream.html">Mithril</a> streams
+<h2>Using the Tracer</h2><p>At its simplest, the Tracer works with
+<a href="https://meiosis.js.org/docs/setup-js-stream-implementation.html">Simple Stream</a>,
+<a href="https://github.com/paldepind/flyd">Flyd</a>, or <a href="https://mithril.js.org/stream.html">Mithril</a> streams
 without any configuration. Simply call <code>meiosisTracer</code> and indicate the <code>streams</code> that you want to
 trace. That&#39;s all you need if you are using the Chrome Extension. If you want to add the Tracer to
 your page instead, also indicate the <code>selector</code>.</p>
-<p>Here is a Flyd example:</p>
-  <div id="flems1" class="flemscode"></div>
+<p>Here is an example that uses <a href="https://meiosis.js.org">Meiosis</a>:</p>
+<div id="flems1" class="flemscode" style=" height:800px;"></div>
 
   <script>
     window.Flems(flems1, {
-      files: [{name: "index.js", content: "/*global flyd, meiosisTracer*/\n\nconst app = document.getElementById(\"app\")\nconst stream0 = flyd.stream(\"test\")\n\nmeiosisTracer({\n  selector: \"#tracer\",\n  streams: [ stream0 ]\n})\n\nstream0({ hello: \"world\" })\nstream0.map(value => {\n  app.innerHTML = app.innerHTML + JSON.stringify(value) + \"<br>\"\n})\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
-      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@2.0.0/dist/meiosis-tracer.js"}],
-      middle: 60,
-      autoFocus: false,
-      autoHeight: true,
-      selected: 'index.js'
+      files: [{name: "index.js", content: "/*global m, meiosisTracer*/\n\nconst actions = {\n  increase: (cell) => cell.update((model) => {\n    model.value = model.value + 1;\n    return model;\n  }),\n  editName: (cell, value) => cell.update((model) => {\n    model.name = value;\n    return model;\n  })\n};\n\nconst view = (cell) =>\n  m('div',\n    m('div',\n      m('span', 'Counter: ', cell.state.value, ' '),\n      m('button.btn.btn-primary.btn-sm.ms-2',\n        { onclick: () => actions.increase(cell) },\n        'Increase')\n    ),\n    m('div.mt-3',\n      m('span', 'Name: '),\n      m('input', {\n        type: 'text', value: cell.state.name,\n        oninput: (evt) => actions.editName(cell, evt.target.value)\n      })\n    ),\n    m('div.mt-2',\n      m('span', 'Hello, ', cell.state.name)\n    )\n  );\n\nconst initial = { value: 0, name: '' };\nconst update = m.stream();\nconst states = m.stream.scan((state, fn) => fn(state),\n  initial, update);\nconst createCell = (state) => ({ state, update });\nconst cells = states.map(createCell);\n\nconst element = document.getElementById('app');\ncells.map((cell) => { m.render(element, view(cell)); });\n\nmeiosisTracer({ selector: '#tracer', streams: [states] });\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril@2.0.4/stream/stream.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@5.0.0/dist/meiosis-tracer.js"}],
+      middle: 60
     })
   </script>
-
-
-<p>And here is the same example with Mithril-Stream:</p>
-  <div id="flems2" class="flemscode"></div>
-
-  <script>
-    window.Flems(flems2, {
-      files: [{name: "index.js", content: "/*global m, meiosisTracer*/\n\nconst app = document.getElementById(\"app\")\nconst stream0 = m.stream(\"test\")\n\nmeiosisTracer({\n  selector: \"#tracer\",\n  streams: [ stream0 ]\n})\n\nstream0({ hello: \"world\" })\nstream0.map(value => {\n  app.innerHTML = app.innerHTML + JSON.stringify(value) + \"<br>\"\n})\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@2.0.0/dist/meiosis-tracer.js"}],
-      middle: 60,
-      autoFocus: false,
-      autoHeight: true,
-      selected: 'index.js'
-    })
-  </script>
-
-
 <p>The controls that you see at the top of the Tracer are as follows:</p>
 <ul>
 <li><strong>Row / Col</strong>: when you trace more than one stream, this indicates the layout direction of the
@@ -134,68 +124,32 @@ resize them manually.</li>
 <ul>
 <li><strong>Hist</strong>: whether or not to accumulate history. This automatically shuts off if you have Auto on
 and use the slider or arrow buttons to go back and forth in history.</li>
-<li><strong>Hide button</strong>: hide an individual stream.</li>
-<li><strong>Arrow buttons</strong>: go back and forth in history.</li>
-<li><strong>Send</strong>: send the value entered in the textarea onto the stream. Note that the value that you
+<li><strong>Hide button</strong>: hides an individual stream.</li>
+<li><strong>Arrow buttons</strong>: goes back and forth in history.</li>
+<li><strong>Send</strong>: sends the value entered in the textarea onto the stream. Note that the value that you
 enter in the textarea must be valid JSON, or be recognized by the <code>parse</code> function that you
 specify (see below for full list of options), otherwise an error will occur.</li>
 <li><strong>Reset</strong>: wipes out the stream&#39;s history.</li>
 </ul>
 <p>By default, streams are labeled <code>Stream 0</code>, <code>Stream 1</code>, etc. To specify different labels, use
 objects in the <code>streams</code> array. Each object must have a <code>stream</code> property for the stream. Then,
-use <code>label</code> to indicate the label:</p>
-  <div id="flems3" class="flemscode" style="height:800px"></div>
-
-  <script>
-    window.Flems(flems3, {
-      files: [{name: "index.js", content: "/*global flyd, ReactDOM, meiosisTracer*/\n\nconst createActions = update => ({\n  increase: () => update(model => {\n    model.value = model.value + 1\n    return model\n  }),\n  editName: value => update(model => {\n    model.name = value\n    return model\n  })\n})\n\nconst createView = actions => model => (\n  <div>\n    <div>\n      <span>Counter: {model.value} </span>\n      <button onClick={actions.increase}>Increase</button>\n    </div>\n    <div>\n      <span>Name: </span>\n      <input type=\"text\" value={model.name}\n        onChange={evt => actions.editName(evt.target.value)}/>\n    </div>\n    <div>\n      <span>Hello, {model.name}</span>\n    </div>\n  </div>\n)\n\nconst update = flyd.stream()\nconst models = flyd.scan((model, func) => func(model),\n  { value: 0, name: \"\" }, update)\n\nconst view = createView(createActions(update))\nconst element = document.getElementById(\"app\")\nmodels.map(model => { ReactDOM.render(view(model), element) })\n\nmeiosisTracer({ selector: \"#tracer\", streams: [\n  { stream: models, label: \"models\" }\n]})\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
-      links: [{name: "flyd", type: "js", url: "https://unpkg.com/flyd@0.2.8/flyd.js"},{name: "react", type: "js", url: "https://unpkg.com/react@16.4.2/umd/react.development.js"},{name: "react-dom", type: "js", url: "https://unpkg.com/react-dom@16.4.2/umd/react-dom.development.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@2.0.0/dist/meiosis-tracer.js"}],
-      middle: 60,
-      autoFocus: false,
-
-      selected: 'index.js'
-    })
-  </script>
-
-
+use <code>label</code> to indicate the label.</p>
 <p>You can also specify options to the tracer itself, which apply to all streams. In the
-example below, we indicated the number of <code>rows</code> for the textarea, and how to <code>stringify</code>
-values:</p>
-  <div id="flems4" class="flemscode" style="height:800px"></div>
+example below, we&#39;ve indicated the number of <code>rows</code> for the textarea, and how to <code>stringify</code>
+values. This example uses <a href="https://meiosis.js.org/setup">Meiosis-Setup</a>.</p>
+<div id="flems2" class="flemscode" style=" height:800px;"></div>
 
   <script>
-    window.Flems(flems4, {
-      files: [{name: "index.js", content: "/*global m, meiosisTracer*/\n\nconst createActions = update => ({\n  increase: () => update(model => {\n    model.value = model.value + 1\n    return model\n  }),\n  editName: value => update(model => {\n    model.name = value\n    return model\n  })\n})\n\nconst createView = actions => model =>\n  m(\"div\",\n    m(\"div\",\n      m(\"span\", \"Counter: \", model.value, \" \"),\n      m(\"button\", { onclick: actions.increase }, \"Increase\")\n    ),\n    m(\"div\",\n      m(\"span\", \"Name: \"),\n      m(\"input\", { type: \"text\", value: model.name,\n        oninput: evt => actions.editName(evt.target.value) })\n    ),\n    m(\"div\",\n      m(\"span\", \"Hello, \", model.name)\n    )\n  )\n\nconst update = m.stream()\nconst models = m.stream.scan((model, func) => func(model),\n  { value: 0, name: \"\" }, update)\n\nconst view = createView(createActions(update))\nconst element = document.getElementById(\"app\")\nmodels.map(model => { m.render(element, view(model)) })\n\nmeiosisTracer({\n  selector: \"#tracer\",\n  streams: [\n    { stream: models, label: \"models\" }\n  ],\n  rows: 10,\n  stringify: value => JSON.stringify(value, null, 2)\n})\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
-      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@1.1.6"},{name: "mithril-stream", type: "js", url: "https://unpkg.com/mithril-stream@1.1.0"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@2.0.0/dist/meiosis-tracer.js"}],
-      middle: 60,
-      autoFocus: false,
-
-      selected: 'index.js'
+    window.Flems(flems2, {
+      files: [{name: "index.js", content: "/*global Meiosis, m, meiosisTracer*/\n\nconst actions = {\n  increase: (cell) => cell.update((model) => {\n    model.value = model.value + 1;\n    return model;\n  }),\n  editName: (cell, value) => cell.update((model) => {\n    model.name = value;\n    return model;\n  })\n};\n\nconst view = (cell) =>\n  m('div',\n    m('div',\n      m('span', 'Counter: ', cell.state.value, ' '),\n      m('button.btn.btn-primary.btn-sm.ms-2',\n        { onclick: () => actions.increase(cell) },\n        'Increase')\n    ),\n    m('div.mt-3',\n      m('span', 'Name: '),\n      m('input', {\n        type: 'text', value: cell.state.name,\n        oninput: (evt) => actions.editName(cell, evt.target.value)\n      })\n    ),\n    m('div.mt-2',\n      m('span', 'Hello, ', cell.state.name)\n    )\n  );\n\nconst initial = { value: 0, name: '' };\nconst cells = Meiosis.setup({ app: { initial } });\n\nconst element = document.getElementById('app');\ncells.map((cell) => { m.render(element, view(cell)); });\n\nmeiosisTracer({\n  selector: '#tracer',\n  streams: [\n    { stream: cells().states, label: 'states' }\n  ],\n  rows: 10,\n  stringify: (value) => JSON.stringify(value, null, 2)\n});\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
+      links: [{name: "mithril", type: "js", url: "https://unpkg.com/mithril@2.0.4"},{name: "meiosis-setup", type: "js", url: "https://unpkg.com/meiosis-setup@6.1.1/meiosis-setup.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@5.0.0/dist/meiosis-tracer.js"}],
+      middle: 60
     })
   </script>
-
-
-<p>The Tracer can also work with other stream libraries such as
-<a href="https://rxjs-dev.firebaseapp.com/">RxJS</a>, <a href="https://github.com/cujojs/most">most.js</a>, and so on.
-In those cases, specify the <code>listen</code> and <code>emit</code> properties to indicate how to listen to a stream
-and how to emit a value onto a stream. Here is an example with RxJS:</p>
-  <div id="flems5" class="flemscode" style="height:600px"></div>
-
-  <script>
-    window.Flems(flems5, {
-      files: [{name: "index.js", content: "/*global rxjs, meiosisTracer*/\n\nconst app = document.getElementById(\"app\")\nconst stream1 = new rxjs.BehaviorSubject(\"test\")\n\nmeiosisTracer({\n  selector: \"#tracer\",\n  listen: (stream, fn) => stream1.subscribe(fn),\n  emit: (stream, value) => stream.next(value),\n  streams: [\n    { stream: stream1,\n      label: \"Behavior Subject 1\"\n    }\n  ]\n})\n\nstream1.next({ hello: \"world\" })\nstream1.subscribe(value => {\n  app.innerHTML = app.innerHTML + JSON.stringify(value) + \"<br>\"\n})\n", compiler: "babel"},{name: "app.html", content: "<div id=\"tracer\"></div>\n<div id=\"app\"></div>\n"}],
-      links: [{name: "rxjs", type: "js", url: "https://unpkg.com/@reactivex/rxjs@6.2.2/dist/global/rxjs.umd.js"},{name: "meiosis-tracer", type: "js", url: "https://unpkg.com/meiosis-tracer@2.0.0/dist/meiosis-tracer.js"}],
-      middle: 60,
-      autoFocus: false,
-
-      selected: 'index.js'
-    })
-  </script>
-
-
 <blockquote>
-<p>For more examples using Meiosis-Tracer, see the
-<a href="http://meiosis.js.org/examples.html">Meiosis Examples</a>.</p>
+<p>These examples are also available <a href="https://meiosis.js.org/tracer/examples/index.html">here</a> so
+that you can run them in your browser with the <a href="#using_chrome_extension">Chrome Devtools</a> version
+of Meiosis-Tracer.</p>
 </blockquote>
 <p><a name="options"></a></p>
 <h2>Full List of Options</h2><h3>Options for <code>meiosisTracer({ ... })</code></h3><p>These are general options for the tracer. Stream-related options apply to all streams.</p>
@@ -215,7 +169,7 @@ and how to emit a value onto a stream. Here is an example with RxJS:</p>
 <td></td>
 </tr>
 <tr>
-<td><code>stream</code></td>
+<td><code>streams</code></td>
 <td>array of streams to be traced</td>
 <td>array</td>
 <td></td>
@@ -313,7 +267,8 @@ you pass to the <code>streams</code> array.</p>
 </tbody></table>
 <hr>
 <p><a href="https://github.com/foxdonut/meiosis-tracer">Meiosis-Tracer</a> is developed by
-<a href="http://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a>
+<a href="https://twitter.com/foxdonut00">@foxdonut00</a> / <a href="https://github.com/foxdonut">foxdonut</a>
 and is released under the MIT license.</p>
-  </body>
+
+</body>
 </html>
