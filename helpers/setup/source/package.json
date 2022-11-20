@@ -1,9 +1,10 @@
 {
   "name": "meiosis-setup",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "private": true,
   "description": "Meiosis Helpers - Setup",
   "main": "index.js",
+  "unpkg": "meiosis-setup.js",
   "scripts": {
     "start": "tsc -p tsconfig-build.json && rollup -c && cp ../README.md dist/ && cat package.json|grep -v private>dist/package.json",
     "watch": "rollup -c -w",
