@@ -116,7 +116,7 @@ export type RouterConfig<T extends string = string> = {
 };
 
 /**
- * This is the router that is created by {@link createRouter}.
+ * This is the router that is created by {@link "index".createRouter}.
  */
  export type Router<T extends string = string> = {
   /** The initial route as parsed from the location bar. */
