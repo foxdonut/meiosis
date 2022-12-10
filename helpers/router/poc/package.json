@@ -2,12 +2,10 @@
   "name": "meiosis-router-poc",
   "version": "1.0.0",
   "private": true,
-  "description": "meiosis docs example",
-  "main": "src/index.js",
+  "description": "meiosis docs example server",
+  "main": "server/index.js",
   "scripts": {
-    "start": "webpack",
-    "watch": "webpack --progress --colors --watch",
-    "server": "node server"
+    "start": "node server"
   },
   "repository": {
     "type": "git",
@@ -15,7 +13,6 @@
   },
   "keywords": [
     "meiosis",
-    "mithril",
     "router",
     "state",
     "state management"
@@ -27,18 +24,6 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "feather-route-matcher": "^4.0.0",
-    "meiosis-router": "..",
-    "mergerino": "^0.4.0",
-    "mithril": "^2.2.2",
     "paperplane": "^3.1.2"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.18.13",
-    "@babel/preset-env": "^7.18.10",
-    "babel-loader": "^8.2.5",
-    "meiosis-tracer": "^4.0.0",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
   }
 }

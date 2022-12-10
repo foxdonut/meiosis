@@ -2,6 +2,8 @@ const http = require('http');
 const { html, mount, send } = require('paperplane');
 const fs = require('fs');
 
+const PORT = 8000;
+
 const getHtmlContents = () =>
   new Promise((resolve) => {
     fs.readFile('./index.html', function(error, data) {
@@ -31,4 +33,5 @@ const app = (req) =>
     ? getGeneratedApp()
     : getHtmlContents();
 
-http.createServer(mount({ app })).listen(8000);
+http.createServer(mount({ app })).listen(PORT);
+console.log('listening on port', PORT);
