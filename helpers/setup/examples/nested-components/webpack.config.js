@@ -1,6 +1,6 @@
 /*global __dirname*/
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-var path = require('path');
+const path = require('path');
 
 module.exports = (
   {

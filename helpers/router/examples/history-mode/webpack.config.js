@@ -12,7 +12,7 @@ module.exports = (
       filename: 'generated-app.js'
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js']
+      extensions: ['.ts', '.tsx']
     },
     module: {
       rules: [
@@ -21,13 +21,6 @@ module.exports = (
           exclude: /node_modules/,
           use: {
             loader: 'ts-loader'
-          }
-        },
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'source-map-loader'
           }
         }
       ]
