@@ -12,7 +12,7 @@ module.exports = (
       filename: 'generated-app.js'
     },
     resolve: {
-      extensions: ['.ts', '.tsx']
+      extensions: ['.ts', '.tsx', '.js']
     },
     module: {
       rules: [

@@ -1,6 +1,12 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const http = require('http');
 const { html, mount, send } = require('paperplane');
 const fs = require('fs');
+
+const FILES = [
+  '/build/generated-app.js',
+  '/public/css/bootstrap-simplex.min.css'
+];
 
 const PORT = 8000;
 
@@ -15,13 +21,15 @@ const getHtmlContents = () =>
     });
   });
 
-const getGeneratedApp = () =>
+const getFile = (file) =>
   new Promise((resolve, reject) => {
-    fs.readFile('./build/generated-app.js', function(error, data) {
+    fs.readFile(`.${file}`, function(error, data) {
       if (error) {
         reject(error);
       } else {
-        resolve(send(data));
+        resolve(file.indexOf('css') > 0
+          ? ({ body: data, headers: { 'content-type': 'text/css' } })
+          : send(data));
       }
     });
   });
@@ -29,8 +37,8 @@ const getGeneratedApp = () =>
 const app = (req) =>
   req.url === '/favicon.ico'
     ? { body: '' }
-    : req.url === '/build/generated-app.js'
-    ? getGeneratedApp()
+    : FILES.includes(req.url)
+    ? getFile(req.url)
     : getHtmlContents();
 
 http.createServer(mount({ app })).listen(PORT);
