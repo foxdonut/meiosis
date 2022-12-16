@@ -1,3 +1,6 @@
+// @ts-check
+import { createRouter } from 'meiosis-router';
+
 export const Route = {
   Home: 'Home',
   Login: 'Login',
@@ -18,3 +21,5 @@ export const routeConfig = {
   '/:404...': Route.NotFound,
   '/*': Route.NotFound
 };
+
+export const router = createRouter({ routeConfig });

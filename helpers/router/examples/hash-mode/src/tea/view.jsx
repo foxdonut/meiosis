@@ -1,12 +1,10 @@
-import m from 'mithril';
 
 import { TeaDetails } from '../teaDetails';
+import { Route } from '../router';
 import { PleaseWait } from '../ui';
-import { ViewAttrs } from '../app/types';
-import { Route, router } from '../router';
 
-export const Tea: m.Component<ViewAttrs> = {
-  view: ({ attrs: { state, update, actions } }) => [
+export const Tea = {
+  view: ({ attrs: { state, router } }) => [
     m('h3', 'Tea Page'),
     m(
       '.row',
@@ -30,11 +28,8 @@ export const Tea: m.Component<ViewAttrs> = {
           )
       ),
       state.route.page === 'TeaDetails' &&
-        m(
-          '.col-md-6',
-          m(TeaDetails, { state, update, actions })
-        )
+        m('.col-md-6', m(TeaDetails, { state, router }))
     ),
-    m(PleaseWait, { state, update, actions })
+    m(PleaseWait, { state })
   ]
 };

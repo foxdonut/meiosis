@@ -1,5 +1,4 @@
 import merge from 'mergerino';
-import m from 'mithril';
 import flyd from 'flyd';
 
 // Only for using Meiosis Tracer in development.

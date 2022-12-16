@@ -35,11 +35,13 @@ export const data: MeiosisViewComponent<Data> = {
       }
     }
   ],
-  view: (cell, loggedInUser) => (<div>
-    <h4>Data page</h4>
-    <div>Logged in user: {loggedInUser}</div>
-    {cell.state.loading
-      ? <div>Loading, please wait...</div>
-      : <ul>{cell.state.items.map((item) => <li>{item}</li>)}</ul>}
-  </div>)
+  view: (cell, loggedInUser) => (
+    <div>
+      <h4>Data page</h4>
+      <div>Logged in user: {loggedInUser}</div>
+      {cell.state.loading
+        ? <div>Loading, please wait...</div>
+        : <ul>{cell.state.items.map((item) => <li>{item}</li>)}</ul>}
+    </div>
+  )
 };

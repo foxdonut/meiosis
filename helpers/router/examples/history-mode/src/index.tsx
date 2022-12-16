@@ -45,43 +45,45 @@ const app: MeiosisViewComponent<State> = {
     data1: data,
     data2: data
   },
-  view: (cell) => (<div>
-    <div class="mb-2">
-      <a href="#"
-        onClick={(evt) => {
-          evt.preventDefault();
-          cell.update({ page: 'home' });
-        }}>
-        Home
-      </a>
-      <span> | </span>
-      <a href="#"
-        onClick={(evt) => {
-          evt.preventDefault();
-          cell.update({ page: 'login' });
-        }}>
-        Login
-      </a>
-      <span> | </span>
-      <a href="#"
-        onClick={(evt) => {
-          evt.preventDefault();
-          cell.update({ page: 'data1' });
-        }}>
-        Data 1
-      </a>
-      <span> | </span>
-      <a href="#"
-        onClick={(evt) => {
-          evt.preventDefault();
-          cell.update({ page: 'data2' });
-        }}>
-        Data 2
-      </a>
+  view: (cell) => (
+    <div>
+      <div class="mb-2">
+        <a href="#"
+          onClick={(evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'home' });
+          }}>
+          Home
+        </a>
+        <span> | </span>
+        <a href="#"
+          onClick={(evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'login' });
+          }}>
+          Login
+        </a>
+        <span> | </span>
+        <a href="#"
+          onClick={(evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'data1' });
+          }}>
+          Data 1
+        </a>
+        <span> | </span>
+        <a href="#"
+          onClick={(evt) => {
+            evt.preventDefault();
+            cell.update({ page: 'data2' });
+          }}>
+          Data 2
+        </a>
+      </div>
+      {views[cell.state.page](cell)}
+      <div class="mt-3"><pre>{JSON.stringify(cell.state, null, 2)}</pre></div>
     </div>
-    {views[cell.state.page](cell)}
-    <div class="mt-3"><pre>{JSON.stringify(cell.state, null, 2)}</pre></div>
-  </div>)
+  )
 };
 
 const cells = meiosisSetup<State>({ app });

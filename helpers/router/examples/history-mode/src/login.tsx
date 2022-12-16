@@ -24,28 +24,30 @@ export const login: MeiosisViewComponent<Login> = {
       }
     }
   ],
-  view: (cell, onLogin: (username: string) => void) => (<div>
-    <h4>Login page</h4>
-    <div
+  view: (cell, onLogin: (username: string) => void) => (
+    <div>
+      <h4>Login page</h4>
+      <div
         style={{
           width: '300px',
           display: 'grid',
           gridTemplateColumns: '1fr 3fr',
           gridGap: '5px'
         }}>
-      <span>Username:</span>
-      <input type="text"
-        value={cell.state.username}
-        onInput={(evt) => cell.update({ username: evt.currentTarget.value })}/>
-      <span>Password:</span>
-      <input type="password"
-        value={cell.state.password}
-        onInput={(evt) => cell.update({ password: evt.currentTarget.value })}/>
+        <span>Username:</span>
+        <input type="text"
+          value={cell.state.username}
+          onInput={(evt) => cell.update({ username: evt.currentTarget.value })} />
+        <span>Password:</span>
+        <input type="password"
+          value={cell.state.password}
+          onInput={(evt) => cell.update({ password: evt.currentTarget.value })} />
+      </div>
+      <div>
+        <button class="btn btn-primary" onClick={() => onLogin(cell.state.username)}>
+          Login
+        </button>
+      </div>
     </div>
-    <div>
-      <button class="btn btn-primary" onClick={() => onLogin(cell.state.username)}>
-        Login
-      </button>
-    </div>
-  </div>)
+  )
 };
