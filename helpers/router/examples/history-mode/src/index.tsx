@@ -47,39 +47,35 @@ const app: MeiosisViewComponent<State> = {
   },
   view: (cell) => (<div>
     <div class="mb-2">
-      <a
-        href="#"
+      <a href="#"
         onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'home' });
-          }}>
+          evt.preventDefault();
+          cell.update({ page: 'home' });
+        }}>
         Home
       </a>
       <span> | </span>
-      <a
-        href="#"
+      <a href="#"
         onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'login' });
-          }}>
+          evt.preventDefault();
+          cell.update({ page: 'login' });
+        }}>
         Login
       </a>
       <span> | </span>
-      <a
-        href="#"
+      <a href="#"
         onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'data1' });
-          }}>
+          evt.preventDefault();
+          cell.update({ page: 'data1' });
+        }}>
         Data 1
       </a>
       <span> | </span>
-      <a
-        href="#"
+      <a href="#"
         onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'data2' });
-          }}>
+          evt.preventDefault();
+          cell.update({ page: 'data2' });
+        }}>
         Data 2
       </a>
     </div>
