@@ -1,6 +1,6 @@
 import { Route } from '../router';
 
-export const Effect = (router) => (update) => (state) => {
+export const service = (router) => (update) => (state) => {
   if (
     state.route.page !== Route.Login &&
     (state.login.username || state.login.password)

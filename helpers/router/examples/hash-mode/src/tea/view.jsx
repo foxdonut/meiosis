@@ -1,35 +1,24 @@
-
 import { TeaDetails } from '../teaDetails';
-import { Route } from '../router';
+import { Route, router } from '../router';
 import { PleaseWait } from '../ui';
 
-export const Tea = {
-  view: ({ attrs: { state, router } }) => [
-    m('h3', 'Tea Page'),
-    m(
-      '.row',
-      m(
-        '.col-md-6',
-        state.teas &&
+export const Tea = ({ state }) => (
+  <>
+    <h3>Tea Page</h3>
+    <div class="row">
+      <div class="col-md-6">
+        {state.teas &&
           state.teas.map((tea) =>
-            m(
-              'div',
-              { key: tea.id },
-              m(
-                'a',
-                {
-                  href: router.toUrl(Route.TeaDetails, {
-                    id: tea.id
-                  })
-                },
-                tea.title
-              )
-            )
-          )
-      ),
-      state.route.page === 'TeaDetails' &&
-        m('.col-md-6', m(TeaDetails, { state, router }))
-    ),
-    m(PleaseWait, { state })
-  ]
-};
+            <div key={tea.id}>
+              <a href={router.toUrl(Route.TeaDetails, {
+                id: tea.id
+              })}>{tea.title}</a>
+            </div>
+          )}
+      </div>
+      {state.route.page === 'TeaDetails' &&
+        <div class="col-md-6"><TeaDetails state={state} /></div>}
+    </div>
+    <PleaseWait state={state} />
+  </>
+);

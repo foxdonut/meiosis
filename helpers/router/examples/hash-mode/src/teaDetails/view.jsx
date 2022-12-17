@@ -1,12 +1,10 @@
-import { Route } from '../router';
+import { Route, router } from '../router';
 
-export const TeaDetails = {
-  view: ({ attrs: { state, router } }) => (
+export const TeaDetails = ({ state }) => (
+  <div>
+    <div>{state.tea}</div>
     <div>
-      <div>{state.tea}</div>
-      <div>
-        <a href={router.toUrl(Route.Tea)}>Close</a>
-      </div>
+      <a href={router.toUrl(Route.Tea)}>Close</a>
     </div>
-  )
-};
+  </div>
+);

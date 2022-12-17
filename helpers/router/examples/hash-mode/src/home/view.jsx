@@ -1,10 +1,8 @@
-export const Home = {
-  view: ({ attrs: { state } }) => (
-    <>
-      <h3>Home Page</h3>
-      {state.user &&
-        <div>You are logged in as: {state.user}</div>}
-      {state.message && <div>state.message</div>}
-    </>
-  )
-};
+export const Home = ({ cell }) => (
+  <>
+    <h3>Home Page</h3>
+    {cell.state.user &&
+      <div>You are logged in as: {cell.state.user}</div>}
+    {cell.state.message && <div>state.message</div>}
+  </>
+);

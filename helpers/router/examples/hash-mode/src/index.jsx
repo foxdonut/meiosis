@@ -1,35 +1,28 @@
-import merge from 'mergerino';
-import flyd from 'flyd';
+import { meiosisSetup } from 'meiosis-setup';
+import { render } from 'preact';
+import { createApp, App } from './app';
+import { router } from './router';
 
 // Only for using Meiosis Tracer in development.
 import meiosisTracer from 'meiosis-tracer';
 
-import { meiosis } from './meiosis';
-import { createApp, App } from './app';
+const app = createApp(router);
+const cells = meiosisSetup({ app });
+const cell = cells();
 
-export const setupApp = (router) => {
-  const app = createApp(router);
-  const { states, update, actions } = meiosis({
-    stream: flyd,
-    merge,
-    app
-  });
+router.start((route) => cell.update({ route: () => route }));
+cells.map((cell) =>
+  router.syncLocationBar(cell.state.route)
+);
 
-  router.start((route) => update({ route: () => route }));
-  states.map((state) =>
-    router.syncLocationBar(state.route)
-  );
+// Only for using Meiosis Tracer in development.
+meiosisTracer({
+  selector: '#tracer',
+  rows: 30,
+  streams: [{ stream: cell.states, label: 'states' }]
+});
 
-  // Only for using Meiosis Tracer in development.
-  meiosisTracer({
-    selector: '#tracer',
-    rows: 30,
-    streams: [{ stream: states, label: 'states' }]
-  });
-
-  m.mount(document.getElementById('app'), {
-    view: () => m(App, { state: states(), actions, router })
-  });
-
-  states.map(() => m.redraw());
-};
+const element = document.getElementById('app');
+cells.map((cell) => {
+  render(<App cell={cell} />, element);
+});

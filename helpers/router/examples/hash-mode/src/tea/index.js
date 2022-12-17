@@ -1,7 +1,7 @@
-import { Effect } from './effect';
+import { service } from './service';
 
 export const tea = {
-  Effect
+  service
 };
 
 export { Tea } from './view';
