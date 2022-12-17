@@ -5,8 +5,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/public/css/bootstrap-simplex.min.css">
-    <link rel="stylesheet" href="/public/css/style.css">
-    <title>Meiosis Documentation</title>
+    <title>Meiosis Router</title>
   </head>
   <body class="container">
     <div class="row">
@@ -24,15 +23,6 @@
       <a href="https://meiosis.js.org/docs/using-a-router.html"
          target="_blank">Using a Router <span class="glyphicon glyphicon-new-window"></span></a>
     </h4>
-    <div>
-      <a href="/docs-examples.html">Examples</a> &gt;
-      <a href="/code/router-setup/<%= htmlWebpackPlugin.options.mode %>-mode/<%= htmlWebpackPlugin.options.example %>/build">
-        <b>
-          <%= htmlWebpackPlugin.options.mode %> mode -
-          <%= htmlWebpackPlugin.options.example %>
-        </b>
-      </a>
-    </div>
     <hr>
 
     <div class="row">
@@ -42,6 +32,6 @@
     </div>
     <div id="tracer"></div>
 
-    <script src="./generated-app.js"></script>
+    <script src="/build/generated-app.js"></script>
   </body>
 </html>

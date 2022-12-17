@@ -5,7 +5,9 @@
   "description": "meiosis docs example server",
   "main": "src/index.jsx",
   "scripts": {
-    "start": "webpack",
+    "build": "webpack",
+    "server": "static-server -p 9000",
+    "start": "webpack && npm run server",
     "watch": "webpack --progress --watch"
   },
   "repository": {
@@ -35,6 +37,7 @@
     "@babel/preset-env": "^7.20.2",
     "babel-loader": "^9.1.0",
     "meiosis-tracer": "^5.0.1",
+    "static-server": "^2.2.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"
   }
