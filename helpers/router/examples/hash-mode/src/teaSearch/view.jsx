@@ -11,7 +11,7 @@ export const TeaSearch = ({ state }) => {
 
   return (
     <>
-      <h3>Tea Search Page</h3>
+      <h4>Tea Search Page</h4>
       <div class="row">
         <div class="col-md-6">
           {state.searchTeas && <>

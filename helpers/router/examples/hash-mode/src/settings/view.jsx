@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Fragment } from 'preact';
 
-export const Settings = ({ actions }) => (
+import { actions } from './actions';
+
+export const Settings = ({ cell }) => (
   <>
-    <h3>Settings Page</h3>
-    <button class="btn btn-danger"
-      onClick={() => actions.settings.logout()}>Logout</button>
+    <h4>Settings Page</h4>
+    <button class="btn btn-primary" onClick={() => actions.logout(cell)}>
+      Logout
+    </button>
   </>
 );

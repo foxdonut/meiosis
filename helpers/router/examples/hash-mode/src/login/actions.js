@@ -1,14 +1,15 @@
-import { Route } from '../router';
+import { Route, router } from '../router';
 
-export const Actions = (update, router) => ({
-  username: (value) =>
-    update({ login: { username: value } }),
-  password: (value) =>
-    update({ login: { password: value } }),
+export const actions = ({
+  username: (cell, value) =>
+    cell.update({ login: { username: value } }),
 
-  login: (username, returnTo) =>
-    update({
-      user: username,
-      route: returnTo || router.toRoute(Route.Home)
+  password: (cell, value) =>
+    cell.update({ login: { password: value } }),
+
+  login: (cell) =>
+    cell.update({
+      user: cell.state.login.username,
+      route: cell.state.login.returnTo || router.toRoute(Route.Home)
     })
 });

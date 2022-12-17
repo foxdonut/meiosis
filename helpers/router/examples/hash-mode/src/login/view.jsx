@@ -1,35 +1,34 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Fragment } from 'preact';
 
-export const Login = ({ state, actions }) => (
+import { actions } from './actions';
+
+export const Login = ({ cell }) => (
   <>
-    <h3>Login Page</h3>
-    {state.login.message && <div>{state.login.message}</div>},
-    <form class="form">
-      <div class="form-group">
+    <h4>Login Page</h4>
+    {cell.state.login.message && <div>{cell.state.login.message}</div>}
+    <form class="form" style="width: 400px">
+      <div class="form-group mt-3 mb-2">
         <input class="form-control"
           type="text"
           placeholder="username"
-          value={state.login.username}
-          onInput={(evt) => actions.login.username(evt.currentTarget.value)}
+          value={cell.state.login.username}
+          onInput={(evt) => actions.username(cell, evt.currentTarget.value)}
         />
       </div>
-      <div class="form-group">
+      <div class="form-group mb-3">
         <input class="form-control"
           type="password"
           placeholder="password"
-          value={state.login.password}
-          onInput={(evt) => actions.login.password(evt.currentTarget.value)}
+          value={cell.state.login.password}
+          onInput={(evt) => actions.password(cell, evt.currentTarget.value)}
         />
       </div>
       <button class="btn btn-primary"
         type="button"
-        onClick={() =>
-          actions.login.login(
-            state.login.username,
-            state.login.returnTo
-          )
-        }>Login</button>
+        onClick={() => actions.login(cell)}>
+        Login
+      </button>
     </form>
   </>
 );

@@ -1,10 +1,10 @@
-import { Route } from '../router';
+import { Route, router } from '../router';
 
-export const Actions = (update, router) => ({
-  logout: () =>
-    update({
+export const actions = {
+  logout: (cell) =>
+    cell.update({
       user: null,
       route: () => router.toRoute(Route.Home),
       message: 'You have been logged out.'
     })
-});
+};

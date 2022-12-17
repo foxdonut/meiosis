@@ -34,7 +34,7 @@ export const App = ({ cell }) => {
 
   return (
     <>
-      <ul class="nav nav-tabs">
+      <ul class="nav nav-tabs mb-2">
         {pages.map((page) => (
           <li class="nav-item">
             <a class={'nav-link' + isActive(page.route)}

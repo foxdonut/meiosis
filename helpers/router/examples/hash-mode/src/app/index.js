@@ -1,4 +1,6 @@
 import { home } from '../home';
+import { login } from '../login';
+import { settings } from '../settings';
 
 export const createApp = (initialRoute) => ({
   initial: {
@@ -10,7 +12,9 @@ export const createApp = (initialRoute) => ({
   },
 
   services: [
-    home.service
+    home.service,
+    login.service,
+    settings.service
   ]
 });
 

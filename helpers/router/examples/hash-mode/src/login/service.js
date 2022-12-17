@@ -1,17 +1,20 @@
-import { Route } from '../router';
+import { Route, router } from '../router';
 
-export const service = (router) => (update) => (state) => {
-  if (
-    state.route.page !== Route.Login &&
-    (state.login.username || state.login.password)
-  ) {
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
     if (
-      !state.user &&
-      !confirm('You have unsaved data. Continue?')
+      cell.state.route.value !== Route.Login &&
+      (cell.state.login.username || cell.state.login.password)
     ) {
-      update({ route: () => router.toRoute(Route.Login) });
-    } else {
-      update({ login: { username: '', password: '' } });
+      if (
+        !cell.state.user &&
+        !confirm('You have unsaved data. Continue?')
+      ) {
+        cell.update({ route: () => router.toRoute(Route.Login) });
+      } else {
+        cell.update({ login: { username: '', password: '' } });
+      }
     }
   }
 };

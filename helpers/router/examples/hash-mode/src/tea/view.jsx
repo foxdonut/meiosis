@@ -7,7 +7,7 @@ import { PleaseWait } from '../ui';
 
 export const Tea = ({ state }) => (
   <>
-    <h3>Tea Page</h3>
+    <h4>Tea Page</h4>
     <div class="row">
       <div class="col-md-6">
         {state.teas &&
@@ -19,7 +19,7 @@ export const Tea = ({ state }) => (
             </div>
           )}
       </div>
-      {state.route.page === 'TeaDetails' &&
+      {state.route.value === 'TeaDetails' &&
         <div class="col-md-6"><TeaDetails state={state} /></div>}
     </div>
     <PleaseWait state={state} />
