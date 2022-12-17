@@ -11,7 +11,7 @@ export const Tea = ({ cell }) => (
     {cell.state.teas
       ? (
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             {cell.state.teas.map((tea) =>
               <div key={tea.id}>
                 <a href={router.toUrl(Route.TeaDetails, {
@@ -21,7 +21,7 @@ export const Tea = ({ cell }) => (
             )}
           </div>
           {cell.state.route.value === 'TeaDetails' &&
-            <div class="col-md-6"><TeaDetails cell={cell} /></div>}
+            <div class="col-md-3"><TeaDetails cell={cell} /></div>}
         </div>
       )
       : (<PleaseWait />)
