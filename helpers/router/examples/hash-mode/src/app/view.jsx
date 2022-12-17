@@ -16,33 +16,30 @@ const componentMap = {
   NotFound
 };
 
+const pages = [
+  { page: Home, route: Route.Home, label: 'Home' },
+  { page: Login, route: Route.Login, label: 'Login' },
+  { page: Settings, route: Route.Settings, label: 'Settings' },
+  { page: Tea, route: Route.Tea, label: 'Tea' },
+  { page: TeaSearch, route: Route.TeaSearch, label: 'Tea Search' }
+];
+
 export const App = ({ cell }) => {
-  const Component = componentMap[cell.state.route.page];
-  const isActive = (tab) =>
-    tab === Component ? 'active' : '';
+  const Component = componentMap[cell.state.route.value];
+  const isActive = (route) =>
+    route === cell.state.route.value ? ' active' : '';
 
   return (
     <div>
-      <div class="nav navbar navbar-default">
-        <ul class="nav navbar-nav">
-          <li class={isActive(Home)}>
-            <a href={router.toUrl(Route.Home)}>Home</a>
+      <ul class="nav nav-tabs">
+        {pages.map((page) => (
+          <li class="nav-item">
+            <a class={'nav-link' + isActive(page.route)}
+              href={router.toUrl(page.route)}>{page.label}</a>
           </li>
-          <li class={isActive(Login)}>
-            <a href={router.toUrl(Route.Login)}>Login</a>
-          </li>
-          <li class={isActive(Settings)}>
-            <a href={router.toUrl(Route.Settings)}>Settings</a>
-          </li>
-          <li class={isActive(Tea)}>
-            <a href={router.toUrl(Route.Tea)}>Tea</a>
-          </li>
-          <li class={isActive(TeaSearch)}>
-            <a href={router.toUrl(Route.TeaSearch)}>Tea Search</a>
-          </li>
-        </ul>
-      </div>
-      <Component cell={cell} />
+        ))}
+      </ul>
+      {/* <Component cell={cell} /> */}
     </div>
   );
 };
