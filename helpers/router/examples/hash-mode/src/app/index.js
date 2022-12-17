@@ -3,6 +3,7 @@ import { login } from '../login';
 import { settings } from '../settings';
 import { tea } from '../tea';
 import { teaDetails } from '../teaDetails';
+import { teaSearch } from '../teaSearch';
 
 export const createApp = (initialRoute) => ({
   initial: {
@@ -18,7 +19,8 @@ export const createApp = (initialRoute) => ({
     login.service,
     settings.service,
     tea.service,
-    teaDetails.service
+    teaDetails.service,
+    teaSearch.service
   ]
 });
 
