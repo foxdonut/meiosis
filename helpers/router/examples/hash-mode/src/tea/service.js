@@ -11,6 +11,8 @@ export const service = {
       setTimeout(() => {
         cell.update({ teas });
       }, 1000);
+    } else {
+      cell.update({ teas: undefined });
     }
   }
 };
