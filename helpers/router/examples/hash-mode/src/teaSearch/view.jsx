@@ -2,7 +2,7 @@
 import { Fragment } from 'preact';
 
 import { Route, router } from '../router';
-import { PleaseWait } from '../ui';
+import { PleaseWait } from '../pleaseWait';
 
 const types = ['Black', 'Green', 'Herbal', 'Oolong'];
 
@@ -50,7 +50,7 @@ export const TeaSearch = ({ state }) => {
           </>}
         </div>
       </div>
-      <PleaseWait state={state} />
+      <PleaseWait />
     </>
   );
 };

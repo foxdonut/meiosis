@@ -1,6 +1,8 @@
 import { home } from '../home';
 import { login } from '../login';
 import { settings } from '../settings';
+import { tea } from '../tea';
+import { teaDetails } from '../teaDetails';
 
 export const createApp = (initialRoute) => ({
   initial: {
@@ -14,7 +16,9 @@ export const createApp = (initialRoute) => ({
   services: [
     home.service,
     login.service,
-    settings.service
+    settings.service,
+    tea.service,
+    teaDetails.service
   ]
 });
 

@@ -3,8 +3,6 @@ import { searchTeas } from './data';
 
 export const service = (update) => (state) => {
   if (state.route.value === Route.TeaSearch) {
-    setTimeout(() => {
-      update({ searchTeas });
-    }, 1000);
+    update({ searchTeas });
   }
 };
