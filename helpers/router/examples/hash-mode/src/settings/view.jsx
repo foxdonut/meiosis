@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Fragment } from 'preact';
+
 export const Settings = ({ actions }) => (
   <>
     <h3>Settings Page</h3>

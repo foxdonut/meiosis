@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Fragment } from 'preact';
+
 import { Home } from '../home';
 import { Login } from '../login';
 import { Settings } from '../settings';
@@ -30,7 +33,7 @@ export const App = ({ cell }) => {
     route === cell.state.route.value ? ' active' : '';
 
   return (
-    <div>
+    <>
       <ul class="nav nav-tabs">
         {pages.map((page) => (
           <li class="nav-item">
@@ -39,7 +42,7 @@ export const App = ({ cell }) => {
           </li>
         ))}
       </ul>
-      {/* <Component cell={cell} /> */}
-    </div>
+      <Component cell={cell} />
+    </>
   );
 };

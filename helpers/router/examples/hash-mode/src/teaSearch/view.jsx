@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Fragment } from 'preact';
+
 import { Route, router } from '../router';
 import { PleaseWait } from '../ui';
 

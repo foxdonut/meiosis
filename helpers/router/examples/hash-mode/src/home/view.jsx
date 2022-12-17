@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Fragment } from 'preact';
+
 export const Home = ({ cell }) => (
   <>
     <h3>Home Page</h3>

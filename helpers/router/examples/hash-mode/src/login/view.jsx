@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Fragment } from 'preact';
+
 export const Login = ({ state, actions }) => (
   <>
     <h3>Login Page</h3>
