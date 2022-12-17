@@ -18,7 +18,6 @@ export const routeConfig = {
   '/tea/search': Route.TeaSearch,
   '/tea': Route.Tea,
   '/tea/:id': Route.TeaDetails,
-  '/:404...': Route.NotFound,
   '/*': Route.NotFound
 };
 

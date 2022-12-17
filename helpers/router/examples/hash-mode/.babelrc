@@ -11,6 +11,14 @@
         "pragma": "h",
         "pragmaFrag": "Fragment"
       }
+    ],
+    [
+      "babel-plugin-jsx-pragmatic",
+      {
+        "module": "preact",
+        "import": "h",
+        "export": "h"
+      }
     ]
   ]
 }

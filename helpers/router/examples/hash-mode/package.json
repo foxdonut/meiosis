@@ -36,6 +36,7 @@
     "@babel/plugin-transform-react-jsx": "^7.19.0",
     "@babel/preset-env": "^7.20.2",
     "babel-loader": "^9.1.0",
+    "babel-plugin-jsx-pragmatic": "^1.0.2",
     "meiosis-tracer": "^5.0.1",
     "static-server": "^2.2.1",
     "webpack": "^5.75.0",
