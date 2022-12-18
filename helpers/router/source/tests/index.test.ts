@@ -2,6 +2,7 @@
 
 import createRouteMatcher from 'feather-route-matcher';
 import { createRouter } from '../src/index';
+import { createToUrl } from '../src/helpers';
 import { Route, RouteConfig, RouterConfig } from '../src/types';
 
 type Page = 'Home' | 'Login' | 'UserProfile';
@@ -180,6 +181,20 @@ describe('router', () => {
           value: 'Login',
           params: {}
         });
+      });
+    });
+
+    describe('createToUrl', () => {
+      it('keeps slash for empty path', () => {
+        const routeConfig = {
+          '/': 'home',
+          '/login': 'login'
+        };
+
+        const toUrl = createToUrl(routeConfig, '', true);
+        const url = toUrl('home');
+
+        expect(url).toEqual('/');
       });
     });
 });

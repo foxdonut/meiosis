@@ -11,7 +11,9 @@ import {
 // ----- Helpers
 
 const stripTrailingSlash = (url: string) =>
-  (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
+  url.length === 0 || url === '/'
+    ? '/'
+    : (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
 
 const I = (x: string) => x;
 
