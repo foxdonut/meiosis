@@ -108,7 +108,7 @@ export type RouterConfig<T extends string = string> = {
   routeConfig: RouteConfig<T>;
 
   /** If specified, uses history mode instead of hash mode. If you are using history mode, you need
-   * to provide server side router support. If not provided, defaults to the identity function. */
+   * to provide server side router support. */
   rootPath?: string;
 
   /** The `window`, used for testing purposes. */

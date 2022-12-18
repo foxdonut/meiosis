@@ -8,7 +8,7 @@ const FILES = [
   '/public/css/bootstrap-simplex.min.css'
 ];
 
-const PORT = 8000;
+const PORT = 9000;
 
 const getHtmlContents = () =>
   new Promise((resolve) => {

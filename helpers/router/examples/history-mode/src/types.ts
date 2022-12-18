@@ -1,3 +1,5 @@
+import { Route } from 'meiosis-router/types';
+
 export type PageKey = 'home' | 'login' | 'data1' | 'data2';
 
 export interface Page {
@@ -16,6 +18,7 @@ export interface Login extends Page {
 
 export interface State extends Page {
   page: PageKey;
+  route: Route<PageKey>;
   home: Page;
   login: Login;
   loggedInUser: string;

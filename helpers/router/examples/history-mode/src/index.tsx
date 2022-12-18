@@ -1,8 +1,10 @@
+// @ts-check
 /** @jsxImportSource preact */
 import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
 import { render } from 'preact';
 import { Page, PageKey, State } from './types';
+import { router } from './router';
 import { home } from './home';
 import { login } from './login';
 import { data } from './data';
@@ -10,10 +12,10 @@ import { data } from './data';
 const pages = ['home', 'login', 'data1', 'data2'];
 
 const pageService: Service<State> = {
-  onchange: (state) => state.page,
+  onchange: (state) => state.route.value,
   run: (cell) => {
     const pagePatch = pages.reduce((result, page) => {
-      result[page] = { active: cell.state.page === page };
+      result[page] = { active: cell.state.route.value === page };
       return result;
     }, {} as Record<string, Page>);
     cell.update(pagePatch);
@@ -36,7 +38,7 @@ const views: Record<PageKey, (cell: MeiosisCell<State>) => any> = {
 
 const app: MeiosisViewComponent<State> = {
   initial: {
-    page: 'home'
+    route: router.initialRoute
   },
   services: [pageService],
   nested: {
@@ -48,45 +50,25 @@ const app: MeiosisViewComponent<State> = {
   view: (cell) => (
     <div>
       <div class="mb-2">
-        <a href="#"
-          onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'home' });
-          }}>
-          Home
-        </a>
+        <a href={router.toUrl('home')}>Home</a>
         <span> | </span>
-        <a href="#"
-          onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'login' });
-          }}>
-          Login
-        </a>
+        <a href={router.toUrl('login')}>Login</a>
         <span> | </span>
-        <a href="#"
-          onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'data1' });
-          }}>
-          Data 1
-        </a>
+        <a href={router.toUrl('data1')}>Data 1</a>
         <span> | </span>
-        <a href="#"
-          onClick={(evt) => {
-            evt.preventDefault();
-            cell.update({ page: 'data2' });
-          }}>
-          Data 2
-        </a>
+        <a href={router.toUrl('data2')}>Data 2</a>
       </div>
-      {views[cell.state.page](cell)}
-      <div class="mt-3"><pre>{JSON.stringify(cell.state, null, 2)}</pre></div>
+      {views[cell.state.route.value](cell)}
     </div>
   )
 };
 
 const cells = meiosisSetup<State>({ app });
+const cell = cells();
+router.start((route) => cell.update({ route: () => route }));
+cells.map((cell) => {
+  router.syncLocationBar(cell.state.route);
+});
 
 const element = document.getElementById('app') as HTMLElement;
 cells.map((cell) => {
