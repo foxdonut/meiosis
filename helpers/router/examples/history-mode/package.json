@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-router": "^1.0.0-beta.7",
+    "meiosis-router": "^1.0.0-beta.8",
     "meiosis-setup": "^6.1.1",
     "paperplane": "^3.1.2",
     "preact": "^10.11.3"
