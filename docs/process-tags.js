@@ -34,10 +34,13 @@ filenames.forEach((source) => {
     }
     else if (line.startsWith('@nav-toc')
       || line.startsWith('@nav-setup-js-toc')
-      || line.startsWith('@nav-setup-ts-toc')) {
+      || line.startsWith('@nav-setup-ts-toc')
+      || line.startsWith('@nav-router-toc')) {
 
       const toc = line.startsWith('@nav-toc') ? 'toc' :
-        line.startsWith('@nav-setup-js-toc') ? 'setup-js-toc' : 'setup-ts-toc';
+        line.startsWith('@nav-setup-js-toc') ? 'setup-js-toc' :
+        line.startsWith('@nav-setup-ts-toc') ? 'setup-ts-toc' :
+        'router-toc';
 
       line = `  <a class="toc" href="${toc}.html">&#x2B06; Contents</a>`;
     }
