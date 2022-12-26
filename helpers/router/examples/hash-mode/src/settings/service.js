@@ -1,14 +1,15 @@
-import { Route, router } from '../router';
+// @ts-check
+import { Page, router } from '../router';
 
 export const service = {
   onchange: (state) => state.route.value,
   run: (cell) => {
-    if (cell.state.route.value === Route.Settings && !cell.state.user) {
+    if (cell.state.route.value === Page.Settings && !cell.state.user) {
       cell.update({
-        route: {...router.toRoute(Route.Login), replace: true },
+        route: {...router.toRoute(Page.Login), replace: true },
         login: {
           message: 'Please login.',
-          returnTo: router.toRoute(Route.Settings)
+          returnTo: router.toRoute(Page.Settings)
         }
       });
     }

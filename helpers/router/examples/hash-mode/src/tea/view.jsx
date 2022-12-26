@@ -2,7 +2,7 @@
 import { Fragment } from 'preact';
 
 import { TeaDetails } from '../teaDetails';
-import { Route, router } from '../router';
+import { Page, router } from '../router';
 import { PleaseWait } from '../pleaseWait';
 
 export const Tea = ({ cell }) => (
@@ -14,7 +14,7 @@ export const Tea = ({ cell }) => (
           <div class="col-md-3">
             {cell.state.teas.map((tea) =>
               <div key={tea.id}>
-                <a href={router.toUrl(Route.TeaDetails, {
+                <a href={router.toUrl(Page.TeaDetails, {
                   id: tea.id
                 })}>{tea.title}</a>
               </div>

@@ -1,10 +1,10 @@
-import { Route, router } from '../router';
+import { Page, router } from '../router';
 
 export const TeaDetails = ({ cell }) => (
   <div>
     <div>{cell.state.tea}</div>
     <div>
-      <a href={router.toUrl(Route.Tea)}>Close</a>
+      <a href={router.toUrl(Page.Tea)}>Close</a>
     </div>
   </div>
 );

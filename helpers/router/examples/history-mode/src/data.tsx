@@ -1,14 +1,14 @@
 /** @jsxImportSource preact */
-import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
-import { Data } from './types';
+import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
+import { Data, DataProp, State } from './types';
 
 const dataActions = {
-  loadData: (cell: MeiosisCell<Data>) => {
-    cell.update({ loading: true });
+  loadData: (cell: MeiosisCell<State>, nestedCell: MeiosisCell<Data>) => {
+    nestedCell.update({ loading: true });
     setTimeout(
       () => {
-        if (cell.getState().active) {
-          cell.update({
+        if (cell.state.route.value === 'data1') {
+          nestedCell.update({
             loading: false,
             items: ['One', 'Two']
           });
@@ -22,19 +22,18 @@ const dataActions = {
   }
 };
 
-export const data: MeiosisViewComponent<Data> = {
-  services: [
-    {
-      onchange: (state) => state.active,
-      run: (cell) => {
-        if (cell.state.active) {
-          dataActions.loadData(cell);
-        } else {
-          dataActions.clearData(cell);
-        }
-      }
+export const createDataService: (prop: DataProp) => Service<State> = (prop) => ({
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value === prop) {
+      dataActions.loadData(cell, cell.nest(prop));
+    } else {
+      dataActions.clearData(cell.nest(prop));
     }
-  ],
+  }
+});
+
+export const data: MeiosisViewComponent<Data> = {
   view: (cell, loggedInUser) => (
     <div>
       <h4>Data page</h4>

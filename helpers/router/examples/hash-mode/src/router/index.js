@@ -1,7 +1,7 @@
 // @ts-check
 import { createRouter } from 'meiosis-router';
 
-export const Route = {
+export const Page = {
   Home: 'Home',
   Login: 'Login',
   Settings: 'Settings',
@@ -12,13 +12,13 @@ export const Route = {
 };
 
 export const routeConfig = {
-  '/': Route.Home,
-  '/login': Route.Login,
-  '/settings': Route.Settings,
-  '/tea/search': Route.TeaSearch,
-  '/tea': Route.Tea,
-  '/tea/:id': Route.TeaDetails,
-  '/*': Route.NotFound
+  '/': Page.Home,
+  '/login': Page.Login,
+  '/settings': Page.Settings,
+  '/tea/search': Page.TeaSearch,
+  '/tea': Page.Tea,
+  '/tea/:id': Page.TeaDetails,
+  '/*': Page.NotFound
 };
 
 export const router = createRouter({ routeConfig });

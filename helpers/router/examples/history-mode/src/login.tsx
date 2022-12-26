@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
-import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
-import { Login } from './types';
+import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
+import { Login, State } from './types';
 
 const loginActions = {
   prepareBlankForm: (cell: MeiosisCell<Login>) => {
@@ -11,19 +11,18 @@ const loginActions = {
   }
 };
 
-export const login: MeiosisViewComponent<Login> = {
-  services: [
-    {
-      onchange: (state) => state.active,
-      run: (cell) => {
-        if (cell.state.active) {
-          loginActions.prepareBlankForm(cell);
-        } else {
-          loginActions.clearForm(cell);
-        }
-      }
+export const loginService: Service<State> = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value === 'login') {
+      loginActions.prepareBlankForm(cell.nest('login'));
+    } else {
+      loginActions.clearForm(cell.nest('login'));
     }
-  ],
+  }
+};
+
+export const login: MeiosisViewComponent<Login> = {
   view: (cell, onLogin: (username: string) => void) => (
     <div>
       <h4>Login page</h4>

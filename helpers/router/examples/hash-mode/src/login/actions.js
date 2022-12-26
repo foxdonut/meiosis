@@ -1,4 +1,4 @@
-import { Route, router } from '../router';
+import { Page, router } from '../router';
 
 export const actions = ({
   username: (cell, value) =>
@@ -10,6 +10,6 @@ export const actions = ({
   login: (cell) =>
     cell.update({
       user: cell.state.login.username,
-      route: cell.state.login.returnTo || router.toRoute(Route.Home)
+      route: cell.state.login.returnTo || router.toRoute(Page.Home)
     })
 });

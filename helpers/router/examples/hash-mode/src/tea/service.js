@@ -1,12 +1,12 @@
-import { Route } from '../router';
+import { Page } from '../router';
 import { teas } from '../teaDetails/data';
 
 export const service = {
   onchange: (state) => state.route.value,
   run: (cell) => {
     if (
-      cell.state.route.value === Route.Tea ||
-      cell.state.route.value === Route.TeaDetails
+      cell.state.route.value === Page.Tea ||
+      cell.state.route.value === Page.TeaDetails
     ) {
       setTimeout(() => {
         cell.update({ teas });

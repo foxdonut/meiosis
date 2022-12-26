@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Fragment } from 'preact';
 
-import { Route, router } from '../router';
+import { Page, router } from '../router';
 import { PleaseWait } from '../pleaseWait';
 
 const types = ['Black', 'Green', 'Herbal', 'Oolong'];
@@ -19,13 +19,13 @@ export const TeaSearch = ({ cell }) => {
               <div>
                 {types.map((type) => (
                   <a style={{ marginRight: '10px' }}
-                    href={router.toUrl(Route.TeaSearch, {
+                    href={router.toUrl(Page.TeaSearch, {
                       type
                     })
                     }>{type}</a>
                 )
                 )}
-                <a href={router.toUrl(Route.TeaSearch)}>All</a>
+                <a href={router.toUrl(Page.TeaSearch)}>All</a>
               </div>
               <table class="table table-bordered table-striped">
                 <thead>

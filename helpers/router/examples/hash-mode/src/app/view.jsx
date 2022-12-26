@@ -7,7 +7,7 @@ import { Settings } from '../settings';
 import { Tea } from '../tea';
 import { TeaSearch } from '../teaSearch';
 import { NotFound } from '../notFound';
-import { Route, router } from '../router';
+import { Page, router } from '../router';
 
 const componentMap = {
   Home,
@@ -20,11 +20,11 @@ const componentMap = {
 };
 
 const pages = [
-  { page: Home, route: Route.Home, label: 'Home' },
-  { page: Login, route: Route.Login, label: 'Login' },
-  { page: Settings, route: Route.Settings, label: 'Settings' },
-  { page: Tea, route: Route.Tea, label: 'Tea' },
-  { page: TeaSearch, route: Route.TeaSearch, label: 'Tea Search' }
+  { page: Page.Home, label: 'Home' },
+  { page: Page.Login, label: 'Login' },
+  { page: Page.Settings, label: 'Settings' },
+  { page: Page.Tea, label: 'Tea' },
+  { page: Page.TeaSearch, label: 'Tea Search' }
 ];
 
 export const App = ({ cell }) => {
@@ -37,8 +37,8 @@ export const App = ({ cell }) => {
       <ul class="nav nav-tabs mb-2">
         {pages.map((page) => (
           <li class="nav-item">
-            <a class={'nav-link' + isActive(page.route)}
-              href={router.toUrl(page.route)}>{page.label}</a>
+            <a class={'nav-link' + isActive(page.page)}
+              href={router.toUrl(page.page)}>{page.label}</a>
           </li>
         ))}
       </ul>

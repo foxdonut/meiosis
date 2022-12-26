@@ -1,34 +1,21 @@
 // @ts-check
 /** @jsxImportSource preact */
 import { meiosisSetup } from 'meiosis-setup';
-import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
+import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import { render } from 'preact';
-import { Page, PageKey, State } from './types';
+import { Page, State } from './types';
 import { router } from './router';
 import { home } from './home';
-import { login } from './login';
-import { data } from './data';
-
-const pages = ['home', 'login', 'data1', 'data2'];
-
-const pageService: Service<State> = {
-  onchange: (state) => state.route.value,
-  run: (cell) => {
-    const pagePatch = pages.reduce((result, page) => {
-      result[page] = { active: cell.state.route.value === page };
-      return result;
-    }, {} as Record<string, Page>);
-    cell.update(pagePatch);
-  }
-};
+import { login, loginService } from './login';
+import { data, createDataService } from './data';
 
 const actions = {
   onLogin: (cell: MeiosisCell<State>, loggedInUser: string): void => {
-    cell.update({ loggedInUser, page: 'data1' });
+    cell.update({ loggedInUser, route: router.toRoute('data1') });
   }
 };
 
-const views: Record<PageKey, (cell: MeiosisCell<State>) => any> = {
+const views: Record<Page, (cell: MeiosisCell<State>) => any> = {
   home: (cell) => cell.nested.home.view(cell),
   login: (cell) => cell.nested.login.view(cell,
     (loggedInUser: string) => actions.onLogin(cell, loggedInUser)),
@@ -40,7 +27,11 @@ const app: MeiosisViewComponent<State> = {
   initial: {
     route: router.initialRoute
   },
-  services: [pageService],
+  services: [
+    loginService,
+    createDataService('data1'),
+    createDataService('data2')
+  ],
   nested: {
     home,
     login,

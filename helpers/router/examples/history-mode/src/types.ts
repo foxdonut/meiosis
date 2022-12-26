@@ -1,27 +1,24 @@
 import { Route } from 'meiosis-router/types';
 
-export type PageKey = 'home' | 'login' | 'data1' | 'data2';
+export type Page = 'home' | 'login' | 'data1' | 'data2';
 
-export interface Page {
-  active: boolean;
-}
-
-export interface Data extends Page {
+export interface Data {
   loading: boolean;
   items: string[];
 }
 
-export interface Login extends Page {
+export interface Login {
   username: string;
   password: string;
 }
 
-export interface State extends Page {
-  page: PageKey;
-  route: Route<PageKey>;
-  home: Page;
+export interface State {
+  route: Route<Page>;
   login: Login;
+  home: Page;
   loggedInUser: string;
   data1: Data;
   data2: Data;
 }
+
+export type DataProp = 'data1' | 'data2';
