@@ -9,6 +9,9 @@ import { home } from './home';
 import { login, loginService } from './login';
 import { data, createDataService } from './data';
 
+// Only for using Meiosis Tracer in development / Chrome DevTools.
+import meiosisTracer from 'meiosis-tracer';
+
 const actions = {
   onLogin: (cell: MeiosisCell<State>, loggedInUser: string): void => {
     cell.update({ loggedInUser, route: router.toRoute('data1') });
@@ -64,4 +67,10 @@ cells.map((cell) => {
 const element = document.getElementById('app') as HTMLElement;
 cells.map((cell) => {
   render(app.view(cell), element);
+});
+
+// Only for using Meiosis Tracer in development / Chrome DevTools.
+meiosisTracer({
+  rows: 30,
+  streams: [{ stream: cell.states, label: 'states' }]
 });

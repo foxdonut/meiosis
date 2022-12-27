@@ -3,11 +3,13 @@ import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types'
 import { Data, DataProp, State } from './types';
 
 const dataActions = {
-  loadData: (cell: MeiosisCell<State>, nestedCell: MeiosisCell<Data>) => {
+  loadData: (cell: MeiosisCell<State>, prop: DataProp) => {
+    const nestedCell = cell.nest(prop);
     nestedCell.update({ loading: true });
+
     setTimeout(
       () => {
-        if (cell.state.route.value === 'data1') {
+        if (cell.state.route.value === prop) {
           nestedCell.update({
             loading: false,
             items: ['One', 'Two']
@@ -26,7 +28,7 @@ export const createDataService: (prop: DataProp) => Service<State> = (prop) => (
   onchange: (state) => state.route.value,
   run: (cell) => {
     if (cell.state.route.value === prop) {
-      dataActions.loadData(cell, cell.nest(prop));
+      dataActions.loadData(cell, prop);
     } else {
       dataActions.clearData(cell.nest(prop));
     }
