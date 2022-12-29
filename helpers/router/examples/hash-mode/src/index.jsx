@@ -1,12 +1,11 @@
 import { meiosisSetup } from 'meiosis-setup';
 import { render } from 'preact';
-import { createApp, App } from './app';
+import { app, App } from './app';
 import { router } from './router';
 
 // Only for using Meiosis Tracer in development / Chrome DevTools.
 import meiosisTracer from 'meiosis-tracer';
 
-const app = createApp(router.initialRoute);
 const cells = meiosisSetup({ app });
 const cell = cells();
 

@@ -4,10 +4,11 @@ import { settings } from '../settings';
 import { tea } from '../tea';
 import { teaDetails } from '../teaDetails';
 import { teaSearch } from '../teaSearch';
+import { router } from './router';
 
-export const createApp = (initialRoute) => ({
+export const app = {
   initial: {
-    route: initialRoute || {},
+    route: router.initialRoute,
     login: {
       username: '',
       password: ''
@@ -22,6 +23,6 @@ export const createApp = (initialRoute) => ({
     teaDetails.service,
     teaSearch.service
   ]
-});
+};
 
 export { App } from './view';

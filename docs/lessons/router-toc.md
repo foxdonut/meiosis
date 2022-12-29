@@ -12,3 +12,4 @@
 
 - [Overview](router-overview.html)
 - [Basic Setup](router-basic.html)
+- [Using the Router](router-using.html)
