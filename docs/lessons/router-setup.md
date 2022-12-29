@@ -3,10 +3,10 @@
 @docs-nav-start
 @nav-prev:router-overview.html:Overview
 @nav-router-toc
-@nav-next:router-using.html:Using the Router
+@nav-next:router-history-mode.html:History Mode
 @docs-nav-end
 
-## Basic Setup
+## Setup
 
 In `router.js` we have:
 
@@ -46,6 +46,7 @@ const cells = meiosisSetup({ app });
 const cell = cells();
 
 router.start((route) => cell.update({ route: () => route }));
+
 cells.map((cell) => {
   router.syncLocationBar(cell.state.route);
 });
@@ -54,5 +55,5 @@ cells.map((cell) => {
 @docs-nav-start
 @nav-prev:router-overview.html:Overview
 @nav-router-toc
-@nav-next:router-using.html:Using the Router
+@nav-next:router-history-mode.html:History Mode
 @docs-nav-end

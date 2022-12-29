@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-empty
 @nav-router-toc
-@nav-next:router-basic.html:Basic Setup
+@nav-next:router-setup.html:Setup
 @docs-nav-end
 
 ## Overview
@@ -71,5 +71,5 @@ Using this information, we can render application views according to the current
 @docs-nav-start
 @nav-empty
 @nav-router-toc
-@nav-next:router-basic.html:Basic Setup
+@nav-next:router-setup.html:Setup
 @docs-nav-end
