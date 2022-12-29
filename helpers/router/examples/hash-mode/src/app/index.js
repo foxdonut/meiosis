@@ -4,7 +4,7 @@ import { settings } from '../settings';
 import { tea } from '../tea';
 import { teaDetails } from '../teaDetails';
 import { teaSearch } from '../teaSearch';
-import { router } from './router';
+import { router } from '../router';
 
 export const app = {
   initial: {

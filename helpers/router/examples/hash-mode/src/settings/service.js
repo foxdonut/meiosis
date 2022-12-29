@@ -6,7 +6,7 @@ export const service = {
   run: (cell) => {
     if (cell.state.route.value === Page.Settings && !cell.state.user) {
       cell.update({
-        route: {...router.toRoute(Page.Login), replace: true },
+        route: router.toRoute(Page.Login, {}, true),
         login: {
           message: 'Please login.',
           returnTo: router.toRoute(Page.Settings)
