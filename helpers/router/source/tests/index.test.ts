@@ -78,6 +78,9 @@ describe('router', () => {
         const params = { duck: 'quack' };
         const route2 = { value: 'Login', params };
         expect(router.toRoute('Login', params)).toEqual(route2);
+
+        const route3 = { value: 'Login', params: {}, replace: true };
+        expect(router.toRoute('Login', {}, true)).toEqual(route3);
       });
 
       describe('syncLocationBar', () => {

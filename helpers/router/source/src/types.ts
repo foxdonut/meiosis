@@ -47,7 +47,8 @@ export type ToUrl<T extends string = string> = (value: T, params?: Params) => st
  * @param value the route value.
  * @param params the path parameters.
  */
-export type ToRoute<T extends string = string> = (value: T, params?: Params) => Route<T>;
+export type ToRoute<T extends string = string> =
+  (value: T, params?: Params, replace?: boolean) => Route<T>;
 
 export type GetStatePath = (path: string) => string;
 
