@@ -68,8 +68,8 @@ const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
     const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
 
     return (
-      (path.match(/(:[^/]*)/g) || []).reduce(
-        (result, pathParam) =>
+      (path.match(/(:[^/]*)/g) || [] as Array<string>).reduce(
+        (result: string, pathParam: string) =>
           result.replace(new RegExp(pathParam), encodeURI(params[pathParam.substring(1)])),
         path
       ) + getQueryString(queryParams)
