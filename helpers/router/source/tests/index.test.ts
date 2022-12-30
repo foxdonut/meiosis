@@ -65,6 +65,10 @@ describe('router', () => {
         const router = createRouterFn({ wdw });
 
         expect(router.toUrl('Login')).toEqual(prefix + path);
+        expect(router.toUrl('UserProfile')).toEqual(prefix + '/user/undefined');
+        expect(router.toUrl('UserProfile', { id: 42 })).toEqual(prefix + '/user/42');
+        expect(router.toUrl('UserProfile', { id: 42, a: 1, b: 'two' }))
+          .toEqual(prefix + '/user/42?a=1&b=two');
       });
 
       test('toRoute produces a Route', () => {

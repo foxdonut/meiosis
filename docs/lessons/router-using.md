@@ -24,8 +24,30 @@ cell.update({ route: router.toRoute(Page.Login)});
 cell.update({ route: router.toRoute(Page.User, { id: user.id })});
 ```
 
+If there are extra parameters beyond route parameters, they are added as query parameters:
+
+```js
+// say user.id is 42
+cell.update({ route: router.toRoute(Page.User, { id: user.id, a: 1, b: 'two' })});
+// produces /user/42?a=1&b=two
+```
+
+> Warning:
+
 ```js
 cell.update({ route: router.toRoute(Page.Login), {}, true});
+```
+
+```js
+const componentMap = {
+  Home: ...,
+  Login: ...,
+  ...
+};
+
+const Component = componentMap[cell.state.route.value];
+
+<Component cell={cell} />
 ```
 
 @docs-nav-start

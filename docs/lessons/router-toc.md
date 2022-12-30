@@ -6,6 +6,12 @@
 
 ## Features
 
+- Supports two modes: hash mode and history mode
+- Route parameters
+- Query parameters
+- Provides a URL-generating function - no more manual string concatenation!
+- Routes can be changed programmatically
+- Keeps the browser's location bar in sync
 - Provides [TypeScript](https://www.typescriptlang.org/) support
 
 ## Table of Contents
