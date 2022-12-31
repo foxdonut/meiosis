@@ -32,7 +32,8 @@ cell.update({ route: router.toRoute(Page.User, { id: user.id, a: 1, b: 'two' })}
 // produces /user/42?a=1&b=two
 ```
 
-> Warning:
+> Warning: if you do not specify values for route parameters, they will be `undefined` in the
+> resulting URL.
 
 ```js
 cell.update({ route: router.toRoute(Page.Login), {}, true});
