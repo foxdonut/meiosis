@@ -19,13 +19,14 @@ import {
 } from './helpers';
 
 /**
- * Creates a router.
+ * Creates a router for use with Meiosis. Required:
+ * - `routeConfig`: the mapping of route paths to string identifiers
  */
-export const createRouter = <T extends string = string>({
-  routeConfig,
-  rootPath,
-  wdw = window
-}: RouterConfig<T>): Router<T> => {
+export const createRouter = <T extends string = string>(routerConfig: RouterConfig<T>):
+  Router<T> => {
+
+  const { routeConfig, rootPath, wdw = window } = routerConfig;
+
   const routeMatcher = createRouteMatcher(routeConfig);
   const { prefix, historyMode } = getConfig(rootPath);
 

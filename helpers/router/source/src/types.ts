@@ -112,7 +112,7 @@ export type RouterConfig<T extends string = string> = {
    * to provide server side router support. */
   rootPath?: string;
 
-  /** The `window`, used for testing purposes. */
+  /** The `window`, for testing purposes only. */
   wdw?: WindowLike;
 };
 

@@ -13,7 +13,7 @@ or [Mithril Stream](https://mithril.js.org/stream.html)
 
 ## Installation
 
-Using npm:
+Using `npm`:
 
 ```
 npm i meiosis-setup
