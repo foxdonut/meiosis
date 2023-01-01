@@ -1,3 +1,7 @@
+/**
+ * Contains helper functions for internal use only.
+ * @module
+ */
 import qs from 'query-string';
 import {
   DoSyncLocationBarParams,
@@ -17,11 +21,13 @@ const stripTrailingSlash = (url: string) =>
 
 const I = (x: string) => x;
 
+/** For internal use only. */
 export const getQuery = (path: string): string => {
   const idx = path.indexOf('?');
   return idx >= 0 ? path.substring(idx + 1) : '';
 };
 
+/** For internal use only. */
 export const getQueryString = (queryParams = {}): string => {
   const query = qs.stringify(queryParams);
   return (query.length > 0 ? '?' : '') + query;
@@ -40,6 +46,7 @@ const separateParamsAndQueryParams = (path: string, allParams) => {
   );
 };
 
+/** For internal use only. */
 export const getConfig = (rootPath?: string) => {
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : '#!';
@@ -47,14 +54,12 @@ export const getConfig = (rootPath?: string) => {
   return { prefix, historyMode };
 };
 
-export const createGetUrl = (prefix: string, historyMode: boolean, wdw) =>
+/** For internal use only. */
+export const createGetUrl = (prefix: string, historyMode: boolean, wdw: WindowLike) =>
   historyMode
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
-/**
- * Helper that creates a `toUrl` function.
- */
 const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
   getStatePath: GetStatePath): ToUrl => {
 
@@ -77,6 +82,7 @@ const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
   };
 };
 
+/** For internal use only. */
 export const createToUrl = <T extends string = string>(routeConfig: RouteConfig<T>,
   prefix: string, historyMode: boolean): ToUrl<T> => {
 
@@ -85,20 +91,16 @@ export const createToUrl = <T extends string = string>(routeConfig: RouteConfig<
   return (page, params = {}) => prefix + toUrl(page, params);
 };
 
-export const doSyncLocationBar = ({ replace, url, getUrl, wdw }: DoSyncLocationBarParams) => {
+/** For internal use only. */
+export const doSyncLocationBar = (doSyncParams: DoSyncLocationBarParams) => {
+  const { replace, url, getUrl, wdw } = doSyncParams;
   if (url !== getUrl() && wdw) {
     const fn = replace ? 'replaceState' : 'pushState';
     wdw.history[fn].call(wdw.history, {}, '', url);
   }
 };
 
-/**
- * Helper to intercept link clicks in history mode.
- *
- * @param {Window} wdw
- * @param {string} prefix
- * @param {function(string):void} setHref
- */
+/** For internal use only. */
 export const addHistoryEventListener = (wdw: WindowLike, prefix: string, setHref: SetHref) => {
   const origin = wdw.location.origin;
 

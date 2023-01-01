@@ -1,4 +1,9 @@
 /**
+ * Types for `meiosis-router`.
+ * @module
+ */
+
+/**
  * Route configuration. This is a plain object that associates route path templates to values.
  * Route path templates may contain parameters by using `:` as a prefix. For example:
  *
@@ -34,7 +39,7 @@
 export type RouteConfig<T extends string = string> = Record<string, T>;
 
 /**
- * Route and query string params.
+ * Route path and query string parameters.
  */
 export type Params = Record<string, any>;
 
@@ -83,9 +88,10 @@ export type ToUrl<T extends string = string> = (value: T, params?: Params) => st
 export type ToRoute<T extends string = string> =
   (value: T, params?: Params, replace?: boolean) => Route<T>;
 
+/** Used internally. */
 export type GetStatePath = (path: string) => string;
 
-/** Used internally */
+/** Used internally. */
 export type SetHref = (href: string) => void;
 
 /**
@@ -125,6 +131,7 @@ export type WindowLike = {
   onpopstate: ((this: any, event: PopStateEvent) => any) | null;
 }
 
+/** Used internally. */
 export type DoSyncLocationBarParams = {
   replace?: boolean;
   url: string;
@@ -150,8 +157,11 @@ export type RouterConfig<T extends string = string> = {
   /** The route configuration. See the documentation for {@link RouteConfig} for details. */
   routeConfig: RouteConfig<T>;
 
-  /** If specified, uses history mode instead of hash mode. If you are using history mode, you need
-   * to provide server side router support. */
+  /** If specified, uses history mode instead of hash mode. To use history mode, you need to provide
+   * server side router support. The root path is the URL path leading up to the root of your
+   * application. For example, if the URL of your application is `https://my.domain.com/apps/myapp`
+   * then the root path is `/apps/myapp`. If your application is at `https://my.domain.com` then
+   * simply specify an empty string, `''`, as the root path. */
   rootPath?: string;
 
   /** Do not use this, it is for internal testing purposes only. */

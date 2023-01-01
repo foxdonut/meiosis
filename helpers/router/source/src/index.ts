@@ -1,3 +1,8 @@
+/**
+ * `meiosis-router` main module.
+ * @module
+ */
+
 import createRouteMatcher from 'feather-route-matcher';
 import qs from 'query-string';
 import {
@@ -19,8 +24,15 @@ import {
 } from './helpers';
 
 /**
- * Creates a router for use with Meiosis. Required:
- * - `routeConfig`: the mapping of route paths to string identifiers
+ * Creates a router for use with Meiosis.
+ *
+ * Required:
+ * - `routeConfig`: the mapping of route paths to string identifiers. See
+ * {@link "types".RouteConfig} for details.
+ *
+ * Optional:
+ * - `rootPath` (`string`): indicates to use history mode instead of hash mode by specifying the
+ * root path. See {@link "types".RouterConfig} for details.
  */
 export const createRouter = <T extends string = string>(routerConfig: RouterConfig<T>):
   Router<T> => {
