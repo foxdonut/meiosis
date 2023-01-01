@@ -85,6 +85,7 @@ export type ToRoute<T extends string = string> =
 
 export type GetStatePath = (path: string) => string;
 
+/** Used internally */
 export type SetHref = (href: string) => void;
 
 /**
@@ -132,7 +133,11 @@ export type DoSyncLocationBarParams = {
 };
 
 /**
- * Function that synchronizes the location bar with the state route.
+ * Function that synchronizes the location bar with the application state route.
+ *
+ * @template T See {@link RouteConfig} for details.
+ *
+ * @param route the current route.
  */
 export type SyncLocationBar<T extends string = string> = (route: Route<T>) => void;
 
