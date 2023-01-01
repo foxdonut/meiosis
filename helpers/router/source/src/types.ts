@@ -9,6 +9,27 @@
  *   "/user/:id": "UserProfile"
  * };
  * ```
+ *
+ * @template T to restrict values to specific strings. For example:
+ *
+ * ```ts
+ * type Page = 'Home' | 'Login' | 'UserProfile';
+ *
+ * export const routeConfig: RouteConfig<Page> = {
+ *   '/': 'Home',
+ *   '/login': 'Login',
+ *   '/user/:id': 'UserProfile'
+ * };
+ *
+ * export const router = createRouter({ routeConfig });
+ * ```
+ *
+ * This will provide type safety for route values.
+ *
+ * ```ts
+ * router.toRoute('invalid') // error
+ * router.toUrl('invalid') // error
+ * ```
  */
 export type RouteConfig<T extends string = string> = Record<string, T>;
 
@@ -105,21 +126,21 @@ export type SyncLocationBar<T extends string = string> = (route: Route<T>) => vo
  * Configuration to create a router.
  */
 export type RouterConfig<T extends string = string> = {
-  /** The route configuration. */
+  /** The route configuration. See the documentation for {@link RouteConfig} for details. */
   routeConfig: RouteConfig<T>;
 
   /** If specified, uses history mode instead of hash mode. If you are using history mode, you need
    * to provide server side router support. */
   rootPath?: string;
 
-  /** The `window`, for testing purposes only. */
+  /** Do not use this, it is for internal testing purposes only. */
   wdw?: WindowLike;
 };
 
 /**
  * This is the router that is created by {@link "index".createRouter}.
  */
- export type Router<T extends string = string> = {
+export type Router<T extends string = string> = {
   /** The initial route as parsed from the location bar. */
   initialRoute: Route<T>;
 

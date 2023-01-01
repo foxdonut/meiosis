@@ -1,7 +1,8 @@
 import { createRouter } from 'meiosis-router';
+import { RouteConfig } from 'meiosis-router/types';
 import { Page } from './types';
 
-export const routeConfig: Record<string, Page> = {
+export const routeConfig: RouteConfig<Page> = {
   '/': 'home',
   '/login': 'login',
   '/data1': 'data1',
