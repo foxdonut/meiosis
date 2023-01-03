@@ -3,6 +3,7 @@
 @docs-nav-start
 @nav-prev:router-using.html:Using the Router
 @nav-router-toc
+@nav-next:router-examples.html:Examples
 @docs-nav-end
 
 ## Using Route State
@@ -28,4 +29,5 @@ export const service = {
 @docs-nav-start
 @nav-prev:router-using.html:Using the Router
 @nav-router-toc
+@nav-next:router-examples.html:Examples
 @docs-nav-end
