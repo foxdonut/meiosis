@@ -57,11 +57,30 @@ the results of your changes.
 
 ### Hash Mode
 
-The Hash Mode example...
+This example uses `meiosis-router` in hash mode and demonstrates the following:
+
+- Displaying different tabs according to the route
+- Clearing out data when leaving a tab
+- Asking the user to confirm before leaving a tab has unsaved data
+- Forbidding access to a tab if the user is not logged in
+- Loading data needed for a tab on each entry
+- Loading data needed for a tab only on first entry
+- Filtering data using query parameters.
 
 ### History Mode
 
-The History Mode example...
+This example is the same example as the Nested Components example from `meiosis-setup` (see the
+example at the bottom of the
+[Nested Components documentation](https://meiosis.js.org/docs/setup-ts-nested-components.html)),
+except that it uses routing in History Mode for tab navigation.
+
+To use History Mode, you need to provide server-side support to respond to requests with different
+URLs. This is because although the router handles URL changes without sending a request back to the
+server, there is always the possibility that the user reloads the page or accesses a URL directly.
+
+The example includes a bare-bones server so that the above works correctly. That part of the example
+**should not** be considered for a real-world application. The server is for demonstration purposes
+only, to show the router working in History Mode.
 
 @docs-nav-start
 @nav-prev:router-state.html:Using Route State
