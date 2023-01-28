@@ -42,7 +42,7 @@ In both cases, to start the example, use:
 npm start
 ```
 
-You can then access the example in your browser with this URL: `http://localhost:9000`.
+You can then access the example in your browser with this URL: http://localhost:9000.
 
 If you would like to experiment with the code, you can auto-load your changes. Open a separate
 terminal window, use `cd` to navigate to the example's directory (`hash-mode` or `history-mode`),
@@ -57,6 +57,10 @@ the results of your changes.
 
 ### Hash Mode
 
+<img src="/dist/hash-mode-home.png" width="440" height="300" style="border:1px solid gray">
+
+_The Hash Mode example._
+
 This example uses `meiosis-router` in hash mode and demonstrates the following:
 
 - Displaying different tabs according to the route
@@ -67,7 +71,21 @@ This example uses `meiosis-router` in hash mode and demonstrates the following:
 - Loading data needed for a tab only on first entry
 - Filtering data using query parameters.
 
+We will look at each item in detail.
+
+#### Displaying different tabs according to the route
+#### Clearing out data when leaving a tab
+#### Asking the user to confirm before leaving a tab has unsaved data
+#### Forbidding access to a tab if the user is not logged in
+#### Loading data needed for a tab on each entry
+#### Loading data needed for a tab only on first entry
+#### Filtering data using query parameters.
+
 ### History Mode
+
+<img src="/dist/history-mode-home.png" width="350" height="280" style="border:1px solid gray">
+
+_The History Mode example._
 
 This example is the same example as the Nested Components example from `meiosis-setup` (see the
 example at the bottom of the
