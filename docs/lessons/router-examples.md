@@ -74,6 +74,27 @@ This example uses `meiosis-router` in hash mode and demonstrates the following:
 We will look at each item in detail.
 
 #### Displaying different tabs according to the route
+
+```js
+import { Home } from '../home';
+import { Login } from '../login';
+// ...
+
+const componentMap = {
+  Home,
+  Login,
+  // ...
+};
+```
+
+```js
+const Component = componentMap[cell.state.route.value];
+```
+
+```html
+<Component cell={cell} />
+```
+
 #### Clearing out data when leaving a tab
 #### Asking the user to confirm before leaving a tab has unsaved data
 #### Forbidding access to a tab if the user is not logged in
