@@ -63,17 +63,16 @@ _The Hash Mode example._
 
 This example uses `meiosis-router` in hash mode and demonstrates the following:
 
-- Displaying different tabs according to the route
-- Clearing out data when leaving a tab
-- Asking the user to confirm before leaving a tab has unsaved data
-- Forbidding access to a tab if the user is not logged in
-- Loading data needed for a tab on each entry
-- Loading data needed for a tab only on first entry
+- Displaying different pages according to the route
+- Clearing out data when leaving a page
+- Asking the user to confirm before leaving a page has unsaved data
+- Forbidding access to a page if the user is not logged in
+- Loading data needed for a page
 - Filtering data using query parameters.
 
 We will look at each item in detail.
 
-#### Displaying different tabs according to the route
+#### Displaying different pages according to the route
 
 ```js
 import { Home } from '../home';
@@ -95,12 +94,93 @@ const Component = componentMap[cell.state.route.value];
 <Component cell={cell} />
 ```
 
-#### Clearing out data when leaving a tab
-#### Asking the user to confirm before leaving a tab has unsaved data
-#### Forbidding access to a tab if the user is not logged in
-#### Loading data needed for a tab on each entry
-#### Loading data needed for a tab only on first entry
-#### Filtering data using query parameters.
+#### Clearing out data when leaving a page
+
+```js
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value !== Page.Login) {
+      cell.update({
+        login: {
+          username: '',
+          password: '',
+          message: '',
+          returnTo: undefined
+        }
+      });
+    }
+  }
+};
+```
+
+#### Asking the user to confirm before leaving a page has unsaved data
+
+```js
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value !== Page.Login) {
+      if (
+        (cell.state.login.username || cell.state.login.password) &&
+        (!cell.state.user && !confirm('You have unsaved data. Continue?'))) {
+        cell.update({ route: () => router.toRoute(Page.Login) });
+      } else {
+        cell.update({
+          login: {
+            username: '',
+            password: '',
+            message: '',
+            returnTo: undefined
+          }
+        });
+      }
+    }
+  }
+};
+```
+
+#### Forbidding access to a page if the user is not logged in
+
+```js
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value === Page.Settings && !cell.state.user) {
+      cell.update({
+        route: router.toRoute(Page.Login, {}, true),
+        login: {
+          message: 'Please login.',
+          returnTo: router.toRoute(Page.Settings)
+        }
+      });
+    }
+  }
+};
+```
+
+#### Loading data needed for a page
+
+```js
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (
+      cell.state.route.value === Page.Tea ||
+      cell.state.route.value === Page.TeaDetails
+    ) {
+      setTimeout(() => {
+        cell.update({ teas });
+      }, 1000);
+    } else {
+      cell.update({ teas: undefined });
+    }
+  }
+};
+
+```
+
+#### Filtering data using query parameters
 
 ### History Mode
 
