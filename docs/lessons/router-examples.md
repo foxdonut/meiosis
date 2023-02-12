@@ -219,6 +219,25 @@ The example includes a bare-bones server so that the above works correctly. That
 **should not** be considered for a real-world application. The server is for demonstration purposes
 only, to show the router working in History Mode.
 
+```ts
+export type Page = 'home' | 'login' | 'data1' | 'data2';
+```
+
+```ts
+import { createRouter } from 'meiosis-router';
+import { RouteConfig } from 'meiosis-router/types';
+import { Page } from './types';
+
+export const routeConfig: RouteConfig<Page> = {
+  '/': 'home',
+  '/login': 'login',
+  '/data1': 'data1',
+  '/data2': 'data2'
+};
+
+export const router = createRouter({ routeConfig, rootPath: '' });
+```
+
 @docs-nav-start
 @nav-prev:router-state.html:Using Route State
 @nav-router-toc
