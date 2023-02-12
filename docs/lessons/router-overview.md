@@ -37,8 +37,8 @@ complements this concept by also using application state to drive routing.
 
 - Hash mode: uses the browser's location hash for the route. The hash-bang, `#!`, is used as a route
   prefix. This is the default mode.
-- History mode: uses routes directly in the URL. When using this mode, server-side support must be
-  provided.
+- History mode: uses routes directly in the URL. When using this mode, you must provide server-side
+  support to respond to route requests.
 
 When setting up `meiosis-router`, we provide a mapping that associates route paths to strings that
 identify the route.
@@ -66,7 +66,8 @@ end of the URL in the form of `?key1=value1&key2=value2`.
 - `params` contains the combination of route parameters and query parameters
 - `replace` indicates whether to replace the route in the browser's history instead of adding to it.
 
-Using this information, we can render application views according to the current route.
+Using this information, we can perform tasks upon route change, such as loading data, and we can
+render application views according to the current route.
 
 @docs-nav-start
 @nav-empty
