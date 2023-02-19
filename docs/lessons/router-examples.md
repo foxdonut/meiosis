@@ -62,7 +62,7 @@ the results of your changes.
 
 _The Hash Mode example._
 
-This example uses `meiosis-router` in hash mode and demonstrates the following:
+This example uses `meiosis-router` in Hash Mode and demonstrates the following:
 
 - Displaying different pages according to the route
 - Clearing out data when leaving a page

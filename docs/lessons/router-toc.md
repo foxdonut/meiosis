@@ -6,7 +6,7 @@
 
 ## Features
 
-- Supports two modes: hash mode and history mode
+- Supports two modes: Hash Mode and History Mode
 - Route parameters
 - Query parameters
 - Provides a URL-generating function - no more manual string concatenation!
