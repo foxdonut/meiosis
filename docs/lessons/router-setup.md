@@ -8,7 +8,8 @@
 
 ## Setup / Hash Mode
 
-Let's look at how we can set up `meiosis-router`.
+Let's look at how we can set up `meiosis-router`, first in Hash Mode (this section), then in History
+Mode (next section).
 
 Make sure you have installed it, using
 [these instructions](https://github.com/foxdonut/meiosis/tree/master/helpers/router#installation).
@@ -41,6 +42,8 @@ export const routeConfig = {
 
 export const router = createRouter({ routeConfig });
 ```
+
+This sets up the router in Hash Mode, which uses `#!` as a prefix in routes.
 
 We defined a `Page` constant for convenience, but this is not strictly necessary. You could use
 strings directly in the `routeConfig` object, if you prefer.

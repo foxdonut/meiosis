@@ -35,10 +35,19 @@ complements this concept by also using application state to drive routing.
 
 `meiosis-router` can be set up to work one of two modes:
 
-- Hash Mode: uses the browser's location hash for the route. The hash-bang, `#!`, is used as a route
-  prefix. This is the default mode.
-- History Mode: uses routes directly in the URL. When using this mode, you must provide server-side
-  support to respond to route requests.
+Hash Mode:
+
+- Uses the browser's location hash for the route
+- The hash-bang, `#!`, is used as a route prefix
+- A location in the browser bar looks like `http://mysite.com/#!/user/42`
+- You do not need any server-side routing support when using this mode
+- This is the default mode.
+
+History Mode:
+
+- Uses routes directly in the URL
+- A location in the browser bar looks like `http://mysite.com/user/42`
+- When using this mode, you must provide server-side support to respond to route requests.
 
 When setting up `meiosis-router`, we provide a mapping that associates route paths to strings that
 identify the route.
