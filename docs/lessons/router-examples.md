@@ -3,6 +3,7 @@
 @docs-nav-start
 @nav-prev:router-state.html:Using Route State
 @nav-router-toc
+@nav-next:router-conclusion.html:Conclusion
 @docs-nav-end
 
 ## Examples
@@ -217,11 +218,19 @@ server, there is always the possibility that the user reloads the page or access
 
 The example includes a bare-bones server so that the above works correctly. That part of the example
 **should not** be considered for a real-world application. The server is for demonstration purposes
-only, to show the router working in History Mode.
+only, to show the router working in History Mode. It serves the JavaScript and CSS files needed for
+the example, and serves `index.html` for all other URLs.
+
+TypeScript is used for this example, showing how types can be used with the router.
+
+We can use a type to define the valid pages of our application:
 
 ```ts
 export type Page = 'home' | 'login' | 'data1' | 'data2';
 ```
+
+Then, when creating the router, we can specify the type of the route configuration as
+`RouteConfig<Page>`:
 
 ```ts
 import { createRouter } from 'meiosis-router';
@@ -238,7 +247,47 @@ export const routeConfig: RouteConfig<Page> = {
 export const router = createRouter({ routeConfig, rootPath: '' });
 ```
 
+With that, we'll get a TypeScript error if we try to define a route with an invalid page, such as
+`'/': 'invalid'`.
+
+Notice that we are using History Mode by specifying a `rootPath` when creating the router. It is
+blank in this example since our example runs from the root of the base URL, i.e.
+`http://localhost:9000`.
+
+Next, we can use the `Page` type for the `route` in our application state:
+
+```ts
+export interface State {
+  route: Route<Page>;
+  // ...
+}
+```
+
+Then, we'll get a TypeScript error if we try to use the route state with an invalid page, for
+example:
+
+```ts
+export const loginService: Service<State> = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value === 'invalid') { // TypeScript error here
+      // ...
+    }
+  }
+};
+```
+
+Finally, we'll also get a TypeScript error if we specify an invalid page with `toUrl`:
+
+```ts
+<a href={router.toUrl('invalid')}>...</a>
+```
+
+I encourage you to experiment with the example, whether it is with TypeScript support and/or with
+History Mode which gives you URLs without hashes `#` in them.
+
 @docs-nav-start
 @nav-prev:router-state.html:Using Route State
 @nav-router-toc
+@nav-next:router-conclusion.html:Conclusion
 @docs-nav-end
