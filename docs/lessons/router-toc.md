@@ -17,7 +17,7 @@
 ## Table of Contents
 
 - [Overview](router-overview.html)
-- [Setup](router-setup.html)
+- [Setup / Hash Mode](router-setup.html)
 - [History Mode](router-history-mode.html)
 - [Using the Router](router-using.html)
 - [Using Route State](router-state.html)

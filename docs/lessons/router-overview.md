@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-empty
 @nav-router-toc
-@nav-next:router-setup.html:Setup
+@nav-next:router-setup.html:Setup / Hash Mode
 @docs-nav-end
 
 ## Overview
@@ -72,5 +72,5 @@ render application views according to the current route.
 @docs-nav-start
 @nav-empty
 @nav-router-toc
-@nav-next:router-setup.html:Setup
+@nav-next:router-setup.html:Setup / Hash Mode
 @docs-nav-end

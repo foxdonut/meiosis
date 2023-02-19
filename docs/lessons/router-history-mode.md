@@ -1,7 +1,7 @@
 # [meiosis-router](https://meiosis.js.org/router) Documentation
 
 @docs-nav-start
-@nav-prev:router-setup.html:Setup
+@nav-prev:router-setup.html:Setup / Hash Mode
 @nav-router-toc
 @nav-next:router-using.html:Using the Router
 @docs-nav-end
@@ -27,7 +27,7 @@ export const router = createRouter({ routeConfig, rootPath: '' });
 ```
 
 @docs-nav-start
-@nav-prev:router-setup.html:Setup
+@nav-prev:router-setup.html:Setup / Hash Mode
 @nav-router-toc
 @nav-next:router-using.html:Using the Router
 @docs-nav-end
