@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:router-history-mode.html:History Mode
 @nav-router-toc
-@nav-next:router-state.html:Using Route State
+@nav-next:router-examples.html:Examples
 @docs-nav-end
 
 ## Using the Router
@@ -51,8 +51,28 @@ const Component = componentMap[cell.state.route.value];
 <Component cell={cell} />
 ```
 
+### Using Route State
+
+```js
+import { Page } from './router';
+import { loadUserData } from './api';
+
+export const service = {
+  onchange: (state) => state.route.value,
+  run: (cell) => {
+    if (cell.state.route.value === Page.User) {
+      loadUserData().then(data => {
+        cell.update({ userData: data });
+      });
+    } else {
+      cell.update({ userData: undefined });
+    }
+  }
+};
+```
+
 @docs-nav-start
 @nav-prev:router-history-mode.html:History Mode
 @nav-router-toc
-@nav-next:router-state.html:Using Route State
+@nav-next:router-examples.html:Examples
 @docs-nav-end

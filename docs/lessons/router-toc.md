@@ -20,6 +20,5 @@
 - [Setup / Hash Mode](router-setup.html)
 - [History Mode](router-history-mode.html)
 - [Using the Router](router-using.html)
-- [Using Route State](router-state.html)
 - [Examples](router-examples.html)
 - [Conclusion](router-conclusion.html)

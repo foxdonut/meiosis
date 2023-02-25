@@ -1,7 +1,7 @@
 # [meiosis-router](https://meiosis.js.org/router) Documentation
 
 @docs-nav-start
-@nav-prev:router-state.html:Using Route State
+@nav-prev:router-using.html:Using the Router
 @nav-router-toc
 @nav-next:router-conclusion.html:Conclusion
 @docs-nav-end
@@ -287,7 +287,7 @@ I encourage you to experiment with the example, whether it is with TypeScript su
 History Mode which gives you URLs without hashes `#` in them.
 
 @docs-nav-start
-@nav-prev:router-state.html:Using Route State
+@nav-prev:router-using.html:Using the Router
 @nav-router-toc
 @nav-next:router-conclusion.html:Conclusion
 @docs-nav-end
