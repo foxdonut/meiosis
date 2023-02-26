@@ -1,18 +1,30 @@
 # [meiosis-router](https://meiosis.js.org/router) Documentation
 
 @docs-nav-start
-@nav-prev:router-history-mode.html:History Mode
+@nav-prev:router-history-mode.html:Setup / History Mode
 @nav-router-toc
 @nav-next:router-examples.html:Examples
 @docs-nav-end
 
 ## Using the Router
 
+Once we've created the router, we can use it to:
+
+- generate URLs without having to mess with string concatenation
+- generate routes to re-route programmatically via the application state
+- get the current route to render the corresponding page or perform any related tasks, such as
+  loading data for the page
+- get the route parameters, from both path parameters and query parameters
+
+### Generating URLs
+
 ```js
 import { Page, router } from './router';
 
 <a href={router.toUrl(Page.Login)}>Login</a>
 ```
+
+### Generating Routes
 
 ```js
 <a href={router.toUrl(Page.User, { id: user.id })}>User</a>
@@ -71,8 +83,10 @@ export const service = {
 };
 ```
 
+See the next section for examples of applying these principles.
+
 @docs-nav-start
-@nav-prev:router-history-mode.html:History Mode
+@nav-prev:router-history-mode.html:Setup / History Mode
 @nav-router-toc
 @nav-next:router-examples.html:Examples
 @docs-nav-end

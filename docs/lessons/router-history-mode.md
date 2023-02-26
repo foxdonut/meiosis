@@ -6,7 +6,7 @@
 @nav-next:router-using.html:Using the Router
 @docs-nav-end
 
-## History Mode
+## Setup / History Mode
 
 To set up `meiosis-router` in History Mode, we can follow the same process as for Hash Mode (see previous section), except that we specify a `rootPath` when calling `createRouter`:
 

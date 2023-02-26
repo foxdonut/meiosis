@@ -4,7 +4,7 @@ import { Fragment } from 'preact';
 import { Page, router } from '../router';
 import { PleaseWait } from '../pleaseWait';
 
-const types = ['Black', 'Green', 'Herbal', 'Oolong'];
+const teaTypes = ['Black', 'Green', 'Herbal', 'Oolong'];
 
 export const TeaSearch = ({ cell }) => (
   <>
@@ -16,12 +16,12 @@ export const TeaSearch = ({ cell }) => (
             {cell.state.searching
               ? null
               : <div>
-                  {types.map((type) => (
+                  {teaTypes.map((teaType) => (
                     <a style={{ marginRight: '10px' }}
                       href={router.toUrl(Page.TeaSearch, {
-                        type
+                        teaType
                       })
-                      }>{type}</a>
+                      }>{teaType}</a>
                   ))}
                   <a href={router.toUrl(Page.TeaSearch)}>All</a>
                 </div>}

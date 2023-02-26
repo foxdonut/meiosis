@@ -3,7 +3,7 @@
 @docs-nav-start
 @nav-prev:router-overview.html:Overview
 @nav-router-toc
-@nav-next:router-history-mode.html:History Mode
+@nav-next:router-history-mode.html:Setup / History Mode
 @docs-nav-end
 
 ## Setup / Hash Mode
@@ -110,5 +110,5 @@ cells.map((cell) => {
 @docs-nav-start
 @nav-prev:router-overview.html:Overview
 @nav-router-toc
-@nav-next:router-history-mode.html:History Mode
+@nav-next:router-history-mode.html:Setup / History Mode
 @docs-nav-end
