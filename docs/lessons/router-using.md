@@ -11,12 +11,17 @@
 Once we've created the router, we can use it to:
 
 - generate URLs without having to mess with string concatenation
-- generate routes to re-route programmatically via the application state
+- generate route objects to re-route programmatically via the application state
 - get the current route to render the corresponding page or perform any related tasks, such as
   loading data for the page
 - get the route parameters, from both path parameters and query parameters
 
+> In all of the following code, `router` refers to the router that we created with `createRouter` in
+> either Hash Mode or History Mode (see previous sections).
+
 ### Generating URLs
+
+To generate a URL, we use `router.toUrl` and pass the route identifier:
 
 ```js
 import { Page, router } from './router';
@@ -24,11 +29,28 @@ import { Page, router } from './router';
 <a href={router.toUrl(Page.Login)}>Login</a>
 ```
 
-### Generating Routes
+We can pass parameters as the second argument:
 
 ```js
 <a href={router.toUrl(Page.User, { id: user.id })}>User</a>
 ```
+
+Any parameters that we pass that are not path parameters of the route are automatically included as
+query parameters in the generated URL.
+
+```js
+// say user.id is 42
+<a href={router.toUrl(Page.User, { id: user.id, a: 1, b: 'two' })}>User</a>
+// produces /user/42?a=1&b=two
+```
+
+> Warning: if you do not specify values for route path parameters, they will be `undefined` in the
+> resulting URL.
+
+### Generating Route Objects
+
+We can update the route programmatically by updating the route in the application state, using
+`router.toRoute` to generate the route object:
 
 ```js
 cell.update({ route: router.toRoute(Page.Login)});
@@ -36,18 +58,12 @@ cell.update({ route: router.toRoute(Page.Login)});
 cell.update({ route: router.toRoute(Page.User, { id: user.id })});
 ```
 
-If there are extra parameters beyond route parameters, they are added as query parameters:
+In some cases, we may want to **replace** the route in the browser history instead of appending. For
+example, we would do this when redirecting the user after they tried to access a page for which they
+are not authorized. To accomplish this, we pass `true` as the third argument to `router.toRoute`:
 
 ```js
-// say user.id is 42
-cell.update({ route: router.toRoute(Page.User, { id: user.id, a: 1, b: 'two' })});
-// produces /user/42?a=1&b=two
-```
-
-> Warning: if you do not specify values for route parameters, they will be `undefined` in the
-> resulting URL.
-
-```js
+// No parameters, so pass {} as the second argument
 cell.update({ route: router.toRoute(Page.Login), {}, true});
 ```
 
