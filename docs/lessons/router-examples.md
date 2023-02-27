@@ -73,6 +73,8 @@ This example uses `meiosis-router` in Hash Mode and demonstrates the following:
 
 We will look at each item in detail.
 
+----------
+
 #### Displaying different pages according to the route
 
 ```js

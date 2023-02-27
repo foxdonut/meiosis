@@ -12,9 +12,8 @@ Once we've created the router, we can use it to:
 
 - generate URLs without having to mess with string concatenation
 - generate route objects to re-route programmatically via the application state
-- get the current route to render the corresponding page or perform any related tasks, such as
-  loading data for the page
-- get the route parameters, from both path parameters and query parameters
+- get the current route and parameters to render the corresponding page or perform any related
+  tasks, such as loading data for the page
 
 > In all of the following code, `router` refers to the router that we created with `createRouter` in
 > either Hash Mode or History Mode (see previous sections).
@@ -67,6 +66,20 @@ are not authorized. To accomplish this, we pass `true` as the third argument to 
 cell.update({ route: router.toRoute(Page.Login), {}, true});
 ```
 
+### Using The Current Route
+
+To access the current route and parameters, we retrieve it from the application state:
+
+```js
+const routeValue = cell.state.route.value;
+const routeParams = cell.state.route.params;
+```
+
+Both path parameters and query parameters are included in `route.params`.
+
+We can use the current route value to render the corresponding component, for example by using a
+single route-to-component map:
+
 ```js
 const componentMap = {
   Home: ...,
@@ -79,7 +92,8 @@ const Component = componentMap[cell.state.route.value];
 <Component cell={cell} />
 ```
 
-### Using Route State
+We can also use Meiosis services to load data for a page when the route changes to that page, and
+clear the data when leaving the page:
 
 ```js
 import { Page } from './router';
