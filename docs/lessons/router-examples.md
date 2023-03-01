@@ -73,9 +73,10 @@ This example uses `meiosis-router` in Hash Mode and demonstrates the following:
 
 We will look at each item in detail.
 
-----------
-
 #### Displaying different pages according to the route
+
+As explained in the previous section, displaying pages according to the route is done with simple
+component map:
 
 ```js
 import { Home } from '../home';
@@ -99,6 +100,10 @@ const Component = componentMap[cell.state.route.value];
 
 #### Clearing out data when leaving a page
 
+The example includes a login form for the user to fill in. If the user starts filling in the form
+and then leaves the page, we want to clear out the form. We can do that using a service, and the
+current route:
+
 ```js
 export const service = {
   onchange: (state) => state.route.value,
@@ -118,6 +123,11 @@ export const service = {
 ```
 
 #### Asking the user to confirm before leaving a page has unsaved data
+
+Suppose that before clearing out the login form when the user leaves the page, we want to confirm
+first by warning them that their data is unsaved. We can augment our service and look at the form to
+see if there is any data. If there is, we can ask for confirmation. If the user decides not to leave
+the page, we programmatically change the route back to the login page.
 
 ```js
 export const service = {
@@ -144,6 +154,20 @@ export const service = {
 ```
 
 #### Forbidding access to a page if the user is not logged in
+
+In the example, there is a Settings page that is only allowed access to users who are logged in. Of
+course, in a real-world application, that page would not be shown at all when the user is not logged
+in. Even in that case, however, it would be possible for a user to manually type in the URL that
+leads to the Settings page. Thus, we need to verify that the user is logged in before displaying the
+Settings page.
+
+To accomplish this, we use a service that changes the route to the Login page. We pass `true` as the
+third argument to `router.toRoute` in order to **replace** the route in the browser history, instead
+of appending. That way, the URL to the Settings page will be replaced by that of the Login page in
+the browser history.
+
+As a bonus, we add a message to the login application state so that it can be displayed on the Login
+page.
 
 ```js
 export const service = {
