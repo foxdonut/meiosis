@@ -188,6 +188,9 @@ export const service = {
 
 #### Loading data needed for a page
 
+To load data needed for a page, we can use a service that loads the data upon arrival at the page,
+and clears it when the user leaves the page:
+
 ```js
 export const service = {
   onchange: (state) => state.route.value,
@@ -204,10 +207,14 @@ export const service = {
     }
   }
 };
-
 ```
 
 #### Filtering data using query parameters
+
+The route object contains the value of the route and the route parameters, including path parameters
+and query parameters. To filter data using query parameters, we need our service's `onchange` to
+consider both the route value and the parameter(s) that we use for filtering. That way, the service
+will run when the route value stays the same but the parameter(s) change.
 
 ```js
 import { Page } from '../router';
