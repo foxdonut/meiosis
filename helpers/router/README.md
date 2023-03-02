@@ -8,7 +8,7 @@ demand and for your convenience, here is a module that sets up a router for use 
 - Store the route in the application state
 - Use the route in the state to determine which page to render, what data to load, etc.
 - Clicking on a link, changing the URL in the location bar, etc. changes the route in the state
-- Changing the route in the state programmatically synchronizes the URL in the location bar
+- Changing the route in the state programmatically synchronizes the URL in the location bar.
 
 ## Installation
 

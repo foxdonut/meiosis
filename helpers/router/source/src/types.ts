@@ -68,7 +68,8 @@ export type Route<T extends string = string> = {
  *
  * @param value the route value.
  * @param params the path parameters and, optionally query parameters. Any parameters not part of
- * path parameters are automatically added as query parameters.
+ * path parameters are automatically added as query parameters. Warning: if you do not specify
+ * values for route path parameters, they will be `undefined` in the resulting URL.
  *
  * @returns the URL.
  */
@@ -140,7 +141,14 @@ export type DoSyncLocationBarParams = {
 };
 
 /**
- * Function that synchronizes the location bar with the application state route.
+ * Function that synchronizes the location bar with the application state route. This should be done
+ * when the application state changes, i.e.:
+ *
+ * ```ts
+ * cells.map((cell) => {
+ *   router.syncLocationBar(cell.state.route);
+ * });
+ * ```
  *
  * @template T See {@link RouteConfig} for details.
  *
