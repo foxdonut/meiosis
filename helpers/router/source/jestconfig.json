@@ -1,5 +1,6 @@
 {
   "testRegex": "tests/.*\\.[jt]s$",
   "testPathIgnorePatterns": ["/dist/"],
+  "transformIgnorePatterns": ["/node_modules/(?!(.*)/)"],
   "moduleFileExtensions": ["js", "ts"]
 }
