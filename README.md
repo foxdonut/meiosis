@@ -17,9 +17,9 @@ Easily use the pattern with your favourite view library: React, Preact, Mithril,
 
 ## Ready to have a closer look?
 
-→ Read the [Meiosis Documentation](https://meiosis.js.org/docs/toc.html) to get started.
+&#x27A1; Read the [Meiosis Documentation](https://meiosis.js.org/docs/toc.html) to get started.
 
-→ Don't want to setup Meiosis yourself?
+&#x27A1; Don't want to setup Meiosis yourself?
 [meiosis-setup](https://github.com/foxdonut/meiosis/tree/master/helpers/setup#meiosis-setup) is
 available for your convenience.
 
@@ -27,6 +27,7 @@ available for your convenience.
 
 - Try out more [examples](https://meiosis.js.org/examples.html).
 - Check out the [Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer).
+- Need a router? Try [Meiosis-Router](https://meiosis.js.org/router).
 - Chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
 
 Please post questions and suggestions as Github issues on the
