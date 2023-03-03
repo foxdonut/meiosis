@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<div class="lesson">
+<h1><a href="https://meiosis.js.org/router">meiosis-router</a> Documentation</h1><div class="docs-nav">
+  <a href="router-history-mode.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Setup / History Mode</span>
+      </span></a>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-examples.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Examples</span>
+      </span></a>
+</div>
+
+<h2>Using the Router</h2><p>Once we&#39;ve created the router, we can use it to:</p>
+<ul>
+<li>generate URLs without having to mess with string concatenation</li>
+<li>generate route objects to re-route programmatically via the application state</li>
+<li>get the current route and parameters to render the corresponding page or perform any related
+tasks, such as loading data for the page</li>
+</ul>
+<blockquote>
+<p>In all of the following code, <code>router</code> refers to the router that we created with <code>createRouter</code> in
+either Hash Mode or History Mode (see previous sections).</p>
+</blockquote>
+<h3>Generating URLs</h3><p>To generate a URL, we use <code>router.toUrl</code> and pass the route identifier:</p>
+<pre><code class="language-js">import { Page, router } from &#39;./router&#39;;
+
+&lt;a href={router.toUrl(Page.Login)}&gt;Login&lt;/a&gt;
+</code></pre>
+<p>We can pass parameters as the second argument:</p>
+<pre><code class="language-js">&lt;a href={router.toUrl(Page.User, { id: user.id })}&gt;User&lt;/a&gt;
+</code></pre>
+<p>Any parameters that we pass that are not path parameters of the route are automatically included as
+query parameters in the generated URL.</p>
+<pre><code class="language-js">// say user.id is 42
+&lt;a href={router.toUrl(Page.User, { id: user.id, a: 1, b: &#39;two&#39; })}&gt;User&lt;/a&gt;
+// produces /user/42?a=1&amp;b=two
+</code></pre>
+<blockquote>
+<p>Warning: if you do not specify values for route path parameters, they will be <code>undefined</code> in the
+resulting URL.</p>
+</blockquote>
+<h3>Generating Route Objects</h3><p>We can update the route programmatically by updating the route in the application state, using
+<code>router.toRoute</code> to generate the route object:</p>
+<pre><code class="language-js">cell.update({ route: router.toRoute(Page.Login)});
+
+cell.update({ route: router.toRoute(Page.User, { id: user.id })});
+</code></pre>
+<p>In some cases, we may want to <strong>replace</strong> the route in the browser history instead of appending. For
+example, we would do this when redirecting the user after they tried to access a page for which they
+are not authorized. To accomplish this, we pass <code>true</code> as the third argument to <code>router.toRoute</code>:</p>
+<pre><code class="language-js">// No parameters, so pass {} as the second argument
+cell.update({ route: router.toRoute(Page.Login), {}, true});
+</code></pre>
+<h3>Using The Current Route</h3><p>To access the current route and parameters, we retrieve it from the application state:</p>
+<pre><code class="language-js">const routeValue = cell.state.route.value;
+const routeParams = cell.state.route.params;
+</code></pre>
+<p>Both path parameters and query parameters are included in <code>route.params</code>.</p>
+<p>We can use the current route value to render the corresponding component, for example by using a
+single route-to-component map:</p>
+<pre><code class="language-js">const componentMap = {
+  Home: ...,
+  Login: ...,
+  ...
+};
+
+const Component = componentMap[cell.state.route.value];
+
+&lt;Component cell={cell} /&gt;
+</code></pre>
+<p>We can also use Meiosis services to load data for a page when the route changes to that page, and
+clear the data when leaving the page:</p>
+<pre><code class="language-js">import { Page } from &#39;./router&#39;;
+import { loadUserData } from &#39;./api&#39;;
+
+export const service = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (cell.state.route.value === Page.User) {
+      loadUserData().then(data =&gt; {
+        cell.update({ userData: data });
+      });
+    } else {
+      cell.update({ userData: undefined });
+    }
+  }
+};
+</code></pre>
+<p>See the next section for examples of applying these principles.</p>
+<div class="docs-nav">
+  <a href="router-history-mode.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Setup / History Mode</span>
+      </span></a>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-examples.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Examples</span>
+      </span></a>
+</div>
+
+<hr>
+<div>
+<a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
+</div>
+</div>
+</body>
+</html>

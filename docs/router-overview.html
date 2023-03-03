@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<div class="lesson">
+<h1><a href="https://meiosis.js.org/router">meiosis-router</a> Documentation</h1><div class="docs-nav">
+<span></span>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-setup.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Setup / Hash Mode</span>
+      </span></a>
+</div>
+
+<h2>Overview</h2><p><code>meiosis-router</code> sets up a router that uses Meiosis to produce route-related data to be stored in
+the application state.</p>
+<h3>Concepts</h3><p>The Meiosis pattern updates application state which is then used render the view. <code>meiosis-router</code>
+complements this concept by also using application state to drive routing.</p>
+<p><code>meiosis-router</code> provides:</p>
+<ul>
+<li>The initial route of the application</li>
+<li>A function to produce a route, which can be set in the application state, thus changing the
+application route programmatically</li>
+<li>A function to produce a URL in a type-safe manner. No need to construct URLs manually with string
+concatenation!</li>
+</ul>
+<p><code>meiosis-router</code> coordinates between application state and routes:</p>
+<ul>
+<li>When the browser&#39;s location bar changes, it produces route data to be stored in the application
+state</li>
+<li>It provides a function to synchronize the browser&#39;s location bar and history when the route is
+updated in the application state (in the same way as any other application state update with
+Meiosis). Thus, updating the route programatically works correctly with the browser&#39;s &quot;Back&quot;
+button.</li>
+</ul>
+<p><code>meiosis-router</code> can be set up to work one of two modes:</p>
+<p>Hash Mode:</p>
+<ul>
+<li>Uses the browser&#39;s location hash for the route</li>
+<li>The hash-bang, <code>#!</code>, is used as a route prefix</li>
+<li>A location in the browser bar looks like <code>http://mysite.com/#!/user/42</code></li>
+<li>You do not need any server-side routing support when using this mode</li>
+<li>This is the default mode.</li>
+</ul>
+<p>History Mode:</p>
+<ul>
+<li>Uses routes directly in the URL</li>
+<li>A location in the browser bar looks like <code>http://mysite.com/user/42</code></li>
+<li>When using this mode, you must provide server-side support to respond to route requests.</li>
+</ul>
+<p>When setting up <code>meiosis-router</code>, we provide a mapping that associates route paths to strings that
+identify the route.</p>
+<p>Route paths are strings that start with a slash, such as <code>&#39;/&#39;</code>, <code>&#39;/login&#39;</code>, <code>/user/settings</code>, and so
+on. Route paths can contain one or more <em>route parameters</em>, indicated with a <code>:</code> prefix, such as
+<code>/user/:id</code>.</p>
+<p><code>meiosis-router</code> also supports <em>query parameters</em>, which are additional parameters provided at the
+end of the URL in the form of <code>?key1=value1&amp;key2=value2</code>.</p>
+<h3>Route</h3><p><code>meiosis-router</code> produces <code>Route</code> objects of the following shape:</p>
+<pre><code class="language-js">{
+  value: string,
+  params: Object,
+  replace: boolean
+}
+</code></pre>
+<ul>
+<li><code>value</code> identifies the route</li>
+<li><code>params</code> contains the combination of route parameters and query parameters</li>
+<li><code>replace</code> indicates whether to replace the route in the browser&#39;s history instead of adding to it.</li>
+</ul>
+<p>Using this information, we can perform tasks upon route change, such as loading data, and we can
+render application views according to the current route.</p>
+<div class="docs-nav">
+<span></span>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-setup.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Setup / Hash Mode</span>
+      </span></a>
+</div>
+
+<hr>
+<div>
+<a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
+</div>
+</div>
+</body>
+</html>

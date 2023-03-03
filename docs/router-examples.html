@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Meiosis Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="normalize.css">
+<link rel="stylesheet" href="skeleton.css">
+<link rel="stylesheet" href="prism.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="container">
+<script src="prism.js" type="text/javascript"></script>
+<script src="flems.html" type="text/javascript" charset="utf-8"></script>
+<div class="lesson">
+<h1><a href="https://meiosis.js.org/router">meiosis-router</a> Documentation</h1><div class="docs-nav">
+  <a href="router-using.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Using the Router</span>
+      </span></a>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-conclusion.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Conclusion</span>
+      </span></a>
+</div>
+
+<h2>Examples</h2><p>The code repository for <code>meiosis-router</code> includes examples for both Hash Mode and History Mode.</p>
+<p>To try out these examples, first clone the repository and set up the projects by using the commands
+below:</p>
+<pre><code>git clone https://github.com/foxdonut/meiosis
+cd meiosis/helpers/router/examples
+cd hash-mode
+npm ci
+cd ../history-mode
+npm ci
+cd ..
+</code></pre>
+<p>Then you can experiment with the Hash Mode and History Mode examples.</p>
+<p>For the Hash Mode example:</p>
+<pre><code>cd hash-mode
+</code></pre>
+<p>For the History Mode example:</p>
+<pre><code>cd history-mode
+</code></pre>
+<p>In both cases, to start the example, use:</p>
+<pre><code>npm start
+</code></pre>
+<p>You can then access the example in your browser with this URL: <a href="http://localhost:9000">http://localhost:9000</a>.</p>
+<p>If you would like to experiment with the code, you can auto-load your changes. Open a separate
+terminal window, use <code>cd</code> to navigate to the example&#39;s directory (<code>hash-mode</code> or <code>history-mode</code>),
+and run the following command:</p>
+<pre><code>npm run watch
+</code></pre>
+<p>This will recompile the project when you save your changes. Reload the page in your browser to see
+the results of your changes.</p>
+<h3>Hash Mode</h3><img src="/dist/hash-mode-home.png" width="440" height="300" style="border:1px solid gray">
+
+<p><em>The Hash Mode example.</em></p>
+<p>This example uses <code>meiosis-router</code> in Hash Mode and demonstrates the following:</p>
+<ul>
+<li>Displaying different pages according to the route</li>
+<li>Clearing out data when leaving a page</li>
+<li>Asking the user to confirm before leaving a page has unsaved data</li>
+<li>Forbidding access to a page if the user is not logged in</li>
+<li>Loading data needed for a page</li>
+<li>Filtering data using query parameters.</li>
+</ul>
+<p>We will look at each item in detail.</p>
+<h4>Displaying different pages according to the route</h4><p>As explained in the previous section, displaying pages according to the route is done with simple
+component map:</p>
+<pre><code class="language-js">import { Home } from &#39;../home&#39;;
+import { Login } from &#39;../login&#39;;
+// ...
+
+const componentMap = {
+  Home,
+  Login,
+  // ...
+};
+</code></pre>
+<pre><code class="language-js">const Component = componentMap[cell.state.route.value];
+</code></pre>
+<pre><code class="language-html">&lt;Component cell={cell} /&gt;
+</code></pre>
+<h4>Clearing out data when leaving a page</h4><p>The example includes a login form for the user to fill in. If the user starts filling in the form
+and then leaves the page, we want to clear out the form. We can do that using a service, and the
+current route:</p>
+<pre><code class="language-js">export const service = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (cell.state.route.value !== Page.Login) {
+      cell.update({
+        login: {
+          username: &#39;&#39;,
+          password: &#39;&#39;,
+          message: &#39;&#39;,
+          returnTo: undefined
+        }
+      });
+    }
+  }
+};
+</code></pre>
+<h4>Asking the user to confirm before leaving a page has unsaved data</h4><p>Suppose that before clearing out the login form when the user leaves the page, we want to confirm
+first by warning them that their data is unsaved. We can augment our service and look at the form to
+see if there is any data. If there is, we can ask for confirmation. If the user decides not to leave
+the page, we programmatically change the route back to the login page.</p>
+<pre><code class="language-js">export const service = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (cell.state.route.value !== Page.Login) {
+      if (
+        (cell.state.login.username || cell.state.login.password) &amp;&amp;
+        (!cell.state.user &amp;&amp; !confirm(&#39;You have unsaved data. Continue?&#39;))) {
+        cell.update({ route: () =&gt; router.toRoute(Page.Login) });
+      } else {
+        cell.update({
+          login: {
+            username: &#39;&#39;,
+            password: &#39;&#39;,
+            message: &#39;&#39;,
+            returnTo: undefined
+          }
+        });
+      }
+    }
+  }
+};
+</code></pre>
+<h4>Forbidding access to a page if the user is not logged in</h4><p>In the example, there is a Settings page that is only allowed access to users who are logged in. Of
+course, in a real-world application, that page would not be shown at all when the user is not logged
+in. Even in that case, however, it would be possible for a user to manually type in the URL that
+leads to the Settings page. Thus, we need to verify that the user is logged in before displaying the
+Settings page.</p>
+<p>To accomplish this, we use a service that changes the route to the Login page. We pass <code>true</code> as the
+third argument to <code>router.toRoute</code> in order to <strong>replace</strong> the route in the browser history, instead
+of appending. That way, the URL to the Settings page will be replaced by that of the Login page in
+the browser history.</p>
+<p>As a bonus, we add a message to the login application state so that it can be displayed on the Login
+page.</p>
+<pre><code class="language-js">export const service = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (cell.state.route.value === Page.Settings &amp;&amp; !cell.state.user) {
+      cell.update({
+        route: router.toRoute(Page.Login, {}, true),
+        login: {
+          message: &#39;Please login.&#39;,
+          returnTo: router.toRoute(Page.Settings)
+        }
+      });
+    }
+  }
+};
+</code></pre>
+<h4>Loading data needed for a page</h4><p>To load data needed for a page, we can use a service that loads the data upon arrival at the page,
+and clears it when the user leaves the page:</p>
+<pre><code class="language-js">export const service = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (
+      cell.state.route.value === Page.Tea ||
+      cell.state.route.value === Page.TeaDetails
+    ) {
+      setTimeout(() =&gt; {
+        cell.update({ teas });
+      }, 1000);
+    } else {
+      cell.update({ teas: undefined });
+    }
+  }
+};
+</code></pre>
+<h4>Filtering data using query parameters</h4><p>The route object contains the value of the route and the route parameters, including path parameters
+and query parameters. To filter data using query parameters, we need our service&#39;s <code>onchange</code> to
+consider both the route value and the parameter(s) that we use for filtering. That way, the service
+will run when the route value stays the same but the parameter(s) change.</p>
+<pre><code class="language-js">import { Page } from &#39;../router&#39;;
+import { searchTeas } from &#39;./data&#39;;
+
+export const service = {
+  onchange: (state) =&gt; state.route.value + state.route.params.teaType,
+  run: (cell) =&gt; {
+    if (cell.state.route.value === Page.TeaSearch) {
+      cell.update({ searching: true });
+
+      setTimeout(() =&gt; {
+        const teaType = cell.state.route.params.teaType;
+        const filteredTeas = searchTeas.filter(
+          (tea) =&gt; !teaType || tea.type === teaType);
+        cell.update({ searching: false, searchTeas: filteredTeas });
+      }, 1000);
+    }
+  }
+};
+</code></pre>
+<h3>History Mode</h3><img src="/dist/history-mode-home.png" width="350" height="280" style="border:1px solid gray">
+
+<p><em>The History Mode example.</em></p>
+<p>This example is the same example as the Nested Components example from <code>meiosis-setup</code> (see the
+example at the bottom of the
+<a href="https://meiosis.js.org/docs/setup-ts-nested-components.html">Nested Components documentation</a>),
+except that it uses routing in History Mode for tab navigation.</p>
+<p>To use History Mode, you need to provide server-side support to respond to requests with different
+URLs. This is because although the router handles URL changes without sending a request back to the
+server, there is always the possibility that the user reloads the page or accesses a URL directly.</p>
+<p>The example includes a bare-bones server so that the above works correctly. That part of the example
+<strong>should not</strong> be considered for a real-world application. The server is for demonstration purposes
+only, to show the router working in History Mode. It serves the JavaScript and CSS files needed for
+the example, and serves <code>index.html</code> for all other URLs.</p>
+<p>TypeScript is used for this example, showing how types can be used with the router.</p>
+<p>We can use a type to define the valid pages of our application:</p>
+<pre><code class="language-ts">export type Page = &#39;home&#39; | &#39;login&#39; | &#39;data1&#39; | &#39;data2&#39;;
+</code></pre>
+<p>Then, when creating the router, we can specify the type of the route configuration as
+<code>RouteConfig&lt;Page&gt;</code>:</p>
+<pre><code class="language-ts">import { createRouter } from &#39;meiosis-router&#39;;
+import { RouteConfig } from &#39;meiosis-router/types&#39;;
+import { Page } from &#39;./types&#39;;
+
+export const routeConfig: RouteConfig&lt;Page&gt; = {
+  &#39;/&#39;: &#39;home&#39;,
+  &#39;/login&#39;: &#39;login&#39;,
+  &#39;/data1&#39;: &#39;data1&#39;,
+  &#39;/data2&#39;: &#39;data2&#39;
+};
+
+export const router = createRouter({ routeConfig, rootPath: &#39;&#39; });
+</code></pre>
+<p>With that, we&#39;ll get a TypeScript error if we try to define a route with an invalid page, such as
+<code>&#39;/&#39;: &#39;invalid&#39;</code>.</p>
+<p>Notice that we are using History Mode by specifying a <code>rootPath</code> when creating the router. It is
+blank in this example since our example runs from the root of the base URL, i.e.
+<code>http://localhost:9000</code>.</p>
+<p>Next, we can use the <code>Page</code> type for the <code>route</code> in our application state:</p>
+<pre><code class="language-ts">export interface State {
+  route: Route&lt;Page&gt;;
+  // ...
+}
+</code></pre>
+<p>Then, we&#39;ll get a TypeScript error if we try to use the route state with an invalid page, for
+example:</p>
+<pre><code class="language-ts">export const loginService: Service&lt;State&gt; = {
+  onchange: (state) =&gt; state.route.value,
+  run: (cell) =&gt; {
+    if (cell.state.route.value === &#39;invalid&#39;) { // TypeScript error here
+      // ...
+    }
+  }
+};
+</code></pre>
+<p>Finally, we&#39;ll also get a TypeScript error if we specify an invalid page with <code>toUrl</code>:</p>
+<pre><code class="language-ts">&lt;a href={router.toUrl(&#39;invalid&#39;)}&gt;...&lt;/a&gt;
+</code></pre>
+<p>I encourage you to experiment with the example, whether it is with TypeScript support and/or with
+History Mode which gives you URLs without hashes <code>#</code> in them.</p>
+<div class="docs-nav">
+  <a href="router-using.html"><span class="nav-prev">
+        <span class="arrow">&#x2B05;</span>
+        <span class="title">Using the Router</span>
+      </span></a>
+  <a class="toc" href="router-toc.html">&#x2B06; Contents</a>
+  <a href="router-conclusion.html"><span class="nav-next">
+        <span class="arrow">&#x27A1;</span>
+        <span class="title">Conclusion</span>
+      </span></a>
+</div>
+
+<hr>
+<div>
+<a href="https://meiosis.js.org">Meiosis</a> is developed by foxdonut
+(<a href="https://twitter.com/foxdonut00">Twitter</a> /
+<a href="https://github.com/foxdonut">GitHub</a>) and is released under the MIT license.
+</div>
+</div>
+</body>
+</html>
