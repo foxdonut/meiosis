@@ -27,15 +27,15 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-router": "^1.0.0-beta.9",
+    "meiosis-router": "^1.0.0",
     "meiosis-setup": "^6.1.1",
-    "preact": "^10.11.3"
+    "preact": "^10.13.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.7",
-    "@babel/plugin-transform-react-jsx": "^7.20.7",
+    "@babel/core": "^7.21.0",
+    "@babel/plugin-transform-react-jsx": "^7.21.0",
     "@babel/preset-env": "^7.20.2",
-    "babel-loader": "^9.1.0",
+    "babel-loader": "^9.1.2",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
     "meiosis-tracer": "^5.0.3",
     "static-server": "^2.2.1",
