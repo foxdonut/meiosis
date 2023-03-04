@@ -21,9 +21,9 @@
   },
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
-    "meiosis-setup": "^6.0.0-beta.23"
+    "meiosis-setup": "^6.1.1"
   },
   "devDependencies": {
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.5"
   }
 }
