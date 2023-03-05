@@ -15,7 +15,7 @@ additional features including TypeScript support and nested services and views, 
 - See also more [Examples](https://meiosis.js.org/examples.html).
 - The [Meiosis Tracer](https://meiosis.js.org/tracer) is a time-travel development tool.
 - Need a router? Try [meiosis-router](https://meiosis.js.org/router).
-- Use the [Gitter chat](https://gitter.im/foxdonut/meiosis) for discussion and to ask questions.
+- Use the [Gitter chat](https://app.gitter.im/#/room/#foxdonut_meiosis:gitter.im) for discussion and to ask questions.
 
 Thank you for reading. I hope you enjoy Meiosis!
 

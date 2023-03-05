@@ -1,6 +1,6 @@
 # Meiosis
 
-[![Join the chat at https://gitter.im/foxdonut/meiosis](https://badges.gitter.im/foxdonut/meiosis.svg)](https://gitter.im/foxdonut/meiosis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/foxdonut/meiosis](https://badges.gitter.im/foxdonut/meiosis.svg)](https://app.gitter.im/#/room/#foxdonut_meiosis:gitter.im)
 
 https://meiosis.js.org
 
@@ -28,7 +28,7 @@ available for your convenience.
 - Try out more [examples](https://meiosis.js.org/examples.html).
 - Check out the [Meiosis-Tracer](https://github.com/foxdonut/meiosis-tracer).
 - Need a router? Try [Meiosis-Router](https://meiosis.js.org/router).
-- Chat on the [Gitter channel](https://gitter.im/foxdonut/meiosis).
+- Chat on the [Gitter channel](https://app.gitter.im/#/room/#foxdonut_meiosis:gitter.im).
 
 Please post questions and suggestions as Github issues on the
 [Meiosis repository](https://github.com/foxdonut/meiosis).
