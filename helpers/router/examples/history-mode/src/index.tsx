@@ -1,5 +1,3 @@
-// @ts-check
-/** @jsxImportSource preact */
 import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import { render } from 'preact';

@@ -1,4 +1,3 @@
-/** @jsxImportSource preact */
 import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
 import { Data, DataProp, State } from './types';
 

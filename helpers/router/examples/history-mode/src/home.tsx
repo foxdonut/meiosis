@@ -1,4 +1,3 @@
-/** @jsxImportSource preact */
 import { MeiosisViewComponent } from 'meiosis-setup/types';
 import { Page } from './types';
 

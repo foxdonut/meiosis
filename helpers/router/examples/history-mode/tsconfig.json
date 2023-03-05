@@ -13,6 +13,7 @@
     "types": ["preact"]
   },
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
   ]
 }
