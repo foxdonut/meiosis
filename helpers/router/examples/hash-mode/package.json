@@ -39,7 +39,7 @@
     "babel-plugin-jsx-pragmatic": "^1.0.2",
     "meiosis-tracer": "^5.0.3",
     "static-server": "^2.2.1",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1"
   }
 }
