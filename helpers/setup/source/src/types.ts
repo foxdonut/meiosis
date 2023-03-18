@@ -122,6 +122,16 @@ export type Service<S> = {
 };
 
 /**
+ * A Meiosis view function, which receives a `cell` property and optional additional properties.
+ *
+ * @template S the State type.
+ */
+export type MeiosisView<S> = {
+  cell: MeiosisCell<S>;
+  [others: string]: unknown;
+};
+
+/**
  * A Meiosis component has (all of which are optional) initial state, services, and nested
  * components.
  *
