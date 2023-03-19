@@ -5,6 +5,8 @@ import terser from '@rollup/plugin-terser';
 
 const name = 'Meiosis';
 const input = './src/meiosis.ts';
+const outFileReg = 'dist/meiosis-setup.js';
+const outFileMin = 'dist/meiosis-setup.min.js';
 const extensions = ['.js', '.ts'];
 const babelHelpers = 'bundled';
 
@@ -29,7 +31,7 @@ export default [
     plugins,
     output: Object.assign(
       {
-        file: 'dist/meiosis-setup.js'
+        file: outFileReg
       },
       output
     )
@@ -39,7 +41,7 @@ export default [
     plugins: plugins.concat(terser()),
     output: Object.assign(
       {
-        file: 'dist/meiosis-setup.min.js'
+        file: outFileMin
       },
       output
     )

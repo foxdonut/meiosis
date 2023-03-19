@@ -2,6 +2,7 @@ import { meiosisSetup } from '../src';
 import {
   MeiosisCell,
   MeiosisComponent,
+  MeiosisView,
   MeiosisViewComponent,
   Patch,
   Service
@@ -491,6 +492,11 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
+      const homeView: MeiosisView<Home> = ({ cell, other }) =>  {
+        expect(cell.state.size).toEqual(42);
+        expect(other).toEqual('area 42');
+      };
+
       const homeComponent: MeiosisViewComponent<Home> = {
         initial: {
           size: 37
@@ -537,6 +543,10 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       const cells = meiosisSetup<AppState>({ app });
       const cell = cells();
       cell.nested.pet.view(cell);
+
+      const viewCells = meiosisSetup<Home>({ app: { initial: { size: 42 } } });
+      const viewCell = viewCells();
+      homeView({ cell: viewCell, other: 'area 42' });
     });
   });
 

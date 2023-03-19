@@ -126,10 +126,7 @@ export type Service<S> = {
  *
  * @template S the State type.
  */
-export type MeiosisView<S> = {
-  cell: MeiosisCell<S>;
-  [others: string]: unknown;
-};
+export type MeiosisView<S> = (params: { cell: MeiosisCell<S>, [others: string]: unknown }) => any;
 
 /**
  * A Meiosis component has (all of which are optional) initial state, services, and nested
