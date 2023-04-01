@@ -56,9 +56,9 @@ const updateParseValue =
  *
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
-export const updateFormValue = (
-  cell: MeiosisCell<any>,
-  path: string[] | string,
+export const updateFormValue = <S>(
+  cell: MeiosisCell<S>,
+  path: string[] | Extract<keyof S, string>,
   fn: (value: string) => any = (value) => value
 ) => (evt: any) => cell.update(intoPath(toPath(path), fn(evt.currentTarget.value)));
 
@@ -82,8 +82,9 @@ export const updateFormValue = (
  *
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
-export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  (evt: any) => updateParseValue(parseInt, cell, path)(evt);
+export const updateFormIntValue = <S>(cell: MeiosisCell<S>,
+  path: string[] | Extract<keyof S, string>) =>
+  (evt: any) => <S>updateParseValue(parseInt, cell, path)(evt);
 
 /**
  * Convenience function to update a form value with a Float value. If the user input does not return
@@ -105,5 +106,6 @@ export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | stri
  *
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
-export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  (evt: any) => updateParseValue(parseFloat, cell, path)(evt);
+export const updateFormFloatValue = <S>(cell: MeiosisCell<S>,
+  path: string[] | Extract<keyof S, string>) =>
+  (evt: any) => <S>updateParseValue(parseFloat, cell, path)(evt);

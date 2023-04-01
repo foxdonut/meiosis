@@ -73,6 +73,9 @@ describe('util', () => {
       },
       name: newName
     });
+
+    // type check
+    // updateFormValue(cell, 'invalid');
   });
 
   test('updateFormValue with function', () => {
@@ -166,6 +169,9 @@ describe('util', () => {
       },
       counter: 1
     });
+
+    // type check
+    // updateFormIntValue(cell, 'invalid');
   });
 
   test('updateFormFloatValue', () => {
@@ -218,6 +224,9 @@ describe('util', () => {
       },
       pH: 7.01
     });
+
+    // type check
+    // updateFormFloatValue(cell, 'invalid');
   });
 
   test('preact types', () => {
