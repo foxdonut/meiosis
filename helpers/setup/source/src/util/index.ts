@@ -30,7 +30,7 @@ const toPath = (pathOrProp: string[] | string): string[] =>
 const updateParseValue =
   (parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
     (evt: any) => {
-      const value = parseFn(evt.target.value);
+      const value = parseFn(evt.currentTarget.value);
       if (!isNaN(value)) {
         cell.update(intoPath(toPath(path), value));
       }
@@ -60,7 +60,7 @@ export const updateFormValue = (
   cell: MeiosisCell<any>,
   path: string[] | string,
   fn: (value: string) => any = (value) => value
-) => (evt: any) => cell.update(intoPath(toPath(path), fn(evt.target.value)));
+) => (evt: any) => cell.update(intoPath(toPath(path), fn(evt.currentTarget.value)));
 
 /**
  * Convenience function to update a form value with an Integer value. If the user input does not

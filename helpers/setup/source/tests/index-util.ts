@@ -48,7 +48,7 @@ describe('util', () => {
 
     const newMaterial = 'wood';
     const cell = cells();
-    const evt = { target: { value: newMaterial } };
+    const evt = { currentTarget: { value: newMaterial } };
     updateFormValue(cell, ['pet', 'env', 'material'])(evt);
 
     expect(cells().state).toEqual({
@@ -62,7 +62,7 @@ describe('util', () => {
     });
 
     const newName = 'Black';
-    updateFormValue(cell, 'name')({ target: { value: newName } });
+    updateFormValue(cell, 'name')({ currentTarget: { value: newName } });
 
     expect(cells().state).toEqual({
       pet: {
@@ -103,7 +103,7 @@ describe('util', () => {
     const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
-    const evt = { target: { value: 'wood' } };
+    const evt = { currentTarget: { value: 'wood' } };
     updateFormValue(cell, ['pet', 'env', 'material'], (value) => value.toUpperCase())(evt);
 
     expect(cells().state).toEqual({
@@ -144,7 +144,7 @@ describe('util', () => {
     const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
-    const evt = { target: { value: '10' } };
+    const evt = { currentTarget: { value: '10' } };
     updateFormIntValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
@@ -156,7 +156,7 @@ describe('util', () => {
       counter: 0
     });
 
-    updateFormIntValue(cell, 'counter')({ target: { value: '1' } });
+    updateFormIntValue(cell, 'counter')({ currentTarget: { value: '1' } });
 
     expect(cells().state).toEqual({
       pet: {
@@ -196,7 +196,7 @@ describe('util', () => {
     const cells = meiosisSetup<AppState>({ app });
 
     const cell = cells();
-    const evt = { target: { value: '10.5' } };
+    const evt = { currentTarget: { value: '10.5' } };
     updateFormFloatValue(cell, ['pet', 'house', 'size'])(evt);
 
     expect(cells().state).toEqual({
@@ -208,7 +208,7 @@ describe('util', () => {
       pH: 6.9
     });
 
-    updateFormFloatValue(cell, 'pH')({ target: { value: '7.01' } });
+    updateFormFloatValue(cell, 'pH')({ currentTarget: { value: '7.01' } });
 
     expect(cells().state).toEqual({
       pet: {
