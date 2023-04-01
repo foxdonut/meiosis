@@ -4,6 +4,9 @@ import { meiosisSetup } from '../src';
 import { MeiosisComponent } from '../src/types';
 import { get } from '../src/util';
 import { updateFormFloatValue, updateFormIntValue, updateFormValue } from '../src/util';
+import { h } from 'preact';
+import { m } from 'mithril';
+import { createElement } from 'react';
 
 describe('util', () => {
   test('get', () => {
@@ -215,5 +218,51 @@ describe('util', () => {
       },
       pH: 7.01
     });
+  });
+
+  test('preact types', () => {
+    interface AppState {
+      name: string;
+    }
+
+    const app: MeiosisComponent<AppState> = {};
+
+    const cells = meiosisSetup<AppState>({ app });
+    const cell = cells();
+
+    // type check
+    const view = () => h('input', { type: 'text', onInput: updateFormValue(cell, 'name') });
+    view();
+  });
+
+  test('mithril types', () => {
+    interface AppState {
+      name: string;
+    }
+
+    const app: MeiosisComponent<AppState> = {};
+
+    const cells = meiosisSetup<AppState>({ app });
+    const cell = cells();
+
+    // type check
+    const view = () => m('input', { type: 'text', onInput: updateFormValue(cell, 'name') });
+    view();
+  });
+
+  test('react types', () => {
+    interface AppState {
+      name: string;
+    }
+
+    const app: MeiosisComponent<AppState> = {};
+
+    const cells = meiosisSetup<AppState>({ app });
+    const cell = cells();
+
+    // type check
+    const view = () => createElement('input',
+      { type: 'text', onInput: updateFormValue(cell, 'name') });
+    view();
   });
 });

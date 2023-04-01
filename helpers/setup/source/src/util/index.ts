@@ -14,15 +14,6 @@ export const get = (object: Record<string, any> | null | undefined, path: string
 
 // helpers to update values from input
 
-/**
- * Represents a DOM event.
- */
-export interface DomEvent {
-  target: {
-    value: string;
-  };
-}
-
 type Updatable = {
   update: (value: any) => any;
 };
@@ -38,7 +29,7 @@ const toPath = (pathOrProp: string[] | string): string[] =>
 
 const updateParseValue =
   (parseFn: ParseFn, cell: Updatable, path: string[] | string) =>
-    (evt: DomEvent) => {
+    (evt: any) => {
       const value = parseFn(evt.target.value);
       if (!isNaN(value)) {
         cell.update(intoPath(toPath(path), value));
@@ -69,7 +60,7 @@ export const updateFormValue = (
   cell: MeiosisCell<any>,
   path: string[] | string,
   fn: (value: string) => any = (value) => value
-) => (evt: DomEvent) => cell.update(intoPath(toPath(path), fn(evt.target.value)));
+) => (evt: any) => cell.update(intoPath(toPath(path), fn(evt.target.value)));
 
 /**
  * Convenience function to update a form value with an Integer value. If the user input does not
@@ -92,7 +83,7 @@ export const updateFormValue = (
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
 export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  (evt: DomEvent) => updateParseValue(parseInt, cell, path)(evt);
+  (evt: any) => updateParseValue(parseInt, cell, path)(evt);
 
 /**
  * Convenience function to update a form value with a Float value. If the user input does not return
@@ -115,4 +106,4 @@ export const updateFormIntValue = (cell: MeiosisCell<any>, path: string[] | stri
  * @returns a function that accepts a DOM event and updates the value on the Meiosis state.
  */
 export const updateFormFloatValue = (cell: MeiosisCell<any>, path: string[] | string) =>
-  (evt: DomEvent) => updateParseValue(parseFloat, cell, path)(evt);
+  (evt: any) => updateParseValue(parseFloat, cell, path)(evt);
