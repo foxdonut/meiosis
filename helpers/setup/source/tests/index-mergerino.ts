@@ -492,9 +492,10 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
-      const homeView: MeiosisView<Home> = ({ cell, other }) =>  {
+      const homeView: MeiosisView<Home> = ({ cell, other, someFn }) => {
         expect(cell.state.size).toEqual(42);
         expect(other).toEqual('area 42');
+        expect(someFn(24)).toEqual(48);
       };
 
       const homeComponent: MeiosisViewComponent<Home> = {
@@ -546,7 +547,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
       const viewCells = meiosisSetup<Home>({ app: { initial: { size: 42 } } });
       const viewCell = viewCells();
-      homeView({ cell: viewCell, other: 'area 42' });
+      homeView({ cell: viewCell, other: 'area 42', someFn: (x: number) => x * 2 });
     });
   });
 
