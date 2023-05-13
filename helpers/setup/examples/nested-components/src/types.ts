@@ -1,10 +1,3 @@
-export interface DomEvent {
-  preventDefault: () => void;
-  target: {
-    value: string;
-  };
-}
-
 export type PageKey = 'home' | 'login' | 'data1' | 'data2';
 
 export interface Page {

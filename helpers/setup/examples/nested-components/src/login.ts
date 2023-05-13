@@ -1,6 +1,6 @@
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
-import { DomEvent, Login } from './types';
+import { Login } from './types';
 
 const loginActions = {
   prepareBlankForm: (cell: MeiosisCell<Login>) => {
@@ -38,12 +38,12 @@ export const login: MeiosisViewComponent<Login> = {
       m('span', 'Username:'),
       m('input[type=text]', {
         value: cell.state.username,
-        oninput: (evt: DomEvent) => cell.update({ username: evt.target.value })
+        oninput: (evt: any) => cell.update({ username: evt.currentTarget.value })
       }),
       m('span', 'Password:'),
       m('input[type=password]', {
         value: cell.state.password,
-        oninput: (evt: DomEvent) => cell.update({ password: evt.target.value })
+        oninput: (evt: any) => cell.update({ password: evt.currentTarget.value })
       })
     ),
     m('div',

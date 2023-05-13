@@ -25,21 +25,6 @@ get({ duck: { color: 'yellow' } }, ['bird', 'color']) // returns undefined
 get(null, ['bird', 'color']) // returns undefined
 ```
 
-### Updating Form Values
-
-The utility functions below use the following `DomEvent` type:
-
-```ts
-/**
- * Represents a DOM event.
- */
-export interface DomEvent {
-  target: {
-    value: string;
-  };
-}
-```
-
 ### updateFormValue
 
 ```ts

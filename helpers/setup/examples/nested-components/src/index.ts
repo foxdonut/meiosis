@@ -2,7 +2,7 @@ import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent, Service } from 'meiosis-setup/types';
 import m from 'mithril';
 import Stream from 'mithril/stream';
-import { DomEvent, Page, PageKey, State } from './types';
+import { Page, PageKey, State } from './types';
 import { home } from './home';
 import { login } from './login';
 import { data } from './data';
@@ -50,7 +50,7 @@ const app: MeiosisViewComponent<State> = {
       m('a',
         {
           href: '#',
-          onclick: (evt: DomEvent) => {
+          onclick: (evt: any) => {
             evt.preventDefault();
             cell.update({ page: 'home' });
           }
@@ -61,7 +61,7 @@ const app: MeiosisViewComponent<State> = {
       m('a',
         {
           href: '#',
-          onclick: (evt: DomEvent) => {
+          onclick: (evt: any) => {
             evt.preventDefault();
             cell.update({ page: 'login' });
           }
@@ -72,7 +72,7 @@ const app: MeiosisViewComponent<State> = {
       m('a',
         {
           href: '#',
-          onclick: (evt: DomEvent) => {
+          onclick: (evt: any) => {
             evt.preventDefault();
             cell.update({ page: 'data1' });
           }
@@ -83,7 +83,7 @@ const app: MeiosisViewComponent<State> = {
       m('a',
         {
           href: '#',
-          onclick: (evt: DomEvent) => {
+          onclick: (evt: any) => {
             evt.preventDefault();
             cell.update({ page: 'data2' });
           }
