@@ -30,16 +30,6 @@
 get({ duck: { color: &#39;yellow&#39; } }, [&#39;bird&#39;, &#39;color&#39;]) // returns undefined
 get(null, [&#39;bird&#39;, &#39;color&#39;]) // returns undefined
 </code></pre>
-<h3>Updating Form Values</h3><p>The utility functions below use the following <code>DomEvent</code> type:</p>
-<pre><code class="language-ts">/**
- * Represents a DOM event.
- */
-export interface DomEvent {
-  target: {
-    value: string;
-  };
-}
-</code></pre>
 <h3>updateFormValue</h3><pre><code class="language-ts">const updateFormValue = (
   cell: MeiosisCell&lt;any&gt;,
   path: string[] | string,
