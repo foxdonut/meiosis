@@ -5,6 +5,8 @@
 
 import createRouteMatcher from 'feather-route-matcher';
 import qs from 'query-string';
+import { MeiosisCell } from 'meiosis-setup/types';
+import { Stream } from 'meiosis-setup/simple-stream';
 import {
   OnRouteChange,
   Params,
@@ -12,7 +14,8 @@ import {
   Router,
   RouterConfig,
   ToRoute,
-  ToUrl
+  ToUrl,
+  WithRoute
 } from './types';
 import {
   addHistoryEventListener,
@@ -78,5 +81,15 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
-  return { initialRoute, toUrl, toRoute, start, syncLocationBar };
+  const setup = <P extends WithRoute<T>>(cells: Stream<MeiosisCell<P>>) => {
+    const cell = cells();
+
+    start((route) => cell.update((state) => ({ ...state, route })));
+
+    cells.map((cell) => {
+      syncLocationBar(cell.state.route);
+    });
+  };
+
+  return { initialRoute, toUrl, toRoute, start, syncLocationBar, setup };
 };

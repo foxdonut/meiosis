@@ -1,6 +1,6 @@
 {
   "name": "meiosis-router-example-hash-mode",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "meiosis docs example server",
   "main": "src/index.jsx",
@@ -28,18 +28,18 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "meiosis-router": "^1.0.0",
-    "meiosis-setup": "^6.1.1",
-    "preact": "^10.13.0"
+    "meiosis-setup": "^6.2.3",
+    "preact": "^10.16.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.0",
-    "@babel/plugin-transform-react-jsx": "^7.21.0",
-    "@babel/preset-env": "^7.20.2",
-    "babel-loader": "^9.1.2",
+    "@babel/core": "^7.22.9",
+    "@babel/plugin-transform-react-jsx": "^7.22.5",
+    "@babel/preset-env": "^7.22.9",
+    "babel-loader": "^9.1.3",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
-    "meiosis-tracer": "^5.0.3",
+    "meiosis-tracer": "^6.0.0",
     "static-server": "^2.2.1",
-    "webpack": "^5.76.0",
-    "webpack-cli": "^5.0.1"
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
   }
 }

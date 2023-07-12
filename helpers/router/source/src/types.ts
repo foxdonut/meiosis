@@ -1,3 +1,6 @@
+import { MeiosisCell } from 'meiosis-setup/types';
+import { Stream } from 'meiosis-setup/simple-stream';
+
 /**
  * Types for `meiosis-router`.
  * @module
@@ -176,6 +179,10 @@ export type RouterConfig<T extends string = string> = {
   wdw?: WindowLike;
 };
 
+export type WithRoute<T extends string> = {
+  route: Route<T>;
+};
+
 /**
  * Router created by {@link "index".createRouter}.
  *
@@ -196,4 +203,7 @@ export type Router<T extends string = string> = {
 
   /** Function that synchronizes the location bar with the application state route. */
   syncLocationBar: SyncLocationBar<T>;
+
+  /** Convenience function that calls start, map, and syncLocation bar. */
+  setup: <P extends WithRoute<T>>(cells: Stream<MeiosisCell<P>>) => void;
 };

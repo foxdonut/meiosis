@@ -1,9 +1,9 @@
 /* eslint-env jest */
 
-import createRouteMatcher from 'feather-route-matcher';
 import { createRouter } from '../src/index';
 import { createToUrl } from '../src/helpers';
 import { Route, RouteConfig, RouterConfig } from '../src/types';
+import { meiosisSetup } from 'meiosis-setup';
 
 type Page = 'Home' | 'Login' | 'UserProfile';
 
@@ -33,8 +33,6 @@ const routeConfig: RouteConfig<Page> = {
   '/user/:id': 'UserProfile'
 };
 
-const routeMatcher = createRouteMatcher(routeConfig);
-
 type TestRouterConfig = {
   rootPath?: string;
 };
@@ -54,7 +52,7 @@ describe('router', () => {
       const createWindow = (path) => mockWindow(caseConfig.rootPath, prefix, path);
 
       const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
-        Object.assign({ routeMatcher, routeConfig }, caseConfig, config);
+        Object.assign({ routeConfig }, caseConfig, config);
 
       const createRouterFn = (config?: Partial<RouterConfig<Page>>) =>
         createRouter(createRouterConfig(config));
@@ -189,19 +187,39 @@ describe('router', () => {
           params: {}
         });
       });
+    }
+  );
+
+  describe('setup', () => {
+    const wdw = mockWindow(undefined, '#!', '/');
+
+    test('calls start and map with syncLocationBar', () => {
+      type MyApp = { route: Route<Page>, count: number };
+      const router = createRouter({ routeConfig, wdw });
+
+      const app = { initial: { route: router.initialRoute, count: 0 } };
+      const cells = meiosisSetup<MyApp>({ app });
+
+      router.setup(cells);
+
+      wdw.location.hash = '#!/login';
+      wdw.onpopstate();
+
+      expect(cells().state.route.value).toEqual('Login');
     });
+  });
 
-    describe('createToUrl', () => {
-      it('keeps slash for empty path', () => {
-        const routeConfig = {
-          '/': 'home',
-          '/login': 'login'
-        };
+  describe('createToUrl', () => {
+    it('keeps slash for empty path', () => {
+      const routeConfig = {
+        '/': 'home',
+        '/login': 'login'
+      };
 
-        const toUrl = createToUrl(routeConfig, '', true);
-        const url = toUrl('home');
+      const toUrl = createToUrl(routeConfig, '', true);
+      const url = toUrl('home');
 
-        expect(url).toEqual('/');
-      });
+      expect(url).toEqual('/');
     });
+  });
 });
