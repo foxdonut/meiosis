@@ -179,6 +179,11 @@ export type RouterConfig<T extends string = string> = {
   wdw?: WindowLike;
 };
 
+/**
+ * Defines the `route` property where to store the route in the Meiosis application state.
+ *
+ * @template T See {@link RouteConfig} for details.
+ */
 export type WithRoute<T extends string> = {
   route: Route<T>;
 };
@@ -204,6 +209,6 @@ export type Router<T extends string = string> = {
   /** Function that synchronizes the location bar with the application state route. */
   syncLocationBar: SyncLocationBar<T>;
 
-  /** Convenience function that calls start, map, and syncLocation bar. */
+  /** Convenience function that calls start, map, and syncLocation bar for you. */
   setup: <P extends WithRoute<T>>(cells: Stream<MeiosisCell<P>>) => void;
 };

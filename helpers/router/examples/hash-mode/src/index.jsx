@@ -7,17 +7,12 @@ import { router } from './router';
 import meiosisTracer from 'meiosis-tracer';
 
 const cells = meiosisSetup({ app });
-const cell = cells();
-
-router.start((route) => cell.update({ route: () => route }));
-cells.map((cell) => {
-  router.syncLocationBar(cell.state.route);
-});
+router.setup(cells);
 
 // Only for using Meiosis Tracer in development / Chrome DevTools.
 meiosisTracer({
   rows: 30,
-  streams: [{ stream: cell.states, label: 'states' }]
+  streams: [{ stream: cells().states, label: 'states' }]
 });
 
 const element = document.getElementById('app');
