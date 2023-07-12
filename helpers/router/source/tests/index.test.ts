@@ -206,6 +206,12 @@ describe('router', () => {
       wdw.onpopstate();
 
       expect(cells().state.route.value).toEqual('Login');
+
+      wdw.location.hash = '#!/user/42';
+      wdw.onpopstate();
+
+      expect(cells().state.route.value).toEqual('UserProfile');
+      expect(cells().state.route.params.id).toEqual('42');
     });
   });
 
