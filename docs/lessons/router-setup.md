@@ -69,6 +69,19 @@ const app = {
 };
 
 const cells = meiosisSetup({ app });
+router.setup(cells);
+```
+
+This is a regular Meiosis setup. In our initial application state, we use `router.initialRoute` to
+indicate the first `route`. After creating the Meiosis application with `meiosisSetup`, we can set
+up the router with `router.setup(cells)`.
+
+The `router.setup` function is a convenience function that reduces the amount of code needed to
+set up the router, by making assumptions about the Meiosis application state. Namely, it assumes
+that the current route will be stored in the state using the `route` property. The `router.setup`
+function does the equivalent of the code below:
+
+```js
 const cell = cells();
 
 router.start((route) => cell.update({ route: () => route }));
@@ -78,10 +91,7 @@ cells.map((cell) => {
 });
 ```
 
-This is a regular Meiosis setup. In our initial application state, we use `router.initialRoute` to
-indicate the first `route`.
-
-To respond to route changes and update the `route` in the application state, we use:
+To respond to route changes and update the `route` in the application state:
 
 ```js
 router.start((route) => cell.update({ route: () => route }));
@@ -93,7 +103,7 @@ router.start((route) => cell.update({ route: () => route }));
 - the function updates the route in the application state by calling `cell.update(...)`.
 
 Finally, to keep the browser's location bar in sync with the route when we change the route
-programmatically by updating the application state, we use:
+programmatically by updating the application state:
 
 ```js
 cells.map((cell) => {
