@@ -58,7 +58,7 @@ the results of your changes.
 
 ### Hash Mode
 
-<img src="/dist/hash-mode-home.png" width="440" height="300" style="border:1px solid gray">
+<img src="hash-mode-home.png" width="440" height="300" style="border:1px solid gray">
 
 _The Hash Mode example._
 
@@ -239,7 +239,7 @@ export const service = {
 
 ### History Mode
 
-<img src="/dist/history-mode-home.png" width="350" height="280" style="border:1px solid gray">
+<img src="history-mode-home.png" width="350" height="280" style="border:1px solid gray">
 
 _The History Mode example._
 
