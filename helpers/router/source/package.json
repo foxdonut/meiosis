@@ -43,7 +43,7 @@
     "jest": "^29.6.1",
     "meiosis-setup": "^6.2.3",
     "mergerino": "^0.4.0",
-    "rollup": "^3.26.2",
+    "rollup": "^3.29.5",
     "typedoc": "^0.24.8",
     "typescript": "^5.1.6"
   }
