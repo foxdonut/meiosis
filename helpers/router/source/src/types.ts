@@ -79,6 +79,20 @@ export type Route<T extends string = string> = {
 export type ToUrl<T extends string = string> = (value: T, params?: Params) => string;
 
 /**
+ * Function to navigate to a URL from a value and params.
+ *
+ * @template T See {@link RouteConfig} for details.
+ *
+ * @param value the route value.
+ * @param params the path parameters and, optionally query parameters. Any parameters not part of
+ * path parameters are automatically added as query parameters. Warning: if you do not specify
+ * values for route path parameters, they will be `undefined` in the resulting URL.
+ *
+ * @returns the URL.
+ */
+export type Navigate<T extends string = string> = (value: T, params?: Params) => void;
+
+/**
  * Function to generate a Route.
  *
  * @template T See {@link RouteConfig} for details.
@@ -199,6 +213,9 @@ export type Router<T extends string = string> = {
 
   /** Function to generate a URL. */
   toUrl: ToUrl<T>;
+
+  /** Function to navigate to a URL. */
+  navigate: Navigate<T>;
 
   /** Function to generate a Route. */
   toRoute: ToRoute<T>;

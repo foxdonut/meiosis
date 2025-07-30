@@ -8,6 +8,7 @@ import qs from 'query-string';
 import { MeiosisCell } from 'meiosis-setup/types';
 import { Stream } from 'meiosis-setup/simple-stream';
 import {
+  Navigate,
   OnRouteChange,
   Params,
   Route,
@@ -48,6 +49,12 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
+
+  const navigate: Navigate<T> = (value: T, params?: Params) => {
+    const url = toUrl(value, params);
+    wdw.history.pushState({}, '', url);
+  };
+
   const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
     ({ value, params: params || {}, replace });
 
@@ -91,5 +98,5 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     });
   };
 
-  return { initialRoute, toUrl, toRoute, start, syncLocationBar, setup };
+  return { initialRoute, navigate, toUrl, toRoute, start, syncLocationBar, setup };
 };

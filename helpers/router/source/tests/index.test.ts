@@ -85,6 +85,18 @@ describe('router', () => {
         expect(router.toRoute('Login', {}, true)).toEqual(route3);
       });
 
+      test('navigate changes the URL', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        const navigate = router.navigate;
+        navigate('Login');
+        expect(wdw.location.hash).toEqual((historyMode ? rootPath : prefix) + path);
+        expect(wdw.history.pushState.mock.calls[0][2]).toEqual(prefix + path);
+        wdw.history.pushState.mockClear();
+      });
+
       describe('syncLocationBar', () => {
         type SyncLocationBarCases = [string, { replace?: boolean }];
 
