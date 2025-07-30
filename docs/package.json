@@ -32,7 +32,7 @@
   "devDependencies": {
     "harp": "^0.46.1",
     "onchange": "^7.1.0",
-    "reload": "^3.3.0",
+    "reload": "^3.4.2",
     "static-server": "^2.2.1"
   }
 }
