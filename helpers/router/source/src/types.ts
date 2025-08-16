@@ -212,6 +212,9 @@ export type Router<T extends string = string> = {
   /** The initial route as parsed from the location bar. */
   initialRoute: Route<T>;
 
+  /** Returns the current route. */
+  getCurrentRoute: () => Route<T>;
+
   /** Function to generate a URL. */
   toUrl: ToUrl<T>;
 

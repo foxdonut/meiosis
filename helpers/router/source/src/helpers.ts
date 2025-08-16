@@ -22,9 +22,12 @@ const stripTrailingSlash = (url: string) =>
 const I = (x: string) => x;
 
 /** For internal use only. */
-export const getQuery = (path: string): string => {
-  const idx = path.indexOf('?');
-  return idx >= 0 ? path.substring(idx + 1) : '';
+export const getQuery = (path: string | undefined): string => {
+  if (path) {
+    const idx = path.indexOf('?');
+    return idx >= 0 ? path.substring(idx + 1) : '';
+  }
+  return '';
 };
 
 /** For internal use only. */

@@ -52,7 +52,7 @@ describe('router', () => {
     (_label, caseConfig, prefix) => {
       const historyMode = !!caseConfig.rootPath;
 
-      const createWindow = (path) => mockWindow(caseConfig.rootPath, prefix, path);
+      const createWindow = (path: string) => mockWindow(caseConfig.rootPath, prefix, path);
 
       const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
         Object.assign({ routeConfig }, caseConfig, config);
@@ -106,7 +106,7 @@ describe('router', () => {
 
         global.dispatchEvent = global.dispatchEvent || jest.fn();
         global.PopStateEvent = global.PopStateEvent || class {
-          constructor(_type, _options) {
+          constructor(_type: string, _options: Record<string, any>) {
             // noop
           }
         };
@@ -115,6 +115,21 @@ describe('router', () => {
         router.navigate('Login', {}, true);
 
         expect(global.dispatchEvent).toHaveBeenCalled();
+      });
+
+      test('getCurrentRoute', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        router.navigate('Login');
+        const currentRoute = router.getCurrentRoute();
+        expect(currentRoute).toEqual({
+          value: 'Login',
+          pattern: '/login',
+          url: '/login',
+          params: {}
+        });
       });
 
       describe('syncLocationBar', () => {

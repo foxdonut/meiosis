@@ -61,7 +61,7 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
   const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
     ({ value, params: params || {}, replace });
 
-  const getRoute = (path) => {
+  const getRoute = (path: string | undefined) => {
     let matchPath = path || '/';
     if (matchPath.startsWith('?')) {
       matchPath = '/' + matchPath;
@@ -73,7 +73,9 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     return Object.assign(match, { params });
   };
 
-  const initialRoute = getRoute(getPath());
+  const getCurrentRoute = () => getRoute(getPath());
+
+  const initialRoute = getCurrentRoute();
 
   const start = (onRouteChange: OnRouteChange<T>) => {
     if (historyMode) {
@@ -101,5 +103,5 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     });
   };
 
-  return { initialRoute, navigate, toUrl, toRoute, start, syncLocationBar, setup };
+  return { initialRoute, getCurrentRoute, navigate, toUrl, toRoute, start, syncLocationBar, setup };
 };
