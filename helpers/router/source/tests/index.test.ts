@@ -20,6 +20,9 @@ const mockWindow = (rootPath: string | undefined, prefix: string, path: string) 
     pathname: rootPath + path,
     search: ''
   },
+  document: {
+    dispatchEvent: jest.fn()
+  },
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
   onpopstate: () => null
@@ -90,11 +93,28 @@ describe('router', () => {
         const wdw = createWindow(path);
         const router = createRouterFn({ wdw });
 
-        const navigate = router.navigate;
-        navigate('Login');
+        router.navigate('Login');
         expect(wdw.location.hash).toEqual((historyMode ? rootPath : prefix) + path);
         expect(wdw.history.pushState.mock.calls[0][2]).toEqual(prefix + path);
         wdw.history.pushState.mockClear();
+      });
+
+      test('navigate triggers popstate', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        global.dispatchEvent = global.dispatchEvent || jest.fn();
+        global.PopStateEvent = global.PopStateEvent || class {
+          constructor(_type, _options) {
+            // noop
+          }
+        };
+        jest.spyOn(global, 'dispatchEvent');
+
+        router.navigate('Login', {}, true);
+
+        expect(global.dispatchEvent).toHaveBeenCalled();
       });
 
       describe('syncLocationBar', () => {

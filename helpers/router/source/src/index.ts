@@ -50,9 +50,12 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
 
-  const navigate: Navigate<T> = (value: T, params?: Params) => {
+  const navigate: Navigate<T> = (value: T, params?: Params, popstate?: boolean) => {
     const url = toUrl(value, params);
     wdw.history.pushState({}, '', url);
+    if (popstate) {
+      dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+    }
   };
 
   const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>

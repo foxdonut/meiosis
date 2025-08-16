@@ -90,7 +90,8 @@ export type ToUrl<T extends string = string> = (value: T, params?: Params) => st
  *
  * @returns the URL.
  */
-export type Navigate<T extends string = string> = (value: T, params?: Params) => void;
+export type Navigate<T extends string = string> =
+  (value: T, params?: Params, popstate?: boolean) => void;
 
 /**
  * Function to generate a Route.
