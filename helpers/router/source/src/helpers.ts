@@ -14,7 +14,7 @@ import {
 
 // ----- Helpers
 
-const stripTrailingSlash = (url: string) =>
+const stripTrailingSlash = (url: string): string =>
   url.length === 0 || url === '/'
     ? '/'
     : (url.endsWith('/') ? url.substring(0, url.length - 1) : url);
@@ -36,7 +36,7 @@ export const getQueryString = (queryParams = {}): string => {
   return (query.length > 0 ? '?' : '') + query;
 };
 
-const separateParamsAndQueryParams = (path: string, allParams) => {
+const separateParamsAndQueryParams = (path: string, allParams: Record<string, string>) => {
   const pathParams = (path.match(/(:[^/]*)/g) || []).map((key) => key.substring(1));
 
   return Object.entries(allParams).reduce(
@@ -45,7 +45,7 @@ const separateParamsAndQueryParams = (path: string, allParams) => {
       result[slot][key] = value;
       return result;
     },
-    { params: {}, queryParams: {} }
+    { params: {} as Record<string, string>, queryParams: {} as Record<string, string> }
   );
 };
 
@@ -68,7 +68,7 @@ const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
 
   const pathLookup = Object.entries(routeConfig).reduce(
     (result, [path, page]) => Object.assign(result, { [page]: path }),
-    {}
+    {} as Record<string, string>
   );
 
   return (page, allParams = {}) => {
@@ -107,10 +107,10 @@ export const doSyncLocationBar = (doSyncParams: DoSyncLocationBarParams) => {
 export const addHistoryEventListener = (wdw: WindowLike, prefix: string, setHref: SetHref) => {
   const origin = wdw.location.origin;
 
-  const linkHandler = (evt) => {
+  const linkHandler = (evt: { target: HTMLAnchorElement | null; preventDefault: () => void; }) => {
     let element = evt.target;
     while (element && element.nodeName.toLowerCase() !== 'a') {
-      element = element.parentNode;
+      element = element.parentNode as HTMLAnchorElement | null;
     }
     if (
       element &&

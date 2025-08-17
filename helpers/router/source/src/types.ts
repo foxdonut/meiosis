@@ -138,6 +138,7 @@ export type WindowLike = {
   decodeURI: (uri: string) => string;
   history: {
     pushState: (state: any, unused: string, url?: string) => any;
+    replaceState: (state: any, unused: string, url?: string) => any;
   };
   location: {
     hash: string;

@@ -12,7 +12,8 @@ const decodeURI = (uri: string) => uri;
 const mockWindow = (rootPath: string | undefined, prefix: string, path: string) => ({
   decodeURI,
   history: {
-    pushState: jest.fn()
+    pushState: jest.fn(),
+    replaceState: jest.fn()
   },
   location: {
     hash: prefix + path,
