@@ -87,7 +87,7 @@ const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<s
 };
 
 /** For internal use only. */
-export const flattenRouteConfig = <T = string>(routeConfig: RouteConfig<T>,
+export const flattenRouteConfig = <T>(routeConfig: RouteConfig<T>,
   parent = '', rootPath = ''): Record<string, string> => {
 
   return Object.entries(routeConfig).reduce((result, next) =>
@@ -117,16 +117,16 @@ export const createGetUrl = (prefix: string, historyMode: boolean, wdw: WindowLi
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
-const createToUrlFn = <T = string>(routeConfig: RouteConfig<T>,
-  getStatePath: GetStatePath): ToUrl => {
+const createToUrlFn = <T>(routeConfig: RouteConfig<T>,
+  getStatePath: GetStatePath): ToUrl<T> => {
 
   const pathLookup = Object.entries(flattenRouteConfig(routeConfig)).reduce(
     (result, [path, value]) => Object.assign(result, { [value]: path }),
     {} as Record<string, string>
   );
 
-  return (value: string, allParams = {}) => {
-    const path = getStatePath(pathLookup[value]);
+  return (value: RouteValue<T>, allParams = {}) => {
+    const path = getStatePath(pathLookup[flattenRouteValue(value)]);
     const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
 
     return (
@@ -145,7 +145,7 @@ export const createToUrl = <T = string>(routeConfig: RouteConfig<T>,
 
   const getStatePath = historyMode ? stripTrailingSlash : I;
   const toUrl = createToUrlFn<T>(routeConfig, getStatePath);
-  return (value: RouteValue<T>, params = {}) => prefix + toUrl(flattenRouteValue(value), params);
+  return (value: RouteValue<T>, params = {}) => prefix + toUrl(value, params);
 };
 
 /** For internal use only. */

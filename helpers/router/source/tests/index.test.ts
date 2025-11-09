@@ -2,7 +2,7 @@
 
 import { createRouter } from '../src/index';
 import { createToUrl, expandRouteValue, flattenRouteConfig } from '../src/helpers';
-import { Route, RouteConfig, RouterConfig } from '../src/types';
+import { Route, RouteConfig, Router, RouterConfig } from '../src/types';
 import { meiosisSetup } from 'meiosis-setup';
 
 type ProfilePage = 'User' | 'Home';
@@ -68,7 +68,7 @@ describe('router', () => {
       const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
         Object.assign({ routeConfig }, caseConfig, config);
 
-      const createRouterFn = (config?: Partial<RouterConfig<Page>>) =>
+      const createRouterFn = (config?: Partial<RouterConfig<Page>>): Router<Page> =>
         createRouter(createRouterConfig(config));
 
       test('toUrl converts route to URL', () => {
@@ -81,6 +81,21 @@ describe('router', () => {
         expect(router.toUrl('UserProfile', { id: 42 })).toEqual(prefix + '/user/42');
         expect(router.toUrl('UserProfile', { id: 42, a: 1, b: 'two' }))
           .toEqual(prefix + '/user/42?a=1&b=two');
+      });
+
+      test('toUrl converts route to URL for subroutes', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        expect(router.toUrl(['Settings', 'Home'], { org: 'my-org' }))
+          .toEqual(prefix + '/settings/my-org');
+        expect(router.toUrl(['Settings', 'List'], { org: 'my-org' }))
+          .toEqual(prefix + '/settings/my-org/list');
+        expect(router.toUrl(['Settings', ['Profile', 'User']], { org: 'my-org', id: 7 }))
+          .toEqual(prefix + '/settings/my-org/profile/7');
+        expect(router.toUrl(['Settings', ['Profile', 'Home']], { org: 'my-org' }))
+          .toEqual(prefix + '/settings/my-org/profile');
       });
 
       test('toRoute produces a Route', () => {

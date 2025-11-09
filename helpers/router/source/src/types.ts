@@ -87,7 +87,7 @@ export type Route<T> = {
  *
  * @returns the URL.
  */
-export type ToUrl<T = string> = (value: RouteValue<T>, params?: Params) => string;
+export type ToUrl<T> = (value: RouteValue<T>, params?: Params) => string;
 
 /**
  * Function to navigate to a URL from a value and params.

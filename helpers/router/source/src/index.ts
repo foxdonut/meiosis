@@ -53,7 +53,7 @@ export const createRouter = <T = string>(routerConfig: RouterConfig<T>):
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
   const getPath = () => getUrl().substring(prefix.length) || '/';
-  const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
+  const toUrl: ToUrl<T> = createToUrl<T>(routeConfig, prefix, historyMode);
 
   const navigate: Navigate<T> = (value: RouteValue<T>, params?: Params, popstate?: boolean) => {
     const url = toUrl(value, params);
