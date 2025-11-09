@@ -12,7 +12,6 @@ import {
   OnRouteChange,
   Params,
   Route,
-  RouteType,
   RouteValue,
   Router,
   RouterConfig,
@@ -42,9 +41,7 @@ import {
  * - `rootPath` (`string`): indicates to use history mode instead of hash mode by specifying the
  * root path. See {@link "types".RouterConfig} for details.
  */
-export const createRouter = <T extends RouteType>(routerConfig: RouterConfig<T>):
-  Router<T> => {
-
+export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>): Router<T> => {
   const { routeConfig, rootPath, wdw = window } = routerConfig;
 
   const flattenedRouteConfig = flattenRouteConfig(routeConfig);
@@ -56,7 +53,7 @@ export const createRouter = <T extends RouteType>(routerConfig: RouterConfig<T>)
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl<T>(routeConfig, prefix, historyMode);
 
-  const navigate: Navigate<T> = (value: RouteValue<T>, params?: Params, popstate?: boolean) => {
+  const navigate: Navigate<T> = (value: T, params?: Params, popstate?: boolean) => {
     const url = toUrl(value, params);
     wdw.history.pushState({}, '', url);
     if (popstate) {
@@ -64,10 +61,10 @@ export const createRouter = <T extends RouteType>(routerConfig: RouterConfig<T>)
     }
   };
 
-  const toRoute: ToRoute<T> = (value: RouteValue<T>, params?: Params, replace?: boolean) =>
+  const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
     ({ value, params: params || {}, replace });
 
-  const getRoute = <T extends RouteType>(path: string | undefined): Route<T> => {
+  const getRoute = (path: string | undefined): Route<T> => {
     let matchPath = path || '/';
     if (matchPath.startsWith('?')) {
       matchPath = '/' + matchPath;
@@ -75,7 +72,7 @@ export const createRouter = <T extends RouteType>(routerConfig: RouterConfig<T>)
     const match = routeMatcher(matchPath);
     const queryParams = qs.parse(getQuery(path));
     const params = Object.assign(queryParams, match.params);
-    const value: RouteValue<T> = expandRouteValue<T>(match.value);
+    const value: T = expandRouteValue<T>(match.value);
 
     return { value, params };
   };
@@ -93,7 +90,7 @@ export const createRouter = <T extends RouteType>(routerConfig: RouterConfig<T>)
         }
       });
     }
-    wdw.onpopstate = () => onRouteChange(getRoute<T>(getPath()));
+    wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {

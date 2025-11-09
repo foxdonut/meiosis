@@ -6,22 +6,16 @@ import { Stream } from 'meiosis-setup/simple-stream';
  * @module
  */
 
-export type RouteType = string | [string, RouteType];
-
 /**
  * Route value. This is what is returned when obtaining a route from the router.
  *
  * @template T to restrict values to specific strings, or to subroutes.
  */
-export type RouteValue<T extends RouteType> = T extends string
-  ? string
-  : T extends [infer V extends string, infer S extends RouteType]
-  ? [V, RouteValue<S>]
-  : never;
+export type RouteValue = string | [string, RouteValue];
 
-export type RouteConfigEntry<T extends RouteType> = T extends string
+export type RouteConfigEntry<T extends RouteValue> = T extends string
   ? string
-  : T extends [infer V extends string, infer S extends RouteType]
+  : T extends [infer V extends string, infer S extends RouteValue]
   ? [V, RouteConfig<S>]
   : never;
 
@@ -58,7 +52,7 @@ export type RouteConfigEntry<T extends RouteType> = T extends string
  * router.toUrl('invalid') // error
  * ```
  */
-export type RouteConfig<T extends RouteType> = Record<string, RouteConfigEntry<T>>;
+export type RouteConfig<T extends RouteValue> = Record<string, RouteConfigEntry<T>>;
 
 /**
  * Route path and query string parameters.
@@ -71,8 +65,8 @@ export type Params = Record<string, any>;
  * @template T See {@link RouteConfig} for details.
  *
  */
-export type Route<T extends RouteType> = {
-  value: RouteValue<T>;
+export type Route<T extends RouteValue> = {
+  value: T;
   params: Params;
   replace?: boolean;
 };
@@ -89,7 +83,7 @@ export type Route<T extends RouteType> = {
  *
  * @returns the URL.
  */
-export type ToUrl<T extends RouteType> = (value: RouteValue<T>, params?: Params) => string;
+export type ToUrl<T extends RouteValue> = (value: T, params?: Params) => string;
 
 /**
  * Function to navigate to a URL from a value and params.
@@ -103,8 +97,8 @@ export type ToUrl<T extends RouteType> = (value: RouteValue<T>, params?: Params)
  *
  * @returns the URL.
  */
-export type Navigate<T extends RouteType> =
-  (value: RouteValue<T>, params?: Params, popstate?: boolean) => void;
+export type Navigate<T extends RouteValue> =
+  (value: T, params?: Params, popstate?: boolean) => void;
 
 /**
  * Function to generate a Route.
@@ -117,8 +111,8 @@ export type Navigate<T extends RouteType> =
  * appending. This is useful, for example, when redirecting from a route that the user was not
  * allowed to access.
  */
-export type ToRoute<T extends RouteType> =
-  (value: RouteValue<T>, params?: Params, replace?: boolean) => Route<T>;
+export type ToRoute<T extends RouteValue> =
+  (value: T, params?: Params, replace?: boolean) => Route<T>;
 
 /** Used internally. */
 export type GetStatePath = (path: string) => string;
@@ -136,7 +130,7 @@ export type SetHref = (href: string) => void;
  *
  * @param route the current route.
  */
-export type OnRouteChange<T extends RouteType> = (route: Route<T>) => void;
+export type OnRouteChange<T extends RouteValue> = (route: Route<T>) => void;
 
 /**
  * Function to start the router.
@@ -144,7 +138,7 @@ export type OnRouteChange<T extends RouteType> = (route: Route<T>) => void;
  * @param onRouteChange callback function for when the route changes. This should be used to update
  * the route in the application state. See {@link OnRouteChange}.
  */
-export type Start<T extends RouteType> = (onRouteChange: OnRouteChange<T>) => void;
+export type Start<T extends RouteValue> = (onRouteChange: OnRouteChange<T>) => void;
 
 /** Do not use this, it is for internal testing purposes only. */
 export type WindowLike = {
@@ -186,14 +180,14 @@ export type DoSyncLocationBarParams = {
  *
  * @param route the current route.
  */
-export type SyncLocationBar<T extends RouteType> = (route: Route<T>) => void;
+export type SyncLocationBar<T extends RouteValue> = (route: Route<T>) => void;
 
 /**
  * Configuration to create a router.
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type RouterConfig<T extends RouteType> = {
+export type RouterConfig<T extends RouteValue> = {
   /** The route configuration. See the documentation for {@link RouteConfig} for details. */
   routeConfig: RouteConfig<T>;
 
@@ -213,7 +207,7 @@ export type RouterConfig<T extends RouteType> = {
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type WithRoute<T extends RouteType> = {
+export type WithRoute<T extends RouteValue> = {
   route: Route<T>;
 };
 
@@ -222,7 +216,7 @@ export type WithRoute<T extends RouteType> = {
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type Router<T extends RouteType> = {
+export type Router<T extends RouteValue> = {
   /** The initial route as parsed from the location bar. */
   initialRoute: Route<T>;
 
