@@ -5,7 +5,9 @@ import { createToUrl } from '../src/helpers';
 import { Route, RouteConfig, RouterConfig } from '../src/types';
 import { meiosisSetup } from 'meiosis-setup';
 
-type Page = 'Home' | 'Login' | 'UserProfile';
+type ProfilePage = 'User' | 'Home';
+type SettingsPage = 'List' | 'Home' | ['Profile', ProfilePage];
+type Page = 'Home' | 'Login' | 'UserProfile' | ['Settings', SettingsPage];
 
 const decodeURI = (uri: string) => uri;
 
@@ -34,8 +36,38 @@ const rootPath = '/my-server/my-base-path';
 const routeConfig: RouteConfig<Page> = {
   '/': 'Home',
   '/login': 'Login',
-  '/user/:id': 'UserProfile'
+  '/user/:id': 'UserProfile',
+  '/settings/:org': ['Settings', {
+    '/profile': ['Profile', {
+      '/:id': 'User',
+      '': 'Home'
+    }],
+    '/list': 'List',
+    '': 'Home'
+  }]
 };
+
+const _route1 = {
+  value: 'UserProfile',
+  params: { id: '42' }
+};
+
+const _route2 = {
+  value: ['Settings', 'List'],
+  params: { org: 'my-org' }
+};
+
+const _route3 = {
+  value: ['Settings', ['Profile', 'User']],
+  params: { org: 'my-org', id: '99' }
+};
+
+// router.toUrl('UserProfile', { id: 42 }) => '/user/42'
+// router.toUrl(['Settings', 'List'], { org: 'my-org' }) => '/settings/my-org/list'
+// router.toUrl(['Settings', ['Profile', 'User']], { org: 'my-org', id: 99 })
+
+// router.toUrl('Settings', { org: 'my-org' })
+// router.toUrl(['Settings', 'Profile', 'User'], { org: 'my-org', id: 99 })
 
 type TestRouterConfig = {
   rootPath?: string;

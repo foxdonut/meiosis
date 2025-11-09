@@ -12,6 +12,7 @@ import {
   OnRouteChange,
   Params,
   Route,
+  RouteValue,
   Router,
   RouterConfig,
   ToRoute,
@@ -50,7 +51,7 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl(routeConfig, prefix, historyMode);
 
-  const navigate: Navigate<T> = (value: T, params?: Params, popstate?: boolean) => {
+  const navigate: Navigate<T> = (value: RouteValue<T>, params?: Params, popstate?: boolean) => {
     const url = toUrl(value, params);
     wdw.history.pushState({}, '', url);
     if (popstate) {
@@ -58,10 +59,10 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     }
   };
 
-  const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
+  const toRoute: ToRoute<T> = (value: RouteValue<T>, params?: Params, replace?: boolean) =>
     ({ value, params: params || {}, replace });
 
-  const getRoute = (path: string | undefined) => {
+  const getRoute = <T>(path: string | undefined): Route<T> => {
     let matchPath = path || '/';
     if (matchPath.startsWith('?')) {
       matchPath = '/' + matchPath;
@@ -86,7 +87,7 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
         }
       });
     }
-    wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
+    wdw.onpopstate = () => onRouteChange(getRoute<T>(getPath()));
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
