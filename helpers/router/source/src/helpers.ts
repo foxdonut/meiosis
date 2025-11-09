@@ -8,6 +8,7 @@ import {
   GetStatePath,
   RouteConfig,
   RouteConfigEntry,
+  RouteType,
   RouteValue,
   SetHref,
   ToUrl,
@@ -53,7 +54,7 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
   );
 };
 
-const flattenRouteValue = <T>(routeValue: RouteValue<T>): string => {
+const flattenRouteValue = <T extends RouteType>(routeValue: RouteValue<T>): string => {
   if (typeof routeValue === 'string') {
     return routeValue;
   } else if (Array.isArray(routeValue)) {
@@ -63,8 +64,8 @@ const flattenRouteValue = <T>(routeValue: RouteValue<T>): string => {
   }
 };
 
-const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<string, string>,
-  [path, value]: [path: string, value: RouteConfigEntry<T>]) => {
+const flattenRouteEntry = <T extends RouteType>(parent: string, rootPath: string,
+  result: Record<string, string>, [path, value]: [path: string, value: RouteConfigEntry<T>]) => {
 
   if (typeof value === 'string') {
     const nextValue = parent.length > 0 ? `${parent}${routeValueSeparator}${value}` : value;
@@ -87,7 +88,7 @@ const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<s
 };
 
 /** For internal use only. */
-export const flattenRouteConfig = <T>(routeConfig: RouteConfig<T>,
+export const flattenRouteConfig = <T extends RouteType>(routeConfig: RouteConfig<T>,
   parent = '', rootPath = ''): Record<string, string> => {
 
   return Object.entries(routeConfig).reduce((result, next) =>
@@ -95,12 +96,12 @@ export const flattenRouteConfig = <T>(routeConfig: RouteConfig<T>,
 };
 
 /** For internal use only. */
-export const expandRouteValue = <T>(routeValue: string): RouteValue<T> => {
+export const expandRouteValue = <T extends RouteType>(routeValue: string): RouteValue<T> => {
   const parts = routeValue.split(routeValueSeparator);
   if (parts.length === 1) {
     return parts[0] as RouteValue<T>;
   }
-  return [parts[0], expandRouteValue<T>(parts.slice(1).join(routeValueSeparator))] as RouteValue<T>;
+  return [parts[0], expandRouteValue(parts.slice(1).join(routeValueSeparator))] as RouteValue<T>;
 };
 
 /** For internal use only. */
@@ -117,7 +118,7 @@ export const createGetUrl = (prefix: string, historyMode: boolean, wdw: WindowLi
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
-const createToUrlFn = <T>(routeConfig: RouteConfig<T>,
+const createToUrlFn = <T extends RouteType>(routeConfig: RouteConfig<T>,
   getStatePath: GetStatePath): ToUrl<T> => {
 
   const pathLookup = Object.entries(flattenRouteConfig(routeConfig)).reduce(
@@ -140,7 +141,7 @@ const createToUrlFn = <T>(routeConfig: RouteConfig<T>,
 };
 
 /** For internal use only. */
-export const createToUrl = <T = string>(routeConfig: RouteConfig<T>,
+export const createToUrl = <T extends RouteType>(routeConfig: RouteConfig<T>,
   prefix: string, historyMode: boolean): ToUrl<T> => {
 
   const getStatePath = historyMode ? stripTrailingSlash : I;
