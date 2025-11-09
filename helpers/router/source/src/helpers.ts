@@ -7,6 +7,7 @@ import {
   DoSyncLocationBarParams,
   GetStatePath,
   RouteConfig,
+  RouteConfigEntry,
   SetHref,
   ToUrl,
   WindowLike
@@ -49,6 +50,35 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
   );
 };
 
+const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<string, string>,
+  [path, value]: [path: string, value: RouteConfigEntry<T>]) => {
+
+  if (typeof value === 'string') {
+    const nextValue = parent.length > 0 ? `${parent}__${value}` : value;
+    return Object.assign(result, { [rootPath + path]: nextValue });
+  } else if (Array.isArray(value) && value.length === 2) {
+    const subrouteValue = value[0];
+
+    if (typeof subrouteValue !== 'string') {
+      throw new Error(`Invalid routeConfig value for path "${path}": ${subrouteValue}`);
+    }
+
+    const nextParent = parent.length > 0 ? `${parent}__${subrouteValue}` : subrouteValue;
+
+    return Object.assign(result, flattenRouteConfig(value[1], nextParent, rootPath + path));
+  } else {
+    throw new Error(`Invalid routeConfig value for path "${path}": ${value}`);
+  }
+};
+
+/** For internal use only. */
+export const flattenRouteConfig = <T = string>(routeConfig: RouteConfig<T>,
+  parent = '', rootPath = ''): Record<string, string> => {
+
+  return Object.entries(routeConfig).reduce((result, next) =>
+    flattenRouteEntry(parent, rootPath, result, next), {} as Record<string, string>);
+};
+
 /** For internal use only. */
 export const getConfig = (rootPath?: string) => {
   const historyMode = rootPath != null;
@@ -67,12 +97,12 @@ const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
   getStatePath: GetStatePath): ToUrl => {
 
   const pathLookup = Object.entries(routeConfig).reduce(
-    (result, [path, page]) => Object.assign(result, { [page]: path }),
+    (result, [path, value]) => Object.assign(result, { [value]: path }),
     {} as Record<string, string>
   );
 
-  return (page, allParams = {}) => {
-    const path = getStatePath(pathLookup[page]);
+  return (value, allParams = {}) => {
+    const path = getStatePath(pathLookup[value]);
     const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
 
     return (
@@ -91,7 +121,7 @@ export const createToUrl = <T extends string = string>(routeConfig: RouteConfig<
 
   const getStatePath = historyMode ? stripTrailingSlash : I;
   const toUrl = createToUrlFn<T>(routeConfig, getStatePath);
-  return (page, params = {}) => prefix + toUrl(page, params);
+  return (value, params = {}) => prefix + toUrl(value, params);
 };
 
 /** For internal use only. */

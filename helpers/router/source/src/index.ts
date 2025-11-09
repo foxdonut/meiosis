@@ -24,6 +24,7 @@ import {
   createGetUrl,
   createToUrl,
   doSyncLocationBar,
+  flattenRouteConfig,
   getConfig,
   getQuery
 } from './helpers';
@@ -44,7 +45,9 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
 
   const { routeConfig, rootPath, wdw = window } = routerConfig;
 
-  const routeMatcher = createRouteMatcher(routeConfig);
+  const flattenedRouteConfig = flattenRouteConfig(routeConfig);
+
+  const routeMatcher = createRouteMatcher(flattenedRouteConfig);
   const { prefix, historyMode } = getConfig(rootPath);
 
   const getUrl = createGetUrl(prefix, historyMode, wdw);
@@ -71,7 +74,8 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     const queryParams = qs.parse(getQuery(path));
     const params = Object.assign(queryParams, match.params);
 
-    return Object.assign(match, { params });
+    return Object.assign({ value: 'test' as RouteValue<T> }, { params });
+    // return Object.assign(match, { params });
   };
 
   const getCurrentRoute = () => getRoute(getPath());
