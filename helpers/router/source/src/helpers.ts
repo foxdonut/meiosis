@@ -8,12 +8,15 @@ import {
   GetStatePath,
   RouteConfig,
   RouteConfigEntry,
+  RouteValue,
   SetHref,
   ToUrl,
   WindowLike
 } from './types';
 
 // ----- Helpers
+
+const routeValueSeparator = '__';
 
 const stripTrailingSlash = (url: string): string =>
   url.length === 0 || url === '/'
@@ -50,11 +53,21 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
   );
 };
 
+const flattenRouteValue = <T>(routeValue: RouteValue<T>): string => {
+  if (typeof routeValue === 'string') {
+    return routeValue;
+  } else if (Array.isArray(routeValue)) {
+    return routeValue.flat().join(routeValueSeparator);
+  } else {
+    throw new Error(`Invalid routeValue: ${routeValue}`);
+  }
+};
+
 const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<string, string>,
   [path, value]: [path: string, value: RouteConfigEntry<T>]) => {
 
   if (typeof value === 'string') {
-    const nextValue = parent.length > 0 ? `${parent}__${value}` : value;
+    const nextValue = parent.length > 0 ? `${parent}${routeValueSeparator}${value}` : value;
     return Object.assign(result, { [rootPath + path]: nextValue });
   } else if (Array.isArray(value) && value.length === 2) {
     const subrouteValue = value[0];
@@ -63,7 +76,9 @@ const flattenRouteEntry = <T>(parent: string, rootPath: string, result: Record<s
       throw new Error(`Invalid routeConfig value for path "${path}": ${subrouteValue}`);
     }
 
-    const nextParent = parent.length > 0 ? `${parent}__${subrouteValue}` : subrouteValue;
+    const nextParent = parent.length > 0
+      ? `${parent}${routeValueSeparator}${subrouteValue}`
+      : subrouteValue;
 
     return Object.assign(result, flattenRouteConfig(value[1], nextParent, rootPath + path));
   } else {
@@ -80,6 +95,15 @@ export const flattenRouteConfig = <T = string>(routeConfig: RouteConfig<T>,
 };
 
 /** For internal use only. */
+export const expandRouteValue = <T>(routeValue: string): RouteValue<T> => {
+  const parts = routeValue.split(routeValueSeparator);
+  if (parts.length === 1) {
+    return parts[0] as RouteValue<T>;
+  }
+  return [parts[0], expandRouteValue<T>(parts.slice(1).join(routeValueSeparator))] as RouteValue<T>;
+};
+
+/** For internal use only. */
 export const getConfig = (rootPath?: string) => {
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : '#!';
@@ -93,15 +117,15 @@ export const createGetUrl = (prefix: string, historyMode: boolean, wdw: WindowLi
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
-const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
+const createToUrlFn = <T = string>(routeConfig: RouteConfig<T>,
   getStatePath: GetStatePath): ToUrl => {
 
-  const pathLookup = Object.entries(routeConfig).reduce(
+  const pathLookup = Object.entries(flattenRouteConfig(routeConfig)).reduce(
     (result, [path, value]) => Object.assign(result, { [value]: path }),
     {} as Record<string, string>
   );
 
-  return (value, allParams = {}) => {
+  return (value: string, allParams = {}) => {
     const path = getStatePath(pathLookup[value]);
     const { params, queryParams } = separateParamsAndQueryParams(path, allParams);
 
@@ -116,12 +140,12 @@ const createToUrlFn = <T extends string = string>(routeConfig: RouteConfig<T>,
 };
 
 /** For internal use only. */
-export const createToUrl = <T extends string = string>(routeConfig: RouteConfig<T>,
+export const createToUrl = <T = string>(routeConfig: RouteConfig<T>,
   prefix: string, historyMode: boolean): ToUrl<T> => {
 
   const getStatePath = historyMode ? stripTrailingSlash : I;
   const toUrl = createToUrlFn<T>(routeConfig, getStatePath);
-  return (value, params = {}) => prefix + toUrl(value, params);
+  return (value: RouteValue<T>, params = {}) => prefix + toUrl(flattenRouteValue(value), params);
 };
 
 /** For internal use only. */

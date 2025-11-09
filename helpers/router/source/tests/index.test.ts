@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 import { createRouter } from '../src/index';
-import { createToUrl, flattenRouteConfig } from '../src/helpers';
+import { createToUrl, expandRouteValue, flattenRouteConfig } from '../src/helpers';
 import { Route, RouteConfig, RouterConfig } from '../src/types';
 import { meiosisSetup } from 'meiosis-setup';
 
@@ -47,28 +47,6 @@ const routeConfig: RouteConfig<Page> = {
   }]
 };
 
-const _route1 = {
-  value: 'UserProfile',
-  params: { id: '42' }
-};
-
-const _route2 = {
-  value: ['Settings', 'List'],
-  params: { org: 'my-org' }
-};
-
-const _route3 = {
-  value: ['Settings', ['Profile', 'User']],
-  params: { org: 'my-org', id: '99' }
-};
-
-// router.toUrl('UserProfile', { id: 42 }) => '/user/42'
-// router.toUrl(['Settings', 'List'], { org: 'my-org' }) => '/settings/my-org/list'
-// router.toUrl(['Settings', ['Profile', 'User']], { org: 'my-org', id: 99 })
-
-// router.toUrl('Settings', { org: 'my-org' })
-// router.toUrl(['Settings', 'Profile', 'User'], { org: 'my-org', id: 99 })
-
 type TestRouterConfig = {
   rootPath?: string;
 };
@@ -81,235 +59,233 @@ const hashAndHistoryModeCases: HashAndHistoryModeCases[] = [
 ];
 
 describe('router', () => {
-  /*
-    describe.each(hashAndHistoryModeCases)('%s',
-      (_label, caseConfig, prefix) => {
-        const historyMode = !!caseConfig.rootPath;
+  describe.each(hashAndHistoryModeCases)('%s',
+    (_label, caseConfig: Partial<RouterConfig<Page>>, prefix: string) => {
+      const historyMode = !!caseConfig.rootPath;
 
-        const createWindow = (path: string) => mockWindow(caseConfig.rootPath, prefix, path);
+      const createWindow = (path: string) => mockWindow(caseConfig.rootPath, prefix, path);
 
-        const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
-          Object.assign({ routeConfig }, caseConfig, config);
+      const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
+        Object.assign({ routeConfig }, caseConfig, config);
 
-        const createRouterFn = (config?: Partial<RouterConfig<Page>>) =>
-          createRouter(createRouterConfig(config));
+      const createRouterFn = (config?: Partial<RouterConfig<Page>>) =>
+        createRouter(createRouterConfig(config));
 
-        test('toUrl converts route to URL', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+      test('toUrl converts route to URL', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          expect(router.toUrl('Login')).toEqual(prefix + path);
-          expect(router.toUrl('UserProfile')).toEqual(prefix + '/user/undefined');
-          expect(router.toUrl('UserProfile', { id: 42 })).toEqual(prefix + '/user/42');
-          expect(router.toUrl('UserProfile', { id: 42, a: 1, b: 'two' }))
-            .toEqual(prefix + '/user/42?a=1&b=two');
-        });
+        expect(router.toUrl('Login')).toEqual(prefix + path);
+        expect(router.toUrl('UserProfile')).toEqual(prefix + '/user/undefined');
+        expect(router.toUrl('UserProfile', { id: 42 })).toEqual(prefix + '/user/42');
+        expect(router.toUrl('UserProfile', { id: 42, a: 1, b: 'two' }))
+          .toEqual(prefix + '/user/42?a=1&b=two');
+      });
 
-        test('toRoute produces a Route', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+      test('toRoute produces a Route', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          const route1 = { value: 'Login', params: {} };
-          expect(router.toRoute('Login')).toEqual(route1);
+        const route1 = { value: 'Login', params: {} };
+        expect(router.toRoute('Login')).toEqual(route1);
 
-          const params = { duck: 'quack' };
-          const route2 = { value: 'Login', params };
-          expect(router.toRoute('Login', params)).toEqual(route2);
+        const params = { duck: 'quack' };
+        const route2 = { value: 'Login', params };
+        expect(router.toRoute('Login', params)).toEqual(route2);
 
-          const route3 = { value: 'Login', params: {}, replace: true };
-          expect(router.toRoute('Login', {}, true)).toEqual(route3);
-        });
+        const route3 = { value: 'Login', params: {}, replace: true };
+        expect(router.toRoute('Login', {}, true)).toEqual(route3);
+      });
 
-        test('navigate changes the URL', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+      test('navigate changes the URL', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          router.navigate('Login');
-          expect(wdw.location.hash).toEqual((historyMode ? rootPath : prefix) + path);
-          expect(wdw.history.pushState.mock.calls[0][2]).toEqual(prefix + path);
-          wdw.history.pushState.mockClear();
-        });
+        router.navigate('Login');
+        expect(wdw.location.hash).toEqual((historyMode ? rootPath : prefix) + path);
+        expect(wdw.history.pushState.mock.calls[0][2]).toEqual(prefix + path);
+        wdw.history.pushState.mockClear();
+      });
 
-        test('navigate triggers popstate', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
+      test('navigate triggers popstate', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
 
-          global.dispatchEvent = global.dispatchEvent || jest.fn();
-          global.PopStateEvent = global.PopStateEvent || class {
-            constructor(_type: string, _options: Record<string, any>) {
-              // noop
-            }
-          };
-          jest.spyOn(global, 'dispatchEvent');
-
-          router.navigate('Login', {}, true);
-
-          expect(global.dispatchEvent).toHaveBeenCalled();
-        });
-
-        test('getCurrentRoute', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
-
-          router.navigate('Login');
-          const currentRoute = router.getCurrentRoute();
-          expect(currentRoute).toEqual({
-            value: 'Login',
-            pattern: '/login',
-            url: '/login',
-            params: {}
-          });
-        });
-
-        describe('syncLocationBar', () => {
-          type SyncLocationBarCases = [string, { replace?: boolean }];
-
-          const syncLocationBarCases: SyncLocationBarCases[] = [
-            ['pushState', {}],
-            ['replaceState', { replace: true }]
-          ];
-
-          test.each(syncLocationBarCases)('calls %s', (method, options) => {
-            const path = '/login';
-            const methodFn = jest.fn();
-            const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
-            const router = createRouterFn({ wdw });
-            const url = prefix + '/user/42?sport=tennis';
-            const route: Route<Page> = Object.assign(
-              {
-                url,
-                value: 'UserProfile' as Page,
-                params: { id: '42', sport: 'tennis' }
-              },
-              options
-            );
-
-            router.syncLocationBar(route);
-
-            const calls = methodFn.mock.calls;
-            expect(calls.length).toBe(1);
-            expect(calls[0][0]).toEqual({});
-            expect(calls[0][1]).toEqual('');
-            expect(calls[0][2]).toEqual(url);
-          });
-        });
-
-        test('addEventListener in historyMode: ' + historyMode, () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
-
-          const onRouteChange = jest.fn();
-          if (router.start) {
-            router.start(onRouteChange);
+        global.dispatchEvent = global.dispatchEvent || jest.fn();
+        global.PopStateEvent = global.PopStateEvent || class {
+          constructor(_type: string, _options: Record<string, any>) {
+            // noop
           }
-
-          expect(wdw.addEventListener.mock.calls.length).toBe(historyMode ? 2 : 0);
-        });
-
-        describe('initial route', () => {
-          type InitialRouteCases = [string, string, { value: string, params: any }];
-
-          const initialRouteCases: InitialRouteCases[] = [
-            ['slash', '/', { value: 'Home', params: {} }],
-            ['empty', '', { value: 'Home', params: {} }],
-            [
-              'slash with queryParams',
-              '/?sport=tennis',
-              { value: 'Home', params: { sport: 'tennis' } }
-            ],
-            [
-              'empty with queryParams',
-              '?sport=tennis',
-              { value: 'Home', params: { sport: 'tennis' } }
-            ],
-            ['just a route', '/login', { value: 'Login', params: {} }],
-            ['with params', '/user/42', { value: 'UserProfile', params: { id: '42' } }],
-            [
-              'with queryParams',
-              '/login?sport=tennis',
-              { value: 'Login', params: { sport: 'tennis' } }
-            ],
-            [
-              'with params and queryParams',
-              '/user/42?sport=tennis',
-              { value: 'UserProfile', params: { id: '42', sport: 'tennis' } }
-            ]
-          ];
-
-          test.each(initialRouteCases)('%s', (_label, path, expectedResult) => {
-            const router = createRouterFn(Object.assign({ wdw: createWindow(path) }));
-
-            expect(router.initialRoute).toMatchObject(expectedResult);
-          });
-        });
-
-        test('start calls onRouteChange', () => {
-          const path = '/login';
-          const wdw = createWindow(path);
-          const router = createRouterFn({ wdw });
-
-          const onRouteChange = jest.fn();
-
-          router.start(onRouteChange);
-
-          wdw.location.pathname = prefix + path;
-          wdw.onpopstate();
-
-          const calls = onRouteChange.mock.calls;
-          expect(calls.length).toBe(1);
-          expect(calls[0][0]).toMatchObject({
-            value: 'Login',
-            params: {}
-          });
-        });
-      }
-    );
-
-    describe('setup', () => {
-      const wdw = mockWindow(undefined, '#!', '/');
-
-      test('calls start and map with syncLocationBar', () => {
-        type MyApp = { route: Route<Page>, count: number };
-        const router = createRouter({ routeConfig, wdw });
-
-        const app = { initial: { route: router.initialRoute, count: 0 } };
-        const cells = meiosisSetup<MyApp>({ app });
-
-        router.setup(cells);
-
-        wdw.location.hash = '#!/login';
-        wdw.onpopstate();
-
-        expect(cells().state.route.value).toEqual('Login');
-
-        wdw.location.hash = '#!/user/42';
-        wdw.onpopstate();
-
-        expect(cells().state.route.value).toEqual('UserProfile');
-        expect(cells().state.route.params.id).toEqual('42');
-      });
-    });
-
-    describe('createToUrl', () => {
-      it('keeps slash for empty path', () => {
-        const routeConfig = {
-          '/': 'home',
-          '/login': 'login'
         };
+        jest.spyOn(global, 'dispatchEvent');
 
-        const toUrl = createToUrl(routeConfig, '', true);
-        const url = toUrl('home');
+        router.navigate('Login', {}, true);
 
-        expect(url).toEqual('/');
+        expect(global.dispatchEvent).toHaveBeenCalled();
       });
+
+      test('getCurrentRoute', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        router.navigate('Login');
+        const currentRoute = router.getCurrentRoute();
+        expect(currentRoute).toEqual({
+          value: 'Login',
+          pattern: '/login',
+          url: '/login',
+          params: {}
+        });
+      });
+
+      describe('syncLocationBar', () => {
+        type SyncLocationBarCases = [string, { replace?: boolean }];
+
+        const syncLocationBarCases: SyncLocationBarCases[] = [
+          ['pushState', {}],
+          ['replaceState', { replace: true }]
+        ];
+
+        test.each(syncLocationBarCases)('calls %s', (method, options) => {
+          const path = '/login';
+          const methodFn = jest.fn();
+          const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
+          const router = createRouterFn({ wdw });
+          const url = prefix + '/user/42?sport=tennis';
+          const route: Route<Page> = Object.assign(
+            {
+              url,
+              value: 'UserProfile' as Page,
+              params: { id: '42', sport: 'tennis' }
+            },
+            options
+          );
+
+          router.syncLocationBar(route);
+
+          const calls = methodFn.mock.calls;
+          expect(calls.length).toBe(1);
+          expect(calls[0][0]).toEqual({});
+          expect(calls[0][1]).toEqual('');
+          expect(calls[0][2]).toEqual(url);
+        });
+      });
+
+      test('addEventListener in historyMode: ' + historyMode, () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        const onRouteChange = jest.fn();
+        if (router.start) {
+          router.start(onRouteChange);
+        }
+
+        expect(wdw.addEventListener.mock.calls.length).toBe(historyMode ? 2 : 0);
+      });
+
+      describe('initial route', () => {
+        type InitialRouteCases = [string, string, { value: string, params: any }];
+
+        const initialRouteCases: InitialRouteCases[] = [
+          ['slash', '/', { value: 'Home', params: {} }],
+          ['empty', '', { value: 'Home', params: {} }],
+          [
+            'slash with queryParams',
+            '/?sport=tennis',
+            { value: 'Home', params: { sport: 'tennis' } }
+          ],
+          [
+            'empty with queryParams',
+            '?sport=tennis',
+            { value: 'Home', params: { sport: 'tennis' } }
+          ],
+          ['just a route', '/login', { value: 'Login', params: {} }],
+          ['with params', '/user/42', { value: 'UserProfile', params: { id: '42' } }],
+          [
+            'with queryParams',
+            '/login?sport=tennis',
+            { value: 'Login', params: { sport: 'tennis' } }
+          ],
+          [
+            'with params and queryParams',
+            '/user/42?sport=tennis',
+            { value: 'UserProfile', params: { id: '42', sport: 'tennis' } }
+          ]
+        ];
+
+        test.each(initialRouteCases)('%s', (_label, path, expectedResult) => {
+          const router = createRouterFn(Object.assign({ wdw: createWindow(path) }));
+
+          expect(router.initialRoute).toMatchObject(expectedResult);
+        });
+      });
+
+      test('start calls onRouteChange', () => {
+        const path = '/login';
+        const wdw = createWindow(path);
+        const router = createRouterFn({ wdw });
+
+        const onRouteChange = jest.fn();
+
+        router.start(onRouteChange);
+
+        wdw.location.pathname = prefix + path;
+        wdw.onpopstate();
+
+        const calls = onRouteChange.mock.calls;
+        expect(calls.length).toBe(1);
+        expect(calls[0][0]).toMatchObject({
+          value: 'Login',
+          params: {}
+        });
+      });
+    }
+  );
+
+  describe('setup', () => {
+    const wdw = mockWindow(undefined, '#!', '/');
+
+    test('calls start and map with syncLocationBar', () => {
+      type MyApp = { route: Route<Page>, count: number };
+      const router = createRouter({ routeConfig, wdw });
+
+      const app = { initial: { route: router.initialRoute, count: 0 } };
+      const cells = meiosisSetup<MyApp>({ app });
+
+      router.setup(cells);
+
+      wdw.location.hash = '#!/login';
+      wdw.onpopstate();
+
+      expect(cells().state.route.value).toEqual('Login');
+
+      wdw.location.hash = '#!/user/42';
+      wdw.onpopstate();
+
+      expect(cells().state.route.value).toEqual('UserProfile');
+      expect(cells().state.route.params.id).toEqual('42');
     });
-  */
+  });
+
+  describe('createToUrl', () => {
+    it('keeps slash for empty path', () => {
+      const routeConfig = {
+        '/': 'home',
+        '/login': 'login'
+      };
+
+      const toUrl = createToUrl(routeConfig, '', true);
+      const url = toUrl('home');
+
+      expect(url).toEqual('/');
+    });
+  });
 
   describe('flattenRouteConfig', () => {
     it('returns flat config unchanged', () => {
@@ -350,6 +326,22 @@ describe('router', () => {
 
       const flattenedRouteConfig = flattenRouteConfig(inputRouteConfig);
       expect(flattenedRouteConfig).toEqual(expectedRouteConfig);
+    });
+  });
+
+  describe('expandRouteValue', () => {
+    it('returns single route value unchanged', () => {
+      expect(expandRouteValue<Page>('UserProfile')).toEqual('UserProfile');
+    });
+
+    it('expands flat route value to single nested route value', () => {
+      expect(expandRouteValue<Page>('Settings__List'))
+        .toEqual(['Settings', ['Profile', 'Home']]);
+    });
+
+    it('expands flat route value to multiple nested route value', () => {
+      expect(expandRouteValue<Page>('Settings__Profile__Home'))
+        .toEqual(['Settings', ['Profile', 'Home']]);
     });
   });
 });

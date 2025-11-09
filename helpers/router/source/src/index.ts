@@ -24,6 +24,7 @@ import {
   createGetUrl,
   createToUrl,
   doSyncLocationBar,
+  expandRouteValue,
   flattenRouteConfig,
   getConfig,
   getQuery
@@ -40,7 +41,7 @@ import {
  * - `rootPath` (`string`): indicates to use history mode instead of hash mode by specifying the
  * root path. See {@link "types".RouterConfig} for details.
  */
-export const createRouter = <T extends string = string>(routerConfig: RouterConfig<T>):
+export const createRouter = <T = string>(routerConfig: RouterConfig<T>):
   Router<T> => {
 
   const { routeConfig, rootPath, wdw = window } = routerConfig;
@@ -73,9 +74,9 @@ export const createRouter = <T extends string = string>(routerConfig: RouterConf
     const match = routeMatcher(matchPath);
     const queryParams = qs.parse(getQuery(path));
     const params = Object.assign(queryParams, match.params);
+    const value: RouteValue<T> = expandRouteValue<T>(match.value);
 
-    return Object.assign({ value: 'test' as RouteValue<T> }, { params });
-    // return Object.assign(match, { params });
+    return { value, params };
   };
 
   const getCurrentRoute = () => getRoute(getPath());
