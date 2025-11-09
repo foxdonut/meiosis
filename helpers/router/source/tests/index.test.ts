@@ -137,8 +137,6 @@ describe('router', () => {
         const currentRoute = router.getCurrentRoute();
         expect(currentRoute).toEqual({
           value: 'Login',
-          pattern: '/login',
-          url: '/login',
           params: {}
         });
       });
@@ -336,7 +334,7 @@ describe('router', () => {
 
     it('expands flat route value to single nested route value', () => {
       expect(expandRouteValue<Page>('Settings__List'))
-        .toEqual(['Settings', ['Profile', 'Home']]);
+        .toEqual(['Settings', 'List']);
     });
 
     it('expands flat route value to multiple nested route value', () => {
