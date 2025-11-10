@@ -9,9 +9,12 @@ import { MeiosisCell } from 'meiosis-setup/types';
 import { Stream } from 'meiosis-setup/simple-stream';
 import {
   Navigate,
+  OnListener,
   OnRouteChange,
+  OnRouteListener,
   Params,
   Route,
+  RouteListener,
   RouteValue,
   Router,
   RouterConfig,
@@ -26,6 +29,7 @@ import {
   doSyncLocationBar,
   expandRouteValue,
   flattenRouteConfig,
+  flattenRouteValue,
   getConfig,
   getQuery
 } from './helpers';
@@ -80,8 +84,45 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
   const getCurrentRoute = () => getRoute(getPath());
 
   const initialRoute = getCurrentRoute();
+  let previousRoute = initialRoute;
 
-  const start = (onRouteChange: OnRouteChange<T>) => {
+  const onListeners: RouteListener<T>[] = [];
+
+  const listen: OnRouteListener<T> = (value: T, callbacks: OnListener<T>) => {
+    onListeners.push({ value, callbacks });
+  };
+
+  const notifyListeners = (route: Route<T>, previousRoute: Route<T>) => {
+    if (route.value === previousRoute.value &&
+      JSON.stringify(route.params) === JSON.stringify(previousRoute.params)) {
+
+      return;
+    }
+
+    onListeners.forEach((listener) => {
+      const previousRouteValue = flattenRouteValue(previousRoute.value);
+      const routeValue = flattenRouteValue(route.value);
+      const listenerValue = flattenRouteValue(listener.value);
+
+      let callback: OnRouteChange<T> | undefined = undefined;
+
+      if (routeValue.startsWith(listenerValue)) {
+        if (previousRouteValue.startsWith(listenerValue)) {
+          callback = listener.callbacks.change;
+        } else {
+          callback = listener.callbacks.enter;
+        }
+      } else if (previousRouteValue.startsWith(listenerValue)) {
+        callback = listener.callbacks.exit;
+      }
+
+      if (callback) {
+        callback(route);
+      }
+    });
+  };
+
+  const start = (onRouteChange?: OnRouteChange<T>) => {
     if (historyMode) {
       addHistoryEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);
@@ -90,7 +131,14 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
         }
       });
     }
-    wdw.onpopstate = () => onRouteChange(getRoute(getPath()));
+    wdw.onpopstate = () => {
+      const route = getRoute(getPath());
+      notifyListeners(route, previousRoute);
+      if (onRouteChange) {
+        onRouteChange(route);
+      }
+      previousRoute = route;
+    };
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
@@ -107,5 +155,15 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
     });
   };
 
-  return { initialRoute, getCurrentRoute, navigate, toUrl, toRoute, start, syncLocationBar, setup };
+  return {
+    initialRoute,
+    getCurrentRoute,
+    listen,
+    navigate,
+    toUrl,
+    toRoute,
+    start,
+    syncLocationBar,
+    setup
+  };
 };

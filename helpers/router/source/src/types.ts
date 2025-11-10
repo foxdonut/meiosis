@@ -138,7 +138,7 @@ export type OnRouteChange<T extends RouteValue> = (route: Route<T>) => void;
  * @param onRouteChange callback function for when the route changes. This should be used to update
  * the route in the application state. See {@link OnRouteChange}.
  */
-export type Start<T extends RouteValue> = (onRouteChange: OnRouteChange<T>) => void;
+export type Start<T extends RouteValue> = (onRouteChange?: OnRouteChange<T>) => void;
 
 /** Do not use this, it is for internal testing purposes only. */
 export type WindowLike = {
@@ -212,6 +212,33 @@ export type WithRoute<T extends RouteValue> = {
 };
 
 /**
+ * Listener for route navigation.
+ */
+export type OnListener<T extends RouteValue> = {
+  /** Called when a route is entered. */
+  enter?: OnRouteChange<T>;
+
+  /** Called when there was a change within the route. */
+  change?: OnRouteChange<T>;
+
+  /** Called when a route is exited. */
+  exit?: OnRouteChange<T>;
+};
+
+/**
+ * Function to listen to route navigation.
+ */
+export type OnRouteListener<T extends RouteValue> = (value: T, callbacks: OnListener<T>) => void;
+
+/**
+ * Listener for route navigation.
+ */
+export type RouteListener<T extends RouteValue> = {
+  value: T;
+  callbacks: OnListener<T>;
+};
+
+/**
  * Router created by {@link "index".createRouter}.
  *
  * @template T See {@link RouteConfig} for details.
@@ -234,6 +261,9 @@ export type Router<T extends RouteValue> = {
 
   /** Function to start the router. */
   start: Start<T>;
+
+  /** Function to listen to route navigation. */
+  listen: OnRouteListener<T>;
 
   /** Function that synchronizes the location bar with the application state route. */
   syncLocationBar: SyncLocationBar<T>;

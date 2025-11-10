@@ -63,6 +63,15 @@ describe('router', () => {
     (_label, caseConfig: Partial<RouterConfig<Page>>, prefix: string) => {
       const historyMode = !!caseConfig.rootPath;
 
+      const changePath = (wdw: any, path: string) => {
+        if (historyMode) {
+          wdw.location.pathname = prefix + path;
+        } else {
+          wdw.location.hash = prefix + path;
+        }
+        wdw.onpopstate();
+      };
+
       const createWindow = (path = '/login') => mockWindow(caseConfig.rootPath, prefix, path);
 
       const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
@@ -251,14 +260,243 @@ describe('router', () => {
 
         router.start(onRouteChange);
 
-        wdw.location.pathname = prefix + path;
-        wdw.onpopstate();
+        changePath(wdw, path);
 
         const calls = onRouteChange.mock.calls;
         expect(calls.length).toBe(1);
         expect(calls[0][0]).toMatchObject({
           value: 'Login',
           params: {}
+        });
+      });
+
+      describe('route listeners', () => {
+        test('enter simple route', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path = '/user/42';
+          router.listen('UserProfile', {
+            enter: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path);
+
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: 'UserProfile',
+            params: { id: '42' }
+          });
+        });
+
+        test('exit simple route', () => {
+          const wdw = createWindow('/login');
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path = '/user/42';
+          router.listen('Login', {
+            exit: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path);
+
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: 'UserProfile',
+            params: { id: '42' }
+          });
+        });
+
+        test('change simple route', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/user/42';
+          const path2 = '/user/24';
+          router.listen('UserProfile', {
+            change: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: 'UserProfile',
+            params: { id: '24' }
+          });
+        });
+
+        test('all listener', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const enterListener = jest.fn();
+          const changeListener = jest.fn();
+          const exitListener = jest.fn();
+
+          const path1 = '/user/42';
+          const path2 = '/user/24';
+          const path3 = '/login';
+
+          router.listen('UserProfile', {
+            enter: enterListener,
+            change: changeListener,
+            exit: exitListener
+          });
+
+          router.start();
+          expect(enterListener.mock.calls.length).toBe(0);
+          expect(changeListener.mock.calls.length).toBe(0);
+          expect(exitListener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(enterListener.mock.calls.length).toBe(1);
+          expect(changeListener.mock.calls.length).toBe(0);
+          expect(exitListener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(enterListener.mock.calls.length).toBe(1);
+          expect(changeListener.mock.calls.length).toBe(1);
+          expect(exitListener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path3);
+          expect(enterListener.mock.calls.length).toBe(1);
+          expect(changeListener.mock.calls.length).toBe(1);
+          expect(exitListener.mock.calls.length).toBe(1);
+        });
+
+        test('unconcerned listener', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/settings/my-org/profile/7';
+          router.listen('UserProfile', {
+            enter: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(0);
+        });
+
+        test('enter subroute same level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path = '/settings/my-org/list';
+          router.listen(['Settings', 'List'], {
+            enter: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path);
+
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: ['Settings', 'List'],
+            params: { org: 'my-org' }
+          });
+        });
+
+        test('exit subroute same level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/user/42';
+
+          router.listen(['Settings', 'List'], {
+            exit: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: 'UserProfile',
+            params: { id: '42' }
+          });
+        });
+
+        test('change subroute same level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/settings/other-org/list';
+
+          router.listen(['Settings', 'List'], {
+            change: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: ['Settings', 'List'],
+            params: { org: 'other-org' }
+          });
+        });
+
+        test('enter subroute lower level', () => {
+        });
+
+        test('exit subroute lower level', () => {
+        });
+
+        test('change subroute lower level', () => {
+        });
+
+        test('enter subroute different', () => {
+        });
+
+        test('exit subroute different', () => {
+        });
+
+        test('change subroute different', () => {
         });
       });
     }

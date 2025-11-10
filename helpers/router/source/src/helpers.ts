@@ -53,7 +53,8 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
   );
 };
 
-const flattenRouteValue = <T extends RouteValue>(routeValue: T): string => {
+/** For internal use only. */
+export const flattenRouteValue = <T extends RouteValue>(routeValue: T): string => {
   if (typeof routeValue === 'string') {
     return routeValue;
   } else if (Array.isArray(routeValue)) {
