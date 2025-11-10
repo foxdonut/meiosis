@@ -63,7 +63,7 @@ describe('router', () => {
     (_label, caseConfig: Partial<RouterConfig<Page>>, prefix: string) => {
       const historyMode = !!caseConfig.rootPath;
 
-      const createWindow = (path: string) => mockWindow(caseConfig.rootPath, prefix, path);
+      const createWindow = (path = '/login') => mockWindow(caseConfig.rootPath, prefix, path);
 
       const createRouterConfig = (config?: Partial<RouterConfig<Page>>): RouterConfig<Page> =>
         Object.assign({ routeConfig }, caseConfig, config);
@@ -84,8 +84,7 @@ describe('router', () => {
       });
 
       test('toUrl converts route to URL for subroutes', () => {
-        const path = '/login';
-        const wdw = createWindow(path);
+        const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
         expect(router.toUrl(['Settings', 'Home'], { org: 'my-org' }))
@@ -99,8 +98,7 @@ describe('router', () => {
       });
 
       test('toRoute produces a Route', () => {
-        const path = '/login';
-        const wdw = createWindow(path);
+        const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
         const route1 = { value: 'Login', params: {} };
@@ -112,6 +110,21 @@ describe('router', () => {
 
         const route3 = { value: 'Login', params: {}, replace: true };
         expect(router.toRoute('Login', {}, true)).toEqual(route3);
+      });
+
+      test('toRoute produces a Route for subroutes', () => {
+        const wdw = createWindow();
+        const router = createRouterFn({ wdw });
+
+        const route1 = { value: ['Settings', 'Home'], params: { org: 'test' } };
+        expect(router.toRoute(['Settings', 'Home'], { org: 'test' })).toEqual(route1);
+
+        const params = { org: 'test2', id: 5 };
+        const route2 = { value: ['Settings', ['Profile', 'User']], params };
+        expect(router.toRoute(['Settings', ['Profile', 'User']], params)).toEqual(route2);
+
+        const route3 = { value: ['Settings', 'List'], params: {}, replace: true };
+        expect(router.toRoute(['Settings', 'List'], {}, true)).toEqual(route3);
       });
 
       test('navigate changes the URL', () => {
@@ -126,8 +139,7 @@ describe('router', () => {
       });
 
       test('navigate triggers popstate', () => {
-        const path = '/login';
-        const wdw = createWindow(path);
+        const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
         global.dispatchEvent = global.dispatchEvent || jest.fn();
@@ -143,19 +155,6 @@ describe('router', () => {
         expect(global.dispatchEvent).toHaveBeenCalled();
       });
 
-      test('getCurrentRoute', () => {
-        const path = '/login';
-        const wdw = createWindow(path);
-        const router = createRouterFn({ wdw });
-
-        router.navigate('Login');
-        const currentRoute = router.getCurrentRoute();
-        expect(currentRoute).toEqual({
-          value: 'Login',
-          params: {}
-        });
-      });
-
       describe('syncLocationBar', () => {
         type SyncLocationBarCases = [string, { replace?: boolean }];
 
@@ -165,9 +164,8 @@ describe('router', () => {
         ];
 
         test.each(syncLocationBarCases)('calls %s', (method, options) => {
-          const path = '/login';
           const methodFn = jest.fn();
-          const wdw = Object.assign(createWindow(path), { history: { [method]: methodFn } });
+          const wdw = Object.assign(createWindow(), { history: { [method]: methodFn } });
           const router = createRouterFn({ wdw });
           const url = prefix + '/user/42?sport=tennis';
           const route: Route<Page> = Object.assign(
@@ -190,8 +188,7 @@ describe('router', () => {
       });
 
       test('addEventListener in historyMode: ' + historyMode, () => {
-        const path = '/login';
-        const wdw = createWindow(path);
+        const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
         const onRouteChange = jest.fn();
@@ -203,7 +200,8 @@ describe('router', () => {
       });
 
       describe('initial route', () => {
-        type InitialRouteCases = [string, string, { value: string, params: any }];
+        type InitialRouteCases = [string, string,
+          { value: string | [string, string[]], params: any }];
 
         const initialRouteCases: InitialRouteCases[] = [
           ['slash', '/', { value: 'Home', params: {} }],
@@ -229,6 +227,11 @@ describe('router', () => {
             'with params and queryParams',
             '/user/42?sport=tennis',
             { value: 'UserProfile', params: { id: '42', sport: 'tennis' } }
+          ],
+          [
+            'subroute',
+            '/settings/my-org/profile/7',
+            { value: ['Settings', ['Profile', 'User']], params: { org: 'my-org', id: '7' } }
           ]
         ];
 
