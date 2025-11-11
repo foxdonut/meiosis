@@ -211,6 +211,8 @@ export type WithRoute<T extends RouteValue> = {
   route: Route<T>;
 };
 
+export type ListenerValue<T extends RouteValue> = T | string | string[];
+
 /**
  * Listener for route navigation.
  */
@@ -228,13 +230,14 @@ export type OnListener<T extends RouteValue> = {
 /**
  * Function to listen to route navigation.
  */
-export type OnRouteListener<T extends RouteValue> = (value: T, callbacks: OnListener<T>) => void;
+export type OnRouteListener<T extends RouteValue> =
+  (value: ListenerValue<T>, callbacks: OnListener<T>) => void;
 
 /**
  * Listener for route navigation.
  */
 export type RouteListener<T extends RouteValue> = {
-  value: T;
+  value: ListenerValue<T>;
   callbacks: OnListener<T>;
 };
 

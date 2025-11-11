@@ -479,24 +479,144 @@ describe('router', () => {
             value: ['Settings', 'List'],
             params: { org: 'other-org' }
           });
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(2);
         });
 
         test('enter subroute lower level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/settings/my-org/profile/3';
+          router.listen('Settings', {
+            enter: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(1);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
         });
 
         test('exit subroute lower level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/login';
+          router.listen('Settings', {
+            exit: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
         });
 
         test('change subroute lower level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/settings/my-org/profile/3';
+          router.listen('Settings', {
+            change: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(2);
         });
 
-        test('enter subroute different', () => {
+        test('enter subroute upper level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/list';
+          const path2 = '/settings/my-org/profile/3';
+          router.listen(['Settings', 'Profile'], {
+            enter: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
         });
 
-        test('exit subroute different', () => {
+        test('exit subroute upper level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/profile/3';
+          const path2 = '/settings/my-org/list';
+          router.listen(['Settings', 'Profile'], {
+            exit: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
         });
 
-        test('change subroute different', () => {
+        test('change subroute upper level', () => {
+          const wdw = createWindow();
+          const router = createRouterFn({ wdw });
+
+          const listener = jest.fn();
+
+          const path1 = '/settings/my-org/profile/5';
+          const path2 = '/settings/my-org/profile/3';
+          router.listen(['Settings', 'Profile'], {
+            change: listener
+          });
+
+          router.start();
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path1);
+          expect(listener.mock.calls.length).toBe(0);
+
+          changePath(wdw, path2);
+          expect(listener.mock.calls.length).toBe(1);
         });
       });
     }

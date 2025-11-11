@@ -8,6 +8,7 @@ import qs from 'query-string';
 import { MeiosisCell } from 'meiosis-setup/types';
 import { Stream } from 'meiosis-setup/simple-stream';
 import {
+  ListenerValue,
   Navigate,
   OnListener,
   OnRouteChange,
@@ -88,7 +89,7 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
 
   const onListeners: RouteListener<T>[] = [];
 
-  const listen: OnRouteListener<T> = (value: T, callbacks: OnListener<T>) => {
+  const listen: OnRouteListener<T> = (value: ListenerValue<T>, callbacks: OnListener<T>) => {
     onListeners.push({ value, callbacks });
   };
 

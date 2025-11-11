@@ -6,6 +6,7 @@ import qs from 'query-string';
 import {
   DoSyncLocationBarParams,
   GetStatePath,
+  ListenerValue,
   RouteConfig,
   RouteConfigEntry,
   RouteValue,
@@ -54,7 +55,7 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
 };
 
 /** For internal use only. */
-export const flattenRouteValue = <T extends RouteValue>(routeValue: T): string => {
+export const flattenRouteValue = <T extends RouteValue>(routeValue: ListenerValue<T>): string => {
   if (typeof routeValue === 'string') {
     return routeValue;
   } else if (Array.isArray(routeValue)) {
