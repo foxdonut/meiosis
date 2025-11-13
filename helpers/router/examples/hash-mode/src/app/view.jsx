@@ -23,14 +23,14 @@ const pages = [
   { page: Page.Home, label: 'Home' },
   { page: Page.Login, label: 'Login' },
   { page: Page.Settings, label: 'Settings' },
-  { page: Page.Tea, label: 'Tea' },
+  { page: [Page.Tea, Page.TeaHome], label: 'Tea' },
   { page: Page.TeaSearch, label: 'Tea Search' }
 ];
 
 export const App = ({ cell }) => {
-  const Component = componentMap[cell.state.route.value];
+  const Component = componentMap[cell.state.route.top];
   const isActive = (route) =>
-    route === cell.state.route.value ? ' active' : '';
+    route === cell.state.route.top ? ' active' : '';
 
   return (
     <>

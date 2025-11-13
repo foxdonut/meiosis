@@ -7,6 +7,8 @@ import {
   DoSyncLocationBarParams,
   GetStatePath,
   ListenerValue,
+  Params,
+  Route,
   RouteConfig,
   RouteConfigEntry,
   RouteValue,
@@ -55,7 +57,39 @@ const separateParamsAndQueryParams = (path: string, allParams: Record<string, st
 };
 
 /** For internal use only. */
-export const flattenRouteValue = <T extends RouteValue>(routeValue: ListenerValue<T>): string => {
+export const getTopRouteValue = <T extends RouteValue = RouteValue>(routeValue: T): string => {
+  if (typeof routeValue === 'string') {
+    return routeValue;
+  } else if (Array.isArray(routeValue)) {
+    return getTopRouteValue(routeValue[0] as T);
+  } else {
+    throw new Error(`Invalid routeValue: ${routeValue}`);
+  }
+};
+
+/** For internal use only. */
+export const getSubroute = <T extends RouteValue = RouteValue>(routeValue: T,
+  params: Params): Route<T> | undefined => {
+
+  if (typeof routeValue === 'string') {
+    return undefined;
+  } else if (Array.isArray(routeValue) && routeValue.length === 2) {
+    const subrouteValue = routeValue[1] as T;
+    return {
+      value: subrouteValue,
+      top: getTopRouteValue(subrouteValue),
+      params,
+      subroute: getSubroute(subrouteValue, params)
+    };
+  } else {
+    throw new Error(`Invalid routeValue: ${routeValue}`);
+  }
+};
+
+/** For internal use only. */
+export const flattenRouteValue = <T extends RouteValue = RouteValue>(routeValue: ListenerValue<T>):
+  string => {
+
   if (typeof routeValue === 'string') {
     return routeValue;
   } else if (Array.isArray(routeValue)) {
@@ -65,7 +99,7 @@ export const flattenRouteValue = <T extends RouteValue>(routeValue: ListenerValu
   }
 };
 
-const flattenRouteEntry = <T extends RouteValue>(parent: string, rootPath: string,
+const flattenRouteEntry = <T extends RouteValue = RouteValue>(parent: string, rootPath: string,
   result: Record<string, string>, [path, value]: [path: string, value: RouteConfigEntry<T>]) => {
 
   if (typeof value === 'string') {
@@ -89,7 +123,7 @@ const flattenRouteEntry = <T extends RouteValue>(parent: string, rootPath: strin
 };
 
 /** For internal use only. */
-export const flattenRouteConfig = <T extends RouteValue>(routeConfig: RouteConfig<T>,
+export const flattenRouteConfig = <T extends RouteValue = RouteValue>(routeConfig: RouteConfig<T>,
   parent = '', rootPath = ''): Record<string, string> => {
 
   return Object.entries(routeConfig).reduce((result, next) =>
@@ -97,7 +131,7 @@ export const flattenRouteConfig = <T extends RouteValue>(routeConfig: RouteConfi
 };
 
 /** For internal use only. */
-export const expandRouteValue = <T extends RouteValue>(routeValue: string): T => {
+export const expandRouteValue = <T extends RouteValue = RouteValue>(routeValue: string): T => {
   const parts = routeValue.split(routeValueSeparator);
   if (parts.length === 1) {
     return parts[0] as T;
@@ -119,7 +153,7 @@ export const createGetUrl = (prefix: string, historyMode: boolean, wdw: WindowLi
     ? () => wdw.decodeURI(wdw.location.pathname + wdw.location.search)
     : () => wdw.decodeURI(wdw.location.hash || prefix + '/');
 
-const createToUrlFn = <T extends RouteValue>(routeConfig: RouteConfig<T>,
+const createToUrlFn = <T extends RouteValue = RouteValue>(routeConfig: RouteConfig<T>,
   getStatePath: GetStatePath): ToUrl<T> => {
 
   const pathLookup = Object.entries(flattenRouteConfig(routeConfig)).reduce(
@@ -142,7 +176,7 @@ const createToUrlFn = <T extends RouteValue>(routeConfig: RouteConfig<T>,
 };
 
 /** For internal use only. */
-export const createToUrl = <T extends RouteValue>(routeConfig: RouteConfig<T>,
+export const createToUrl = <T extends RouteValue = RouteValue>(routeConfig: RouteConfig<T>,
   prefix: string, historyMode: boolean): ToUrl<T> => {
 
   const getStatePath = historyMode ? stripTrailingSlash : I;

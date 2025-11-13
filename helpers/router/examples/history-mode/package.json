@@ -1,6 +1,6 @@
 {
   "name": "meiosis-router-example-history-mode",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "meiosis docs example server",
   "main": "src/index.ts",
@@ -30,13 +30,13 @@
     "meiosis-router": "../../source/dist",
     "meiosis-setup": "^6.2.3",
     "paperplane": "^3.1.2",
-    "preact": "^10.16.0"
+    "preact": "^10.27.2"
   },
   "devDependencies": {
-    "meiosis-tracer": "^6.0.0",
-    "ts-loader": "^9.4.4",
-    "typescript": "^5.1.6",
-    "webpack": "^5.88.1",
-    "webpack-cli": "^5.1.4"
+    "meiosis-tracer": "^6.0.1",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
   }
 }

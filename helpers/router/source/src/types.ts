@@ -13,7 +13,7 @@ import { Stream } from 'meiosis-setup/simple-stream';
  */
 export type RouteValue = string | [string, RouteValue];
 
-export type RouteConfigEntry<T extends RouteValue> = T extends string
+export type RouteConfigEntry<T extends RouteValue = RouteValue> = T extends string
   ? string
   : T extends [infer V extends string, infer S extends RouteValue]
   ? [V, RouteConfig<S>]
@@ -52,7 +52,7 @@ export type RouteConfigEntry<T extends RouteValue> = T extends string
  * router.toUrl('invalid') // error
  * ```
  */
-export type RouteConfig<T extends RouteValue> = Record<string, RouteConfigEntry<T>>;
+export type RouteConfig<T extends RouteValue = RouteValue> = Record<string, RouteConfigEntry<T>>;
 
 /**
  * Route path and query string parameters.
@@ -65,9 +65,11 @@ export type Params = Record<string, any>;
  * @template T See {@link RouteConfig} for details.
  *
  */
-export type Route<T extends RouteValue> = {
+export type Route<T extends RouteValue = RouteValue> = {
   value: T;
   params: Params;
+  top: string;
+  subroute?: Route<T>;
   replace?: boolean;
 };
 
@@ -83,7 +85,7 @@ export type Route<T extends RouteValue> = {
  *
  * @returns the URL.
  */
-export type ToUrl<T extends RouteValue> = (value: T, params?: Params) => string;
+export type ToUrl<T extends RouteValue = RouteValue> = (value: T, params?: Params) => string;
 
 /**
  * Function to navigate to a URL from a value and params.
@@ -97,7 +99,7 @@ export type ToUrl<T extends RouteValue> = (value: T, params?: Params) => string;
  *
  * @returns the URL.
  */
-export type Navigate<T extends RouteValue> =
+export type Navigate<T extends RouteValue = RouteValue> =
   (value: T, params?: Params, popstate?: boolean) => void;
 
 /**
@@ -111,7 +113,7 @@ export type Navigate<T extends RouteValue> =
  * appending. This is useful, for example, when redirecting from a route that the user was not
  * allowed to access.
  */
-export type ToRoute<T extends RouteValue> =
+export type ToRoute<T extends RouteValue = RouteValue> =
   (value: T, params?: Params, replace?: boolean) => Route<T>;
 
 /** Used internally. */
@@ -130,7 +132,7 @@ export type SetHref = (href: string) => void;
  *
  * @param route the current route.
  */
-export type OnRouteChange<T extends RouteValue> = (route: Route<T>) => void;
+export type OnRouteChange<T extends RouteValue = RouteValue> = (route: Route<T>) => void;
 
 /**
  * Function to start the router.
@@ -138,7 +140,7 @@ export type OnRouteChange<T extends RouteValue> = (route: Route<T>) => void;
  * @param onRouteChange callback function for when the route changes. This should be used to update
  * the route in the application state. See {@link OnRouteChange}.
  */
-export type Start<T extends RouteValue> = (onRouteChange?: OnRouteChange<T>) => void;
+export type Start<T extends RouteValue = RouteValue> = (onRouteChange?: OnRouteChange<T>) => void;
 
 /** Do not use this, it is for internal testing purposes only. */
 export type WindowLike = {
@@ -180,14 +182,14 @@ export type DoSyncLocationBarParams = {
  *
  * @param route the current route.
  */
-export type SyncLocationBar<T extends RouteValue> = (route: Route<T>) => void;
+export type SyncLocationBar<T extends RouteValue = RouteValue> = (route: Route<T>) => void;
 
 /**
  * Configuration to create a router.
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type RouterConfig<T extends RouteValue> = {
+export type RouterConfig<T extends RouteValue = RouteValue> = {
   /** The route configuration. See the documentation for {@link RouteConfig} for details. */
   routeConfig: RouteConfig<T>;
 
@@ -207,16 +209,16 @@ export type RouterConfig<T extends RouteValue> = {
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type WithRoute<T extends RouteValue> = {
+export type WithRoute<T extends RouteValue = RouteValue> = {
   route: Route<T>;
 };
 
-export type ListenerValue<T extends RouteValue> = T | string | string[];
+export type ListenerValue<T extends RouteValue = RouteValue> = T | string | string[];
 
 /**
  * Listener for route navigation.
  */
-export type OnListener<T extends RouteValue> = {
+export type OnListener<T extends RouteValue = RouteValue> = {
   /** Called when a route is entered. */
   enter?: OnRouteChange<T>;
 
@@ -230,13 +232,13 @@ export type OnListener<T extends RouteValue> = {
 /**
  * Function to listen to route navigation.
  */
-export type OnRouteListener<T extends RouteValue> =
+export type OnRouteListener<T extends RouteValue = RouteValue> =
   (value: ListenerValue<T>, callbacks: OnListener<T>) => void;
 
 /**
  * Listener for route navigation.
  */
-export type RouteListener<T extends RouteValue> = {
+export type RouteListener<T extends RouteValue = RouteValue> = {
   value: ListenerValue<T>;
   callbacks: OnListener<T>;
 };
@@ -246,7 +248,7 @@ export type RouteListener<T extends RouteValue> = {
  *
  * @template T See {@link RouteConfig} for details.
  */
-export type Router<T extends RouteValue> = {
+export type Router<T extends RouteValue = RouteValue> = {
   /** The initial route as parsed from the location bar. */
   initialRoute: Route<T>;
 

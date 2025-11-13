@@ -32,7 +32,9 @@ import {
   flattenRouteConfig,
   flattenRouteValue,
   getConfig,
-  getQuery
+  getQuery,
+  getSubroute,
+  getTopRouteValue
 } from './helpers';
 
 /**
@@ -46,7 +48,9 @@ import {
  * - `rootPath` (`string`): indicates to use history mode instead of hash mode by specifying the
  * root path. See {@link "types".RouterConfig} for details.
  */
-export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>): Router<T> => {
+export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: RouterConfig<T>):
+  Router<T> => {
+
   const { routeConfig, rootPath, wdw = window } = routerConfig;
 
   const flattenedRouteConfig = flattenRouteConfig(routeConfig);
@@ -67,7 +71,10 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
   };
 
   const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
-    ({ value, params: params || {}, replace });
+  ({
+    value, params: params || {}, top: getTopRouteValue(value), replace,
+    subroute: getSubroute(value, params || {})
+  });
 
   const getRoute = (path: string | undefined): Route<T> => {
     let matchPath = path || '/';
@@ -79,7 +86,7 @@ export const createRouter = <T extends RouteValue>(routerConfig: RouterConfig<T>
     const params = Object.assign(queryParams, match.params);
     const value: T = expandRouteValue<T>(match.value);
 
-    return { value, params };
+    return { value, top: getTopRouteValue(value), params, subroute: getSubroute(value, params) };
   };
 
   const getCurrentRoute = () => getRoute(getPath());

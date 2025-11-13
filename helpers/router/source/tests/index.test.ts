@@ -110,14 +110,14 @@ describe('router', () => {
         const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
-        const route1 = { value: 'Login', params: {} };
+        const route1 = { value: 'Login', params: {}, top: 'Login' };
         expect(router.toRoute('Login')).toEqual(route1);
 
         const params = { duck: 'quack' };
-        const route2 = { value: 'Login', params };
+        const route2 = { value: 'Login', params, top: 'Login' };
         expect(router.toRoute('Login', params)).toEqual(route2);
 
-        const route3 = { value: 'Login', params: {}, replace: true };
+        const route3 = { value: 'Login', params: {}, replace: true, top: 'Login' };
         expect(router.toRoute('Login', {}, true)).toEqual(route3);
       });
 
@@ -125,14 +125,27 @@ describe('router', () => {
         const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
-        const route1 = { value: ['Settings', 'Home'], params: { org: 'test' } };
+        const route1 = {
+          value: ['Settings', 'Home'], params: { org: 'test' }, top: 'Settings',
+          subroute: { value: 'Home', top: 'Home', params: { org: 'test' } }
+        };
         expect(router.toRoute(['Settings', 'Home'], { org: 'test' })).toEqual(route1);
 
         const params = { org: 'test2', id: 5 };
-        const route2 = { value: ['Settings', ['Profile', 'User']], params };
+        const route2 = {
+          value: ['Settings', ['Profile', 'User']], params, top: 'Settings',
+          subroute: {
+            value: ['Profile', 'User'], top: 'Profile', params, subroute: {
+              value: 'User', top: 'User', params
+            }
+          }
+        };
         expect(router.toRoute(['Settings', ['Profile', 'User']], params)).toEqual(route2);
 
-        const route3 = { value: ['Settings', 'List'], params: {}, replace: true };
+        const route3 = {
+          value: ['Settings', 'List'], params: {}, replace: true, top: 'Settings',
+          subroute: { value: 'List', top: 'List', params: {} }
+        };
         expect(router.toRoute(['Settings', 'List'], {}, true)).toEqual(route3);
       });
 
@@ -179,8 +192,8 @@ describe('router', () => {
           const url = prefix + '/user/42?sport=tennis';
           const route: Route<Page> = Object.assign(
             {
-              url,
               value: 'UserProfile' as Page,
+              top: 'UserProfile',
               params: { id: '42', sport: 'tennis' }
             },
             options
@@ -573,6 +586,10 @@ describe('router', () => {
 
           changePath(wdw, path2);
           expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toMatchObject({
+            value: ['Settings', ['Profile', 'User']],
+            params: { org: 'my-org', id: '3' }
+          });
         });
 
         test('exit subroute upper level', () => {

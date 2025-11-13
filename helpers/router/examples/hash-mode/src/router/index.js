@@ -6,18 +6,22 @@ export const Page = {
   Login: 'Login',
   Settings: 'Settings',
   Tea: 'Tea',
+  TeaHome: 'TeaHome',
   TeaDetails: 'TeaDetails',
   TeaSearch: 'TeaSearch',
   NotFound: 'NotFound'
 };
 
+/** @type {import('meiosis-router/types').RouteConfig<any>} */
 export const routeConfig = {
   '/': Page.Home,
   '/login': Page.Login,
   '/settings': Page.Settings,
   '/tea/search': Page.TeaSearch,
-  '/tea': Page.Tea,
-  '/tea/:id': Page.TeaDetails,
+  '/tea': [Page.Tea, {
+    '/:id': Page.TeaDetails,
+    '': Page.TeaHome
+  }],
   '/*': Page.NotFound
 };
 
