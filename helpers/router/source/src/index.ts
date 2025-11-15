@@ -156,12 +156,12 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     }
 
     wdw.onpopstate = () => {
-      const route = getRoute(getPath());
-      notifyListeners(route, previousRoute);
+      // Always get the latest route in case something changed in the meantime.
+      notifyListeners(getRoute(getPath()), previousRoute);
       if (onRouteChange) {
-        onRouteChange(route);
+        onRouteChange(getRoute(getPath()));
       }
-      previousRoute = route;
+      previousRoute = getRoute(getPath());
     };
 
     initNotifyListeners(initialRoute);
