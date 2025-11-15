@@ -79,8 +79,9 @@ const assembleServices = <S>(
       return concatIfPresent(
         result,
         nestedApp.services?.map<Service<any>>((service) => ({
+          init: (cell) => service.init && service.init(nextGetCell(cell)),
           onchange: (state) => (service.onchange ? service.onchange(nextGetState(state)) : state),
-          run: (cell) => service.run(nextGetCell(cell))
+          run: (cell) => service.run && service.run(nextGetCell(cell))
         }))
       ).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
     }, [] as Service<S>[])
@@ -167,16 +168,22 @@ export const meiosisSetup = <S>(config?: MeiosisConfig<S>): Stream<MeiosisCell<S
   const nest = nestCell(states, update, view);
   const getState = () => states();
   const getCell = (state: S): MeiosisCell<S> =>
-      ({ states, state, getState, update, nest, nested: view });
+    ({ states, state, getState, update, nest, nested: view });
   const dropRepeats = createDropRepeats(stream);
 
+  let services: Service<S>[] = [];
+
   if (app) {
-    getServices(app).forEach((service) => {
-      dropRepeats(states, service.onchange).map((state) => service.run(getCell(state)));
+    services = getServices(app);
+    services.forEach((service) => {
+      dropRepeats(states, service.onchange).map((state) =>
+        service.run && service.run(getCell(state)));
     });
   }
 
   const cells: Stream<MeiosisCell<S>> = dropRepeats(states).map(getCell);
+  const cell = cells();
+  services.forEach((service) => service.init && service.init(cell));
 
   return cells;
 };

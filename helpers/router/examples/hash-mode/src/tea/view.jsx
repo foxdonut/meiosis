@@ -14,13 +14,13 @@ export const Tea = ({ cell }) => (
           <div class="col-md-3">
             {cell.state.teas.map((tea) =>
               <div key={tea.id}>
-                <a href={router.toUrl(Page.TeaDetails, {
+                <a href={router.toUrl([Page.Tea, Page.TeaDetails], {
                   id: tea.id
                 })}>{tea.title}</a>
               </div>
             )}
           </div>
-          {cell.state.route.value === 'TeaDetails' &&
+          {cell.state.route.subroute?.value === 'TeaDetails' &&
             <div class="col-md-3"><TeaDetails cell={cell} /></div>}
         </div>
       )

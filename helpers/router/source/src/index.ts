@@ -107,25 +107,40 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
       return;
     }
 
+    const previousRouteValue = flattenRouteValue(previousRoute.value);
+    const routeValue = flattenRouteValue(route.value);
+
     onListeners.forEach((listener) => {
-      const previousRouteValue = flattenRouteValue(previousRoute.value);
-      const routeValue = flattenRouteValue(route.value);
       const listenerValue = flattenRouteValue(listener.value);
 
-      let callback: OnRouteChange<T> | undefined = undefined;
+      const callbacks: Array<OnRouteChange<T> | undefined> = [];
 
       if (routeValue.startsWith(listenerValue)) {
-        if (previousRouteValue.startsWith(listenerValue)) {
-          callback = listener.callbacks.change;
-        } else {
-          callback = listener.callbacks.enter;
+        callbacks.push(listener.callbacks.change);
+        if (!previousRouteValue.startsWith(listenerValue)) {
+          callbacks.push(listener.callbacks.enter);
         }
       } else if (previousRouteValue.startsWith(listenerValue)) {
-        callback = listener.callbacks.exit;
+        callbacks.push(listener.callbacks.exit);
       }
 
-      if (callback) {
-        callback(route);
+      for (const callback of callbacks) {
+        if (callback) {
+          callback(route);
+        }
+      }
+    });
+  };
+
+  const initNotifyListeners = (route: Route<T>) => {
+    const routeValue = flattenRouteValue(route.value);
+
+    onListeners.forEach((listener) => {
+      const listenerValue = flattenRouteValue(listener.value);
+
+      if (routeValue.startsWith(listenerValue)) {
+        listener.callbacks.enter && listener.callbacks.enter(route);
+        listener.callbacks.change && listener.callbacks.change(route);
       }
     });
   };
@@ -139,6 +154,7 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
         }
       });
     }
+
     wdw.onpopstate = () => {
       const route = getRoute(getPath());
       notifyListeners(route, previousRoute);
@@ -147,6 +163,8 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
       }
       previousRoute = route;
     };
+
+    initNotifyListeners(initialRoute);
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
@@ -159,7 +177,7 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     start((route) => cell.update((state) => ({ ...state, route })));
 
     cells.map((cell) => {
-      syncLocationBar(cell.state.route);
+      syncLocationBar(cell.getState().route);
     });
   };
 

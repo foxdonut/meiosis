@@ -109,6 +109,12 @@ export type NestedViews<S> = {
  */
 export type Service<S> = {
   /**
+   * Function that gets called at application initialization.
+   * The function can call `cell.update(...)` to update the state.
+   */
+  init?: (cell: MeiosisCell<S>) => any;
+
+  /**
    * Function that gets called when the state changes. This function should return a value from the
    * state. Only when that value changes will the service's `run` function be called.
    */
@@ -118,7 +124,7 @@ export type Service<S> = {
    * Function that gets called when the value returned by the `onchange` function has changed.
    * The function should call `cell.update(...)` to update the state.
    */
-  run: (cell: MeiosisCell<S>) => any;
+  run?: (cell: MeiosisCell<S>) => any;
 };
 
 /**

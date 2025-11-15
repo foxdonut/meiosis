@@ -157,7 +157,12 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       { sequence: true }
     ];
 
+    const initFn = jest.fn();
+
     const services: Service<State>[] = [
+      {
+        init: initFn
+      },
       {
         onchange: (state) => state.increment,
         run: (cell) => {
@@ -200,6 +205,8 @@ describe('Meiosis with TypeScript - Mergerino', () => {
 
     const cells = meiosisSetup<State>({ app: { initial: { count: 0 }, services } });
     const cell = cells();
+
+    expect(initFn).toHaveBeenCalledWith(cell);
 
     cell.update(updatePatches[0]);
     cell.update(updatePatches[1]);
@@ -385,11 +392,16 @@ describe('Meiosis with TypeScript - Mergerino', () => {
         size: number;
       }
 
+      const nestedInitFn = jest.fn();
+
       const homeComponent: MeiosisComponent<Home> = {
         initial: {
           size: 37
         },
         services: [
+          {
+            init: (cell) => nestedInitFn(cell.state)
+          },
           {
             onchange: (state) => state.size,
             run: (cell) => {
@@ -472,6 +484,7 @@ describe('Meiosis with TypeScript - Mergerino', () => {
       };
 
       const cells = meiosisSetup<AppState>({ app });
+      expect(nestedInitFn).toHaveBeenCalledWith({ size: 37 });
 
       expect(cells().state.volume).toEqual('loud');
       cells().update({ sound: 'beck' });

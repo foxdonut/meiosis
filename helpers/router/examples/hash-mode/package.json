@@ -28,7 +28,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "meiosis-router": "../../source/dist",
-    "meiosis-setup": "^6.2.3",
+    "meiosis-setup": "../../../setup/source/dist",
     "preact": "^10.27.2"
   },
   "devDependencies": {

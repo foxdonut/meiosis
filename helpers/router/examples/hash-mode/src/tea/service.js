@@ -1,18 +1,18 @@
 import { Page } from '../router';
 import { teas } from '../teaDetails/data';
+import { router } from '../router';
 
 export const service = {
-  onchange: (state) => state.route.value,
-  run: (cell) => {
-    if (
-      cell.state.route.value === Page.Tea ||
-      cell.state.route.value === Page.TeaDetails
-    ) {
-      setTimeout(() => {
-        cell.update({ teas });
-      }, 1000);
-    } else {
-      cell.update({ teas: undefined });
-    }
+  init: (cell) => {
+    router.listen(Page.Tea, {
+      enter: () => {
+        setTimeout(() => {
+          cell.update({ teas });
+        }, 1000);
+      },
+      exit: () => {
+        cell.update({ teas: undefined });
+      }
+    });
   }
 };

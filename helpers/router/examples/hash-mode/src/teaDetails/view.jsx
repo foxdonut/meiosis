@@ -4,7 +4,7 @@ export const TeaDetails = ({ cell }) => (
   <div>
     <div>{cell.state.tea}</div>
     <div>
-      <a href={router.toUrl(Page.Tea)}>Close</a>
+      <a href={router.toUrl([Page.Tea, Page.TeaHome])}>Close</a>
     </div>
   </div>
 );

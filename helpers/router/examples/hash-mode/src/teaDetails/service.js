@@ -1,12 +1,17 @@
 import { teaMap } from './data';
 import { Page } from '../router';
+import { router } from '../router';
 
 export const service = {
-  onchange: (state) => state.route.value + state.route.params.id,
-  run: (cell) => {
-    if (cell.state.route.value === Page.TeaDetails) {
-      const id = cell.state.route.params.id;
-      cell.update({ tea: teaMap[id].description });
-    }
+  init: (cell) => {
+    router.listen([Page.Tea, Page.TeaDetails], {
+      change: (route) => {
+        const id = route.params.id;
+        cell.update({ tea: teaMap[id].description });
+      },
+      exit: () => {
+        cell.update({ tea: undefined });
+      }
+    });
   }
 };
