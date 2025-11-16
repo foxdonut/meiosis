@@ -28,6 +28,7 @@ import {
   createGetUrl,
   createToUrl,
   doSyncLocationBar,
+  equalRoutes,
   expandRouteValue,
   flattenRouteConfig,
   flattenRouteValue,
@@ -101,9 +102,8 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
   };
 
   const notifyListeners = (route: Route<T>, previousRoute: Route<T>) => {
-    if (route.value === previousRoute.value &&
-      JSON.stringify(route.params) === JSON.stringify(previousRoute.params)) {
-
+    console.log('notifyListeners:', route, previousRoute);
+    if (equalRoutes(route, previousRoute)) {
       return;
     }
 
@@ -157,10 +157,13 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
 
     wdw.onpopstate = () => {
       // Always get the latest route in case something changed in the meantime.
+      console.log('onpopstate:', getRoute(getPath()));
       notifyListeners(getRoute(getPath()), previousRoute);
       if (onRouteChange) {
+        console.log('onRouteChange:', getRoute(getPath()));
         onRouteChange(getRoute(getPath()));
       }
+      console.log('previousRoute=:', getRoute(getPath()));
       previousRoute = getRoute(getPath());
     };
 
@@ -168,13 +171,18 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
+    console.log('syncLocationBar:', { value, params, replace });
     doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
   const setup = <P extends WithRoute<T>>(cells: Stream<MeiosisCell<P>>) => {
     const cell = cells();
 
-    start((route) => cell.update((state) => ({ ...state, route })));
+    // start((route) => cell.update((state) => ({ ...state, route })));
+    start((route) => {
+      console.log('update route:', route);
+      cell.update((state) => ({ ...state, route }));
+    });
 
     cells.map((cell) => {
       syncLocationBar(cell.getState().route);

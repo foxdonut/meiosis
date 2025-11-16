@@ -37,8 +37,10 @@ export const App = ({ cell }) => {
       <ul class="nav nav-tabs mb-2">
         {pages.map((page) => (
           <li class="nav-item">
+            {/* <a class={'nav-link' + isActive(page.page)}
+              href={router.toUrl(page.page)}>{page.label}</a> */}
             <a class={'nav-link' + isActive(page.page)}
-              href={router.toUrl(page.page)}>{page.label}</a>
+              onClick={() => cell.update({ route: router.toRoute(page.page) })}>{page.label}</a>
           </li>
         ))}
       </ul>

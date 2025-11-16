@@ -140,6 +140,14 @@ export const expandRouteValue = <T extends RouteValue = RouteValue>(routeValue: 
 };
 
 /** For internal use only. */
+export const equalRoutes = <T extends RouteValue = RouteValue>(route: Route<T>,
+  previousRoute: Route<T>): boolean => {
+
+  return (route.value === previousRoute.value &&
+    JSON.stringify(route.params) === JSON.stringify(previousRoute.params));
+};
+
+/** For internal use only. */
 export const getConfig = (rootPath?: string) => {
   const historyMode = rootPath != null;
   const prefix = historyMode ? rootPath : '#!';
