@@ -63,14 +63,6 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
   const getPath = () => getUrl().substring(prefix.length) || '/';
   const toUrl: ToUrl<T> = createToUrl<T>(routeConfig, prefix, historyMode);
 
-  const navigate: Navigate<T> = (value: T, params?: Params, popstate?: boolean) => {
-    const url = toUrl(value, params);
-    wdw.history.pushState({}, '', url);
-    if (popstate) {
-      dispatchEvent(new PopStateEvent('popstate', { state: {} }));
-    }
-  };
-
   const toRoute: ToRoute<T> = (value: T, params?: Params, replace?: boolean) =>
   ({
     value, params: params || {}, top: getTopRouteValue(value), replace,
@@ -94,6 +86,7 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
 
   const initialRoute = getCurrentRoute();
   let previousRoute = initialRoute;
+  let onRouteChangeFn: OnRouteChange<T> | undefined;
 
   const onListeners: RouteListener<T>[] = [];
 
@@ -101,14 +94,15 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     onListeners.push({ value, callbacks });
   };
 
-  const notifyListeners = (route: Route<T>, previousRoute: Route<T>) => {
-    console.log('notifyListeners:', route, previousRoute);
+  const notifyListeners = (route: Route<T>, previousRoute: Route<T>): Route<T> | undefined => {
     if (equalRoutes(route, previousRoute)) {
       return;
     }
 
     const previousRouteValue = flattenRouteValue(previousRoute.value);
     const routeValue = flattenRouteValue(route.value);
+
+    let reRoute: Route<T> | undefined;
 
     onListeners.forEach((listener) => {
       const listenerValue = flattenRouteValue(listener.value);
@@ -130,6 +124,8 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
         }
       }
     });
+
+    return reRoute;
   };
 
   const initNotifyListeners = (route: Route<T>) => {
@@ -145,7 +141,24 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     });
   };
 
+  const handleRouteChange = (routeChange?: Route<T>): Route<T> => {
+    const route = routeChange || getRoute(getPath());
+    const reRoute = notifyListeners(route, previousRoute);
+
+    if (reRoute) {
+      return handleRouteChange(reRoute);
+    }
+    if (onRouteChangeFn) {
+      onRouteChangeFn(route);
+    }
+    previousRoute = route;
+    syncLocationBar(route);
+    return route;
+  };
+
   const start = (onRouteChange?: OnRouteChange<T>) => {
+    onRouteChangeFn = onRouteChange;
+
     if (historyMode) {
       addHistoryEventListener(wdw, prefix, (href) => {
         wdw.history.pushState({}, '', href);
@@ -155,38 +168,27 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
       });
     }
 
-    wdw.onpopstate = () => {
-      // Always get the latest route in case something changed in the meantime.
-      console.log('onpopstate:', getRoute(getPath()));
-      notifyListeners(getRoute(getPath()), previousRoute);
-      if (onRouteChange) {
-        console.log('onRouteChange:', getRoute(getPath()));
-        onRouteChange(getRoute(getPath()));
-      }
-      console.log('previousRoute=:', getRoute(getPath()));
-      previousRoute = getRoute(getPath());
-    };
+    wdw.onpopstate = () => handleRouteChange();
 
     initNotifyListeners(initialRoute);
   };
 
+  const navigate: Navigate<T> = (value: T, params?: Params, replace?: boolean) => {
+    const route = toRoute(value, params, replace);
+    const reRoute = handleRouteChange(route);
+    const url = toUrl(reRoute.value, reRoute.params);
+    wdw.history.pushState({}, '', url);
+    dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+  };
+
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
-    console.log('syncLocationBar:', { value, params, replace });
     doSyncLocationBar({ replace, url: toUrl(value, params), getUrl, wdw });
   };
 
   const setup = <P extends WithRoute<T>>(cells: Stream<MeiosisCell<P>>) => {
     const cell = cells();
 
-    // start((route) => cell.update((state) => ({ ...state, route })));
-    start((route) => {
-      console.log('update route:', route);
-      cell.update((state) => ({ ...state, route }));
-    });
-
-    cells.map((cell) => {
-      syncLocationBar(cell.getState().route);
-    });
+    start((route) => cell.update((state) => ({ ...state, route })));
   };
 
   return {

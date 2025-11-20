@@ -149,10 +149,21 @@ describe('router', () => {
         expect(router.toRoute(['Settings', 'List'], {}, true)).toEqual(route3);
       });
 
+      const setupDispatchEvent = () => {
+        global.dispatchEvent = global.dispatchEvent || jest.fn();
+        global.PopStateEvent = global.PopStateEvent || class {
+          constructor(_type: string, _options: Record<string, any>) {
+            // noop
+          }
+        };
+      };
+
       test('navigate changes the URL', () => {
         const path = '/login';
         const wdw = createWindow(path);
         const router = createRouterFn({ wdw });
+
+        setupDispatchEvent();
 
         router.navigate('Login');
         expect(wdw.location.hash).toEqual((historyMode ? rootPath : prefix) + path);
@@ -164,12 +175,7 @@ describe('router', () => {
         const wdw = createWindow();
         const router = createRouterFn({ wdw });
 
-        global.dispatchEvent = global.dispatchEvent || jest.fn();
-        global.PopStateEvent = global.PopStateEvent || class {
-          constructor(_type: string, _options: Record<string, any>) {
-            // noop
-          }
-        };
+        setupDispatchEvent();
         jest.spyOn(global, 'dispatchEvent');
 
         router.navigate('Login', {}, true);

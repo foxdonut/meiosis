@@ -6,12 +6,12 @@ export const service = {
       enter: () => {
         if (!cell.getState().user) {
           cell.update({
-            route: router.toRoute(Page.Login, {}, true),
             login: {
               message: 'Please login.',
               returnTo: router.toRoute(Page.Settings)
             }
           });
+          return router.toRoute(Page.Login, {}, true);
         }
       }
     });

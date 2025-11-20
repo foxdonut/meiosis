@@ -40,7 +40,7 @@ export const App = ({ cell }) => {
             {/* <a class={'nav-link' + isActive(page.page)}
               href={router.toUrl(page.page)}>{page.label}</a> */}
             <a class={'nav-link' + isActive(page.page)}
-              onClick={() => cell.update({ route: router.toRoute(page.page) })}>{page.label}</a>
+              onClick={() => router.navigate(page.page) }>{page.label}</a>
           </li>
         ))}
       </ul>

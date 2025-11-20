@@ -258,11 +258,11 @@ export type Router<T extends RouteValue = RouteValue> = {
   /** Function to generate a URL. */
   toUrl: ToUrl<T>;
 
-  /** Function to navigate to a URL. */
-  navigate: Navigate<T>;
-
   /** Function to generate a Route. */
   toRoute: ToRoute<T>;
+
+  /** Function to navigate to a URL. */
+  navigate: Navigate<T>;
 
   /** Function to start the router. */
   start: Start<T>;

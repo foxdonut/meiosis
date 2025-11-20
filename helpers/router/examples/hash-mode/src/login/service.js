@@ -7,7 +7,7 @@ export const service = {
         if (
           (cell.state.login.username || cell.state.login.password) &&
           (!cell.state.user && !confirm('You have unsaved data. Continue?'))) {
-          cell.update({ route: () => router.toRoute(Page.Login) });
+          return router.toRoute(Page.Login);
         } else {
           cell.update({
             login: {
