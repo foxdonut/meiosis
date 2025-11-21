@@ -1,45 +1,36 @@
+/* global __dirname */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const http = require('http');
-const { html, mount, send } = require('paperplane');
-const fs = require('fs');
+const express = require('express');
+const path = require('path');
 
-const FILES = [
-  '/build/generated-app.js',
-  '/public/css/bootstrap-simplex.min.css'
-];
-
+const app = express();
 const PORT = 9000;
+const ROOT = path.join(__dirname, '..');
 
-const getHtmlContents = () =>
-  new Promise((resolve) => {
-    fs.readFile('./index.html', function(error, data) {
-      if (error) {
-        resolve(html('<html><body>An error occurred: ' + error + '</body></html>'));
-      } else {
-        resolve(html(data));
-      }
-    });
-  });
+// Paths for your static files
+/*
+const staticDirs = [
+  path.join(ROOT, 'build'),
+  path.join(ROOT, 'public')
+];
+*/
 
-const getFile = (file) =>
-  new Promise((resolve, reject) => {
-    fs.readFile(`.${file}`, function(error, data) {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(file.indexOf('css') > 0
-          ? ({ body: data, headers: { 'content-type': 'text/css' } })
-          : send(data));
-      }
-    });
-  });
+// Serve favicon as empty response
+app.get('/favicon.ico', (_req, res) => res.status(204).end());
+app.use(express.static(ROOT));
 
-const app = (req) =>
-  req.url === '/favicon.ico'
-    ? { body: '' }
-    : FILES.includes(req.url)
-    ? getFile(req.url)
-    : getHtmlContents();
+// Serve static files (JS, CSS, images, etc.)
+/*
+staticDirs.forEach((dir) => {
+  app.use(express.static(dir));
+});
+*/
 
-http.createServer(mount({ app })).listen(PORT);
-console.log('listening on port', PORT);
+// Serve index.html for all other routes
+app.get('/{*splat}', (_req, res) => {
+  res.sendFile(path.join(ROOT, 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log('listening on port', PORT);
+});
