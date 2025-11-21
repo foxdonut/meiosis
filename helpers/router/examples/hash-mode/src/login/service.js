@@ -4,9 +4,10 @@ export const service = {
   init: (cell) => {
     router.listen(Page.Login, {
       exit: () => {
+        const state = cell.getState();
         if (
-          (cell.state.login.username || cell.state.login.password) &&
-          (!cell.state.user && !confirm('You have unsaved data. Continue?'))) {
+          (state.login.username || state.login.password) &&
+          (!state.user && !confirm('You have unsaved data. Continue?'))) {
           return router.toRoute(Page.Login);
         } else {
           cell.update({

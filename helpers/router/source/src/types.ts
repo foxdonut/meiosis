@@ -132,7 +132,8 @@ export type SetHref = (href: string) => void;
  *
  * @param route the current route.
  */
-export type OnRouteChange<T extends RouteValue = RouteValue> = (route: Route<T>) => void;
+export type OnRouteChange<T extends RouteValue = RouteValue> =
+  (route: Route<T>) => Route<T> | undefined;
 
 /**
  * Function to start the router.

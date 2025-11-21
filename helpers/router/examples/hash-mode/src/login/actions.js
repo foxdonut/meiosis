@@ -7,9 +7,10 @@ export const actions = ({
   password: (cell, value) =>
     cell.update({ login: { password: value } }),
 
-  login: (cell) =>
+  login: (cell) => {
     cell.update({
-      user: cell.state.login.username,
-      route: cell.state.login.returnTo || router.toRoute(Page.Home)
-    })
+      user: cell.state.login.username
+    });
+    router.navigate(cell.state.login.returnTo || Page.Home);
+  }
 });

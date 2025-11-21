@@ -8,7 +8,7 @@ export const service = {
           cell.update({
             login: {
               message: 'Please login.',
-              returnTo: router.toRoute(Page.Settings)
+              returnTo: Page.Settings
             }
           });
           return router.toRoute(Page.Login, {}, true);
