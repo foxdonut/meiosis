@@ -13,6 +13,7 @@ import {
   OnListener,
   OnRouteChange,
   OnRouteListener,
+  OnRouteUnlistener,
   Params,
   Route,
   RouteListener,
@@ -88,10 +89,17 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
   let previousRoute = initialRoute;
   let onRouteChangeFn: OnRouteChange<T> | undefined;
 
-  const onListeners: RouteListener<T>[] = [];
+  let onListeners: RouteListener<T>[] = [];
 
   const listen: OnRouteListener<T> = (value: ListenerValue<T>, callbacks: OnListener<T>) => {
     onListeners.push({ value, callbacks });
+  };
+
+  const unlisten: OnRouteUnlistener<T> = (value: ListenerValue<T>) => {
+    const listenerValue = flattenRouteValue(value);
+    onListeners = onListeners.filter((listener) =>
+      flattenRouteValue(listener.value) !== listenerValue
+    );
   };
 
   const notifyListeners = (route: Route<T>, previousRoute: Route<T>): Route<T> | undefined => {
@@ -199,6 +207,7 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     initialRoute,
     getCurrentRoute,
     listen,
+    unlisten,
     navigate,
     toUrl,
     toRoute,
