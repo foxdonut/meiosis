@@ -156,9 +156,6 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     if (reRoute) {
       return handleRouteChange(reRoute);
     }
-    if (onRouteChangeFn) {
-      onRouteChangeFn(route);
-    }
     previousRoute = route;
     syncLocationBar(route);
     return route;
@@ -178,7 +175,10 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
 
     wdw.onpopstate = (evt) => {
       if (!evt?.state?._meiosisRouter) {
-        handleRouteChange();
+        const route = handleRouteChange();
+        if (onRouteChangeFn) {
+          onRouteChangeFn(route);
+        }
       }
     };
 
@@ -191,6 +191,9 @@ export const createRouter = <T extends RouteValue = RouteValue>(routerConfig: Ro
     const url = toUrl(reRoute.value, reRoute.params);
     wdw.history.pushState({}, '', url);
     dispatchEvent(new PopStateEvent('popstate', { state: { _meiosisRouter: true } }));
+    if (onRouteChangeFn) {
+      onRouteChangeFn(reRoute);
+    }
   };
 
   const syncLocationBar = ({ value, params, replace }: Route<T>) => {
