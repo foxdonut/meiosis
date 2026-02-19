@@ -28,7 +28,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "meiosis-setup": "^6.1.1",
-    "mithril": "^2.2.2"
+    "mithril": "^2.3.8"
   },
   "devDependencies": {
     "@types/mithril": "^2.0.12",
