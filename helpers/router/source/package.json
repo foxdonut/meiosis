@@ -37,7 +37,7 @@
     "@rollup/plugin-babel": "^6.1.0",
     "@rollup/plugin-commonjs": "^28.0.9",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-terser": "^1.0.0",
     "@types/feather-route-matcher": "^4.0.2",
     "@types/jest": "^30.0.0",
     "babel-jest": "^30.2.0",
