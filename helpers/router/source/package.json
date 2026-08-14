@@ -41,7 +41,7 @@
     "@types/feather-route-matcher": "^4.0.2",
     "@types/jest": "^30.0.0",
     "babel-jest": "^30.2.0",
-    "jest": "^30.2.0",
+    "jest": "^30.4.2",
     "meiosis-setup": "^6.2.3",
     "mergerino": "^0.4.0",
     "rollup": "^4.52.5",

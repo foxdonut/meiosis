@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "source-map-loader": "^4.0.1",
-    "static-server": "^2.2.1",
+    "static-server": "^3.0.0",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.5",
     "webpack": "^5.105.1",
