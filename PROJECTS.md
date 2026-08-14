@@ -1,0 +1,11 @@
+./package.json
+./docs/package.json
+./helpers/router/examples/hash-mode/package.json
+./helpers/router/examples/history-mode/package.json
+./helpers/router/source/package.json
+./helpers/setup/examples/nested-components/package.json
+./helpers/setup/examples/snippets/package.json
+./helpers/setup/examples/view-mithril/package.json
+./helpers/setup/examples/view-preact/package.json
+./helpers/setup/examples/view-react/package.json
+./helpers/setup/source/package.json
