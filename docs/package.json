@@ -9,7 +9,7 @@
     "build": "harp build dist && (cd images && ./generate_all_diagrams.sh)",
     "postbuild": "cp css/* images/*.svg images/*.png dist && echo 'Done.'",
     "onchange": "onchange -i app.css app.html 'common/*' 'css/*' 'images/*.dot' 'lessons/*' 'code/**' -- npm run build",
-    "start": "static-server -p ${PORT:-5000}"
+    "start": "static-server -p ${PORT:-5542}"
   },
   "repository": {
     "type": "git",
