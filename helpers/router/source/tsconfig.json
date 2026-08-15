@@ -10,6 +10,7 @@
     "declaration": true,
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
     "isolatedModules": false,
     "lib": ["es2018", "dom"],
     "module": "commonjs",
