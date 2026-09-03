@@ -28,7 +28,7 @@
   "homepage": "https://github.com/foxdonut/meiosis#readme",
   "dependencies": {
     "feather-route-matcher": "^4.0.0",
-    "query-string": "^8.1.0"
+    "query-string": "^9.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.29.6",
